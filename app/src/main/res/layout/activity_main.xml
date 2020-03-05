@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/main_activity_layout"
+    tools:context="deneme.example.filedeneme.MainActivity">
+
+
+
+    <LinearLayout
+        android:id="@+id/linearLayout_profile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView_followers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_gravity="start"
+            android:text="@string/Main_Activity_text_view_followers"
+            android:textAllCaps="false"
+            android:textColor="@color/colorBlack"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/imageView_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="10dp"
+            app:srcCompat="@mipmap/ic_launcher" />
+
+        <TextView
+            android:id="@+id/textView_follows"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:text="@string/Main_Activity_text_view_follows"
+            android:textAllCaps="false"
+            android:textColor="@color/colorBlack"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout_follewers"
+        android:layout_below="@id/linearLayout_profile"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        >
+        <TextView
+            android:id="@+id/textView_followers_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorBlack"
+            android:textAllCaps="false"
+            android:text="@string/Main_Activity_edit_text_followers" />
+        <EditText
+            android:id="@+id/editText_followers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="3"
+            android:inputType="number"
+            android:gravity="center_vertical"
+            android:textSize="16sp"
+            android:backgroundTint="@color/colorBlack"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            android:textAllCaps="false" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout_follows"
+        android:layout_below="@id/linearLayout_follewers"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        >
+        <TextView
+            android:id="@+id/textView_follows_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorBlack"
+            android:textAllCaps="false"
+            android:text="@string/Main_Activity_edit_text_follows" />
+
+        <EditText
+            android:id="@+id/editText_follows"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="3"
+            android:backgroundTint="@color/colorBlack"
+            android:gravity="center_vertical"
+            android:textColor="@color/colorBlack"
+            android:inputType="number"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textAllCaps="false" />
+
+
+
+    </LinearLayout>
+
+
+
+    <Button
+        android:id="@+id/button_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/linearLayout_follows"
+        android:textColor="@color/colorBlack"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        android:text="@string/Main_Activity_button_add" />
+
+    <Button
+        android:id="@+id/button_read_logs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/colorBlack"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        android:layout_below="@id/button_add"
+        android:text="@string/Main_Activity_button_read_logs" />
+
+    <Button
+        android:id="@+id/button_next_activity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/colorBlack"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        android:layout_below="@id/button_read_logs"
+        android:text="next activity" />
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="wrap_content"
+        android:id="@+id/recycler_view"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible"
+        android:layout_height="wrap_content" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       android:layout_centerHorizontal="true"
+        android:layout_below="@id/button_next_activity"
+        android:indeterminate="true"
+        android:visibility="gone"
+        android:layout_marginTop="20dp"
+        />
+
+
+</RelativeLayout>

@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">filedeneme</string>
+    <string name="Main_Activity_edit_text_follows">Enter Your Follows Number:</string>
+    <string name="Main_Activity_edit_text_followers">Enter Your Follower Number:</string>
+    <string name="Main_Activity_edit_text_empty">Text Field Cannot Be Empty!</string>
+    <string name="Main_Activity_text_view_followers">Followers:0</string>
+    <string name="Main_Activity_text_view_follows">Follows:0</string>
+    <string name="Main_Activity_button_add">Add</string>
+    <string name="Main_Activity_button_read_logs">Read Logs</string>
+    <string name="Main_activity_Insert_Successfull">Followers and Follows added successfully!</string>
+    <string name="Main_activity_Insert_Failure">Followers and Follows addition failure!</string>
+</resources>
