@@ -179,6 +179,7 @@ class MainActivity : AppCompatActivity(){
 //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
 //            LogDeneme.saveAllDetails(context=this)
             //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
+            LogDeneme.saveLifeCycleDetails()
             startActivity(Intent(this@MainActivity, Main2Activity::class.java))
         })
     }

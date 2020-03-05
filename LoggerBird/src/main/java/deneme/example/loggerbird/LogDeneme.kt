@@ -5,7 +5,6 @@ import android.content.res.Resources
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,14 +23,11 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.system.exitProcess
 
 //LogDeneme class is the general logging class for this library.
 class LogDeneme : LifecycleObserver {
     companion object {
-//        init {
-//        val logCatObserver:LogCatObserver= LogCatObserver()
-//        Thread.setDefaultUncaughtExceptionHandler(logCatObserver)
-//    }
         private var controlLogInit: Boolean = false
         private var stringBuilderComponent: StringBuilder = StringBuilder()
         private var stringBuilderLifeCycle: StringBuilder = StringBuilder()
@@ -86,8 +82,8 @@ class LogDeneme : LifecycleObserver {
                 context,
                 fragmentManager
             )
-            val logCatObserver:LogCatObserver= LogCatObserver()
-            Thread.setDefaultUncaughtExceptionHandler(logCatObserver)
+            val logcatObserver:LogcatObserver= LogcatObserver()
+            Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
             return controlLogInit
         }
 
@@ -673,7 +669,7 @@ class LogDeneme : LifecycleObserver {
                                 )
                             }
                             stringBuilderException = StringBuilder()
-                            System.exit(0)
+                            exitProcess(0)
                         } catch (e: Exception) {
                             e.printStackTrace()
                             logExceptionDetails(e, Constants.exceptionTag)
