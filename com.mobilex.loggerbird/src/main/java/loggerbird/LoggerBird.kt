@@ -892,9 +892,9 @@ class LoggerBird : LifecycleObserver {
                     val date = Calendar.getInstance().time
                     val formatter = SimpleDateFormat.getDateTimeInstance()
                     formattedTime = formatter.format(date)
-                    if(view is RecyclerView){
-                        takeRecyclerViewDetails(recyclerView = view,resources = resources)
-                    }else{
+                    if (view is RecyclerView) {
+                        takeRecyclerViewDetails(recyclerView = view, resources = resources)
+                    } else {
                         stringBuilderComponent.append(
                             formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + (resources?.getResourceName(
                                 view!!.id
@@ -918,10 +918,10 @@ class LoggerBird : LifecycleObserver {
         }
 
         //In progress method.
-        private fun takeRecyclerViewDetails(recyclerView: RecyclerView,resources: Resources?){
-            val recyclerViewList:ArrayList<Any> = ArrayList()
-            val stringBuilderRecyclerViewItem:StringBuilder=StringBuilder()
-            for(recyclerViewItem in 0..recyclerView.adapter!!.itemCount){
+        private fun takeRecyclerViewDetails(recyclerView: RecyclerView, resources: Resources?) {
+            val recyclerViewList: ArrayList<Any> = ArrayList()
+            val stringBuilderRecyclerViewItem: StringBuilder = StringBuilder()
+            for (recyclerViewItem in 0..recyclerView.adapter!!.itemCount) {
                 recyclerViewList.add(recyclerView.adapter!!.getItemViewType(recyclerViewItem))
                 stringBuilderRecyclerViewItem.append(recyclerViewItem.toString() + "\n")
             }
@@ -930,7 +930,8 @@ class LoggerBird : LifecycleObserver {
                     recyclerView.id
                 )) + " " + "Component Id:" + recyclerView.id + "\n" + "Component Type:" + recyclerView.findViewById<View>(
                     recyclerView.id
-                ).toString() + "\n"+"RecyclerView Layout:"+recyclerView.layoutManager+"\n"+"RecyclerView Adapter:"+recyclerView.adapter+"\n"+"RecyclerView Item Size:"+recyclerViewList.size+"\n"+"RecyclerView Item list:"+"\n"+stringBuilderRecyclerViewItem.toString())
+                ).toString() + "\n" + "RecyclerView Layout:" + recyclerView.layoutManager + "\n" + "RecyclerView Adapter:" + recyclerView.adapter + "\n" + "RecyclerView Item Size:" + recyclerViewList.size + "\n" + "RecyclerView Item list:" + "\n" + stringBuilderRecyclerViewItem.toString()
+            )
         }
 
         /**
