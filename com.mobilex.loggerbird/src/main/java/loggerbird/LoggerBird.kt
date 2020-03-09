@@ -10,8 +10,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
+import androidx.core.view.children
+import androidx.core.view.get
+import androidx.core.view.iterator
+import androidx.core.view.size
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
+import androidx.recyclerview.widget.RecyclerView
 import com.android.billingclient.api.*
 import com.google.gson.GsonBuilder
 import deneme.example.loggerbird.R
@@ -31,6 +36,7 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 
 //LoggerBird class is the general logging class for this library.
@@ -886,13 +892,17 @@ class LoggerBird : LifecycleObserver {
                     val date = Calendar.getInstance().time
                     val formatter = SimpleDateFormat.getDateTimeInstance()
                     formattedTime = formatter.format(date)
-                    stringBuilderComponent.append(
-                        formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + (resources?.getResourceName(
-                            view!!.id
-                        )) + " " + "Component Id:" + view?.id + "\n" + "Component Type:" + view!!.findViewById<View>(
-                            view.id
-                        ).toString() + "\n"
-                    )
+                    if(view is RecyclerView){
+                        takeRecyclerViewDetails(recyclerView = view,resources = resources)
+                    }else{
+                        stringBuilderComponent.append(
+                            formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + (resources?.getResourceName(
+                                view!!.id
+                            )) + " " + "Component Id:" + view?.id + "\n" + "Component Type:" + view!!.findViewById<View>(
+                                view.id
+                            ).toString() + "\n"
+                        )
+                    }
 
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -905,6 +915,22 @@ class LoggerBird : LifecycleObserver {
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
+        }
+
+        //In progress method.
+        private fun takeRecyclerViewDetails(recyclerView: RecyclerView,resources: Resources?){
+            val recyclerViewList:ArrayList<Any> = ArrayList()
+            val stringBuilderRecyclerViewItem:StringBuilder=StringBuilder()
+            for(recyclerViewItem in 0..recyclerView.adapter!!.itemCount){
+                recyclerViewList.add(recyclerView.adapter!!.getItemViewType(recyclerViewItem))
+                stringBuilderRecyclerViewItem.append(recyclerViewItem.toString() + "\n")
+            }
+            stringBuilderComponent.append(
+                formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + (resources?.getResourceName(
+                    recyclerView.id
+                )) + " " + "Component Id:" + recyclerView.id + "\n" + "Component Type:" + recyclerView.findViewById<View>(
+                    recyclerView.id
+                ).toString() + "\n"+"RecyclerView Layout:"+recyclerView.layoutManager+"\n"+"RecyclerView Adapter:"+recyclerView.adapter+"\n"+"RecyclerView Item Size:"+recyclerViewList.size+"\n"+"RecyclerView Item list:"+"\n"+stringBuilderRecyclerViewItem.toString())
         }
 
         /**

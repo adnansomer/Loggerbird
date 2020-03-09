@@ -18,6 +18,8 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import android.view.View
+import android.widget.LinearLayout
+import androidx.recyclerview.widget.LinearLayoutManager
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.Sort
@@ -60,6 +62,7 @@ class MainActivity : AppCompatActivity(){
     private lateinit var jsonObject:JSONObject
     private val transformerFactory:TransformerFactory=TransformerFactory.newInstance()
     private  val  transformer:Transformer=transformerFactory.newTransformer()
+    private var recyclerViewList:ArrayList<RecyclerModel> = ArrayList()
     var disposable: Disposable? = null
     var retrofit: Retrofit = ApiServiceInterface.createObject()
     val ApiService by lazy {
@@ -80,6 +83,9 @@ class MainActivity : AppCompatActivity(){
         val intent:Intent=getIntent()
         val uri:Uri? = intent.data
         Log.d("deep_link_url",uri.toString())
+        addRecyclerViewList()
+        recycler_view.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
+        recycler_view.adapter=RecyclerViewAdapter(recyclerViewList)
         LoggerBird.logInit(context = this)
 
 
@@ -92,7 +98,7 @@ class MainActivity : AppCompatActivity(){
         }
         LoggerBird.logInit(context = this)
         button_add.setOnClickListener() {
-            throw NullPointerException("button is null")
+//            throw NullPointerException("button is null")
 //            for( i in 0..100){
 //                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
 //                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
@@ -129,10 +135,11 @@ class MainActivity : AppCompatActivity(){
 //                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
 //                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
 //                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
+
 //            }
 // )
 //            LogDeneme.saveComponentDetails()
+            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
             LoggerBird.saveComponentDetails()
 //            val emailFile:File=File(this.filesDir,"component_details.txt")
 //            val rootView:ViewGroup=(this as Activity).window.decorView.findViewById(android.R.id.content);
@@ -184,7 +191,13 @@ class MainActivity : AppCompatActivity(){
         })
     }
 
-
+    private fun addRecyclerViewList(){
+        recyclerViewList.add(RecyclerModel("Deniz"))
+        recyclerViewList.add(RecyclerModel("Adnan"))
+        recyclerViewList.add(RecyclerModel("Gökhan"))
+        recyclerViewList.add(RecyclerModel("Fırat"))
+        recyclerViewList.add(RecyclerModel("Berk"))
+    }
 
     private fun beginSearch(srsearch: String, context: Context) {
 
