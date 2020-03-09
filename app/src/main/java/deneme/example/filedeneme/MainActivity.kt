@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity(){
         val intent:Intent=getIntent()
         val uri:Uri? = intent.data
         Log.d("deep_link_url",uri.toString())
+        LogDeneme.logInit(context = this)
 
 
 //        LogDeneme.logLifeCycleDetails()

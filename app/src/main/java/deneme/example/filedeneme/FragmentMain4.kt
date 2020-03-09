@@ -52,6 +52,7 @@ class FragmentMain4 : Fragment() {
             Log.d("new_fragment_list",i.tag)
         }
         button_dummy_3.setOnClickListener(){
+            LogDeneme.saveLifeCycleDetails()
 //            LogDeneme.saveLifeCycleDetails()
 //            for(i in fragmentManager!!.fragments){
 //                fragmentManager!!.beginTransaction().remove(i).commitNow()

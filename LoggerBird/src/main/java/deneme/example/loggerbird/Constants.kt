@@ -2,6 +2,7 @@ package deneme.example.loggerbird
 //Constant class.
 class Constants {
     companion object {
+        //Static global constant variables.
         const val fileCreationSuccessMessage = "File Created Successfully!"
         const val componentDetailsSuccessMessage = "Component Details Gathered!"
         const val componentTag = "component"
@@ -21,6 +22,7 @@ class Constants {
         const val allTag = "all"
         const val exceptionMessage="Exception Details Gathered!"
         const val exceptionTag = "exception"
+        const val unHandledExceptionTag = "Unhandled Exception"
         const val transaction="Transaction Name:"
         const val logInitErrorMessage="Call logInit method before calling any other method!"
         const val internetErrorMessage="Invalid internet connection response code!"

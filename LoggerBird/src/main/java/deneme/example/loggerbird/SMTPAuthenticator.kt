@@ -8,5 +8,4 @@ open class SMTPAuthenticator : javax.mail.Authenticator() {
     override fun getPasswordAuthentication(): PasswordAuthentication {
         return PasswordAuthentication(SMTP_AUTH_USER,SMTP_AUTH_PWD)
     }
-
 }

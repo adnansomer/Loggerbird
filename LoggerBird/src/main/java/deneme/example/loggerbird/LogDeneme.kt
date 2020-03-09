@@ -5,6 +5,7 @@ import android.content.res.Resources
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +29,7 @@ import kotlin.system.exitProcess
 //LogDeneme class is the general logging class for this library.
 class LogDeneme : LifecycleObserver {
     companion object {
+        //Static global variables.
         private var controlLogInit: Boolean = false
         private var stringBuilderComponent: StringBuilder = StringBuilder()
         private var stringBuilderLifeCycle: StringBuilder = StringBuilder()
@@ -58,7 +60,8 @@ class LogDeneme : LifecycleObserver {
         private lateinit var defaultFileDirectory: File
         private lateinit var defaultFilePath: File
         private var formattedTime: String? = null
-        private val LifeCycleObserver = LogLifeCycleObserver()
+        private val lifeCycleObserver = LogLifeCycleObserver()
+        private lateinit var fragmentLifeCycleObserver:LogFragmentLifeCycleObserver
         private lateinit var context: Context
         private var fileLimit: Long = 2097152
         private var stringBuilderTemp: StringBuilder = StringBuilder()
@@ -71,7 +74,7 @@ class LogDeneme : LifecycleObserver {
          * Call This Method Before Calling Any Other Methods.
          * Parameters:
          * @param context is for getting reference from the application context , you must deploy this parameter.
-         * @param fragmentManager is used for getting details from FragmentManager which is used for  tracking life cycle of Fragments rather than activity.
+         * @param fragmentManager is used for getting details from FragmentManager which is used for tracking life cycle of Fragments rather than activity.
          * Variables:
          * controlLogInit is used for tracking the logInit return value which is used in other methods in this class.
          * @return Boolean value.
@@ -91,7 +94,15 @@ class LogDeneme : LifecycleObserver {
          * This Method DeAttaches A LifeCycle Observer From The Current Activity.
          */
         fun logDeAttachObserver() {
-            LifeCycleObserver.deRegisterLifeCycle()
+            lifeCycleObserver.deRegisterLifeCycle()
+        }
+        /**
+         * This Method DeAttaches A Fragment Observer From The Current Fragment.
+         */
+        fun logDeAttachFragmentObserver(fragmentManager: FragmentManager){
+            if(::fragmentLifeCycleObserver.isInitialized){
+                fragmentManager.unregisterFragmentLifecycleCallbacks(fragmentLifeCycleObserver)
+            }
         }
 
         /**
@@ -130,7 +141,12 @@ class LogDeneme : LifecycleObserver {
          * @return Boolean value.
          */
         private fun logAttach(context: Context, fragmentManager: FragmentManager? = null): Boolean {
-            LifeCycleObserver.registerLifeCycle(context, fragmentManager)
+            if(fragmentManager!=null){
+                fragmentLifeCycleObserver=LogFragmentLifeCycleObserver(fragmentManager=fragmentManager)
+                fragmentManager.registerFragmentLifecycleCallbacks(fragmentLifeCycleObserver,true)
+            }else{
+                lifeCycleObserver.registerLifeCycle(context)
+            }
             return true
         }
 
@@ -145,7 +161,7 @@ class LogDeneme : LifecycleObserver {
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("component_details").
          * @var stringBuilderComponent prints component details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
@@ -208,7 +224,7 @@ class LogDeneme : LifecycleObserver {
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("activity_details").
          * @var stringBuilderLifeCycle prints life-cycle details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in LogExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
@@ -247,6 +263,7 @@ class LogDeneme : LifecycleObserver {
                         } catch (e: Exception) {
                             e.printStackTrace()
                             logExceptionDetails(e, Constants.lifeCycleTag)
+                            saveExceptionDetails()
                         }
 
                     }
@@ -269,7 +286,7 @@ class LogDeneme : LifecycleObserver {
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("fragment_manager_details")
          * @var stringBuilderFragmentManager prints fragment manager details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
@@ -309,6 +326,7 @@ class LogDeneme : LifecycleObserver {
                         } catch (e: Exception) {
                             e.printStackTrace()
                             logExceptionDetails(e, Constants.fragmentManagerTag)
+                            saveExceptionDetails()
                         }
                     }
                 } else {
@@ -331,7 +349,7 @@ class LogDeneme : LifecycleObserver {
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("analytics_details").
          * @var stringBuilderAnalyticsManager prints analytics details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
@@ -369,6 +387,7 @@ class LogDeneme : LifecycleObserver {
                         } catch (e: Exception) {
                             e.printStackTrace()
                             logExceptionDetails(e, Constants.analyticsTag)
+                            saveExceptionDetails()
                         }
                     }
                 } else {
@@ -390,7 +409,7 @@ class LogDeneme : LifecycleObserver {
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("http_details").
          * @var stringBuilderHttp prints http details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
@@ -430,6 +449,7 @@ class LogDeneme : LifecycleObserver {
                         } catch (e: Exception) {
                             e.printStackTrace()
                             logExceptionDetails(e, Constants.httpTag)
+                            saveExceptionDetails()
                         }
                     }
                 } else {
@@ -451,7 +471,7 @@ class LogDeneme : LifecycleObserver {
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("in_a_purchase_details").
          * @var stringBuilderInAPurchase prints android In A Purchase details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
@@ -491,6 +511,7 @@ class LogDeneme : LifecycleObserver {
                         } catch (e: Exception) {
                             e.printStackTrace()
                             logExceptionDetails(e, Constants.inAPurchaseTag)
+                            saveExceptionDetails()
                         }
                     }
                 }else{
@@ -512,7 +533,7 @@ class LogDeneme : LifecycleObserver {
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("retrofit_details").
          * @var stringBuilderRetrofit prints retrofit details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
@@ -552,6 +573,7 @@ class LogDeneme : LifecycleObserver {
                         }catch (e: Exception) {
                             e.printStackTrace()
                             logExceptionDetails(e, Constants.retrofitTag)
+                            saveExceptionDetails()
                         }
                     }
                 }else{
@@ -573,7 +595,7 @@ class LogDeneme : LifecycleObserver {
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("realm_details").
          * @var stringBuilderRealm prints realm details.
          * Exception:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
@@ -613,6 +635,7 @@ class LogDeneme : LifecycleObserver {
                         } catch (e: Exception) {
                             e.printStackTrace()
                             logExceptionDetails(e, Constants.realmTag)
+                            saveExceptionDetails()
                         }
                     }
                 }else{
@@ -634,7 +657,7 @@ class LogDeneme : LifecycleObserver {
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("exception_details").
          * @var stringBuilderException prints exception details.
          * Exception:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun saveExceptionDetails(
@@ -673,6 +696,7 @@ class LogDeneme : LifecycleObserver {
                         } catch (e: Exception) {
                             e.printStackTrace()
                             logExceptionDetails(e, Constants.exceptionTag)
+                            saveExceptionDetails()
                         }
                     }
                 }else{
@@ -680,6 +704,7 @@ class LogDeneme : LifecycleObserver {
                 }
         }
 
+        //This method isnt updated needs to be modified or deleted.
         /**
          * This Method Saves All Details To Txt File.
          * Parameters:
@@ -698,8 +723,8 @@ class LogDeneme : LifecycleObserver {
          * @var stringBuilderRealm prints realm details.
          * @var stringBuilderException prints exception details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails
-         * @throws exception if logInit method return value is false
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
          */
         fun saveAllDetails(
             file: File? = null
@@ -752,6 +777,7 @@ class LogDeneme : LifecycleObserver {
                     } catch (e: Exception) {
                         e.printStackTrace()
                         logExceptionDetails(e, Constants.allTag)
+                        saveExceptionDetails()
                     }
                 }
             } else {
@@ -769,7 +795,7 @@ class LogDeneme : LifecycleObserver {
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second)
          * @var stringBuilderComponent used for printing details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun logComponentDetails(view: View? = null, resources: Resources? = null) {
@@ -789,6 +815,7 @@ class LogDeneme : LifecycleObserver {
                 } catch (e: Exception) {
                     e.printStackTrace()
                     logExceptionDetails(e, Constants.componentTag)
+                    saveExceptionDetails()
                 }
             } else {
                 throw ExceptionCustom(Constants.logInitErrorMessage)
@@ -801,23 +828,37 @@ class LogDeneme : LifecycleObserver {
          * Variables:
          * @var stringBuilderLifeCycle used for printing details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
       private  fun logLifeCycleDetails() {
             if (controlLogInit) {
                 try {
-                    for (classList in LifeCycleObserver.returnClassList()) {
-                        stringBuilderLifeCycle.append(classList + ":" + "\n")
-                        for (stateList in LifeCycleObserver.returnActivityLifeCycleState().split("\n")) {
-                            if (stateList.contains(classList)) {
-                                stringBuilderLifeCycle.append(stateList + "\n")
+                    if(::fragmentLifeCycleObserver.isInitialized){
+                        if(fragmentLifeCycleObserver.returnFragmentLifeCycleState().isNotEmpty()){
+                            for (classList in fragmentLifeCycleObserver.returnClassList()) {
+                                stringBuilderLifeCycle.append(classList + ":" + "\n")
+                                for (stateList in fragmentLifeCycleObserver.returnFragmentLifeCycleState().split("\n")) {
+                                    if (stateList.contains(classList)) {
+                                        stringBuilderLifeCycle.append(stateList + "\n")
+                                    }
+                                }
+                            }
+                    }
+                    }else if (lifeCycleObserver.returnActivityLifeCycleState().isNotEmpty()){
+                        for (classList in lifeCycleObserver.returnClassList()) {
+                            stringBuilderLifeCycle.append(classList + ":" + "\n")
+                            for (stateList in lifeCycleObserver.returnActivityLifeCycleState().split("\n")) {
+                                if (stateList.contains(classList)) {
+                                    stringBuilderLifeCycle.append(stateList + "\n")
+                                }
                             }
                         }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     logExceptionDetails(e, Constants.lifeCycleTag)
+                    saveExceptionDetails()
                 }
             } else {
                 throw ExceptionCustom(Constants.logInitErrorMessage)
@@ -839,7 +880,7 @@ class LogDeneme : LifecycleObserver {
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderAnalyticsManager used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun logAnalyticsDetails(bundle: Bundle? = null) {
@@ -861,6 +902,7 @@ class LogDeneme : LifecycleObserver {
                 } catch (e: Exception) {
                     e.printStackTrace()
                     logExceptionDetails(e, Constants.analyticsTag)
+                    saveExceptionDetails()
                 }
             } else {
                 throw ExceptionCustom(Constants.logInitErrorMessage)
@@ -874,7 +916,7 @@ class LogDeneme : LifecycleObserver {
          * Variables:
          * @var stringBuilderFragmentManager used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun logFragmentManagerDetails(fragmentManager: FragmentManager? = null) {
@@ -907,7 +949,7 @@ class LogDeneme : LifecycleObserver {
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderHttp used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun logHttpRequestDetails(httpUrlConnection: HttpURLConnection? = null) {
@@ -921,6 +963,7 @@ class LogDeneme : LifecycleObserver {
                 } catch (e: Exception) {
                     e.printStackTrace()
                     logExceptionDetails(e, Constants.httpTag)
+                    saveExceptionDetails()
                 }
             } else {
                 throw ExceptionCustom(Constants.logInitErrorMessage)
@@ -943,7 +986,7 @@ class LogDeneme : LifecycleObserver {
          * @var responseMessage is the outcome message according to the response code comes from billingResult.
          * @var stringBuilderSkuDetailList used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun logInAPurchaseDetails(
@@ -995,6 +1038,7 @@ class LogDeneme : LifecycleObserver {
                 } catch (e: Exception) {
                     e.printStackTrace()
                     logExceptionDetails(e, Constants.inAPurchaseTag)
+                    saveExceptionDetails()
                 }
             } else {
                 throw ExceptionCustom(Constants.logInitErrorMessage)
@@ -1013,7 +1057,7 @@ class LogDeneme : LifecycleObserver {
          * @var stringBuilderRetrofit used for printing the details.
          * @var stringBuilderQuery used for printing the details of query that gathered from request.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun logRetrofitRequestDetails(
@@ -1042,6 +1086,7 @@ class LogDeneme : LifecycleObserver {
                 } catch (e: Exception) {
                     e.printStackTrace()
                     logExceptionDetails(e, Constants.retrofitTag)
+                    saveExceptionDetails()
                 }
             } else {
                 throw ExceptionCustom(Constants.logInitErrorMessage)
@@ -1058,6 +1103,7 @@ class LogDeneme : LifecycleObserver {
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderRealm used for printing the details.
          * Exceptions:
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if error occurs and saves the exception in logExceptionDetails.
          * @throws exception if logInit method return value is false.
          */
@@ -1077,6 +1123,7 @@ class LogDeneme : LifecycleObserver {
                 } catch (e: Exception) {
                     e.printStackTrace()
                     logExceptionDetails(e, Constants.realmTag)
+                    saveExceptionDetails()
                 }
             } else {
                 throw ExceptionCustom(Constants.logInitErrorMessage)
@@ -1093,7 +1140,7 @@ class LogDeneme : LifecycleObserver {
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderException used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun logExceptionDetails(exception: Exception? = null, tag: String? = null,throwable: Throwable?= null) {
@@ -1102,12 +1149,13 @@ class LogDeneme : LifecycleObserver {
                     val formatter = SimpleDateFormat.getDateTimeInstance()
                     formattedTime = formatter.format(date)
                     if(exception!=null){
-                        stringBuilderException.append("\n" + formattedTime + ":" + Constants.exceptionTag + "\n" + "Exception:" + exception + "\n" + "Method Tag:" + tag)
+                        stringBuilderException.append("\n" + formattedTime + ":" + Constants.exceptionTag + "\n" + "Exception:" + Log.getStackTraceString(exception)  + "Method Tag:" + tag)
                     }else if(throwable!=null){
-                        stringBuilderException.append("\n" + formattedTime + ":" + Constants.exceptionTag + "\n" + "Throwable:" + throwable + "\n" + "Method Tag:" + tag)
+                        stringBuilderException.append("\n" + formattedTime + ":" + Constants.unHandledExceptionTag + "\n" + "Throwable:" + Log.getStackTraceString(throwable) + "Method Tag:" + tag)
                     }
                 } catch (e: Exception) {
                     logExceptionDetails(exception=e)
+                    saveExceptionDetails()
                 }
         }
 
@@ -1130,7 +1178,7 @@ class LogDeneme : LifecycleObserver {
          * @var fileTemp is used for creating temp files which is used for holding the parts of original file which exceeds 2mb size.
          * @var withContext code block calls ui thread for using progressbar.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         fun sendLogDetailsAsEmail(
             file: File,
@@ -1228,6 +1276,7 @@ class LogDeneme : LifecycleObserver {
             } catch (e: Exception) {
                 e.printStackTrace()
                 LogDeneme.logExceptionDetails(e)
+                saveExceptionDetails()
             }
         }
 

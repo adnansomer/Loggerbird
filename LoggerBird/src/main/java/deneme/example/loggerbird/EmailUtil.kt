@@ -21,6 +21,7 @@ import javax.mail.internet.MimeMultipart
 //EmailUtil class is used for sending desired logfile as email.
 class EmailUtil {
     companion object {
+        //Static global variables.
         private lateinit var  properties: Properties
         private lateinit var mimeBodyPart: MimeBodyPart
         private lateinit var mimeMessage: MimeMessage
@@ -41,7 +42,7 @@ class EmailUtil {
          * @var internetConnectionUtil is used for instantiate the InternetConnectionUtil class.
          * @var coroutineCallEmail is used for get the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws ExceptionCustom if internet or network check gives exceptions.
          */
         fun sendEmail(file: File? = null, arrayListFile: ArrayList<File>? = null,context:Context,progressBar: ProgressBar,coroutinecallEmail:CoroutineScope) {
@@ -92,6 +93,7 @@ class EmailUtil {
             } catch (e: Exception) {
                 e.printStackTrace()
                 LogDeneme.logExceptionDetails(e)
+                LogDeneme.saveExceptionDetails()
                 coroutinecallEmail.launch {
                     withContext(Dispatchers.Main) {
                         progressBar.visibility =View.GONE
@@ -117,7 +119,7 @@ class EmailUtil {
          * @var multipart is used for creating contents that used in mail.
          * @var mimeMessage is used for mime the content that given.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun initializeEmail(){
             try {
@@ -158,7 +160,7 @@ class EmailUtil {
          * @var mimeMessage is used for mime the content that given.
          * @var transport is used for sending email instance.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun sendSingleEmail(file:File? = null){
             initializeEmail()
@@ -183,7 +185,7 @@ class EmailUtil {
          * @var mimeMessage is used for mime the content that given.
          * @var transport is used for sending email instance.
          * Exceptions:
-         * @throws exception if error occurs and saves the exception in logExceptionDetails.
+         * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun sendMultipleEmail(file: File? = null){
             initializeEmail()
