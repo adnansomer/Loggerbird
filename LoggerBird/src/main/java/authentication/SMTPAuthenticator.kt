@@ -1,4 +1,4 @@
-package loggerbird.authentication
+package authentication
 
 import javax.mail.PasswordAuthentication
 

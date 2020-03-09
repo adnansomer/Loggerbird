@@ -1,11 +1,11 @@
-package loggerbird.observers
+package observers
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
-import loggerbird.constants.Constants
+import constants.Constants
 import loggerbird.LoggerBird
 import java.lang.Exception
 import java.text.SimpleDateFormat

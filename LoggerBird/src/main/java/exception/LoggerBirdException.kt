@@ -1,4 +1,4 @@
-package loggerbird.exception
+package exception
 
 import java.lang.Exception
 

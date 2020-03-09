@@ -1,13 +1,13 @@
-package loggerbird.utils
+package utils
 
 import android.content.Context
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
-import loggerbird.constants.Constants
+import constants.Constants
 import loggerbird.LoggerBird
-import loggerbird.authentication.SMTPAuthenticator
-import loggerbird.exception.LoggerBirdException
+import authentication.SMTPAuthenticator
+import exception.LoggerBirdException
 import kotlinx.coroutines.*
 import java.io.File
 import java.time.LocalDateTime

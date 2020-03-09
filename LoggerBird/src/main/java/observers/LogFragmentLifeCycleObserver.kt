@@ -1,11 +1,11 @@
-package loggerbird.observers
+package observers
 
 import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import loggerbird.constants.Constants
+import constants.Constants
 import loggerbird.LoggerBird
 import java.lang.Exception
 import java.text.SimpleDateFormat

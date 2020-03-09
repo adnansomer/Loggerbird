@@ -1,4 +1,4 @@
-package loggerbird.constants
+package constants
 
 //Constant class.
 class Constants {
