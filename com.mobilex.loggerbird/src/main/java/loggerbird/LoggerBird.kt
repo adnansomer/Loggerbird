@@ -1,5 +1,6 @@
 package loggerbird
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.res.Resources
 import android.os.AsyncTask
@@ -10,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
+import androidx.annotation.RequiresApi
 import androidx.core.view.children
 import androidx.core.view.get
 import androidx.core.view.iterator
@@ -57,6 +59,7 @@ class LoggerBird : LifecycleObserver {
         private var stringBuilderBuild: StringBuilder = StringBuilder()
         private var stringBuilderException: StringBuilder = StringBuilder()
         private var stringBuilderAll: StringBuilder = StringBuilder()
+        private var stringBuilderPerformanceDetails: StringBuilder = StringBuilder()
         private var coroutineCallRetrofit = CoroutineScope(Dispatchers.IO)
         private var coroutineCallLogRetrofit = CoroutineScope(Dispatchers.IO)
         private var coroutineCallAnalytic = CoroutineScope(Dispatchers.IO)
@@ -73,14 +76,14 @@ class LoggerBird : LifecycleObserver {
         private lateinit var defaultFileDirectory: File
         private lateinit var defaultFilePath: File
         private var formattedTime: String? = null
-        private val lifeCycleObserver =
-            LogLifeCycleObserver()
+        private val lifeCycleObserver = LogLifeCycleObserver()
         private lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
         private lateinit var context: Context
         private var fileLimit: Long = 2097152
         private var stringBuilderTemp: StringBuilder = StringBuilder()
         private var arrayListFile: ArrayList<File> = ArrayList()
         private lateinit var fileTemp: File
+
 
         //---------------Public Methods:---------------
 
@@ -984,10 +987,89 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+
+        //burayabak
+        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+        fun takeDevicePerformanceDetails(){
+            if(controlLogInit){
+                try {
+                    val memoryInfo = ActivityManager.MemoryInfo()
+                    val activityManager : ActivityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                    activityManager.getMemoryInfo(memoryInfo)
+                    val runtime : Runtime = Runtime.getRuntime()
+
+                    val availableMemory = memoryInfo.availMem
+                    val totalMemory = memoryInfo.totalMem
+                    val lowMemory = memoryInfo.lowMemory
+                    val runtimeMaxMemory = runtime.maxMemory()
+                    val runtimeTotalMemory = runtime.totalMemory()
+                    val runtimeFreeMemory = runtime.freeMemory()
+                    val availableProcessors = runtime.availableProcessors()
+
+                    val date = Calendar.getInstance().time
+                    val formatter = SimpleDateFormat.getDateTimeInstance()
+                    formattedTime = formatter.format(date)
+
+                    stringBuilderPerformanceDetails.append("\nFormatted Time : $formattedTime\nAvailable Memory: $availableMemory\nTotal Memory: $totalMemory\nRuntime Max Memory: $runtimeMaxMemory\n" +
+                            "Runtime Total Memory: $runtimeTotalMemory\nRuntime Free Memmory: $runtimeFreeMemory\nLow Memory: $lowMemory\nAvilable Processors: $availableProcessors")
+
+                    Log.d("performance", stringBuilderPerformanceDetails.toString())
+
+                }catch (e: Exception) {
+                    e.printStackTrace()
+                    saveExceptionDetails()
+                }
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+        }
+
+        /**This Function Used For Obtaining Device Information
+         *Variables:
+         * @var deviceId is used for obtain device id of user
+         * @var deviceSerial is used for getting device serial
+         * @var device is used for getting device info
+         * @var deviceModel is used for getting device model
+         * @var deviceType is used for getting device type
+         * @var deviceUser is used to get user of device
+         * @var sdkVersion is used for getting sdk version of device
+         * @var manufacturer is used for getting manufacturer of device
+         * @var host is used for getting host of device
+         * @var hardware is used for getting hardware details of device
+         * @var devicebrand is used to get brand name of device
+         * @var product is used for getting product info
+         * @return
+         */
         private fun takeBuilderDetails(): String {
-            stringBuilderBuild = StringBuilder()
-            stringBuilderBuild.append("Device Information:" + "\n" + "ID:" + Build.ID + "\n" + "DEVICE:" + Build.DEVICE + "\n" + "DEVICE MODEL:" + Build.MODEL + "\n" + "DEVICE TYPE:" + Build.TYPE + "\n" + "USER:" + Build.USER + "\n" + "SDK VERSION:" + Build.VERSION.SDK_INT + "\n" + "MANUFACTURER:" + Build.MANUFACTURER + "\n" + "HOST:" + Build.HOST + "HARDWARE:" + Build.HARDWARE + "\n")
+            val deviceId = Build.ID
+            val deviceSerial = Build.FINGERPRINT
+            val device = Build.DEVICE
+            val deviceModel = Build.MODEL
+            val deviceType = Build.TYPE
+            val deviceUser = Build.USER
+            val sdkVersion = Build.VERSION.SDK_INT
+            val manufacturer = Build.MANUFACTURER
+            val host = Build.HOST
+            val hardware = Build.HARDWARE
+            val deviceBrand = Build.BRAND
+            val product = Build.PRODUCT
+
+            stringBuilderBuild=StringBuilder()
+            stringBuilderBuild.append(
+                "Device Information:"+"\n"
+                        +"ID:"+deviceId+ "\n"
+                        +"SERIAL: "+ deviceSerial+"\n"
+                        +"DEVICE:"+device+"\n"
+                        +"DEVICE MODEL:"+deviceModel+"\n"
+                        +"DEVICE TYPE:"+deviceType+ "\n"
+                        +"USER:"+deviceUser+"\n"
+                        +"SDK VERSION:"+sdkVersion+"\n"
+                        +"MANUFACTURER:"+manufacturer+"\n"
+                        +"HOST:"+host+"\n"
+                        +"HARDWARE:"+hardware +"\n" +"BRAND:" +deviceBrand+"\n" +"PRODUCT:" +product+"\n")
+
             return stringBuilderBuild.toString()
+
         }
 
         /**

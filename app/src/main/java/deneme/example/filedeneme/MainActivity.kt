@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity(){
     private lateinit var jsonObject:JSONObject
     private val transformerFactory:TransformerFactory=TransformerFactory.newInstance()
     private  val  transformer:Transformer=transformerFactory.newTransformer()
-    private var recyclerViewList:ArrayList<RecyclerModel> = ArrayList()
+    //private var recyclerViewList:ArrayList<RecyclerModel> = ArrayList()
     var disposable: Disposable? = null
     var retrofit: Retrofit = ApiServiceInterface.createObject()
     val ApiService by lazy {
@@ -83,9 +83,9 @@ class MainActivity : AppCompatActivity(){
         val intent:Intent=getIntent()
         val uri:Uri? = intent.data
         Log.d("deep_link_url",uri.toString())
-        addRecyclerViewList()
+        //addRecyclerViewList()
         recycler_view.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
-        recycler_view.adapter=RecyclerViewAdapter(recyclerViewList)
+        //recycler_view.adapter=RecyclerViewAdapter(recyclerViewList)
         LoggerBird.logInit(context = this)
 
 
@@ -189,15 +189,13 @@ class MainActivity : AppCompatActivity(){
 
             startActivity(Intent(this@MainActivity, Main2Activity::class.java))
         })
+
+        button_performance.setOnClickListener {
+            LoggerBird.takeDevicePerformanceDetails()
+        }
     }
 
-    private fun addRecyclerViewList(){
-        recyclerViewList.add(RecyclerModel("Deniz"))
-        recyclerViewList.add(RecyclerModel("Adnan"))
-        recyclerViewList.add(RecyclerModel("Gökhan"))
-        recyclerViewList.add(RecyclerModel("Fırat"))
-        recyclerViewList.add(RecyclerModel("Berk"))
-    }
+
 
     private fun beginSearch(srsearch: String, context: Context) {
 

@@ -28,8 +28,7 @@ class Constants {
         const val logInitErrorMessage = "Call logInit method before calling any other method!"
         const val internetErrorMessage = "Invalid internet connection response code!"
         const val networkErrorMessage = "Invalid network response"
-        const val saveErrorMessage =
-            "Empty Log Instance , Please Call Appropriate Instance Method Before Calling Save Method Hint="
+        const val saveErrorMessage = "Empty Log Instance , Please Call Appropriate Instance Method Before Calling Save Method Hint="
         const val componentMethodTag = "LogDeneme.logComponentDetails()"
         const val lifeCycleMethodTag = "LogDeneme.logLifeCycleDetails()"
         const val retrofitMethodTag = "LogDeneme.logRetrofitRequestDetails()"
