@@ -18,13 +18,11 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import android.view.View
-import deneme.example.loggerbird.Constants
-import deneme.example.loggerbird.ExceptionCustom
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.Sort
 import kotlinx.coroutines.*
-import deneme.example.loggerbird.LogDeneme
+import loggerbird.LoggerBird
 import io.reactivex.disposables.Disposable
 import okhttp3.FormBody
 import okhttp3.HttpUrl
@@ -82,7 +80,7 @@ class MainActivity : AppCompatActivity(){
         val intent:Intent=getIntent()
         val uri:Uri? = intent.data
         Log.d("deep_link_url",uri.toString())
-        LogDeneme.logInit(context = this)
+        LoggerBird.logInit(context = this)
 
 
 //        LogDeneme.logLifeCycleDetails()
@@ -92,7 +90,7 @@ class MainActivity : AppCompatActivity(){
             implementRealm()
 
         }
-        LogDeneme.logInit(context = this)
+        LoggerBird.logInit(context = this)
         button_add.setOnClickListener() {
             throw NullPointerException("button is null")
 //            for( i in 0..100){
@@ -135,7 +133,7 @@ class MainActivity : AppCompatActivity(){
 //            }
 // )
 //            LogDeneme.saveComponentDetails()
-            LogDeneme.saveComponentDetails()
+            LoggerBird.saveComponentDetails()
 //            val emailFile:File=File(this.filesDir,"component_details.txt")
 //            val rootView:ViewGroup=(this as Activity).window.decorView.findViewById(android.R.id.content);
 //            LogDeneme.sendLogDetailsAsEmail(file=emailFile,context = this,rootView = rootView )
@@ -180,7 +178,7 @@ class MainActivity : AppCompatActivity(){
 //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
 //            LogDeneme.saveAllDetails(context=this)
             //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
-            LogDeneme.saveLifeCycleDetails()
+            LoggerBird.saveLifeCycleDetails()
             startActivity(Intent(this@MainActivity, Main2Activity::class.java))
         })
     }
@@ -218,10 +216,10 @@ class MainActivity : AppCompatActivity(){
                         .post(fromBodyBuilder.build())
                         .build()
                     coroutineCallInternet.async {
-                        LogDeneme.logRetrofitRequestDetails(response= ApiServiceInterface.httpClient(
+                        LoggerBird.takeRetrofitRequestDetails(response= ApiServiceInterface.httpClient(
                             request
                         ),request=request)
-                        LogDeneme.saveRetrofitRequestDetails()
+                        LoggerBird.saveRetrofitRequestDetails()
                     }
 
 

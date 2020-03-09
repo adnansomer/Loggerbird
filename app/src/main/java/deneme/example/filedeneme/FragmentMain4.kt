@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import deneme.example.loggerbird.LogDeneme
+import loggerbird.LoggerBird
 import kotlinx.android.synthetic.main.fragment_main4.*
 
 class FragmentMain4 : Fragment() {
@@ -21,13 +21,13 @@ class FragmentMain4 : Fragment() {
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view: View =inflater.inflate(R.layout.fragment_main4, container, false)
-        LogDeneme.logInit(context!!,fragmentManager = fragmentManager)
+        LoggerBird.logInit(context!!,fragmentManager = fragmentManager)
 
         bundle.putString("id", "1")
         bundle.putString("item", "berk")
         bundle.putString("type", "component")
-        LogDeneme.logFragmentManagerDetails(fragmentManager = fragmentManager)
-        LogDeneme.saveFragmentManagerDetails()
+        LoggerBird.takeFragmentManagerDetails(fragmentManager = fragmentManager)
+        LoggerBird.saveFragmentManagerDetails()
 
 //        LogDeneme.saveAnalyticsDetails(bundle=bundle)
 //        LogDeneme.logAttach()
@@ -52,7 +52,7 @@ class FragmentMain4 : Fragment() {
             Log.d("new_fragment_list",i.tag)
         }
         button_dummy_3.setOnClickListener(){
-            LogDeneme.saveLifeCycleDetails()
+            LoggerBird.saveLifeCycleDetails()
 //            LogDeneme.saveLifeCycleDetails()
 //            for(i in fragmentManager!!.fragments){
 //                fragmentManager!!.beginTransaction().remove(i).commitNow()

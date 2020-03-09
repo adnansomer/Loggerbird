@@ -6,8 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import deneme.example.loggerbird.Constants.Companion.fragmentTag
-import deneme.example.loggerbird.LogDeneme
+import loggerbird.constants.Constants.Companion.fragmentTag
+import loggerbird.LoggerBird
 import kotlinx.android.synthetic.main.fragment_main3.*
 
 class FragmentMain3 : Fragment() {
@@ -29,7 +29,7 @@ class FragmentMain3 : Fragment() {
         val view: View = inflater.inflate(R.layout.fragment_main3, container, false)
         Log.d("fragment_name",fragmentTag)
         Log.d("super_class", FragmentMain3::class.java.superclass!!.simpleName)
-        LogDeneme.logInit(context!!,fragmentManager = fragmentManager)
+        LoggerBird.logInit(context!!,fragmentManager = fragmentManager)
 //        LogDeneme.logAttach()
 //        LogDeneme.logFragmentAttach()
         return view
@@ -39,7 +39,7 @@ class FragmentMain3 : Fragment() {
     override fun onStart() {
         super.onStart()
         button_dummy_2.setOnClickListener() {
-            LogDeneme.saveLifeCycleDetails()
+            LoggerBird.saveLifeCycleDetails()
             fragmentManager?.beginTransaction()
                 ?.add(
                     R.id.main_activity_2,

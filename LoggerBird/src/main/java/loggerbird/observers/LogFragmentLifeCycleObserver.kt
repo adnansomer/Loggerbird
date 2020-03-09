@@ -1,10 +1,12 @@
-package deneme.example.loggerbird
+package loggerbird.observers
 
 import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import loggerbird.constants.Constants
+import loggerbird.LoggerBird
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
@@ -21,6 +23,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
     }
+
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnViewCreate State In The Current Fragment.
      * Parameters:
@@ -33,7 +36,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * @var classList will take fragment's in the FragmentManager.
      * Exceptions:
-     * @throws exception if error occurs and saves the exception in logExceptionDetails details and saves exceptions to txt file with saveExceptionDetails.
+     * @throws exception if error occurs and saves the deneme.example.loggerbird.exception in logExceptionDetails details and saves exceptions to txt file with saveExceptionDetails.
      */
     override fun onFragmentViewCreated(
         fm: FragmentManager,
@@ -48,22 +51,24 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentViewCreated"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
-            if(classList.isEmpty()){
-                 classList.add(f.tag!!)
+            if (classList.isEmpty()) {
+                classList.add(f.tag!!)
             }
-            while (classList.iterator().hasNext()){
-                 if (classList.contains(f.tag!!)) {
-                        break;
-                 }else{
-                      classList.add(f.tag!!)
-                 }
+            while (classList.iterator().hasNext()) {
+                if (classList.contains(f.tag!!)) {
+                    break;
+                } else {
+                    classList.add(f.tag!!)
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -77,7 +82,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentAttached(fm: FragmentManager, f: Fragment, context: Context) {
         try {
@@ -86,11 +91,11 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentAttached"
-            stringBuilderFragmentLifeCycleObserver.append(" " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n")
+            stringBuilderFragmentLifeCycleObserver.append(" " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -104,7 +109,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentPreAttached(fm: FragmentManager, f: Fragment, context: Context) {
         super.onFragmentPreAttached(fm, f, context)
@@ -114,12 +119,14 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentPreAttached"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -133,7 +140,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentSaveInstanceState(fm: FragmentManager, f: Fragment, outState: Bundle) {
         super.onFragmentSaveInstanceState(fm, f, outState)
@@ -143,12 +150,14 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onSaveInstanceState"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -161,7 +170,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentViewDestroyed(fm: FragmentManager, f: Fragment) {
         super.onFragmentViewDestroyed(fm, f)
@@ -171,12 +180,14 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentViewDestroyed"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -190,7 +201,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentPreCreated(
         fm: FragmentManager,
@@ -204,12 +215,14 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentPreCreated"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -223,7 +236,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentActivityCreated(
         fm: FragmentManager,
@@ -238,12 +251,14 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentActivityCreated"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -257,7 +272,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentCreated(fm: FragmentManager, f: Fragment, savedInstanceState: Bundle?) {
         try {
@@ -267,12 +282,14 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentCreate"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -285,7 +302,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
     override fun onFragmentStarted(fm: FragmentManager, f: Fragment) {
@@ -296,12 +313,14 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentStarted"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -314,7 +333,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
         try {
@@ -324,12 +343,14 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentResumed"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -342,7 +363,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentPaused(fm: FragmentManager, f: Fragment) {
         try {
@@ -352,12 +373,14 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentPaused"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -370,7 +393,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentStopped(fm: FragmentManager, f: Fragment) {
         try {
@@ -380,12 +403,14 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentStopped"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
 
     }
@@ -399,7 +424,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment) {
         try {
@@ -409,12 +434,14 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentDestroyed"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:$currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState}\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -427,7 +454,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentDetached(fm: FragmentManager, f: Fragment) {
         try {
@@ -437,12 +464,14 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentDetached"
             stringBuilderFragmentLifeCycleObserver.append(
-                " " + Constants.fragmentTag + ":" + f.tag + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LogDeneme.logExceptionDetails(exception = e)
-            LogDeneme.saveExceptionDetails()
+            LoggerBird.takeExceptionDetails(
+                exception = e
+            )
+            LoggerBird.saveExceptionDetails()
         }
     }
 
