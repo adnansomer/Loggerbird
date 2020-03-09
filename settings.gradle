@@ -1,2 +1,2 @@
-include ':app', ':LoggerBird'
+include ':app', ':com.mobilex.loggerbird'
 rootProject.name='filedeneme'

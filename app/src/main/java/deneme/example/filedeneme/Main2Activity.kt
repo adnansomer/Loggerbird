@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import com.android.billingclient.api.*
-import deneme.example.loggerbird.LogDeneme
+import loggerbird.LoggerBird
 import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.activity_main2.*
 import org.json.JSONObject
@@ -151,8 +151,8 @@ class Main2Activity : AppCompatActivity(), PurchasesUpdatedListener {
         billingClient.acknowledgePurchase(acknowledgePurchaseParams) { billingResult ->
             val responseCode = billingResult.responseCode
             val debugMessage = billingResult.debugMessage
-            LogDeneme.logInAPurchaseDetails(billingResult=billingResult,acknowledgePurchaseParams = acknowledgePurchaseParams,billingClient = billingClient,skuDetailsParams= skuDetailsParams,billingFlowParams = billingFlowParams)
-            LogDeneme.saveInAPurchaseDetails()
+            LoggerBird.takeInAPurchaseDetails(billingResult=billingResult,acknowledgePurchaseParams = acknowledgePurchaseParams,billingClient = billingClient,skuDetailsParams= skuDetailsParams,billingFlowParams = billingFlowParams)
+            LoggerBird.saveInAPurchaseDetails()
             Log.d("bill_on_acknowledge", responseCode.toString()+","+acknowledgePurchaseParams.purchaseToken)
         }
     }
