@@ -1159,10 +1159,10 @@ class LoggerBird : LifecycleObserver {
                     activityManager.getMemoryInfo(memoryInfo)
                     val runtime : Runtime = Runtime.getRuntime()
 
-                    val availableMemory = memoryInfo.availMem
-                    val totalMemory = memoryInfo.totalMem
+                    val availableMemory = memoryInfo.availMem / 1048576L
+                    val totalMemory = memoryInfo.totalMem / 1048576L
                     val lowMemory = memoryInfo.lowMemory
-                    val runtimeMaxMemory = runtime.maxMemory()
+                    val runtimeMaxMemory = runtime.maxMemory() / 1048576L
                     val runtimeTotalMemory = runtime.totalMemory()
                     val runtimeFreeMemory = runtime.freeMemory()
                     val availableProcessors = runtime.availableProcessors()
@@ -1171,8 +1171,8 @@ class LoggerBird : LifecycleObserver {
                     val formatter = SimpleDateFormat.getDateTimeInstance()
                     formattedTime = formatter.format(date)
 
-                    stringBuilderPerformanceDetails.append("\nFormatted Time : $formattedTime\nAvailable Memory: $availableMemory\nTotal Memory: $totalMemory\nRuntime Max Memory: $runtimeMaxMemory\n" +
-                            "Runtime Total Memory: $runtimeTotalMemory\nRuntime Free Memmory: $runtimeFreeMemory\nLow Memory: $lowMemory\nAvilable Processors: $availableProcessors")
+                    stringBuilderPerformanceDetails.append("\nFormatted Time : $formattedTime\nAvailable Memory: $availableMemory MB\nTotal Memory: $totalMemory MB\nRuntime Max Memory: $runtimeMaxMemory MB\n" +
+                            "Runtime Total Memory: $runtimeTotalMemory KB\nRuntime Free Memmory: $runtimeFreeMemory KB\nLow Memory: $lowMemory\nAvilable Processors: $availableProcessors")
 
                     Log.d("performance", stringBuilderPerformanceDetails.toString())
 
