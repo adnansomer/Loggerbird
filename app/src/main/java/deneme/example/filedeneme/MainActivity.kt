@@ -191,6 +191,7 @@ class MainActivity : AppCompatActivity(){
         })
 
         button_performance.setOnClickListener {
+            LoggerBird.takeBuilderDetails()
             LoggerBird.takeDevicePerformanceDetails()
         }
     }

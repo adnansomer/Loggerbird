@@ -60,6 +60,7 @@ class LoggerBird : LifecycleObserver {
         private var stringBuilderException: StringBuilder = StringBuilder()
         private var stringBuilderAll: StringBuilder = StringBuilder()
         private var stringBuilderPerformanceDetails: StringBuilder = StringBuilder()
+        private var stringBuilderDeviceInfoDetails: StringBuilder = StringBuilder()
         private var coroutineCallRetrofit = CoroutineScope(Dispatchers.IO)
         private var coroutineCallLogRetrofit = CoroutineScope(Dispatchers.IO)
         private var coroutineCallAnalytic = CoroutineScope(Dispatchers.IO)
@@ -70,6 +71,8 @@ class LoggerBird : LifecycleObserver {
         private var coroutineCallEmail = CoroutineScope(Dispatchers.IO)
         private var coroutineCallActivity = CoroutineScope(Dispatchers.IO)
         private var coroutineCallFragment = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallDevicePerformance = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallBuilder = CoroutineScope(Dispatchers.IO)
         private var coroutineCallRealm = CoroutineScope(Dispatchers.IO)
         private var coroutineCallException = CoroutineScope(Dispatchers.IO)
         private var coroutineCallAll = CoroutineScope(Dispatchers.IO)
@@ -85,7 +88,7 @@ class LoggerBird : LifecycleObserver {
         private lateinit var fileTemp: File
 
 
-        //---------------Public Methods:---------------
+        //---------------Public Methods:---------------//
 
         /**
          * Call This Method Before Calling Any Other Methods.
@@ -310,6 +313,147 @@ class LoggerBird : LifecycleObserver {
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
+        }
+
+        /**
+         * This Method Saves Device Information Details To Txt File.
+         * Parameters:
+         * @param file allow user modify the file they want to create for saving their Device Information Details , otherwise it will save your file to the devices data->data->your project package name->files->device_performance_details with an default name device_information_details.
+         * Variables:
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallDeviceBuilder is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files
+         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("device_information_details")
+         * Exceptions:
+         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         * @throws exception if log instance is empty.
+         */
+
+        fun saveBuilderDetails(
+            file: File? = null
+        ) {
+            if (controlLogInit) {
+                if (stringBuilderBuild.isNotEmpty()) {
+                    coroutineCallBuilder.async {
+                        try {
+                            if (file != null) {
+                                if (!file.exists()) {
+                                    withContext(Dispatchers.IO) {
+                                        file.createNewFile()
+                                        file.appendText(takeBuilderDetails())
+                                    }
+                                }
+                                file.appendText(
+                                    stringBuilderBuild.toString()
+                                )
+                            } else {
+                                defaultFileDirectory = context.filesDir
+                                defaultFilePath = File(
+                                    defaultFileDirectory, "device_information_details.txt"
+                                )
+                                if (!defaultFilePath.exists()) {
+                                    withContext(Dispatchers.IO) {
+                                        defaultFilePath.createNewFile()
+                                        defaultFilePath.appendText(
+                                            takeBuilderDetails()
+                                        )
+                                    }
+                                }
+                                defaultFilePath.appendText(
+                                    stringBuilderBuild.toString()
+                                )
+                            }
+                            stringBuilderBuild = StringBuilder()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            takeExceptionDetails(
+                                e,
+                                Constants.deviceInfoTag
+                            )
+                            saveExceptionDetails()
+                        }
+                    }
+                } else {
+                    throw LoggerBirdException(
+                        Constants.saveErrorMessage + Constants.deviceInfoTag
+                    )
+                }
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+
+        }
+
+
+        /**
+         * This Method Saves DevicePerformance Details To Txt File.
+         * Parameters:
+         * @param file allow user modify the file they want to create for saving their Device Performance Details , otherwise it will save your file to the devices data->data->your project package name->files->device_performance_details with an default name device_performance_details.
+         * Variables:
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallDevicePerformance is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files
+         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("device_performance_details")
+         * Exceptions:
+         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         * @throws exception if log instance is empty.
+         */
+
+        fun saveDevicePerformanceDetails(
+            file: File? = null
+        ) {
+            if (controlLogInit) {
+                if (stringBuilderPerformanceDetails.isNotEmpty()) {
+                    coroutineCallDevicePerformance.async {
+                        try {
+                            if (file != null) {
+                                if (!file.exists()) {
+                                    withContext(Dispatchers.IO) {
+                                        file.createNewFile()
+                                        file.appendText(takeBuilderDetails())
+                                    }
+                                }
+                                file.appendText(
+                                    stringBuilderPerformanceDetails.toString()
+                                )
+                            } else {
+                                defaultFileDirectory = context.filesDir
+                                defaultFilePath = File(
+                                    defaultFileDirectory, "device_performance_details.txt"
+                                )
+                                if (!defaultFilePath.exists()) {
+                                    withContext(Dispatchers.IO) {
+                                        defaultFilePath.createNewFile()
+                                        defaultFilePath.appendText(
+                                            takeBuilderDetails()
+                                        )
+                                    }
+                                }
+                                defaultFilePath.appendText(
+                                    stringBuilderPerformanceDetails.toString()
+                                )
+                            }
+                            stringBuilderPerformanceDetails = StringBuilder()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            takeExceptionDetails(
+                                e,
+                                Constants.devicePerformanceTag
+                            )
+                            saveExceptionDetails()
+                        }
+                    }
+                } else {
+                    throw LoggerBirdException(
+                        Constants.saveErrorMessage + Constants.devicePerformanceMethodTag
+                    )
+                }
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+
         }
 
         /**
@@ -988,7 +1132,24 @@ class LoggerBird : LifecycleObserver {
         }
 
 
-        //burayabak
+        /**This Function Takes Device Performance Details
+         *Variables:
+         * @var deviceId is used for obtain device id of user.
+         * @var deviceSerial is used for getting device serial.
+         * @var device is used for getting device info.
+         * @var deviceModel is used for getting device model.
+         * @var deviceType is used for getting device type.
+         * @var deviceUser is used to get user of device.
+         * @var sdkVersion is used for getting sdk version of device.
+         * @var manufacturer is used for getting manufacturer of device.
+         * @var host is used for getting host of device.
+         * @var hardware is used for getting hardware details of device.
+         * @var devicebrand is used to get brand name of device.
+         * @var product is used for getting product info.
+         * @return device information with a string builder.
+         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         */
         @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
         fun takeDevicePerformanceDetails(){
             if(controlLogInit){
@@ -1024,52 +1185,68 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-        /**This Function Used For Obtaining Device Information
+        /**This Function Takes Device Information Details
          *Variables:
-         * @var deviceId is used for obtain device id of user
-         * @var deviceSerial is used for getting device serial
-         * @var device is used for getting device info
-         * @var deviceModel is used for getting device model
-         * @var deviceType is used for getting device type
-         * @var deviceUser is used to get user of device
-         * @var sdkVersion is used for getting sdk version of device
-         * @var manufacturer is used for getting manufacturer of device
-         * @var host is used for getting host of device
-         * @var hardware is used for getting hardware details of device
-         * @var devicebrand is used to get brand name of device
-         * @var product is used for getting product info
-         * @return
+         * @var deviceId is used for obtain device id of user.
+         * @var deviceSerial is used for getting device serial.
+         * @var device is used for getting device info.
+         * @var deviceModel is used for getting device model.
+         * @var deviceType is used for getting device type.
+         * @var deviceUser is used to get user of device.
+         * @var sdkVersion is used for getting sdk version of device.
+         * @var manufacturer is used for getting manufacturer of device.
+         * @var host is used for getting host of device.
+         * @var hardware is used for getting hardware details of device.
+         * @var devicebrand is used to get brand name of device.
+         * @var product is used for getting product info.
+         * @return device information with a string builder.
+         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
          */
-        private fun takeBuilderDetails(): String {
-            val deviceId = Build.ID
-            val deviceSerial = Build.FINGERPRINT
-            val device = Build.DEVICE
-            val deviceModel = Build.MODEL
-            val deviceType = Build.TYPE
-            val deviceUser = Build.USER
-            val sdkVersion = Build.VERSION.SDK_INT
-            val manufacturer = Build.MANUFACTURER
-            val host = Build.HOST
-            val hardware = Build.HARDWARE
-            val deviceBrand = Build.BRAND
-            val product = Build.PRODUCT
+        fun takeBuilderDetails(): String {
+            if(controlLogInit) {
+                try {
+                    val deviceId = Build.ID
+                    val deviceSerial = Build.FINGERPRINT
+                    val device = Build.DEVICE
+                    val deviceModel = Build.MODEL
+                    val deviceType = Build.TYPE
+                    val deviceUser = Build.USER
+                    val sdkVersion = Build.VERSION.SDK_INT
+                    val manufacturer = Build.MANUFACTURER
+                    val host = Build.HOST
+                    val hardware = Build.HARDWARE
+                    val deviceBrand = Build.BRAND
+                    val product = Build.PRODUCT
 
-            stringBuilderBuild=StringBuilder()
-            stringBuilderBuild.append(
-                "Device Information:"+"\n"
-                        +"ID:"+deviceId+ "\n"
-                        +"SERIAL: "+ deviceSerial+"\n"
-                        +"DEVICE:"+device+"\n"
-                        +"DEVICE MODEL:"+deviceModel+"\n"
-                        +"DEVICE TYPE:"+deviceType+ "\n"
-                        +"USER:"+deviceUser+"\n"
-                        +"SDK VERSION:"+sdkVersion+"\n"
-                        +"MANUFACTURER:"+manufacturer+"\n"
-                        +"HOST:"+host+"\n"
-                        +"HARDWARE:"+hardware +"\n" +"BRAND:" +deviceBrand+"\n" +"PRODUCT:" +product+"\n")
+                    stringBuilderBuild = StringBuilder()
+                    stringBuilderBuild.append(
+                        "Device Information:" + "\n"
+                                + "ID:" + deviceId + "\n"
+                                + "SERIAL: " + deviceSerial + "\n"
+                                + "DEVICE:" + device + "\n"
+                                + "DEVICE MODEL:" + deviceModel + "\n"
+                                + "DEVICE TYPE:" + deviceType + "\n"
+                                + "USER:" + deviceUser + "\n"
+                                + "SDK VERSION:" + sdkVersion + "\n"
+                                + "MANUFACTURER:" + manufacturer + "\n"
+                                + "HOST:" + host + "\n"
+                                + "HARDWARE:" + hardware + "\n" + "BRAND:" + deviceBrand + "\n" + "PRODUCT:" + product + "\n"
+                    )
 
+                    Log.d("deviceInfo", stringBuilderBuild.toString())
+                }catch (e: Exception){
+                    e.printStackTrace()
+                    takeExceptionDetails(
+                        e,
+                        Constants.deviceInfoTag
+                    )
+                    saveExceptionDetails()
+                }
+                }else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
+                }
             return stringBuilderBuild.toString()
-
         }
 
         /**
