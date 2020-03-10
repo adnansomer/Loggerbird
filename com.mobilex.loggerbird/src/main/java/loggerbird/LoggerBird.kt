@@ -10,10 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
-import androidx.core.view.children
-import androidx.core.view.get
-import androidx.core.view.iterator
-import androidx.core.view.size
+import android.widget.TextView
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
@@ -22,13 +19,11 @@ import com.google.gson.GsonBuilder
 import deneme.example.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
-import observers.LogFragmentLifeCycleObserver
-import observers.LogLifeCycleObserver
-import observers.LogcatObserver
 import utils.EmailUtil
 import io.realm.Realm
 import io.realm.RealmModel
 import kotlinx.coroutines.*
+import observers.*
 import okhttp3.Request
 import okhttp3.Response
 import retrofit2.Retrofit
@@ -73,14 +68,15 @@ class LoggerBird : LifecycleObserver {
         private lateinit var defaultFileDirectory: File
         private lateinit var defaultFilePath: File
         private var formattedTime: String? = null
-        private val lifeCycleObserver =
-            LogLifeCycleObserver()
+        private val lifeCycleObserver = LogLifeCycleObserver()
         private lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
         private lateinit var context: Context
         private var fileLimit: Long = 2097152
         private var stringBuilderTemp: StringBuilder = StringBuilder()
         private var arrayListFile: ArrayList<File> = ArrayList()
         private lateinit var fileTemp: File
+        private var recyclerViewObserver: LogRecyclerViewObserver = LogRecyclerViewObserver()
+        private lateinit var recyclerViewItemObserver: LogDataSetObserver
 
         //---------------Public Methods:---------------
 
@@ -167,6 +163,7 @@ class LoggerBird : LifecycleObserver {
             } else {
                 lifeCycleObserver.registerLifeCycle(context)
             }
+            recyclerViewItemObserver = LogDataSetObserver(context)
             return true
         }
 
@@ -886,7 +883,10 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeComponentDetails(view: View? = null, resources: Resources? = null) {
+        fun takeComponentDetails(
+            view: View? = null,
+            resources: Resources? = null
+        ) {
             if (controlLogInit) {
                 try {
                     val date = Calendar.getInstance().time
@@ -918,20 +918,59 @@ class LoggerBird : LifecycleObserver {
         }
 
         //In progress method.
+        fun registerRecyclerViewAdapterDataObserver(recyclerView: RecyclerView) {
+            recyclerView.adapter?.registerAdapterDataObserver(recyclerViewObserver)
+        }
+
+        //In progress method.
+        fun unRegisterRecyclerViewAdapterDataObserver(recyclerView: RecyclerView){
+            recyclerView.adapter?.unregisterAdapterDataObserver(recyclerViewObserver)
+        }
+        //In progress method.
         private fun takeRecyclerViewDetails(recyclerView: RecyclerView, resources: Resources?) {
-            val recyclerViewList: ArrayList<Any> = ArrayList()
-            val stringBuilderRecyclerViewItem: StringBuilder = StringBuilder()
-            for (recyclerViewItem in 0..recyclerView.adapter!!.itemCount) {
-                recyclerViewList.add(recyclerView.adapter!!.getItemViewType(recyclerViewItem))
-                stringBuilderRecyclerViewItem.append(recyclerViewItem.toString() + "\n")
+            try {
+                val stringBuilderRecyclerViewItem: StringBuilder = StringBuilder()
+                val recyclerViewList: ArrayList<Any> = ArrayList()
+                var tempView: View
+                var tempViewGroup: ViewGroup
+                var tempTextView: TextView
+                recyclerViewItemObserver.takeObserverList()
+                for (recyclerViewItem in 0..recyclerView.adapter!!.itemCount) {
+                    if (recyclerView.getChildAt(recyclerViewItem) != null) {
+                        tempView = recyclerView.getChildAt(recyclerViewItem)
+                        tempViewGroup = tempView as ViewGroup
+                        do {
+                            if(tempView is ViewGroup ){
+                                tempViewGroup = tempView as ViewGroup
+                                if(tempViewGroup.getChildAt(0)!=null){
+                                    tempView = tempViewGroup.getChildAt(0)
+                                }else if(tempViewGroup.getChildAt(recyclerViewItem)!=null){
+                                    tempView = tempViewGroup.getChildAt(recyclerViewItem)
+                                }
+                            }else{
+                                if(tempView is TextView){
+                                    tempTextView=tempView
+                                    recyclerViewList.add(tempTextView.text)
+                                    break
+                                }
+                            }
+                        } while (true)
+                    }
+                }
+                stringBuilderRecyclerViewItem.append(recyclerViewList.toString() + "\n")
+                stringBuilderComponent.append(
+                    formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + (resources?.getResourceName(
+                        recyclerView.id
+                    )) + " " + "Component Id:" + recyclerView.id + "\n" + "Component Type:" + recyclerView.findViewById<View>(
+                        recyclerView.id
+                    ).toString() + "\n" + "RecyclerView Layout:" + recyclerView.layoutManager + "\n" + "RecyclerView Adapter:" + recyclerView.adapter + "\n" + "RecyclerView Item Size:" + recyclerView.adapter?.itemCount + "\n" + "RecyclerView Item list:" + "\n" + recyclerViewList.toString()+"\n"
+                )
+                stringBuilderComponent.append(recyclerViewObserver.returnRecyclerViewState())
+            } catch (e: Exception) {
+                e.printStackTrace()
+                takeExceptionDetails(e)
+                saveExceptionDetails()
             }
-            stringBuilderComponent.append(
-                formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + (resources?.getResourceName(
-                    recyclerView.id
-                )) + " " + "Component Id:" + recyclerView.id + "\n" + "Component Type:" + recyclerView.findViewById<View>(
-                    recyclerView.id
-                ).toString() + "\n" + "RecyclerView Layout:" + recyclerView.layoutManager + "\n" + "RecyclerView Adapter:" + recyclerView.adapter + "\n" + "RecyclerView Item Size:" + recyclerViewList.size + "\n" + "RecyclerView Item list:" + "\n" + stringBuilderRecyclerViewItem.toString()
-            )
         }
 
         /**

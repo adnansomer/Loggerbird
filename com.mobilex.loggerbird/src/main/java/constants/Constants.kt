@@ -7,6 +7,7 @@ class Constants {
         const val fileCreationSuccessMessage = "File Created Successfully!"
         const val componentDetailsSuccessMessage = "Component Details Gathered!"
         const val componentTag = "component"
+        const val recyclerViewTag="recyclerView"
         const val lifeCycleTag = "activity"
         const val fragmentTag = "fragment"
         const val analyticsTag = "analytics"
@@ -30,15 +31,15 @@ class Constants {
         const val networkErrorMessage = "Invalid network response"
         const val saveErrorMessage =
             "Empty Log Instance , Please Call Appropriate Instance Method Before Calling Save Method Hint="
-        const val componentMethodTag = "LogDeneme.logComponentDetails()"
-        const val lifeCycleMethodTag = "LogDeneme.logLifeCycleDetails()"
-        const val retrofitMethodTag = "LogDeneme.logRetrofitRequestDetails()"
-        const val analyticsMethodTag = "LogDeneme.logAnalyticsDetails()"
-        const val fragmentManagerMethodTag = "LogDeneme.logFragmentManagerDetails()"
-        const val htppRequestMethodTag = "LogDeneme.logHttpRequestDetails()"
-        const val inAPurchaseMethodTag = "LogDeneme.logInAPurchaseDetails()"
-        const val realmMethodTag = "LogDeneme.logRealmDetails()"
-        const val exceptionMethodTag = "LogDeneme.logExceptionDetails()"
+        const val componentMethodTag = "LoggerBird.takeComponentDetails()"
+        const val lifeCycleMethodTag = "LoggerBird.LifeCycleDetails()"
+        const val retrofitMethodTag = "LoggerBird.takeRetrofitRequestDetails()"
+        const val analyticsMethodTag = "LoggerBird.takeAnalyticsDetails()"
+        const val fragmentManagerMethodTag = "LoggerBird.takeFragmentManagerDetails()"
+        const val htppRequestMethodTag = "LoggerBird.takeHttpRequestDetails()"
+        const val inAPurchaseMethodTag = "LoggerBird.takeInAPurchaseDetails()"
+        const val realmMethodTag = "LoggerBird.takeRealmDetails()"
+        const val exceptionMethodTag = "LoggerBird.takeExceptionDetails()"
         const val SMTP_HOST_NAME: String = "smtp.gmail.com";
     }
 }

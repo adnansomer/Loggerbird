@@ -20,6 +20,7 @@ import java.net.URL
 import android.view.View
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.Sort
@@ -85,7 +86,15 @@ class MainActivity : AppCompatActivity(){
         Log.d("deep_link_url",uri.toString())
         addRecyclerViewList()
         recycler_view.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
-        recycler_view.adapter=RecyclerViewAdapter(recyclerViewList)
+        val adapter:RecyclerViewAdapter=RecyclerViewAdapter(recyclerViewList)
+        recycler_view.adapter=adapter
+        LoggerBird.registerRecyclerViewAdapterDataObserver(recycler_view)
+        addRecyclerViewList()
+        adapter.notifyDataSetChanged()
+        recyclerViewList.removeAt(0)
+        adapter.notifyDataSetChanged()
+        recyclerViewList.add(RecyclerModel("deneme"))
+        adapter.notifyDataSetChanged()
         LoggerBird.logInit(context = this)
 
 
@@ -98,6 +107,8 @@ class MainActivity : AppCompatActivity(){
         }
         LoggerBird.logInit(context = this)
         button_add.setOnClickListener() {
+            adapter.notifyItemRemoved(0)
+
 //            throw NullPointerException("button is null")
 //            for( i in 0..100){
 //                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)

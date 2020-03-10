@@ -30,7 +30,7 @@ class LogLifeCycleObserver() : LifecycleObserver {
      * Parameters:
      * @param context is for getting reference from the application context , you must deploy this parameter.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     fun registerLifeCycle(context: Context) {
         try {
@@ -47,7 +47,7 @@ class LogLifeCycleObserver() : LifecycleObserver {
     /**
      * This Method DeRegister A LifeCycle Observer From The Current Activity.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     fun deRegisterLifeCycle() {
         try {
@@ -66,7 +66,7 @@ class LogLifeCycleObserver() : LifecycleObserver {
      * @var classList will take list of activities.
      * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs and saves the deneme.example.loggerbird.exception in logExceptionDetails.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onCreateListener() {
@@ -100,7 +100,7 @@ class LogLifeCycleObserver() : LifecycleObserver {
      * @var classList will take list of activities.
      * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs and saves the deneme.example.loggerbird.exception in logExceptionDetails.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -127,7 +127,7 @@ class LogLifeCycleObserver() : LifecycleObserver {
      * @var classList will take list of activities.
      * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs and saves the deneme.example.loggerbird.exception in logExceptionDetails.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -152,7 +152,7 @@ class LogLifeCycleObserver() : LifecycleObserver {
      * @var classList will take list of activities.
      * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs and saves the deneme.example.loggerbird.exception in logExceptionDetails.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     private fun onPauseListener() {
@@ -176,7 +176,7 @@ class LogLifeCycleObserver() : LifecycleObserver {
      * @var classList will take list of activities.
      * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs and saves the deneme.example.loggerbird.exception in logExceptionDetails.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     private fun onDestroyListener() {
@@ -200,7 +200,7 @@ class LogLifeCycleObserver() : LifecycleObserver {
      * @var classList will take list of activities.
      * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs and saves the deneme.example.loggerbird.exception in logExceptionDetails.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private fun onStopListener() {
@@ -235,7 +235,7 @@ class LogLifeCycleObserver() : LifecycleObserver {
     }
 
     /**
-     * This Method Is Used For Getting Activity Or Fragment List.
+     * This Method Is Used For Getting Activity List.
      * Variables:
      * @var if method is called with fragmentManager then stringBuilderLifeCycleObserver will print fragment detail's otherwise it will print activity details.
      * @return ArrayList<String>.
