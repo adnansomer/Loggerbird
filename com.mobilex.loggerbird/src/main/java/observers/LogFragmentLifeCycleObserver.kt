@@ -12,8 +12,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 //LogLifeCycleObserver class is used for attaching lifecycle observer for your current fragment.
-class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
-    FragmentManager.FragmentLifecycleCallbacks() {
+class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) : FragmentManager.FragmentLifecycleCallbacks() {
     //Global variables.
     private var stringBuilderFragmentLifeCycleObserver: StringBuilder = StringBuilder()
     private var classList: ArrayList<String> = ArrayList()

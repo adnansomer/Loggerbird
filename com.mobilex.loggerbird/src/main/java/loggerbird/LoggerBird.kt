@@ -2,39 +2,44 @@ package loggerbird
 
 import android.app.ActivityManager
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Resources
 import android.os.AsyncTask
+import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.Choreographer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.view.children
-import androidx.core.view.get
-import androidx.core.view.iterator
-import androidx.core.view.size
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
 import com.android.billingclient.api.*
 import com.google.gson.GsonBuilder
-import deneme.example.loggerbird.R
 import constants.Constants
+import deneme.example.loggerbird.R
 import exception.LoggerBirdException
+import io.realm.Realm
+import io.realm.RealmModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import observers.LogFragmentLifeCycleObserver
 import observers.LogLifeCycleObserver
 import observers.LogcatObserver
-import utils.EmailUtil
-import io.realm.Realm
-import io.realm.RealmModel
-import kotlinx.coroutines.*
 import okhttp3.Request
 import okhttp3.Response
 import retrofit2.Retrofit
+import utils.EmailUtil
 import java.io.File
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
@@ -1131,6 +1136,61 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+        //in progress method
+        fun takeChoreographerDetails(){
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
+                    override fun doFrame(frameTimeNanos: Long) {
+                       /* if (LogMonitor.getInstance().hasMonitor()) {
+                            LogMonitor.getInstance().removeMonitor()
+                        }
+                        LogMonitor.getInstance().startMonitor()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                            Choreographer.getInstance().postFrameCallback(this)
+                        }*/
+                    }
+                })
+            }
+        }
+
+        /**
+         * This function takes CPU and processor details of Android Device
+         * Variables:
+         * @var stringBuffer is used for getting cpu information from /proc/cpuinfo
+         * @var file is used for get cpu info to the file
+         * Excepitons:
+         * @throws exception if logInit method return value is false.
+         */
+        fun takeDeviceCpuDetails():String {
+
+            val stringBuffer = StringBuffer()
+
+            if (controlLogInit) {
+                try {
+                    stringBuffer.append("abi: ").append(Build.CPU_ABI).append("\n")
+
+                    if (File("/proc/cpuinfo").exists()) {
+                        try {
+                            val file = File("/proc/cpuinfo")
+                            file.bufferedReader().forEachLine { stringBuffer.append(it + "\n") }
+
+                        } catch (e: IOException) {
+                            e.printStackTrace();
+                        }
+                    }
+                    Log.d("CPU", stringBuffer.toString())
+                    return stringBuffer.toString()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    saveExceptionDetails()
+                }
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+            return stringBuffer.toString()
+        }
+
 
         /**This Function Takes Device Performance Details
          *Variables:
@@ -1146,7 +1206,11 @@ class LoggerBird : LifecycleObserver {
          * @var hardware is used for getting hardware details of device.
          * @var devicebrand is used to get brand name of device.
          * @var product is used for getting product info.
+         * @var battery level is used for getting battery level information.
+         * @var battery scale is used for getting battery level information.
+         * @var battery gives the battery percentage of device.
          * @return device information with a string builder.
+         * Exceptions:
          * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
@@ -1154,6 +1218,7 @@ class LoggerBird : LifecycleObserver {
         fun takeDevicePerformanceDetails(){
             if(controlLogInit){
                 try {
+
                     val memoryInfo = ActivityManager.MemoryInfo()
                     val activityManager : ActivityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
                     activityManager.getMemoryInfo(memoryInfo)
@@ -1163,23 +1228,43 @@ class LoggerBird : LifecycleObserver {
                     val totalMemory = memoryInfo.totalMem / 1048576L
                     val lowMemory = memoryInfo.lowMemory
                     val runtimeMaxMemory = runtime.maxMemory() / 1048576L
-                    val runtimeTotalMemory = runtime.totalMemory()
-                    val runtimeFreeMemory = runtime.freeMemory()
+                    val runtimeTotalMemory = runtime.totalMemory() / 1048576L
+                    val runtimeFreeMemory = runtime.freeMemory() / 1048576L
                     val availableProcessors = runtime.availableProcessors()
+                    val usedMemorySize = (runtimeTotalMemory - runtimeFreeMemory)
+                    val cpuAbi = Build.CPU_ABI.toString()
+                    val sendNetworkUsage = android.net.TrafficStats.getMobileTxBytes()
+                    val receivedNetworkUsage = android.net.TrafficStats.getMobileRxBytes()
+
+                    val batteryStatus = context.registerReceiver(
+                        null,
+                        IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                    )
+                    var batteryLevel = -1
+                    var batteryScale = 1
+                    if (batteryStatus != null) {
+                        batteryLevel = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, batteryLevel)
+                        batteryScale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, batteryScale)
+                    }
+                    val battery = batteryLevel / batteryScale.toFloat() * 100
 
                     val date = Calendar.getInstance().time
                     val formatter = SimpleDateFormat.getDateTimeInstance()
                     formattedTime = formatter.format(date)
 
                     stringBuilderPerformanceDetails.append("\nFormatted Time : $formattedTime\nAvailable Memory: $availableMemory MB\nTotal Memory: $totalMemory MB\nRuntime Max Memory: $runtimeMaxMemory MB\n" +
-                            "Runtime Total Memory: $runtimeTotalMemory KB\nRuntime Free Memmory: $runtimeFreeMemory KB\nLow Memory: $lowMemory\nAvilable Processors: $availableProcessors")
+                            "Runtime Total Memory: $runtimeTotalMemory MB\nRuntime Free Memmory: $runtimeFreeMemory MB\nLow Memory: $lowMemory\nAvilable Processors: $availableProcessors\n"
+                            +"Used Memory Size: $usedMemorySize KB \nCPU ABI: $cpuAbi\nNetwork Usage(Send): $sendNetworkUsage Bytes\nNetwork Usage(Received): $receivedNetworkUsage Bytes\n"
+                            +"Battery: $battery")
 
                     Log.d("performance", stringBuilderPerformanceDetails.toString())
 
+                    val memorytreshold = 1239728
+                    if(memorytreshold > runtimeTotalMemory){ Toast.makeText(context,"Memory overused",Toast.LENGTH_LONG).show() }
+
                 }catch (e: Exception) {
                     e.printStackTrace()
-                    saveExceptionDetails()
-                }
+                    saveExceptionDetails() }
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
@@ -1200,10 +1285,12 @@ class LoggerBird : LifecycleObserver {
          * @var devicebrand is used to get brand name of device.
          * @var product is used for getting product info.
          * @return device information with a string builder.
+         * Exceptions:
          * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun takeBuilderDetails(): String {
+
             if(controlLogInit) {
                 try {
                     val deviceId = Build.ID
@@ -1231,16 +1318,16 @@ class LoggerBird : LifecycleObserver {
                                 + "SDK VERSION:" + sdkVersion + "\n"
                                 + "MANUFACTURER:" + manufacturer + "\n"
                                 + "HOST:" + host + "\n"
-                                + "HARDWARE:" + hardware + "\n" + "BRAND:" + deviceBrand + "\n" + "PRODUCT:" + product + "\n"
+                                + "HARDWARE:" + hardware + "\n"
+                                + "BRAND:" + deviceBrand + "\n"
+                                + "PRODUCT:" + product + "\n"
                     )
 
                     Log.d("deviceInfo", stringBuilderBuild.toString())
+
                 }catch (e: Exception){
                     e.printStackTrace()
-                    takeExceptionDetails(
-                        e,
-                        Constants.deviceInfoTag
-                    )
+                    takeExceptionDetails(e, Constants.deviceInfoTag)
                     saveExceptionDetails()
                 }
                 }else {
@@ -1738,6 +1825,8 @@ class LoggerBird : LifecycleObserver {
         }
     }
 }
+
+
 
 //dummy class probably will be deleted.
 class asyncTakeRetrofitTask(
