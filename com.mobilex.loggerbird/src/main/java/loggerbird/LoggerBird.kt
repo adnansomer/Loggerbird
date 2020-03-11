@@ -66,6 +66,7 @@ class LoggerBird : LifecycleObserver {
         private var stringBuilderAll: StringBuilder = StringBuilder()
         private var stringBuilderPerformanceDetails: StringBuilder = StringBuilder()
         private var stringBuilderDeviceInfoDetails: StringBuilder = StringBuilder()
+        private var stringBuilderMemoryUsageDetails : StringBuilder = StringBuilder()
         private var coroutineCallRetrofit = CoroutineScope(Dispatchers.IO)
         private var coroutineCallLogRetrofit = CoroutineScope(Dispatchers.IO)
         private var coroutineCallAnalytic = CoroutineScope(Dispatchers.IO)
@@ -88,6 +89,7 @@ class LoggerBird : LifecycleObserver {
         private lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
         private lateinit var context: Context
         private var fileLimit: Long = 2097152
+        private var memoryThreshold: Long = 2097152L
         private var stringBuilderTemp: StringBuilder = StringBuilder()
         private var arrayListFile: ArrayList<File> = ArrayList()
         private lateinit var fileTemp: File
@@ -207,7 +209,7 @@ class LoggerBird : LifecycleObserver {
                                 if (!file.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file.appendText(takeDeviceInformationDetails())
                                     }
                                 }
                                 file.appendText(
@@ -222,7 +224,7 @@ class LoggerBird : LifecycleObserver {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            takeDeviceInformationDetails()
                                         )
                                     }
                                 }
@@ -278,7 +280,7 @@ class LoggerBird : LifecycleObserver {
                                 if (!file.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file.appendText(takeDeviceInformationDetails())
                                     }
                                 }
                                 file.appendText(stringBuilderLifeCycle.toString())
@@ -291,7 +293,7 @@ class LoggerBird : LifecycleObserver {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            takeDeviceInformationDetails()
                                         )
                                     }
                                 }
@@ -346,7 +348,7 @@ class LoggerBird : LifecycleObserver {
                                 if (!file.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file.appendText(takeDeviceInformationDetails())
                                     }
                                 }
                                 file.appendText(
@@ -361,7 +363,7 @@ class LoggerBird : LifecycleObserver {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            takeDeviceInformationDetails()
                                         )
                                     }
                                 }
@@ -417,7 +419,7 @@ class LoggerBird : LifecycleObserver {
                                 if (!file.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file.appendText(takeDeviceInformationDetails())
                                     }
                                 }
                                 file.appendText(
@@ -432,7 +434,7 @@ class LoggerBird : LifecycleObserver {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            takeDeviceInformationDetails()
                                         )
                                     }
                                 }
@@ -487,7 +489,7 @@ class LoggerBird : LifecycleObserver {
                                 if (!file.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file.appendText(takeDeviceInformationDetails())
                                     }
                                 }
                                 file.appendText(
@@ -502,7 +504,7 @@ class LoggerBird : LifecycleObserver {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            takeDeviceInformationDetails()
                                         )
                                     }
                                 }
@@ -555,7 +557,7 @@ class LoggerBird : LifecycleObserver {
                                 if (!file.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file.appendText(takeDeviceInformationDetails())
                                     }
                                 }
                                 file.appendText(
@@ -570,7 +572,7 @@ class LoggerBird : LifecycleObserver {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            takeDeviceInformationDetails()
                                         )
                                     }
                                 }
@@ -624,7 +626,7 @@ class LoggerBird : LifecycleObserver {
                                 if (!file.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file.appendText(takeDeviceInformationDetails())
                                     }
                                 }
                                 file.appendText(
@@ -639,7 +641,7 @@ class LoggerBird : LifecycleObserver {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            takeDeviceInformationDetails()
                                         )
                                     }
                                 }
@@ -693,7 +695,7 @@ class LoggerBird : LifecycleObserver {
                                 if (!file.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file.appendText(takeDeviceInformationDetails())
                                     }
                                 }
                                 file.appendText(
@@ -708,7 +710,7 @@ class LoggerBird : LifecycleObserver {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            takeDeviceInformationDetails()
                                         )
                                     }
                                 }
@@ -762,7 +764,7 @@ class LoggerBird : LifecycleObserver {
                                 if (!file.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file.appendText(takeDeviceInformationDetails())
                                     }
                                 }
                                 file.appendText(
@@ -777,7 +779,7 @@ class LoggerBird : LifecycleObserver {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            takeDeviceInformationDetails()
                                         )
                                     }
                                 }
@@ -831,7 +833,7 @@ class LoggerBird : LifecycleObserver {
                                 if (!file.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file.appendText(takeDeviceInformationDetails())
                                     }
                                 }
                                 file.appendText(
@@ -846,7 +848,7 @@ class LoggerBird : LifecycleObserver {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            takeDeviceInformationDetails()
                                         )
                                     }
                                 }
@@ -898,7 +900,7 @@ class LoggerBird : LifecycleObserver {
                             if (!file.exists()) {
                                 withContext(Dispatchers.IO) {
                                     file.createNewFile()
-                                    file.appendText(takeBuilderDetails())
+                                    file.appendText(takeDeviceInformationDetails())
                                 }
                             }
                             file.appendText(
@@ -913,7 +915,7 @@ class LoggerBird : LifecycleObserver {
                                 withContext(Dispatchers.IO) {
                                     defaultFilePath.createNewFile()
                                     defaultFilePath.appendText(
-                                        takeBuilderDetails()
+                                        takeDeviceInformationDetails()
                                     )
                                 }
                             }
@@ -971,7 +973,7 @@ class LoggerBird : LifecycleObserver {
                             if (!file.exists()) {
                                 withContext(Dispatchers.IO) {
                                     file.createNewFile()
-                                    file.appendText(takeBuilderDetails())
+                                    file.appendText(takeDeviceInformationDetails())
                                 }
                             }
                             file.appendText(
@@ -994,7 +996,7 @@ class LoggerBird : LifecycleObserver {
                                 withContext(Dispatchers.IO) {
                                     defaultFilePath.createNewFile()
                                     defaultFilePath.appendText(
-                                        takeBuilderDetails()
+                                        takeDeviceInformationDetails()
                                     )
                                 }
                             }
@@ -1136,21 +1138,21 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-        //in progress method
+        /**
+         * This function takes Choreograhper frame creation details.
+         * Excepitons:
+         * @throws exception if logInit method return value is false.
+         */
+
+        //in progress
         fun takeChoreographerDetails(){
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
                     override fun doFrame(frameTimeNanos: Long) {
-                       /* if (LogMonitor.getInstance().hasMonitor()) {
-                            LogMonitor.getInstance().removeMonitor()
-                        }
-                        LogMonitor.getInstance().startMonitor()
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                            Choreographer.getInstance().postFrameCallback(this)
-                        }*/
+                        Choreographer.getInstance().postFrameCallback(this)}
                     }
-                })
+                )
             }
         }
 
@@ -1192,20 +1194,55 @@ class LoggerBird : LifecycleObserver {
         }
 
 
+        /**This function shows a toast message when memory is overused
+         * Parameters:
+         * @param memoryThreshold takes threshold value to determine whether memory is overused.
+         * Variables:
+         * @var runTimeMaxMemory returns maximum amount of memory that application uses in runtime.
+         * Exceptions:
+         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         */
+
+        fun takeMemoryUsageDetails(threshold : Long?){
+            if(controlLogInit) {
+                try {
+                    val runtime: Runtime = Runtime.getRuntime()
+                    val runtimeMaxMemory = runtime.maxMemory() / 1048576L
+
+                    if(threshold != null){
+                        memoryThreshold = threshold
+                    }
+
+                    if (memoryThreshold > runtimeMaxMemory) {
+                        Toast.makeText(context, "Memory overused", Toast.LENGTH_LONG).show()
+                    }
+
+                    Log.d("memoryUsage", stringBuilderMemoryUsageDetails.toString())
+
+                }catch (e: Exception) {
+                    e.printStackTrace()
+                    saveExceptionDetails() }
+            }else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+        }
+
+
         /**This Function Takes Device Performance Details
          *Variables:
-         * @var deviceId is used for obtain device id of user.
-         * @var deviceSerial is used for getting device serial.
-         * @var device is used for getting device info.
-         * @var deviceModel is used for getting device model.
-         * @var deviceType is used for getting device type.
-         * @var deviceUser is used to get user of device.
-         * @var sdkVersion is used for getting sdk version of device.
-         * @var manufacturer is used for getting manufacturer of device.
-         * @var host is used for getting host of device.
-         * @var hardware is used for getting hardware details of device.
-         * @var devicebrand is used to get brand name of device.
-         * @var product is used for getting product info.
+         * @var availableMemory returns available memory on device.
+         * @var totalMemory returns total memory on device.
+         * @var lowMemory returns true if system considers memory is low.
+         * @var runtimeMaxMemory returns maximum amount of memory that application uses in runtime.
+         * @var runtimeTotalMemory returns total amount of memory in runtime.
+         * @var runtimeFreeMemory returns free amount of memory in runtime.
+         * @var availableProcessors returns number of available processors.
+         * @var usedMemorySize returns extraction freeMemory from totalMemory.
+         * @var cpuAbi returns cpu abi.
+         * @var sendNetworkUsage returns number of bytes that ransmitted across mobile networks.
+         * @var receivedNetworkUsage returns number of bytes that received across mobile networks.
+         * @var battery status gets information of battery percentage with using receiver.
          * @var battery level is used for getting battery level information.
          * @var battery scale is used for getting battery level information.
          * @var battery gives the battery percentage of device.
@@ -1236,10 +1273,7 @@ class LoggerBird : LifecycleObserver {
                     val sendNetworkUsage = android.net.TrafficStats.getMobileTxBytes()
                     val receivedNetworkUsage = android.net.TrafficStats.getMobileRxBytes()
 
-                    val batteryStatus = context.registerReceiver(
-                        null,
-                        IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-                    )
+                    val batteryStatus = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
                     var batteryLevel = -1
                     var batteryScale = 1
                     if (batteryStatus != null) {
@@ -1259,8 +1293,6 @@ class LoggerBird : LifecycleObserver {
 
                     Log.d("performance", stringBuilderPerformanceDetails.toString())
 
-                    val memorytreshold = 1239728
-                    if(memorytreshold > runtimeTotalMemory){ Toast.makeText(context,"Memory overused",Toast.LENGTH_LONG).show() }
 
                 }catch (e: Exception) {
                     e.printStackTrace()
@@ -1271,7 +1303,7 @@ class LoggerBird : LifecycleObserver {
         }
 
         /**This Function Takes Device Information Details
-         *Variables:
+         * Variables:
          * @var deviceId is used for obtain device id of user.
          * @var deviceSerial is used for getting device serial.
          * @var device is used for getting device info.
@@ -1282,14 +1314,14 @@ class LoggerBird : LifecycleObserver {
          * @var manufacturer is used for getting manufacturer of device.
          * @var host is used for getting host of device.
          * @var hardware is used for getting hardware details of device.
-         * @var devicebrand is used to get brand name of device.
+         * @var deviceBrand is used to get brand name of device.
          * @var product is used for getting product info.
          * @return device information with a string builder.
          * Exceptions:
          * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeBuilderDetails(): String {
+        fun takeDeviceInformationDetails(): String {
 
             if(controlLogInit) {
                 try {
