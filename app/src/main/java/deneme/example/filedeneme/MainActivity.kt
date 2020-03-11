@@ -18,9 +18,7 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import android.view.View
-import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.Sort
@@ -88,14 +86,13 @@ class MainActivity : AppCompatActivity(){
         recycler_view.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
         val adapter:RecyclerViewAdapter=RecyclerViewAdapter(recyclerViewList)
         recycler_view.adapter=adapter
-        LoggerBird.registerRecyclerViewAdapterDataObserver(recycler_view)
+        LoggerBird.registerRecyclerViewObservers(recycler_view)
         addRecyclerViewList()
         adapter.notifyDataSetChanged()
         recyclerViewList.removeAt(0)
         adapter.notifyDataSetChanged()
         recyclerViewList.add(RecyclerModel("deneme"))
         adapter.notifyDataSetChanged()
-        LoggerBird.logInit(context = this)
 
 
 //        LogDeneme.logLifeCycleDetails()
@@ -151,7 +148,7 @@ class MainActivity : AppCompatActivity(){
 // )
 //            LogDeneme.saveComponentDetails()
             LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-            LoggerBird.saveComponentDetails()
+            //LoggerBird.saveComponentDetails()
 //            val emailFile:File=File(this.filesDir,"component_details.txt")
 //            val rootView:ViewGroup=(this as Activity).window.decorView.findViewById(android.R.id.content);
 //            LogDeneme.sendLogDetailsAsEmail(file=emailFile,context = this,rootView = rootView )
@@ -196,7 +193,10 @@ class MainActivity : AppCompatActivity(){
 //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
 //            LogDeneme.saveAllDetails(context=this)
             //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
-            LoggerBird.saveLifeCycleDetails()
+           // LoggerBird.saveLifeCycleDetails()
+
+            LoggerBird.takeLifeCycleDetails()
+
 
             startActivity(Intent(this@MainActivity, Main2Activity::class.java))
         })
@@ -244,7 +244,7 @@ class MainActivity : AppCompatActivity(){
                         LoggerBird.takeRetrofitRequestDetails(response= ApiServiceInterface.httpClient(
                             request
                         ),request=request)
-                        LoggerBird.saveRetrofitRequestDetails()
+                       // LoggerBird.saveRetrofitRequestDetails()
                     }
 
 
@@ -441,10 +441,6 @@ class MainActivity : AppCompatActivity(){
     }
 
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("life_cycle_state_destroyed",this.lifecycle.currentState.name)
-    }
 
     private suspend fun httpRequest(url: String?): String {
         var result: String = ""

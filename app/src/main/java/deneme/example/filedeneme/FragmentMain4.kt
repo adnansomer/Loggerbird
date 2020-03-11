@@ -27,7 +27,7 @@ class FragmentMain4 : Fragment() {
         bundle.putString("item", "berk")
         bundle.putString("type", "component")
         LoggerBird.takeFragmentManagerDetails(fragmentManager = fragmentManager)
-        LoggerBird.saveFragmentManagerDetails()
+       // LoggerBird.saveFragmentManagerDetails()
 
 //        LogDeneme.saveAnalyticsDetails(bundle=bundle)
 //        LogDeneme.logAttach()
@@ -52,7 +52,7 @@ class FragmentMain4 : Fragment() {
             Log.d("new_fragment_list",i.tag)
         }
         button_dummy_3.setOnClickListener(){
-            LoggerBird.saveLifeCycleDetails()
+            LoggerBird.takeLifeCycleDetails()
 //            LogDeneme.saveLifeCycleDetails()
 //            for(i in fragmentManager!!.fragments){
 //                fragmentManager!!.beginTransaction().remove(i).commitNow()

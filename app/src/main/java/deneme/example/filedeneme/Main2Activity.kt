@@ -152,7 +152,7 @@ class Main2Activity : AppCompatActivity(), PurchasesUpdatedListener {
             val responseCode = billingResult.responseCode
             val debugMessage = billingResult.debugMessage
             LoggerBird.takeInAPurchaseDetails(billingResult=billingResult,acknowledgePurchaseParams = acknowledgePurchaseParams,billingClient = billingClient,skuDetailsParams= skuDetailsParams,billingFlowParams = billingFlowParams)
-            LoggerBird.saveInAPurchaseDetails()
+           // LoggerBird.saveInAPurchaseDetails()
             Log.d("bill_on_acknowledge", responseCode.toString()+","+acknowledgePurchaseParams.purchaseToken)
         }
     }

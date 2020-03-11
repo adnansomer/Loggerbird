@@ -1,7 +1,7 @@
 package constants
 
 //Constant class.
-class Constants {
+internal class Constants {
     companion object {
         //Static global constant variables.
         const val fileCreationSuccessMessage = "File Created Successfully!"
@@ -24,9 +24,11 @@ class Constants {
         const val allTag = "all"
         const val exceptionMessage = "Exception Details Gathered!"
         const val exceptionTag = ""
+        const val emailTag="email"
         const val unHandledExceptionTag = "Unhandled Exception"
         const val transaction = "Transaction Name:"
         const val logInitErrorMessage = "Call logInit method before calling any other method!"
+        const val logInitAttachedErrorMessage = "logInit method is already attached to your application!"
         const val internetErrorMessage = "Invalid internet connection response code!"
         const val networkErrorMessage = "Invalid network response"
         const val saveErrorMessage =

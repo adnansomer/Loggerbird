@@ -7,13 +7,14 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import constants.Constants
 import loggerbird.LoggerBird
+import java.io.Serializable
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
 //LogLifeCycleObserver class is used for attaching lifecycle observer for your current activity.
-class LogLifeCycleObserver() : LifecycleObserver {
+internal class LogLifeCycleObserver() : LifecycleObserver {
     //Global variables.
     private var stringBuilderLifeCycleObserver: StringBuilder = StringBuilder()
     private lateinit var context: Context
@@ -23,6 +24,10 @@ class LogLifeCycleObserver() : LifecycleObserver {
     companion object {
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
+    }
+
+    init {
+        stringBuilderLifeCycleObserver.append("\n"+"Life Cycle Details:"+"\n")
     }
 
     /**
@@ -40,7 +45,6 @@ class LogLifeCycleObserver() : LifecycleObserver {
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.takeExceptionDetails(e)
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -55,7 +59,6 @@ class LogLifeCycleObserver() : LifecycleObserver {
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.takeExceptionDetails(e)
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -89,7 +92,6 @@ class LogLifeCycleObserver() : LifecycleObserver {
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.takeExceptionDetails(e)
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -116,7 +118,6 @@ class LogLifeCycleObserver() : LifecycleObserver {
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -141,7 +142,6 @@ class LogLifeCycleObserver() : LifecycleObserver {
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.takeExceptionDetails(e)
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -165,7 +165,6 @@ class LogLifeCycleObserver() : LifecycleObserver {
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.takeExceptionDetails(e)
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -179,7 +178,7 @@ class LogLifeCycleObserver() : LifecycleObserver {
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    private fun onDestroyListener() {
+    internal fun onDestroyListener() {
         try {
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
@@ -189,7 +188,6 @@ class LogLifeCycleObserver() : LifecycleObserver {
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.takeExceptionDetails(e)
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -213,14 +211,13 @@ class LogLifeCycleObserver() : LifecycleObserver {
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.takeExceptionDetails(e)
-            LoggerBird.saveExceptionDetails()
         }
     }
 
     /**
      * This Method Is Used For Printing Observer Outcome.
      * Variables:
-     * @var if method is called with fragmentManager then stringBuilderLifeCycleObserver will print fragment detail's otherwise it will print activity details.
+     * @var stringBuilderLifeCycleObserver will print activity details.
      * @return String value.
      */
     fun returnActivityLifeCycleState(): String {
@@ -237,7 +234,7 @@ class LogLifeCycleObserver() : LifecycleObserver {
     /**
      * This Method Is Used For Getting Activity List.
      * Variables:
-     * @var if method is called with fragmentManager then stringBuilderLifeCycleObserver will print fragment detail's otherwise it will print activity details.
+     * @var classList takes list of activities that are called with this observer.
      * @return ArrayList<String>.
      */
     fun returnClassList(): ArrayList<String> {
