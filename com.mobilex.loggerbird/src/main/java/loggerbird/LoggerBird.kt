@@ -1,19 +1,18 @@
 package loggerbird
 
 import android.content.Context
+import android.content.Intent
 import android.content.res.Resources
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
-import androidx.core.view.children
-import androidx.core.view.get
-import androidx.core.view.iterator
-import androidx.core.view.size
+import android.widget.TextView
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
@@ -22,20 +21,24 @@ import com.google.gson.GsonBuilder
 import deneme.example.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
-import observers.LogFragmentLifeCycleObserver
-import observers.LogLifeCycleObserver
-import observers.LogcatObserver
 import utils.EmailUtil
 import io.realm.Realm
 import io.realm.RealmModel
 import kotlinx.coroutines.*
+import listeners.LogRecyclerViewChildAttachStateChangeListener
+import listeners.LogRecyclerViewItemTouchListener
+import listeners.LogRecyclerViewScrollListener
+import observers.*
 import okhttp3.Request
 import okhttp3.Response
 import retrofit2.Retrofit
+import services.LoggerBirdService
 import java.io.File
+import java.io.Serializable
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.logging.Logger
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 
@@ -73,14 +76,25 @@ class LoggerBird : LifecycleObserver {
         private lateinit var defaultFileDirectory: File
         private lateinit var defaultFilePath: File
         private var formattedTime: String? = null
-        private val lifeCycleObserver =
-            LogLifeCycleObserver()
+        private val lifeCycleObserver = LogLifeCycleObserver()
         private lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
         private lateinit var context: Context
+        private var file: File? = null
         private var fileLimit: Long = 2097152
         private var stringBuilderTemp: StringBuilder = StringBuilder()
         private var arrayListFile: ArrayList<File> = ArrayList()
         private lateinit var fileTemp: File
+        private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver =
+            LogRecyclerViewAdapterDataObserver()
+        private var recyclerViewScrollListener: LogRecyclerViewScrollListener =
+            LogRecyclerViewScrollListener()
+        private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener =
+            LogRecyclerViewChildAttachStateChangeListener()
+        private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener =
+            LogRecyclerViewItemTouchListener()
+        private lateinit var recyclerViewItemObserver: LogDataSetObserver
+        private lateinit var intentService: Intent
+
 
         //---------------Public Methods:---------------
 
@@ -93,8 +107,15 @@ class LoggerBird : LifecycleObserver {
          * controlLogInit is used for tracking the logInit return value which is used in other methods in this class.
          * @return Boolean value.
          */
-        fun logInit(context: Context, fragmentManager: FragmentManager? = null): Boolean {
-            Companion.context = context
+        fun logInit(
+            context: Context,
+            file: File? = null,
+            fragmentManager: FragmentManager? = null
+        ): Boolean {
+            intentService = Intent(context, LoggerBirdService::class.java)
+            context.startService(intentService)
+            this.context = context
+            this.file = file
             controlLogInit =
                 logAttach(
                     context,
@@ -104,6 +125,18 @@ class LoggerBird : LifecycleObserver {
                 LogcatObserver()
             Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
             return controlLogInit
+        }
+        /**
+         * This Method Used For Checking LogInit State.
+         */
+        fun isLogInitAttached(): Boolean {
+            return controlLogInit
+        }
+        /**
+         * This Method Used For Refreshing LogInit State.
+         */
+        fun refreshLogInitInstance() {
+            controlLogInit = false
         }
 
         /**
@@ -167,45 +200,44 @@ class LoggerBird : LifecycleObserver {
             } else {
                 lifeCycleObserver.registerLifeCycle(context)
             }
+            recyclerViewItemObserver = LogDataSetObserver(context)
             return true
         }
 
         /**
          * This Method Saves Component Details To Txt File.
          * Parameters:
-         * @param file allow user modify the file they want to create for saving their Component Details , otherwise it will save your file to the devices data->data->your project package name->files->component_details with an default name of "component_details" .
          * Variables:
          * @var controlLogInit is used for getting logInit method return value.
          * @var coroutineCallComponent is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var file allow user modify the file they want to create for saving their Component Details , otherwise it will save your file to the devices data->data->your project package name->files->component_details with an default name of "logger_bird_details"
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
-         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("component_details").
+         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderComponent prints component details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        fun saveComponentDetails(
-            file: File? = null
-        ) {
+        private fun saveComponentDetails() {
             if (controlLogInit) {
                 if (stringBuilderComponent.isNotEmpty()) {
                     coroutineCallComponent.async {
                         try {
                             if (file != null) {
-                                if (!file.exists()) {
+                                if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
-                                        file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file!!.createNewFile()
+                                        file!!.appendText(takeBuilderDetails())
                                     }
                                 }
-                                file.appendText(
+                                file!!.appendText(
                                     stringBuilderComponent.toString()
                                 )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
-                                    defaultFileDirectory, "component_details.txt"
+                                    defaultFileDirectory, "logger_bird_details.txt"
                                 )
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
@@ -220,13 +252,16 @@ class LoggerBird : LifecycleObserver {
                                 )
                             }
                             stringBuilderComponent = StringBuilder()
+                            recyclerViewAdapterDataObserver.refreshRecyclerViewObserverState()
+                            recyclerViewChildAttachStateChangeListener.refreshRecyclerViewObserverState()
+                            recyclerViewItemTouchListener.refreshRecyclerViewObserverState()
+                            recyclerViewScrollListener.refreshRecyclerViewObserverState()
                         } catch (e: Exception) {
                             e.printStackTrace()
                             takeExceptionDetails(
                                 e,
                                 Constants.componentTag
                             )
-                            saveExceptionDetails()
                         }
                     }
                 } else {
@@ -242,47 +277,41 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Life-Cycle Details To Txt File.
-         * Parameters:
-         * @param file allow user modify the file they want to create for saving their Activity Details , otherwise it will save your file to the devices data->data->your project package name->files->life_cycle_details with an default name of life_cycle_details.
          * Variables:
          * @var controlLogInit is used for getting logInit method return value.
+         * @var LoggerBirdService.onDestroyMessage used for getting onDestroy state for lifecycle via service.
          * @var coroutineCallActivity is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var  defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
-         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("activity_details").
+         * @var file allow user modify the file they want to create for saving their Activity Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of life_cycle_details.
+         * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
+         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderLifeCycle prints life-cycle details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        fun saveLifeCycleDetails(
-            file: File? = null
-        ) {
+        private fun saveLifeCycleDetails() {
             if (controlLogInit) {
-                takeLifeCycleDetails()
                 if (stringBuilderLifeCycle.isNotEmpty()) {
-                    coroutineCallActivity.async {
+                    if (LoggerBirdService.onDestroyMessage != null) {
                         try {
                             if (file != null) {
-                                if (!file.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
-                                    }
+                                if (!file!!.exists()) {
+                                    file!!.createNewFile()
+                                    file!!.appendText(takeBuilderDetails())
+
                                 }
-                                file.appendText(stringBuilderLifeCycle.toString())
+                                file!!.appendText(stringBuilderLifeCycle.toString())
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
-                                    defaultFileDirectory, "life_cycle_details.txt"
+                                    defaultFileDirectory, "logger_bird_details.txt"
                                 )
                                 if (!defaultFilePath.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        defaultFilePath.createNewFile()
-                                        defaultFilePath.appendText(
-                                            takeBuilderDetails()
-                                        )
-                                    }
+                                    defaultFilePath.createNewFile()
+                                    defaultFilePath.appendText(
+                                        takeBuilderDetails()
+                                    )
                                 }
                                 defaultFilePath.appendText(
                                     stringBuilderLifeCycle.toString()
@@ -295,9 +324,45 @@ class LoggerBird : LifecycleObserver {
                                 e,
                                 Constants.lifeCycleTag
                             )
-                            saveExceptionDetails()
                         }
+                    } else {
+                        coroutineCallActivity.async {
+                            try {
+                                if (file != null) {
+                                    if (!file!!.exists()) {
+                                        withContext(Dispatchers.IO) {
+                                            file!!.createNewFile()
+                                            file!!.appendText(takeBuilderDetails())
+                                        }
+                                    }
+                                    file!!.appendText(stringBuilderLifeCycle.toString())
+                                } else {
+                                    defaultFileDirectory = context.filesDir
+                                    defaultFilePath = File(
+                                        defaultFileDirectory, "logger_bird_details.txt"
+                                    )
+                                    if (!defaultFilePath.exists()) {
+                                        withContext(Dispatchers.IO) {
+                                            defaultFilePath.createNewFile()
+                                            defaultFilePath.appendText(
+                                                takeBuilderDetails()
+                                            )
+                                        }
+                                    }
+                                    defaultFilePath.appendText(
+                                        stringBuilderLifeCycle.toString()
+                                    )
+                                }
+                                stringBuilderLifeCycle = StringBuilder()
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                takeExceptionDetails(
+                                    e,
+                                    Constants.lifeCycleTag
+                                )
+                            }
 
+                        }
                     }
                 } else {
                     throw LoggerBirdException(
@@ -311,40 +376,37 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves FragmentManager Details To Txt File.
-         * Parameters:
-         * @param file allow user modify the file they want to create for saving their FragmentManager Details , otherwise it will save your file to the devices data->data->your project package name->files->fragment_manager_details with an default name fragment_manager_details.
          * Variables:
          * @var controlLogInit is used for getting logInit method return value.
          * @var coroutineCallFragment is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var file allow user modify the file they want to create for saving their FragmentManager Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name logger_bird_details.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files
-         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("fragment_manager_details")
+         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details")
          * @var stringBuilderFragmentManager prints fragment manager details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        fun saveFragmentManagerDetails(
-            file: File? = null
-        ) {
+        private fun saveFragmentManagerDetails() {
             if (controlLogInit) {
                 if (stringBuilderFragmentManager.isNotEmpty()) {
                     coroutineCallFragment.async {
                         try {
                             if (file != null) {
-                                if (!file.exists()) {
+                                if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
-                                        file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file!!.createNewFile()
+                                        file!!.appendText(takeBuilderDetails())
                                     }
                                 }
-                                file.appendText(
+                                file!!.appendText(
                                     stringBuilderFragmentManager.toString()
                                 )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
-                                    defaultFileDirectory, "fragment_manager_details.txt"
+                                    defaultFileDirectory, "logger_bird_details.txt"
                                 )
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
@@ -365,7 +427,6 @@ class LoggerBird : LifecycleObserver {
                                 e,
                                 Constants.fragmentManagerTag
                             )
-                            saveExceptionDetails()
                         }
                     }
                 } else {
@@ -381,38 +442,37 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Analytics Details To Txt File.
-         * Parameters:
-         * @param file allow user modify the file they want to create for saving their Analytics Details , otherwise it will save your file to the devices data->data->your project package name->files->analytics_details with an default name of analytics_details.
          * Variables:
          * @var controlLogInit is used for getting logInit method return value.
          * @var coroutineCallAnalytic is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var file allow user modify the file they want to create for saving their Analytics Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of logger_bird_details.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
-         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("analytics_details").
+         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderAnalyticsManager prints analytics details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        fun saveAnalyticsDetails(file: File? = null) {
+        private fun saveAnalyticsDetails() {
             if (controlLogInit) {
                 if (stringBuilderAnalyticsManager.isNotEmpty()) {
                     coroutineCallAnalytic.async {
                         try {
                             if (file != null) {
-                                if (!file.exists()) {
+                                if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
-                                        file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file!!.createNewFile()
+                                        file!!.appendText(takeBuilderDetails())
                                     }
                                 }
-                                file.appendText(
+                                file!!.appendText(
                                     stringBuilderAnalyticsManager.toString()
                                 )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
-                                    defaultFileDirectory, "analytics_details.txt"
+                                    defaultFileDirectory, "logger_bird.txt"
                                 )
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
@@ -433,7 +493,6 @@ class LoggerBird : LifecycleObserver {
                                 e,
                                 Constants.analyticsTag
                             )
-                            saveExceptionDetails()
                         }
                     }
                 } else {
@@ -448,40 +507,37 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves HttpRequest Details To Txt File.
-         * Parameters:
-         * @param file allow user modify the file they want to create for saving their HttpRequest Details , otherwise it will save your file to the devices data->data->your project package name->files->http_details with an default name of http_details
          * Variables:
          * @var controlLogInit is used for getting logInit method return value.
          * @var coroutineCallHttp is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var file allow user modify the file they want to create for saving their HttpRequest Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of logger_bird_details.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
-         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("http_details").
+         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderHttp prints http details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        fun saveHttpRequestDetails(
-            file: File? = null
-        ) {
+        private fun saveHttpRequestDetails() {
             if (controlLogInit) {
                 if (stringBuilderHttp.isNotEmpty()) {
                     coroutineCallHttp.async {
                         try {
                             if (file != null) {
-                                if (!file.exists()) {
+                                if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
-                                        file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file!!.createNewFile()
+                                        file!!.appendText(takeBuilderDetails())
                                     }
                                 }
-                                file.appendText(
+                                file!!.appendText(
                                     stringBuilderHttp.toString()
                                 )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
-                                    defaultFileDirectory, "http_details.txt"
+                                    defaultFileDirectory, "logger_bird_details.txt"
                                 )
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
@@ -502,7 +558,6 @@ class LoggerBird : LifecycleObserver {
                                 e,
                                 Constants.httpTag
                             )
-                            saveExceptionDetails()
                         }
                     }
                 } else {
@@ -517,40 +572,37 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Android In A Purchase Details To Txt File.
-         * Parameters:
-         * @param file allow user modify the file  they want to create for saving their InAPurchase Details , otherwise it will save your file to the devices data->data->your project package name->files->in_a_purchase_details with an default name of in_a_purchase_details.
          * Variables:
          * @var controlLogInit is used for getting logInit method return value.
          * @var coroutineCallInAPurchase is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var file allow user modify the file  they want to create for saving their InAPurchase Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of logger_bird_details.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
-         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("in_a_purchase_details").
+         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderInAPurchase prints android In A Purchase details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        fun saveInAPurchaseDetails(
-            file: File? = null
-        ) {
+        private fun saveInAPurchaseDetails() {
             if (controlLogInit) {
                 if (stringBuilderInAPurchase.isNotEmpty()) {
                     coroutineCallInAPurchase.async {
                         try {
                             if (file != null) {
-                                if (!file.exists()) {
+                                if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
-                                        file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file!!.createNewFile()
+                                        file!!.appendText(takeBuilderDetails())
                                     }
                                 }
-                                file.appendText(
+                                file!!.appendText(
                                     stringBuilderInAPurchase.toString()
                                 )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
-                                    defaultFileDirectory, "in_a_purchase_details.txt"
+                                    defaultFileDirectory, "logger_bird_details.txt"
                                 )
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
@@ -571,7 +623,6 @@ class LoggerBird : LifecycleObserver {
                                 e,
                                 Constants.inAPurchaseTag
                             )
-                            saveExceptionDetails()
                         }
                     }
                 } else {
@@ -586,40 +637,37 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves RetrofitRequest Details To Txt File.
-         * Parameters:
-         * @param file allow user to modify the file they want to create for their RetrofitRequest Details , otherwise it will save your file to the devices data->data->your project package name->files->retrofit_details with an default name of retrofit_details.
          * Variables:
          * @var controlLogInit is used for getting logInit method return value.
          * @var coroutineCallRetrofit is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var file allow user to modify the file they want to create for their RetrofitRequest Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of logger_bird_details.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
-         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("retrofit_details").
+         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderRetrofit prints retrofit details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        fun saveRetrofitRequestDetails(
-            file: File? = null
-        ) {
+        private fun saveRetrofitRequestDetails() {
             if (controlLogInit) {
                 if (stringBuilderRetrofit.isNotEmpty()) {
                     coroutineCallRetrofit.async {
                         try {
                             if (file != null) {
-                                if (!file.exists()) {
+                                if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
-                                        file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file!!.createNewFile()
+                                        file!!.appendText(takeBuilderDetails())
                                     }
                                 }
-                                file.appendText(
+                                file!!.appendText(
                                     stringBuilderRetrofit.toString()
                                 )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
-                                    defaultFileDirectory, "retrofit_details.txt"
+                                    defaultFileDirectory, "logger_bird_details.txt"
                                 )
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
@@ -640,7 +688,6 @@ class LoggerBird : LifecycleObserver {
                                 e,
                                 Constants.retrofitTag
                             )
-                            saveExceptionDetails()
                         }
                     }
                 } else {
@@ -656,39 +703,37 @@ class LoggerBird : LifecycleObserver {
         /**
          * This Method Saves Realm Details To Txt File.
          * Parameters:
-         * @param file allow user modify the file they want to create for saving their Realm Details , otherwise it will save your file to the devices data->data->your project package name->files->realm_details with an default name of realm_details
+         * @param file allow user modify the file they want to create for saving their Realm Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of logger_bird_details.
          * Variables:
          * @var controlLogInit is used for getting logInit method return value.
          * @var coroutineCallRealm is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
-         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("realm_details").
+         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderRealm prints realm details.
          * Exception:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        fun saveRealmDetails(
-            file: File? = null
-        ) {
+        private fun saveRealmDetails() {
             if (controlLogInit) {
                 if (stringBuilderRealm.isNotEmpty()) {
                     coroutineCallRealm.async {
                         try {
                             if (file != null) {
-                                if (!file.exists()) {
+                                if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
-                                        file.createNewFile()
-                                        file.appendText(takeBuilderDetails())
+                                        file!!.createNewFile()
+                                        file!!.appendText(takeBuilderDetails())
                                     }
                                 }
-                                file.appendText(
+                                file!!.appendText(
                                     stringBuilderRealm.toString()
                                 )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
-                                    defaultFileDirectory, "realm_details.txt"
+                                    defaultFileDirectory, "logger_bird_details.txt"
                                 )
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
@@ -724,38 +769,35 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Exception Details To Txt File.
-         * Parameters:
-         * @param file allow user to modify the file they want to create for saving their Exception Details , otherwise it will save your file to the devices data->data->your project package name->files->exception_details with an default name of exception_details.
          * Variables:
          * @var controlLogInit is used for getting logInit method return value.
          * @var coroutineCallAnalytic is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var file allow user to modify the file they want to create for saving their Exception Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of logger_bird_details.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("exception_details").
-         * @var stringBuilderException prints deneme.example.loggerbird.exception details.
+         * @var stringBuilderException prints com.mobilex.loggerbird.exception details.
          * Exception:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun saveExceptionDetails(
-            file: File? = null
-        ) {
+        private fun saveExceptionDetails() {
             if (stringBuilderException.isNotEmpty()) {
                 coroutineCallException.async {
                     try {
                         if (file != null) {
-                            if (!file.exists()) {
+                            if (!file!!.exists()) {
                                 withContext(Dispatchers.IO) {
-                                    file.createNewFile()
-                                    file.appendText(takeBuilderDetails())
+                                    file!!.createNewFile()
+                                    file!!.appendText(takeBuilderDetails())
                                 }
                             }
-                            file.appendText(
+                            file!!.appendText(
                                 stringBuilderException.toString()
                             )
                         } else {
                             defaultFileDirectory = context.filesDir
                             defaultFilePath = File(
-                                defaultFileDirectory, "exception_details.txt"
+                                defaultFileDirectory, "logger_bird_details.txt"
                             )
                             if (!defaultFilePath.exists()) {
                                 withContext(Dispatchers.IO) {
@@ -773,11 +815,6 @@ class LoggerBird : LifecycleObserver {
                         exitProcess(0)
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        takeExceptionDetails(
-                            e,
-                            Constants.exceptionTag
-                        )
-                        saveExceptionDetails()
                     }
                 }
             } else {
@@ -804,9 +841,9 @@ class LoggerBird : LifecycleObserver {
          * @var stringBuilderInAPurchase prints android in a purchase details.
          * @var stringBuilderRetrofit prints retrofit details.
          * @var stringBuilderRealm prints realm details.
-         * @var stringBuilderException prints deneme.example.loggerbird.exception details.
+         * @var stringBuilderException prints com.mobilex.exception details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun saveAllDetails(
@@ -865,7 +902,6 @@ class LoggerBird : LifecycleObserver {
                             e,
                             Constants.allTag
                         )
-                        saveExceptionDetails()
                     }
                 }
             } else {
@@ -883,10 +919,13 @@ class LoggerBird : LifecycleObserver {
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second)
          * @var stringBuilderComponent used for printing details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeComponentDetails(view: View? = null, resources: Resources? = null) {
+        fun takeComponentDetails(
+            view: View? = null,
+            resources: Resources? = null
+        ) {
             if (controlLogInit) {
                 try {
                     val date = Calendar.getInstance().time
@@ -903,14 +942,13 @@ class LoggerBird : LifecycleObserver {
                             ).toString() + "\n"
                         )
                     }
-
+                    saveComponentDetails()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
                         e,
                         Constants.componentTag
                     )
-                    saveExceptionDetails()
                 }
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
@@ -918,20 +956,71 @@ class LoggerBird : LifecycleObserver {
         }
 
         //In progress method.
-        private fun takeRecyclerViewDetails(recyclerView: RecyclerView, resources: Resources?) {
-            val recyclerViewList: ArrayList<Any> = ArrayList()
-            val stringBuilderRecyclerViewItem: StringBuilder = StringBuilder()
-            for (recyclerViewItem in 0..recyclerView.adapter!!.itemCount) {
-                recyclerViewList.add(recyclerView.adapter!!.getItemViewType(recyclerViewItem))
-                stringBuilderRecyclerViewItem.append(recyclerViewItem.toString() + "\n")
-            }
-            stringBuilderComponent.append(
-                formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + (resources?.getResourceName(
-                    recyclerView.id
-                )) + " " + "Component Id:" + recyclerView.id + "\n" + "Component Type:" + recyclerView.findViewById<View>(
-                    recyclerView.id
-                ).toString() + "\n" + "RecyclerView Layout:" + recyclerView.layoutManager + "\n" + "RecyclerView Adapter:" + recyclerView.adapter + "\n" + "RecyclerView Item Size:" + recyclerViewList.size + "\n" + "RecyclerView Item list:" + "\n" + stringBuilderRecyclerViewItem.toString()
+        fun registerRecyclerViewObservers(recyclerView: RecyclerView) {
+            recyclerView.adapter?.registerAdapterDataObserver(recyclerViewAdapterDataObserver)
+            recyclerView.addOnScrollListener(recyclerViewScrollListener)
+            recyclerView.addOnChildAttachStateChangeListener(
+                recyclerViewChildAttachStateChangeListener
             )
+            recyclerView.addOnItemTouchListener(recyclerViewItemTouchListener)
+        }
+
+        //In progress method.
+        fun unRegisterRecyclerViewObservers(recyclerView: RecyclerView) {
+            recyclerView.adapter?.unregisterAdapterDataObserver(recyclerViewAdapterDataObserver)
+            recyclerView.removeOnScrollListener(recyclerViewScrollListener)
+            recyclerView.removeOnChildAttachStateChangeListener(
+                recyclerViewChildAttachStateChangeListener
+            )
+            recyclerView.removeOnItemTouchListener(recyclerViewItemTouchListener)
+        }
+
+        //In progress method.
+        private fun takeRecyclerViewDetails(recyclerView: RecyclerView, resources: Resources?) {
+            try {
+                val stringBuilderRecyclerViewItem: StringBuilder = StringBuilder()
+                val recyclerViewList: ArrayList<Any> = ArrayList()
+                var tempView: View
+                var tempViewGroup: ViewGroup
+                var tempTextView: TextView
+                recyclerViewItemObserver.takeObserverList()
+                for (recyclerViewItem in 0..recyclerView.adapter!!.itemCount) {
+                    if (recyclerView.getChildAt(recyclerViewItem) != null) {
+                        tempView = recyclerView.getChildAt(recyclerViewItem)
+                        tempViewGroup = tempView as ViewGroup
+                        do {
+                            if (tempView is ViewGroup) {
+                                tempViewGroup = tempView as ViewGroup
+                                if (tempViewGroup.getChildAt(0) != null) {
+                                    tempView = tempViewGroup.getChildAt(0)
+                                } else if (tempViewGroup.getChildAt(recyclerViewItem) != null) {
+                                    tempView = tempViewGroup.getChildAt(recyclerViewItem)
+                                }
+                            } else {
+                                if (tempView is TextView) {
+                                    tempTextView = tempView
+                                    recyclerViewList.add(tempTextView.text)
+                                    break
+                                }
+                            }
+                        } while (true)
+                    }
+                }
+                stringBuilderRecyclerViewItem.append(recyclerViewList.toString() + "\n")
+                stringBuilderComponent.append(
+                    "\n" + formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + (resources?.getResourceName(
+                        recyclerView.id
+                    )) + " " + "Component Id:" + recyclerView.id + "\n" + "Component Type:" + recyclerView.findViewById<View>(
+                        recyclerView.id
+                    ).toString() + "\n" + "RecyclerView Layout:" + recyclerView.layoutManager + "\n" + "RecyclerView Adapter:" + recyclerView.adapter + "\n" + "RecyclerView Item Size:" + recyclerView.adapter?.itemCount + "\n" + "RecyclerView Item list:" + "\n" + recyclerViewList.toString() + "\n"
+                )
+                stringBuilderComponent.append(recyclerViewAdapterDataObserver.returnRecyclerViewState())
+                stringBuilderComponent.append(recyclerViewScrollListener.returnRecyclerViewState())
+                stringBuilderComponent.append(recyclerViewChildAttachStateChangeListener.returnRecyclerViewState())
+            } catch (e: Exception) {
+                e.printStackTrace()
+                takeExceptionDetails(e, Constants.componentTag)
+            }
         }
 
         /**
@@ -940,10 +1029,10 @@ class LoggerBird : LifecycleObserver {
          * Variables:
          * @var stringBuilderLifeCycle used for printing details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        private fun takeLifeCycleDetails() {
+        fun takeLifeCycleDetails() {
             if (controlLogInit) {
                 try {
                     if (Companion::fragmentLifeCycleObserver.isInitialized) {
@@ -971,19 +1060,23 @@ class LoggerBird : LifecycleObserver {
                             }
                         }
                     }
+                    if (LoggerBirdService.onDestroyMessage != null) {
+                        stringBuilderLifeCycle.append(LoggerBirdService.onDestroyMessage)
+                    }
+                    saveLifeCycleDetails()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
                         e,
                         Constants.lifeCycleTag
                     )
-                    saveExceptionDetails()
                 }
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
 
+        //adnan improved this method probably will be deleted.
         private fun takeBuilderDetails(): String {
             stringBuilderBuild = StringBuilder()
             stringBuilderBuild.append("Device Information:" + "\n" + "ID:" + Build.ID + "\n" + "DEVICE:" + Build.DEVICE + "\n" + "DEVICE MODEL:" + Build.MODEL + "\n" + "DEVICE TYPE:" + Build.TYPE + "\n" + "USER:" + Build.USER + "\n" + "SDK VERSION:" + Build.VERSION.SDK_INT + "\n" + "MANUFACTURER:" + Build.MANUFACTURER + "\n" + "HOST:" + Build.HOST + "HARDWARE:" + Build.HARDWARE + "\n")
@@ -999,7 +1092,7 @@ class LoggerBird : LifecycleObserver {
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderAnalyticsManager used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun takeAnalyticsDetails(bundle: Bundle? = null) {
@@ -1018,13 +1111,13 @@ class LoggerBird : LifecycleObserver {
                             )
                         }
                     }
+                    saveAnalyticsDetails()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
                         e,
                         Constants.analyticsTag
                     )
-                    saveExceptionDetails()
                 }
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
@@ -1038,13 +1131,12 @@ class LoggerBird : LifecycleObserver {
          * Variables:
          * @var stringBuilderFragmentManager used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun takeFragmentManagerDetails(fragmentManager: FragmentManager? = null) {
             if (controlLogInit) {
                 try {
-                    //stringBuilderFragmentManager = StringBuilder()
                     stringBuilderFragmentManager.append("\n" + Constants.fragmentTag + " " + "list:")
                     if (fragmentManager != null) {
                         var fragmentCounter: Int = 1
@@ -1053,6 +1145,7 @@ class LoggerBird : LifecycleObserver {
                             fragmentCounter++
                         }
                     }
+                    saveFragmentManagerDetails()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
@@ -1074,7 +1167,7 @@ class LoggerBird : LifecycleObserver {
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderHttp used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun takeHttpRequestDetails(httpUrlConnection: HttpURLConnection? = null) {
@@ -1084,14 +1177,13 @@ class LoggerBird : LifecycleObserver {
                     val formatter = SimpleDateFormat.getDateTimeInstance()
                     formattedTime = formatter.format(date)
                     stringBuilderHttp.append("\n" + formattedTime + ":" + Constants.httpTag + "\n" + "Http Request Code:" + httpUrlConnection?.responseCode + " " + "Http Response Message:" + httpUrlConnection?.responseMessage)
-
+                    saveHttpRequestDetails()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
                         e,
                         Constants.httpTag
                     )
-                    saveExceptionDetails()
                 }
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
@@ -1114,7 +1206,7 @@ class LoggerBird : LifecycleObserver {
          * @var responseMessage is the outcome message according to the response code comes from billingResult.
          * @var stringBuilderSkuDetailList used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun takeInAPurchaseDetails(
@@ -1163,13 +1255,13 @@ class LoggerBird : LifecycleObserver {
                         }
                     }
                     stringBuilderInAPurchase.append("\n" + formattedTime + ":" + Constants.inAPurchaseTag + "\n" + "Billing Flow Item Consumed:" + billingFlowParams?.skuDetails?.isRewarded + "\n" + "Billing Response Code:" + billingResult?.responseCode + "\n" + "Billing Response Message:" + responseMessage + "\n" + "Billing Client Is Ready:" + billingClient?.isReady + "\n" + "Sku Type:" + skuDetailsParams?.skuType + "\n" + "Sku List:" + stringBuilderSkuDetailList.toString() + "\n" + "Billing Flow Sku Details:" + prettyJson + "\n" + "Billing Flow Sku:" + billingFlowParams?.sku + "\n" + "Billing Flow Account Id:" + billingFlowParams?.accountId + "\n" + "Billing Flow Developer Id:" + billingFlowParams?.developerId + "\n" + "Billing flow Old Sku:" + billingFlowParams?.oldSku + "\n" + "Billing Flow Old Sku Purchase Token:" + billingFlowParams?.oldSkuPurchaseToken + "\n" + "Acknowledge Params:" + acknowledgePurchaseParams?.developerPayload + "\n" + "Acknowledge Purchase Token:" + acknowledgePurchaseParams?.purchaseToken)
+                    saveInAPurchaseDetails()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
                         e,
                         Constants.inAPurchaseTag
                     )
-                    saveExceptionDetails()
                 }
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
@@ -1188,7 +1280,7 @@ class LoggerBird : LifecycleObserver {
          * @var stringBuilderRetrofit used for printing the details.
          * @var stringBuilderQuery used for printing the details of query that gathered from request.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun takeRetrofitRequestDetails(
@@ -1214,13 +1306,13 @@ class LoggerBird : LifecycleObserver {
                         }
                     }
                     stringBuilderRetrofit.append("\n" + formattedTime + ":" + Constants.retrofitTag + "\n" + "Retrofit Request Code:" + response?.code + " " + "Response Message:" + response?.message + "\n" + "Retrofit Url:" + retrofit?.baseUrl() + " " + "Request Url:" + request?.url + "\n" + "Response Success:" + response?.isSuccessful + "\n" + "Request Method:" + request?.method + "\n" + stringBuilderQuery.toString() + "Response Value:" + response?.body?.string())
+                    saveRetrofitRequestDetails()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
                         e,
                         Constants.retrofitTag
                     )
-                    saveExceptionDetails()
                 }
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
@@ -1237,8 +1329,7 @@ class LoggerBird : LifecycleObserver {
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderRealm used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if error occurs and saves the deneme.example.loggerbird.exception in logExceptionDetails.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun takeRealmDetails(realm: Realm? = null, realmModel: RealmModel? = null) {
@@ -1253,6 +1344,7 @@ class LoggerBird : LifecycleObserver {
                                 realmModel
                             )
                         )
+                        saveRealmDetails()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -1260,7 +1352,6 @@ class LoggerBird : LifecycleObserver {
                         e,
                         Constants.realmTag
                     )
-                    saveExceptionDetails()
                 }
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
@@ -1277,7 +1368,7 @@ class LoggerBird : LifecycleObserver {
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderException used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         fun takeExceptionDetails(
@@ -1302,9 +1393,9 @@ class LoggerBird : LifecycleObserver {
                         ) + "Method Tag:" + tag
                     )
                 }
-            } catch (e: Exception) {
-                takeExceptionDetails(exception = e)
                 saveExceptionDetails()
+            } catch (e: Exception) {
+                takeExceptionDetails(exception = e, tag = Constants.exceptionTag)
             }
         }
 
@@ -1327,7 +1418,7 @@ class LoggerBird : LifecycleObserver {
          * @var fileTemp is used for creating temp files which is used for holding the parts of original file which exceeds 2mb size.
          * @var withContext code block calls ui thread for using progressbar.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         fun sendDetailsAsEmail(
             file: File,
@@ -1355,7 +1446,6 @@ class LoggerBird : LifecycleObserver {
                         }
                         if (file.length() > fileLimit) {
                             val scanner: Scanner = Scanner(file)
-                            val stringTempEmailBuilder: StringBuilder = StringBuilder()
                             var fileCounter: Int = 0
                             do {
                                 fileTemp = File(context.filesDir, file.name + fileCounter + ".txt")
@@ -1427,8 +1517,7 @@ class LoggerBird : LifecycleObserver {
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                takeExceptionDetails(e)
-                saveExceptionDetails()
+                takeExceptionDetails(e, Constants.emailTag)
             }
         }
 

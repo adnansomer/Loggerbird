@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 //LogLifeCycleObserver class is used for attaching lifecycle observer for your current fragment.
-class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
+internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
     FragmentManager.FragmentLifecycleCallbacks() {
     //Global variables.
     private var stringBuilderFragmentLifeCycleObserver: StringBuilder = StringBuilder()
@@ -36,7 +36,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * @var classList will take fragment's in the FragmentManager.
      * Exceptions:
-     * @throws exception if error occurs and saves the deneme.example.loggerbird.exception in logExceptionDetails details and saves exceptions to txt file with saveExceptionDetails.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentViewCreated(
         fm: FragmentManager,
@@ -68,7 +68,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -82,7 +81,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentAttached(fm: FragmentManager, f: Fragment, context: Context) {
         try {
@@ -95,7 +94,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.takeExceptionDetails(e)
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -109,7 +107,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentPreAttached(fm: FragmentManager, f: Fragment, context: Context) {
         super.onFragmentPreAttached(fm, f, context)
@@ -126,7 +124,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -140,7 +137,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentSaveInstanceState(fm: FragmentManager, f: Fragment, outState: Bundle) {
         super.onFragmentSaveInstanceState(fm, f, outState)
@@ -157,7 +154,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -170,7 +166,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentViewDestroyed(fm: FragmentManager, f: Fragment) {
         super.onFragmentViewDestroyed(fm, f)
@@ -187,7 +183,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -201,7 +196,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentPreCreated(
         fm: FragmentManager,
@@ -222,7 +217,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -236,7 +230,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentActivityCreated(
         fm: FragmentManager,
@@ -258,7 +252,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -289,7 +282,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -302,7 +294,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
     override fun onFragmentStarted(fm: FragmentManager, f: Fragment) {
@@ -320,7 +312,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -333,7 +324,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
         try {
@@ -350,7 +341,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -363,7 +353,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentPaused(fm: FragmentManager, f: Fragment) {
         try {
@@ -380,7 +370,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -393,7 +382,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentStopped(fm: FragmentManager, f: Fragment) {
         try {
@@ -410,7 +399,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
 
     }
@@ -424,7 +412,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment) {
         try {
@@ -441,7 +429,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
@@ -454,7 +441,7 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
      * @var currentLifeCycle states takes current state as a String in the life cycle.
      * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentDetached(fm: FragmentManager, f: Fragment) {
         try {
@@ -471,7 +458,6 @@ class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             LoggerBird.takeExceptionDetails(
                 exception = e
             )
-            LoggerBird.saveExceptionDetails()
         }
     }
 
