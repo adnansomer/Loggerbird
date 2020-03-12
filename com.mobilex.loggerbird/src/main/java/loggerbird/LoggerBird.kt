@@ -3,14 +3,16 @@ package loggerbird
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import android.opengl.Visibility
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
-import android.os.Parcelable
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.FragmentManager
@@ -18,7 +20,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
 import com.android.billingclient.api.*
 import com.google.gson.GsonBuilder
-import deneme.example.loggerbird.R
+import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
 import utils.EmailUtil
@@ -34,11 +36,10 @@ import okhttp3.Response
 import retrofit2.Retrofit
 import services.LoggerBirdService
 import java.io.File
-import java.io.Serializable
+import java.io.FileWriter
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.logging.Logger
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 
@@ -94,6 +95,8 @@ class LoggerBird : LifecycleObserver {
             LogRecyclerViewItemTouchListener()
         private lateinit var recyclerViewItemObserver: LogDataSetObserver
         private lateinit var intentService: Intent
+        private lateinit var textViewFileReader: TextView
+        private lateinit var buttonFileReader: Button
 
 
         //---------------Public Methods:---------------
@@ -126,12 +129,14 @@ class LoggerBird : LifecycleObserver {
             Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
             return controlLogInit
         }
+
         /**
          * This Method Used For Checking LogInit State.
          */
         fun isLogInitAttached(): Boolean {
             return controlLogInit
         }
+
         /**
          * This Method Used For Refreshing LogInit State.
          */
@@ -204,6 +209,80 @@ class LoggerBird : LifecycleObserver {
             return true
         }
 
+        //dummy method probably removed.
+        private fun attachRootView(rootView: ViewGroup) {
+            val view: View = LayoutInflater.from(context)
+                .inflate(R.layout.default_file_text_reader, rootView, true)
+            textViewFileReader = view.findViewById(R.id.textView_file_reader)
+            buttonFileReader = view.findViewById(R.id.button_file_reader)
+            textViewFileReader.movementMethod = ScrollingMovementMethod()
+            when {
+                stringBuilderComponent.isNotEmpty() -> textViewFileReader.text =
+                    stringBuilderComponent
+                stringBuilderLifeCycle.isNotEmpty() -> textViewFileReader.text =
+                    stringBuilderLifeCycle
+                stringBuilderFragmentManager.isNotEmpty() -> textViewFileReader.text =
+                    stringBuilderFragmentManager
+                stringBuilderAnalyticsManager.isNotEmpty() -> textViewFileReader.text =
+                    stringBuilderAnalyticsManager
+                stringBuilderHttp.isNotEmpty() -> textViewFileReader.text = stringBuilderHttp
+                stringBuilderInAPurchase.isNotEmpty() -> textViewFileReader.text =
+                    stringBuilderInAPurchase
+                stringBuilderRetrofit.isNotEmpty() -> textViewFileReader.text =
+                    stringBuilderRetrofit
+                stringBuilderQuery.isNotEmpty() -> textViewFileReader.text = stringBuilderQuery
+                stringBuilderRealm.isNotEmpty() -> textViewFileReader.text = stringBuilderRealm
+                stringBuilderException.isNotEmpty() -> textViewFileReader.text =
+                    stringBuilderException
+                stringBuilderAll.isNotEmpty() -> textViewFileReader.text = stringBuilderAll
+            }
+            buttonFileReader.setOnClickListener {
+                //                rootView.removeView(view.rootView)
+            }
+        }
+
+        /**
+         * This Method used for when a saving method exceed's 2mb file limit and delete's old entries at the start and add's new entries to the end of the file.
+         * Parameters:
+         * @param stringBuilder is used for getting the reference of stringBuilder of called saving method.
+         * @param file is used for getting the reference of stringBuilder of called saving method.
+         * Exceptions:
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         */
+        private suspend fun exceededFileLimitWriter(stringBuilder: StringBuilder, file: File) {
+
+            try {
+                val scannerFile = Scanner(file)
+                val scannerStringBuilderComponent =
+                    Scanner(stringBuilder.toString())
+                val scannerTempStringBuilderComponent =
+                    Scanner(stringBuilder.toString())
+                withContext(Dispatchers.IO) {
+                    file.delete()
+                    file.createNewFile()
+                }
+                do {
+                    if (scannerTempStringBuilderComponent.hasNextLine()) {
+                        scannerTempStringBuilderComponent.nextLine()
+                        scannerFile.nextLine()
+                    } else {
+                        file.appendText(scannerFile.nextLine() + "\n")
+                    }
+
+                } while (scannerFile.hasNextLine())
+                do {
+                    if (scannerStringBuilderComponent.hasNextLine()) {
+                        file.appendText(
+                            scannerStringBuilderComponent.nextLine() + "\n"
+                        )
+                    }
+                } while (scannerStringBuilderComponent.hasNextLine())
+            } catch (e: Exception) {
+                e.printStackTrace()
+                takeExceptionDetails(e)
+            }
+        }
+
         /**
          * This Method Saves Component Details To Txt File.
          * Parameters:
@@ -219,7 +298,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        private fun saveComponentDetails() {
+        private fun saveComponentDetails(rootView: ViewGroup? = null) {
             if (controlLogInit) {
                 if (stringBuilderComponent.isNotEmpty()) {
                     coroutineCallComponent.async {
@@ -228,12 +307,23 @@ class LoggerBird : LifecycleObserver {
                                 if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file!!.createNewFile()
-                                        file!!.appendText(takeBuilderDetails())
+                                    }
+                                    file!!.appendText(takeBuilderDetails())
+                                    file!!.appendText(
+                                        stringBuilderComponent.toString()
+                                    )
+                                } else {
+                                    if (file!!.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderComponent,
+                                            file = file!!
+                                        )
+                                    } else {
+                                        file!!.appendText(
+                                            stringBuilderComponent.toString()
+                                        )
                                     }
                                 }
-                                file!!.appendText(
-                                    stringBuilderComponent.toString()
-                                )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
@@ -242,20 +332,29 @@ class LoggerBird : LifecycleObserver {
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
+                                    }
+                                    defaultFilePath.appendText(
+                                        takeBuilderDetails()
+                                    )
+                                    defaultFilePath.appendText(stringBuilderComponent.toString())
+                                } else {
+                                    if (defaultFilePath.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderComponent,
+                                            file = defaultFilePath
+                                        )
+                                    } else {
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            stringBuilderComponent.toString()
                                         )
                                     }
                                 }
-                                defaultFilePath.appendText(
-                                    stringBuilderComponent.toString()
-                                )
                             }
-                            stringBuilderComponent = StringBuilder()
-                            recyclerViewAdapterDataObserver.refreshRecyclerViewObserverState()
-                            recyclerViewChildAttachStateChangeListener.refreshRecyclerViewObserverState()
-                            recyclerViewItemTouchListener.refreshRecyclerViewObserverState()
-                            recyclerViewScrollListener.refreshRecyclerViewObserverState()
+                            if (rootView != null) {
+                                withContext(Dispatchers.Main) {
+                                    attachRootView(rootView)
+                                }
+                            }
                         } catch (e: Exception) {
                             e.printStackTrace()
                             takeExceptionDetails(
@@ -290,7 +389,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        private fun saveLifeCycleDetails() {
+        private fun saveLifeCycleDetails(rootView: ViewGroup? = null) {
             if (controlLogInit) {
                 if (stringBuilderLifeCycle.isNotEmpty()) {
                     if (LoggerBirdService.onDestroyMessage != null) {
@@ -299,9 +398,14 @@ class LoggerBird : LifecycleObserver {
                                 if (!file!!.exists()) {
                                     file!!.createNewFile()
                                     file!!.appendText(takeBuilderDetails())
-
+                                    file!!.appendText(stringBuilderLifeCycle.toString())
+                                } else {
+                                    if (file!!.length() > fileLimit) {
+                                        //exceed method here
+                                    } else {
+                                        file!!.appendText(stringBuilderLifeCycle.toString())
+                                    }
                                 }
-                                file!!.appendText(stringBuilderLifeCycle.toString())
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
@@ -312,10 +416,21 @@ class LoggerBird : LifecycleObserver {
                                     defaultFilePath.appendText(
                                         takeBuilderDetails()
                                     )
+                                    defaultFilePath.appendText(
+                                        stringBuilderLifeCycle.toString()
+                                    )
+                                } else {
+                                    if (defaultFilePath.length() > fileLimit) {
+                                        //exceed method here
+                                    } else {
+                                        defaultFilePath.appendText(
+                                            stringBuilderLifeCycle.toString()
+                                        )
+                                    }
                                 }
-                                defaultFilePath.appendText(
-                                    stringBuilderLifeCycle.toString()
-                                )
+                            }
+                            if (rootView != null) {
+                                attachRootView(rootView)
                             }
                             stringBuilderLifeCycle = StringBuilder()
                         } catch (e: Exception) {
@@ -332,10 +447,19 @@ class LoggerBird : LifecycleObserver {
                                     if (!file!!.exists()) {
                                         withContext(Dispatchers.IO) {
                                             file!!.createNewFile()
-                                            file!!.appendText(takeBuilderDetails())
+                                        }
+                                        file!!.appendText(takeBuilderDetails())
+                                        file!!.appendText(stringBuilderLifeCycle.toString())
+                                    } else {
+                                        if (file!!.length() > fileLimit) {
+                                            exceededFileLimitWriter(
+                                                stringBuilder = stringBuilderLifeCycle,
+                                                file = file!!
+                                            )
+                                        } else {
+                                            file!!.appendText(stringBuilderLifeCycle.toString())
                                         }
                                     }
-                                    file!!.appendText(stringBuilderLifeCycle.toString())
                                 } else {
                                     defaultFileDirectory = context.filesDir
                                     defaultFilePath = File(
@@ -344,14 +468,29 @@ class LoggerBird : LifecycleObserver {
                                     if (!defaultFilePath.exists()) {
                                         withContext(Dispatchers.IO) {
                                             defaultFilePath.createNewFile()
+                                        }
+                                        defaultFilePath.appendText(
+                                            takeBuilderDetails()
+                                        )
+                                        defaultFilePath.appendText(
+                                            stringBuilderLifeCycle.toString()
+                                        )
+                                    } else {
+                                        if (defaultFilePath.length() > fileLimit) {
+                                            exceededFileLimitWriter(
+                                                stringBuilder = stringBuilderLifeCycle,
+                                                file = defaultFilePath
+                                            )
+                                        } else {
                                             defaultFilePath.appendText(
-                                                takeBuilderDetails()
+                                                stringBuilderLifeCycle.toString()
                                             )
                                         }
                                     }
-                                    defaultFilePath.appendText(
-                                        stringBuilderLifeCycle.toString()
-                                    )
+
+                                }
+                                if (rootView != null) {
+                                    attachRootView(rootView)
                                 }
                                 stringBuilderLifeCycle = StringBuilder()
                             } catch (e: Exception) {
@@ -388,7 +527,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        private fun saveFragmentManagerDetails() {
+        private fun saveFragmentManagerDetails(rootView: ViewGroup? = null) {
             if (controlLogInit) {
                 if (stringBuilderFragmentManager.isNotEmpty()) {
                     coroutineCallFragment.async {
@@ -397,12 +536,23 @@ class LoggerBird : LifecycleObserver {
                                 if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file!!.createNewFile()
-                                        file!!.appendText(takeBuilderDetails())
+                                    }
+                                    file!!.appendText(takeBuilderDetails())
+                                    file!!.appendText(
+                                        stringBuilderFragmentManager.toString()
+                                    )
+                                } else {
+                                    if (file!!.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderFragmentManager,
+                                            file = file!!
+                                        )
+                                    } else {
+                                        file!!.appendText(
+                                            stringBuilderFragmentManager.toString()
+                                        )
                                     }
                                 }
-                                file!!.appendText(
-                                    stringBuilderFragmentManager.toString()
-                                )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
@@ -411,14 +561,30 @@ class LoggerBird : LifecycleObserver {
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
+                                    }
+                                    defaultFilePath.appendText(
+                                        takeBuilderDetails()
+                                    )
+                                    defaultFilePath.appendText(
+                                        stringBuilderFragmentManager.toString()
+                                    )
+                                } else {
+                                    if (defaultFilePath.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderFragmentManager,
+                                            file = defaultFilePath
+                                        )
+                                    } else {
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            stringBuilderFragmentManager.toString()
                                         )
                                     }
                                 }
-                                defaultFilePath.appendText(
-                                    stringBuilderFragmentManager.toString()
-                                )
+                            }
+                            if (rootView != null) {
+                                withContext(Dispatchers.Main) {
+                                    attachRootView(rootView)
+                                }
                             }
                             stringBuilderFragmentManager = StringBuilder()
                         } catch (e: Exception) {
@@ -454,7 +620,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        private fun saveAnalyticsDetails() {
+        private fun saveAnalyticsDetails(rootView: ViewGroup? = null) {
             if (controlLogInit) {
                 if (stringBuilderAnalyticsManager.isNotEmpty()) {
                     coroutineCallAnalytic.async {
@@ -463,12 +629,23 @@ class LoggerBird : LifecycleObserver {
                                 if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file!!.createNewFile()
-                                        file!!.appendText(takeBuilderDetails())
+                                    }
+                                    file!!.appendText(takeBuilderDetails())
+                                    file!!.appendText(
+                                        stringBuilderAnalyticsManager.toString()
+                                    )
+                                } else {
+                                    if (file!!.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderAnalyticsManager,
+                                            file = file!!
+                                        )
+                                    } else {
+                                        file!!.appendText(
+                                            stringBuilderAnalyticsManager.toString()
+                                        )
                                     }
                                 }
-                                file!!.appendText(
-                                    stringBuilderAnalyticsManager.toString()
-                                )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
@@ -477,14 +654,30 @@ class LoggerBird : LifecycleObserver {
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
+                                    }
+                                    defaultFilePath.appendText(
+                                        takeBuilderDetails()
+                                    )
+                                    defaultFilePath.appendText(
+                                        stringBuilderAnalyticsManager.toString()
+                                    )
+                                } else {
+                                    if (defaultFilePath.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderAnalyticsManager,
+                                            file = defaultFilePath
+                                        )
+                                    } else {
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            stringBuilderAnalyticsManager.toString()
                                         )
                                     }
                                 }
-                                defaultFilePath.appendText(
-                                    stringBuilderAnalyticsManager.toString()
-                                )
+                            }
+                            if (rootView != null) {
+                                withContext(Dispatchers.Main) {
+                                    attachRootView(rootView)
+                                }
                             }
                             stringBuilderAnalyticsManager = StringBuilder()
                         } catch (e: Exception) {
@@ -519,7 +712,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        private fun saveHttpRequestDetails() {
+        private fun saveHttpRequestDetails(rootView: ViewGroup? = null) {
             if (controlLogInit) {
                 if (stringBuilderHttp.isNotEmpty()) {
                     coroutineCallHttp.async {
@@ -528,12 +721,23 @@ class LoggerBird : LifecycleObserver {
                                 if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file!!.createNewFile()
-                                        file!!.appendText(takeBuilderDetails())
+                                    }
+                                    file!!.appendText(takeBuilderDetails())
+                                    file!!.appendText(
+                                        stringBuilderHttp.toString()
+                                    )
+                                } else {
+                                    if (file!!.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderHttp,
+                                            file = file!!
+                                        )
+                                    } else {
+                                        file!!.appendText(
+                                            stringBuilderHttp.toString()
+                                        )
                                     }
                                 }
-                                file!!.appendText(
-                                    stringBuilderHttp.toString()
-                                )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
@@ -542,14 +746,30 @@ class LoggerBird : LifecycleObserver {
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
+                                    }
+                                    defaultFilePath.appendText(
+                                        takeBuilderDetails()
+                                    )
+                                    defaultFilePath.appendText(
+                                        stringBuilderHttp.toString()
+                                    )
+                                } else {
+                                    if (defaultFilePath.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderHttp,
+                                            file = defaultFilePath
+                                        )
+                                    } else {
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            stringBuilderHttp.toString()
                                         )
                                     }
                                 }
-                                defaultFilePath.appendText(
-                                    stringBuilderHttp.toString()
-                                )
+                            }
+                            if (rootView != null) {
+                                withContext(Dispatchers.Main) {
+                                    attachRootView(rootView)
+                                }
                             }
                             stringBuilderHttp = StringBuilder()
                         } catch (e: Exception) {
@@ -584,7 +804,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        private fun saveInAPurchaseDetails() {
+        private fun saveInAPurchaseDetails(rootView: ViewGroup? = null) {
             if (controlLogInit) {
                 if (stringBuilderInAPurchase.isNotEmpty()) {
                     coroutineCallInAPurchase.async {
@@ -593,12 +813,23 @@ class LoggerBird : LifecycleObserver {
                                 if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file!!.createNewFile()
-                                        file!!.appendText(takeBuilderDetails())
+                                    }
+                                    file!!.appendText(takeBuilderDetails())
+                                    file!!.appendText(
+                                        stringBuilderInAPurchase.toString()
+                                    )
+                                } else {
+                                    if (file!!.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderInAPurchase,
+                                            file = file!!
+                                        )
+                                    } else {
+                                        file!!.appendText(
+                                            stringBuilderInAPurchase.toString()
+                                        )
                                     }
                                 }
-                                file!!.appendText(
-                                    stringBuilderInAPurchase.toString()
-                                )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
@@ -607,14 +838,30 @@ class LoggerBird : LifecycleObserver {
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
+                                    }
+                                    defaultFilePath.appendText(
+                                        takeBuilderDetails()
+                                    )
+                                    defaultFilePath.appendText(
+                                        stringBuilderInAPurchase.toString()
+                                    )
+                                } else {
+                                    if (defaultFilePath.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderInAPurchase,
+                                            file = defaultFilePath
+                                        )
+                                    } else {
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            stringBuilderInAPurchase.toString()
                                         )
                                     }
                                 }
-                                defaultFilePath.appendText(
-                                    stringBuilderInAPurchase.toString()
-                                )
+                            }
+                            if (rootView != null) {
+                                withContext(Dispatchers.Main) {
+                                    attachRootView(rootView)
+                                }
                             }
                             stringBuilderInAPurchase = StringBuilder()
                         } catch (e: Exception) {
@@ -649,7 +896,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        private fun saveRetrofitRequestDetails() {
+        private fun saveRetrofitRequestDetails(rootView: ViewGroup? = null) {
             if (controlLogInit) {
                 if (stringBuilderRetrofit.isNotEmpty()) {
                     coroutineCallRetrofit.async {
@@ -658,12 +905,23 @@ class LoggerBird : LifecycleObserver {
                                 if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file!!.createNewFile()
-                                        file!!.appendText(takeBuilderDetails())
+                                    }
+                                    file!!.appendText(takeBuilderDetails())
+                                    file!!.appendText(
+                                        stringBuilderRetrofit.toString()
+                                    )
+                                } else {
+                                    if (file!!.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderRetrofit,
+                                            file = file!!
+                                        )
+                                    } else {
+                                        file!!.appendText(
+                                            stringBuilderRetrofit.toString()
+                                        )
                                     }
                                 }
-                                file!!.appendText(
-                                    stringBuilderRetrofit.toString()
-                                )
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
@@ -672,14 +930,30 @@ class LoggerBird : LifecycleObserver {
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
+                                    }
+                                    defaultFilePath.appendText(
+                                        takeBuilderDetails()
+                                    )
+                                    defaultFilePath.appendText(
+                                        stringBuilderRetrofit.toString()
+                                    )
+                                } else {
+                                    if (defaultFilePath.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderRetrofit,
+                                            file = defaultFilePath
+                                        )
+                                    } else {
                                         defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                            stringBuilderRetrofit.toString()
                                         )
                                     }
                                 }
-                                defaultFilePath.appendText(
-                                    stringBuilderRetrofit.toString()
-                                )
+                            }
+                            if (rootView != null) {
+                                withContext(Dispatchers.Main) {
+                                    attachRootView(rootView)
+                                }
                             }
                             stringBuilderRetrofit = StringBuilder()
                         } catch (e: Exception) {
@@ -715,7 +989,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if logInit method return value is false.
          * @throws exception if log instance is empty.
          */
-        private fun saveRealmDetails() {
+        private fun saveRealmDetails(rootView: ViewGroup? = null) {
             if (controlLogInit) {
                 if (stringBuilderRealm.isNotEmpty()) {
                     coroutineCallRealm.async {
@@ -724,12 +998,24 @@ class LoggerBird : LifecycleObserver {
                                 if (!file!!.exists()) {
                                     withContext(Dispatchers.IO) {
                                         file!!.createNewFile()
-                                        file!!.appendText(takeBuilderDetails())
+                                    }
+                                    file!!.appendText(takeBuilderDetails())
+                                    file!!.appendText(
+                                        stringBuilderRealm.toString()
+                                    )
+                                } else {
+                                    if (file!!.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderRealm,
+                                            file = file!!
+                                        )
+                                    } else {
+                                        file!!.appendText(
+                                            stringBuilderRealm.toString()
+                                        )
                                     }
                                 }
-                                file!!.appendText(
-                                    stringBuilderRealm.toString()
-                                )
+
                             } else {
                                 defaultFileDirectory = context.filesDir
                                 defaultFilePath = File(
@@ -738,14 +1024,26 @@ class LoggerBird : LifecycleObserver {
                                 if (!defaultFilePath.exists()) {
                                     withContext(Dispatchers.IO) {
                                         defaultFilePath.createNewFile()
-                                        defaultFilePath.appendText(
-                                            takeBuilderDetails()
+                                    }
+                                    defaultFilePath.appendText(
+                                        takeBuilderDetails()
+                                    )
+                                    defaultFilePath.appendText(
+                                        stringBuilderRealm.toString()
+                                    )
+                                } else {
+                                    if (defaultFilePath.length() > fileLimit) {
+                                        exceededFileLimitWriter(
+                                            stringBuilder = stringBuilderRealm,
+                                            file = defaultFilePath
                                         )
                                     }
                                 }
-                                defaultFilePath.appendText(
-                                    stringBuilderRealm.toString()
-                                )
+                            }
+                            if (rootView != null) {
+                                withContext(Dispatchers.Main) {
+                                    attachRootView(rootView)
+                                }
                             }
                             stringBuilderRealm = StringBuilder()
                         } catch (e: Exception) {
@@ -780,7 +1078,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        private fun saveExceptionDetails() {
+        private fun saveExceptionDetails(rootView: ViewGroup? = null) {
             if (stringBuilderException.isNotEmpty()) {
                 coroutineCallException.async {
                     try {
@@ -788,12 +1086,24 @@ class LoggerBird : LifecycleObserver {
                             if (!file!!.exists()) {
                                 withContext(Dispatchers.IO) {
                                     file!!.createNewFile()
-                                    file!!.appendText(takeBuilderDetails())
+                                }
+                                file!!.appendText(takeBuilderDetails())
+                                file!!.appendText(
+                                    stringBuilderException.toString()
+                                )
+                            } else {
+                                if (file!!.length() > fileLimit) {
+                                    exceededFileLimitWriter(
+                                        stringBuilder = stringBuilderException,
+                                        file = file!!
+                                    )
+                                } else {
+                                    file!!.appendText(
+                                        stringBuilderException.toString()
+                                    )
                                 }
                             }
-                            file!!.appendText(
-                                stringBuilderException.toString()
-                            )
+
                         } else {
                             defaultFileDirectory = context.filesDir
                             defaultFilePath = File(
@@ -802,14 +1112,31 @@ class LoggerBird : LifecycleObserver {
                             if (!defaultFilePath.exists()) {
                                 withContext(Dispatchers.IO) {
                                     defaultFilePath.createNewFile()
+                                }
+                                defaultFilePath.appendText(
+                                    takeBuilderDetails()
+                                )
+                                defaultFilePath.appendText(
+                                    stringBuilderException.toString()
+                                )
+                            } else {
+                                if (defaultFilePath.length() > fileLimit) {
+                                    exceededFileLimitWriter(
+                                        stringBuilder = stringBuilderException,
+                                        file = defaultFilePath
+                                    )
+                                } else {
                                     defaultFilePath.appendText(
-                                        takeBuilderDetails()
+                                        stringBuilderException.toString()
                                     )
                                 }
                             }
-                            defaultFilePath.appendText(
-                                stringBuilderException.toString()
-                            )
+
+                        }
+                        if (rootView != null) {
+                            withContext(Dispatchers.Main) {
+                                attachRootView(rootView)
+                            }
                         }
                         stringBuilderException = StringBuilder()
                         exitProcess(0)
@@ -924,10 +1251,16 @@ class LoggerBird : LifecycleObserver {
          */
         fun takeComponentDetails(
             view: View? = null,
-            resources: Resources? = null
+            resources: Resources? = null,
+            rootView: ViewGroup? = null
         ) {
             if (controlLogInit) {
                 try {
+                    stringBuilderComponent = StringBuilder()
+                    recyclerViewAdapterDataObserver.refreshRecyclerViewObserverState()
+                    recyclerViewChildAttachStateChangeListener.refreshRecyclerViewObserverState()
+                    recyclerViewItemTouchListener.refreshRecyclerViewObserverState()
+                    recyclerViewScrollListener.refreshRecyclerViewObserverState()
                     val date = Calendar.getInstance().time
                     val formatter = SimpleDateFormat.getDateTimeInstance()
                     formattedTime = formatter.format(date)
@@ -942,7 +1275,7 @@ class LoggerBird : LifecycleObserver {
                             ).toString() + "\n"
                         )
                     }
-                    saveComponentDetails()
+                    saveComponentDetails(rootView = rootView)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
@@ -1032,7 +1365,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeLifeCycleDetails() {
+        fun takeLifeCycleDetails(rootView: ViewGroup? = null) {
             if (controlLogInit) {
                 try {
                     if (Companion::fragmentLifeCycleObserver.isInitialized) {
@@ -1063,7 +1396,7 @@ class LoggerBird : LifecycleObserver {
                     if (LoggerBirdService.onDestroyMessage != null) {
                         stringBuilderLifeCycle.append(LoggerBirdService.onDestroyMessage)
                     }
-                    saveLifeCycleDetails()
+                    saveLifeCycleDetails(rootView = rootView)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
@@ -1095,7 +1428,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeAnalyticsDetails(bundle: Bundle? = null) {
+        fun takeAnalyticsDetails(bundle: Bundle? = null, rootView: ViewGroup? = null) {
             if (controlLogInit) {
                 try {
                     val date = Calendar.getInstance().time
@@ -1111,7 +1444,7 @@ class LoggerBird : LifecycleObserver {
                             )
                         }
                     }
-                    saveAnalyticsDetails()
+                    saveAnalyticsDetails(rootView = rootView)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
@@ -1134,7 +1467,10 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeFragmentManagerDetails(fragmentManager: FragmentManager? = null) {
+        fun takeFragmentManagerDetails(
+            fragmentManager: FragmentManager? = null,
+            rootView: ViewGroup? = null
+        ) {
             if (controlLogInit) {
                 try {
                     stringBuilderFragmentManager.append("\n" + Constants.fragmentTag + " " + "list:")
@@ -1145,7 +1481,7 @@ class LoggerBird : LifecycleObserver {
                             fragmentCounter++
                         }
                     }
-                    saveFragmentManagerDetails()
+                    saveFragmentManagerDetails(rootView = rootView)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
@@ -1170,14 +1506,17 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeHttpRequestDetails(httpUrlConnection: HttpURLConnection? = null) {
+        fun takeHttpRequestDetails(
+            httpUrlConnection: HttpURLConnection? = null,
+            rootView: ViewGroup? = null
+        ) {
             if (controlLogInit) {
                 try {
                     val date = Calendar.getInstance().time
                     val formatter = SimpleDateFormat.getDateTimeInstance()
                     formattedTime = formatter.format(date)
                     stringBuilderHttp.append("\n" + formattedTime + ":" + Constants.httpTag + "\n" + "Http Request Code:" + httpUrlConnection?.responseCode + " " + "Http Response Message:" + httpUrlConnection?.responseMessage)
-                    saveHttpRequestDetails()
+                    saveHttpRequestDetails(rootView = rootView)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
@@ -1214,7 +1553,8 @@ class LoggerBird : LifecycleObserver {
             billingResult: BillingResult? = null,
             skuDetailsParams: SkuDetailsParams? = null,
             billingFlowParams: BillingFlowParams? = null,
-            acknowledgePurchaseParams: AcknowledgePurchaseParams? = null
+            acknowledgePurchaseParams: AcknowledgePurchaseParams? = null,
+            rootView: ViewGroup? = null
         ) {
             if (controlLogInit) {
                 try {
@@ -1255,7 +1595,7 @@ class LoggerBird : LifecycleObserver {
                         }
                     }
                     stringBuilderInAPurchase.append("\n" + formattedTime + ":" + Constants.inAPurchaseTag + "\n" + "Billing Flow Item Consumed:" + billingFlowParams?.skuDetails?.isRewarded + "\n" + "Billing Response Code:" + billingResult?.responseCode + "\n" + "Billing Response Message:" + responseMessage + "\n" + "Billing Client Is Ready:" + billingClient?.isReady + "\n" + "Sku Type:" + skuDetailsParams?.skuType + "\n" + "Sku List:" + stringBuilderSkuDetailList.toString() + "\n" + "Billing Flow Sku Details:" + prettyJson + "\n" + "Billing Flow Sku:" + billingFlowParams?.sku + "\n" + "Billing Flow Account Id:" + billingFlowParams?.accountId + "\n" + "Billing Flow Developer Id:" + billingFlowParams?.developerId + "\n" + "Billing flow Old Sku:" + billingFlowParams?.oldSku + "\n" + "Billing Flow Old Sku Purchase Token:" + billingFlowParams?.oldSkuPurchaseToken + "\n" + "Acknowledge Params:" + acknowledgePurchaseParams?.developerPayload + "\n" + "Acknowledge Purchase Token:" + acknowledgePurchaseParams?.purchaseToken)
-                    saveInAPurchaseDetails()
+                    saveInAPurchaseDetails(rootView = rootView)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
@@ -1286,7 +1626,8 @@ class LoggerBird : LifecycleObserver {
         fun takeRetrofitRequestDetails(
             retrofit: Retrofit? = null,
             response: Response? = null,
-            request: Request? = null
+            request: Request? = null,
+            rootView: ViewGroup? = null
         ) {
             if (controlLogInit) {
                 try {
@@ -1306,7 +1647,7 @@ class LoggerBird : LifecycleObserver {
                         }
                     }
                     stringBuilderRetrofit.append("\n" + formattedTime + ":" + Constants.retrofitTag + "\n" + "Retrofit Request Code:" + response?.code + " " + "Response Message:" + response?.message + "\n" + "Retrofit Url:" + retrofit?.baseUrl() + " " + "Request Url:" + request?.url + "\n" + "Response Success:" + response?.isSuccessful + "\n" + "Request Method:" + request?.method + "\n" + stringBuilderQuery.toString() + "Response Value:" + response?.body?.string())
-                    saveRetrofitRequestDetails()
+                    saveRetrofitRequestDetails(rootView = rootView)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     takeExceptionDetails(
@@ -1332,7 +1673,11 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeRealmDetails(realm: Realm? = null, realmModel: RealmModel? = null) {
+        fun takeRealmDetails(
+            realm: Realm? = null,
+            realmModel: RealmModel? = null,
+            rootView: ViewGroup? = null
+        ) {
             if (controlLogInit) {
                 try {
                     if (controlLogInit) {
@@ -1344,7 +1689,7 @@ class LoggerBird : LifecycleObserver {
                                 realmModel
                             )
                         )
-                        saveRealmDetails()
+                        saveRealmDetails(rootView = rootView)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -1374,7 +1719,8 @@ class LoggerBird : LifecycleObserver {
         fun takeExceptionDetails(
             exception: Exception? = null,
             tag: String? = null,
-            throwable: Throwable? = null
+            throwable: Throwable? = null,
+            rootView: ViewGroup? = null
         ) {
             try {
                 val date = Calendar.getInstance().time
@@ -1393,7 +1739,7 @@ class LoggerBird : LifecycleObserver {
                         ) + "Method Tag:" + tag
                     )
                 }
-                saveExceptionDetails()
+                saveExceptionDetails(rootView = rootView)
             } catch (e: Exception) {
                 takeExceptionDetails(exception = e, tag = Constants.exceptionTag)
             }

@@ -3,12 +3,8 @@ package services
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
-import androidx.fragment.app.FragmentManager
 import constants.Constants
 import loggerbird.LoggerBird
-import observers.LogFragmentLifeCycleObserver
-import observers.LogLifeCycleObserver
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*

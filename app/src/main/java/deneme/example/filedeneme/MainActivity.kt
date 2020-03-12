@@ -18,6 +18,7 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import android.view.View
+import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -70,6 +71,7 @@ class MainActivity : AppCompatActivity(){
     }
     private var coroutineCallComponent = CoroutineScope(Dispatchers.IO)
 
+
 //    val TAG_ACTIVITY_NAME:String="MainActivity"
 //    val TAG_ONCREATE:String="Activity In OnCreate State"
 
@@ -108,49 +110,32 @@ class MainActivity : AppCompatActivity(){
 
 //            throw NullPointerException("button is null")
 //            for( i in 0..100){
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//
+//        }
+            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
 
-//            }
 // )
 //            LogDeneme.saveComponentDetails()
-            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+            val rootView: ViewGroup =(this as Activity).window.decorView.findViewById(android.R.id.content);
             //LoggerBird.saveComponentDetails()
 //            val emailFile:File=File(this.filesDir,"component_details.txt")
-//            val rootView:ViewGroup=(this as Activity).window.decorView.findViewById(android.R.id.content);
+
 //            LogDeneme.sendLogDetailsAsEmail(file=emailFile,context = this,rootView = rootView )
 
 
