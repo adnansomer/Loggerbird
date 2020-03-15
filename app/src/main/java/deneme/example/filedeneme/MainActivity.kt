@@ -26,6 +26,7 @@ import io.realm.Sort
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import io.reactivex.disposables.Disposable
+import loggerbird.LoggerBirdBuilder
 import okhttp3.FormBody
 import okhttp3.HttpUrl
 import retrofit2.Call
@@ -87,6 +88,10 @@ class MainActivity : AppCompatActivity(){
         recycler_view.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
         //recycler_view.adapter=RecyclerViewAdapter(recyclerViewList)
         LoggerBird.logInit(context = this)
+
+
+
+
 
 
 //        LogDeneme.logLifeCycleDetails()
@@ -191,10 +196,15 @@ class MainActivity : AppCompatActivity(){
         })
 
         button_performance.setOnClickListener {
-            LoggerBird.takeDeviceInformationDetails()
-            LoggerBird.takeDevicePerformanceDetails()
+
+            var loggerbirdbuilder = LoggerBirdBuilder.Builder()
+                .takeDeviceInfoDetails()
+
             LoggerBird.takeDeviceCpuDetails()
-            LoggerBird.takeChoreographerDetails()
+            LoggerBird.takeDevicePerformanceDetails()
+
+
+
         }
     }
 
@@ -269,7 +279,7 @@ class MainActivity : AppCompatActivity(){
             val filePath = this.getFilesDir()
             val fileDirectory = File(filePath, "example")
             fileDirectoryException = fileDirectory
-//            LogDeneme.saveAllDetails(fileName ="berk_deneme" ,context = this,view = button_read_logs,resources = resources)
+            // LogDeneme.saveAllDetails(fileName ="berk_deneme" ,context = this,view = button_read_logs,resources = resources)
             // fileDirectory.mkdir()
 
 
