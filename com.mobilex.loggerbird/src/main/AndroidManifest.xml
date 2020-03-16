@@ -8,7 +8,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application>
-    <service android:name="service.LoggerBirdMemoryService" android:exported="true"/>
+    <service android:name="services.LoggerBirdMemoryService" android:exported="true"/>
+        <service android:name="services.LoggerBirdService" />
     </application>
 
 </manifest>
+

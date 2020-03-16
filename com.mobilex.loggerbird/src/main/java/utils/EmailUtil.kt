@@ -24,7 +24,7 @@ import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 
 //EmailUtil class is used for sending desired logfile as email.
-class EmailUtil {
+internal class EmailUtil {
     companion object {
         //Static global variables.
         private lateinit var properties: Properties
@@ -121,7 +121,6 @@ class EmailUtil {
                 LoggerBird.takeExceptionDetails(
                     e
                 )
-                LoggerBird.saveExceptionDetails()
                 coroutinecallEmail.launch {
                     withContext(Dispatchers.Main) {
                         progressBar.visibility = View.GONE

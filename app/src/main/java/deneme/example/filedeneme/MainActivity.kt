@@ -85,8 +85,20 @@ class MainActivity : AppCompatActivity(){
         Log.d("deep_link_url",uri.toString())
         //addRecyclerViewList()
         recycler_view.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
+
         //recycler_view.adapter=RecyclerViewAdapter(recyclerViewList)
         LoggerBird.logInit(context = this)
+/*
+        val adapter:RecyclerViewAdapter=RecyclerViewAdapter(recyclerViewList)
+        recycler_view.adapter=adapter
+        LoggerBird.registerRecyclerViewObservers(recycler_view)
+        addRecyclerViewList()
+        adapter.notifyDataSetChanged()
+        recyclerViewList.removeAt(0)
+        adapter.notifyDataSetChanged()
+        recyclerViewList.add(RecyclerModel("deneme"))
+        adapter.notifyDataSetChanged() */
+
 
 
 
@@ -102,6 +114,8 @@ class MainActivity : AppCompatActivity(){
         }
         LoggerBird.logInit(context = this)
         button_add.setOnClickListener() {
+            //adapter.notifyItemRemoved(0)
+
 //            throw NullPointerException("button is null")
 //            for( i in 0..100){
 //                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
@@ -144,7 +158,7 @@ class MainActivity : AppCompatActivity(){
 // )
 //            LogDeneme.saveComponentDetails()
             LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-            LoggerBird.saveComponentDetails()
+            //LoggerBird.saveComponentDetails()
 //            val emailFile:File=File(this.filesDir,"component_details.txt")
 //            val rootView:ViewGroup=(this as Activity).window.decorView.findViewById(android.R.id.content);
 //            LogDeneme.sendLogDetailsAsEmail(file=emailFile,context = this,rootView = rootView )
@@ -189,18 +203,19 @@ class MainActivity : AppCompatActivity(){
 //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
 //            LogDeneme.saveAllDetails(context=this)
             //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
-            LoggerBird.saveLifeCycleDetails()
+           // LoggerBird.saveLifeCycleDetails()
+
+            LoggerBird.takeLifeCycleDetails()
+
 
             startActivity(Intent(this@MainActivity, Main2Activity::class.java))
         })
 
         button_performance.setOnClickListener {
 
-
-
-
-
-
+            LoggerBird.takeDeviceInformationDetails()
+            LoggerBird.takeDevicePerformanceDetails()
+            LoggerBird.takeDeviceCpuDetails()
 
 
         }
@@ -242,7 +257,7 @@ class MainActivity : AppCompatActivity(){
                         LoggerBird.takeRetrofitRequestDetails(response= ApiServiceInterface.httpClient(
                             request
                         ),request=request)
-                        LoggerBird.saveRetrofitRequestDetails()
+                       // LoggerBird.saveRetrofitRequestDetails()
                     }
 
 
@@ -439,10 +454,6 @@ class MainActivity : AppCompatActivity(){
     }
 
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("life_cycle_state_destroyed",this.lifecycle.currentState.name)
-    }
 
     private suspend fun httpRequest(url: String?): String {
         var result: String = ""

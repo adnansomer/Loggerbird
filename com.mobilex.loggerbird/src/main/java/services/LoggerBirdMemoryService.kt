@@ -1,10 +1,9 @@
-package service
+package services
 
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import android.widget.Toast
 import constants.Constants.Companion.memoryUsageTag
 import loggerbird.LoggerBird.Companion.takeMemoryUsageDetails
 import java.lang.Exception
@@ -69,7 +68,8 @@ internal class LoggerBirdMemoryService : Service(){
 
         timer = Timer()
         initializeMemoryUsage()
-        timer!!.schedule(timerTask, 0, 5000)
+        timer!!.schedule(
+            timerTask, 0, 5000)
     }
 
     /**
