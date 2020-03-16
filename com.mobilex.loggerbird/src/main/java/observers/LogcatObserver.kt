@@ -10,3 +10,5 @@ internal class LogcatObserver : Thread.UncaughtExceptionHandler {
         )
     }
 }
+
+
