@@ -103,6 +103,7 @@ class LoggerBird : LifecycleObserver {
         private var arrayListFile: ArrayList<File> = ArrayList()
         private lateinit var fileTemp: File
         private lateinit var intentService: Intent
+        private lateinit var intentServiceMemory: Intent
         private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver = LogRecyclerViewAdapterDataObserver()
         private var recyclerViewScrollListener: LogRecyclerViewScrollListener = LogRecyclerViewScrollListener()
         private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener = LogRecyclerViewChildAttachStateChangeListener()
@@ -122,38 +123,35 @@ class LoggerBird : LifecycleObserver {
          * @return Boolean value.
          */
 
-        fun logInit(context: Context, fragmentManager: FragmentManager? = null) {
-            intentService = Intent(context, LoggerBirdMemoryService::class.java)
-            context.startService(intentService)
 
-            Companion.context = context
-
-            controlLogInit = logAttach(context, fragmentManager)
-            val logcatObserver: LogcatObserver = LogcatObserver()
-
-            fun logInit(
+        fun logInit(
                 context: Context,
                 file: File? = null,
                 fragmentManager: FragmentManager? = null
             ): Boolean {
                 intentService = Intent(context, LoggerBirdService::class.java)
                 context.startService(intentService)
+
+                intentServiceMemory = Intent(context, LoggerBirdMemoryService::class.java)
+                context.startService(intentServiceMemory)
+
                 this.context = context
                 this.file = file
+
+                Companion.context = context
                 controlLogInit =
                     logAttach(
                         context,
                         fragmentManager
                     )
-                val logcatObserver: LogcatObserver =
-                    LogcatObserver()
+                val logcatObserver: LogcatObserver = LogcatObserver()
                 Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
 
                 return controlLogInit
 
             }
 
-        }
+
 
 
             /**
