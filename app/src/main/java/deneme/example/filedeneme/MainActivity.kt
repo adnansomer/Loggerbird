@@ -18,7 +18,7 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import android.view.View
-import android.widget.LinearLayout
+
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.realm.Realm
 import io.realm.RealmConfiguration
