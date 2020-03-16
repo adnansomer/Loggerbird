@@ -36,6 +36,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import loggerbird.LoggerBird.Companion.controlLogInit
 import loggerbird.LoggerBird.Companion.saveExceptionDetails
 import loggerbird.LoggerBird.Companion.takeExceptionDetails
 import observers.LogFragmentLifeCycleObserver
@@ -1856,65 +1857,3 @@ class asynTakeEmailTask(
     }
 }
 
-/**
- * Builder Class will be developed
- */
-
-class LoggerBirdBuilder private constructor(
-
-    var threshold: Long?
-
-
-){
-
-    data class Builder(private var threshold: Long? = null) {
-
-        fun takeMemoryUsageDetails(threshold : Long?) = apply { this.threshold = threshold}
-        fun takeDeviceInfoDetails() = apply {  if(LoggerBird.controlLogInit) {
-
-            try {
-                val deviceId = Build.ID
-                val deviceSerial = Build.FINGERPRINT
-                val device = Build.DEVICE
-                val deviceModel = Build.MODEL
-                val deviceType = Build.TYPE
-                val deviceUser = Build.USER
-                val sdkVersion = Build.VERSION.SDK_INT
-                val manufacturer = Build.MANUFACTURER
-                val host = Build.HOST
-                val hardware = Build.HARDWARE
-                val deviceBrand = Build.BRAND
-                val product = Build.PRODUCT
-
-                var stringBuilderBuild : java.lang.StringBuilder? = null
-                stringBuilderBuild = StringBuilder()
-                stringBuilderBuild.append(
-                    "Device Information:" + "\n"
-                            + "ID:" + deviceId + "\n"
-                            + "SERIAL: " + deviceSerial + "\n"
-                            + "DEVICE:" + device + "\n"
-                            + "DEVICE MODEL:" + deviceModel + "\n"
-                            + "DEVICE TYPE:" + deviceType + "\n"
-                            + "USER:" + deviceUser + "\n"
-                            + "SDK VERSION:" + sdkVersion + "\n"
-                            + "MANUFACTURER:" + manufacturer + "\n"
-                            + "HOST:" + host + "\n"
-                            + "HARDWARE:" + hardware + "\n"
-                            + "BRAND:" + deviceBrand + "\n"
-                            + "PRODUCT:" + product + "\n"
-                )
-
-                Log.d(deviceInfoTag, stringBuilderBuild.toString())
-
-            }catch (e: Exception){
-                e.printStackTrace()
-                takeExceptionDetails(e, Constants.deviceInfoTag)
-                saveExceptionDetails()
-            }
-        }else {
-            throw LoggerBirdException(Constants.logInitErrorMessage)
-        } }
-
-        fun build() = LoggerBirdBuilder(threshold)
-    }
-}

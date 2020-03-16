@@ -26,7 +26,6 @@ import io.realm.Sort
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import io.reactivex.disposables.Disposable
-import loggerbird.LoggerBirdBuilder
 import okhttp3.FormBody
 import okhttp3.HttpUrl
 import retrofit2.Call
@@ -197,11 +196,10 @@ class MainActivity : AppCompatActivity(){
 
         button_performance.setOnClickListener {
 
-            var loggerbirdbuilder = LoggerBirdBuilder.Builder()
-                .takeDeviceInfoDetails()
 
-            LoggerBird.takeDeviceCpuDetails()
-            LoggerBird.takeDevicePerformanceDetails()
+
+
+
 
 
 
