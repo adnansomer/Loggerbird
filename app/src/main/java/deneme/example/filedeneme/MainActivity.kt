@@ -225,7 +225,7 @@ class MainActivity : AppCompatActivity(){
                 .logDetachObserver()
                 .refreshLogInitInstance()
                 .takeAnalyticsDetails()
-                
+
 
             /*
             val interceptor = run {
