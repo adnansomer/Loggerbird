@@ -1157,7 +1157,7 @@ class LoggerBird : LifecycleObserver {
                             )
                         } else {
                             if (defaultFilePath.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderException.toString()
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderException.toString())
                             } else {
                                 defaultFilePath.appendText(
                                     stringBuilderException.toString()
