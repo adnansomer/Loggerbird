@@ -6,34 +6,44 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.net.Uri
-import android.os.*
-import androidx.appcompat.app.AppCompatActivity
+import android.os.AsyncTask
+import android.os.Build
+import android.os.Bundle
+import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import kotlinx.android.synthetic.main.activity_main.*
-import androidx.appcompat.app.AlertDialog
-import java.io.*
-import java.net.HttpURLConnection
-import java.net.URL
-import android.view.View
-
 import androidx.recyclerview.widget.LinearLayoutManager
+import io.reactivex.disposables.Disposable
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.Sort
-import kotlinx.coroutines.*
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import loggerbird.LoggerBird
-import io.reactivex.disposables.Disposable
+import loggerbird.LoggerBirdBuilder
 import okhttp3.FormBody
 import okhttp3.HttpUrl
-import retrofit2.Call
-import retrofit2.Response
+import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.logging.HttpLoggingInterceptor
+import org.json.JSONObject
+import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.Response
 import retrofit2.Retrofit
-import org.json.JSONObject;
+import retrofit2.converter.gson.GsonConverterFactory
+import java.io.*
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.concurrent.TimeUnit
+import java.util.logging.Level
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
 
@@ -98,10 +108,6 @@ class MainActivity : AppCompatActivity(){
         adapter.notifyDataSetChanged()
         recyclerViewList.add(RecyclerModel("deneme"))
         adapter.notifyDataSetChanged() */
-
-
-
-
 
 
 
@@ -213,9 +219,50 @@ class MainActivity : AppCompatActivity(){
 
         button_performance.setOnClickListener {
 
-            LoggerBird.takeDeviceInformationDetails()
-            LoggerBird.takeDevicePerformanceDetails()
-            LoggerBird.takeDeviceCpuDetails()
+            LoggerBirdBuilder.Builder()
+                .isLogInitAttached()
+                .logAttach()
+                .logDetachObserver()
+                .refreshLogInitInstance()
+                .takeAnalyticsDetails()
+                .
+
+            /*
+            val interceptor = run {
+                val httpLoggingInterceptor = HttpLoggingInterceptor()
+                httpLoggingInterceptor.apply {
+                    httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+                }
+            }
+
+
+            val okHttpClient = OkHttpClient.Builder()
+                .addNetworkInterceptor(interceptor) // same for .addInterceptor(...)
+                .connectTimeout(30, TimeUnit.SECONDS) //Backend is really slow
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build()
+
+            /*val API_BASE_URL : String = ""
+
+            val logging = HttpLoggingInterceptor()
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+            var httpClient = OkHttpClient()
+            httpClient.interceptors()
+
+            val retrofit: Retrofit = Retrofit.Builder()
+                .baseUrl(API_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(httpClient)
+                .build()*/
+            
+
+            /*
+            val logging : HttpLoggingInterceptor? = null
+            logging?.setLevel(HttpLoggingInterceptor.Level.BASIC)*/
+
+             */
+
 
 
         }
@@ -254,11 +301,12 @@ class MainActivity : AppCompatActivity(){
                         .post(fromBodyBuilder.build())
                         .build()
                     coroutineCallInternet.async {
+                        for ( x in 0..10 ){
                         LoggerBird.takeRetrofitRequestDetails(response= ApiServiceInterface.httpClient(
                             request
                         ),request=request)
                        // LoggerBird.saveRetrofitRequestDetails()
-                    }
+                    }}
 
 
                   //  LogDeneme.saveRetrofitRequestDetails()

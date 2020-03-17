@@ -1,5 +1,6 @@
 package loggerbird
 
+import android.accessibilityservice.GestureDescription
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
@@ -27,6 +28,7 @@ import constants.Constants.Companion.deviceInfoTag
 import constants.Constants.Companion.devicePerformanceTag
 import deneme.example.loggerbird.R
 import exception.LoggerBirdException
+import interceptors.LogOkHttpInterceptor
 import io.realm.Realm
 import io.realm.RealmModel
 import kotlinx.coroutines.CoroutineScope
@@ -44,7 +46,11 @@ import utils.EmailUtil
 import listeners.LogRecyclerViewChildAttachStateChangeListener
 import listeners.LogRecyclerViewItemTouchListener
 import listeners.LogRecyclerViewScrollListener
+import loggerbird.LoggerBird.Companion.controlLogInit
+import loggerbird.LoggerBird.Companion.saveExceptionDetails
+import loggerbird.LoggerBird.Companion.takeExceptionDetails
 import observers.*
+import okhttp3.Interceptor
 import services.LoggerBirdService
 import java.io.File
 import java.net.HttpURLConnection
@@ -75,7 +81,6 @@ class LoggerBird : LifecycleObserver {
         private var stringBuilderDeviceInfoDetails: StringBuilder = StringBuilder()
         private var stringBuilderMemoryUsageDetails: StringBuilder = StringBuilder()
         private var coroutineCallRetrofit = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallLogRetrofit = CoroutineScope(Dispatchers.IO)
         private var coroutineCallAnalytic = CoroutineScope(Dispatchers.IO)
         private var coroutineCallHttp = CoroutineScope(Dispatchers.IO)
         private var coroutineCallInAPurchase = CoroutineScope(Dispatchers.IO)
@@ -85,8 +90,6 @@ class LoggerBird : LifecycleObserver {
         private var coroutineCallActivity = CoroutineScope(Dispatchers.IO)
         private var coroutineCallFragment = CoroutineScope(Dispatchers.IO)
         private var coroutineCallDevicePerformance = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallMemoryUsageDetails = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallBuilder = CoroutineScope(Dispatchers.IO)
         private var coroutineCallRealm = CoroutineScope(Dispatchers.IO)
         private var coroutineCallException = CoroutineScope(Dispatchers.IO)
         private var coroutineCallAll = CoroutineScope(Dispatchers.IO)
@@ -99,7 +102,6 @@ class LoggerBird : LifecycleObserver {
         private var file: File? = null
         private var fileLimit: Long = 2097152
         private var memoryThreshold: Long = 1897152L
-        private var stringBuilderTemp: StringBuilder = StringBuilder()
         private var arrayListFile: ArrayList<File> = ArrayList()
         private lateinit var fileTemp: File
         private lateinit var intentService: Intent
@@ -139,19 +141,12 @@ class LoggerBird : LifecycleObserver {
                 this.file = file
 
                 Companion.context = context
-                controlLogInit =
-                    logAttach(
-                        context,
-                        fragmentManager
-                    )
+                controlLogInit = logAttach(context, fragmentManager)
                 val logcatObserver: LogcatObserver = LogcatObserver()
                 Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
 
                 return controlLogInit
-
             }
-
-
 
 
             /**
@@ -201,6 +196,9 @@ class LoggerBird : LifecycleObserver {
                 stringBuilderLifeCycle = StringBuilder()
                 stringBuilderFragmentManager = StringBuilder()
                 stringBuilderAnalyticsManager = StringBuilder()
+                stringBuilderMemoryUsageDetails = StringBuilder()
+                stringBuilderDeviceInfoDetails = StringBuilder()
+                stringBuilderPerformanceDetails = StringBuilder()
                 stringBuilderHttp = StringBuilder()
                 stringBuilderInAPurchase = StringBuilder()
                 stringBuilderSkuDetailList = StringBuilder()
@@ -899,7 +897,7 @@ class LoggerBird : LifecycleObserver {
              * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
              * @throws exception if logInit method return value is false.
              */
-            private fun saveExceptionDetails() {
+            fun saveExceptionDetails() {
                 if (stringBuilderException.isNotEmpty()) {
                     coroutineCallException.async {
                         try {
@@ -1288,7 +1286,6 @@ class LoggerBird : LifecycleObserver {
                 } else {
                     throw LoggerBirdException(Constants.logInitErrorMessage)
                 }
-
                 return stringBuilderMemoryUsageDetails.toString()
             }
 
@@ -1320,8 +1317,7 @@ class LoggerBird : LifecycleObserver {
 
                     try {
                         val memoryInfo = ActivityManager.MemoryInfo()
-                        val activityManager: ActivityManager =
-                            context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                        val activityManager: ActivityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
                         activityManager.getMemoryInfo(memoryInfo)
                         val runtime: Runtime = Runtime.getRuntime()
 
@@ -1442,6 +1438,7 @@ class LoggerBird : LifecycleObserver {
 
                 return stringBuilderBuild.toString()
             }
+
                 /**
                  * This Method Takes Analytics Details.
                  * Parameters:
@@ -1537,6 +1534,7 @@ class LoggerBird : LifecycleObserver {
                             val date = Calendar.getInstance().time
                             val formatter = SimpleDateFormat.getDateTimeInstance()
                             formattedTime = formatter.format(date)
+
                             stringBuilderHttp.append("\n" + formattedTime + ":" + Constants.httpTag + "\n" + "Http Request Code:" + httpUrlConnection?.responseCode + " " + "Http Response Message:" + httpUrlConnection?.responseMessage)
                             saveHttpRequestDetails()
                         } catch (e: Exception) {
@@ -1546,6 +1544,7 @@ class LoggerBird : LifecycleObserver {
                                 Constants.httpTag
                             )
                         }
+
                     } else {
                         throw LoggerBirdException(Constants.logInitErrorMessage)
                     }
@@ -1720,7 +1719,6 @@ class LoggerBird : LifecycleObserver {
                         throw LoggerBirdException(Constants.logInitErrorMessage)
                     }
                 }
-
 
                 /**
                  * This Method Takes Exception Details.
@@ -1936,10 +1934,5 @@ class LoggerBird : LifecycleObserver {
                     )
                     return stringBuilderAll.toString()
                 }
-
             }
         }
-
-
-
-
