@@ -46,7 +46,7 @@ internal class LoggerBirdService() : Service() {
     /**
      * This Method Called When Service Detect's An  OnBind State In The Current Activity.
      * Parameters:
-     * @param intent used for getting context reference from the Activity.
+     * @param rootIntent used for getting context reference from the Activity.
      * Variables:
      * @var currentLifeCycleState states takes current state as a String in the Activity life cycle.
      * @var onDestroyMessage used for providing detail's for stringBuilder in LoggerBird.takelifeCycleDetails.
@@ -63,10 +63,10 @@ internal class LoggerBirdService() : Service() {
             currentLifeCycleState = "onDestroy"
             onDestroyMessage =
                 " " + Constants.lifeCycleTag + ":" + intentService!!.component!!.className + " " + "${formattedTime}:${currentLifeCycleState}\n"
-            LoggerBird.takeLifeCycleDetails()
+            LoggerBird.callLifeCycleDetails()
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 

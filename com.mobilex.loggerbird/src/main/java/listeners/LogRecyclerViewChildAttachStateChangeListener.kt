@@ -37,7 +37,7 @@ internal class LogRecyclerViewChildAttachStateChangeListener:RecyclerView.OnChil
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -62,7 +62,7 @@ internal class LogRecyclerViewChildAttachStateChangeListener:RecyclerView.OnChil
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
 
     }

@@ -118,9 +118,7 @@ internal class EmailUtil {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                LoggerBird.takeExceptionDetails(
-                    e
-                )
+                LoggerBird.callExceptionDetails(e)
                 coroutinecallEmail.launch {
                     withContext(Dispatchers.Main) {
                         progressBar.visibility = View.GONE

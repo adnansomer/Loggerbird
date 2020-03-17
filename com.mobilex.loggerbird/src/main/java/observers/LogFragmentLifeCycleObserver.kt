@@ -65,9 +65,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -93,7 +91,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             stringBuilderFragmentLifeCycleObserver.append(" " + Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -121,9 +119,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -151,9 +147,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -180,9 +174,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -214,9 +206,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -249,9 +239,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -279,9 +267,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -309,9 +295,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -338,9 +322,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -367,9 +349,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -396,9 +376,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
 
     }
@@ -426,9 +404,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -455,9 +431,7 @@ internal class LogFragmentLifeCycleObserver(fragmentManager: FragmentManager?) :
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 

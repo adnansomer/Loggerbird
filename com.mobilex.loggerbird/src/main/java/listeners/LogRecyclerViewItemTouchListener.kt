@@ -43,7 +43,7 @@ internal class LogRecyclerViewItemTouchListener : RecyclerView.OnItemTouchListen
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -73,7 +73,7 @@ internal class LogRecyclerViewItemTouchListener : RecyclerView.OnItemTouchListen
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
         return false
     }
@@ -98,7 +98,7 @@ internal class LogRecyclerViewItemTouchListener : RecyclerView.OnItemTouchListen
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 

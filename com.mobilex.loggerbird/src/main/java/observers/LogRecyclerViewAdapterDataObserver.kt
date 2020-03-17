@@ -36,7 +36,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
             stringBuilderRecyclerViewAdapterDataObserver.append("$formattedTime:$currentRecyclerViewAdapterDataObserverState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -64,7 +64,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -93,7 +93,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -121,7 +121,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -148,7 +148,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -178,7 +178,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 

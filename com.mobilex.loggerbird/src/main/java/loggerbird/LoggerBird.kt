@@ -3,7 +3,6 @@ package loggerbird
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
-import android.opengl.Visibility
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
@@ -18,6 +17,7 @@ import android.widget.TextView
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.*
 import com.android.billingclient.api.*
 import com.google.gson.GsonBuilder
 import com.mobilex.loggerbird.R
@@ -35,8 +35,9 @@ import okhttp3.Request
 import okhttp3.Response
 import retrofit2.Retrofit
 import services.LoggerBirdService
+import utils.LinkedBlockingQueueUtil
+import utils.WorkerUtil
 import java.io.File
-import java.io.FileWriter
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
@@ -48,6 +49,10 @@ class LoggerBird : LifecycleObserver {
     companion object {
         //Static global variables.
         private var controlLogInit: Boolean = false
+        private lateinit var context: Context
+        private var file: File? = null
+        private lateinit var defaultFileDirectory: File
+        private lateinit var defaultFilePath: File
         private var stringBuilderComponent: StringBuilder = StringBuilder()
         private var stringBuilderLifeCycle: StringBuilder = StringBuilder()
         private var stringBuilderFragmentManager: StringBuilder = StringBuilder()
@@ -61,30 +66,24 @@ class LoggerBird : LifecycleObserver {
         private var stringBuilderBuild: StringBuilder = StringBuilder()
         private var stringBuilderException: StringBuilder = StringBuilder()
         private var stringBuilderAll: StringBuilder = StringBuilder()
-        private var coroutineCallRetrofit = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallLogRetrofit = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallAnalytic = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallHttp = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallInAPurchase = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallComponent = CoroutineScope(Dispatchers.IO)
+        private var stringBuilderExceedFileWriterLimit: StringBuilder = StringBuilder()
+        private var coroutineCallComponent: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallLifeCycle: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallAnalytics: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallFragmentManager: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallHttpRequest: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallInAPurchase: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallRetrofit: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallRealm: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallException: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var coroutineRetrofitTask: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineCallEmailTask = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallEmail = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallActivity = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallFragment = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallRealm = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallException = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallAll = CoroutineScope(Dispatchers.IO)
-        private lateinit var defaultFileDirectory: File
-        private lateinit var defaultFilePath: File
         private var formattedTime: String? = null
-        private val lifeCycleObserver = LogLifeCycleObserver()
-        private lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
-        private lateinit var context: Context
-        private var file: File? = null
         private var fileLimit: Long = 2097152
-        private var stringBuilderTemp: StringBuilder = StringBuilder()
         private var arrayListFile: ArrayList<File> = ArrayList()
         private lateinit var fileTemp: File
+        private lateinit var lifeCycleObserver: LogLifeCycleObserver
+        private lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
         private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver =
             LogRecyclerViewAdapterDataObserver()
         private var recyclerViewScrollListener: LogRecyclerViewScrollListener =
@@ -93,10 +92,18 @@ class LoggerBird : LifecycleObserver {
             LogRecyclerViewChildAttachStateChangeListener()
         private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener =
             LogRecyclerViewItemTouchListener()
+        private lateinit var workQueueLinked: LinkedBlockingQueueUtil
         private lateinit var recyclerViewItemObserver: LogDataSetObserver
         private lateinit var intentService: Intent
         private lateinit var textViewFileReader: TextView
         private lateinit var buttonFileReader: Button
+        //private var corePoolSize: Int = 1000
+        //private var maximumPoolSize: Int = 1000
+        //private var keepAliveTime: Long = 100000
+        //private var timeUnit: TimeUnit = TimeUnit.MILLISECONDS
+        //private lateinit var threadPoolExecutor: ThreadPoolExecutor
+        private var runnableList: ArrayList<Runnable> = ArrayList()
+        internal var uncaughtExceptionHandlerController = false
 
 
         //---------------Public Methods:---------------
@@ -105,9 +112,13 @@ class LoggerBird : LifecycleObserver {
          * Call This Method Before Calling Any Other Methods.
          * Parameters:
          * @param context is for getting reference from the application context , you must deploy this parameter.
+         * @param file allow user modify the file they want to create for saving their details method , otherwise it will save your file to the devices data->data->your project package name->files->component_details with an default name of "logger_bird_details"
          * @param fragmentManager is used for getting details from FragmentManager which is used for tracking life cycle of Fragments rather than activity.
          * Variables:
-         * controlLogInit is used for tracking the logInit return value which is used in other methods in this class.
+         * @var controlLogInit is used for tracking the logInit return value which is used in other methods in this class.
+         * @var intentService start's service class for listening some event's in the application.
+         * @var workQueueLinked is used for adding called saving method's into a queue.
+         * @var logcatObserver is used for adding and initializing unhandled exception observer into application.
          * @return Boolean value.
          */
         fun logInit(
@@ -124,6 +135,14 @@ class LoggerBird : LifecycleObserver {
                     context,
                     fragmentManager
                 )
+            workQueueLinked = LinkedBlockingQueueUtil(context = context)
+//            threadPoolExecutor= LogThreadPoolExecutorUtil(
+//                corePoolSize = corePoolSize,
+//                maximumPoolSize = maximumPoolSize,
+//                keepAliveTime = keepAliveTime,
+//                workQueue = workQueueLinked,
+//                unit = timeUnit
+//            )
             val logcatObserver: LogcatObserver =
                 LogcatObserver()
             Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
@@ -131,16 +150,16 @@ class LoggerBird : LifecycleObserver {
         }
 
         /**
-         * This Method Used For Checking LogInit State.
+         * This Method Used For Checking logInit State.
          */
         fun isLogInitAttached(): Boolean {
             return controlLogInit
         }
 
         /**
-         * This Method Used For Refreshing LogInit State.
+         * This Method Detaches logInit from Your Application.
          */
-        fun refreshLogInitInstance() {
+        fun logDetach() {
             controlLogInit = false
         }
 
@@ -148,7 +167,9 @@ class LoggerBird : LifecycleObserver {
          * This Method Detaches A LifeCycle Observer From The Current Activity.
          */
         fun logDetachObserver() {
-            lifeCycleObserver.deRegisterLifeCycle()
+            if (Companion::lifeCycleObserver.isInitialized) {
+                lifeCycleObserver.deRegisterLifeCycle()
+            }
         }
 
         /**
@@ -160,14 +181,6 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-        /**
-         * This Method Detaches library from Your Application.
-         */
-        fun logDetach() {
-            if (controlLogInit) {
-                controlLogInit = false
-            }
-        }
 
         /**
          * This Method Re-Creates Instantiation For StringBuilders.
@@ -187,12 +200,21 @@ class LoggerBird : LifecycleObserver {
             stringBuilderAll = StringBuilder()
         }
 
+        /**
+         * This Method Used For Re-Instantation Of The File Details You Have Specified.
+         */
+        fun changeFileDetails(file: File?) {
+            this.file = file
+        }
 
         /**
          * This Method Attaches A LifeCycle Observer For The Current Activity.
          * Parameters:
          * @param context is for getting reference from the application context , you must deploy this parameter.
          * @param fragmentManager is used for getting details from FragmentManager which is used for  tracking life cycle of Fragments rather than activity.
+         * Variables:
+         * @var If fragmentManager is not null then fragmentLifeCycleObserver is used for initializing the fragment observer class and adding fragment observer into fragment.
+         * @var If fragmentManager is null then lifeCycleobserver is used for initializing the activity observer class and adding activity observer into activity.
          * @return Boolean value.
          */
         private fun logAttach(context: Context, fragmentManager: FragmentManager? = null): Boolean {
@@ -203,6 +225,7 @@ class LoggerBird : LifecycleObserver {
                     )
                 fragmentManager.registerFragmentLifecycleCallbacks(fragmentLifeCycleObserver, true)
             } else {
+                lifeCycleObserver = LogLifeCycleObserver()
                 lifeCycleObserver.registerLifeCycle(context)
             }
             recyclerViewItemObserver = LogDataSetObserver(context)
@@ -246,903 +269,935 @@ class LoggerBird : LifecycleObserver {
          * Parameters:
          * @param stringBuilder is used for getting the reference of stringBuilder of called saving method.
          * @param file is used for getting the reference of stringBuilder of called saving method.
+         * Variables:
+         * @var scannerFile is used for getting file content to the scanner instance.
+         * @var scannerStringBuilder is used for getting used saving method content to the scanner instance.
+         * @var scannerTempStringBuilder is used for getting used saving method content to the temporary scanner instance.
+         * @var temFile is used for opening temporary file that will be used for getting the deleted content's from real file(only have 2mb file limit).
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private suspend fun exceededFileLimitWriter(stringBuilder: StringBuilder, file: File) {
-
             try {
                 val scannerFile = Scanner(file)
-                val scannerStringBuilderComponent =
+                val scannerStringBuilder =
                     Scanner(stringBuilder.toString())
-                val scannerTempStringBuilderComponent =
+                val scannerTempStringBuilder =
                     Scanner(stringBuilder.toString())
+                val tempFile: File =
+                    File(file.toString().substringBeforeLast("/"), "logger_bird_details_temp.txt")
                 withContext(Dispatchers.IO) {
                     file.delete()
                     file.createNewFile()
+                    if (!tempFile.exists()) {
+                        tempFile.createNewFile()
+                    }
+                    if (tempFile.length() > fileLimit) {
+                        tempFile.delete()
+                        tempFile.createNewFile()
+                    }
                 }
                 do {
-                    if (scannerTempStringBuilderComponent.hasNextLine()) {
-                        scannerTempStringBuilderComponent.nextLine()
-                        scannerFile.nextLine()
+                    if (scannerTempStringBuilder.hasNextLine()) {
+                        scannerTempStringBuilder.nextLine()
+                        tempFile.appendText(scannerFile.nextLine() + "\n")
                     } else {
                         file.appendText(scannerFile.nextLine() + "\n")
                     }
-
                 } while (scannerFile.hasNextLine())
                 do {
-                    if (scannerStringBuilderComponent.hasNextLine()) {
+                    if (scannerStringBuilder.hasNextLine()) {
                         file.appendText(
-                            scannerStringBuilderComponent.nextLine() + "\n"
+                            scannerStringBuilder.nextLine() + "\n"
                         )
                     }
-                } while (scannerStringBuilderComponent.hasNextLine())
+                } while (scannerStringBuilder.hasNextLine())
             } catch (e: Exception) {
                 e.printStackTrace()
-                takeExceptionDetails(e)
+                callExceptionDetails(e)
             }
+            stringBuilderExceedFileWriterLimit = StringBuilder()
         }
 
         /**
          * This Method Saves Component Details To Txt File.
          * Parameters:
          * Variables:
-         * @var controlLogInit is used for getting logInit method return value.
-         * @var coroutineCallComponent is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var file allow user modify the file they want to create for saving their Component Details , otherwise it will save your file to the devices data->data->your project package name->files->component_details with an default name of "logger_bird_details"
+         * @var file is used for getting reference of file details that are desired given in logInit method.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderComponent prints component details.
+         * @var stringBuilderExceedFileWriterLimit is used for printing deleted content from real file to temporary file.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         * @throws exception if log instance is empty.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun saveComponentDetails(rootView: ViewGroup? = null) {
-            if (controlLogInit) {
-                if (stringBuilderComponent.isNotEmpty()) {
-                    coroutineCallComponent.async {
-                        try {
-                            if (file != null) {
-                                if (!file!!.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        file!!.createNewFile()
-                                    }
-                                    file!!.appendText(takeBuilderDetails())
-                                    file!!.appendText(
-                                        stringBuilderComponent.toString()
-                                    )
-                                } else {
-                                    if (file!!.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderComponent,
-                                            file = file!!
-                                        )
-                                    } else {
-                                        file!!.appendText(
-                                            stringBuilderComponent.toString()
-                                        )
-                                    }
-                                }
-                            } else {
-                                defaultFileDirectory = context.filesDir
-                                defaultFilePath = File(
-                                    defaultFileDirectory, "logger_bird_details.txt"
+        private suspend fun saveComponentDetails() {
+            if (stringBuilderComponent.isNotEmpty()) {
+                try {
+                    if (file != null) {
+                        if (!file!!.exists()) {
+                            withContext(Dispatchers.IO) {
+                                file!!.createNewFile()
+                                file!!.appendText(takeBuilderDetails())
+                                file!!.appendText(
+                                    stringBuilderComponent.toString()
                                 )
-                                if (!defaultFilePath.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        defaultFilePath.createNewFile()
-                                    }
-                                    defaultFilePath.appendText(
-                                        takeBuilderDetails()
-                                    )
-                                    defaultFilePath.appendText(stringBuilderComponent.toString())
-                                } else {
-                                    if (defaultFilePath.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderComponent,
-                                            file = defaultFilePath
-                                        )
-                                    } else {
-                                        defaultFilePath.appendText(
-                                            stringBuilderComponent.toString()
-                                        )
-                                    }
-                                }
                             }
-                            if (rootView != null) {
-                                withContext(Dispatchers.Main) {
-                                    attachRootView(rootView)
-                                }
+                        } else {
+                            if (file!!.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderComponent.toString())
+                            } else {
+                                file!!.appendText(
+                                    stringBuilderComponent.toString()
+                                )
                             }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            takeExceptionDetails(
-                                e,
-                                Constants.componentTag
+                        }
+                    } else {
+                        defaultFileDirectory = context.filesDir
+                        defaultFilePath = File(
+                            defaultFileDirectory, "logger_bird_details.txt"
+                        )
+                        if (!defaultFilePath.exists()) {
+                            withContext(Dispatchers.IO) {
+                                defaultFilePath.createNewFile()
+                                defaultFilePath.appendText(
+                                    takeBuilderDetails()
+                                )
+                                defaultFilePath.appendText(stringBuilderComponent.toString())
+                            }
+                        } else {
+                            if (defaultFilePath.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderComponent.toString())
+                            } else {
+                                defaultFilePath.appendText(
+                                    stringBuilderComponent.toString()
+                                )
+                            }
+                        }
+                    }
+//                            if (rootView != null) {
+//                                withContext(Dispatchers.Main) {
+//                                    attachRootView(rootView)
+//                                }
+//                            }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callExceptionDetails(
+                        e,
+                        Constants.componentTag
+                    )
+                }
+                withContext(Dispatchers.IO) {
+                    workQueueLinked.controlRunnable = false
+
+                    if (runnableList.size > 0) {
+                        runnableList.removeAt(0)
+                        if (runnableList.size > 0) {
+                            workQueueLinked.put(runnableList[0])
+                        }
+                    }
+                    if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                        if (file != null) {
+                            exceededFileLimitWriter(
+                                stringBuilder = stringBuilderExceedFileWriterLimit,
+                                file = file!!
+                            )
+                        } else {
+                            exceededFileLimitWriter(
+                                stringBuilder = stringBuilderExceedFileWriterLimit,
+                                file = defaultFilePath
                             )
                         }
                     }
-                } else {
-                    throw LoggerBirdException(
-                        Constants.saveErrorMessage + Constants.componentMethodTag
-                    )
                 }
             } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
+                throw LoggerBirdException(
+                    Constants.saveErrorMessage + Constants.componentMethodTag
+                )
             }
-
         }
 
         /**
          * This Method Saves Life-Cycle Details To Txt File.
          * Variables:
-         * @var controlLogInit is used for getting logInit method return value.
          * @var LoggerBirdService.onDestroyMessage used for getting onDestroy state for lifecycle via service.
-         * @var coroutineCallActivity is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var file allow user modify the file they want to create for saving their Activity Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of life_cycle_details.
+         * @var file is used for getting reference of file details that are desired given in logInit method.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderLifeCycle prints life-cycle details.
+         * @var stringBuilderExceedFileWriterLimit is used for printing deleted content from real file to temporary file.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         * @throws exception if log instance is empty.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun saveLifeCycleDetails(rootView: ViewGroup? = null) {
-            if (controlLogInit) {
-                if (stringBuilderLifeCycle.isNotEmpty()) {
-                    if (LoggerBirdService.onDestroyMessage != null) {
-                        try {
-                            if (file != null) {
-                                if (!file!!.exists()) {
-                                    file!!.createNewFile()
-                                    file!!.appendText(takeBuilderDetails())
-                                    file!!.appendText(stringBuilderLifeCycle.toString())
-                                } else {
-                                    if (file!!.length() > fileLimit) {
-                                        //exceed method here
-                                    } else {
-                                        file!!.appendText(stringBuilderLifeCycle.toString())
-                                    }
-                                }
+        private suspend fun saveLifeCycleDetails() {
+            if (stringBuilderLifeCycle.isNotEmpty()) {
+                try {
+                    if (file != null) {
+                        if (!file!!.exists()) {
+                            withContext(Dispatchers.IO) {
+                                file!!.createNewFile()
+                                file!!.appendText(takeBuilderDetails())
+                                file!!.appendText(stringBuilderLifeCycle.toString())
+                            }
+                        } else {
+                            if (file!!.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderLifeCycle.toString())
                             } else {
-                                defaultFileDirectory = context.filesDir
-                                defaultFilePath = File(
-                                    defaultFileDirectory, "logger_bird_details.txt"
-                                )
-                                if (!defaultFilePath.exists()) {
-                                    defaultFilePath.createNewFile()
-                                    defaultFilePath.appendText(
-                                        takeBuilderDetails()
-                                    )
-                                    defaultFilePath.appendText(
-                                        stringBuilderLifeCycle.toString()
-                                    )
-                                } else {
-                                    if (defaultFilePath.length() > fileLimit) {
-                                        //exceed method here
-                                    } else {
-                                        defaultFilePath.appendText(
-                                            stringBuilderLifeCycle.toString()
-                                        )
-                                    }
-                                }
+                                file!!.appendText(stringBuilderLifeCycle.toString())
                             }
-                            if (rootView != null) {
-                                attachRootView(rootView)
-                            }
-                            stringBuilderLifeCycle = StringBuilder()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            takeExceptionDetails(
-                                e,
-                                Constants.lifeCycleTag
-                            )
                         }
                     } else {
-                        coroutineCallActivity.async {
-                            try {
-                                if (file != null) {
-                                    if (!file!!.exists()) {
-                                        withContext(Dispatchers.IO) {
-                                            file!!.createNewFile()
-                                        }
-                                        file!!.appendText(takeBuilderDetails())
-                                        file!!.appendText(stringBuilderLifeCycle.toString())
-                                    } else {
-                                        if (file!!.length() > fileLimit) {
-                                            exceededFileLimitWriter(
-                                                stringBuilder = stringBuilderLifeCycle,
-                                                file = file!!
-                                            )
-                                        } else {
-                                            file!!.appendText(stringBuilderLifeCycle.toString())
-                                        }
-                                    }
-                                } else {
-                                    defaultFileDirectory = context.filesDir
-                                    defaultFilePath = File(
-                                        defaultFileDirectory, "logger_bird_details.txt"
-                                    )
-                                    if (!defaultFilePath.exists()) {
-                                        withContext(Dispatchers.IO) {
-                                            defaultFilePath.createNewFile()
-                                        }
-                                        defaultFilePath.appendText(
-                                            takeBuilderDetails()
-                                        )
-                                        defaultFilePath.appendText(
-                                            stringBuilderLifeCycle.toString()
-                                        )
-                                    } else {
-                                        if (defaultFilePath.length() > fileLimit) {
-                                            exceededFileLimitWriter(
-                                                stringBuilder = stringBuilderLifeCycle,
-                                                file = defaultFilePath
-                                            )
-                                        } else {
-                                            defaultFilePath.appendText(
-                                                stringBuilderLifeCycle.toString()
-                                            )
-                                        }
-                                    }
-
-                                }
-                                if (rootView != null) {
-                                    attachRootView(rootView)
-                                }
-                                stringBuilderLifeCycle = StringBuilder()
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                takeExceptionDetails(
-                                    e,
-                                    Constants.lifeCycleTag
+                        defaultFileDirectory = context.filesDir
+                        defaultFilePath = File(
+                            defaultFileDirectory, "logger_bird_details.txt"
+                        )
+                        if (!defaultFilePath.exists()) {
+                            withContext(Dispatchers.IO) {
+                                defaultFilePath.createNewFile()
+                                defaultFilePath.appendText(
+                                    takeBuilderDetails()
+                                )
+                                defaultFilePath.appendText(
+                                    stringBuilderLifeCycle.toString()
                                 )
                             }
-
+                        } else {
+                            if (defaultFilePath.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderLifeCycle.toString())
+                            } else {
+                                defaultFilePath.appendText(
+                                    stringBuilderLifeCycle.toString()
+                                )
+                            }
                         }
+
                     }
-                } else {
-                    throw LoggerBirdException(
-                        Constants.saveErrorMessage + Constants.lifeCycleMethodTag
+//                               if (rootView != null) {
+//                                    attachRootView(rootView)
+//                                }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callExceptionDetails(
+                        e,
+                        Constants.lifeCycleTag
                     )
                 }
+
+                withContext(Dispatchers.IO) {
+                    workQueueLinked.controlRunnable = false
+                    if (runnableList.size > 0) {
+                        runnableList.removeAt(0)
+                        if (runnableList.size > 0) {
+                            workQueueLinked.put(runnableList[0])
+                        }
+                    }
+                    if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                        if (file != null) {
+                            exceededFileLimitWriter(
+                                stringBuilder = stringBuilderExceedFileWriterLimit,
+                                file = file!!
+                            )
+                        } else {
+                            exceededFileLimitWriter(
+                                stringBuilder = stringBuilderExceedFileWriterLimit,
+                                file = defaultFilePath
+                            )
+                        }
+                    }
+                }
             } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
+                throw LoggerBirdException(
+                    Constants.saveErrorMessage + Constants.lifeCycleMethodTag
+                )
             }
         }
 
         /**
          * This Method Saves FragmentManager Details To Txt File.
          * Variables:
-         * @var controlLogInit is used for getting logInit method return value.
-         * @var coroutineCallFragment is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var file allow user modify the file they want to create for saving their FragmentManager Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name logger_bird_details.
+         * @var file is used for getting reference of file details that are desired given in logInit method.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details")
          * @var stringBuilderFragmentManager prints fragment manager details.
+         * @var stringBuilderExceedFileWriterLimit is used for printing deleted content from real file to temporary file.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         * @throws exception if log instance is empty.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun saveFragmentManagerDetails(rootView: ViewGroup? = null) {
-            if (controlLogInit) {
-                if (stringBuilderFragmentManager.isNotEmpty()) {
-                    coroutineCallFragment.async {
-                        try {
-                            if (file != null) {
-                                if (!file!!.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        file!!.createNewFile()
-                                    }
-                                    file!!.appendText(takeBuilderDetails())
-                                    file!!.appendText(
-                                        stringBuilderFragmentManager.toString()
-                                    )
-                                } else {
-                                    if (file!!.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderFragmentManager,
-                                            file = file!!
-                                        )
-                                    } else {
-                                        file!!.appendText(
-                                            stringBuilderFragmentManager.toString()
-                                        )
-                                    }
-                                }
-                            } else {
-                                defaultFileDirectory = context.filesDir
-                                defaultFilePath = File(
-                                    defaultFileDirectory, "logger_bird_details.txt"
-                                )
-                                if (!defaultFilePath.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        defaultFilePath.createNewFile()
-                                    }
-                                    defaultFilePath.appendText(
-                                        takeBuilderDetails()
-                                    )
-                                    defaultFilePath.appendText(
-                                        stringBuilderFragmentManager.toString()
-                                    )
-                                } else {
-                                    if (defaultFilePath.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderFragmentManager,
-                                            file = defaultFilePath
-                                        )
-                                    } else {
-                                        defaultFilePath.appendText(
-                                            stringBuilderFragmentManager.toString()
-                                        )
-                                    }
-                                }
+        private suspend fun saveFragmentManagerDetails() {
+            if (stringBuilderFragmentManager.isNotEmpty()) {
+                try {
+                    if (file != null) {
+                        if (!file!!.exists()) {
+                            withContext(Dispatchers.IO) {
+                                file!!.createNewFile()
                             }
-                            if (rootView != null) {
-                                withContext(Dispatchers.Main) {
-                                    attachRootView(rootView)
-                                }
-                            }
-                            stringBuilderFragmentManager = StringBuilder()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            takeExceptionDetails(
-                                e,
-                                Constants.fragmentManagerTag
+                            file!!.appendText(takeBuilderDetails())
+                            file!!.appendText(
+                                stringBuilderFragmentManager.toString()
                             )
+                        } else {
+                            if (file!!.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(
+                                    stringBuilderFragmentManager.toString()
+                                )
+                            } else {
+                                file!!.appendText(
+                                    stringBuilderFragmentManager.toString()
+                                )
+                            }
+                        }
+                    } else {
+                        defaultFileDirectory = context.filesDir
+                        defaultFilePath = File(
+                            defaultFileDirectory, "logger_bird_details.txt"
+                        )
+                        if (!defaultFilePath.exists()) {
+                            withContext(Dispatchers.IO) {
+                                defaultFilePath.createNewFile()
+                            }
+                            defaultFilePath.appendText(
+                                takeBuilderDetails()
+                            )
+                            defaultFilePath.appendText(
+                                stringBuilderFragmentManager.toString()
+                            )
+                        } else {
+                            if (defaultFilePath.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(
+                                    stringBuilderFragmentManager.toString()
+                                )
+                            } else {
+                                defaultFilePath.appendText(
+                                    stringBuilderFragmentManager.toString()
+                                )
+                            }
                         }
                     }
-                } else {
-                    throw LoggerBirdException(
-                        Constants.saveErrorMessage + Constants.fragmentManagerMethodTag
+//                            if (rootView != null) {
+//                                withContext(Dispatchers.Main) {
+//                                    attachRootView(rootView)
+//                                }
+//                            }
+                    withContext(Dispatchers.IO) {
+                        workQueueLinked.controlRunnable = false
+                        if (runnableList.size > 0) {
+                            runnableList.removeAt(0)
+                            if (runnableList.size > 0) {
+                                workQueueLinked.put(runnableList[0])
+                            }
+                        }
+                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                            if (file != null) {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = file!!
+                                )
+                            } else {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = defaultFilePath
+                                )
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callExceptionDetails(
+                        e,
+                        Constants.fragmentManagerTag
                     )
                 }
             } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
+                throw LoggerBirdException(
+                    Constants.saveErrorMessage + Constants.fragmentManagerMethodTag
+                )
             }
-
         }
 
         /**
          * This Method Saves Analytics Details To Txt File.
          * Variables:
-         * @var controlLogInit is used for getting logInit method return value.
-         * @var coroutineCallAnalytic is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var file allow user modify the file they want to create for saving their Analytics Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of logger_bird_details.
+         * @var file is used for getting reference of file details that are desired given in logInit method.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderAnalyticsManager prints analytics details.
+         * @var stringBuilderExceedFileWriterLimit is used for printing deleted content from real file to temporary file.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         * @throws exception if log instance is empty.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun saveAnalyticsDetails(rootView: ViewGroup? = null) {
-            if (controlLogInit) {
-                if (stringBuilderAnalyticsManager.isNotEmpty()) {
-                    coroutineCallAnalytic.async {
-                        try {
-                            if (file != null) {
-                                if (!file!!.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        file!!.createNewFile()
-                                    }
-                                    file!!.appendText(takeBuilderDetails())
-                                    file!!.appendText(
-                                        stringBuilderAnalyticsManager.toString()
-                                    )
-                                } else {
-                                    if (file!!.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderAnalyticsManager,
-                                            file = file!!
-                                        )
-                                    } else {
-                                        file!!.appendText(
-                                            stringBuilderAnalyticsManager.toString()
-                                        )
-                                    }
-                                }
-                            } else {
-                                defaultFileDirectory = context.filesDir
-                                defaultFilePath = File(
-                                    defaultFileDirectory, "logger_bird.txt"
-                                )
-                                if (!defaultFilePath.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        defaultFilePath.createNewFile()
-                                    }
-                                    defaultFilePath.appendText(
-                                        takeBuilderDetails()
-                                    )
-                                    defaultFilePath.appendText(
-                                        stringBuilderAnalyticsManager.toString()
-                                    )
-                                } else {
-                                    if (defaultFilePath.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderAnalyticsManager,
-                                            file = defaultFilePath
-                                        )
-                                    } else {
-                                        defaultFilePath.appendText(
-                                            stringBuilderAnalyticsManager.toString()
-                                        )
-                                    }
-                                }
+        private suspend fun saveAnalyticsDetails() {
+            if (stringBuilderAnalyticsManager.isNotEmpty()) {
+                try {
+                    if (file != null) {
+                        if (!file!!.exists()) {
+                            withContext(Dispatchers.IO) {
+                                file!!.createNewFile()
                             }
-                            if (rootView != null) {
-                                withContext(Dispatchers.Main) {
-                                    attachRootView(rootView)
-                                }
-                            }
-                            stringBuilderAnalyticsManager = StringBuilder()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            takeExceptionDetails(
-                                e,
-                                Constants.analyticsTag
+                            file!!.appendText(takeBuilderDetails())
+                            file!!.appendText(
+                                stringBuilderAnalyticsManager.toString()
                             )
+                        } else {
+                            if (file!!.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(
+                                    stringBuilderAnalyticsManager.toString()
+                                )
+                            } else {
+                                file!!.appendText(
+                                    stringBuilderAnalyticsManager.toString()
+                                )
+                            }
+                        }
+                    } else {
+                        defaultFileDirectory = context.filesDir
+                        defaultFilePath = File(
+                            defaultFileDirectory, "logger_bird.txt"
+                        )
+                        if (!defaultFilePath.exists()) {
+                            withContext(Dispatchers.IO) {
+                                defaultFilePath.createNewFile()
+                            }
+                            defaultFilePath.appendText(
+                                takeBuilderDetails()
+                            )
+                            defaultFilePath.appendText(
+                                stringBuilderAnalyticsManager.toString()
+                            )
+                        } else {
+                            if (defaultFilePath.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(
+                                    stringBuilderAnalyticsManager.toString()
+                                )
+                            } else {
+                                defaultFilePath.appendText(
+                                    stringBuilderAnalyticsManager.toString()
+                                )
+                            }
                         }
                     }
-                } else {
-                    throw LoggerBirdException(
-                        Constants.saveErrorMessage + Constants.analyticsMethodTag
+//                            if (rootView != null) {
+//                                withContext(Dispatchers.Main) {
+//                                    attachRootView(rootView)
+//                                }
+//                            }
+                    withContext(Dispatchers.IO) {
+                        workQueueLinked.controlRunnable = false
+                        if (runnableList.size > 0) {
+                            runnableList.removeAt(0)
+                            if (runnableList.size > 0) {
+                                workQueueLinked.put(runnableList[0])
+                            }
+                        }
+                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                            if (file != null) {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = file!!
+                                )
+                            } else {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = defaultFilePath
+                                )
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callExceptionDetails(
+                        e,
+                        Constants.analyticsTag
                     )
                 }
+
             } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
+                throw LoggerBirdException(
+                    Constants.saveErrorMessage + Constants.analyticsMethodTag
+                )
             }
         }
 
         /**
          * This Method Saves HttpRequest Details To Txt File.
          * Variables:
-         * @var controlLogInit is used for getting logInit method return value.
-         * @var coroutineCallHttp is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var file allow user modify the file they want to create for saving their HttpRequest Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of logger_bird_details.
+         * @var file is used for getting reference of file details that are desired given in logInit method.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderHttp prints http details.
+         * @var stringBuilderExceedFileWriterLimit is used for printing deleted content from real file to temporary file.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         * @throws exception if log instance is empty.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun saveHttpRequestDetails(rootView: ViewGroup? = null) {
-            if (controlLogInit) {
-                if (stringBuilderHttp.isNotEmpty()) {
-                    coroutineCallHttp.async {
-                        try {
-                            if (file != null) {
-                                if (!file!!.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        file!!.createNewFile()
-                                    }
-                                    file!!.appendText(takeBuilderDetails())
-                                    file!!.appendText(
-                                        stringBuilderHttp.toString()
-                                    )
-                                } else {
-                                    if (file!!.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderHttp,
-                                            file = file!!
-                                        )
-                                    } else {
-                                        file!!.appendText(
-                                            stringBuilderHttp.toString()
-                                        )
-                                    }
-                                }
-                            } else {
-                                defaultFileDirectory = context.filesDir
-                                defaultFilePath = File(
-                                    defaultFileDirectory, "logger_bird_details.txt"
-                                )
-                                if (!defaultFilePath.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        defaultFilePath.createNewFile()
-                                    }
-                                    defaultFilePath.appendText(
-                                        takeBuilderDetails()
-                                    )
-                                    defaultFilePath.appendText(
-                                        stringBuilderHttp.toString()
-                                    )
-                                } else {
-                                    if (defaultFilePath.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderHttp,
-                                            file = defaultFilePath
-                                        )
-                                    } else {
-                                        defaultFilePath.appendText(
-                                            stringBuilderHttp.toString()
-                                        )
-                                    }
-                                }
+        private suspend fun saveHttpRequestDetails() {
+            if (stringBuilderHttp.isNotEmpty()) {
+                try {
+                    if (file != null) {
+                        if (!file!!.exists()) {
+                            withContext(Dispatchers.IO) {
+                                file!!.createNewFile()
                             }
-                            if (rootView != null) {
-                                withContext(Dispatchers.Main) {
-                                    attachRootView(rootView)
-                                }
-                            }
-                            stringBuilderHttp = StringBuilder()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            takeExceptionDetails(
-                                e,
-                                Constants.httpTag
+                            file!!.appendText(takeBuilderDetails())
+                            file!!.appendText(
+                                stringBuilderHttp.toString()
                             )
+                        } else {
+                            if (file!!.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderHttp.toString())
+                            } else {
+                                file!!.appendText(
+                                    stringBuilderHttp.toString()
+                                )
+                            }
+                        }
+                    } else {
+                        defaultFileDirectory = context.filesDir
+                        defaultFilePath = File(
+                            defaultFileDirectory, "logger_bird_details.txt"
+                        )
+                        if (!defaultFilePath.exists()) {
+                            withContext(Dispatchers.IO) {
+                                defaultFilePath.createNewFile()
+                            }
+                            defaultFilePath.appendText(
+                                takeBuilderDetails()
+                            )
+                            defaultFilePath.appendText(
+                                stringBuilderHttp.toString()
+                            )
+                        } else {
+                            if (defaultFilePath.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderHttp.toString())
+                            } else {
+                                defaultFilePath.appendText(
+                                    stringBuilderHttp.toString()
+                                )
+                            }
                         }
                     }
-                } else {
-                    throw LoggerBirdException(
-                        Constants.saveErrorMessage + Constants.htppRequestMethodTag
+//                            if (rootView != null) {
+//                                withContext(Dispatchers.Main) {
+//                                    attachRootView(rootView)
+//                                }
+//                            }
+                    withContext(Dispatchers.IO) {
+                        workQueueLinked.controlRunnable = false
+                        if (runnableList.size > 0) {
+                            runnableList.removeAt(0)
+                            if (runnableList.size > 0) {
+                                workQueueLinked.put(runnableList[0])
+                            }
+                        }
+                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                            if (file != null) {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = file!!
+                                )
+                            } else {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = defaultFilePath
+                                )
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callExceptionDetails(
+                        e,
+                        Constants.httpTag
                     )
                 }
             } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
+                throw LoggerBirdException(
+                    Constants.saveErrorMessage + Constants.htppRequestMethodTag
+                )
             }
         }
 
         /**
          * This Method Saves Android In A Purchase Details To Txt File.
          * Variables:
-         * @var controlLogInit is used for getting logInit method return value.
-         * @var coroutineCallInAPurchase is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var file allow user modify the file  they want to create for saving their InAPurchase Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of logger_bird_details.
+         * @var file is used for getting reference of file details that are desired given in logInit method.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderInAPurchase prints android In A Purchase details.
+         * @var stringBuilderExceedFileWriterLimit is used for printing deleted content from real file to temporary file.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         * @throws exception if log instance is empty.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun saveInAPurchaseDetails(rootView: ViewGroup? = null) {
-            if (controlLogInit) {
-                if (stringBuilderInAPurchase.isNotEmpty()) {
-                    coroutineCallInAPurchase.async {
-                        try {
-                            if (file != null) {
-                                if (!file!!.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        file!!.createNewFile()
-                                    }
-                                    file!!.appendText(takeBuilderDetails())
-                                    file!!.appendText(
-                                        stringBuilderInAPurchase.toString()
-                                    )
-                                } else {
-                                    if (file!!.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderInAPurchase,
-                                            file = file!!
-                                        )
-                                    } else {
-                                        file!!.appendText(
-                                            stringBuilderInAPurchase.toString()
-                                        )
-                                    }
-                                }
-                            } else {
-                                defaultFileDirectory = context.filesDir
-                                defaultFilePath = File(
-                                    defaultFileDirectory, "logger_bird_details.txt"
-                                )
-                                if (!defaultFilePath.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        defaultFilePath.createNewFile()
-                                    }
-                                    defaultFilePath.appendText(
-                                        takeBuilderDetails()
-                                    )
-                                    defaultFilePath.appendText(
-                                        stringBuilderInAPurchase.toString()
-                                    )
-                                } else {
-                                    if (defaultFilePath.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderInAPurchase,
-                                            file = defaultFilePath
-                                        )
-                                    } else {
-                                        defaultFilePath.appendText(
-                                            stringBuilderInAPurchase.toString()
-                                        )
-                                    }
-                                }
+        private suspend fun saveInAPurchaseDetails() {
+            if (stringBuilderInAPurchase.isNotEmpty()) {
+                try {
+                    if (file != null) {
+                        if (!file!!.exists()) {
+                            withContext(Dispatchers.IO) {
+                                file!!.createNewFile()
                             }
-                            if (rootView != null) {
-                                withContext(Dispatchers.Main) {
-                                    attachRootView(rootView)
-                                }
-                            }
-                            stringBuilderInAPurchase = StringBuilder()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            takeExceptionDetails(
-                                e,
-                                Constants.inAPurchaseTag
+                            file!!.appendText(takeBuilderDetails())
+                            file!!.appendText(
+                                stringBuilderInAPurchase.toString()
                             )
+                        } else {
+                            if (file!!.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderInAPurchase.toString())
+                            } else {
+                                file!!.appendText(
+                                    stringBuilderInAPurchase.toString()
+                                )
+                            }
+                        }
+                    } else {
+                        defaultFileDirectory = context.filesDir
+                        defaultFilePath = File(
+                            defaultFileDirectory, "logger_bird_details.txt"
+                        )
+                        if (!defaultFilePath.exists()) {
+                            withContext(Dispatchers.IO) {
+                                defaultFilePath.createNewFile()
+                            }
+                            defaultFilePath.appendText(
+                                takeBuilderDetails()
+                            )
+                            defaultFilePath.appendText(
+                                stringBuilderInAPurchase.toString()
+                            )
+                        } else {
+                            if (defaultFilePath.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderInAPurchase.toString())
+                            } else {
+                                defaultFilePath.appendText(
+                                    stringBuilderInAPurchase.toString()
+                                )
+                            }
                         }
                     }
-                } else {
-                    throw LoggerBirdException(
-                        Constants.saveErrorMessage + Constants.inAPurchaseMethodTag
+//                            if (rootView != null) {
+//                                withContext(Dispatchers.Main) {
+//                                    attachRootView(rootView)
+//                                }
+//                            }
+                    withContext(Dispatchers.IO) {
+                        workQueueLinked.controlRunnable = false
+                        if (runnableList.size > 0) {
+                            runnableList.removeAt(0)
+                            if (runnableList.size > 0) {
+                                workQueueLinked.put(runnableList[0])
+                            }
+                        }
+                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                            if (file != null) {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = file!!
+                                )
+                            } else {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = defaultFilePath
+                                )
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callExceptionDetails(
+                        e,
+                        Constants.inAPurchaseTag
                     )
                 }
             } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
+                throw LoggerBirdException(
+                    Constants.saveErrorMessage + Constants.inAPurchaseMethodTag
+                )
             }
         }
 
         /**
          * This Method Saves RetrofitRequest Details To Txt File.
          * Variables:
-         * @var controlLogInit is used for getting logInit method return value.
-         * @var coroutineCallRetrofit is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var file allow user to modify the file they want to create for their RetrofitRequest Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of logger_bird_details.
+         * @var file is used for getting reference of file details that are desired given in logInit method.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderRetrofit prints retrofit details.
+         * @var stringBuilderExceedFileWriterLimit is used for printing deleted content from real file to temporary file.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         * @throws exception if log instance is empty.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun saveRetrofitRequestDetails(rootView: ViewGroup? = null) {
-            if (controlLogInit) {
-                if (stringBuilderRetrofit.isNotEmpty()) {
-                    coroutineCallRetrofit.async {
-                        try {
-                            if (file != null) {
-                                if (!file!!.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        file!!.createNewFile()
-                                    }
-                                    file!!.appendText(takeBuilderDetails())
-                                    file!!.appendText(
-                                        stringBuilderRetrofit.toString()
-                                    )
-                                } else {
-                                    if (file!!.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderRetrofit,
-                                            file = file!!
-                                        )
-                                    } else {
-                                        file!!.appendText(
-                                            stringBuilderRetrofit.toString()
-                                        )
-                                    }
-                                }
-                            } else {
-                                defaultFileDirectory = context.filesDir
-                                defaultFilePath = File(
-                                    defaultFileDirectory, "logger_bird_details.txt"
-                                )
-                                if (!defaultFilePath.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        defaultFilePath.createNewFile()
-                                    }
-                                    defaultFilePath.appendText(
-                                        takeBuilderDetails()
-                                    )
-                                    defaultFilePath.appendText(
-                                        stringBuilderRetrofit.toString()
-                                    )
-                                } else {
-                                    if (defaultFilePath.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderRetrofit,
-                                            file = defaultFilePath
-                                        )
-                                    } else {
-                                        defaultFilePath.appendText(
-                                            stringBuilderRetrofit.toString()
-                                        )
-                                    }
-                                }
+        private suspend fun saveRetrofitRequestDetails() {
+            if (stringBuilderRetrofit.isNotEmpty()) {
+                try {
+                    if (file != null) {
+                        if (!file!!.exists()) {
+                            withContext(Dispatchers.IO) {
+                                file!!.createNewFile()
                             }
-                            if (rootView != null) {
-                                withContext(Dispatchers.Main) {
-                                    attachRootView(rootView)
-                                }
-                            }
-                            stringBuilderRetrofit = StringBuilder()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            takeExceptionDetails(
-                                e,
-                                Constants.retrofitTag
+                            file!!.appendText(takeBuilderDetails())
+                            file!!.appendText(
+                                stringBuilderRetrofit.toString()
                             )
+                        } else {
+                            if (file!!.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderRetrofit.toString())
+                            } else {
+                                file!!.appendText(
+                                    stringBuilderRetrofit.toString()
+                                )
+                            }
+                        }
+                    } else {
+                        defaultFileDirectory = context.filesDir
+                        defaultFilePath = File(
+                            defaultFileDirectory, "logger_bird_details.txt"
+                        )
+                        if (!defaultFilePath.exists()) {
+                            withContext(Dispatchers.IO) {
+                                defaultFilePath.createNewFile()
+                            }
+                            defaultFilePath.appendText(
+                                takeBuilderDetails()
+                            )
+                            defaultFilePath.appendText(
+                                stringBuilderRetrofit.toString()
+                            )
+                        } else {
+                            if (defaultFilePath.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderRetrofit.toString())
+                            } else {
+                                defaultFilePath.appendText(
+                                    stringBuilderRetrofit.toString()
+                                )
+                            }
                         }
                     }
-                } else {
-                    throw LoggerBirdException(
-                        Constants.saveErrorMessage + Constants.retrofitMethodTag
+//                            if (rootView != null) {
+//                                withContext(Dispatchers.Main) {
+//                                    attachRootView(rootView)
+//                                }
+//                            }
+                    withContext(Dispatchers.IO) {
+                        workQueueLinked.controlRunnable = false
+                        if (runnableList.size > 0) {
+                            runnableList.removeAt(0)
+                            if (runnableList.size > 0) {
+                                workQueueLinked.put(runnableList[0])
+                            }
+                        }
+                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                            if (file != null) {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = file!!
+                                )
+                            } else {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = defaultFilePath
+                                )
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callExceptionDetails(
+                        e,
+                        Constants.retrofitTag
                     )
                 }
             } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
+                throw LoggerBirdException(
+                    Constants.saveErrorMessage + Constants.retrofitMethodTag
+                )
             }
         }
 
         /**
          * This Method Saves Realm Details To Txt File.
-         * Parameters:
-         * @param file allow user modify the file they want to create for saving their Realm Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of logger_bird_details.
          * Variables:
-         * @var controlLogInit is used for getting logInit method return value.
-         * @var coroutineCallRealm is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var file is used for getting reference of file details that are desired given in logInit method.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("logger_bird_details").
          * @var stringBuilderRealm prints realm details.
+         * @var stringBuilderExceedFileWriterLimit is used for printing deleted content from real file to temporary file.
          * Exception:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         * @throws exception if log instance is empty.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun saveRealmDetails(rootView: ViewGroup? = null) {
-            if (controlLogInit) {
-                if (stringBuilderRealm.isNotEmpty()) {
-                    coroutineCallRealm.async {
-                        try {
-                            if (file != null) {
-                                if (!file!!.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        file!!.createNewFile()
-                                    }
-                                    file!!.appendText(takeBuilderDetails())
-                                    file!!.appendText(
-                                        stringBuilderRealm.toString()
-                                    )
-                                } else {
-                                    if (file!!.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderRealm,
-                                            file = file!!
-                                        )
-                                    } else {
-                                        file!!.appendText(
-                                            stringBuilderRealm.toString()
-                                        )
-                                    }
-                                }
-
-                            } else {
-                                defaultFileDirectory = context.filesDir
-                                defaultFilePath = File(
-                                    defaultFileDirectory, "logger_bird_details.txt"
-                                )
-                                if (!defaultFilePath.exists()) {
-                                    withContext(Dispatchers.IO) {
-                                        defaultFilePath.createNewFile()
-                                    }
-                                    defaultFilePath.appendText(
-                                        takeBuilderDetails()
-                                    )
-                                    defaultFilePath.appendText(
-                                        stringBuilderRealm.toString()
-                                    )
-                                } else {
-                                    if (defaultFilePath.length() > fileLimit) {
-                                        exceededFileLimitWriter(
-                                            stringBuilder = stringBuilderRealm,
-                                            file = defaultFilePath
-                                        )
-                                    }
-                                }
+        private suspend fun saveRealmDetails() {
+            if (stringBuilderRealm.isNotEmpty()) {
+                try {
+                    if (file != null) {
+                        if (!file!!.exists()) {
+                            withContext(Dispatchers.IO) {
+                                file!!.createNewFile()
                             }
-                            if (rootView != null) {
-                                withContext(Dispatchers.Main) {
-                                    attachRootView(rootView)
-                                }
-                            }
-                            stringBuilderRealm = StringBuilder()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            takeExceptionDetails(
-                                e,
-                                Constants.realmTag
+                            file!!.appendText(takeBuilderDetails())
+                            file!!.appendText(
+                                stringBuilderRealm.toString()
                             )
-                            saveExceptionDetails()
+                        } else {
+                            if (file!!.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderRealm.toString())
+                            } else {
+                                file!!.appendText(
+                                    stringBuilderRealm.toString()
+                                )
+                            }
+                        }
+
+                    } else {
+                        defaultFileDirectory = context.filesDir
+                        defaultFilePath = File(
+                            defaultFileDirectory, "logger_bird_details.txt"
+                        )
+                        if (!defaultFilePath.exists()) {
+                            withContext(Dispatchers.IO) {
+                                defaultFilePath.createNewFile()
+                            }
+                            defaultFilePath.appendText(
+                                takeBuilderDetails()
+                            )
+                            defaultFilePath.appendText(
+                                stringBuilderRealm.toString()
+                            )
+                        } else {
+                            if (defaultFilePath.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderRealm.toString())
+                            }
                         }
                     }
-                } else {
-                    throw LoggerBirdException(
-                        Constants.saveErrorMessage + Constants.realmMethodTag
+//                            if (rootView != null) {
+//                                withContext(Dispatchers.Main) {
+//                                    attachRootView(rootView)
+//                                }
+//                            }
+                    withContext(Dispatchers.IO) {
+                        workQueueLinked.controlRunnable = false
+                        if (runnableList.size > 0) {
+                            runnableList.removeAt(0)
+                            if (runnableList.size > 0) {
+                                workQueueLinked.put(runnableList[0])
+                            }
+                        }
+                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                            if (file != null) {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = file!!
+                                )
+                            } else {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = defaultFilePath
+                                )
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callExceptionDetails(
+                        e,
+                        Constants.realmTag
                     )
+                    saveRealmDetails()
                 }
             } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
+                throw LoggerBirdException(
+                    Constants.saveErrorMessage + Constants.realmMethodTag
+                )
             }
         }
 
         /**
          * This Method Saves Exception Details To Txt File.
          * Variables:
-         * @var controlLogInit is used for getting logInit method return value.
-         * @var coroutineCallAnalytic is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var file allow user to modify the file they want to create for saving their Exception Details , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of logger_bird_details.
+         * @var file is used for getting reference of file details that are desired given in logInit method.
          * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
          * @var defaultFilePath is used for getting defaultFileDirectory and default file name("exception_details").
          * @var stringBuilderException prints com.mobilex.loggerbird.exception details.
+         * @var stringBuilderExceedFileWriterLimit is used for printing deleted content from real file to temporary file.
          * Exception:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun saveExceptionDetails(rootView: ViewGroup? = null) {
+        private suspend fun saveExceptionDetails() {
             if (stringBuilderException.isNotEmpty()) {
-                coroutineCallException.async {
-                    try {
-                        if (file != null) {
-                            if (!file!!.exists()) {
-                                withContext(Dispatchers.IO) {
-                                    file!!.createNewFile()
-                                }
-                                file!!.appendText(takeBuilderDetails())
+                try {
+                    if (file != null) {
+                        if (!file!!.exists()) {
+                            withContext(Dispatchers.IO) {
+                                file!!.createNewFile()
+                            }
+                            file!!.appendText(takeBuilderDetails())
+                            file!!.appendText(
+                                stringBuilderException.toString()
+                            )
+                        } else {
+                            if (file!!.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderException.toString())
+                            } else {
                                 file!!.appendText(
                                     stringBuilderException.toString()
                                 )
-                            } else {
-                                if (file!!.length() > fileLimit) {
-                                    exceededFileLimitWriter(
-                                        stringBuilder = stringBuilderException,
-                                        file = file!!
-                                    )
-                                } else {
-                                    file!!.appendText(
-                                        stringBuilderException.toString()
-                                    )
-                                }
                             }
+                        }
 
-                        } else {
-                            defaultFileDirectory = context.filesDir
-                            defaultFilePath = File(
-                                defaultFileDirectory, "logger_bird_details.txt"
+                    } else {
+                        defaultFileDirectory = context.filesDir
+                        defaultFilePath = File(
+                            defaultFileDirectory, "logger_bird_details.txt"
+                        )
+                        if (!defaultFilePath.exists()) {
+                            withContext(Dispatchers.IO) {
+                                defaultFilePath.createNewFile()
+                            }
+                            defaultFilePath.appendText(
+                                takeBuilderDetails()
                             )
-                            if (!defaultFilePath.exists()) {
-                                withContext(Dispatchers.IO) {
-                                    defaultFilePath.createNewFile()
-                                }
-                                defaultFilePath.appendText(
-                                    takeBuilderDetails()
-                                )
+                            defaultFilePath.appendText(
+                                stringBuilderException.toString()
+                            )
+                        } else {
+                            if (defaultFilePath.length() > fileLimit) {
+                                stringBuilderExceedFileWriterLimit.append(stringBuilderException.toString()
+                            } else {
                                 defaultFilePath.appendText(
                                     stringBuilderException.toString()
                                 )
-                            } else {
-                                if (defaultFilePath.length() > fileLimit) {
-                                    exceededFileLimitWriter(
-                                        stringBuilder = stringBuilderException,
-                                        file = defaultFilePath
-                                    )
-                                } else {
-                                    defaultFilePath.appendText(
-                                        stringBuilderException.toString()
-                                    )
-                                }
                             }
+                        }
 
-                        }
-                        if (rootView != null) {
-                            withContext(Dispatchers.Main) {
-                                attachRootView(rootView)
+                    }
+//                        if (rootView != null) {
+//                            withContext(Dispatchers.Main) {
+//                                attachRootView(rootView)
+//                            }
+//                        }
+                    withContext(Dispatchers.IO) {
+                        workQueueLinked.controlRunnable = false
+                        if (runnableList.size > 0) {
+                            runnableList.removeAt(0)
+                            if (runnableList.size > 0) {
+                                workQueueLinked.put(runnableList[0])
                             }
                         }
-                        stringBuilderException = StringBuilder()
-                        exitProcess(0)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                            if (file != null) {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = file!!
+                                )
+                            } else {
+                                exceededFileLimitWriter(
+                                    stringBuilder = stringBuilderExceedFileWriterLimit,
+                                    file = defaultFilePath
+                                )
+                            }
+                        }
                     }
+                    if (uncaughtExceptionHandlerController) {
+                        exitProcess(0)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             } else {
                 throw LoggerBirdException(
@@ -1151,141 +1206,210 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-        //This method isnt updated needs to be modified or deleted.
-        /**
-         * This Method Saves All Details To Txt File.
-         * Parameters:
-         * @param file allow user to modify the file they want to create for saving their All Details , otherwise it will save your file to the devices data->data->your project package name->files->all_details with an default name of all_details.
-         * Variables:
-         * @var controlLogInit is used for getting logInit method return value.
-         * @var coroutineCallAll is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files.
-         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("all_details").
-         * @var stringBuilderLifeCycle prints life-cycle details.
-         * @var stringBuilderFragmentManager prints fragment manager details.
-         * @var stringBuilderAnalyticsManager prints analytics details.
-         * @var stringBuilderHttp prints http request details.
-         * @var stringBuilderInAPurchase prints android in a purchase details.
-         * @var stringBuilderRetrofit prints retrofit details.
-         * @var stringBuilderRealm prints realm details.
-         * @var stringBuilderException prints com.mobilex.exception details.
-         * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         */
-        fun saveAllDetails(
-            file: File? = null
-        ) {
-            if (controlLogInit) {
-                coroutineCallAll.async {
-                    try {
-                        if (file != null) {
-                            if (!file.exists()) {
-                                withContext(Dispatchers.IO) {
-                                    file.createNewFile()
-                                    file.appendText(takeBuilderDetails())
-                                }
-                            }
-                            file.appendText(
-                                stringBuilderComponent.toString()
-                                        + "\n" + stringBuilderLifeCycle.toString()
-                                        + "\n" + stringBuilderFragmentManager.toString()
-                                        + "\n" + stringBuilderAnalyticsManager.toString()
-                                        + "\n" + stringBuilderHttp.toString()
-                                        + "\n" + stringBuilderInAPurchase.toString()
-                                        + "\n" + stringBuilderRetrofit.toString()
-                                        + "\n" + stringBuilderRealm.toString()
-                                        + "\n" + stringBuilderException.toString()
-                            )
-                        } else {
-                            defaultFileDirectory = context.filesDir
-                            defaultFilePath = File(
-                                defaultFileDirectory, "all_details.txt"
-                            )
-                            if (!defaultFilePath.exists()) {
-                                withContext(Dispatchers.IO) {
-                                    defaultFilePath.createNewFile()
-                                    defaultFilePath.appendText(
-                                        takeBuilderDetails()
-                                    )
-                                }
-                            }
-                            defaultFilePath.appendText(
-                                stringBuilderComponent.toString()
-                                        + "\n" + stringBuilderLifeCycle.toString()
-                                        + "\n" + stringBuilderFragmentManager.toString()
-                                        + "\n" + stringBuilderAnalyticsManager.toString()
-                                        + "\n" + stringBuilderHttp.toString()
-                                        + "\n" + stringBuilderInAPurchase.toString()
-                                        + "\n" + stringBuilderRetrofit.toString()
-                                        + "\n" + stringBuilderRealm.toString()
-                                        + "\n" + stringBuilderException.toString()
-                            )
-                        }
-                        stringBuilderAll = StringBuilder()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        takeExceptionDetails(
-                            e,
-                            Constants.allTag
-                        )
-                    }
-                }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
-            }
+        //dummy worker method probably deleted.
+        private fun callEnqueue() {
+            val saveFileWorkRequest = OneTimeWorkRequestBuilder<WorkerUtil>().build()
+            WorkManager.getInstance(context).enqueue(saveFileWorkRequest)
         }
 
+        //in progress method.
+        fun callComponentDetails(view: View?, resources: Resources?) {
+            if (runnableList.isEmpty()) {
+                workQueueLinked.put(Runnable {
+                    takeComponentDetails(
+                        view = view,
+                        resources = resources
+                    )
+                })
+            }
+            runnableList.add(Runnable { takeComponentDetails(view = view, resources = resources) })
+        }
+
+        //in progress method.
+        fun callLifeCycleDetails() {
+            if (runnableList.isEmpty()) {
+                workQueueLinked.put(Runnable { takeLifeCycleDetails() })
+            }
+            runnableList.add(Runnable { takeLifeCycleDetails() })
+        }
+
+        //in progress method.
+        fun callAnalyticsDetails(bundle: Bundle?) {
+            if (runnableList.isEmpty()) {
+                workQueueLinked.put(Runnable {
+                    takeAnalyticsDetails(bundle = bundle)
+                })
+            }
+            runnableList.add(Runnable { takeAnalyticsDetails(bundle = bundle) })
+        }
+
+        //in progress method.
+        fun callFragmentManagerDetails(fragmentManager: FragmentManager?) {
+            if (runnableList.isEmpty()) {
+                workQueueLinked.put(Runnable {
+                    takeFragmentManagerDetails(fragmentManager = fragmentManager)
+                })
+            }
+            runnableList.add(Runnable { takeFragmentManagerDetails(fragmentManager = fragmentManager) })
+        }
+
+        //in progress method.
+        fun callHttpRequestDetails(httpUrlConnection: HttpURLConnection?) {
+            if (runnableList.isEmpty()) {
+                workQueueLinked.put(Runnable {
+                    takeHttpRequestDetails(httpUrlConnection = httpUrlConnection)
+                })
+            }
+            runnableList.add(Runnable { takeHttpRequestDetails(httpUrlConnection = httpUrlConnection) })
+        }
+
+        //in progress method.
+        fun callInAPurchase(
+            billingClient: BillingClient? = null,
+            billingResult: BillingResult? = null,
+            skuDetailsParams: SkuDetailsParams? = null,
+            billingFlowParams: BillingFlowParams? = null,
+            acknowledgePurchaseParams: AcknowledgePurchaseParams? = null
+        ) {
+            if (runnableList.isEmpty()) {
+                workQueueLinked.put(Runnable {
+                    takeInAPurchaseDetails(
+                        billingClient = billingClient,
+                        billingResult = billingResult,
+                        skuDetailsParams = skuDetailsParams,
+                        billingFlowParams = billingFlowParams,
+                        acknowledgePurchaseParams = acknowledgePurchaseParams
+                    )
+                })
+            }
+            runnableList.add(Runnable {
+                takeInAPurchaseDetails(
+                    billingClient = billingClient,
+                    billingResult = billingResult,
+                    skuDetailsParams = skuDetailsParams,
+                    billingFlowParams = billingFlowParams,
+                    acknowledgePurchaseParams = acknowledgePurchaseParams
+                )
+            })
+        }
+
+        //in progress method.
+        fun callRetrofitRequestDetails(
+            retrofit: Retrofit? = null,
+            response: Response? = null,
+            request: Request? = null
+        ) {
+            if (runnableList.isEmpty()) {
+                workQueueLinked.put(Runnable {
+                    takeRetrofitRequestDetails(
+                        retrofit = retrofit,
+                        response = response,
+                        request = request
+                    )
+                })
+            }
+            runnableList.add(Runnable {
+                takeRetrofitRequestDetails(
+                    retrofit = retrofit,
+                    response = response,
+                    request = request
+                )
+            })
+        }
+
+        //in progress method.
+        fun callRealmDetails(realm: Realm? = null, realmModel: RealmModel? = null) {
+            if (runnableList.isEmpty()) {
+                workQueueLinked.put(Runnable {
+                    takeRealmDetails(realm = realm, realmModel = realmModel)
+                })
+            }
+            runnableList.add(Runnable { takeRealmDetails(realm = realm, realmModel = realmModel) })
+        }
+
+        //in progress method.
+        fun callExceptionDetails(
+            exception: Exception? = null,
+            tag: String? = null,
+            throwable: Throwable? = null
+        ) {
+//            if (runnableList.isEmpty()) {
+//                workQueueLinked.put(Runnable {
+//                    takeExceptionDetails(exception = exception, tag = tag, throwable = throwable)
+//                })
+//            }
+//            runnableList.add(Runnable {
+//                takeExceptionDetails(
+//                    exception = exception,
+//                    tag = tag,
+//                    throwable = throwable
+//                )
+//            })
+            takeExceptionDetails(exception = exception, tag = tag, throwable = throwable)
+        }
+
+
         /**
+         * //in progress method.
          * This Method Takes Component Details.
          * Parameters:
          * @param view parameter used for getting id of the component.
          * @param resources parameter used for getting component name with view parameter.
          * Variables:
+         * @var workQueueLinked is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallComponent is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second)
          * @var stringBuilderComponent used for printing details.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeComponentDetails(
-            view: View? = null,
-            resources: Resources? = null,
-            rootView: ViewGroup? = null
-        ) {
-            if (controlLogInit) {
-                try {
-                    stringBuilderComponent = StringBuilder()
-                    recyclerViewAdapterDataObserver.refreshRecyclerViewObserverState()
-                    recyclerViewChildAttachStateChangeListener.refreshRecyclerViewObserverState()
-                    recyclerViewItemTouchListener.refreshRecyclerViewObserverState()
-                    recyclerViewScrollListener.refreshRecyclerViewObserverState()
-                    val date = Calendar.getInstance().time
-                    val formatter = SimpleDateFormat.getDateTimeInstance()
-                    formattedTime = formatter.format(date)
-                    if (view is RecyclerView) {
-                        takeRecyclerViewDetails(recyclerView = view, resources = resources)
-                    } else {
-                        stringBuilderComponent.append(
-                            formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + (resources?.getResourceName(
-                                view!!.id
-                            )) + " " + "Component Id:" + view?.id + "\n" + "Component Type:" + view!!.findViewById<View>(
-                                view.id
-                            ).toString() + "\n"
+        private fun takeComponentDetails(view: View?, resources: Resources?) {
+            workQueueLinked.controlRunnable = true
+            coroutineCallComponent.async {
+                if (controlLogInit) {
+                    try {
+//                         throw NullPointerException("button is null")
+                        stringBuilderComponent = StringBuilder()
+                        recyclerViewAdapterDataObserver.refreshRecyclerViewObserverState()
+                        recyclerViewChildAttachStateChangeListener.refreshRecyclerViewObserverState()
+                        recyclerViewItemTouchListener.refreshRecyclerViewObserverState()
+                        recyclerViewScrollListener.refreshRecyclerViewObserverState()
+                        val date = Calendar.getInstance().time
+                        val formatter = SimpleDateFormat.getDateTimeInstance()
+                        formattedTime = formatter.format(date)
+                        if (view is RecyclerView) {
+                            takeRecyclerViewDetails(recyclerView = view, resources = resources)
+                        } else {
+                            if (view != null) {
+                                stringBuilderComponent.append(
+                                    formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + (resources?.getResourceName(
+                                        view.id
+                                    )) + " " + "Component Id:" + view.id + "\n" + "Component Type:" + view.findViewById<View>(
+                                        view.id
+                                    ).toString() + "\n"
+                                )
+                            } else {
+                                stringBuilderComponent.append(
+                                    formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + "null" + " " + "Component Id:" + view?.id + "\n" + "Component Type:" + "null" + "\n"
+                                )
+                            }
+                        }
+                        saveComponentDetails()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        callExceptionDetails(
+                            e,
+                            Constants.componentTag
                         )
                     }
-                    saveComponentDetails(rootView = rootView)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    takeExceptionDetails(
-                        e,
-                        Constants.componentTag
-                    )
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
                 }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
+
         }
 
         //In progress method.
@@ -1352,27 +1476,44 @@ class LoggerBird : LifecycleObserver {
                 stringBuilderComponent.append(recyclerViewChildAttachStateChangeListener.returnRecyclerViewState())
             } catch (e: Exception) {
                 e.printStackTrace()
-                takeExceptionDetails(e, Constants.componentTag)
+                callExceptionDetails(e, Constants.componentTag)
             }
         }
 
         /**
          * This Method Takes Life-Cycle Details.
-         * printing LifeCycleObserver.returnActivityLifeCycleState outcomes.
          * Variables:
+         * @var workQueueLinked is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallLifeCycle is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var stringBuilderLifeCycle used for printing details.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeLifeCycleDetails(rootView: ViewGroup? = null) {
-            if (controlLogInit) {
-                try {
-                    if (Companion::fragmentLifeCycleObserver.isInitialized) {
-                        if (fragmentLifeCycleObserver.returnFragmentLifeCycleState().isNotEmpty()) {
-                            for (classList in fragmentLifeCycleObserver.returnClassList()) {
+        private fun takeLifeCycleDetails() {
+            workQueueLinked.controlRunnable = true
+            coroutineCallLifeCycle.async {
+                if (controlLogInit) {
+                    stringBuilderLifeCycle = StringBuilder()
+                    try {
+                        if (Companion::fragmentLifeCycleObserver.isInitialized) {
+                            if (fragmentLifeCycleObserver.returnFragmentLifeCycleState().isNotEmpty()) {
+                                for (classList in fragmentLifeCycleObserver.returnClassList()) {
+                                    stringBuilderLifeCycle.append(classList + ":" + "\n")
+                                    for (stateList in fragmentLifeCycleObserver.returnFragmentLifeCycleState().split(
+                                        "\n"
+                                    )) {
+                                        if (stateList.contains(classList)) {
+                                            stringBuilderLifeCycle.append(stateList + "\n")
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (lifeCycleObserver.returnActivityLifeCycleState().isNotEmpty()) {
+                            for (classList in lifeCycleObserver.returnClassList()) {
                                 stringBuilderLifeCycle.append(classList + ":" + "\n")
-                                for (stateList in fragmentLifeCycleObserver.returnFragmentLifeCycleState().split(
+                                for (stateList in lifeCycleObserver.returnActivityLifeCycleState().split(
                                     "\n"
                                 )) {
                                     if (stateList.contains(classList)) {
@@ -1381,31 +1522,21 @@ class LoggerBird : LifecycleObserver {
                                 }
                             }
                         }
-                    } else if (lifeCycleObserver.returnActivityLifeCycleState().isNotEmpty()) {
-                        for (classList in lifeCycleObserver.returnClassList()) {
-                            stringBuilderLifeCycle.append(classList + ":" + "\n")
-                            for (stateList in lifeCycleObserver.returnActivityLifeCycleState().split(
-                                "\n"
-                            )) {
-                                if (stateList.contains(classList)) {
-                                    stringBuilderLifeCycle.append(stateList + "\n")
-                                }
-                            }
+                        if (LoggerBirdService.onDestroyMessage != null) {
+                            stringBuilderLifeCycle.append(LoggerBirdService.onDestroyMessage)
                         }
+                        saveLifeCycleDetails()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        callExceptionDetails(
+                            e,
+                            Constants.lifeCycleTag
+                        )
                     }
-                    if (LoggerBirdService.onDestroyMessage != null) {
-                        stringBuilderLifeCycle.append(LoggerBirdService.onDestroyMessage)
-                    }
-                    saveLifeCycleDetails(rootView = rootView)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    takeExceptionDetails(
-                        e,
-                        Constants.lifeCycleTag
-                    )
+
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
                 }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
 
@@ -1421,39 +1552,46 @@ class LoggerBird : LifecycleObserver {
          * Parameters:
          * @param bundle parameter used for getting details from analytic bundle.
          * Variables:
+         * @var workQueueLinked is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallAnalytic is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderAnalyticsManager used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeAnalyticsDetails(bundle: Bundle? = null, rootView: ViewGroup? = null) {
-            if (controlLogInit) {
-                try {
-                    val date = Calendar.getInstance().time
-                    val formatter = SimpleDateFormat.getDateTimeInstance()
-                    formattedTime = formatter.format(date)
-                    stringBuilderAnalyticsManager.append("\n" + formattedTime + ":" + Constants.analyticsTag + "\n")
-                    if (bundle != null) {
-                        for (bundleItem in bundle.keySet()) {
-                            stringBuilderAnalyticsManager.append(
-                                "$bundleItem:" + bundle.get(
-                                    bundleItem
-                                ) + "\n"
-                            )
+        private fun takeAnalyticsDetails(bundle: Bundle? = null) {
+            workQueueLinked.controlRunnable = true
+            coroutineCallAnalytics.async {
+                if (controlLogInit) {
+                    try {
+                        stringBuilderAnalyticsManager = StringBuilder()
+                        val date = Calendar.getInstance().time
+                        val formatter = SimpleDateFormat.getDateTimeInstance()
+                        formattedTime = formatter.format(date)
+                        stringBuilderAnalyticsManager.append("\n" + formattedTime + ":" + Constants.analyticsTag + "\n")
+                        if (bundle != null) {
+                            for (bundleItem in bundle.keySet()) {
+                                stringBuilderAnalyticsManager.append(
+                                    "$bundleItem:" + bundle.get(
+                                        bundleItem
+                                    ) + "\n"
+                                )
+                            }
                         }
+                        saveAnalyticsDetails()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        callExceptionDetails(
+                            e,
+                            Constants.analyticsTag
+                        )
                     }
-                    saveAnalyticsDetails(rootView = rootView)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    takeExceptionDetails(
-                        e,
-                        Constants.analyticsTag
-                    )
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
                 }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
 
@@ -1462,35 +1600,41 @@ class LoggerBird : LifecycleObserver {
          * Parameters:
          * @param fragmentManager parameter used for getting details from FragmentManager and printing all fragments in FragmentManager.
          * Variables:
+         * @var workQueueLinked is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallFragment is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var stringBuilderFragmentManager used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeFragmentManagerDetails(
-            fragmentManager: FragmentManager? = null,
-            rootView: ViewGroup? = null
+        private fun takeFragmentManagerDetails(
+            fragmentManager: FragmentManager? = null
         ) {
-            if (controlLogInit) {
-                try {
-                    stringBuilderFragmentManager.append("\n" + Constants.fragmentTag + " " + "list:")
-                    if (fragmentManager != null) {
-                        var fragmentCounter: Int = 1
-                        for (fragmentList in fragmentManager.fragments) {
-                            stringBuilderFragmentManager.append("\n" + fragmentCounter + ")" + fragmentList.tag)
-                            fragmentCounter++
+            workQueueLinked.controlRunnable = true
+            coroutineCallFragmentManager.async {
+                if (controlLogInit) {
+                    try {
+                        stringBuilderFragmentManager = StringBuilder()
+                        stringBuilderFragmentManager.append("\n" + Constants.fragmentTag + " " + "list:")
+                        if (fragmentManager != null) {
+                            var fragmentCounter: Int = 1
+                            for (fragmentList in fragmentManager.fragments) {
+                                stringBuilderFragmentManager.append("\n" + fragmentCounter + ")" + fragmentList.tag)
+                                fragmentCounter++
+                            }
                         }
+                        saveFragmentManagerDetails()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        callExceptionDetails(
+                            e,
+                            Constants.fragmentManagerTag
+                        )
                     }
-                    saveFragmentManagerDetails(rootView = rootView)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    takeExceptionDetails(
-                        e,
-                        Constants.fragmentManagerTag
-                    )
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
                 }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
 
@@ -1499,33 +1643,39 @@ class LoggerBird : LifecycleObserver {
          * Parameters:
          * @param httpUrlConnection parameter used for getting details from HttpUrlConnection which is used for printing response code and response message.
          * Variables:
+         * @var workQueueLinked is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallHttpRequest is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderHttp used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeHttpRequestDetails(
-            httpUrlConnection: HttpURLConnection? = null,
-            rootView: ViewGroup? = null
+        private fun takeHttpRequestDetails(
+            httpUrlConnection: HttpURLConnection? = null
         ) {
-            if (controlLogInit) {
-                try {
-                    val date = Calendar.getInstance().time
-                    val formatter = SimpleDateFormat.getDateTimeInstance()
-                    formattedTime = formatter.format(date)
-                    stringBuilderHttp.append("\n" + formattedTime + ":" + Constants.httpTag + "\n" + "Http Request Code:" + httpUrlConnection?.responseCode + " " + "Http Response Message:" + httpUrlConnection?.responseMessage)
-                    saveHttpRequestDetails(rootView = rootView)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    takeExceptionDetails(
-                        e,
-                        Constants.httpTag
-                    )
+            workQueueLinked.controlRunnable = true
+            coroutineCallHttpRequest.async {
+                if (controlLogInit) {
+                    try {
+                        stringBuilderHttp = StringBuilder()
+                        val date = Calendar.getInstance().time
+                        val formatter = SimpleDateFormat.getDateTimeInstance()
+                        formattedTime = formatter.format(date)
+                        stringBuilderHttp.append("\n" + formattedTime + ":" + Constants.httpTag + "\n" + "Http Request Code:" + httpUrlConnection?.responseCode + " " + "Http Response Message:" + httpUrlConnection?.responseMessage)
+                        saveHttpRequestDetails()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        callExceptionDetails(
+                            e,
+                            Constants.httpTag
+                        )
+                    }
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
                 }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
 
@@ -1538,6 +1688,9 @@ class LoggerBird : LifecycleObserver {
          * @param billingFlowParams parameter used for getting the details of the sku's in the Billing flow.
          * @param acknowledgePurchaseParams parameter used for getting the details developer payload and purchase token.
          * Variables:
+         * @var workQueueLinked is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallInAPurchase is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var gson used for converting a json format to the String format.
@@ -1545,66 +1698,71 @@ class LoggerBird : LifecycleObserver {
          * @var responseMessage is the outcome message according to the response code comes from billingResult.
          * @var stringBuilderSkuDetailList used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeInAPurchaseDetails(
+        private fun takeInAPurchaseDetails(
             billingClient: BillingClient? = null,
             billingResult: BillingResult? = null,
             skuDetailsParams: SkuDetailsParams? = null,
             billingFlowParams: BillingFlowParams? = null,
-            acknowledgePurchaseParams: AcknowledgePurchaseParams? = null,
-            rootView: ViewGroup? = null
+            acknowledgePurchaseParams: AcknowledgePurchaseParams? = null
         ) {
-            if (controlLogInit) {
-                try {
-                    val date = Calendar.getInstance().time
-                    val formatter = SimpleDateFormat.getDateTimeInstance()
-                    formattedTime = formatter.format(date)
-                    val gson = GsonBuilder().setPrettyPrinting().create()
-                    val prettyJson: String = gson.toJson(billingFlowParams?.skuDetails);
-                    var responseMessage: String = ""
-                    if (skuDetailsParams != null) {
-                        if (skuDetailsParams.skusList != null) {
-                            var skuListCounter: Int = 0
-                            do {
-                                if (skuDetailsParams.skusList.size > skuListCounter) {
-                                    stringBuilderSkuDetailList.append(
-                                        "\n" + skuDetailsParams.skusList[skuListCounter]
-                                    )
-                                } else {
-                                    break
-                                }
-                                skuListCounter++
-                            } while (skuDetailsParams.skusList.iterator().hasNext())
+            workQueueLinked.controlRunnable = true
+            coroutineCallInAPurchase.async {
+                if (controlLogInit) {
+                    try {
+                        stringBuilderInAPurchase = StringBuilder()
+                        val date = Calendar.getInstance().time
+                        val formatter = SimpleDateFormat.getDateTimeInstance()
+                        formattedTime = formatter.format(date)
+                        val gson = GsonBuilder().setPrettyPrinting().create()
+                        val prettyJson: String = gson.toJson(billingFlowParams?.skuDetails);
+                        var responseMessage: String = ""
+                        if (skuDetailsParams != null) {
+                            if (skuDetailsParams.skusList != null) {
+                                var skuListCounter: Int = 0
+                                do {
+                                    if (skuDetailsParams.skusList.size > skuListCounter) {
+                                        stringBuilderSkuDetailList.append(
+                                            "\n" + skuDetailsParams.skusList[skuListCounter]
+                                        )
+                                    } else {
+                                        break
+                                    }
+                                    skuListCounter++
+                                } while (skuDetailsParams.skusList.iterator().hasNext())
+                            }
                         }
-                    }
-                    if (billingResult != null) {
-                        when (billingResult.responseCode) {
-                            0 -> responseMessage = "Success"
-                            1 -> responseMessage = "User pressed back or canceled a dialog"
-                            2 -> responseMessage = "Network connection is down"
-                            3 -> responseMessage =
-                                "The Google Play Billing AIDL version is not supported for the type requested"
-                            4 -> responseMessage = "Requested product is not available for purchase"
-                            5 -> responseMessage =
-                                "Invalid arguments provided to the API.This error can also indicate that the application was not correctly signed or properly \n set up for Google Play Billing , or does not have the neccessary permissions in the manifest"
-                            6 -> responseMessage = "Fatal error during the API action"
-                            7 -> responseMessage = "Failure to purchase since item is already owned"
-                            8 -> responseMessage = "Failure to consume since item is not owned"
+                        if (billingResult != null) {
+                            when (billingResult.responseCode) {
+                                0 -> responseMessage = "Success"
+                                1 -> responseMessage = "User pressed back or canceled a dialog"
+                                2 -> responseMessage = "Network connection is down"
+                                3 -> responseMessage =
+                                    "The Google Play Billing AIDL version is not supported for the type requested"
+                                4 -> responseMessage =
+                                    "Requested product is not available for purchase"
+                                5 -> responseMessage =
+                                    "Invalid arguments provided to the API.This error can also indicate that the application was not correctly signed or properly \n set up for Google Play Billing , or does not have the neccessary permissions in the manifest"
+                                6 -> responseMessage = "Fatal error during the API action"
+                                7 -> responseMessage =
+                                    "Failure to purchase since item is already owned"
+                                8 -> responseMessage = "Failure to consume since item is not owned"
+                            }
                         }
+                        stringBuilderInAPurchase.append("\n" + formattedTime + ":" + Constants.inAPurchaseTag + "\n" + "Billing Flow Item Consumed:" + billingFlowParams?.skuDetails?.isRewarded + "\n" + "Billing Response Code:" + billingResult?.responseCode + "\n" + "Billing Response Message:" + responseMessage + "\n" + "Billing Client Is Ready:" + billingClient?.isReady + "\n" + "Sku Type:" + skuDetailsParams?.skuType + "\n" + "Sku List:" + stringBuilderSkuDetailList.toString() + "\n" + "Billing Flow Sku Details:" + prettyJson + "\n" + "Billing Flow Sku:" + billingFlowParams?.sku + "\n" + "Billing Flow Account Id:" + billingFlowParams?.accountId + "\n" + "Billing Flow Developer Id:" + billingFlowParams?.developerId + "\n" + "Billing flow Old Sku:" + billingFlowParams?.oldSku + "\n" + "Billing Flow Old Sku Purchase Token:" + billingFlowParams?.oldSkuPurchaseToken + "\n" + "Acknowledge Params:" + acknowledgePurchaseParams?.developerPayload + "\n" + "Acknowledge Purchase Token:" + acknowledgePurchaseParams?.purchaseToken)
+                        saveInAPurchaseDetails()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        callExceptionDetails(
+                            e,
+                            Constants.inAPurchaseTag
+                        )
                     }
-                    stringBuilderInAPurchase.append("\n" + formattedTime + ":" + Constants.inAPurchaseTag + "\n" + "Billing Flow Item Consumed:" + billingFlowParams?.skuDetails?.isRewarded + "\n" + "Billing Response Code:" + billingResult?.responseCode + "\n" + "Billing Response Message:" + responseMessage + "\n" + "Billing Client Is Ready:" + billingClient?.isReady + "\n" + "Sku Type:" + skuDetailsParams?.skuType + "\n" + "Sku List:" + stringBuilderSkuDetailList.toString() + "\n" + "Billing Flow Sku Details:" + prettyJson + "\n" + "Billing Flow Sku:" + billingFlowParams?.sku + "\n" + "Billing Flow Account Id:" + billingFlowParams?.accountId + "\n" + "Billing Flow Developer Id:" + billingFlowParams?.developerId + "\n" + "Billing flow Old Sku:" + billingFlowParams?.oldSku + "\n" + "Billing Flow Old Sku Purchase Token:" + billingFlowParams?.oldSkuPurchaseToken + "\n" + "Acknowledge Params:" + acknowledgePurchaseParams?.developerPayload + "\n" + "Acknowledge Purchase Token:" + acknowledgePurchaseParams?.purchaseToken)
-                    saveInAPurchaseDetails(rootView = rootView)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    takeExceptionDetails(
-                        e,
-                        Constants.inAPurchaseTag
-                    )
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
                 }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
 
@@ -1615,48 +1773,60 @@ class LoggerBird : LifecycleObserver {
          * @param response parameter used for getting details from Response which is used for getting response code ,response message ,response success and response body.
          * @param request parameter used for getting details from Request which is used for getting request query and request method.
          * Variables:
+         * @var workQueueLinked is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallRetrofit is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderRetrofit used for printing the details.
          * @var stringBuilderQuery used for printing the details of query that gathered from request.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeRetrofitRequestDetails(
+        private fun takeRetrofitRequestDetails(
             retrofit: Retrofit? = null,
             response: Response? = null,
-            request: Request? = null,
-            rootView: ViewGroup? = null
+            request: Request? = null
         ) {
-            if (controlLogInit) {
-                try {
-                    stringBuilderQuery = StringBuilder()
-                    val date = Calendar.getInstance().time
-                    val formatter = SimpleDateFormat.getDateTimeInstance()
-                    formattedTime = formatter.format(date)
-                    var parameterQueryCounter: Int = 0
-                    if (request != null) {
-                        while (request.url.querySize > parameterQueryCounter) {
-                            stringBuilderQuery.append(
-                                "Response Query Parameter:" + request.url.queryParameterName(
-                                    parameterQueryCounter
-                                ) + "," + request.url.queryParameterValue(parameterQueryCounter) + "\n"
-                            )
-                            parameterQueryCounter++
+            workQueueLinked.controlRunnable = true
+            coroutineCallRetrofit.async {
+                if (controlLogInit) {
+                    try {
+                        stringBuilderRetrofit = StringBuilder()
+                        stringBuilderQuery = StringBuilder()
+                        val date = Calendar.getInstance().time
+                        val formatter = SimpleDateFormat.getDateTimeInstance()
+                        formattedTime = formatter.format(date)
+                        var parameterQueryCounter: Int = 0
+                        if (request != null) {
+                            while (request.url.querySize > parameterQueryCounter) {
+                                stringBuilderQuery.append(
+                                    "Response Query Parameter:" + request.url.queryParameterName(
+                                        parameterQueryCounter
+                                    ) + "," + request.url.queryParameterValue(parameterQueryCounter) + "\n"
+                                )
+                                parameterQueryCounter++
+                            }
                         }
+                        withContext(Dispatchers.IO) {
+                            coroutineRetrofitTask.async {
+                                withContext(Dispatchers.IO) {
+                                    stringBuilderRetrofit.append("\n" + formattedTime + ":" + Constants.retrofitTag + "\n" + "Retrofit Request Code:" + response?.code + " " + "Response Message:" + response?.message + "\n" + "Retrofit Url:" + retrofit?.baseUrl() + " " + "Request Url:" + request?.url + "\n" + "Response Success:" + response?.isSuccessful + "\n" + "Request Method:" + request?.method + "\n" + stringBuilderQuery.toString() + "Response Value:" + response?.body?.string())
+                                    saveRetrofitRequestDetails()
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        callExceptionDetails(
+                            e,
+                            Constants.retrofitTag
+                        )
                     }
-                    stringBuilderRetrofit.append("\n" + formattedTime + ":" + Constants.retrofitTag + "\n" + "Retrofit Request Code:" + response?.code + " " + "Response Message:" + response?.message + "\n" + "Retrofit Url:" + retrofit?.baseUrl() + " " + "Request Url:" + request?.url + "\n" + "Response Success:" + response?.isSuccessful + "\n" + "Request Method:" + request?.method + "\n" + stringBuilderQuery.toString() + "Response Value:" + response?.body?.string())
-                    saveRetrofitRequestDetails(rootView = rootView)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    takeExceptionDetails(
-                        e,
-                        Constants.retrofitTag
-                    )
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
                 }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
         //return asyncLogRetrofitTask(request = request,response = response,retrofit = retrofit).execute().get()
@@ -1666,21 +1836,25 @@ class LoggerBird : LifecycleObserver {
          * @param realm parameter used for getting details from Realm which is used for getting permissions,privileges and copy realm data.
          * @param realm model parameter used for getting details from RealmModel which is used for giving realm data to the Realm method which is copyFromRealm().
          * Variables:
+         * @var workQueueLinked is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallRealm is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderRealm used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeRealmDetails(
+        private fun takeRealmDetails(
             realm: Realm? = null,
-            realmModel: RealmModel? = null,
-            rootView: ViewGroup? = null
+            realmModel: RealmModel? = null
         ) {
-            if (controlLogInit) {
-                try {
-                    if (controlLogInit) {
+            workQueueLinked.controlRunnable = true
+            coroutineCallRealm.async {
+                if (controlLogInit) {
+                    try {
+                        stringBuilderRealm = StringBuilder()
                         val date = Calendar.getInstance().time
                         val formatter = SimpleDateFormat.getDateTimeInstance()
                         formattedTime = formatter.format(date)
@@ -1689,17 +1863,17 @@ class LoggerBird : LifecycleObserver {
                                 realmModel
                             )
                         )
-                        saveRealmDetails(rootView = rootView)
+                        saveRealmDetails()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        callExceptionDetails(
+                            e,
+                            Constants.realmTag
+                        )
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    takeExceptionDetails(
-                        e,
-                        Constants.realmTag
-                    )
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
                 }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
 
@@ -1709,39 +1883,48 @@ class LoggerBird : LifecycleObserver {
          * @param exception parameter used for getting details from Exception which is used for getting deneme.example.loggerbird.exception messages.
          * @param tag parameter used for getting details of which method caused this deneme.example.loggerbird.exception.
          * Variables:
+         * @var workQueueLinked is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallException is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
          * @var stringBuilderException used for printing the details.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        fun takeExceptionDetails(
+        private fun takeExceptionDetails(
             exception: Exception? = null,
             tag: String? = null,
-            throwable: Throwable? = null,
-            rootView: ViewGroup? = null
+            throwable: Throwable? = null
         ) {
+            workQueueLinked.controlRunnable = true
             try {
-                val date = Calendar.getInstance().time
-                val formatter = SimpleDateFormat.getDateTimeInstance()
-                formattedTime = formatter.format(date)
-                if (exception != null) {
-                    stringBuilderException.append(
-                        "\n" + formattedTime + ":" + Constants.exceptionTag + "\n" + "Exception:" + Log.getStackTraceString(
-                            exception
-                        ) + "Method Tag:" + tag
-                    )
-                } else if (throwable != null) {
-                    stringBuilderException.append(
-                        "\n" + formattedTime + ":" + Constants.unHandledExceptionTag + "\n" + "Throwable:" + Log.getStackTraceString(
-                            throwable
-                        ) + "Method Tag:" + tag
-                    )
+                coroutineCallException.async {
+                    stringBuilderException = StringBuilder()
+                    val date = Calendar.getInstance().time
+                    val formatter = SimpleDateFormat.getDateTimeInstance()
+                    formattedTime = formatter.format(date)
+                    if (exception != null) {
+                        stringBuilderException.append(
+                            "\n" + "Method Tag:" + tag +
+                                    "\n" + formattedTime + ":" + Constants.exceptionTag + "\n" + "Exception:" + Log.getStackTraceString(
+                                exception
+                            )
+                        )
+                    } else if (throwable != null) {
+                        stringBuilderException.append(
+                            "\n" + "Method Tag:" + tag +
+                                    "\n" + formattedTime + ":" + Constants.unHandledExceptionTag + "\n" + "Throwable:" + Log.getStackTraceString(
+                                throwable
+                            )
+                        )
+                    }
+                    saveExceptionDetails()
                 }
-                saveExceptionDetails(rootView = rootView)
             } catch (e: Exception) {
-                takeExceptionDetails(exception = e, tag = Constants.exceptionTag)
+                e.printStackTrace()
+                callExceptionDetails(exception = e, tag = Constants.exceptionTag)
             }
         }
 
@@ -1758,13 +1941,13 @@ class LoggerBird : LifecycleObserver {
          * @var controlLogInit is used for getting logInit method return value.
          * @var defaultProgressBar is used for providing default progressBar if user doesn't provides one.
          * @var arraylistFile is used for holding temp files for sending Email.
-         * @var coroutineCallEmail is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var coroutineCallEmailTask is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var file limit is a constant which is equals to 2mb in byte format.
          * @var scanner is used for reading current desired file.
          * @var fileTemp is used for creating temp files which is used for holding the parts of original file which exceeds 2mb size.
          * @var withContext code block calls ui thread for using progressbar.
          * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         fun sendDetailsAsEmail(
             file: File,
@@ -1772,11 +1955,11 @@ class LoggerBird : LifecycleObserver {
             progressBar: ProgressBar? = null,
             rootView: ViewGroup? = null
         ) {
-            try {
-                if (controlLogInit) {
-                    var defaultProgressBar: ProgressBar = ProgressBar(context)
-                    arrayListFile = ArrayList()
-                    coroutineCallEmail.async {
+            coroutineCallEmailTask.async {
+                try {
+                    if (controlLogInit) {
+                        var defaultProgressBar: ProgressBar = ProgressBar(context)
+                        arrayListFile = ArrayList()
                         withContext(Dispatchers.Main) {
                             progressBar?.let {
                                 it.isShown
@@ -1859,103 +2042,62 @@ class LoggerBird : LifecycleObserver {
                             }
                         }
                     }
-                }
 
-            } catch (e: Exception) {
-                e.printStackTrace()
-                takeExceptionDetails(e, Constants.emailTag)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callExceptionDetails(e, Constants.emailTag)
+                }
             }
         }
 
-        //dummy method probably will be deleted.
-        private fun takeAllDetails(
-            view: View?,
-            resources: Resources?,
-            httpUrlConnection: HttpURLConnection?,
-            realm: Realm?,
-            realmModel: RealmModel?,
-            retrofit: Retrofit?,
-            response: Response?,
-            request: Request?,
-            billingClient: BillingClient?,
-            billingResult: BillingResult?,
-            skuDetailsParams: SkuDetailsParams?,
-            billingFlowParams: BillingFlowParams?,
-            acknowledgePurchaseParams: AcknowledgePurchaseParams?,
-            exception: Exception?
-        ): String {
-            val date = Calendar.getInstance().time
-            val formatter = SimpleDateFormat.getDateTimeInstance()
-            formattedTime = formatter.format(date)
-            stringBuilderAll.append(
-                "$formattedTime:" + takeComponentDetails(
-                    view,
-                    resources
-                ) + "\n" + "$formattedTime:" + takeHttpRequestDetails(
-                    httpUrlConnection
-                ) + "\n" + "$formattedTime:" + takeRealmDetails(
-                    realm,
-                    realmModel
-                ) + "\n" + "$formattedTime:" + takeRetrofitRequestDetails(
-                    retrofit,
-                    response,
-                    request
-                ) + "\n" + "$formattedTime:" + takeInAPurchaseDetails(
-                    billingClient,
-                    billingResult,
-                    skuDetailsParams,
-                    billingFlowParams,
-                    acknowledgePurchaseParams
-                ) + "\n" + "$formattedTime:" + takeExceptionDetails(
-                    exception
-                )
-            )
-            return stringBuilderAll.toString()
+        //dummy method might be useful for future implementation and changes for taking stringBuilderComponent instance.
+        internal fun returnStringBuilderComponent(): StringBuilder {
+            return stringBuilderComponent
+        }
+
+        //dummy method might be useful for future implementation and changes for taking stringBuilderLifeCycle instance.
+        internal fun returnStringBuilderLifecycle(): StringBuilder {
+            return stringBuilderLifeCycle
+        }
+
+        //dummy method might be useful for future implementation and changes for taking stringBuilderFragmentManager instance.
+        internal fun returnStringBuilderFragmentManager(): StringBuilder {
+            return stringBuilderFragmentManager
+        }
+
+        //dummy method might be useful for future implementation and changes for taking stringBuilderAnalyticsManager instance.
+        internal fun returnStringBuilderAnalyticsManager(): StringBuilder {
+            return stringBuilderAnalyticsManager
+        }
+
+        //dummy method might be useful for future implementation and changes for taking stringBuilderHttp instance.
+        internal fun returnStringBuilderHttp(): StringBuilder {
+            return stringBuilderHttp
+        }
+
+        //dummy method might be useful for future implementation and changes for taking stringBuilderInAPurchase instance.
+        internal fun returnStringBuilderInAPurchase(): StringBuilder {
+            return stringBuilderInAPurchase
+        }
+
+        //dummy method might be useful for future implementation and changes for taking stringBuilderRetrofit instance.
+        internal fun returnStringBuilderRetrofit(): StringBuilder {
+            return stringBuilderRetrofit
+        }
+
+        //dummy method might be useful for future implementation and changes for taking stringBuilderRealm instance.
+        internal fun returnStringBuilderRealm(): StringBuilder {
+            return stringBuilderRealm
+        }
+
+        //dummy method might be useful for future implementation and changes for taking stringBuilderException instance.
+        internal fun returnStringBuilderException(): StringBuilder {
+            return stringBuilderException
+        }
+
+        //dummy method might be useful for future implementation and changes for taking stringBuilderAll instance.
+        internal fun returnStringBuilderAll(): StringBuilder {
+            return stringBuilderAll
         }
     }
-}
-
-//dummy class probably will be deleted.
-class asyncTakeRetrofitTask(
-    val retrofit: Retrofit?,
-    val response: Response?,
-    val request: Request?
-) :
-    AsyncTask<Void, Void, String>() {
-    override fun doInBackground(vararg params: Void?): String {
-        val stringBuilderRetro: StringBuilder = StringBuilder()
-        val date = Calendar.getInstance().time
-        val formatter = SimpleDateFormat.getDateTimeInstance()
-        val formattedTime = formatter.format(date)
-        stringBuilderRetro.append("\n" + formattedTime + ":" + Constants.retrofitTag + "\n" + "Retrofit Request Code:" + response?.code + " " + "Response Message:" + response?.message + "\n" + "Retrofit Url:" + retrofit?.baseUrl() + " " + "Request Url:" + request?.url + "\n" + "Response Success:" + response?.isSuccessful + "\n" + "Response Value:" + response?.body?.string())
-        return stringBuilderRetro.toString()
-    }
-
-    override fun onPreExecute() {
-        super.onPreExecute()
-    }
-
-    override fun onPostExecute(result: String?) {
-        super.onPostExecute(result)
-    }
-}
-
-//dummy class probably will be deleted.
-class asynTakeEmailTask(
-    val file: File,
-    val context: Context,
-    val progressBar: ProgressBar,
-    val coroutineScope: CoroutineScope
-) :
-    AsyncTask<Void, Void, Void>() {
-    override fun doInBackground(vararg params: Void?): Void? {
-        EmailUtil.sendEmail(
-            file = file,
-            context = context,
-            progressBar = progressBar,
-            coroutinecallEmail = coroutineScope
-        )
-        return null
-    }
-
 }

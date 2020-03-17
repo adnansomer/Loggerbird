@@ -45,7 +45,7 @@ internal class LogRecyclerViewScrollListener : RecyclerView.OnScrollListener() {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
 
     }
@@ -76,7 +76,7 @@ internal class LogRecyclerViewScrollListener : RecyclerView.OnScrollListener() {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 

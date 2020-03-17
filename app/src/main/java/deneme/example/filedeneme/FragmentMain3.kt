@@ -37,7 +37,7 @@ class FragmentMain3 : Fragment() {
     override fun onStart() {
         super.onStart()
         button_dummy_2.setOnClickListener() {
-            LoggerBird.takeLifeCycleDetails()
+//            LoggerBird.takeLifeCycleDetails()
             //LoggerBird.saveLifeCycleDetails()
             fragmentManager?.beginTransaction()
                 ?.add(

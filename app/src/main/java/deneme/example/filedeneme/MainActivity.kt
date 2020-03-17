@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity(){
     private var getFilePath: String = ""
     private var counterlist = arrayListOf<RealmItem>()
     private val coroutineCallInternet = CoroutineScope(Dispatchers.IO)
-    private val coroutineCallDatabase = CoroutineScope(Dispatchers.IO)
+    private val coroutineCall = CoroutineScope(Dispatchers.IO)
     private lateinit var realmInstance: Realm
     private lateinit var realmInstanceInsert: Realm
     private lateinit var realmLooper: Looper
@@ -107,28 +107,20 @@ class MainActivity : AppCompatActivity(){
         LoggerBird.logInit(context = this)
         button_add.setOnClickListener() {
             adapter.notifyItemRemoved(0)
+            try {
+                for(x in 1..1000){
+                    LoggerBird.callLifeCycleDetails()
+                    LoggerBird.callComponentDetails(view = button_add,resources = button_add.resources)
+                }
 
-//            throw NullPointerException("button is null")
-//            for( i in 0..100){
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//
-//        }
-            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            LoggerBird.callLifeCycleDetails()
+
+
+//            LoggerBird.callEnqueue()
+
 
 // )
 //            LogDeneme.saveComponentDetails()
@@ -180,7 +172,7 @@ class MainActivity : AppCompatActivity(){
             //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
            // LoggerBird.saveLifeCycleDetails()
 
-            LoggerBird.takeLifeCycleDetails()
+//            LoggerBird.takeLifeCycleDetails()
 
 
             startActivity(Intent(this@MainActivity, Main2Activity::class.java))
@@ -225,11 +217,14 @@ class MainActivity : AppCompatActivity(){
                         .url(httpUrl)
                         .post(fromBodyBuilder.build())
                         .build()
-                    coroutineCallInternet.async {
-                        LoggerBird.takeRetrofitRequestDetails(response= ApiServiceInterface.httpClient(
+//                    coroutineCallInternet.async {
+//
+//                       // LoggerBird.saveRetrofitRequestDetails()
+//                    }
+                    for( i in 0..10){
+                        LoggerBird.callRetrofitRequestDetails(response= ApiServiceInterface.httpClient(
                             request
                         ),request=request)
-                       // LoggerBird.saveRetrofitRequestDetails()
                     }
 
 

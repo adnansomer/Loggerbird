@@ -44,7 +44,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -58,7 +58,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             ProcessLifecycleOwner.get().lifecycle.removeObserver(this)
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -91,7 +91,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -115,9 +115,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
-            )
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -141,7 +139,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -164,7 +162,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -187,7 +185,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
@@ -210,7 +208,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callExceptionDetails(e)
         }
     }
 
