@@ -18,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.adjust.sdk.Constants.BASE_URL
+import interceptors.LogOkHttpInterceptor
 import io.reactivex.disposables.Disposable
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -27,10 +29,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
-import loggerbird.LoggerBirdBuilder
+import loggerbird.LoggerBird.Companion.LoggerBirdHttpClient
 import okhttp3.FormBody
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONObject
@@ -42,8 +43,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.concurrent.TimeUnit
-import java.util.logging.Level
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
 
@@ -219,49 +218,18 @@ class MainActivity : AppCompatActivity(){
 
         button_performance.setOnClickListener {
 
-            LoggerBirdBuilder.Builder()
-                .isLogInitAttached()
-                .logAttach()
-                .logDetachObserver()
-                .refreshLogInitInstance()
-                .takeAnalyticsDetails()
-
-
-            /*
-            val interceptor = run {
-                val httpLoggingInterceptor = HttpLoggingInterceptor()
-                httpLoggingInterceptor.apply {
-                    httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-                }
-            }
-
-
-            val okHttpClient = OkHttpClient.Builder()
-                .addNetworkInterceptor(interceptor) // same for .addInterceptor(...)
-                .connectTimeout(30, TimeUnit.SECONDS) //Backend is really slow
-                .writeTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .build()
-
-            /*val API_BASE_URL : String = ""
-
             val logging = HttpLoggingInterceptor()
             logging.setLevel(HttpLoggingInterceptor.Level.BODY)
-            var httpClient = OkHttpClient()
-            httpClient.interceptors()
 
             val retrofit: Retrofit = Retrofit.Builder()
-                .baseUrl(API_BASE_URL)
+                .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
-                .client(httpClient)
-                .build()*/
-            
+                .client(LoggerBirdHttpClient())
+                .build()
 
-            /*
-            val logging : HttpLoggingInterceptor? = null
-            logging?.setLevel(HttpLoggingInterceptor.Level.BASIC)*/
 
-             */
+
+
 
 
 
@@ -288,7 +256,7 @@ class MainActivity : AppCompatActivity(){
                     val httpUrl: HttpUrl = HttpUrl.Builder()
                         .scheme("https")
                         .host("api.plos.org")
-                            .addPathSegment("search")
+                        .addPathSegment("search")
                         .addQueryParameter("q", "DNA")
                         .addQueryParameter("q", "DNA2")
                         .addQueryParameter("q", "DNA3")

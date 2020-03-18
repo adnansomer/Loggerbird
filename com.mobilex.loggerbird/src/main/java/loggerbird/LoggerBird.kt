@@ -1,6 +1,5 @@
 package loggerbird
 
-import android.accessibilityservice.GestureDescription
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
@@ -13,9 +12,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.HttpAuthHandler
 import android.widget.ProgressBar
-import androidx.annotation.RequiresApi
 import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.core.util.rangeTo
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
@@ -28,30 +29,24 @@ import constants.Constants.Companion.deviceInfoTag
 import constants.Constants.Companion.devicePerformanceTag
 import deneme.example.loggerbird.R
 import exception.LoggerBirdException
-import interceptors.LogOkHttpInterceptor
+import interceptors.*
 import io.realm.Realm
 import io.realm.RealmModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import observers.LogFragmentLifeCycleObserver
-import observers.LogLifeCycleObserver
-import observers.LogcatObserver
+import listeners.LogRecyclerViewChildAttachStateChangeListener
+import listeners.LogRecyclerViewItemTouchListener
+import listeners.LogRecyclerViewScrollListener
+import observers.*
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import retrofit2.Retrofit
 import services.LoggerBirdMemoryService
-import utils.EmailUtil
-import listeners.LogRecyclerViewChildAttachStateChangeListener
-import listeners.LogRecyclerViewItemTouchListener
-import listeners.LogRecyclerViewScrollListener
-import loggerbird.LoggerBird.Companion.controlLogInit
-import loggerbird.LoggerBird.Companion.saveExceptionDetails
-import loggerbird.LoggerBird.Companion.takeExceptionDetails
-import observers.*
-import okhttp3.Interceptor
 import services.LoggerBirdService
+import utils.EmailUtil
 import java.io.File
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
@@ -69,6 +64,7 @@ class LoggerBird : LifecycleObserver {
         private var stringBuilderFragmentManager: StringBuilder = StringBuilder()
         private var stringBuilderAnalyticsManager: StringBuilder = StringBuilder()
         private var stringBuilderHttp: StringBuilder = StringBuilder()
+        private var stringBuilderOkHttp : StringBuilder = StringBuilder()
         private var stringBuilderInAPurchase: StringBuilder = StringBuilder()
         private var stringBuilderSkuDetailList: StringBuilder = StringBuilder()
         private var stringBuilderRetrofit: StringBuilder = StringBuilder()
@@ -431,7 +427,6 @@ class LoggerBird : LifecycleObserver {
              * @throws exception if logInit method return value is false.
              * @throws exception if log instance is empty.
              */
-
             fun saveDevicePerformanceDetails(
                 file: File? = null
             ) {
@@ -1239,7 +1234,8 @@ class LoggerBird : LifecycleObserver {
             }
 
 
-            /**This Method Determines Whether Memory is Overused
+            /**
+             * This Method Determines Whether Memory is Overused
              * Parameters:
              * @param memoryThreshold takes threshold value to determine whether memory is overused.
              * Variables:
@@ -1252,7 +1248,6 @@ class LoggerBird : LifecycleObserver {
              * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
              * @throws exception if logInit method return value is false.
              */
-
             fun takeMemoryUsageDetails(threshold: Long?): String {
 
                 if (controlLogInit) {
@@ -1289,8 +1284,9 @@ class LoggerBird : LifecycleObserver {
                 return stringBuilderMemoryUsageDetails.toString()
             }
 
-            /**This Method Takes Device Performance Details
-             *Variables:
+            /**
+             * This Method Takes Device Performance Details
+             * Variables:
              * @var availableMemory returns available memory on device.
              * @var totalMemory returns total memory on device.
              * @var lowMemory returns true if system considers memory is low.
@@ -1359,7 +1355,6 @@ class LoggerBird : LifecycleObserver {
                         )
 
                         Log.d(devicePerformanceTag, stringBuilderPerformanceDetails.toString())
-
 
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -1439,60 +1434,127 @@ class LoggerBird : LifecycleObserver {
                 return stringBuilderBuild.toString()
             }
 
-                /**
-                 * This Method Takes Analytics Details.
-                 * Parameters:
-                 * @param bundle parameter used for getting details from analytic bundle.
-                 * Variables:
-                 * @var current time used for getting local time of your devices.
-                 * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
-                 * @var stringBuilderAnalyticsManager used for printing the details.
-                 * Exceptions:
-                 * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-                 * @throws exception if logInit method return value is false.
-                 */
-                fun takeAnalyticsDetails(bundle: Bundle? = null) {
+            /**
+            * This method creates a HttpClient to Intercept Retrofit Logs
+            * @var builder creates a new OkHttp Client to call in Retrofit Builder for applying interception
+            * @return builder to use it as an OkHttpClient
+            */
+            fun LoggerBirdHttpClient() : OkHttpClient {
 
-                    if (controlLogInit) {
+                if(controlLogInit){
 
-                        try {
-                            val date = Calendar.getInstance().time
-                            val formatter = SimpleDateFormat.getDateTimeInstance()
-                            formattedTime = formatter.format(date)
-                            stringBuilderAnalyticsManager.append("\n" + formattedTime + ":" + Constants.analyticsTag + "\n")
-                            if (bundle != null) {
-                                for (bundleItem in bundle.keySet()) {
-                                    stringBuilderAnalyticsManager.append(
-                                        "$bundleItem:" + bundle.get(
-                                            bundleItem
-                                        ) + "\n"
-                                    )
-                                }
-                            }
-                            saveAnalyticsDetails()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            takeExceptionDetails(
-                                e,
-                                Constants.analyticsTag
-                            )
-                        }
+                    val LoggerBirdHttpClient = OkHttpClient().newBuilder()
+                        .addInterceptor(LogOkHttpInterceptor())
+                        .addInterceptor(LogOkHttpAuthTokenInterceptor())
+                        .addInterceptor(LogOkHttpErrorInterceptor())
+                        .addInterceptor(LogOkHttpCacheInterceptor())
+
+                    return LoggerBirdHttpClient.build()
+
                     } else {
+
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
+                }
+            }
+
+             /**
+              *
+              *
+              *
+              */
+            fun takeOkHttpDetails(okhttpClient: OkHttpClient? = null, okhttpRequest: Request? = null, okHttpURLConnection: HttpURLConnection?){
+
+                if(controlLogInit){
+                    try{
+                        val date = Calendar.getInstance().time
+                        val formatter = SimpleDateFormat.getDateInstance()
+                        formattedTime = formatter.format(date)
+
+                        var okHttpClientInterceptors = okhttpClient?.interceptors
+                        var okHttpClientNetworkInterceptors = okhttpClient?.networkInterceptors
+                        var okHttpClientAuth = okhttpClient?.authenticator
+                        var okHttpClientTimeOut = okhttpClient?.connectTimeoutMillis
+                        var okHttpClientProtocols = okhttpClient?.protocols
+                        var okHttpClientCache = okhttpClient?.cache
+
+                        var okHttpIsRequest = okhttpRequest?.isHttps
+                        var okHttpRequestBody = okhttpRequest?.body
+                        var okHttpRequestHeaders = okhttpRequest?.headers
+                        var okHttpRequestUrl = okhttpRequest?.url
+                        var okHttpRequestMethod = okhttpRequest?.method
+
+                        var okHttpConnectionMethod = okHttpURLConnection?.requestMethod
+                        var okHttpConnectionResponseCode = okHttpURLConnection?.responseCode
+                        var okHttpConnectionError = okHttpURLConnection?.errorStream
+                        var okHttpConnectionResponse = okHttpURLConnection?.responseMessage
+
+                        stringBuilderOkHttp.append("\n"
+                            + formattedTime + " " + Constants.okHttpTag + "\n")
+
+
+                    }catch (e : Exception){
+                        e.printStackTrace()
+                        takeExceptionDetails(e, Constants.okHttpTag)
+                        }
+                    } else{
                         throw LoggerBirdException(Constants.logInitErrorMessage)
                     }
                 }
 
-                /**
-                 * This Method Takes FragmentManager Details.
-                 * Parameters:
-                 * @param fragmentManager parameter used for getting details from FragmentManager and printing all fragments in FragmentManager.
-                 * Variables:
-                 * @var stringBuilderFragmentManager used for printing the details.
-                 * Exceptions:
-                 * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-                 * @throws exception if logInit method return value is false.
-                 */
-                fun takeFragmentManagerDetails(fragmentManager: FragmentManager? = null) {
+
+            /**
+             * This Method Takes Analytics Details.
+             * Parameters:
+             * @param bundle parameter used for getting details from analytic bundle.
+             * Variables:
+             * @var current time used for getting local time of your devices.
+             * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
+             * @var stringBuilderAnalyticsManager used for printing the details.
+             * Exceptions:
+             * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+             * @throws exception if logInit method return value is false.
+             */
+            fun takeAnalyticsDetails(bundle: Bundle? = null) {
+
+                if (controlLogInit) {
+                    try {
+                        val date = Calendar.getInstance().time
+                        val formatter = SimpleDateFormat.getDateTimeInstance()
+                        formattedTime = formatter.format(date)
+                        stringBuilderAnalyticsManager.append("\n" + formattedTime + ":" + Constants.analyticsTag + "\n")
+                        if (bundle != null) {
+                            for (bundleItem in bundle.keySet()) {
+                                stringBuilderAnalyticsManager.append(
+                                    "$bundleItem:" + bundle.get(
+                                        bundleItem
+                                    ) + "\n"
+                                )
+                            }
+                        }
+                            saveAnalyticsDetails()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        takeExceptionDetails(
+                            e,
+                            Constants.analyticsTag
+                        )
+                    }
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
+                    }
+                }
+
+            /**
+             * This Method Takes FragmentManager Details.
+             * Parameters:
+             * @param fragmentManager parameter used for getting details from FragmentManager and printing all fragments in FragmentManager.
+             * Variables:
+             * @var stringBuilderFragmentManager used for printing the details.
+             * Exceptions:
+             * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+             * @throws exception if logInit method return value is false.
+             */
+            fun takeFragmentManagerDetails(fragmentManager: FragmentManager? = null) {
                     if (controlLogInit) {
                         try {
                             stringBuilderFragmentManager.append("\n" + Constants.fragmentTag + " " + "list:")
@@ -1516,74 +1578,44 @@ class LoggerBird : LifecycleObserver {
                     }
                 }
 
-                /**
-                 * This Method Takes HttpRequest Details.
-                 * Parameters:
-                 * @param httpUrlConnection parameter used for getting details from HttpUrlConnection which is used for printing response code and response message.
-                 * Variables:
-                 * @var current time used for getting local time of your devices.
-                 * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
-                 * @var stringBuilderHttp used for printing the details.
-                 * Exceptions:
-                 * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-                 * @throws exception if logInit method return value is false.
-                 */
-                fun takeHttpRequestDetails(httpUrlConnection: HttpURLConnection? = null) {
-                    if (controlLogInit) {
-                        try {
-                            val date = Calendar.getInstance().time
-                            val formatter = SimpleDateFormat.getDateTimeInstance()
-                            formattedTime = formatter.format(date)
 
-                            stringBuilderHttp.append("\n" + formattedTime + ":" + Constants.httpTag + "\n" + "Http Request Code:" + httpUrlConnection?.responseCode + " " + "Http Response Message:" + httpUrlConnection?.responseMessage)
-                            saveHttpRequestDetails()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            takeExceptionDetails(
-                                e,
-                                Constants.httpTag
-                            )
-                        }
 
-                    } else {
-                        throw LoggerBirdException(Constants.logInitErrorMessage)
-                    }
-                }
 
-                /**
-                 * This Method Takes Android In A Purchase Details.
-                 * Parameters:
-                 * @param billingClient parameter used for getting status of BillingClient.
-                 * @param billingResult parameter used for getting the response code and message of Billing flow .
-                 * @param skuDetailsParams parameter used for getting the skusList and sku type of Billing flow.
-                 * @param billingFlowParams parameter used for getting the details of the sku's in the Billing flow.
-                 * @param acknowledgePurchaseParams parameter used for getting the details developer payload and purchase token.
-                 * Variables:
-                 * @var current time used for getting local time of your devices.
-                 * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
-                 * @var gson used for converting a json format to the String format.
-                 * @var prettyJson is the value of billingFlowParams sku's details from json format to the String format.
-                 * @var responseMessage is the outcome message according to the response code comes from billingResult.
-                 * @var stringBuilderSkuDetailList used for printing the details.
-                 * Exceptions:
-                 * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-                 * @throws exception if logInit method return value is false.
-                 */
-                fun takeInAPurchaseDetails(
-                    billingClient: BillingClient? = null,
-                    billingResult: BillingResult? = null,
-                    skuDetailsParams: SkuDetailsParams? = null,
-                    billingFlowParams: BillingFlowParams? = null,
-                    acknowledgePurchaseParams: AcknowledgePurchaseParams? = null
-                ) {
-                    if (controlLogInit) {
-                        try {
-                            val date = Calendar.getInstance().time
-                            val formatter = SimpleDateFormat.getDateTimeInstance()
-                            formattedTime = formatter.format(date)
-                            val gson = GsonBuilder().setPrettyPrinting().create()
-                            val prettyJson: String = gson.toJson(billingFlowParams?.skuDetails);
-                            var responseMessage: String = ""
+
+            /**
+             * This Method Takes Android In A Purchase Details.
+             * Parameters:
+             * @param billingClient parameter used for getting status of BillingClient.
+             * @param billingResult parameter used for getting the response code and message of Billing flow .
+             * @param skuDetailsParams parameter used for getting the skusList and sku type of Billing flow.
+             * @param billingFlowParams parameter used for getting the details of the sku's in the Billing flow.
+             * @param acknowledgePurchaseParams parameter used for getting the details developer payload and purchase token.
+             * Variables:
+             * @var current time used for getting local time of your devices.
+             * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
+             * @var gson used for converting a json format to the String format.
+             * @var prettyJson is the value of billingFlowParams sku's details from json format to the String format.
+             * @var responseMessage is the outcome message according to the response code comes from billingResult.
+             * @var stringBuilderSkuDetailList used for printing the details.
+             * Exceptions:
+             * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+             * @throws exception if logInit method return value is false.
+             */
+            fun takeInAPurchaseDetails(
+                billingClient: BillingClient? = null,
+                billingResult: BillingResult? = null,
+                skuDetailsParams: SkuDetailsParams? = null,
+                billingFlowParams: BillingFlowParams? = null,
+                acknowledgePurchaseParams: AcknowledgePurchaseParams? = null
+            ) {
+                if (controlLogInit) {
+                    try {
+                        val date = Calendar.getInstance().time
+                        val formatter = SimpleDateFormat.getDateTimeInstance()
+                        formattedTime = formatter.format(date)
+                        val gson = GsonBuilder().setPrettyPrinting().create()
+                        val prettyJson: String = gson.toJson(billingFlowParams?.skuDetails);
+                        var responseMessage: String = ""
                             if (skuDetailsParams != null) {
                                 if (skuDetailsParams.skusList != null) {
                                     var skuListCounter: Int = 0
@@ -1599,22 +1631,18 @@ class LoggerBird : LifecycleObserver {
                                     } while (skuDetailsParams.skusList.iterator().hasNext())
                                 }
                             }
-                            if (billingResult != null) {
-                                when (billingResult.responseCode) {
-                                    0 -> responseMessage = "Success"
-                                    1 -> responseMessage = "User pressed back or canceled a dialog"
-                                    2 -> responseMessage = "Network connection is down"
-                                    3 -> responseMessage =
-                                        "The Google Play Billing AIDL version is not supported for the type requested"
-                                    4 -> responseMessage =
-                                        "Requested product is not available for purchase"
-                                    5 -> responseMessage =
-                                        "Invalid arguments provided to the API.This error can also indicate that the application was not correctly signed or properly \n set up for Google Play Billing , or does not have the neccessary permissions in the manifest"
-                                    6 -> responseMessage = "Fatal error during the API action"
-                                    7 -> responseMessage =
-                                        "Failure to purchase since item is already owned"
-                                    8 -> responseMessage =
-                                        "Failure to consume since item is not owned"
+                        if (billingResult != null) {
+                            when (billingResult.responseCode) {
+                                0 -> responseMessage = "Success"
+                                1 -> responseMessage = "User pressed back or canceled a dialog"
+                                2 -> responseMessage = "Network connection is down"
+                                3 -> responseMessage = "The Google Play Billing AIDL version is not supported for the type requested"
+                                4 -> responseMessage = "Requested product is not available for purchase"
+                                5 -> responseMessage = "Invalid arguments provided to the API.This error can also indicate that the application was not correctly signed or properly \n set up for Google Play Billing , or does not have the neccessary permissions in the manifest"
+                                6 -> responseMessage = "Fatal error during the API action"
+                                7 -> responseMessage = "Failure to purchase since item is already owned"
+                                8 -> responseMessage = "Failure to consume since item is not owned"
+
                                 }
                             }
                             stringBuilderInAPurchase.append("\n" + formattedTime + ":" + Constants.inAPurchaseTag + "\n" + "Billing Flow Item Consumed:" + billingFlowParams?.skuDetails?.isRewarded + "\n" + "Billing Response Code:" + billingResult?.responseCode + "\n" + "Billing Response Message:" + responseMessage + "\n" + "Billing Client Is Ready:" + billingClient?.isReady + "\n" + "Sku Type:" + skuDetailsParams?.skuType + "\n" + "Sku List:" + stringBuilderSkuDetailList.toString() + "\n" + "Billing Flow Sku Details:" + prettyJson + "\n" + "Billing Flow Sku:" + billingFlowParams?.sku + "\n" + "Billing Flow Account Id:" + billingFlowParams?.accountId + "\n" + "Billing Flow Developer Id:" + billingFlowParams?.developerId + "\n" + "Billing flow Old Sku:" + billingFlowParams?.oldSku + "\n" + "Billing Flow Old Sku Purchase Token:" + billingFlowParams?.oldSkuPurchaseToken + "\n" + "Acknowledge Params:" + acknowledgePurchaseParams?.developerPayload + "\n" + "Acknowledge Purchase Token:" + acknowledgePurchaseParams?.purchaseToken)
@@ -1657,6 +1685,7 @@ class LoggerBird : LifecycleObserver {
                             val date = Calendar.getInstance().time
                             val formatter = SimpleDateFormat.getDateTimeInstance()
                             formattedTime = formatter.format(date)
+
                             var parameterQueryCounter: Int = 0
                             if (request != null) {
                                 while (request.url.querySize > parameterQueryCounter) {
@@ -1684,6 +1713,7 @@ class LoggerBird : LifecycleObserver {
                     }
                 }
                 //return asyncLogRetrofitTask(request = request,response = response,retrofit = retrofit).execute().get()
+
                 /**
                  * This Method Takes Realm Details.
                  * Parameters:
@@ -1761,17 +1791,17 @@ class LoggerBird : LifecycleObserver {
                     }
                 }
 
-                /**
-                 * This Method Sends Desired File As Email.
-                 * If desired file is greater than 2mb size then it will create temp files and stores 2mb parts of the current file in these fill which will be send as chunks for sending email.
-                 * At the end of transaction these files will be deleted or if there are certain failure in transaction it will automatically deletes temp files created by previous failed transaction.
-                 * Parameters:
-                 * @param file parameter used for getting file details for sending as email.
-                 * @param context parameter used for getting context of the current activity or fragment.
-                 * @param progressBar parameter used for getting custom progressbar that provided by method caller , if progressbar is null there will be default progressbar with default layout and you need to provide rootview in order to not get deneme.example.loggerbird.exception from default progressbar.
-                 * @param rootView parameter used for getting the current view of activity or fragment.
-                 * Variables:
-                 * @var controlLogInit is used for getting logInit method return value.
+            /**
+             * This Method Sends Desired File As Email.
+             * If desired file is greater than 2mb size then it will create temp files and stores 2mb parts of the current file in these fill which will be send as chunks for sending email.
+             * At the end of transaction these files will be deleted or if there are certain failure in transaction it will automatically deletes temp files created by previous failed transaction.
+             * Parameters:
+             * @param file parameter used for getting file details for sending as email.
+             * @param context parameter used for getting context of the current activity or fragment.
+             * @param progressBar parameter used for getting custom progressbar that provided by method caller , if progressbar is null there will be default progressbar with default layout and you need to provide rootview in order to not get deneme.example.loggerbird.exception from default progressbar.
+             * @param rootView parameter used for getting the current view of activity or fragment.
+             * Variables:
+             * @var controlLogInit is used for getting logInit method return value.
                  * @var defaultProgressBar is used for providing default progressBar if user doesn't provides one.
                  * @var arraylistFile is used for holding temp files for sending Email.
                  * @var coroutineCallEmail is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
@@ -1893,7 +1923,9 @@ class LoggerBird : LifecycleObserver {
                 fun takeAllDetails(
                     view: View?,
                     resources: Resources?,
-                    httpUrlConnection: HttpURLConnection?,
+                    okHttpURLConnection: HttpURLConnection,
+                    okhttpClient: OkHttpClient,
+                    okhttpRequest: Request,
                     realm: Realm?,
                     realmModel: RealmModel?,
                     retrofit: Retrofit?,
@@ -1913,8 +1945,9 @@ class LoggerBird : LifecycleObserver {
                         "$formattedTime:" + takeComponentDetails(
                             view,
                             resources
-                        ) + "\n" + "$formattedTime:" + takeHttpRequestDetails(
-                            httpUrlConnection
+                        ) + "\n" + "$formattedTime:" + takeOkHttpDetails(okhttpClient,
+                            okhttpRequest,
+                            okHttpURLConnection
                         ) + "\n" + "$formattedTime:" + takeRealmDetails(
                             realm,
                             realmModel

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentManager
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import retrofit2.Retrofit
@@ -38,7 +39,9 @@ class LoggerBirdBuilder private constructor(
         private var fragmentManager: FragmentManager? = null,
         private var view: View? = null,
         private var resources: Resources? = null,
-        private var httpUrlConnection: HttpURLConnection? = null,
+        private var okHttpUrlConnection: HttpURLConnection? = null,
+        private var okHttpClient: OkHttpClient? = null,
+        private var okHttpRequest : Request? = null,
         private var retrofit: Retrofit? = null,
         private var response: Response? = null,
         private var request: Request? = null,
@@ -79,7 +82,7 @@ class LoggerBirdBuilder private constructor(
 
         fun takeFragmentManagerDetails() = apply { LoggerBird.takeFragmentManagerDetails(fragmentManager) }
 
-        fun takeHttpRequestDetails() = apply { LoggerBird.takeHttpRequestDetails(httpUrlConnection) }
+        fun takeHttpRequestDetails() = apply { LoggerBird.takeOkHttpDetails(okHttpClient,okHttpRequest,okHttpUrlConnection) }
 
         fun takeInAPurchaseDetails() = apply { LoggerBird.takeInAPurchaseDetails() }
 
