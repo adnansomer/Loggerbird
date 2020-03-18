@@ -1501,7 +1501,6 @@ class LoggerBird : LifecycleObserver {
                     }
                 }
 
-
             /**
              * This Method Takes Analytics Details.
              * Parameters:
