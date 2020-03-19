@@ -1442,8 +1442,8 @@ class LoggerBird : LifecycleObserver {
 
             /**
              * This method creates a HttpClient as an OkHttp Client to Intercept Retrofit Logs* Variables:
-             * @var LoggerBirdGeneralInterceptor
-             * @var LoggerBirdHttpClient
+             * @var LoggerBirdGeneralInterceptor returns an interceptor that observes request and response flow with JSON request body.
+             * @var LoggerBirdHttpClient returns a okHttp client with LogOkHttpInterceptor classes.
              * Exceptions:
              * @throws exception if logInit method return value is false
              */

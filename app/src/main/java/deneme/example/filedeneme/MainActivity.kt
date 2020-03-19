@@ -240,7 +240,6 @@ class MainActivity : AppCompatActivity(){
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()*/
             getCurrentData()
-            takeRetrofitRequestDetails()
 
 
 
