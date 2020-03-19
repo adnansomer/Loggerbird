@@ -29,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
 import loggerbird.LoggerBird.Companion.LoggerBirdHttpClient
+import loggerbird.LoggerBird.Companion.takeRetrofitRequestDetails
 import okhttp3.FormBody
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -239,6 +240,7 @@ class MainActivity : AppCompatActivity(){
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()*/
             getCurrentData()
+            takeRetrofitRequestDetails()
 
 
 

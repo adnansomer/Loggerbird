@@ -12,11 +12,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.HttpAuthHandler
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.RequiresApi
-import androidx.core.util.rangeTo
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
@@ -29,7 +27,10 @@ import constants.Constants.Companion.deviceInfoTag
 import constants.Constants.Companion.devicePerformanceTag
 import deneme.example.loggerbird.R
 import exception.LoggerBirdException
-import interceptors.*
+import interceptors.LogOkHttpAuthenticationInterceptor
+import interceptors.LogOkHttpCacheInterceptor
+import interceptors.LogOkHttpErrorInterceptor
+import interceptors.LogOkHttpInterceptor
 import io.realm.Realm
 import io.realm.RealmModel
 import kotlinx.coroutines.CoroutineScope
@@ -43,6 +44,7 @@ import observers.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import services.LoggerBirdMemoryService
 import services.LoggerBirdService
@@ -107,7 +109,10 @@ class LoggerBird : LifecycleObserver {
         private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener = LogRecyclerViewChildAttachStateChangeListener()
         private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener = LogRecyclerViewItemTouchListener()
         private lateinit var recyclerViewItemObserver: LogDataSetObserver
-        lateinit var LoggerBirdOkHttpClient: OkHttpClient
+
+        private lateinit var LoggerBirdOkHttpClient: OkHttpClient
+        private var interceptor = HttpLoggingInterceptor()
+
 
 
         //---------------Public Methods:---------------//
@@ -1436,8 +1441,9 @@ class LoggerBird : LifecycleObserver {
             }
 
             /**
-             * This method creates a HttpClient as an okHttp Client to Intercept Retrofit Logs* Variables:
-             * @var builder creates a new OkHttp Client to call in Retrofit Builder for applying interception
+             * This method creates a HttpClient as an OkHttp Client to Intercept Retrofit Logs* Variables:
+             * @var LoggerBirdGeneralInterceptor
+             * @var LoggerBirdHttpClient
              * Exceptions:
              * @throws exception if logInit method return value is false
              */
@@ -1447,11 +1453,15 @@ class LoggerBird : LifecycleObserver {
 
                     try {
 
+                        val LoggerBirdGeneralInterceptor = HttpLoggingInterceptor()
+                        LoggerBirdGeneralInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+
                         val LoggerBirdHttpClient = OkHttpClient().newBuilder()
                             .addInterceptor(LogOkHttpErrorInterceptor())
                             .addInterceptor(LogOkHttpInterceptor())
                             .addInterceptor(LogOkHttpAuthenticationInterceptor())
                             .addNetworkInterceptor(LogOkHttpCacheInterceptor())
+                            .addInterceptor(LoggerBirdGeneralInterceptor)
 
                         LoggerBirdOkHttpClient = LoggerBirdHttpClient.build()
 
