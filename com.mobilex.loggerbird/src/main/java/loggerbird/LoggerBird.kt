@@ -107,6 +107,7 @@ class LoggerBird : LifecycleObserver {
         private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener = LogRecyclerViewChildAttachStateChangeListener()
         private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener = LogRecyclerViewItemTouchListener()
         private lateinit var recyclerViewItemObserver: LogDataSetObserver
+        lateinit var LoggerBirdOkHttpClient: OkHttpClient
 
 
         //---------------Public Methods:---------------//
@@ -1435,34 +1436,57 @@ class LoggerBird : LifecycleObserver {
             }
 
             /**
-            * This method creates a HttpClient to Intercept Retrofit Logs
-            * @var builder creates a new OkHttp Client to call in Retrofit Builder for applying interception
-            * @return builder to use it as an OkHttpClient
-            */
+             * This method creates a HttpClient as an okHttp Client to Intercept Retrofit Logs* Variables:
+             * @var builder creates a new OkHttp Client to call in Retrofit Builder for applying interception
+             * Exceptions:
+             * @throws exception if logInit method return value is false
+             */
             fun LoggerBirdHttpClient() : OkHttpClient {
 
                 if(controlLogInit){
 
-                    val LoggerBirdHttpClient = OkHttpClient().newBuilder()
-                        .addInterceptor(LogOkHttpInterceptor())
-                        .addInterceptor(LogOkHttpAuthTokenInterceptor())
-                        .addInterceptor(LogOkHttpErrorInterceptor())
-                        .addInterceptor(LogOkHttpCacheInterceptor())
+                    try {
 
-                    return LoggerBirdHttpClient.build()
+                        val LoggerBirdHttpClient = OkHttpClient().newBuilder()
+                            .addInterceptor(LogOkHttpErrorInterceptor())
+                            .addInterceptor(LogOkHttpInterceptor())
+                            .addInterceptor(LogOkHttpAuthenticationInterceptor())
+                            .addNetworkInterceptor(LogOkHttpCacheInterceptor())
 
-                    } else {
+                        LoggerBirdOkHttpClient = LoggerBirdHttpClient.build()
+
+                        //return LoggerBirdHttpClient.build()
+
+                    }catch (e : Exception){
+                        e.printStackTrace()
+                        takeExceptionDetails(e, Constants.okHttpTag)
+                        }
+                    }else {
 
                     throw LoggerBirdException(Constants.logInitErrorMessage)
                 }
+
+                return LoggerBirdOkHttpClient
             }
 
-             /**
-              *
-              *
-              *
-              */
-            fun takeOkHttpDetails(okhttpClient: OkHttpClient? = null, okhttpRequest: Request? = null, okHttpURLConnection: HttpURLConnection?){
+            /**
+             * This Method Provides OkHttp Library Connection,Request and Client details.
+             * Variables:
+             * @var okHttpClientInterceptors returns an immutable list of interceptors that observe the full span of each call.
+             * @var okHttpClientNetworkInterceptors returns an immutable list of interceptors that observe a single network request and response.
+             * @var okHttpClientTimeOut returns connection timeout in milliseconds.
+             * @var okHttpRequestBody returns whole body of Http request.
+             * @var okHttpRequestHeaders returns headers of Http request.
+             * @var okHttpRequestUrl returns Http Url of request.
+             * @var okHttpRequestMethod returns the method name of Http request.
+             * @var okHttpConnectionResponseCode returns the response code of Http connection.
+             * @var okHttpConnectionError returns an error stream if any, null if there have been no errors, the connection is not connected or the server sent no useful data.
+             * @var okHttpConnectionResponse returns Http connection response.
+             * Exceptions:
+             * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+             * @throws exception if logInit method return value is false.
+             */
+             fun takeOkHttpDetails(okhttpClient: OkHttpClient? = null, okhttpRequest: Request? = null, okHttpURLConnection: HttpURLConnection?){
 
                 if(controlLogInit){
                     try{
@@ -1470,27 +1494,34 @@ class LoggerBird : LifecycleObserver {
                         val formatter = SimpleDateFormat.getDateInstance()
                         formattedTime = formatter.format(date)
 
-                        var okHttpClientInterceptors = okhttpClient?.interceptors
-                        var okHttpClientNetworkInterceptors = okhttpClient?.networkInterceptors
-                        var okHttpClientAuth = okhttpClient?.authenticator
-                        var okHttpClientTimeOut = okhttpClient?.connectTimeoutMillis
-                        var okHttpClientProtocols = okhttpClient?.protocols
-                        var okHttpClientCache = okhttpClient?.cache
+                        val okHttpClientInterceptors = okhttpClient?.interceptors
+                        val okHttpClientNetworkInterceptors = okhttpClient?.networkInterceptors
+                        val okHttpClientTimeOut = okhttpClient?.connectTimeoutMillis
 
-                        var okHttpIsRequest = okhttpRequest?.isHttps
-                        var okHttpRequestBody = okhttpRequest?.body
-                        var okHttpRequestHeaders = okhttpRequest?.headers
-                        var okHttpRequestUrl = okhttpRequest?.url
-                        var okHttpRequestMethod = okhttpRequest?.method
+                        val okHttpRequestBody = okhttpRequest?.body
+                        val okHttpRequestHeaders = okhttpRequest?.headers
+                        val okHttpRequestUrl = okhttpRequest?.url
+                        val okHttpRequestMethod = okhttpRequest?.method
 
-                        var okHttpConnectionMethod = okHttpURLConnection?.requestMethod
-                        var okHttpConnectionResponseCode = okHttpURLConnection?.responseCode
-                        var okHttpConnectionError = okHttpURLConnection?.errorStream
-                        var okHttpConnectionResponse = okHttpURLConnection?.responseMessage
+                        val okHttpConnectionResponseCode = okHttpURLConnection?.responseCode
+                        val okHttpConnectionError = okHttpURLConnection?.errorStream
+                        val okHttpConnectionResponse = okHttpURLConnection?.responseMessage
 
                         stringBuilderOkHttp.append("\n"
-                            + formattedTime + " " + Constants.okHttpTag + "\n")
+                            + formattedTime + " " + Constants.okHttpTag + "\n"
+                            + "okHttp Client Interceptors: $okHttpClientInterceptors \n"
+                            + "okHttp Client Network Interceptors: $okHttpClientNetworkInterceptors \n"
+                            + "okHttp Client Connection Time Out: $okHttpClientTimeOut \n"
 
+                            + "okHttp Request Body: $okHttpRequestBody \n"
+                            + "okHttp Request Headers: $okHttpRequestHeaders \n"
+                            + "okHttp Request Url: $okHttpRequestUrl \n"
+                            + "okHttp Request Method: $okHttpRequestMethod \n"
+
+                            + "okHttp Connection Response Code: $okHttpConnectionResponseCode \n"
+                            + "okHttp Connection Error: $okHttpConnectionError \n"
+                            + "okHttp Connection Response: $okHttpConnectionResponse \n"
+                        )
 
                     }catch (e : Exception){
                         e.printStackTrace()
@@ -1576,10 +1607,6 @@ class LoggerBird : LifecycleObserver {
                         throw LoggerBirdException(Constants.logInitErrorMessage)
                     }
                 }
-
-
-
-
 
             /**
              * This Method Takes Android In A Purchase Details.
