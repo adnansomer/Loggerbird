@@ -3,8 +3,7 @@ package services
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
-import constants.Constants.Companion.memoryUsageTag
+
 import loggerbird.LoggerBird.Companion.takeMemoryUsageDetails
 import java.lang.Exception
 import java.util.*
@@ -46,7 +45,6 @@ internal class LoggerBirdMemoryService : Service(){
      * This Method Called When Service In onTaskRemoved State and stops observing memory consumption
      */
     override fun onTaskRemoved(rootIntent: Intent?) {
-
         stopMemoryUsage()
         super.onTaskRemoved(rootIntent)
     }
@@ -55,7 +53,6 @@ internal class LoggerBirdMemoryService : Service(){
      * This Method Called When Service In onDestroy State
      */
     override fun onDestroy() {
-
         super.onDestroy()
     }
 
@@ -63,7 +60,6 @@ internal class LoggerBirdMemoryService : Service(){
      * This function starts time to get Memory Usage data every 5 seconds.
      * @var timer starts timer to count.
      */
-
     fun startMemoryUsage() {
 
         timer = Timer()
@@ -79,7 +75,7 @@ internal class LoggerBirdMemoryService : Service(){
 
         timerTask = object : TimerTask() {
             override fun run() {
-                Log.d(memoryUsageTag, "" + takeMemoryUsageDetails(null))
+                takeMemoryUsageDetails(null)
             }
         }
     }

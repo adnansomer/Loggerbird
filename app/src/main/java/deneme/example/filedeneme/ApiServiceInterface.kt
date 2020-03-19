@@ -25,7 +25,10 @@ interface ApiServiceInterface {
     ):
             Call<RetroFitModel.Result>
 
+
     companion object {
+
+
         fun create(context: Context): ApiServiceInterface {
             val retrofit = Retrofit.Builder()
                 .addCallAdapterFactory(

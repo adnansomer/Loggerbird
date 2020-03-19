@@ -6,34 +6,44 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.net.Uri
-import android.os.*
-import androidx.appcompat.app.AppCompatActivity
+import android.os.AsyncTask
+import android.os.Build
+import android.os.Bundle
+import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import kotlinx.android.synthetic.main.activity_main.*
-import androidx.appcompat.app.AlertDialog
-import java.io.*
-import java.net.HttpURLConnection
-import java.net.URL
-import android.view.View
-
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.adjust.sdk.Constants.BASE_URL
+import io.reactivex.disposables.Disposable
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.Sort
-import kotlinx.coroutines.*
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import loggerbird.LoggerBird
-import io.reactivex.disposables.Disposable
+import loggerbird.LoggerBird.Companion.LoggerBirdHttpClient
+import loggerbird.LoggerBird.Companion.takeRetrofitRequestDetails
 import okhttp3.FormBody
 import okhttp3.HttpUrl
-import retrofit2.Call
-import retrofit2.Response
+import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.logging.HttpLoggingInterceptor
+import org.json.JSONObject
+import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.Response
 import retrofit2.Retrofit
-import org.json.JSONObject;
+import retrofit2.converter.gson.GsonConverterFactory
+import java.io.*
+import java.net.HttpURLConnection
+import java.net.URL
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
 
@@ -98,10 +108,6 @@ class MainActivity : AppCompatActivity(){
         adapter.notifyDataSetChanged()
         recyclerViewList.add(RecyclerModel("deneme"))
         adapter.notifyDataSetChanged() */
-
-
-
-
 
 
 
@@ -213,17 +219,87 @@ class MainActivity : AppCompatActivity(){
 
         button_performance.setOnClickListener {
 
-            LoggerBird.takeDeviceInformationDetails()
-            LoggerBird.takeDevicePerformanceDetails()
-            LoggerBird.takeDeviceCpuDetails()
+            /*val logging = HttpLoggingInterceptor()
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+
+            val retrofit: Retrofit = Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(LoggerBirdHttpClient())
+                .build()*/
+
+/*
+            val interceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+
+            val client: OkHttpClient = OkHttpClient.Builder().addInterceptor(interceptor).addInterceptor(interceptor).build()
+
+            val retrofit = Retrofit.Builder()
+                .baseUrl("https://backend.example.com")
+                .client(LoggerBirdHttpClient())
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()*/
+            getCurrentData()
+
 
 
         }
     }
+    companion object {
+
+        var BaseUrl = "http://api.openweathermap.org/"
+        var AppId = "2e65127e909e178d0af311a81f39948c"
+        var lat = "35"
+        var lon = "139"
+    }
+
+    fun getCurrentData() {
+        val retrofit = Retrofit.Builder()
+            .baseUrl(BaseUrl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(LoggerBirdHttpClient())
+            .build()
+        val service = retrofit.create(WeatherService::class.java)
+        val call = service.getCurrentWeatherData(lat, lon, AppId)
+        var weatherData : String?
+        call.enqueue(object : Callback<WeatherResponse> {
+            override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>) {
+                if (response.code() == 200) {
+                    val weatherResponse = response.body()!!
+
+                    val stringBuilder = "Country: " +
+                            weatherResponse.sys!!.country +
+                            "\n" +
+                            "Temperature: " +
+                            weatherResponse.main!!.temp +
+                            "\n" +
+                            "Temperature(Min): " +
+                            weatherResponse.main!!.temp_min +
+                            "\n" +
+                            "Temperature(Max): " +
+                            weatherResponse.main!!.temp_max +
+                            "\n" +
+                            "Humidity: " +
+                            weatherResponse.main!!.humidity +
+                            "\n" +
+                            "Pressure: " +
+                            weatherResponse.main!!.pressure
+
+                     //weatherData!!.text = stringBuilder
+                }
+            }
+
+            override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
+                //weatherData!!.text = t.message
+            }
+        })}
 
 
 
-    private fun beginSearch(srsearch: String, context: Context) {
+
+
+
+private fun beginSearch(srsearch: String, context: Context) {
 
         ApiService.run {
             hitCountCheck("query", "json", "search", srsearch).enqueue(object :
@@ -241,7 +317,7 @@ class MainActivity : AppCompatActivity(){
                     val httpUrl: HttpUrl = HttpUrl.Builder()
                         .scheme("https")
                         .host("api.plos.org")
-                            .addPathSegment("search")
+                        .addPathSegment("search")
                         .addQueryParameter("q", "DNA")
                         .addQueryParameter("q", "DNA2")
                         .addQueryParameter("q", "DNA3")
@@ -254,11 +330,12 @@ class MainActivity : AppCompatActivity(){
                         .post(fromBodyBuilder.build())
                         .build()
                     coroutineCallInternet.async {
+                        for ( x in 0..10 ){
                         LoggerBird.takeRetrofitRequestDetails(response= ApiServiceInterface.httpClient(
                             request
                         ),request=request)
                        // LoggerBird.saveRetrofitRequestDetails()
-                    }
+                    }}
 
 
                   //  LogDeneme.saveRetrofitRequestDetails()
