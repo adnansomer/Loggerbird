@@ -3,7 +3,6 @@ package loggerbird
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
-import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
@@ -14,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
@@ -50,9 +50,9 @@ class LoggerBird : LifecycleObserver {
         //Static global variables.
         private var controlLogInit: Boolean = false
         private lateinit var context: Context
-        private var file: File? = null
-        private lateinit var defaultFileDirectory: File
-        private lateinit var defaultFilePath: File
+        private var filePathName: String? = null
+        private lateinit var fileDirectory: File
+        private lateinit var filePath: File
         private var stringBuilderComponent: StringBuilder = StringBuilder()
         private var stringBuilderLifeCycle: StringBuilder = StringBuilder()
         private var stringBuilderFragmentManager: StringBuilder = StringBuilder()
@@ -80,8 +80,6 @@ class LoggerBird : LifecycleObserver {
         private var coroutineCallEmailTask = CoroutineScope(Dispatchers.IO)
         private var formattedTime: String? = null
         private var fileLimit: Long = 2097152
-        private var arrayListFile: ArrayList<File> = ArrayList()
-        private lateinit var fileTemp: File
         private lateinit var lifeCycleObserver: LogLifeCycleObserver
         private lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
         private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver =
@@ -104,15 +102,18 @@ class LoggerBird : LifecycleObserver {
         //private lateinit var threadPoolExecutor: ThreadPoolExecutor
         private var runnableList: ArrayList<Runnable> = ArrayList()
         internal var uncaughtExceptionHandlerController = false
+        private lateinit var defaultProgressBar: ProgressBar
+        private var defaultProgressBarView: View? = null
 
 
         //---------------Public Methods:---------------
+
 
         /**
          * Call This Method Before Calling Any Other Methods.
          * Parameters:
          * @param context is for getting reference from the application context , you must deploy this parameter.
-         * @param file allow user modify the file they want to create for saving their details method , otherwise it will save your file to the devices data->data->your project package name->files->component_details with an default name of "logger_bird_details"
+         * @param filePathName allow user modify the file name they want to create for saving their details method , otherwise it will save your file to the devices data->data->your project package name->files->logger_bird_details with an default name of "logger_bird_details"
          * @param fragmentManager is used for getting details from FragmentManager which is used for tracking life cycle of Fragments rather than activity.
          * Variables:
          * @var controlLogInit is used for tracking the logInit return value which is used in other methods in this class.
@@ -123,19 +124,35 @@ class LoggerBird : LifecycleObserver {
          */
         fun logInit(
             context: Context,
-            file: File? = null,
+            filePathName: String? = null,
             fragmentManager: FragmentManager? = null
         ): Boolean {
-            intentService = Intent(context, LoggerBirdService::class.java)
-            context.startService(intentService)
+            if (!controlLogInit) {
+                fileDirectory = context.filesDir
+                if (filePathName != null) {
+                    filePath = File(fileDirectory, "$filePathName.txt")
+                    if (filePath.exists()) {
+                        filePath.delete()
+                    }
+                } else {
+                    filePath = File(fileDirectory, "logger_bird_details.txt")
+                    if (filePath.exists()) {
+                        filePath.delete()
+                    }
+                }
+                intentService = Intent(context, LoggerBirdService::class.java)
+                context.startService(intentService)
+                workQueueLinked = LinkedBlockingQueueUtil(context = context)
+                val logcatObserver = LogcatObserver()
+                Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
+            }
             this.context = context
-            this.file = file
+            this.filePathName = filePathName
             controlLogInit =
                 logAttach(
                     context,
                     fragmentManager
                 )
-            workQueueLinked = LinkedBlockingQueueUtil(context = context)
 //            threadPoolExecutor= LogThreadPoolExecutorUtil(
 //                corePoolSize = corePoolSize,
 //                maximumPoolSize = maximumPoolSize,
@@ -143,9 +160,6 @@ class LoggerBird : LifecycleObserver {
 //                workQueue = workQueueLinked,
 //                unit = timeUnit
 //            )
-            val logcatObserver: LogcatObserver =
-                LogcatObserver()
-            Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
             return controlLogInit
         }
 
@@ -201,10 +215,10 @@ class LoggerBird : LifecycleObserver {
         }
 
         /**
-         * This Method Used For Re-Instantation Of The File Details You Have Specified.
+         * This Method Used For Re-Instantation Of The File Path Name  You Have Specified.
          */
-        fun changeFileDetails(file: File?) {
-            this.file = file
+        fun changeFilePathName(filePathName: String?) {
+            this.filePathName = filePathName
         }
 
         /**
@@ -277,25 +291,26 @@ class LoggerBird : LifecycleObserver {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private suspend fun exceededFileLimitWriter(stringBuilder: StringBuilder, file: File) {
+        private fun exceededFileLimitWriter(
+            stringBuilder: StringBuilder,
+            file: File
+        ) {
             try {
                 val scannerFile = Scanner(file)
                 val scannerStringBuilder =
                     Scanner(stringBuilder.toString())
                 val scannerTempStringBuilder =
                     Scanner(stringBuilder.toString())
-                val tempFile: File =
+                val tempFile =
                     File(file.toString().substringBeforeLast("/"), "logger_bird_details_temp.txt")
-                withContext(Dispatchers.IO) {
-                    file.delete()
-                    file.createNewFile()
-                    if (!tempFile.exists()) {
-                        tempFile.createNewFile()
-                    }
-                    if (tempFile.length() > fileLimit) {
-                        tempFile.delete()
-                        tempFile.createNewFile()
-                    }
+                file.delete()
+                file.createNewFile()
+                if (!tempFile.exists()) {
+                    tempFile.createNewFile()
+                }
+                if (tempFile.length() > fileLimit) {
+                    tempFile.delete()
+                    tempFile.createNewFile()
                 }
                 do {
                     if (scannerTempStringBuilder.hasNextLine()) {
@@ -314,7 +329,7 @@ class LoggerBird : LifecycleObserver {
                 } while (scannerStringBuilder.hasNextLine())
             } catch (e: Exception) {
                 e.printStackTrace()
-                callExceptionDetails(e)
+                callExceptionDetails(exception = e, tag = Constants.exceedFileLimitTag)
             }
             stringBuilderExceedFileWriterLimit = StringBuilder()
         }
@@ -331,48 +346,32 @@ class LoggerBird : LifecycleObserver {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private suspend fun saveComponentDetails() {
+        private fun saveComponentDetails() {
             if (stringBuilderComponent.isNotEmpty()) {
                 try {
-                    if (file != null) {
-                        if (!file!!.exists()) {
-                            withContext(Dispatchers.IO) {
-                                file!!.createNewFile()
-                                file!!.appendText(takeBuilderDetails())
-                                file!!.appendText(
-                                    stringBuilderComponent.toString()
-                                )
-                            }
-                        } else {
-                            if (file!!.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderComponent.toString())
-                            } else {
-                                file!!.appendText(
-                                    stringBuilderComponent.toString()
-                                )
-                            }
-                        }
-                    } else {
-                        defaultFileDirectory = context.filesDir
-                        defaultFilePath = File(
-                            defaultFileDirectory, "logger_bird_details.txt"
+                    fileDirectory = context.filesDir
+                    filePath = if (filePathName != null) {
+                        File(
+                            fileDirectory, "$filePathName.txt"
                         )
-                        if (!defaultFilePath.exists()) {
-                            withContext(Dispatchers.IO) {
-                                defaultFilePath.createNewFile()
-                                defaultFilePath.appendText(
-                                    takeBuilderDetails()
-                                )
-                                defaultFilePath.appendText(stringBuilderComponent.toString())
-                            }
+                    } else {
+                        File(
+                            fileDirectory, "logger_bird_details.txt"
+                        )
+                    }
+                    if (!filePath.exists()) {
+                        filePath.createNewFile()
+                        filePath.appendText(
+                            takeBuilderDetails()
+                        )
+                        filePath.appendText(stringBuilderComponent.toString())
+                    } else {
+                        if (filePath.length() > fileLimit) {
+                            stringBuilderExceedFileWriterLimit.append(stringBuilderComponent.toString())
                         } else {
-                            if (defaultFilePath.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderComponent.toString())
-                            } else {
-                                defaultFilePath.appendText(
-                                    stringBuilderComponent.toString()
-                                )
-                            }
+                            filePath.appendText(
+                                stringBuilderComponent.toString()
+                            )
                         }
                     }
 //                            if (rootView != null) {
@@ -380,16 +379,7 @@ class LoggerBird : LifecycleObserver {
 //                                    attachRootView(rootView)
 //                                }
 //                            }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    callExceptionDetails(
-                        e,
-                        Constants.componentTag
-                    )
-                }
-                withContext(Dispatchers.IO) {
                     workQueueLinked.controlRunnable = false
-
                     if (runnableList.size > 0) {
                         runnableList.removeAt(0)
                         if (runnableList.size > 0) {
@@ -397,19 +387,19 @@ class LoggerBird : LifecycleObserver {
                         }
                     }
                     if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
-                        if (file != null) {
-                            exceededFileLimitWriter(
-                                stringBuilder = stringBuilderExceedFileWriterLimit,
-                                file = file!!
-                            )
-                        } else {
-                            exceededFileLimitWriter(
-                                stringBuilder = stringBuilderExceedFileWriterLimit,
-                                file = defaultFilePath
-                            )
-                        }
+                        exceededFileLimitWriter(
+                            stringBuilder = stringBuilderExceedFileWriterLimit,
+                            file = filePath
+                        )
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callExceptionDetails(
+                        exception = e,
+                        tag = Constants.componentTag
+                    )
                 }
+
             } else {
                 throw LoggerBirdException(
                     Constants.saveErrorMessage + Constants.componentMethodTag
@@ -429,61 +419,39 @@ class LoggerBird : LifecycleObserver {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private suspend fun saveLifeCycleDetails() {
+        private fun saveLifeCycleDetails() {
             if (stringBuilderLifeCycle.isNotEmpty()) {
                 try {
-                    if (file != null) {
-                        if (!file!!.exists()) {
-                            withContext(Dispatchers.IO) {
-                                file!!.createNewFile()
-                                file!!.appendText(takeBuilderDetails())
-                                file!!.appendText(stringBuilderLifeCycle.toString())
-                            }
-                        } else {
-                            if (file!!.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderLifeCycle.toString())
-                            } else {
-                                file!!.appendText(stringBuilderLifeCycle.toString())
-                            }
-                        }
-                    } else {
-                        defaultFileDirectory = context.filesDir
-                        defaultFilePath = File(
-                            defaultFileDirectory, "logger_bird_details.txt"
+                    fileDirectory = context.filesDir
+                    if (filePathName != null) {
+                        filePath = File(
+                            fileDirectory, "$filePathName.txt"
                         )
-                        if (!defaultFilePath.exists()) {
-                            withContext(Dispatchers.IO) {
-                                defaultFilePath.createNewFile()
-                                defaultFilePath.appendText(
-                                    takeBuilderDetails()
-                                )
-                                defaultFilePath.appendText(
-                                    stringBuilderLifeCycle.toString()
-                                )
-                            }
+                    } else {
+                        filePath = File(
+                            fileDirectory, "logger_bird_details.txt"
+                        )
+                    }
+                    if (!filePath.exists()) {
+                        filePath.createNewFile()
+                        filePath.appendText(
+                            takeBuilderDetails()
+                        )
+                        filePath.appendText(
+                            stringBuilderLifeCycle.toString()
+                        )
+                    } else {
+                        if (filePath.length() > fileLimit) {
+                            stringBuilderExceedFileWriterLimit.append(stringBuilderLifeCycle.toString())
                         } else {
-                            if (defaultFilePath.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderLifeCycle.toString())
-                            } else {
-                                defaultFilePath.appendText(
-                                    stringBuilderLifeCycle.toString()
-                                )
-                            }
+                            filePath.appendText(
+                                stringBuilderLifeCycle.toString()
+                            )
                         }
-
                     }
 //                               if (rootView != null) {
 //                                    attachRootView(rootView)
 //                                }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    callExceptionDetails(
-                        e,
-                        Constants.lifeCycleTag
-                    )
-                }
-
-                withContext(Dispatchers.IO) {
                     workQueueLinked.controlRunnable = false
                     if (runnableList.size > 0) {
                         runnableList.removeAt(0)
@@ -492,18 +460,20 @@ class LoggerBird : LifecycleObserver {
                         }
                     }
                     if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
-                        if (file != null) {
-                            exceededFileLimitWriter(
-                                stringBuilder = stringBuilderExceedFileWriterLimit,
-                                file = file!!
-                            )
-                        } else {
-                            exceededFileLimitWriter(
-                                stringBuilder = stringBuilderExceedFileWriterLimit,
-                                file = defaultFilePath
-                            )
-                        }
+                        exceededFileLimitWriter(
+                            stringBuilder = stringBuilderExceedFileWriterLimit,
+                            file = filePath
+                        )
                     }
+                    if (LoggerBirdService.onDestroyMessage != null) {
+                        saveSessionIntoOldSessionFile()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callExceptionDetails(
+                        exception = e,
+                        tag = Constants.lifeCycleTag
+                    )
                 }
             } else {
                 throw LoggerBirdException(
@@ -523,54 +493,36 @@ class LoggerBird : LifecycleObserver {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private suspend fun saveFragmentManagerDetails() {
+        private fun saveFragmentManagerDetails() {
             if (stringBuilderFragmentManager.isNotEmpty()) {
                 try {
-                    if (file != null) {
-                        if (!file!!.exists()) {
-                            withContext(Dispatchers.IO) {
-                                file!!.createNewFile()
-                            }
-                            file!!.appendText(takeBuilderDetails())
-                            file!!.appendText(
-                                stringBuilderFragmentManager.toString()
-                            )
-                        } else {
-                            if (file!!.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(
-                                    stringBuilderFragmentManager.toString()
-                                )
-                            } else {
-                                file!!.appendText(
-                                    stringBuilderFragmentManager.toString()
-                                )
-                            }
-                        }
-                    } else {
-                        defaultFileDirectory = context.filesDir
-                        defaultFilePath = File(
-                            defaultFileDirectory, "logger_bird_details.txt"
+                    fileDirectory = context.filesDir
+                    if (filePathName != null) {
+                        filePath = File(
+                            fileDirectory, "$filePathName.txt"
                         )
-                        if (!defaultFilePath.exists()) {
-                            withContext(Dispatchers.IO) {
-                                defaultFilePath.createNewFile()
-                            }
-                            defaultFilePath.appendText(
-                                takeBuilderDetails()
-                            )
-                            defaultFilePath.appendText(
+                    } else {
+                        filePath = File(
+                            fileDirectory, "logger_bird_details.txt"
+                        )
+                    }
+                    if (!filePath.exists()) {
+                        filePath.createNewFile()
+                        filePath.appendText(
+                            takeBuilderDetails()
+                        )
+                        filePath.appendText(
+                            stringBuilderFragmentManager.toString()
+                        )
+                    } else {
+                        if (filePath.length() > fileLimit) {
+                            stringBuilderExceedFileWriterLimit.append(
                                 stringBuilderFragmentManager.toString()
                             )
                         } else {
-                            if (defaultFilePath.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(
-                                    stringBuilderFragmentManager.toString()
-                                )
-                            } else {
-                                defaultFilePath.appendText(
-                                    stringBuilderFragmentManager.toString()
-                                )
-                            }
+                            filePath.appendText(
+                                stringBuilderFragmentManager.toString()
+                            )
                         }
                     }
 //                            if (rootView != null) {
@@ -578,33 +530,24 @@ class LoggerBird : LifecycleObserver {
 //                                    attachRootView(rootView)
 //                                }
 //                            }
-                    withContext(Dispatchers.IO) {
-                        workQueueLinked.controlRunnable = false
+                    workQueueLinked.controlRunnable = false
+                    if (runnableList.size > 0) {
+                        runnableList.removeAt(0)
                         if (runnableList.size > 0) {
-                            runnableList.removeAt(0)
-                            if (runnableList.size > 0) {
-                                workQueueLinked.put(runnableList[0])
-                            }
+                            workQueueLinked.put(runnableList[0])
                         }
-                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
-                            if (file != null) {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = file!!
-                                )
-                            } else {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = defaultFilePath
-                                )
-                            }
-                        }
+                    }
+                    if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                        exceededFileLimitWriter(
+                            stringBuilder = stringBuilderExceedFileWriterLimit,
+                            file = filePath
+                        )
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     callExceptionDetails(
-                        e,
-                        Constants.fragmentManagerTag
+                        exception = e,
+                        tag = Constants.fragmentManagerTag
                     )
                 }
             } else {
@@ -625,54 +568,36 @@ class LoggerBird : LifecycleObserver {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private suspend fun saveAnalyticsDetails() {
+        private fun saveAnalyticsDetails() {
             if (stringBuilderAnalyticsManager.isNotEmpty()) {
                 try {
-                    if (file != null) {
-                        if (!file!!.exists()) {
-                            withContext(Dispatchers.IO) {
-                                file!!.createNewFile()
-                            }
-                            file!!.appendText(takeBuilderDetails())
-                            file!!.appendText(
-                                stringBuilderAnalyticsManager.toString()
-                            )
-                        } else {
-                            if (file!!.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(
-                                    stringBuilderAnalyticsManager.toString()
-                                )
-                            } else {
-                                file!!.appendText(
-                                    stringBuilderAnalyticsManager.toString()
-                                )
-                            }
-                        }
-                    } else {
-                        defaultFileDirectory = context.filesDir
-                        defaultFilePath = File(
-                            defaultFileDirectory, "logger_bird.txt"
+                    fileDirectory = context.filesDir
+                    if (filePathName != null) {
+                        filePath = File(
+                            fileDirectory, "$filePathName.txt"
                         )
-                        if (!defaultFilePath.exists()) {
-                            withContext(Dispatchers.IO) {
-                                defaultFilePath.createNewFile()
-                            }
-                            defaultFilePath.appendText(
-                                takeBuilderDetails()
-                            )
-                            defaultFilePath.appendText(
+                    } else {
+                        filePath = File(
+                            fileDirectory, "logger_bird.txt"
+                        )
+                    }
+                    if (!filePath.exists()) {
+                        filePath.createNewFile()
+                        filePath.appendText(
+                            takeBuilderDetails()
+                        )
+                        filePath.appendText(
+                            stringBuilderAnalyticsManager.toString()
+                        )
+                    } else {
+                        if (filePath.length() > fileLimit) {
+                            stringBuilderExceedFileWriterLimit.append(
                                 stringBuilderAnalyticsManager.toString()
                             )
                         } else {
-                            if (defaultFilePath.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(
-                                    stringBuilderAnalyticsManager.toString()
-                                )
-                            } else {
-                                defaultFilePath.appendText(
-                                    stringBuilderAnalyticsManager.toString()
-                                )
-                            }
+                            filePath.appendText(
+                                stringBuilderAnalyticsManager.toString()
+                            )
                         }
                     }
 //                            if (rootView != null) {
@@ -680,33 +605,24 @@ class LoggerBird : LifecycleObserver {
 //                                    attachRootView(rootView)
 //                                }
 //                            }
-                    withContext(Dispatchers.IO) {
-                        workQueueLinked.controlRunnable = false
+                    workQueueLinked.controlRunnable = false
+                    if (runnableList.size > 0) {
+                        runnableList.removeAt(0)
                         if (runnableList.size > 0) {
-                            runnableList.removeAt(0)
-                            if (runnableList.size > 0) {
-                                workQueueLinked.put(runnableList[0])
-                            }
+                            workQueueLinked.put(runnableList[0])
                         }
                         if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
-                            if (file != null) {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = file!!
-                                )
-                            } else {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = defaultFilePath
-                                )
-                            }
+                            exceededFileLimitWriter(
+                                stringBuilder = stringBuilderExceedFileWriterLimit,
+                                file = filePath
+                            )
                         }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     callExceptionDetails(
-                        e,
-                        Constants.analyticsTag
+                        exception = e,
+                        tag = Constants.analyticsTag
                     )
                 }
 
@@ -728,50 +644,34 @@ class LoggerBird : LifecycleObserver {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private suspend fun saveHttpRequestDetails() {
+        private fun saveHttpRequestDetails() {
             if (stringBuilderHttp.isNotEmpty()) {
                 try {
-                    if (file != null) {
-                        if (!file!!.exists()) {
-                            withContext(Dispatchers.IO) {
-                                file!!.createNewFile()
-                            }
-                            file!!.appendText(takeBuilderDetails())
-                            file!!.appendText(
-                                stringBuilderHttp.toString()
-                            )
-                        } else {
-                            if (file!!.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderHttp.toString())
-                            } else {
-                                file!!.appendText(
-                                    stringBuilderHttp.toString()
-                                )
-                            }
-                        }
-                    } else {
-                        defaultFileDirectory = context.filesDir
-                        defaultFilePath = File(
-                            defaultFileDirectory, "logger_bird_details.txt"
+                    fileDirectory = context.filesDir
+                    if (filePathName != null) {
+                        filePath = File(
+                            fileDirectory, "$filePathName.txt"
                         )
-                        if (!defaultFilePath.exists()) {
-                            withContext(Dispatchers.IO) {
-                                defaultFilePath.createNewFile()
-                            }
-                            defaultFilePath.appendText(
-                                takeBuilderDetails()
-                            )
-                            defaultFilePath.appendText(
+                    } else {
+                        filePath = File(
+                            fileDirectory, "logger_bird_details.txt"
+                        )
+                    }
+                    if (!filePath.exists()) {
+                        filePath.createNewFile()
+                        filePath.appendText(
+                            takeBuilderDetails()
+                        )
+                        filePath.appendText(
+                            stringBuilderHttp.toString()
+                        )
+                    } else {
+                        if (filePath.length() > fileLimit) {
+                            stringBuilderExceedFileWriterLimit.append(stringBuilderHttp.toString())
+                        } else {
+                            filePath.appendText(
                                 stringBuilderHttp.toString()
                             )
-                        } else {
-                            if (defaultFilePath.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderHttp.toString())
-                            } else {
-                                defaultFilePath.appendText(
-                                    stringBuilderHttp.toString()
-                                )
-                            }
                         }
                     }
 //                            if (rootView != null) {
@@ -779,33 +679,24 @@ class LoggerBird : LifecycleObserver {
 //                                    attachRootView(rootView)
 //                                }
 //                            }
-                    withContext(Dispatchers.IO) {
-                        workQueueLinked.controlRunnable = false
+                    workQueueLinked.controlRunnable = false
+                    if (runnableList.size > 0) {
+                        runnableList.removeAt(0)
                         if (runnableList.size > 0) {
-                            runnableList.removeAt(0)
-                            if (runnableList.size > 0) {
-                                workQueueLinked.put(runnableList[0])
-                            }
+                            workQueueLinked.put(runnableList[0])
                         }
-                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
-                            if (file != null) {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = file!!
-                                )
-                            } else {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = defaultFilePath
-                                )
-                            }
-                        }
+                    }
+                    if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                        exceededFileLimitWriter(
+                            stringBuilder = stringBuilderExceedFileWriterLimit,
+                            file = filePath
+                        )
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     callExceptionDetails(
-                        e,
-                        Constants.httpTag
+                        exception = e,
+                        tag = Constants.httpTag
                     )
                 }
             } else {
@@ -826,50 +717,34 @@ class LoggerBird : LifecycleObserver {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private suspend fun saveInAPurchaseDetails() {
+        private fun saveInAPurchaseDetails() {
             if (stringBuilderInAPurchase.isNotEmpty()) {
                 try {
-                    if (file != null) {
-                        if (!file!!.exists()) {
-                            withContext(Dispatchers.IO) {
-                                file!!.createNewFile()
-                            }
-                            file!!.appendText(takeBuilderDetails())
-                            file!!.appendText(
-                                stringBuilderInAPurchase.toString()
-                            )
-                        } else {
-                            if (file!!.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderInAPurchase.toString())
-                            } else {
-                                file!!.appendText(
-                                    stringBuilderInAPurchase.toString()
-                                )
-                            }
-                        }
-                    } else {
-                        defaultFileDirectory = context.filesDir
-                        defaultFilePath = File(
-                            defaultFileDirectory, "logger_bird_details.txt"
+                    fileDirectory = context.filesDir
+                    filePath = if (filePathName != null) {
+                        File(
+                            fileDirectory, "$filePathName.txt"
                         )
-                        if (!defaultFilePath.exists()) {
-                            withContext(Dispatchers.IO) {
-                                defaultFilePath.createNewFile()
-                            }
-                            defaultFilePath.appendText(
-                                takeBuilderDetails()
-                            )
-                            defaultFilePath.appendText(
+                    } else {
+                        File(
+                            fileDirectory, "logger_bird_details.txt"
+                        )
+                    }
+                    if (!filePath.exists()) {
+                        filePath.createNewFile()
+                        filePath.appendText(
+                            takeBuilderDetails()
+                        )
+                        filePath.appendText(
+                            stringBuilderInAPurchase.toString()
+                        )
+                    } else {
+                        if (filePath.length() > fileLimit) {
+                            stringBuilderExceedFileWriterLimit.append(stringBuilderInAPurchase.toString())
+                        } else {
+                            filePath.appendText(
                                 stringBuilderInAPurchase.toString()
                             )
-                        } else {
-                            if (defaultFilePath.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderInAPurchase.toString())
-                            } else {
-                                defaultFilePath.appendText(
-                                    stringBuilderInAPurchase.toString()
-                                )
-                            }
                         }
                     }
 //                            if (rootView != null) {
@@ -877,33 +752,24 @@ class LoggerBird : LifecycleObserver {
 //                                    attachRootView(rootView)
 //                                }
 //                            }
-                    withContext(Dispatchers.IO) {
-                        workQueueLinked.controlRunnable = false
+                    workQueueLinked.controlRunnable = false
+                    if (runnableList.size > 0) {
+                        runnableList.removeAt(0)
                         if (runnableList.size > 0) {
-                            runnableList.removeAt(0)
-                            if (runnableList.size > 0) {
-                                workQueueLinked.put(runnableList[0])
-                            }
+                            workQueueLinked.put(runnableList[0])
                         }
-                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
-                            if (file != null) {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = file!!
-                                )
-                            } else {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = defaultFilePath
-                                )
-                            }
-                        }
+                    }
+                    if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                        exceededFileLimitWriter(
+                            stringBuilder = stringBuilderExceedFileWriterLimit,
+                            file = filePath
+                        )
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     callExceptionDetails(
-                        e,
-                        Constants.inAPurchaseTag
+                        exception = e,
+                        tag = Constants.inAPurchaseTag
                     )
                 }
             } else {
@@ -924,50 +790,34 @@ class LoggerBird : LifecycleObserver {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private suspend fun saveRetrofitRequestDetails() {
+        private fun saveRetrofitRequestDetails() {
             if (stringBuilderRetrofit.isNotEmpty()) {
                 try {
-                    if (file != null) {
-                        if (!file!!.exists()) {
-                            withContext(Dispatchers.IO) {
-                                file!!.createNewFile()
-                            }
-                            file!!.appendText(takeBuilderDetails())
-                            file!!.appendText(
-                                stringBuilderRetrofit.toString()
-                            )
-                        } else {
-                            if (file!!.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderRetrofit.toString())
-                            } else {
-                                file!!.appendText(
-                                    stringBuilderRetrofit.toString()
-                                )
-                            }
-                        }
-                    } else {
-                        defaultFileDirectory = context.filesDir
-                        defaultFilePath = File(
-                            defaultFileDirectory, "logger_bird_details.txt"
+                    fileDirectory = context.filesDir
+                    filePath = if (filePathName != null) {
+                        File(
+                            fileDirectory, "$filePathName.txt"
                         )
-                        if (!defaultFilePath.exists()) {
-                            withContext(Dispatchers.IO) {
-                                defaultFilePath.createNewFile()
-                            }
-                            defaultFilePath.appendText(
-                                takeBuilderDetails()
-                            )
-                            defaultFilePath.appendText(
+                    } else {
+                        File(
+                            fileDirectory, "logger_bird_details.txt"
+                        )
+                    }
+                    if (!filePath.exists()) {
+                        filePath.createNewFile()
+                        filePath.appendText(
+                            takeBuilderDetails()
+                        )
+                        filePath.appendText(
+                            stringBuilderRetrofit.toString()
+                        )
+                    } else {
+                        if (filePath.length() > fileLimit) {
+                            stringBuilderExceedFileWriterLimit.append(stringBuilderRetrofit.toString())
+                        } else {
+                            filePath.appendText(
                                 stringBuilderRetrofit.toString()
                             )
-                        } else {
-                            if (defaultFilePath.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderRetrofit.toString())
-                            } else {
-                                defaultFilePath.appendText(
-                                    stringBuilderRetrofit.toString()
-                                )
-                            }
                         }
                     }
 //                            if (rootView != null) {
@@ -975,33 +825,24 @@ class LoggerBird : LifecycleObserver {
 //                                    attachRootView(rootView)
 //                                }
 //                            }
-                    withContext(Dispatchers.IO) {
-                        workQueueLinked.controlRunnable = false
+                    workQueueLinked.controlRunnable = false
+                    if (runnableList.size > 0) {
+                        runnableList.removeAt(0)
                         if (runnableList.size > 0) {
-                            runnableList.removeAt(0)
-                            if (runnableList.size > 0) {
-                                workQueueLinked.put(runnableList[0])
-                            }
+                            workQueueLinked.put(runnableList[0])
                         }
-                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
-                            if (file != null) {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = file!!
-                                )
-                            } else {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = defaultFilePath
-                                )
-                            }
-                        }
+                    }
+                    if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                        exceededFileLimitWriter(
+                            stringBuilder = stringBuilderExceedFileWriterLimit,
+                            file = filePath
+                        )
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     callExceptionDetails(
-                        e,
-                        Constants.retrofitTag
+                        exception = e,
+                        tag = Constants.retrofitTag
                     )
                 }
             } else {
@@ -1022,47 +863,30 @@ class LoggerBird : LifecycleObserver {
          * Exception:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private suspend fun saveRealmDetails() {
+        private fun saveRealmDetails() {
             if (stringBuilderRealm.isNotEmpty()) {
                 try {
-                    if (file != null) {
-                        if (!file!!.exists()) {
-                            withContext(Dispatchers.IO) {
-                                file!!.createNewFile()
-                            }
-                            file!!.appendText(takeBuilderDetails())
-                            file!!.appendText(
-                                stringBuilderRealm.toString()
-                            )
-                        } else {
-                            if (file!!.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderRealm.toString())
-                            } else {
-                                file!!.appendText(
-                                    stringBuilderRealm.toString()
-                                )
-                            }
-                        }
-
-                    } else {
-                        defaultFileDirectory = context.filesDir
-                        defaultFilePath = File(
-                            defaultFileDirectory, "logger_bird_details.txt"
+                    fileDirectory = context.filesDir
+                    filePath = if (filePathName != null) {
+                        File(
+                            fileDirectory, "$filePathName.txt"
                         )
-                        if (!defaultFilePath.exists()) {
-                            withContext(Dispatchers.IO) {
-                                defaultFilePath.createNewFile()
-                            }
-                            defaultFilePath.appendText(
-                                takeBuilderDetails()
-                            )
-                            defaultFilePath.appendText(
-                                stringBuilderRealm.toString()
-                            )
-                        } else {
-                            if (defaultFilePath.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderRealm.toString())
-                            }
+                    } else {
+                        File(
+                            fileDirectory, "logger_bird_details.txt"
+                        )
+                    }
+                    if (!filePath.exists()) {
+                        filePath.createNewFile()
+                        filePath.appendText(
+                            takeBuilderDetails()
+                        )
+                        filePath.appendText(
+                            stringBuilderRealm.toString()
+                        )
+                    } else {
+                        if (filePath.length() > fileLimit) {
+                            stringBuilderExceedFileWriterLimit.append(stringBuilderRealm.toString())
                         }
                     }
 //                            if (rootView != null) {
@@ -1070,35 +894,25 @@ class LoggerBird : LifecycleObserver {
 //                                    attachRootView(rootView)
 //                                }
 //                            }
-                    withContext(Dispatchers.IO) {
-                        workQueueLinked.controlRunnable = false
+                    workQueueLinked.controlRunnable = false
+                    if (runnableList.size > 0) {
+                        runnableList.removeAt(0)
                         if (runnableList.size > 0) {
-                            runnableList.removeAt(0)
-                            if (runnableList.size > 0) {
-                                workQueueLinked.put(runnableList[0])
-                            }
+                            workQueueLinked.put(runnableList[0])
                         }
-                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
-                            if (file != null) {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = file!!
-                                )
-                            } else {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = defaultFilePath
-                                )
-                            }
-                        }
+                    }
+                    if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                        exceededFileLimitWriter(
+                            stringBuilder = stringBuilderExceedFileWriterLimit,
+                            file = filePath
+                        )
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     callExceptionDetails(
-                        e,
-                        Constants.realmTag
+                        exception = e,
+                        tag = Constants.realmTag
                     )
-                    saveRealmDetails()
                 }
             } else {
                 throw LoggerBirdException(
@@ -1118,83 +932,59 @@ class LoggerBird : LifecycleObserver {
          * Exception:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private suspend fun saveExceptionDetails() {
+        private fun saveExceptionDetails() {
             if (stringBuilderException.isNotEmpty()) {
                 try {
-                    if (file != null) {
-                        if (!file!!.exists()) {
-                            withContext(Dispatchers.IO) {
-                                file!!.createNewFile()
-                            }
-                            file!!.appendText(takeBuilderDetails())
-                            file!!.appendText(
-                                stringBuilderException.toString()
-                            )
-                        } else {
-                            if (file!!.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderException.toString())
-                            } else {
-                                file!!.appendText(
-                                    stringBuilderException.toString()
-                                )
-                            }
-                        }
-
-                    } else {
-                        defaultFileDirectory = context.filesDir
-                        defaultFilePath = File(
-                            defaultFileDirectory, "logger_bird_details.txt"
+                    fileDirectory = context.filesDir
+                    if (filePathName != null) {
+                        filePath = File(
+                            fileDirectory, "$filePathName.txt"
                         )
-                        if (!defaultFilePath.exists()) {
-                            withContext(Dispatchers.IO) {
-                                defaultFilePath.createNewFile()
-                            }
-                            defaultFilePath.appendText(
-                                takeBuilderDetails()
-                            )
-                            defaultFilePath.appendText(
+                    } else {
+                        filePath = File(
+                            fileDirectory, "logger_bird_details.txt"
+                        )
+                    }
+                    if (!filePath.exists()) {
+                        filePath.createNewFile()
+                        filePath.appendText(
+                            takeBuilderDetails()
+                        )
+                        filePath.appendText(
+                            stringBuilderException.toString()
+                        )
+                    } else {
+                        if (filePath.length() > fileLimit) {
+                            stringBuilderExceedFileWriterLimit.append(stringBuilderException.toString())
+                        } else {
+                            filePath.appendText(
                                 stringBuilderException.toString()
                             )
-                        } else {
-                            if (defaultFilePath.length() > fileLimit) {
-                                stringBuilderExceedFileWriterLimit.append(stringBuilderException.toString())
-                            } else {
-                                defaultFilePath.appendText(
-                                    stringBuilderException.toString()
-                                )
-                            }
                         }
-
                     }
 //                        if (rootView != null) {
 //                            withContext(Dispatchers.Main) {
 //                                attachRootView(rootView)
 //                            }
 //                        }
-                    withContext(Dispatchers.IO) {
-                        workQueueLinked.controlRunnable = false
+                    workQueueLinked.controlRunnable = false
+                    if (runnableList.size > 0) {
+                        runnableList.removeAt(0)
                         if (runnableList.size > 0) {
-                            runnableList.removeAt(0)
-                            if (runnableList.size > 0) {
-                                workQueueLinked.put(runnableList[0])
-                            }
-                        }
-                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
-                            if (file != null) {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = file!!
-                                )
-                            } else {
-                                exceededFileLimitWriter(
-                                    stringBuilder = stringBuilderExceedFileWriterLimit,
-                                    file = defaultFilePath
-                                )
-                            }
+                            workQueueLinked.put(runnableList[0])
                         }
                     }
+                    if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                        exceededFileLimitWriter(
+                            stringBuilder = stringBuilderExceedFileWriterLimit,
+                            file = filePath
+                        )
+                    }
                     if (uncaughtExceptionHandlerController) {
-                        exitProcess(0)
+                        EmailUtil.sendUnhandledException(file = filePath,context = context)
+                        saveSessionIntoOldSessionFile()
+                        android.os.Process.killProcess(android.os.Process.myPid());
+                        exitProcess(0);
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -1214,53 +1004,79 @@ class LoggerBird : LifecycleObserver {
 
         //in progress method.
         fun callComponentDetails(view: View?, resources: Resources?) {
-            if (runnableList.isEmpty()) {
-                workQueueLinked.put(Runnable {
+            if (controlLogInit) {
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put(Runnable {
+                        takeComponentDetails(
+                            view = view,
+                            resources = resources
+                        )
+                    })
+                }
+                runnableList.add(Runnable {
                     takeComponentDetails(
                         view = view,
                         resources = resources
                     )
                 })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
-            runnableList.add(Runnable { takeComponentDetails(view = view, resources = resources) })
         }
 
         //in progress method.
         fun callLifeCycleDetails() {
-            if (runnableList.isEmpty()) {
-                workQueueLinked.put(Runnable { takeLifeCycleDetails() })
+            if (controlLogInit) {
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put(Runnable { takeLifeCycleDetails() })
+                }
+                runnableList.add(Runnable { takeLifeCycleDetails() })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
-            runnableList.add(Runnable { takeLifeCycleDetails() })
         }
 
         //in progress method.
         fun callAnalyticsDetails(bundle: Bundle?) {
-            if (runnableList.isEmpty()) {
-                workQueueLinked.put(Runnable {
-                    takeAnalyticsDetails(bundle = bundle)
-                })
+            if (controlLogInit) {
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put(Runnable {
+                        takeAnalyticsDetails(bundle = bundle)
+                    })
+                }
+                runnableList.add(Runnable { takeAnalyticsDetails(bundle = bundle) })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
-            runnableList.add(Runnable { takeAnalyticsDetails(bundle = bundle) })
         }
 
         //in progress method.
         fun callFragmentManagerDetails(fragmentManager: FragmentManager?) {
-            if (runnableList.isEmpty()) {
-                workQueueLinked.put(Runnable {
-                    takeFragmentManagerDetails(fragmentManager = fragmentManager)
-                })
+            if (controlLogInit) {
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put(Runnable {
+                        takeFragmentManagerDetails(fragmentManager = fragmentManager)
+                    })
+                }
+                runnableList.add(Runnable { takeFragmentManagerDetails(fragmentManager = fragmentManager) })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
-            runnableList.add(Runnable { takeFragmentManagerDetails(fragmentManager = fragmentManager) })
         }
 
         //in progress method.
         fun callHttpRequestDetails(httpUrlConnection: HttpURLConnection?) {
-            if (runnableList.isEmpty()) {
-                workQueueLinked.put(Runnable {
-                    takeHttpRequestDetails(httpUrlConnection = httpUrlConnection)
-                })
+            if (controlLogInit) {
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put(Runnable {
+                        takeHttpRequestDetails(httpUrlConnection = httpUrlConnection)
+                    })
+                }
+                runnableList.add(Runnable { takeHttpRequestDetails(httpUrlConnection = httpUrlConnection) })
+
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
-            runnableList.add(Runnable { takeHttpRequestDetails(httpUrlConnection = httpUrlConnection) })
         }
 
         //in progress method.
@@ -1271,8 +1087,19 @@ class LoggerBird : LifecycleObserver {
             billingFlowParams: BillingFlowParams? = null,
             acknowledgePurchaseParams: AcknowledgePurchaseParams? = null
         ) {
-            if (runnableList.isEmpty()) {
-                workQueueLinked.put(Runnable {
+            if (controlLogInit) {
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put(Runnable {
+                        takeInAPurchaseDetails(
+                            billingClient = billingClient,
+                            billingResult = billingResult,
+                            skuDetailsParams = skuDetailsParams,
+                            billingFlowParams = billingFlowParams,
+                            acknowledgePurchaseParams = acknowledgePurchaseParams
+                        )
+                    })
+                }
+                runnableList.add(Runnable {
                     takeInAPurchaseDetails(
                         billingClient = billingClient,
                         billingResult = billingResult,
@@ -1281,16 +1108,9 @@ class LoggerBird : LifecycleObserver {
                         acknowledgePurchaseParams = acknowledgePurchaseParams
                     )
                 })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
-            runnableList.add(Runnable {
-                takeInAPurchaseDetails(
-                    billingClient = billingClient,
-                    billingResult = billingResult,
-                    skuDetailsParams = skuDetailsParams,
-                    billingFlowParams = billingFlowParams,
-                    acknowledgePurchaseParams = acknowledgePurchaseParams
-                )
-            })
         }
 
         //in progress method.
@@ -1299,32 +1119,45 @@ class LoggerBird : LifecycleObserver {
             response: Response? = null,
             request: Request? = null
         ) {
-            if (runnableList.isEmpty()) {
-                workQueueLinked.put(Runnable {
+            if (controlLogInit) {
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put(Runnable {
+                        takeRetrofitRequestDetails(
+                            retrofit = retrofit,
+                            response = response,
+                            request = request
+                        )
+                    })
+                }
+                runnableList.add(Runnable {
                     takeRetrofitRequestDetails(
                         retrofit = retrofit,
                         response = response,
                         request = request
                     )
                 })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
-            runnableList.add(Runnable {
-                takeRetrofitRequestDetails(
-                    retrofit = retrofit,
-                    response = response,
-                    request = request
-                )
-            })
         }
 
         //in progress method.
         fun callRealmDetails(realm: Realm? = null, realmModel: RealmModel? = null) {
-            if (runnableList.isEmpty()) {
-                workQueueLinked.put(Runnable {
-                    takeRealmDetails(realm = realm, realmModel = realmModel)
+            if (controlLogInit) {
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put(Runnable {
+                        takeRealmDetails(realm = realm, realmModel = realmModel)
+                    })
+                }
+                runnableList.add(Runnable {
+                    takeRealmDetails(
+                        realm = realm,
+                        realmModel = realmModel
+                    )
                 })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
-            runnableList.add(Runnable { takeRealmDetails(realm = realm, realmModel = realmModel) })
         }
 
         //in progress method.
@@ -1333,21 +1166,56 @@ class LoggerBird : LifecycleObserver {
             tag: String? = null,
             throwable: Throwable? = null
         ) {
-//            if (runnableList.isEmpty()) {
-//                workQueueLinked.put(Runnable {
-//                    takeExceptionDetails(exception = exception, tag = tag, throwable = throwable)
-//                })
-//            }
-//            runnableList.add(Runnable {
-//                takeExceptionDetails(
-//                    exception = exception,
-//                    tag = tag,
-//                    throwable = throwable
-//                )
-//            })
-            takeExceptionDetails(exception = exception, tag = tag, throwable = throwable)
+            if (runnableList.isEmpty()) {
+                workQueueLinked.put(Runnable {
+                    takeExceptionDetails(exception = exception, tag = tag, throwable = throwable)
+                })
+            }
+            runnableList.add(Runnable {
+                takeExceptionDetails(
+                    exception = exception,
+                    tag = tag,
+                    throwable = throwable
+                )
+            })
         }
 
+        //In progress method.
+        fun callOldSecessionFile(tag: String?) {
+            if (runnableList.isEmpty()) {
+                workQueueLinked.put(Runnable { saveSessionIntoOldSessionFile() })
+            }
+            runnableList.add(Runnable { saveSessionIntoOldSessionFile() })
+        }
+
+        //In progress method.
+        private fun saveSessionIntoOldSessionFile() {
+            try {
+                val scannerOldSecessionFile = Scanner(filePath)
+                val oldSecessionFile = if (filePathName != null) {
+                    File(filePath.path.substringBeforeLast("/"), filePathName + "_old_session.txt")
+                } else {
+                    File(
+                        filePath.path.substringBeforeLast("/"),
+                        "logger_bird_details_old_session.txt"
+                    )
+                }
+                if (oldSecessionFile.exists()) {
+                    oldSecessionFile.delete()
+                    oldSecessionFile.createNewFile()
+                } else {
+                    oldSecessionFile.createNewFile()
+                }
+                do {
+                    oldSecessionFile.appendText(scannerOldSecessionFile.nextLine() + "\n")
+                } while (scannerOldSecessionFile.hasNextLine())
+                filePath.delete()
+                filePath=oldSecessionFile
+            } catch (e: Exception) {
+                e.printStackTrace()
+                callExceptionDetails(exception = e, tag = Constants.saveSessionOldFileTag)
+            }
+        }
 
         /**
          * //in progress method.
@@ -1401,8 +1269,8 @@ class LoggerBird : LifecycleObserver {
                     } catch (e: Exception) {
                         e.printStackTrace()
                         callExceptionDetails(
-                            e,
-                            Constants.componentTag
+                            exception = e,
+                            tag = Constants.componentTag
                         )
                     }
                 } else {
@@ -1476,7 +1344,7 @@ class LoggerBird : LifecycleObserver {
                 stringBuilderComponent.append(recyclerViewChildAttachStateChangeListener.returnRecyclerViewState())
             } catch (e: Exception) {
                 e.printStackTrace()
-                callExceptionDetails(e, Constants.componentTag)
+                callExceptionDetails(exception = e, tag = Constants.componentTag)
             }
         }
 
@@ -1491,9 +1359,9 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
-        private fun takeLifeCycleDetails() {
+        internal fun takeLifeCycleDetails() {
             workQueueLinked.controlRunnable = true
-            coroutineCallLifeCycle.async {
+            if (LoggerBirdService.onDestroyMessage != null) {
                 if (controlLogInit) {
                     stringBuilderLifeCycle = StringBuilder()
                     try {
@@ -1522,20 +1390,60 @@ class LoggerBird : LifecycleObserver {
                                 }
                             }
                         }
-                        if (LoggerBirdService.onDestroyMessage != null) {
-                            stringBuilderLifeCycle.append(LoggerBirdService.onDestroyMessage)
-                        }
+                        stringBuilderLifeCycle.append(LoggerBirdService.onDestroyMessage)
                         saveLifeCycleDetails()
                     } catch (e: Exception) {
                         e.printStackTrace()
                         callExceptionDetails(
-                            e,
-                            Constants.lifeCycleTag
+                            exception = e,
+                            tag = Constants.lifeCycleTag
                         )
                     }
-
                 } else {
                     throw LoggerBirdException(Constants.logInitErrorMessage)
+                }
+            } else {
+                coroutineCallLifeCycle.async {
+                    if (controlLogInit) {
+                        stringBuilderLifeCycle = StringBuilder()
+                        try {
+                            if (Companion::fragmentLifeCycleObserver.isInitialized) {
+                                if (fragmentLifeCycleObserver.returnFragmentLifeCycleState().isNotEmpty()) {
+                                    for (classList in fragmentLifeCycleObserver.returnClassList()) {
+                                        stringBuilderLifeCycle.append(classList + ":" + "\n")
+                                        for (stateList in fragmentLifeCycleObserver.returnFragmentLifeCycleState().split(
+                                            "\n"
+                                        )) {
+                                            if (stateList.contains(classList)) {
+                                                stringBuilderLifeCycle.append(stateList + "\n")
+                                            }
+                                        }
+                                    }
+                                }
+                            } else if (lifeCycleObserver.returnActivityLifeCycleState().isNotEmpty()) {
+                                for (classList in lifeCycleObserver.returnClassList()) {
+                                    stringBuilderLifeCycle.append(classList + ":" + "\n")
+                                    for (stateList in lifeCycleObserver.returnActivityLifeCycleState().split(
+                                        "\n"
+                                    )) {
+                                        if (stateList.contains(classList)) {
+                                            stringBuilderLifeCycle.append(stateList + "\n")
+                                        }
+                                    }
+                                }
+                            }
+                            saveLifeCycleDetails()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            callExceptionDetails(
+                                exception = e,
+                                tag = Constants.lifeCycleTag
+                            )
+                        }
+
+                    } else {
+                        throw LoggerBirdException(Constants.logInitErrorMessage)
+                    }
                 }
             }
         }
@@ -1585,8 +1493,8 @@ class LoggerBird : LifecycleObserver {
                     } catch (e: Exception) {
                         e.printStackTrace()
                         callExceptionDetails(
-                            e,
-                            Constants.analyticsTag
+                            exception = e,
+                            tag = Constants.analyticsTag
                         )
                     }
                 } else {
@@ -1628,8 +1536,8 @@ class LoggerBird : LifecycleObserver {
                     } catch (e: Exception) {
                         e.printStackTrace()
                         callExceptionDetails(
-                            e,
-                            Constants.fragmentManagerTag
+                            exception = e,
+                            tag = Constants.fragmentManagerTag
                         )
                     }
                 } else {
@@ -1669,8 +1577,8 @@ class LoggerBird : LifecycleObserver {
                     } catch (e: Exception) {
                         e.printStackTrace()
                         callExceptionDetails(
-                            e,
-                            Constants.httpTag
+                            exception = e,
+                            tag = Constants.httpTag
                         )
                     }
                 } else {
@@ -1756,8 +1664,8 @@ class LoggerBird : LifecycleObserver {
                     } catch (e: Exception) {
                         e.printStackTrace()
                         callExceptionDetails(
-                            e,
-                            Constants.inAPurchaseTag
+                            exception = e,
+                            tag = Constants.inAPurchaseTag
                         )
                     }
                 } else {
@@ -1820,8 +1728,8 @@ class LoggerBird : LifecycleObserver {
                     } catch (e: Exception) {
                         e.printStackTrace()
                         callExceptionDetails(
-                            e,
-                            Constants.retrofitTag
+                            exception = e,
+                            tag = Constants.retrofitTag
                         )
                     }
                 } else {
@@ -1867,8 +1775,8 @@ class LoggerBird : LifecycleObserver {
                     } catch (e: Exception) {
                         e.printStackTrace()
                         callExceptionDetails(
-                            e,
-                            Constants.realmTag
+                            exception = e,
+                            tag = Constants.realmTag
                         )
                     }
                 } else {
@@ -1906,19 +1814,34 @@ class LoggerBird : LifecycleObserver {
                     val formatter = SimpleDateFormat.getDateTimeInstance()
                     formattedTime = formatter.format(date)
                     if (exception != null) {
-                        stringBuilderException.append(
-                            "\n" + "Method Tag:" + tag +
-                                    "\n" + formattedTime + ":" + Constants.exceptionTag + "\n" + "Exception:" + Log.getStackTraceString(
-                                exception
+                        if (Log.getStackTraceString(exception).isNotEmpty()) {
+                            stringBuilderException.append(
+                                "\n" + "Method Tag:" + tag +
+                                        "\n" + formattedTime + ":" + Constants.exceptionTag + "\n" + "Exception:" + Log.getStackTraceString(
+                                    exception
+                                )
                             )
-                        )
+                        } else {
+                            stringBuilderException.append(
+                                "\n" + "Method Tag:" + tag +
+                                        "\n" + formattedTime + ":" + Constants.exceptionTag + "\n" + "Exception:" + exception.message
+                            )
+                        }
                     } else if (throwable != null) {
-                        stringBuilderException.append(
-                            "\n" + "Method Tag:" + tag +
-                                    "\n" + formattedTime + ":" + Constants.unHandledExceptionTag + "\n" + "Throwable:" + Log.getStackTraceString(
-                                throwable
+                        if (Log.getStackTraceString(throwable).isNotEmpty()) {
+                            stringBuilderException.append(
+                                "\n" + "Method Tag:" + tag +
+                                        "\n" + formattedTime + ":" + Constants.unHandledExceptionTag + "\n" + "Throwable:" + Log.getStackTraceString(
+                                    throwable
+                                )
                             )
-                        )
+                        } else {
+                            stringBuilderException.append(
+                                "\n" + "Method Tag:" + tag +
+                                        "\n" + formattedTime + ":" + Constants.unHandledExceptionTag + "\n" + "Throwable:" + throwable.message
+                            )
+                        }
+
                     }
                     saveExceptionDetails()
                 }
@@ -1926,6 +1849,50 @@ class LoggerBird : LifecycleObserver {
                 e.printStackTrace()
                 callExceptionDetails(exception = e, tag = Constants.exceptionTag)
             }
+        }
+
+        fun callEmailSender(
+            file: File? = null,
+            context: Context,
+            progressBar: ProgressBar? = null,
+            rootView: ViewGroup? = null
+        ) {
+            if (runnableList.isEmpty()) {
+                workQueueLinked.put(Runnable {
+                    if (file != null) {
+                        sendDetailsAsEmail(
+                            file = file,
+                            context = context,
+                            progressBar = progressBar,
+                            rootView = rootView
+                        )
+                    } else {
+                        sendDetailsAsEmail(
+                            file = this.filePath,
+                            context = context,
+                            progressBar = progressBar,
+                            rootView = rootView
+                        )
+                    }
+                })
+            }
+            runnableList.add(Runnable {
+                if (file != null) {
+                    sendDetailsAsEmail(
+                        file = file,
+                        context = context,
+                        progressBar = progressBar,
+                        rootView = rootView
+                    )
+                } else {
+                    sendDetailsAsEmail(
+                        file = this.filePath,
+                        context = context,
+                        progressBar = progressBar,
+                        rootView = rootView
+                    )
+                }
+            })
         }
 
         /**
@@ -1949,103 +1916,53 @@ class LoggerBird : LifecycleObserver {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        fun sendDetailsAsEmail(
+        private fun sendDetailsAsEmail(
             file: File,
             context: Context,
             progressBar: ProgressBar? = null,
             rootView: ViewGroup? = null
         ) {
+            workQueueLinked.controlRunnable = true
             coroutineCallEmailTask.async {
                 try {
                     if (controlLogInit) {
-                        var defaultProgressBar: ProgressBar = ProgressBar(context)
-                        arrayListFile = ArrayList()
                         withContext(Dispatchers.Main) {
-                            progressBar?.let {
-                                it.isShown
-                                it.visibility = View.VISIBLE
-                            }.run {
-                                val view: View = LayoutInflater.from(context)
-                                    .inflate(R.layout.default_progressbar, rootView, true)
-                                defaultProgressBar = view.findViewById(R.id.progressBar)
-                                defaultProgressBar.isShown
+                            if (defaultProgressBarView != null) {
+                                defaultProgressBar.visibility = View.VISIBLE
+                            } else {
+                                progressBar?.let {
+                                    it.visibility = View.VISIBLE
+                                }.run {
+                                    defaultProgressBarView = LayoutInflater.from(context)
+                                        .inflate(R.layout.default_progressbar, rootView, true)
+                                    defaultProgressBar = ProgressBar(context)
+                                    defaultProgressBar =
+                                        defaultProgressBarView!!.findViewById(R.id.progressBar)
+                                }
                             }
-
-
                         }
-                        if (file.length() > fileLimit) {
-                            val scanner: Scanner = Scanner(file)
-                            var fileCounter: Int = 0
-                            do {
-                                fileTemp = File(context.filesDir, file.name + fileCounter + ".txt")
-                                fileCounter++
-                                if (fileTemp.exists()) {
-                                    fileTemp.delete()
-                                }
-                            } while (fileTemp.exists())
-                            fileCounter = 0
-                            fileTemp = File(context.filesDir, file.name + fileCounter + ".txt")
-                            withContext(Dispatchers.IO) {
-                                fileTemp.createNewFile()
-                            }
-                            do {
-                                fileTemp.appendText(scanner.nextLine() + "\n")
-                                if (fileTemp.length() > fileLimit) {
-                                    fileCounter++
-                                    val fileEmail: File =
-                                        fileTemp
-                                    arrayListFile.add(fileEmail)
-                                    fileTemp =
-                                        File(context.filesDir, file.name + fileCounter + ".txt")
-                                    withContext(Dispatchers.IO) {
-                                        fileTemp.createNewFile()
-                                    }
-                                }
-                            } while (scanner.hasNext())
-                            arrayListFile.add(
-                                fileTemp
+                        if (progressBar != null) {
+                            EmailUtil.sendEmail(
+                                file = file,
+                                context = context,
+                                progressBar = progressBar,
+                                workQueueLinked = workQueueLinked,
+                                runnableList = runnableList
                             )
-                            coroutineCallEmailTask.async {
-                                if (progressBar != null) {
-                                    EmailUtil.sendEmail(
-                                        arrayListFile = arrayListFile,
-                                        context = context,
-                                        progressBar = progressBar,
-                                        coroutinecallEmail = coroutineCallEmailTask
-                                    )
-                                } else {
-                                    EmailUtil.sendEmail(
-                                        arrayListFile = arrayListFile,
-                                        context = context,
-                                        progressBar = defaultProgressBar,
-                                        coroutinecallEmail = coroutineCallEmailTask
-                                    )
-                                }
-                            }
                         } else {
-                            coroutineCallEmailTask.async {
-                                if (progressBar != null) {
-                                    EmailUtil.sendEmail(
-                                        file = file,
-                                        context = context,
-                                        progressBar = progressBar,
-                                        coroutinecallEmail = coroutineCallEmailTask
-                                    )
-                                } else {
-                                    EmailUtil.sendEmail(
-                                        file = file,
-                                        context = context,
-                                        progressBar = defaultProgressBar,
-                                        coroutinecallEmail = coroutineCallEmailTask
-                                    )
-                                }
-                            }
+                            EmailUtil.sendEmail(
+                                file = file,
+                                context = context,
+                                progressBar = defaultProgressBar,
+                                workQueueLinked = workQueueLinked,
+                                runnableList = runnableList
+                            )
                         }
                     }
 
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    callExceptionDetails(e, Constants.emailTag)
+                    callExceptionDetails(exception = e, tag = Constants.emailTag)
                 }
             }
         }

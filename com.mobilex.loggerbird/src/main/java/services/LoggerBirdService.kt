@@ -1,10 +1,12 @@
 package services
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import constants.Constants
 import loggerbird.LoggerBird
+import java.io.File
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
@@ -63,7 +65,7 @@ internal class LoggerBirdService() : Service() {
             currentLifeCycleState = "onDestroy"
             onDestroyMessage =
                 " " + Constants.lifeCycleTag + ":" + intentService!!.component!!.className + " " + "${formattedTime}:${currentLifeCycleState}\n"
-            LoggerBird.callLifeCycleDetails()
+            LoggerBird.takeLifeCycleDetails()
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callExceptionDetails(e)

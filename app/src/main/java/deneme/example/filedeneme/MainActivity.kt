@@ -34,6 +34,7 @@ import okhttp3.Request
 import retrofit2.Callback
 import retrofit2.Retrofit
 import org.json.JSONObject;
+import java.lang.NullPointerException
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
 
@@ -72,6 +73,7 @@ class MainActivity : AppCompatActivity(){
     private var coroutineCallComponent = CoroutineScope(Dispatchers.IO)
 
 
+
 //    val TAG_ACTIVITY_NAME:String="MainActivity"
 //    val TAG_ONCREATE:String="Activity In OnCreate State"
 
@@ -107,16 +109,19 @@ class MainActivity : AppCompatActivity(){
         LoggerBird.logInit(context = this)
         button_add.setOnClickListener() {
             adapter.notifyItemRemoved(0)
+            val filePathTest:File= File(this.filesDir,"logger_bird_details.txt")
+            val rootView: ViewGroup =(this as Activity).window.decorView.findViewById(android.R.id.content);
+            for(x in 1..5){
+                LoggerBird.callLifeCycleDetails()
+                LoggerBird.callEmailSender(file=filePathTest,context = this,rootView = rootView)
+                LoggerBird.callComponentDetails(view = button_add,resources = button_add.resources)
+            }
             try {
-                for(x in 1..1000){
-                    LoggerBird.callLifeCycleDetails()
-                    LoggerBird.callComponentDetails(view = button_add,resources = button_add.resources)
-                }
+
 
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            LoggerBird.callLifeCycleDetails()
 
 
 //            LoggerBird.callEnqueue()
@@ -124,7 +129,6 @@ class MainActivity : AppCompatActivity(){
 
 // )
 //            LogDeneme.saveComponentDetails()
-            val rootView: ViewGroup =(this as Activity).window.decorView.findViewById(android.R.id.content);
             //LoggerBird.saveComponentDetails()
 //            val emailFile:File=File(this.filesDir,"component_details.txt")
 

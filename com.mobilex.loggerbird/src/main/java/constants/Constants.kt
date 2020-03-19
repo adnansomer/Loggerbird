@@ -43,5 +43,7 @@ internal class Constants {
         const val realmMethodTag = "LoggerBird.takeRealmDetails()"
         const val exceptionMethodTag = "LoggerBird.takeExceptionDetails()"
         const val SMTP_HOST_NAME: String = "smtp.gmail.com";
+        const val exceedFileLimitTag:String = "Exceed File Limit"
+        const val saveSessionOldFileTag:String = "Save Session Old File"
     }
 }

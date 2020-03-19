@@ -10,6 +10,7 @@ import authentication.SMTPAuthenticator
 import exception.LoggerBirdException
 import kotlinx.coroutines.*
 import java.io.File
+import java.lang.Runnable
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -22,6 +23,8 @@ import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
+import kotlin.collections.ArrayList
+import kotlin.system.exitProcess
 
 //EmailUtil class is used for sending desired logfile as email.
 internal class EmailUtil {
@@ -50,80 +53,101 @@ internal class EmailUtil {
          * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws LoggerBirdException if internet or network check gives exceptions.
          */
-        fun sendEmail(
+        internal suspend fun sendEmail(
             file: File? = null,
-            arrayListFile: ArrayList<File>? = null,
             context: Context,
             progressBar: ProgressBar,
-            coroutinecallEmail: CoroutineScope
+            workQueueLinked: LinkedBlockingQueueUtil,
+            runnableList: ArrayList<Runnable>
         ) {
-            val internetConnectionUtil: InternetConnectionUtil =
-                InternetConnectionUtil()
             try {
-                if (!progressBar.isShown) {
-                    progressBar.visibility = View.VISIBLE
-                }
+                val internetConnectionUtil = InternetConnectionUtil()
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
                     if (internetConnectionUtil.makeHttpRequest() == 200) {
                         Log.d(
                             "email_time",
                             systemTime()
                         )
-                        if (file != null) {
-                            sendSingleEmail(
-                                file
-                            )
-                        } else if (arrayListFile != null) {
-                            for (arrayList in arrayListFile) {
-                                sendMultipleEmail(
-                                    arrayList
-                                )
-                            }
-                        }
-                        if (file != null) {
-                            file.delete()
-                        } else if (arrayListFile != null) {
-                            for (arrayList in arrayListFile) {
-                                arrayList.delete()
-                            }
-                        }
+                        sendSingleEmail(
+                            file
+                        )
                         Log.d(
                             "email_time",
                             systemTime()
                         )
-                        coroutinecallEmail.launch {
-                            withContext(Dispatchers.Main) {
-                                progressBar.visibility = View.GONE
+                        withContext(Dispatchers.Main) {
+                            progressBar.visibility = View.GONE
+                        }
+                        withContext(Dispatchers.IO) {
+                            workQueueLinked.controlRunnable = false
+                            if (runnableList.size > 0) {
+                                runnableList.removeAt(0)
+                                if (runnableList.size > 0) {
+                                    workQueueLinked.put(runnableList[0])
+                                }
                             }
                         }
+
                     } else {
-                        coroutinecallEmail.launch {
-                            withContext(Dispatchers.Main) {
-                                progressBar.visibility = View.GONE
-                            }
-                        }
                         throw LoggerBirdException(
                             Constants.internetErrorMessage
                         )
                     }
                 } else {
-                    coroutinecallEmail.launch {
-                        withContext(Dispatchers.Main) {
-                            progressBar.visibility = View.GONE
-                        }
-                    }
                     throw LoggerBirdException(
                         Constants.networkErrorMessage
                     )
                 }
             } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    progressBar.visibility = View.GONE
+                }
                 e.printStackTrace()
-                LoggerBird.callExceptionDetails(e)
-                coroutinecallEmail.launch {
-                    withContext(Dispatchers.Main) {
-                        progressBar.visibility = View.GONE
+                withContext(Dispatchers.IO) {
+                    workQueueLinked.controlRunnable = false
+                    if (runnableList.size > 0) {
+                        runnableList.removeAt(0)
+                        if (runnableList.size > 0) {
+                            workQueueLinked.put(runnableList[0])
+                        }
                     }
                 }
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
+            }
+        }
+
+        internal fun sendUnhandledException(file: File,context: Context) {
+            try {
+                val internetConnectionUtil = InternetConnectionUtil()
+                if (internetConnectionUtil.checkNetworkConnection(context = context)) {
+                    if (internetConnectionUtil.makeHttpRequest() == 200) {
+                        Log.d(
+                            "email_time",
+                            systemTime()
+                        )
+                        sendSingleEmail(
+                            file
+                        )
+                        Log.d(
+                            "email_time",
+                            systemTime()
+                        )
+
+
+                    } else {
+                        throw LoggerBirdException(
+                            Constants.internetErrorMessage
+                        )
+                    }
+                } else {
+                    throw LoggerBirdException(
+                        Constants.networkErrorMessage
+                    )
+                }
+            }catch (e: Exception) {
+                e.printStackTrace()
+                LoggerBird.uncaughtExceptionHandlerController=false
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
             }
         }
 
@@ -177,13 +201,13 @@ internal class EmailUtil {
                 multiPart = MimeMultipart()
                 mimeMessage.setFrom(InternetAddress("appcaesars@gmail.com"))
                 mimeMessage.addRecipients(Message.RecipientType.TO, "appcaesars@gmail.com")
-                mimeMessage.setSubject("log_details")
+                mimeMessage.subject = "log_details"
                 mimeBodyPart = MimeBodyPart()
                 transport.connect()
             } catch (e: Exception) {
                 e.printStackTrace()
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
             }
-
         }
 
         /**
@@ -199,55 +223,28 @@ internal class EmailUtil {
          * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun sendSingleEmail(file: File? = null) {
-            initializeEmail()
-            dataSource = FileDataSource(file?.path)
-            mimeBodyPart.dataHandler = DataHandler(
-                dataSource
-            )
-            mimeBodyPart.fileName = file?.name
-            multiPart.addBodyPart(
-                mimeBodyPart
-            )
-            mimeMessage.setContent(
-                multiPart
-            )
-            transport.sendMessage(
-                mimeMessage,
-                mimeMessage.getRecipients(Message.RecipientType.TO)
-            )
-            transport.close()
-        }
-
-        /**
-         * This Method used for sending multiple  email which  exceeds 2mb size.
-         * Variables:
-         * @var dataSource is used for getting filepath.
-         * @var mimeBodyPart takes file content and name.
-         * @var mailSession is used for creating mail instance.
-         * @var multipart is used for getting contents that used in file.
-         * @var mimeMessage is used for mime the content that given.
-         * @var transport is used for sending email instance.
-         * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         */
-        private fun sendMultipleEmail(file: File? = null) {
-            initializeEmail()
-            dataSource = FileDataSource(file?.path)
-            mimeBodyPart.dataHandler = DataHandler(
-                dataSource
-            )
-            mimeBodyPart.fileName = file?.name
-            multiPart.addBodyPart(
-                mimeBodyPart
-            )
-            mimeMessage.setContent(
-                multiPart
-            )
-            transport.sendMessage(
-                mimeMessage,
-                mimeMessage.getRecipients(Message.RecipientType.TO)
-            )
-            transport.close()
+            try {
+                initializeEmail()
+                dataSource = FileDataSource(file?.path)
+                mimeBodyPart.dataHandler = DataHandler(
+                    dataSource
+                )
+                mimeBodyPart.fileName = file?.name
+                multiPart.addBodyPart(
+                    mimeBodyPart
+                )
+                mimeMessage.setContent(
+                    multiPart
+                )
+                transport.sendMessage(
+                    mimeMessage,
+                    mimeMessage.getRecipients(Message.RecipientType.TO)
+                )
+                transport.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
+            }
         }
     }
 }

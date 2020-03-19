@@ -3,6 +3,8 @@ package utils
 import android.content.Context
 import android.net.*
 import android.os.Build
+import constants.Constants
+import loggerbird.LoggerBird
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -17,10 +19,16 @@ import java.net.URL
      */
     fun makeHttpRequest(): Int {
         var internetConnectionResult: Int = 0
-        val getUrl: URL = URL("https://accounts.google.com")
-        val internetConnection: HttpURLConnection = getUrl.openConnection() as HttpURLConnection
-        internetConnection.connect()
-        internetConnectionResult = internetConnection.responseCode
+        try {
+            val getUrl: URL = URL("https://accounts.google.com")
+            val internetConnection: HttpURLConnection = getUrl.openConnection() as HttpURLConnection
+            internetConnection.connect()
+            internetConnectionResult = internetConnection.responseCode
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callExceptionDetails(exception = e ,tag = Constants.emailTag)
+        }
         return internetConnectionResult
     }
 
@@ -32,36 +40,27 @@ import java.net.URL
      * @var internetConnection is used for getting response code after pinging url.
      */
     fun checkNetworkConnection(context: Context): Boolean {
-        val connectivityManager: ConnectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (Build.VERSION.SDK_INT < 23) {
-            val networkInfo = connectivityManager.activeNetworkInfo
-            if (networkInfo != null && networkInfo.isConnectedOrConnecting) {
-                return true
+        try {
+            val connectivityManager: ConnectivityManager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            if (Build.VERSION.SDK_INT < 23) {
+                val networkInfo = connectivityManager.activeNetworkInfo
+                if (networkInfo != null && networkInfo.isConnectedOrConnecting) {
+                    return true
+                }
+            } else {
+                val networkInfo = connectivityManager.activeNetwork
+                if (networkInfo != null) {
+                    val networkCapabilities: NetworkCapabilities =
+                        connectivityManager.getNetworkCapabilities(networkInfo)
+                    return networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || networkCapabilities.hasTransport(
+                        NetworkCapabilities.TRANSPORT_WIFI
+                    )
+                }
             }
-        } else {
-            var checkNetwork: Boolean = false
-            val networkRequest = NetworkRequest.Builder()
-                .build()
-            val networkInfo = connectivityManager.activeNetwork
-            if (networkInfo != null) {
-                val networkCapabilities: NetworkCapabilities =
-                    connectivityManager.getNetworkCapabilities(networkInfo)
-                return networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || networkCapabilities.hasTransport(
-                    NetworkCapabilities.TRANSPORT_WIFI
-                )
-            }
-//            var networkInfo=object:ConnectivityManager.NetworkCallback() {
-//                override fun onAvailable(network: Network) {
-//                    super.onAvailable(network)
-//                    checkNetwork=true
-//                }
-//
-//                override fun onLost(network: Network) {
-//                    super.onLost(network)
-//                    checkNetwork=false
-//                }
-//            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callExceptionDetails(exception = e ,tag = Constants.emailTag)
         }
         return false
     }

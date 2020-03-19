@@ -73,7 +73,6 @@ interface ApiServiceInterface {
             .writeTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .build()
-
     }
 }
 
