@@ -163,6 +163,17 @@
         android:layout_below="@id/button_read_logs"
         android:text="next activity" />
 
+    <Button
+        android:id="@+id/button_performance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/colorBlack"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        android:layout_below="@id/button_next_activity"
+        android:text="performance" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"

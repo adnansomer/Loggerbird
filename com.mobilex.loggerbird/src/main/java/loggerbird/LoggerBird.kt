@@ -1,17 +1,21 @@
 package loggerbird
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.os.BatteryManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
+import androidx.annotation.RequiresApi
 import android.widget.TextView
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
@@ -20,18 +24,27 @@ import com.android.billingclient.api.*
 import com.google.gson.GsonBuilder
 import com.mobilex.loggerbird.R
 import constants.Constants
+import constants.Constants.Companion.cpuInfoErrorTag
+import constants.Constants.Companion.cpuInfoTag
+import constants.Constants.Companion.deviceInfoTag
+import constants.Constants.Companion.devicePerformanceTag
 import exception.LoggerBirdException
-import utils.EmailUtil
 import io.realm.Realm
 import io.realm.RealmModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
+import observers.LogFragmentLifeCycleObserver
+import observers.LogLifeCycleObserver
+import okhttp3.Request
+import okhttp3.Response
+import retrofit2.Retrofit
+import utils.EmailUtil
 import listeners.LogRecyclerViewChildAttachStateChangeListener
 import listeners.LogRecyclerViewItemTouchListener
 import listeners.LogRecyclerViewScrollListener
 import observers.*
-import okhttp3.Request
-import okhttp3.Response
-import retrofit2.Retrofit
 import services.LoggerBirdService
 import utils.LinkedBlockingQueueUtil
 import java.io.File
@@ -75,6 +88,12 @@ class LoggerBird : LifecycleObserver {
         private var coroutineCallException: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineRetrofitTask: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineCallEmailTask = CoroutineScope(Dispatchers.IO)
+        private var stringBuilderPerformanceDetails: StringBuilder = StringBuilder()
+        private var stringBuilderDeviceInfoDetails: StringBuilder = StringBuilder()
+        private var stringBuilderMemoryUsageDetails: StringBuilder = StringBuilder()
+        private var coroutineCallDevicePerformance = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallMemoryUsageDetails = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallBuilder = CoroutineScope(Dispatchers.IO)
         private var formattedTime: String? = null
         private var fileLimit: Long = 2097152
         private lateinit var lifeCycleObserver: LogLifeCycleObserver
@@ -101,7 +120,11 @@ class LoggerBird : LifecycleObserver {
         internal var uncaughtExceptionHandlerController = false
         private lateinit var defaultProgressBar: ProgressBar
         private var defaultProgressBarView: View? = null
+        private var memoryThreshold: Long = 1897152L
+        private lateinit var intentServiceMemory: Intent
 
+
+        //---------------Public Methods:---------------//
 
         /**
          * Call This Method Before Calling Any Other Methods.
@@ -118,6 +141,8 @@ class LoggerBird : LifecycleObserver {
          * @var logcatObserver is used for adding and initializing unhandled exception observer into application.
          * @return Boolean value.
          */
+
+
         fun logInit(
             context: Context,
             filePathName: String? = null,
@@ -159,6 +184,33 @@ class LoggerBird : LifecycleObserver {
             return controlLogInit
         }
 
+
+
+        /**
+         * This Method Attaches A LifeCycle Observer Or Fragment Observer For The Current Activity Or Fragment.
+         * Parameters:
+         * @param context is for getting reference from the application context , you must deploy this parameter.
+         * @param fragmentManager is used for getting details from FragmentManager which is used for  tracking life cycle of Fragments rather than activity.
+         * Variables:
+         * @var If fragmentManager is not null then fragmentLifeCycleObserver is used for initializing the fragment observer class and adding fragment observer into fragment.
+         * @var If fragmentManager is null then lifeCycleobserver is used for initializing the activity observer class and adding activity observer into activity.
+         * @var recyclerviewItemObserver might be useful in the future(in progress).
+         * @return Boolean value.
+         */
+        private fun logAttach(context: Context, fragmentManager: FragmentManager? = null): Boolean {
+            if (fragmentManager != null) {
+                fragmentLifeCycleObserver =
+                    LogFragmentLifeCycleObserver(
+                        fragmentManager = fragmentManager
+                    )
+                fragmentManager.registerFragmentLifecycleCallbacks(fragmentLifeCycleObserver, true)
+            } else {
+                lifeCycleObserver = LogLifeCycleObserver()
+                lifeCycleObserver.registerLifeCycle(context)
+            }
+            //recyclerViewItemObserver = LogDataSetObserver(context)
+            return true
+        }
         /**
          * This Method Used For Checking logInit State.
          */
@@ -181,16 +233,6 @@ class LoggerBird : LifecycleObserver {
                 lifeCycleObserver.deRegisterLifeCycle()
             }
         }
-
-        /**
-         * This Method Detaches A Fragment Observer From The Current Fragment.
-         */
-        fun logDetachFragmentObserver(fragmentManager: FragmentManager) {
-            if (Companion::fragmentLifeCycleObserver.isInitialized) {
-                fragmentManager.unregisterFragmentLifecycleCallbacks(fragmentLifeCycleObserver)
-            }
-        }
-
 
         /**
          * This Method Re-Creates Instantiation For StringBuilders.
@@ -220,29 +262,20 @@ class LoggerBird : LifecycleObserver {
         }
 
         /**
-         * This Method Attaches A LifeCycle Observer Or Fragment Observer For The Current Activity Or Fragment.
-         * Parameters:
-         * @param context is for getting reference from the application context , you must deploy this parameter.
-         * @param fragmentManager is used for getting details from FragmentManager which is used for  tracking life cycle of Fragments rather than activity.
-         * Variables:
-         * @var If fragmentManager is not null then fragmentLifeCycleObserver is used for initializing the fragment observer class and adding fragment observer into fragment.
-         * @var If fragmentManager is null then lifeCycleobserver is used for initializing the activity observer class and adding activity observer into activity.
-         * @var recyclerviewItemObserver might be useful in the future(in progress).
-         * @return Boolean value.
+         * This Method Used For Refreshing LogInit State.
          */
-        private fun logAttach(context: Context, fragmentManager: FragmentManager? = null): Boolean {
-            if (fragmentManager != null) {
-                fragmentLifeCycleObserver =
-                    LogFragmentLifeCycleObserver(
-                        fragmentManager = fragmentManager
-                    )
-                fragmentManager.registerFragmentLifecycleCallbacks(fragmentLifeCycleObserver, true)
-            } else {
-                lifeCycleObserver = LogLifeCycleObserver()
-                lifeCycleObserver.registerLifeCycle(context)
+        fun refreshLogInitInstance() {
+            controlLogInit = false
+        }
+
+
+        /**
+         * This Method Detaches A Fragment Observer From The Current Fragment.
+         */
+        fun logDetachFragmentObserver(fragmentManager: FragmentManager) {
+            if (Companion::fragmentLifeCycleObserver.isInitialized) {
+                fragmentManager.unregisterFragmentLifecycleCallbacks(fragmentLifeCycleObserver)
             }
-            //recyclerViewItemObserver = LogDataSetObserver(context)
-            return true
         }
 
         /**
@@ -317,6 +350,7 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+
         /**
          * This Method adds takeAnalyticsDetails into queue.
          * Parameters:
@@ -363,6 +397,7 @@ class LoggerBird : LifecycleObserver {
                 runnableList.add(Runnable { takeFragmentManagerDetails(fragmentManager = fragmentManager) })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
+
             }
         }
 
@@ -390,7 +425,6 @@ class LoggerBird : LifecycleObserver {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
-
 
         /**
          * This Method adds takeInAPurchaseDetails into queue.
@@ -440,7 +474,6 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-
         /**
          * This Method adds takeRetrofitRequestDetails into queue.
          * Parameters:
@@ -481,7 +514,6 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-
         /**
          * This Method adds takeRealmDetails into queue.
          * Parameters:
@@ -498,20 +530,88 @@ class LoggerBird : LifecycleObserver {
             if (controlLogInit) {
                 if (runnableList.isEmpty()) {
                     workQueueLinked.put(Runnable {
-                        takeRealmDetails(realm = realm, realmModel = realmModel)
+//                        takeRealmDetails(realm = realm, realmModel = realmModel)
                     })
                 }
                 runnableList.add(Runnable {
-                    takeRealmDetails(
-                        realm = realm,
-                        realmModel = realmModel
-                    )
+//                    takeRealmDetails(
+//                        realm = realm,
+//                        realmModel = realmModel
+//                    )
                 })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
 
+        //In progress method.
+        fun registerRecyclerViewObservers(recyclerView: RecyclerView) {
+            recyclerView.adapter?.registerAdapterDataObserver(recyclerViewAdapterDataObserver)
+            recyclerView.addOnScrollListener(recyclerViewScrollListener)
+            recyclerView.addOnChildAttachStateChangeListener(
+                recyclerViewChildAttachStateChangeListener
+            )
+            recyclerView.addOnItemTouchListener(recyclerViewItemTouchListener)
+        }
+
+        //In progress method.
+        fun unRegisterRecyclerViewObservers(recyclerView: RecyclerView) {
+            recyclerView.adapter?.unregisterAdapterDataObserver(recyclerViewAdapterDataObserver)
+            recyclerView.removeOnScrollListener(recyclerViewScrollListener)
+            recyclerView.removeOnChildAttachStateChangeListener(
+                recyclerViewChildAttachStateChangeListener
+            )
+            recyclerView.removeOnItemTouchListener(recyclerViewItemTouchListener)
+        }
+
+        //In progress method.
+        fun takeRecyclerViewDetails(recyclerView: RecyclerView, resources: Resources?) {
+            try {
+                val stringBuilderRecyclerViewItem: StringBuilder = StringBuilder()
+                val recyclerViewList: ArrayList<Any> = ArrayList()
+                var tempView: View
+                var tempViewGroup: ViewGroup
+                var tempTextView: TextView
+                recyclerViewItemObserver.takeObserverList()
+                for (recyclerViewItem in 0..recyclerView.adapter!!.itemCount) {
+                    if (recyclerView.getChildAt(recyclerViewItem) != null) {
+                        tempView = recyclerView.getChildAt(recyclerViewItem)
+                        tempViewGroup = tempView as ViewGroup
+                        do {
+                            if (tempView is ViewGroup) {
+                                tempViewGroup = tempView as ViewGroup
+                                if (tempViewGroup.getChildAt(0) != null) {
+                                    tempView = tempViewGroup.getChildAt(0)
+                                } else if (tempViewGroup.getChildAt(recyclerViewItem) != null) {
+                                    tempView = tempViewGroup.getChildAt(recyclerViewItem)
+                                }
+                            } else {
+                                if (tempView is TextView) {
+                                    tempTextView = tempView
+                                    recyclerViewList.add(tempTextView.text)
+                                    break
+                                }
+                            }
+                        } while (true)
+                    }
+                }
+                stringBuilderRecyclerViewItem.append(recyclerViewList.toString() + "\n")
+                stringBuilderComponent.append(
+                    "\n" + formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + (resources?.getResourceName(
+                        recyclerView.id
+                    )) + " " + "Component Id:" + recyclerView.id + "\n" + "Component Type:" + recyclerView.findViewById<View>(
+                        recyclerView.id
+                    )
+                        .toString() + "\n" + "RecyclerView Layout:" + recyclerView.layoutManager + "\n" + "RecyclerView Adapter:" + recyclerView.adapter + "\n" + "RecyclerView Item Size:" + recyclerView.adapter?.itemCount + "\n" + "RecyclerView Item list:" + "\n" + recyclerViewList.toString() + "\n"
+                )
+                stringBuilderComponent.append(recyclerViewAdapterDataObserver.returnRecyclerViewState())
+                stringBuilderComponent.append(recyclerViewScrollListener.returnRecyclerViewState())
+                stringBuilderComponent.append(recyclerViewChildAttachStateChangeListener.returnRecyclerViewState())
+            } catch (e: Exception) {
+                e.printStackTrace()
+                takeExceptionDetails(e, Constants.componentTag)
+            }
+        }
 
         /**
          * //In progress method still need to be modified!
@@ -609,6 +709,47 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+        /**
+         * This Method Takes CPU and Processor Details of Android Device
+         * Variables:
+         * @var stringBuffer is used for getting cpu information from /proc/cpuinfo
+         * @var file is used for get cpu info to the file
+         * Excepitons:
+         * @throws exception if logInit method return value is false.
+         */
+        fun takeDeviceCpuDetails(): String {
+
+            val stringBuffer = StringBuffer()
+
+            if (controlLogInit) {
+                try {
+                    stringBuffer.append("abi: ").append(Build.CPU_ABI).append("\n")
+
+                    if (File("/proc/cpuinfo").exists()) {
+                        try {
+                            val file = File("/proc/cpuinfo")
+                            file.bufferedReader().forEachLine { stringBuffer.append(it + "\n") }
+
+                        } catch (e: java.lang.Exception) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        Log.d(cpuInfoErrorTag, "Cpu Information directiory not found")
+                    }
+
+                    Log.d(cpuInfoTag, stringBuffer.toString())
+                    return stringBuffer.toString()
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    saveExceptionDetails()
+                }
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+            return stringBuffer.toString()
+        }
+
         //In progress method.
         fun callOldSecessionFile(tag: String?) {
             if (runnableList.isEmpty()) {
@@ -669,82 +810,206 @@ class LoggerBird : LifecycleObserver {
                         callEnqueue()
                         callExceptionDetails(
                             exception = e,
-                            tag = Constants.componentTag
-                        )
-                    }
-                } else {
-                    throw LoggerBirdException(Constants.logInitErrorMessage)
-                }
-            }
-
-        }
-
-        //In progress method.
-        fun registerRecyclerViewObservers(recyclerView: RecyclerView) {
-            recyclerView.adapter?.registerAdapterDataObserver(recyclerViewAdapterDataObserver)
-            recyclerView.addOnScrollListener(recyclerViewScrollListener)
-            recyclerView.addOnChildAttachStateChangeListener(
-                recyclerViewChildAttachStateChangeListener
-            )
-            recyclerView.addOnItemTouchListener(recyclerViewItemTouchListener)
-        }
-
-        //In progress method.
-        fun unRegisterRecyclerViewObservers(recyclerView: RecyclerView) {
-            recyclerView.adapter?.unregisterAdapterDataObserver(recyclerViewAdapterDataObserver)
-            recyclerView.removeOnScrollListener(recyclerViewScrollListener)
-            recyclerView.removeOnChildAttachStateChangeListener(
-                recyclerViewChildAttachStateChangeListener
-            )
-            recyclerView.removeOnItemTouchListener(recyclerViewItemTouchListener)
-        }
-
-        //In progress method.
-        private fun takeRecyclerViewDetails(recyclerView: RecyclerView, resources: Resources?) {
-            try {
-                val stringBuilderRecyclerViewItem: StringBuilder = StringBuilder()
-                val recyclerViewList: ArrayList<Any> = ArrayList()
-                var tempView: View
-                var tempViewGroup: ViewGroup
-                var tempTextView: TextView
-                recyclerViewItemObserver.takeObserverList()
-                for (recyclerViewItem in 0..recyclerView.adapter!!.itemCount) {
-                    if (recyclerView.getChildAt(recyclerViewItem) != null) {
-                        tempView = recyclerView.getChildAt(recyclerViewItem)
-                        tempViewGroup = tempView as ViewGroup
-                        do {
-                            if (tempView is ViewGroup) {
-                                tempViewGroup = tempView as ViewGroup
-                                if (tempViewGroup.getChildAt(0) != null) {
-                                    tempView = tempViewGroup.getChildAt(0)
-                                } else if (tempViewGroup.getChildAt(recyclerViewItem) != null) {
-                                    tempView = tempViewGroup.getChildAt(recyclerViewItem)
-                                }
-                            } else {
-                                if (tempView is TextView) {
-                                    tempTextView = tempView
-                                    recyclerViewList.add(tempTextView.text)
-                                    break
-                                }
-                            }
-                        } while (true)
+                            tag = Constants.componentTag)
                     }
                 }
-                stringBuilderRecyclerViewItem.append(recyclerViewList.toString() + "\n")
-                stringBuilderComponent.append(
-                    "\n" + formattedTime + ":" + Constants.componentTag + "\n" + "Component Name:" + (resources?.getResourceName(
-                        recyclerView.id
-                    )) + " " + "Component Id:" + recyclerView.id + "\n" + "Component Type:" + recyclerView.findViewById<View>(
-                        recyclerView.id
-                    ).toString() + "\n" + "RecyclerView Layout:" + recyclerView.layoutManager + "\n" + "RecyclerView Adapter:" + recyclerView.adapter + "\n" + "RecyclerView Item Size:" + recyclerView.adapter?.itemCount + "\n" + "RecyclerView Item list:" + "\n" + recyclerViewList.toString() + "\n"
-                )
-                stringBuilderComponent.append(recyclerViewAdapterDataObserver.returnRecyclerViewState())
-                stringBuilderComponent.append(recyclerViewScrollListener.returnRecyclerViewState())
-                stringBuilderComponent.append(recyclerViewChildAttachStateChangeListener.returnRecyclerViewState())
-            } catch (e: Exception) {
-                e.printStackTrace()
-                callExceptionDetails(exception = e, tag = Constants.componentTag)
             }
+        }
+
+        /**This Method Determines Whether Memory is Overused
+         * Parameters:
+         * @param memoryThreshold takes threshold value to determine whether memory is overused.
+         * Variables:
+         * @var runtimeTotalMemory returns total amount of memory in runtime.
+         * @var runtimeFreeMemory returns free amount of memory in runtime.
+         * @var usedMemorySize returns extraction freeMemory from totalMemory that gives exact usage of application in memory
+         * @var memoryOverused returns true if memory usage exceeds the threshold value.
+         * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
+         * Exceptions:
+         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         */
+
+        fun takeMemoryUsageDetails(threshold: Long?): String {
+            if (controlLogInit) {
+                try {
+                    stringBuilderMemoryUsageDetails = StringBuilder()
+
+                    val runtime: Runtime = Runtime.getRuntime()
+                    val runtimeTotalMemory = runtime.totalMemory()
+                    val runtimeFreeMemory = runtime.freeMemory()
+                    val usedMemorySize = (runtimeTotalMemory - runtimeFreeMemory)
+                    val memoryOverused: Boolean
+
+                    val date = Calendar.getInstance().time
+                    val formatter = SimpleDateFormat.getDateTimeInstance()
+                    formattedTime = formatter.format(date)
+
+                    if (threshold != null) {
+                        memoryThreshold = threshold
+                    }
+
+                    if (usedMemorySize > memoryThreshold) {
+                        memoryOverused = true
+                        stringBuilderMemoryUsageDetails.append("\n\nMemory Overused: $memoryOverused\nMemory Usage: $usedMemorySize Bytes")
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    saveExceptionDetails()
+                }
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+
+            return stringBuilderMemoryUsageDetails.toString()
+        }
+
+        /**This Method Takes Device Performance Details
+         *Variables:
+         * @var availableMemory returns available memory on device.
+         * @var totalMemory returns total memory on device.
+         * @var lowMemory returns true if system considers memory is low.
+         * @var runtimeMaxMemory returns maximum amount of memory that application uses in runtime.
+         * @var runtimeTotalMemory returns total amount of memory in runtime.
+         * @var runtimeFreeMemory returns free amount of memory in runtime.
+         * @var availableProcessors returns number of available processors.
+         * @var usedMemorySize returns extraction freeMemory from totalMemory.
+         * @var cpuAbi returns cpu abi.
+         * @var sendNetworkUsage returns number of bytes that ransmitted across mobile networks.
+         * @var receivedNetworkUsage returns number of bytes that received across mobile networks.
+         * @var battery status gets information of battery percentage with using receiver.
+         * @var battery level is used for getting battery level information.
+         * @var battery scale is used for getting battery level information.
+         * @var battery gives the battery percentage of device.
+         * @return device information with a string builder.
+         * Exceptions:
+         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         */
+        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+        fun takeDevicePerformanceDetails() {
+            if (controlLogInit) {
+                try {
+                    val memoryInfo = ActivityManager.MemoryInfo()
+                    val activityManager: ActivityManager =
+                        context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                    activityManager.getMemoryInfo(memoryInfo)
+                    val runtime: Runtime = Runtime.getRuntime()
+
+                    val availableMemory = memoryInfo.availMem / 1048576L
+                    val totalMemory = memoryInfo.totalMem / 1048576L
+                    val lowMemory = memoryInfo.lowMemory
+                    val runtimeMaxMemory = runtime.maxMemory() / 1048576L
+                    val runtimeTotalMemory = runtime.totalMemory() / 1048576L
+                    val runtimeFreeMemory = runtime.freeMemory() / 1048576L
+                    val availableProcessors = runtime.availableProcessors()
+                    val usedMemorySize = (runtimeTotalMemory - runtimeFreeMemory)
+                    val cpuAbi = Build.CPU_ABI.toString()
+                    val sendNetworkUsage = android.net.TrafficStats.getMobileTxBytes()
+                    val receivedNetworkUsage = android.net.TrafficStats.getMobileRxBytes()
+
+                    val batteryStatus = context.registerReceiver(
+                        null,
+                        IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                    )
+                    var batteryLevel = -1
+                    var batteryScale = 1
+                    if (batteryStatus != null) {
+                        batteryLevel =
+                            batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, batteryLevel)
+                        batteryScale =
+                            batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, batteryScale)
+                    }
+                    val battery = batteryLevel / batteryScale.toFloat() * 100
+
+                    val date = Calendar.getInstance().time
+                    val formatter = SimpleDateFormat.getDateTimeInstance()
+                    formattedTime = formatter.format(date)
+
+                    stringBuilderPerformanceDetails.append(
+                        "\nFormatted Time : $formattedTime\nAvailable Memory: $availableMemory MB\nTotal Memory: $totalMemory MB\nRuntime Max Memory: $runtimeMaxMemory MB\n" +
+                                "Runtime Total Memory: $runtimeTotalMemory MB\nRuntime Free Memmory: $runtimeFreeMemory MB\nLow Memory: $lowMemory\nAvilable Processors: $availableProcessors\n"
+                                + "Used Memory Size: $usedMemorySize MB \nCPU ABI: $cpuAbi\nNetwork Usage(Send): $sendNetworkUsage Bytes\nNetwork Usage(Received): $receivedNetworkUsage Bytes\n"
+                                + "Battery: $battery\n "
+                    )
+
+                    Log.d(devicePerformanceTag, stringBuilderPerformanceDetails.toString())
+
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    saveExceptionDetails()
+                }
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+        }
+
+        /**
+         * This Method Takes Device Information Details
+         * Variables:
+         * @var deviceId is used for obtain device id of user.
+         * @var deviceSerial is used for getting device serial.
+         * @var device is used for getting device info.
+         * @var deviceModel is used for getting device model.
+         * @var deviceType is used for getting device type.
+         * @var deviceUser is used to get user of device.
+         * @var sdkVersion is used for getting sdk version of device.
+         * @var manufacturer is used for getting manufacturer of device.
+         * @var host is used for getting host of device.
+         * @var hardware is used for getting hardware details of device.
+         * @var deviceBrand is used to get brand name of device.
+         * @var product is used for getting product info.
+         * @return device information with a string builder.
+         * Exceptions:
+         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         */
+        fun takeDeviceInformationDetails(): String {
+            if (controlLogInit) {
+                try {
+                    val deviceId = Build.ID
+                    val deviceSerial = Build.FINGERPRINT
+                    val device = Build.DEVICE
+                    val deviceModel = Build.MODEL
+                    val deviceType = Build.TYPE
+                    val deviceUser = Build.USER
+                    val sdkVersion = Build.VERSION.SDK_INT
+                    val manufacturer = Build.MANUFACTURER
+                    val host = Build.HOST
+                    val hardware = Build.HARDWARE
+                    val deviceBrand = Build.BRAND
+                    val product = Build.PRODUCT
+
+                    stringBuilderBuild = StringBuilder()
+                    stringBuilderBuild.append(
+                        "Device Information:" + "\n"
+                                + "ID:" + deviceId + "\n"
+                                + "SERIAL: " + deviceSerial + "\n"
+                                + "DEVICE:" + device + "\n"
+                                + "DEVICE MODEL:" + deviceModel + "\n"
+                                + "DEVICE TYPE:" + deviceType + "\n"
+                                + "USER:" + deviceUser + "\n"
+                                + "SDK VERSION:" + sdkVersion + "\n"
+                                + "MANUFACTURER:" + manufacturer + "\n"
+                                + "HOST:" + host + "\n"
+                                + "HARDWARE:" + hardware + "\n"
+                                + "BRAND:" + deviceBrand + "\n"
+                                + "PRODUCT:" + product + "\n"
+                    )
+
+                    Log.d(deviceInfoTag, stringBuilderBuild.toString())
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    takeExceptionDetails(e, Constants.deviceInfoTag)
+                    saveExceptionDetails()
+                }
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+            return stringBuilderBuild.toString()
         }
 
         /**
@@ -787,11 +1052,13 @@ class LoggerBird : LifecycleObserver {
                                     if (stateList.contains(classList)) {
                                         stringBuilderLifeCycle.append(stateList + "\n")
                                     }
+
+                                    stringBuilderLifeCycle.append(LoggerBirdService.onDestroyMessage)
+                                    saveLifeCycleDetails()
                                 }
                             }
                         }
-                        stringBuilderLifeCycle.append(LoggerBirdService.onDestroyMessage)
-                        saveLifeCycleDetails()
+
                     } catch (e: Exception) {
                         e.printStackTrace()
                         callEnqueue()
@@ -816,7 +1083,9 @@ class LoggerBird : LifecycleObserver {
                                             "\n"
                                         )) {
                                             if (stateList.contains(classList)) {
-                                                stringBuilderLifeCycle.append(stateList + "\n")
+                                                stringBuilderLifeCycle.append(
+                                                    stateList + "\n"
+                                                )
                                             }
                                         }
                                     }
@@ -828,7 +1097,9 @@ class LoggerBird : LifecycleObserver {
                                         "\n"
                                     )) {
                                         if (stateList.contains(classList)) {
-                                            stringBuilderLifeCycle.append(stateList + "\n")
+                                            stringBuilderLifeCycle.append(
+                                                stateList + "\n"
+                                            )
                                         }
                                     }
                                 }
@@ -842,13 +1113,13 @@ class LoggerBird : LifecycleObserver {
                                 tag = Constants.lifeCycleTag
                             )
                         }
-
                     } else {
                         throw LoggerBirdException(Constants.logInitErrorMessage)
                     }
                 }
             }
         }
+
 
         //adnan improved this method probably will be deleted.
         private fun takeBuilderDetails(): String {
@@ -1030,7 +1301,8 @@ class LoggerBird : LifecycleObserver {
                         val formatter = SimpleDateFormat.getDateTimeInstance()
                         formattedTime = formatter.format(date)
                         val gson = GsonBuilder().setPrettyPrinting().create()
-                        val prettyJson: String = gson.toJson(billingFlowParams?.skuDetails);
+                        val prettyJson: String =
+                            gson.toJson(billingFlowParams?.skuDetails);
                         var responseMessage: String = ""
                         if (skuDetailsParams != null) {
                             if (skuDetailsParams.skusList != null) {
@@ -1050,18 +1322,22 @@ class LoggerBird : LifecycleObserver {
                         if (billingResult != null) {
                             when (billingResult.responseCode) {
                                 0 -> responseMessage = "Success"
-                                1 -> responseMessage = "User pressed back or canceled a dialog"
-                                2 -> responseMessage = "Network connection is down"
+                                1 -> responseMessage =
+                                    "User pressed back or canceled a dialog"
+                                2 -> responseMessage =
+                                    "Network connection is down"
                                 3 -> responseMessage =
                                     "The Google Play Billing AIDL version is not supported for the type requested"
                                 4 -> responseMessage =
                                     "Requested product is not available for purchase"
                                 5 -> responseMessage =
                                     "Invalid arguments provided to the API.This error can also indicate that the application was not correctly signed or properly \n set up for Google Play Billing , or does not have the neccessary permissions in the manifest"
-                                6 -> responseMessage = "Fatal error during the API action"
+                                6 -> responseMessage =
+                                    "Fatal error during the API action"
                                 7 -> responseMessage =
                                     "Failure to purchase since item is already owned"
-                                8 -> responseMessage = "Failure to consume since item is not owned"
+                                8 -> responseMessage =
+                                    "Failure to consume since item is not owned"
                             }
                         }
                         stringBuilderInAPurchase.append("\n" + formattedTime + ":" + Constants.inAPurchaseTag + "\n" + "Billing Flow Item Consumed:" + billingFlowParams?.skuDetails?.isRewarded + "\n" + "Billing Response Code:" + billingResult?.responseCode + "\n" + "Billing Response Message:" + responseMessage + "\n" + "Billing Client Is Ready:" + billingClient?.isReady + "\n" + "Sku Type:" + skuDetailsParams?.skuType + "\n" + "Sku List:" + stringBuilderSkuDetailList.toString() + "\n" + "Billing Flow Sku Details:" + prettyJson + "\n" + "Billing Flow Sku:" + billingFlowParams?.sku + "\n" + "Billing Flow Account Id:" + billingFlowParams?.accountId + "\n" + "Billing Flow Developer Id:" + billingFlowParams?.developerId + "\n" + "Billing flow Old Sku:" + billingFlowParams?.oldSku + "\n" + "Billing Flow Old Sku Purchase Token:" + billingFlowParams?.oldSkuPurchaseToken + "\n" + "Acknowledge Params:" + acknowledgePurchaseParams?.developerPayload + "\n" + "Acknowledge Purchase Token:" + acknowledgePurchaseParams?.purchaseToken)
@@ -1118,7 +1394,9 @@ class LoggerBird : LifecycleObserver {
                                 stringBuilderQuery.append(
                                     "Response Query Parameter:" + request.url.queryParameterName(
                                         parameterQueryCounter
-                                    ) + "," + request.url.queryParameterValue(parameterQueryCounter) + "\n"
+                                    ) + "," + request.url.queryParameterValue(
+                                        parameterQueryCounter
+                                    ) + "\n"
                                 )
                                 parameterQueryCounter++
                             }
@@ -1145,53 +1423,6 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-        /**
-         * This Method Takes Realm Details.
-         * Parameters:
-         * @param realm parameter used for getting details from Realm which is used for getting permissions,privileges and copy realm data.
-         * @param realm model parameter used for getting details from RealmModel which is used for giving realm data to the Realm method which is copyFromRealm().
-         * Variables:
-         * @var workQueueLinked.controlRunnable is used for locking queue class when there is a execution of transaction in the queue.
-         * @var controlLogInit is used for getting logInit method return value.
-         * @var coroutineCallRealm is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var current time used for getting local time of your devices.
-         * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
-         * @var stringBuilderRealm used for printing the details.
-         * Exceptions:
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         */
-        private fun takeRealmDetails(
-            realm: Realm? = null,
-            realmModel: RealmModel? = null
-        ) {
-            workQueueLinked.controlRunnable = true
-            coroutineCallRealm.async {
-                if (controlLogInit) {
-                    try {
-                        stringBuilderRealm = StringBuilder()
-                        val date = Calendar.getInstance().time
-                        val formatter = SimpleDateFormat.getDateTimeInstance()
-                        formattedTime = formatter.format(date)
-                        stringBuilderRealm.append(
-                            "\n" + formattedTime + ":" + Constants.realmTag + "Realm Details:" + "\n" + "Permissions:" + realm?.permissions + " " + "Privileges:" + realm?.privileges + "\n" + "Realm Model:" + realm?.copyFromRealm(
-                                realmModel
-                            )
-                        )
-                        saveRealmDetails()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        callEnqueue()
-                        callExceptionDetails(
-                            exception = e,
-                            tag = Constants.realmTag
-                        )
-                    }
-                } else {
-                    throw LoggerBirdException(Constants.logInitErrorMessage)
-                }
-            }
-        }
 
         /**
          * This Method Takes Exception Details.
@@ -1219,7 +1450,8 @@ class LoggerBird : LifecycleObserver {
                 coroutineCallException.async {
                     stringBuilderException = StringBuilder()
                     val date = Calendar.getInstance().time
-                    val formatter = SimpleDateFormat.getDateTimeInstance()
+                    val formatter =
+                        SimpleDateFormat.getDateTimeInstance()
                     formattedTime = formatter.format(date)
                     if (exception != null) {
                         if (Log.getStackTraceString(exception).isNotEmpty()) {
@@ -1289,16 +1521,25 @@ class LoggerBird : LifecycleObserver {
                     if (controlLogInit) {
                         withContext(Dispatchers.Main) {
                             if (defaultProgressBarView != null) {
-                                defaultProgressBar.visibility = View.VISIBLE
+                                defaultProgressBar.visibility =
+                                    View.VISIBLE
                             } else {
                                 progressBar?.let {
                                     it.visibility = View.VISIBLE
                                 }.run {
-                                    defaultProgressBarView = LayoutInflater.from(context)
-                                        .inflate(R.layout.default_progressbar, rootView, true)
-                                    defaultProgressBar = ProgressBar(context)
+                                    defaultProgressBarView =
+                                        LayoutInflater.from(context)
+                                            .inflate(
+                                                R.layout.default_progressbar,
+                                                rootView,
+                                                true
+                                            )
                                     defaultProgressBar =
-                                        defaultProgressBarView!!.findViewById(R.id.progressBar)
+                                        ProgressBar(context)
+                                    defaultProgressBar =
+                                        defaultProgressBarView!!.findViewById(
+                                            R.id.progressBar
+                                        )
                                 }
                             }
                         }
@@ -1320,7 +1561,10 @@ class LoggerBird : LifecycleObserver {
                 } catch (e: Exception) {
                     e.printStackTrace()
                     callEnqueue()
-                    callExceptionDetails(exception = e, tag = Constants.emailTag)
+                    callExceptionDetails(
+                        exception = e,
+                        tag = Constants.emailTag
+                    )
                 }
             }
         }
@@ -1328,10 +1572,17 @@ class LoggerBird : LifecycleObserver {
         //dummy method probably removed.
         private fun attachRootView(rootView: ViewGroup) {
             val view: View = LayoutInflater.from(context)
-                .inflate(R.layout.default_file_text_reader, rootView, true)
-            textViewFileReader = view.findViewById(R.id.textView_file_reader)
-            buttonFileReader = view.findViewById(R.id.button_file_reader)
-            textViewFileReader.movementMethod = ScrollingMovementMethod()
+                .inflate(
+                    R.layout.default_file_text_reader,
+                    rootView,
+                    true
+                )
+            textViewFileReader =
+                view.findViewById(R.id.textView_file_reader)
+            buttonFileReader =
+                view.findViewById(R.id.button_file_reader)
+            textViewFileReader.movementMethod =
+                ScrollingMovementMethod()
             when {
                 stringBuilderComponent.isNotEmpty() -> textViewFileReader.text =
                     stringBuilderComponent
@@ -1341,16 +1592,20 @@ class LoggerBird : LifecycleObserver {
                     stringBuilderFragmentManager
                 stringBuilderAnalyticsManager.isNotEmpty() -> textViewFileReader.text =
                     stringBuilderAnalyticsManager
-                stringBuilderHttp.isNotEmpty() -> textViewFileReader.text = stringBuilderHttp
+                stringBuilderHttp.isNotEmpty() -> textViewFileReader.text =
+                    stringBuilderHttp
                 stringBuilderInAPurchase.isNotEmpty() -> textViewFileReader.text =
                     stringBuilderInAPurchase
                 stringBuilderRetrofit.isNotEmpty() -> textViewFileReader.text =
                     stringBuilderRetrofit
-                stringBuilderQuery.isNotEmpty() -> textViewFileReader.text = stringBuilderQuery
-                stringBuilderRealm.isNotEmpty() -> textViewFileReader.text = stringBuilderRealm
+                stringBuilderQuery.isNotEmpty() -> textViewFileReader.text =
+                    stringBuilderQuery
+                stringBuilderRealm.isNotEmpty() -> textViewFileReader.text =
+                    stringBuilderRealm
                 stringBuilderException.isNotEmpty() -> textViewFileReader.text =
                     stringBuilderException
-                stringBuilderAll.isNotEmpty() -> textViewFileReader.text = stringBuilderAll
+                stringBuilderAll.isNotEmpty() -> textViewFileReader.text =
+                    stringBuilderAll
             }
             buttonFileReader.setOnClickListener {
                 //                rootView.removeView(view.rootView)
@@ -1382,7 +1637,10 @@ class LoggerBird : LifecycleObserver {
                 val scannerTempStringBuilder =
                     Scanner(stringBuilder.toString())
                 val tempFile =
-                    File(file.toString().substringBeforeLast("/"), "logger_bird_details_temp.txt")
+                    File(
+                        file.toString().substringBeforeLast("/"),
+                        "logger_bird_details_temp.txt"
+                    )
                 file.delete()
                 file.createNewFile()
                 if (!tempFile.exists()) {
@@ -1410,7 +1668,10 @@ class LoggerBird : LifecycleObserver {
             } catch (e: Exception) {
                 e.printStackTrace()
                 callEnqueue()
-                callExceptionDetails(exception = e, tag = Constants.exceedFileLimitTag)
+                callExceptionDetails(
+                    exception = e,
+                    tag = Constants.exceedFileLimitTag
+                )
             }
             stringBuilderExceedFileWriterLimit = StringBuilder()
         }
@@ -1447,7 +1708,9 @@ class LoggerBird : LifecycleObserver {
                         filePath.appendText(stringBuilderComponent.toString())
                     } else {
                         if (filePath.length() > fileLimit) {
-                            stringBuilderExceedFileWriterLimit.append(stringBuilderComponent.toString())
+                            stringBuilderExceedFileWriterLimit.append(
+                                stringBuilderComponent.toString()
+                            )
                         } else {
                             filePath.appendText(
                                 stringBuilderComponent.toString()
@@ -1473,13 +1736,9 @@ class LoggerBird : LifecycleObserver {
                         tag = Constants.componentTag
                     )
                 }
-
-            } else {
-                throw LoggerBirdException(
-                    Constants.saveErrorMessage + Constants.componentMethodTag
-                )
             }
         }
+
 
         /**
          * This Method Saves Life-Cycle Details To Txt File.
@@ -1499,11 +1758,13 @@ class LoggerBird : LifecycleObserver {
                     fileDirectory = context.filesDir
                     filePath = if (filePathName != null) {
                         File(
-                            fileDirectory, "$filePathName.txt"
+                            fileDirectory,
+                            "$filePathName.txt"
                         )
                     } else {
                         File(
-                            fileDirectory, "logger_bird_details.txt"
+                            fileDirectory,
+                            "logger_bird_details.txt"
                         )
                     }
                     if (!filePath.exists()) {
@@ -1516,7 +1777,9 @@ class LoggerBird : LifecycleObserver {
                         )
                     } else {
                         if (filePath.length() > fileLimit) {
-                            stringBuilderExceedFileWriterLimit.append(stringBuilderLifeCycle.toString())
+                            stringBuilderExceedFileWriterLimit.append(
+                                stringBuilderLifeCycle.toString()
+                            )
                         } else {
                             filePath.appendText(
                                 stringBuilderLifeCycle.toString()
@@ -1568,11 +1831,13 @@ class LoggerBird : LifecycleObserver {
                     fileDirectory = context.filesDir
                     filePath = if (filePathName != null) {
                         File(
-                            fileDirectory, "$filePathName.txt"
+                            fileDirectory,
+                            "$filePathName.txt"
                         )
                     } else {
                         File(
-                            fileDirectory, "logger_bird_details.txt"
+                            fileDirectory,
+                            "logger_bird_details.txt"
                         )
                     }
                     if (!filePath.exists()) {
@@ -1638,7 +1903,8 @@ class LoggerBird : LifecycleObserver {
                     fileDirectory = context.filesDir
                     if (filePathName != null) {
                         filePath = File(
-                            fileDirectory, "$filePathName.txt"
+                            fileDirectory,
+                            "$filePathName.txt"
                         )
                     } else {
                         filePath = File(
@@ -1709,11 +1975,13 @@ class LoggerBird : LifecycleObserver {
                     fileDirectory = context.filesDir
                     filePath = if (filePathName != null) {
                         File(
-                            fileDirectory, "$filePathName.txt"
+                            fileDirectory,
+                            "$filePathName.txt"
                         )
                     } else {
                         File(
-                            fileDirectory, "logger_bird_details.txt"
+                            fileDirectory,
+                            "logger_bird_details.txt"
                         )
                     }
                     if (!filePath.exists()) {
@@ -1726,7 +1994,9 @@ class LoggerBird : LifecycleObserver {
                         )
                     } else {
                         if (filePath.length() > fileLimit) {
-                            stringBuilderExceedFileWriterLimit.append(stringBuilderHttp.toString())
+                            stringBuilderExceedFileWriterLimit.append(
+                                stringBuilderHttp.toString()
+                            )
                         } else {
                             filePath.appendText(
                                 stringBuilderHttp.toString()
@@ -1777,11 +2047,13 @@ class LoggerBird : LifecycleObserver {
                     fileDirectory = context.filesDir
                     filePath = if (filePathName != null) {
                         File(
-                            fileDirectory, "$filePathName.txt"
+                            fileDirectory,
+                            "$filePathName.txt"
                         )
                     } else {
                         File(
-                            fileDirectory, "logger_bird_details.txt"
+                            fileDirectory,
+                            "logger_bird_details.txt"
                         )
                     }
                     if (!filePath.exists()) {
@@ -1794,7 +2066,9 @@ class LoggerBird : LifecycleObserver {
                         )
                     } else {
                         if (filePath.length() > fileLimit) {
-                            stringBuilderExceedFileWriterLimit.append(stringBuilderInAPurchase.toString())
+                            stringBuilderExceedFileWriterLimit.append(
+                                stringBuilderInAPurchase.toString()
+                            )
                         } else {
                             filePath.appendText(
                                 stringBuilderInAPurchase.toString()
@@ -1845,11 +2119,13 @@ class LoggerBird : LifecycleObserver {
                     fileDirectory = context.filesDir
                     filePath = if (filePathName != null) {
                         File(
-                            fileDirectory, "$filePathName.txt"
+                            fileDirectory,
+                            "$filePathName.txt"
                         )
                     } else {
                         File(
-                            fileDirectory, "logger_bird_details.txt"
+                            fileDirectory,
+                            "logger_bird_details.txt"
                         )
                     }
                     if (!filePath.exists()) {
@@ -1862,7 +2138,9 @@ class LoggerBird : LifecycleObserver {
                         )
                     } else {
                         if (filePath.length() > fileLimit) {
-                            stringBuilderExceedFileWriterLimit.append(stringBuilderRetrofit.toString())
+                            stringBuilderExceedFileWriterLimit.append(
+                                stringBuilderRetrofit.toString()
+                            )
                         } else {
                             filePath.appendText(
                                 stringBuilderRetrofit.toString()
@@ -1913,11 +2191,13 @@ class LoggerBird : LifecycleObserver {
                     fileDirectory = context.filesDir
                     filePath = if (filePathName != null) {
                         File(
-                            fileDirectory, "$filePathName.txt"
+                            fileDirectory,
+                            "$filePathName.txt"
                         )
                     } else {
                         File(
-                            fileDirectory, "logger_bird_details.txt"
+                            fileDirectory,
+                            "logger_bird_details.txt"
                         )
                     }
                     if (!filePath.exists()) {
@@ -1930,7 +2210,9 @@ class LoggerBird : LifecycleObserver {
                         )
                     } else {
                         if (filePath.length() > fileLimit) {
-                            stringBuilderExceedFileWriterLimit.append(stringBuilderRealm.toString())
+                            stringBuilderExceedFileWriterLimit.append(
+                                stringBuilderRealm.toString()
+                            )
                         }
                     }
 //                            if (rootView != null) {
@@ -1961,6 +2243,74 @@ class LoggerBird : LifecycleObserver {
         }
 
         /**
+         * This Method Saves DevicePerformance Details To Txt File.
+         * Parameters:
+         * @param file allow user modify the file they want to create for saving their Device Performance Details , otherwise it will save your file to the devices data->data->your project package name->files->device_performance_details with an default name device_performance_details.
+         * Variables:
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallDevicePerformance is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files
+         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("device_performance_details")
+         * Exceptions:
+         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         * @throws exception if log instance is empty.
+         */
+        fun saveDevicePerformanceDetails(
+            file: File? = null
+        ) {
+            if (controlLogInit) {
+                if (stringBuilderPerformanceDetails.isNotEmpty()) {
+                    coroutineCallDevicePerformance.async {
+//                        try {
+//                            if (file != null) {
+//                                if (!file.exists()) {
+//                                    withContext(Dispatchers.IO) {
+//                                        file.createNewFile()
+//                                        file.appendText(takeDeviceInformationDetails())
+//                                    }
+//                                }
+//                                file.appendText(
+//                                    stringBuilderPerformanceDetails.toString()
+//                                )
+//                            } else {
+//                                defaultFileDirectory = context.filesDir
+//                                defaultFilePath = File(
+//                                    defaultFileDirectory, "device_performance_details.txt"
+//                                )
+//                                if (!defaultFilePath.exists()) {
+//                                    withContext(Dispatchers.IO) {
+//                                        defaultFilePath.createNewFile()
+//                                        defaultFilePath.appendText(
+//                                            takeDeviceInformationDetails()
+//                                        )
+//                                    }
+//                                }
+//                                defaultFilePath.appendText(
+//                                    stringBuilderPerformanceDetails.toString()
+//                                )
+//                            }
+//                            stringBuilderPerformanceDetails = StringBuilder()
+//                        } catch (e: Exception) {
+//                            e.printStackTrace()
+//                            takeExceptionDetails(
+//                                e,
+//                                Constants.devicePerformanceTag
+//                            )
+//                            saveExceptionDetails()
+//                        }
+                    }
+                } else {
+                    throw LoggerBirdException(
+                        Constants.saveErrorMessage + Constants.devicePerformanceTag
+                    )
+                }
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+        }
+
+        /**
          * This Method Saves Exception Details To Txt File.
          * Variables:
          * @var fileDirectory is used for getting default file path which is data->data->your project package name->files.
@@ -1978,11 +2328,13 @@ class LoggerBird : LifecycleObserver {
                     fileDirectory = context.filesDir
                     if (filePathName != null) {
                         filePath = File(
-                            fileDirectory, "$filePathName.txt"
+                            fileDirectory,
+                            "$filePathName.txt"
                         )
                     } else {
                         filePath = File(
-                            fileDirectory, "logger_bird_details.txt"
+                            fileDirectory,
+                            "logger_bird_details.txt"
                         )
                     }
                     if (!filePath.exists()) {
@@ -1995,13 +2347,16 @@ class LoggerBird : LifecycleObserver {
                         )
                     } else {
                         if (filePath.length() > fileLimit) {
-                            stringBuilderExceedFileWriterLimit.append(stringBuilderException.toString())
+                            stringBuilderExceedFileWriterLimit.append(
+                                stringBuilderException.toString()
+                            )
                         } else {
                             filePath.appendText(
                                 stringBuilderException.toString()
                             )
                         }
                     }
+
 //                        if (rootView != null) {
 //                            withContext(Dispatchers.Main) {
 //                                attachRootView(rootView)
@@ -2038,7 +2393,10 @@ class LoggerBird : LifecycleObserver {
             try {
                 val scannerOldSecessionFile = Scanner(filePath)
                 val oldSecessionFile = if (filePathName != null) {
-                    File(filePath.path.substringBeforeLast("/"), filePathName + "_old_session.txt")
+                    File(
+                        filePath.path.substringBeforeLast("/"),
+                        filePathName + "_old_session.txt"
+                    )
                 } else {
                     File(
                         filePath.path.substringBeforeLast("/"),
@@ -2052,14 +2410,19 @@ class LoggerBird : LifecycleObserver {
                     oldSecessionFile.createNewFile()
                 }
                 do {
-                    oldSecessionFile.appendText(scannerOldSecessionFile.nextLine() + "\n")
+                    oldSecessionFile.appendText(
+                        scannerOldSecessionFile.nextLine() + "\n"
+                    )
                 } while (scannerOldSecessionFile.hasNextLine())
                 filePath.delete()
                 filePath = oldSecessionFile
             } catch (e: Exception) {
                 e.printStackTrace()
                 callEnqueue()
-                callExceptionDetails(exception = e, tag = Constants.saveSessionOldFileTag)
+                callExceptionDetails(
+                    exception = e,
+                    tag = Constants.saveSessionOldFileTag
+                )
             }
         }
 

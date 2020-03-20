@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity(){
     private lateinit var jsonObject:JSONObject
     private val transformerFactory:TransformerFactory=TransformerFactory.newInstance()
     private  val  transformer:Transformer=transformerFactory.newTransformer()
-    private var recyclerViewList:ArrayList<RecyclerModel> = ArrayList()
+    //private var recyclerViewList:ArrayList<RecyclerModel> = ArrayList()
     var disposable: Disposable? = null
     var retrofit: Retrofit = ApiServiceInterface.createObject()
     val ApiService by lazy {
@@ -86,8 +86,12 @@ class MainActivity : AppCompatActivity(){
         val intent:Intent=getIntent()
         val uri:Uri? = intent.data
         Log.d("deep_link_url",uri.toString())
-        addRecyclerViewList()
+        //addRecyclerViewList()
         recycler_view.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
+
+        //recycler_view.adapter=RecyclerViewAdapter(recyclerViewList)
+        LoggerBird.logInit(context = this)
+/*
         val adapter:RecyclerViewAdapter=RecyclerViewAdapter(recyclerViewList)
         recycler_view.adapter=adapter
         LoggerBird.registerRecyclerViewObservers(recycler_view)
@@ -96,7 +100,12 @@ class MainActivity : AppCompatActivity(){
         recyclerViewList.removeAt(0)
         adapter.notifyDataSetChanged()
         recyclerViewList.add(RecyclerModel("deneme"))
-        adapter.notifyDataSetChanged()
+        adapter.notifyDataSetChanged() */
+
+
+
+
+
 
 
 //        LogDeneme.logLifeCycleDetails()
@@ -108,7 +117,6 @@ class MainActivity : AppCompatActivity(){
         }
         LoggerBird.logInit(context = this)
         button_add.setOnClickListener() {
-            adapter.notifyItemRemoved(0)
             val filePathTest:File= File(this.filesDir,"logger_bird_details.txt")
             val rootView: ViewGroup =(this as Activity).window.decorView.findViewById(android.R.id.content);
             for(x in 1..5){
@@ -182,15 +190,18 @@ class MainActivity : AppCompatActivity(){
 
             startActivity(Intent(this@MainActivity, Main2Activity::class.java))
         })
+
+        button_performance.setOnClickListener {
+
+            LoggerBird.takeDeviceInformationDetails()
+            LoggerBird.takeDevicePerformanceDetails()
+            LoggerBird.takeDeviceCpuDetails()
+
+
+        }
     }
 
-    private fun addRecyclerViewList(){
-        recyclerViewList.add(RecyclerModel("Deniz"))
-        recyclerViewList.add(RecyclerModel("Adnan"))
-        recyclerViewList.add(RecyclerModel("Gökhan"))
-        recyclerViewList.add(RecyclerModel("Fırat"))
-        recyclerViewList.add(RecyclerModel("Berk"))
-    }
+
 
     private fun beginSearch(srsearch: String, context: Context) {
 
@@ -264,7 +275,7 @@ class MainActivity : AppCompatActivity(){
             val filePath = this.getFilesDir()
             val fileDirectory = File(filePath, "example")
             fileDirectoryException = fileDirectory
-//            LogDeneme.saveAllDetails(fileName ="berk_deneme" ,context = this,view = button_read_logs,resources = resources)
+            // LogDeneme.saveAllDetails(fileName ="berk_deneme" ,context = this,view = button_read_logs,resources = resources)
             // fileDirectory.mkdir()
 
 
