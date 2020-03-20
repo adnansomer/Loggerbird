@@ -1,6 +1,7 @@
 package listeners
 
 import androidx.recyclerview.widget.RecyclerView
+import constants.Constants
 import loggerbird.LoggerBird
 import java.text.SimpleDateFormat
 import java.util.*
@@ -28,7 +29,7 @@ internal class LogRecyclerViewScrollListener : RecyclerView.OnScrollListener() {
      * @var currentRecyclerViewScrollListenerState states takes current state as a String in the recyclerView listener.
      * @var stringBuilderRecyclerViewScrollListener used for printing recyclerView listener detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
         try {
@@ -45,7 +46,11 @@ internal class LogRecyclerViewScrollListener : RecyclerView.OnScrollListener() {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewScrollListener
+            )
         }
 
     }
@@ -59,7 +64,7 @@ internal class LogRecyclerViewScrollListener : RecyclerView.OnScrollListener() {
      * @var currentRecyclerViewScrollListenerState states takes current state as a String in the recyclerView listener.
      * @var stringBuilderRecyclerViewScrollListener used for printing recyclerView listener detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
         try {
@@ -76,7 +81,11 @@ internal class LogRecyclerViewScrollListener : RecyclerView.OnScrollListener() {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewScrollListener
+            )
         }
     }
 
@@ -84,7 +93,7 @@ internal class LogRecyclerViewScrollListener : RecyclerView.OnScrollListener() {
      * This Method Is Used For Getting RecyclerViewList.
      * @return ArrayList<String>.
      */
-    fun recyclerViewList(): ArrayList<Any?> {
+    internal fun recyclerViewList(): ArrayList<Any?> {
         return recyclerViewList
     }
 
@@ -94,14 +103,14 @@ internal class LogRecyclerViewScrollListener : RecyclerView.OnScrollListener() {
      * @var stringBuilderRecyclerViewScrollListener will print recyclerView scroll listener state detail's.
      * @return String value.
      */
-    fun returnRecyclerViewState(): String {
+    internal fun returnRecyclerViewState(): String {
         return stringBuilderRecyclerViewScrollListener.toString()
     }
 
     /**
      * This Method Re-Creates Instantiation For stringBuilderRecyclerViewScrollListener.
      */
-    fun refreshRecyclerViewObserverState() {
+    internal fun refreshRecyclerViewObserverState() {
         stringBuilderRecyclerViewScrollListener = StringBuilder()
     }
 }

@@ -10,7 +10,6 @@ import authentication.SMTPAuthenticator
 import exception.LoggerBirdException
 import kotlinx.coroutines.*
 import java.io.File
-import java.lang.Runnable
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -23,8 +22,7 @@ import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
-import kotlin.collections.ArrayList
-import kotlin.system.exitProcess
+
 
 //EmailUtil class is used for sending desired logfile as email.
 internal class EmailUtil {
@@ -40,36 +38,35 @@ internal class EmailUtil {
         private lateinit var dataSource: FileDataSource
 
         /**
-         * This Method Takes desired log file and send as email.
+         * This Method Takes Log File And Send As Email.
          * Parameters:
          * @param file parameter used for getting file details for sending as email.
-         * @param arrayListFile parameter used for holding list of temp files which is used for sending multiple emails for each temp files.
          * @param context parameter used for getting context of the current activity or fragment.
          * @param progressBar parameter used for getting the progressbar reference provided by user or getting default progressbar reference.
          * Variables:
-         * @var internetConnectionUtil is used for instantiate the InternetConnectionUtil class.
-         * @var coroutineCallEmail is used for get the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var internetConnectionUtil is used for instantiate the InternetConnectionUtil class and used it's network and internet check operations.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws LoggerBirdException if internet or network check gives exceptions.
          */
         internal suspend fun sendEmail(
             file: File? = null,
             context: Context,
-            progressBar: ProgressBar,
-            workQueueLinked: LinkedBlockingQueueUtil,
-            runnableList: ArrayList<Runnable>
+            progressBar: ProgressBar
         ) {
             try {
                 val internetConnectionUtil = InternetConnectionUtil()
-                if (internetConnectionUtil.checkNetworkConnection(context = context)) {
+                if (internetConnectionUtil.checkNetworkConnection(
+                        context = context
+                    )
+                ) {
                     if (internetConnectionUtil.makeHttpRequest() == 200) {
                         Log.d(
                             "email_time",
                             systemTime()
                         )
                         sendSingleEmail(
-                            file
+                            file = file
                         )
                         Log.d(
                             "email_time",
@@ -78,16 +75,7 @@ internal class EmailUtil {
                         withContext(Dispatchers.Main) {
                             progressBar.visibility = View.GONE
                         }
-                        withContext(Dispatchers.IO) {
-                            workQueueLinked.controlRunnable = false
-                            if (runnableList.size > 0) {
-                                runnableList.removeAt(0)
-                                if (runnableList.size > 0) {
-                                    workQueueLinked.put(runnableList[0])
-                                }
-                            }
-                        }
-
+                        LoggerBird.callEnqueue()
                     } else {
                         throw LoggerBirdException(
                             Constants.internetErrorMessage
@@ -103,30 +91,40 @@ internal class EmailUtil {
                     progressBar.visibility = View.GONE
                 }
                 e.printStackTrace()
-                withContext(Dispatchers.IO) {
-                    workQueueLinked.controlRunnable = false
-                    if (runnableList.size > 0) {
-                        runnableList.removeAt(0)
-                        if (runnableList.size > 0) {
-                            workQueueLinked.put(runnableList[0])
-                        }
-                    }
-                }
+                LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
             }
         }
 
-        internal fun sendUnhandledException(file: File,context: Context) {
+        /**
+         * This Method Takes Log File With Unhandled Exception And Send As Email.
+         * Parameters:
+         * @param file parameter used for getting file details for sending as email.
+         * @param context parameter used for getting context of the current activity or fragment.
+         * Variables:
+         * @var internetConnectionUtil is used for instantiate the InternetConnectionUtil class and used it's network and internet check operations.
+         * @var LoggerBird.uncaughtExceptionHandlerController is used for determining that there is an unhandled exception for callExceptionDetails method.
+         * Exceptions:
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws LoggerBirdException if internet or network check gives exceptions.
+         */
+        internal fun sendUnhandledException(
+            file: File,
+            context: Context
+        ) {
             try {
                 val internetConnectionUtil = InternetConnectionUtil()
-                if (internetConnectionUtil.checkNetworkConnection(context = context)) {
+                if (internetConnectionUtil.checkNetworkConnection(
+                        context = context
+                    )
+                ) {
                     if (internetConnectionUtil.makeHttpRequest() == 200) {
                         Log.d(
                             "email_time",
                             systemTime()
                         )
                         sendSingleEmail(
-                            file
+                            file = file
                         )
                         Log.d(
                             "email_time",
@@ -144,9 +142,9 @@ internal class EmailUtil {
                         Constants.networkErrorMessage
                     )
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
-                LoggerBird.uncaughtExceptionHandlerController=false
+                LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
             }
         }
@@ -160,7 +158,8 @@ internal class EmailUtil {
         }
 
         /**
-         * This Method intialize email system.
+         * This Method initialize email system.
+         * Parameters:
          * Variables:
          * @var properties is used for getting some details for email system.
          * @var authenticator is used for getting details of mail information that will send mail.
@@ -169,23 +168,17 @@ internal class EmailUtil {
          * @var multipart is used for creating contents that used in mail.
          * @var mimeMessage is used for mime the content that given.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun initializeEmail() {
             try {
                 properties = Properties()
-                properties.put("mail.transport.protocol", "smtp")
-                properties.put(
-                    "mail.smtp.host",
-                    Constants.SMTP_HOST_NAME
-                )
-                properties.put("mail.smtp.auth", "true")
-                properties.put("mail.smtp.port", "587")
-                properties.put(
-                    "mail.smtp.socketFactory.class",
-                    "javax.net.ssl.SSLSocketFactory"
-                )
-                properties.put("mail.smtp.starttls.enable", "true")
+                properties["mail.transport.protocol"] = "smtp"
+                properties["mail.smtp.host"] = Constants.SMTP_HOST_NAME
+                properties["mail.smtp.auth"] = "true"
+                properties["mail.smtp.port"] = "587"
+                properties["mail.smtp.socketFactory.class"] = "javax.net.ssl.SSLSocketFactory"
+                properties["mail.smtp.starttls.enable"] = "true"
                 authenticator =
                     SMTPAuthenticator()
                 mailSession =
@@ -206,12 +199,15 @@ internal class EmailUtil {
                 transport.connect()
             } catch (e: Exception) {
                 e.printStackTrace()
+                LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
             }
         }
 
         /**
-         * This Method used for sending single email which doesnt exceeds 2mb size.
+         * This Method used for sending single email.
+         * Parameters:
+         * @param file parameter used for getting file details for sending as email.
          * Variables:
          * @var dataSource is used for getting filepath.
          * @var mimeBodyPart takes file content and name.
@@ -220,7 +216,7 @@ internal class EmailUtil {
          * @var mimeMessage is used for mime the content that given.
          * @var transport is used for sending email instance.
          * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun sendSingleEmail(file: File? = null) {
             try {
@@ -243,6 +239,7 @@ internal class EmailUtil {
                 transport.close()
             } catch (e: Exception) {
                 e.printStackTrace()
+                LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
             }
         }

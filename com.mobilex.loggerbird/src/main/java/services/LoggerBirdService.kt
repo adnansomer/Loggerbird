@@ -1,12 +1,10 @@
 package services
 
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import constants.Constants
 import loggerbird.LoggerBird
-import java.io.File
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
@@ -68,7 +66,8 @@ internal class LoggerBirdService() : Service() {
             LoggerBird.takeLifeCycleDetails()
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.serviceTag)
         }
     }
 

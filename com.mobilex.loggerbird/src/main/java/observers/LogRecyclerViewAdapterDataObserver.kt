@@ -1,12 +1,13 @@
 package observers
 
 import androidx.recyclerview.widget.RecyclerView
+import constants.Constants
 import loggerbird.LoggerBird
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObserver() {
+internal class LogRecyclerViewAdapterDataObserver() : RecyclerView.AdapterDataObserver() {
     //Global variables.
     private var stringBuilderRecyclerViewAdapterDataObserver: StringBuilder = StringBuilder()
     private var formattedTime: String? = null
@@ -24,7 +25,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
      * @var currentRecyclerViewAdapterDataObserverState states takes current state as a String in the recyclerView observer.
      * @var stringBuilderRecyclerViewAdapterDataObserverState used for printing recyclerView observer detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
     override fun onChanged() {
@@ -36,7 +37,11 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
             stringBuilderRecyclerViewAdapterDataObserver.append("$formattedTime:$currentRecyclerViewAdapterDataObserverState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewAdapterDataObserverTag
+            )
         }
     }
 
@@ -49,7 +54,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
      * @var currentRecyclerViewAdapterDataObserverState states takes current state as a String in the recyclerView observer.
      * @var stringBuilderRecyclerViewAdapterDataObserverState used for printing recyclerView observer detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
     override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
@@ -59,12 +64,16 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
             formattedTime = formatter.format(date)
             currentRecyclerViewAdapterDataObserverState = "onItemRangeRemoved"
             stringBuilderRecyclerViewAdapterDataObserver.append(
-                "$formattedTime:$currentRecyclerViewAdapterDataObserverState"+" "+
-                "position:$positionStart,item count:$itemCount"+"\n"
+                "$formattedTime:$currentRecyclerViewAdapterDataObserverState" + " " +
+                        "position:$positionStart,item count:$itemCount" + "\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewAdapterDataObserverTag
+            )
         }
     }
 
@@ -78,7 +87,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
      * @var currentRecyclerViewAdapterDataObserverState states takes current state as a String in the recyclerView observer.
      * @var stringBuilderRecyclerViewAdapterDataObserverState used for printing recyclerView observer detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
     override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
@@ -88,12 +97,16 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
             formattedTime = formatter.format(date)
             currentRecyclerViewAdapterDataObserverState = "onItemRangeRemoved"
             stringBuilderRecyclerViewAdapterDataObserver.append(
-                "$formattedTime:$currentRecyclerViewAdapterDataObserverState"+" "+
-                "from position:$fromPosition,to position:$toPosition,item count:$itemCount"+"\n"
+                "$formattedTime:$currentRecyclerViewAdapterDataObserverState" + " " +
+                        "from position:$fromPosition,to position:$toPosition,item count:$itemCount" + "\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewAdapterDataObserverTag
+            )
         }
     }
 
@@ -106,7 +119,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
      * @var currentRecyclerViewAdapterDataObserverState states takes current state as a String in the recyclerView observer.
      * @var stringBuilderRecyclerViewAdapterDataObserverState used for printing recyclerView observer detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
     override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
@@ -116,12 +129,16 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
             formattedTime = formatter.format(date)
             currentRecyclerViewAdapterDataObserverState = "onItemRangeInserted"
             stringBuilderRecyclerViewAdapterDataObserver.append(
-                "$formattedTime:$currentRecyclerViewAdapterDataObserverState"+" "+
-                "position:$positionStart,item count:$itemCount"+"\n"
+                "$formattedTime:$currentRecyclerViewAdapterDataObserverState" + " " +
+                        "position:$positionStart,item count:$itemCount" + "\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewAdapterDataObserverTag
+            )
         }
     }
 
@@ -134,7 +151,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
      * @var currentRecyclerViewAdapterDataObserverState states takes current state as a String in the recyclerView observer.
      * @var stringBuilderRecyclerViewAdapterDataObserverState used for printing recyclerView observer detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
         try {
@@ -143,12 +160,16 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
             formattedTime = formatter.format(date)
             currentRecyclerViewAdapterDataObserverState = "onItemRangeChanged"
             stringBuilderRecyclerViewAdapterDataObserver.append(
-                "$formattedTime:$currentRecyclerViewAdapterDataObserverState"+" "+
-                "position:$positionStart,item count:$itemCount"+"\n"
+                "$formattedTime:$currentRecyclerViewAdapterDataObserverState" + " " +
+                        "position:$positionStart,item count:$itemCount" + "\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewAdapterDataObserverTag
+            )
         }
     }
 
@@ -162,7 +183,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
      * @var currentRecyclerViewAdapterDataObserverState states takes current state as a String in the recyclerView observer.
      * @var stringBuilderRecyclerViewAdapterDataObserverState used for printing recyclerView observer detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
     override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
@@ -173,12 +194,16 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
             formattedTime = formatter.format(date)
             currentRecyclerViewAdapterDataObserverState = "onItemRangeChanged"
             stringBuilderRecyclerViewAdapterDataObserver.append(
-                "$formattedTime:$currentRecyclerViewAdapterDataObserverState"+" "+
-                "position:$positionStart,item count:$itemCount"+"\n"
+                "$formattedTime:$currentRecyclerViewAdapterDataObserverState" + " " +
+                        "position:$positionStart,item count:$itemCount" + "\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewAdapterDataObserverTag
+            )
         }
     }
 
@@ -188,7 +213,7 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
      * @var recyclerViewList print's recyclerViews that called in onItemRangeChanged method.
      * @return ArrayList<String>.
      */
-    fun recyclerViewList(): ArrayList<Any?> {
+    internal fun recyclerViewList(): ArrayList<Any?> {
         return recyclerViewList
     }
 
@@ -198,14 +223,14 @@ internal class LogRecyclerViewAdapterDataObserver : RecyclerView.AdapterDataObse
      * @var stringBuilderRecyclerViewAdapterDataObserver will print recyclerView AdapterData state detail's.
      * @return String value.
      */
-    fun returnRecyclerViewState(): String {
+    internal fun returnRecyclerViewState(): String {
         return stringBuilderRecyclerViewAdapterDataObserver.toString()
     }
 
     /**
      * This Method Re-Creates Instantiation For stringBuilderRecyclerViewAdapterDataObserver.
      */
-    fun refreshRecyclerViewObserverState() {
+    internal fun refreshRecyclerViewObserverState() {
         stringBuilderRecyclerViewAdapterDataObserver = StringBuilder()
     }
 }

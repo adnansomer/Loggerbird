@@ -2,6 +2,7 @@ package listeners
 
 import android.view.MotionEvent
 import androidx.recyclerview.widget.RecyclerView
+import constants.Constants
 import loggerbird.LoggerBird
 import java.text.SimpleDateFormat
 import java.util.*
@@ -27,7 +28,7 @@ internal class LogRecyclerViewItemTouchListener : RecyclerView.OnItemTouchListen
      * @var currentRecyclerViewItemTouchListenerState states takes current state as a String in the recyclerView listener.
      * @var stringBuilderRecyclerViewItemTouchListener used for printing recyclerView listener detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
         try {
@@ -43,7 +44,11 @@ internal class LogRecyclerViewItemTouchListener : RecyclerView.OnItemTouchListen
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewItemTouchListener
+            )
         }
     }
 
@@ -56,7 +61,7 @@ internal class LogRecyclerViewItemTouchListener : RecyclerView.OnItemTouchListen
      * @var currentRecyclerViewItemTouchListenerState states takes current state as a String in the recyclerView listener.
      * @var stringBuilderRecyclerViewItemTouchListener used for printing recyclerView listener detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      * @return Boolean value(if return value is true then recyclerview can't scroll).
      */
     override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
@@ -73,10 +78,15 @@ internal class LogRecyclerViewItemTouchListener : RecyclerView.OnItemTouchListen
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewItemTouchListener
+            )
         }
         return false
     }
+
     /**
      * This Method Called When RecyclerView onRequestDisallowInterceptTouchEvent Detect's An  OnTouchEvent State In The Current RecyclerView.
      * Parameters:
@@ -85,7 +95,7 @@ internal class LogRecyclerViewItemTouchListener : RecyclerView.OnItemTouchListen
      * @var currentRecyclerViewItemTouchListenerState states takes current state as a String in the recyclerView listener.
      * @var stringBuilderRecyclerViewItemTouchListener used for printing recyclerView listener detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
         try {
@@ -98,7 +108,11 @@ internal class LogRecyclerViewItemTouchListener : RecyclerView.OnItemTouchListen
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewItemTouchListener
+            )
         }
     }
 
@@ -106,7 +120,7 @@ internal class LogRecyclerViewItemTouchListener : RecyclerView.OnItemTouchListen
      * This Method Is Used For Getting RecyclerViewList.
      * @return ArrayList<String>.
      */
-    fun recyclerViewList(): ArrayList<Any?> {
+    internal fun recyclerViewList(): ArrayList<Any?> {
         return recyclerViewList
     }
 
@@ -116,14 +130,14 @@ internal class LogRecyclerViewItemTouchListener : RecyclerView.OnItemTouchListen
      * @var stringBuilderRecyclerViewItemTouchListener will print recyclerView scroll listener state detail's.
      * @return String value.
      */
-    fun returnRecyclerViewState(): String {
+    internal fun returnRecyclerViewState(): String {
         return stringBuilderRecyclerViewItemTouchListener.toString()
     }
 
     /**
      * This Method Re-Creates Instantiation For stringBuilderRecyclerViewItemTouchListener.
      */
-    fun refreshRecyclerViewObserverState() {
+    internal fun refreshRecyclerViewObserverState() {
         stringBuilderRecyclerViewItemTouchListener = StringBuilder()
     }
 }

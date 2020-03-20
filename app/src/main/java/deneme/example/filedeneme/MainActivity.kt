@@ -112,10 +112,11 @@ class MainActivity : AppCompatActivity(){
             val filePathTest:File= File(this.filesDir,"logger_bird_details.txt")
             val rootView: ViewGroup =(this as Activity).window.decorView.findViewById(android.R.id.content);
             for(x in 1..5){
-                LoggerBird.callLifeCycleDetails()
-                LoggerBird.callEmailSender(file=filePathTest,context = this,rootView = rootView)
                 LoggerBird.callComponentDetails(view = button_add,resources = button_add.resources)
+                LoggerBird.callLifeCycleDetails()
+                throw NullPointerException("unhandled exception")
             }
+
             try {
 
 

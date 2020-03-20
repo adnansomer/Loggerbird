@@ -2,16 +2,19 @@ package listeners
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import constants.Constants
 import loggerbird.LoggerBird
 import java.text.SimpleDateFormat
 import java.util.*
 
-internal class LogRecyclerViewChildAttachStateChangeListener:RecyclerView.OnChildAttachStateChangeListener {
+internal class LogRecyclerViewChildAttachStateChangeListener :
+    RecyclerView.OnChildAttachStateChangeListener {
     //Global variables.
     private var stringBuilderRecyclerViewChildAttachListener: StringBuilder = StringBuilder()
     private var formattedTime: String? = null
     private lateinit var currentRecyclerViewChildAttachStateChangeListenerState: String
     private val formatter = SimpleDateFormat.getDateTimeInstance()
+
     init {
         stringBuilderRecyclerViewChildAttachListener.append("RecyclerView Child Attach State Change Listener:" + "\n")
     }
@@ -24,7 +27,7 @@ internal class LogRecyclerViewChildAttachStateChangeListener:RecyclerView.OnChil
      * @var currentRecyclerViewChildAttachStateChangeListenerObserverState states takes current state as a String in the recyclerView listener.
      * @var stringBuilderRecyclerViewScrollListenerObserver used for printing recyclerView listener detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onChildViewDetachedFromWindow(view: View) {
         try {
@@ -33,11 +36,15 @@ internal class LogRecyclerViewChildAttachStateChangeListener:RecyclerView.OnChil
             currentRecyclerViewChildAttachStateChangeListenerState = "onChildViewDetachedFromWindow"
             stringBuilderRecyclerViewChildAttachListener.append(
                 "$formattedTime:$currentRecyclerViewChildAttachStateChangeListenerState" + " " +
-                        "view:${view}"+"\n+root view:${view.rootView}+"+"\n"
+                        "view:${view}" + "\n+root view:${view.rootView}+" + "\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewChildAttachStateChangeListenerTag
+            )
         }
     }
 
@@ -49,7 +56,7 @@ internal class LogRecyclerViewChildAttachStateChangeListener:RecyclerView.OnChil
      * @var currentRecyclerViewChildAttachStateChangeListenerObserverState states takes current state as a String in the recyclerView listener.
      * @var stringBuilderRecyclerViewScrollListenerObserver used for printing recyclerView listener detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onChildViewAttachedToWindow(view: View) {
         try {
@@ -58,11 +65,15 @@ internal class LogRecyclerViewChildAttachStateChangeListener:RecyclerView.OnChil
             currentRecyclerViewChildAttachStateChangeListenerState = "onChildViewAttachedFromWindow"
             stringBuilderRecyclerViewChildAttachListener.append(
                 "$formattedTime:$currentRecyclerViewChildAttachStateChangeListenerState" + " " +
-                        "view:${view}"+"\n+root view:${view.rootView}+"+"\n"
+                        "view:${view}" + "\n+root view:${view.rootView}+" + "\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.callExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.recyclerViewChildAttachStateChangeListenerTag
+            )
         }
 
     }
@@ -73,14 +84,14 @@ internal class LogRecyclerViewChildAttachStateChangeListener:RecyclerView.OnChil
      * @var stringBuilderRecyclerViewChildAttachStateChangeListener will print recyclerView scroll listener state detail's.
      * @return String value.
      */
-    fun returnRecyclerViewState(): String {
+    internal fun returnRecyclerViewState(): String {
         return stringBuilderRecyclerViewChildAttachListener.toString()
     }
 
     /**
      * This Method Re-Creates Instantiation For stringBuilderRecyclerViewChildAttachStateChangeListener
      */
-    fun refreshRecyclerViewObserverState() {
+    internal fun refreshRecyclerViewObserverState() {
         stringBuilderRecyclerViewChildAttachListener = StringBuilder()
     }
 }
