@@ -1011,7 +1011,6 @@ class LoggerBird : LifecycleObserver {
             }
             return stringBuilderBuild.toString()
         }
-
         /**
          * This Method Takes Life-Cycle Details.
          * Variables:
@@ -1052,13 +1051,11 @@ class LoggerBird : LifecycleObserver {
                                     if (stateList.contains(classList)) {
                                         stringBuilderLifeCycle.append(stateList + "\n")
                                     }
-
-                                    stringBuilderLifeCycle.append(LoggerBirdService.onDestroyMessage)
-                                    saveLifeCycleDetails()
                                 }
                             }
                         }
-
+                        stringBuilderLifeCycle.append(LoggerBirdService.onDestroyMessage)
+                        saveLifeCycleDetails()
                     } catch (e: Exception) {
                         e.printStackTrace()
                         callEnqueue()
@@ -1083,9 +1080,7 @@ class LoggerBird : LifecycleObserver {
                                             "\n"
                                         )) {
                                             if (stateList.contains(classList)) {
-                                                stringBuilderLifeCycle.append(
-                                                    stateList + "\n"
-                                                )
+                                                stringBuilderLifeCycle.append(stateList + "\n")
                                             }
                                         }
                                     }
@@ -1097,9 +1092,7 @@ class LoggerBird : LifecycleObserver {
                                         "\n"
                                     )) {
                                         if (stateList.contains(classList)) {
-                                            stringBuilderLifeCycle.append(
-                                                stateList + "\n"
-                                            )
+                                            stringBuilderLifeCycle.append(stateList + "\n")
                                         }
                                     }
                                 }
@@ -1113,6 +1106,7 @@ class LoggerBird : LifecycleObserver {
                                 tag = Constants.lifeCycleTag
                             )
                         }
+
                     } else {
                         throw LoggerBirdException(Constants.logInitErrorMessage)
                     }
@@ -1422,6 +1416,7 @@ class LoggerBird : LifecycleObserver {
                 }
             }
         }
+
 
 
         /**
