@@ -39,7 +39,7 @@ import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
 
 
-class MainActivity : AppCompatActivity(){
+class MainActivity : AppCompatActivity() {
     private var logs: String = ""
     private var follows: String = "0"
     private var followers: String = "0"
@@ -60,9 +60,9 @@ class MainActivity : AppCompatActivity(){
     var stringBuilderComponent: java.lang.StringBuilder = java.lang.StringBuilder()
     lateinit var fileDirectoryException: File
     lateinit var fileDirectoryRetrofit: File
-    private lateinit var jsonObject:JSONObject
-    private val transformerFactory:TransformerFactory=TransformerFactory.newInstance()
-    private  val  transformer:Transformer=transformerFactory.newTransformer()
+    private lateinit var jsonObject: JSONObject
+    private val transformerFactory: TransformerFactory = TransformerFactory.newInstance()
+    private val transformer: Transformer = transformerFactory.newTransformer()
     //private var recyclerViewList:ArrayList<RecyclerModel> = ArrayList()
     var disposable: Disposable? = null
     var retrofit: Retrofit = ApiServiceInterface.createObject()
@@ -73,7 +73,6 @@ class MainActivity : AppCompatActivity(){
     private var coroutineCallComponent = CoroutineScope(Dispatchers.IO)
 
 
-
 //    val TAG_ACTIVITY_NAME:String="MainActivity"
 //    val TAG_ONCREATE:String="Activity In OnCreate State"
 
@@ -81,13 +80,13 @@ class MainActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.d("life_cycle_state_create",this.lifecycle.currentState.name)
+        Log.d("life_cycle_state_create", this.lifecycle.currentState.name)
 //        progressBar=findViewById(R.id.progressBar)
-        val intent:Intent=getIntent()
-        val uri:Uri? = intent.data
-        Log.d("deep_link_url",uri.toString())
+        val intent: Intent = getIntent()
+        val uri: Uri? = intent.data
+        Log.d("deep_link_url", uri.toString())
         //addRecyclerViewList()
-        recycler_view.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
+        recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
         //recycler_view.adapter=RecyclerViewAdapter(recyclerViewList)
         LoggerBird.logInit(context = this)
@@ -103,11 +102,6 @@ class MainActivity : AppCompatActivity(){
         adapter.notifyDataSetChanged() */
 
 
-
-
-
-
-
 //        LogDeneme.logLifeCycleDetails()
 //        LogDeneme.logAttach()
         permissions()
@@ -117,10 +111,11 @@ class MainActivity : AppCompatActivity(){
         }
         LoggerBird.logInit(context = this)
         button_add.setOnClickListener() {
-            val filePathTest:File= File(this.filesDir,"logger_bird_details.txt")
-            val rootView: ViewGroup =(this as Activity).window.decorView.findViewById(android.R.id.content);
-            for(x in 1..5){
-                LoggerBird.callComponentDetails(view = button_add,resources = button_add.resources)
+            val filePathTest: File = File(this.filesDir, "logger_bird_details.txt")
+            val rootView: ViewGroup =
+                (this as Activity).window.decorView.findViewById(android.R.id.content);
+            for (x in 1..5) {
+                LoggerBird.callComponentDetails(view = button_add, resources = button_add.resources)
                 LoggerBird.callLifeCycleDetails()
                 throw NullPointerException("unhandled exception")
             }
@@ -172,18 +167,18 @@ class MainActivity : AppCompatActivity(){
 //            }
         }
         button_read_logs.setOnClickListener(View.OnClickListener {
-            beginSearch("dog",this)
-           // LogDeneme.saveComponentDetails(view=button_read_logs,resources = button_read_logs.resources)
+            beginSearch("dog", this)
+            // LogDeneme.saveComponentDetails(view=button_read_logs,resources = button_read_logs.resources)
             //            LogDeneme.saveComponentDetails(null,button_read_logs,button_read_logs.resources,this)
 //            LogDeneme.saveComponentDetails(null,null,null,this)
 //            writeTextFile()
         })
 
         button_next_activity.setOnClickListener({
-//            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
+            //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
 //            LogDeneme.saveAllDetails(context=this)
             //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
-           // LoggerBird.saveLifeCycleDetails()
+            // LoggerBird.saveLifeCycleDetails()
 
 //            LoggerBird.takeLifeCycleDetails()
 
@@ -200,7 +195,6 @@ class MainActivity : AppCompatActivity(){
 
         }
     }
-
 
 
     private fun beginSearch(srsearch: String, context: Context) {
@@ -221,15 +215,15 @@ class MainActivity : AppCompatActivity(){
                     val httpUrl: HttpUrl = HttpUrl.Builder()
                         .scheme("https")
                         .host("api.plos.org")
-                            .addPathSegment("search")
+                        .addPathSegment("search")
                         .addQueryParameter("q", "DNA")
                         .addQueryParameter("q", "DNA2")
                         .addQueryParameter("q", "DNA3")
-                        .addQueryParameter("z","title:RNA")
+                        .addQueryParameter("z", "title:RNA")
                         .build();
 
                     val fromBodyBuilder = FormBody.Builder()
-                    val request= Request.Builder()
+                    val request = Request.Builder()
                         .url(httpUrl)
                         .post(fromBodyBuilder.build())
                         .build()
@@ -237,15 +231,17 @@ class MainActivity : AppCompatActivity(){
 //
 //                       // LoggerBird.saveRetrofitRequestDetails()
 //                    }
-                    for( i in 0..10){
-                        LoggerBird.callRetrofitRequestDetails(response= ApiServiceInterface.httpClient(
-                            request
-                        ),request=request)
+                    for (i in 0..10) {
+                        LoggerBird.callRetrofitRequestDetails(
+                            response = ApiServiceInterface.httpClient(
+                                request
+                            ), request = request
+                        )
                     }
 
 
-                  //  LogDeneme.saveRetrofitRequestDetails()
-                  //  LogDeneme.saveAllDetails(response=ApiServiceInterface.httpClient(request),context = context,request=request)
+                    //  LogDeneme.saveRetrofitRequestDetails()
+                    //  LogDeneme.saveAllDetails(response=ApiServiceInterface.httpClient(request),context = context,request=request)
 
                 }
             })
@@ -253,6 +249,7 @@ class MainActivity : AppCompatActivity(){
 
 
     }
+
     private fun checkEmpty(): Boolean {
         follows = editText_follows.text.toString();
         followers = editText_followers.text.toString()
@@ -340,10 +337,10 @@ class MainActivity : AppCompatActivity(){
         if (controlWriteStoragePermission == PackageManager.PERMISSION_GRANTED && controlReadStoragePermission == PackageManager.PERMISSION_GRANTED && controlInternetPermission == PackageManager.PERMISSION_GRANTED && controlNetworkPermission == PackageManager.PERMISSION_GRANTED) {
             return true
         } else if (controlWriteStoragePermission != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                    WRITE_STORAGE_REQUEST_CODE
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                WRITE_STORAGE_REQUEST_CODE
             )
             permissions()
         } else if (controlReadStoragePermission != PackageManager.PERMISSION_GRANTED) {
@@ -424,18 +421,17 @@ class MainActivity : AppCompatActivity(){
 
     override fun onStart() {
         super.onStart()
-        Log.d("life_cycle_state_start",this.lifecycle.currentState.name)
+        Log.d("life_cycle_state_start", this.lifecycle.currentState.name)
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d("life_cycle_state_pause",this.lifecycle.currentState.name)
+        Log.d("life_cycle_state_pause", this.lifecycle.currentState.name)
     }
 
     override fun onStop() {
         super.onStop()
     }
-
 
 
     private suspend fun httpRequest(url: String?): String {
@@ -635,7 +631,6 @@ class MainActivity : AppCompatActivity(){
         )
         return stringBuilderComponent.toString()
     }
-
 
 
 }

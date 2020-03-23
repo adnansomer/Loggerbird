@@ -45,6 +45,7 @@ import listeners.LogRecyclerViewChildAttachStateChangeListener
 import listeners.LogRecyclerViewItemTouchListener
 import listeners.LogRecyclerViewScrollListener
 import observers.*
+import services.LoggerBirdMemoryService
 import services.LoggerBirdService
 import utils.LinkedBlockingQueueUtil
 import java.io.File
@@ -163,6 +164,8 @@ class LoggerBird : LifecycleObserver {
                 }
                 intentService = Intent(context, LoggerBirdService::class.java)
                 context.startService(intentService)
+                intentServiceMemory = Intent(context, LoggerBirdMemoryService::class.java)
+                context.startService(intentServiceMemory)
                 workQueueLinked = LinkedBlockingQueueUtil()
                 val logcatObserver = UnhandledExceptionObserver()
                 Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
@@ -183,7 +186,6 @@ class LoggerBird : LifecycleObserver {
 //            )
             return controlLogInit
         }
-
 
 
         /**
@@ -211,6 +213,7 @@ class LoggerBird : LifecycleObserver {
             //recyclerViewItemObserver = LogDataSetObserver(context)
             return true
         }
+
         /**
          * This Method Used For Checking logInit State.
          */
@@ -530,14 +533,14 @@ class LoggerBird : LifecycleObserver {
             if (controlLogInit) {
                 if (runnableList.isEmpty()) {
                     workQueueLinked.put(Runnable {
-//                        takeRealmDetails(realm = realm, realmModel = realmModel)
+                        takeRealmDetails(realm = realm, realmModel = realmModel)
                     })
                 }
                 runnableList.add(Runnable {
-//                    takeRealmDetails(
-//                        realm = realm,
-//                        realmModel = realmModel
-//                    )
+                    takeRealmDetails(
+                        realm = realm,
+                        realmModel = realmModel
+                    )
                 })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
@@ -810,7 +813,8 @@ class LoggerBird : LifecycleObserver {
                         callEnqueue()
                         callExceptionDetails(
                             exception = e,
-                            tag = Constants.componentTag)
+                            tag = Constants.componentTag
+                        )
                     }
                 }
             }
@@ -928,9 +932,9 @@ class LoggerBird : LifecycleObserver {
                     formattedTime = formatter.format(date)
 
                     stringBuilderPerformanceDetails.append(
-                        "\nFormatted Time : $formattedTime\nAvailable Memory: $availableMemory MB\nTotal Memory: $totalMemory MB\nRuntime Max Memory: $runtimeMaxMemory MB\n" +
-                                "Runtime Total Memory: $runtimeTotalMemory MB\nRuntime Free Memmory: $runtimeFreeMemory MB\nLow Memory: $lowMemory\nAvilable Processors: $availableProcessors\n"
-                                + "Used Memory Size: $usedMemorySize MB \nCPU ABI: $cpuAbi\nNetwork Usage(Send): $sendNetworkUsage Bytes\nNetwork Usage(Received): $receivedNetworkUsage Bytes\n"
+                        "\n Formatted Time : $formattedTime\nAvailable Memory: $availableMemory MB\nTotal Memory: $totalMemory MB\nRuntime Max Memory: $runtimeMaxMemory MB \n" +
+                                "Runtime Total Memory: $runtimeTotalMemory MB\n Runtime Free Memory: $runtimeFreeMemory MB\nLow Memory: $lowMemory\n Available Processors: $availableProcessors\n"
+                                + "Used Memory Size: $usedMemorySize MB \n CPU ABI: $cpuAbi\n Network Usage(Send): $sendNetworkUsage Bytes\n Network Usage(Received): $receivedNetworkUsage Bytes\n"
                                 + "Battery: $battery\n "
                     )
 
@@ -1011,6 +1015,7 @@ class LoggerBird : LifecycleObserver {
             }
             return stringBuilderBuild.toString()
         }
+
         /**
          * This Method Takes Life-Cycle Details.
          * Variables:
@@ -1417,7 +1422,53 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-
+        /**
+         * This Method Takes Realm Details.
+         * Parameters:
+         * @param realm parameter used for getting details from Realm which is used for getting permissions,privileges and copy realm data.
+         * @param realm model parameter used for getting details from RealmModel which is used for giving realm data to the Realm method which is copyFromRealm().
+         * Variables:
+         * @var workQueueLinked.controlRunnable is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallRealm is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var current time used for getting local time of your devices.
+         * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
+         * @var stringBuilderRealm used for printing the details.
+         * Exceptions:
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         */
+        private fun takeRealmDetails(
+            realm: Realm? = null,
+            realmModel: RealmModel? = null
+        ) {
+            workQueueLinked.controlRunnable = true
+            coroutineCallRealm.async {
+                if (controlLogInit) {
+                    try {
+                        stringBuilderRealm = StringBuilder()
+                        val date = Calendar.getInstance().time
+                        val formatter = SimpleDateFormat.getDateTimeInstance()
+                        formattedTime = formatter.format(date)
+                        stringBuilderRealm.append(
+                            "\n" + formattedTime + ":" + Constants.realmTag + "Realm Details:" + "\n" + "Permissions:" + realm?.permissions + " " + "Privileges:" + realm?.privileges + "\n" + "Realm Model:" + realm?.copyFromRealm(
+                                realmModel
+                            )
+                        )
+                        saveRealmDetails()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        callEnqueue()
+                        callExceptionDetails(
+                            exception = e,
+                            tag = Constants.realmTag
+                        )
+                    }
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
+                }
+            }
+        }
 
         /**
          * This Method Takes Exception Details.
@@ -2257,7 +2308,7 @@ class LoggerBird : LifecycleObserver {
             if (controlLogInit) {
                 if (stringBuilderPerformanceDetails.isNotEmpty()) {
                     coroutineCallDevicePerformance.async {
-//                        try {
+                        //                        try {
 //                            if (file != null) {
 //                                if (!file.exists()) {
 //                                    withContext(Dispatchers.IO) {
