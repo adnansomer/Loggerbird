@@ -21,6 +21,7 @@ internal class Constants {
         const val cpuInfoErrorTag = "cpuError"
         const val httpRequestDetailSuccessMessage = "Http Request Details Gathered!"
         const val httpTag = "http"
+        const val okHttpTag = "okHttp"
         const val inAPurchaseTag = "in_a_purchase"
         const val retrofitRequestDetailSuccessMessage = "Http Request Details Gathered!"
         const val retrofitTag = "retrofit"
