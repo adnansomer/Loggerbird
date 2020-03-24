@@ -15,7 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
-import androidx.annotation.RequiresApi
 import android.widget.TextView
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
@@ -24,11 +23,11 @@ import com.android.billingclient.api.*
 import com.google.gson.GsonBuilder
 import com.mobilex.loggerbird.R
 import constants.Constants
-import constants.Constants.Companion.cpuInfoErrorTag
-import constants.Constants.Companion.cpuInfoTag
-import constants.Constants.Companion.deviceInfoTag
-import constants.Constants.Companion.devicePerformanceTag
 import exception.LoggerBirdException
+import interceptors.LogOkHttpAuthenticationInterceptor
+import interceptors.LogOkHttpCacheInterceptor
+import interceptors.LogOkHttpErrorInterceptor
+import interceptors.LogOkHttpInterceptor
 import io.realm.Realm
 import io.realm.RealmModel
 import kotlinx.coroutines.CoroutineScope
@@ -45,8 +44,11 @@ import listeners.LogRecyclerViewChildAttachStateChangeListener
 import listeners.LogRecyclerViewItemTouchListener
 import listeners.LogRecyclerViewScrollListener
 import observers.*
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import services.LoggerBirdMemoryService
 import services.LoggerBirdService
+import utils.InternetConnectionUtil
 import utils.LinkedBlockingQueueUtil
 import java.io.File
 import java.net.HttpURLConnection
@@ -72,9 +74,14 @@ class LoggerBird : LifecycleObserver {
         private var stringBuilderInAPurchase: StringBuilder = StringBuilder()
         private var stringBuilderSkuDetailList: StringBuilder = StringBuilder()
         private var stringBuilderRetrofit: StringBuilder = StringBuilder()
+        private var stringBuilderOkHttp: StringBuilder = StringBuilder()
+        internal var stringBuilderInterceptor: StringBuilder = StringBuilder()
         private var stringBuilderQuery: StringBuilder = StringBuilder()
         private var stringBuilderRealm: StringBuilder = StringBuilder()
         private var stringBuilderBuild: StringBuilder = StringBuilder()
+        private var stringBuilderPerformance: StringBuilder = StringBuilder()
+        private var stringBuilderMemoryUsage: StringBuilder = StringBuilder()
+        private var stringBuilderCpu: StringBuilder = StringBuilder()
         private var stringBuilderException: StringBuilder = StringBuilder()
         private var stringBuilderAll: StringBuilder = StringBuilder()
         private var stringBuilderExceedFileWriterLimit: StringBuilder = StringBuilder()
@@ -85,16 +92,13 @@ class LoggerBird : LifecycleObserver {
         private var coroutineCallHttpRequest: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineCallInAPurchase: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineCallRetrofit: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallOkHttpClient: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineCallRealm: CoroutineScope = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallException: CoroutineScope = CoroutineScope(Dispatchers.IO)
-        private var coroutineRetrofitTask: CoroutineScope = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallEmailTask = CoroutineScope(Dispatchers.IO)
-        private var stringBuilderPerformanceDetails: StringBuilder = StringBuilder()
-        private var stringBuilderDeviceInfoDetails: StringBuilder = StringBuilder()
-        private var stringBuilderMemoryUsageDetails: StringBuilder = StringBuilder()
-        private var coroutineCallDevicePerformance = CoroutineScope(Dispatchers.IO)
         private var coroutineCallMemoryUsageDetails = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallBuilder = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallCpu = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallException: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallRetrofitTask: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallEmailTask = CoroutineScope(Dispatchers.IO)
         private var formattedTime: String? = null
         private var fileLimit: Long = 2097152
         private lateinit var lifeCycleObserver: LogLifeCycleObserver
@@ -112,6 +116,7 @@ class LoggerBird : LifecycleObserver {
         private lateinit var intentService: Intent
         private lateinit var textViewFileReader: TextView
         private lateinit var buttonFileReader: Button
+        private var memoryOverused: Boolean = false
         //private var corePoolSize: Int = 1000
         //private var maximumPoolSize: Int = 1000
         //private var keepAliveTime: Long = 100000
@@ -121,7 +126,7 @@ class LoggerBird : LifecycleObserver {
         internal var uncaughtExceptionHandlerController = false
         private lateinit var defaultProgressBar: ProgressBar
         private var defaultProgressBarView: View? = null
-        private var memoryThreshold: Long = 1897152L
+        private var memoryThreshold: Long = 4180632L
         private lateinit var intentServiceMemory: Intent
 
 
@@ -138,6 +143,7 @@ class LoggerBird : LifecycleObserver {
          * @var fileDirectory is used for getting reference of file path which is data->data->your project package name->files.
          * @var filepath is used for getting reference of file path which will be logging method's is saved(if filePathName is not null then the file path will be data->data->your project package name->files->"filePathName".txt or if filePathName is null then the file path will be data->data->your project package name->files->logger_bird_details.txt.
          * @var intentService start's service class for listening some event's in the application.
+         * @var intentServiceMemory start's service class for listening some performance event's in the application.
          * @var workQueueLinked is used for adding called logging method's into a queue.
          * @var logcatObserver is used for adding and initializing unhandled exception observer into application.
          * @return Boolean value.
@@ -301,6 +307,56 @@ class LoggerBird : LifecycleObserver {
         }
 
         /**
+         * This Method adds takeCpuDetails into queue.
+         * Variables:
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var runnableList is used for getting queue list.
+         * @var workQueueLinked is used for executing the first member in the runnableList.
+         * Exceptions:
+         * @throws exception if controlLogInit value is false.
+         */
+        fun callCpuDetails() {
+            if (controlLogInit) {
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put {
+                        takeCpuDetails()
+                    }
+                }
+                runnableList.add(Runnable {
+                    takeCpuDetails()
+                })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+        }
+
+        /**
+         * This Method adds takeMemoryUsageDetails into queue.
+         * Parameters:
+         * @param threshold takes threshold value to determine whether memory is overused.
+         * Variables:
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var runnableList is used for getting queue list.
+         * @var workQueueLinked is used for executing the first member in the runnableList.
+         * Exceptions:
+         * @throws exception if controlLogInit value is false.
+         */
+        fun callMemoryUsageDetails(threshold: Long?) {
+            if (controlLogInit) {
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put {
+                        takeMemoryUsageDetails(threshold = threshold)
+                    }
+                }
+                runnableList.add(Runnable {
+                    takeMemoryUsageDetails(threshold = threshold)
+                })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+        }
+
+        /**
          * This Method adds takeComponentDetails into queue.
          * Parameters:
          * @param view parameter used for getting id of the component.
@@ -315,12 +371,12 @@ class LoggerBird : LifecycleObserver {
         fun callComponentDetails(view: View?, resources: Resources?) {
             if (controlLogInit) {
                 if (runnableList.isEmpty()) {
-                    workQueueLinked.put(Runnable {
+                    workQueueLinked.put {
                         takeComponentDetails(
                             view = view,
                             resources = resources
                         )
-                    })
+                    }
                 }
                 runnableList.add(Runnable {
                     takeComponentDetails(
@@ -345,7 +401,7 @@ class LoggerBird : LifecycleObserver {
         fun callLifeCycleDetails() {
             if (controlLogInit) {
                 if (runnableList.isEmpty()) {
-                    workQueueLinked.put(Runnable { takeLifeCycleDetails() })
+                    workQueueLinked.put { takeLifeCycleDetails() }
                 }
                 runnableList.add(Runnable { takeLifeCycleDetails() })
             } else {
@@ -368,9 +424,9 @@ class LoggerBird : LifecycleObserver {
         fun callAnalyticsDetails(bundle: Bundle?) {
             if (controlLogInit) {
                 if (runnableList.isEmpty()) {
-                    workQueueLinked.put(Runnable {
+                    workQueueLinked.put {
                         takeAnalyticsDetails(bundle = bundle)
-                    })
+                    }
                 }
                 runnableList.add(Runnable { takeAnalyticsDetails(bundle = bundle) })
             } else {
@@ -393,9 +449,9 @@ class LoggerBird : LifecycleObserver {
         fun callFragmentManagerDetails(fragmentManager: FragmentManager?) {
             if (controlLogInit) {
                 if (runnableList.isEmpty()) {
-                    workQueueLinked.put(Runnable {
+                    workQueueLinked.put {
                         takeFragmentManagerDetails(fragmentManager = fragmentManager)
-                    })
+                    }
                 }
                 runnableList.add(Runnable { takeFragmentManagerDetails(fragmentManager = fragmentManager) })
             } else {
@@ -418,9 +474,9 @@ class LoggerBird : LifecycleObserver {
         fun callHttpRequestDetails(httpUrlConnection: HttpURLConnection?) {
             if (controlLogInit) {
                 if (runnableList.isEmpty()) {
-                    workQueueLinked.put(Runnable {
+                    workQueueLinked.put {
                         takeHttpRequestDetails(httpUrlConnection = httpUrlConnection)
-                    })
+                    }
                 }
                 runnableList.add(Runnable { takeHttpRequestDetails(httpUrlConnection = httpUrlConnection) })
 
@@ -453,7 +509,7 @@ class LoggerBird : LifecycleObserver {
         ) {
             if (controlLogInit) {
                 if (runnableList.isEmpty()) {
-                    workQueueLinked.put(Runnable {
+                    workQueueLinked.put {
                         takeInAPurchaseDetails(
                             billingClient = billingClient,
                             billingResult = billingResult,
@@ -461,7 +517,7 @@ class LoggerBird : LifecycleObserver {
                             billingFlowParams = billingFlowParams,
                             acknowledgePurchaseParams = acknowledgePurchaseParams
                         )
-                    })
+                    }
                 }
                 runnableList.add(Runnable {
                     takeInAPurchaseDetails(
@@ -470,6 +526,46 @@ class LoggerBird : LifecycleObserver {
                         skuDetailsParams = skuDetailsParams,
                         billingFlowParams = billingFlowParams,
                         acknowledgePurchaseParams = acknowledgePurchaseParams
+                    )
+                })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+        }
+
+        /**
+         * This Method adds takeRetrofitRequestDetails into queue.
+         * Parameters:
+         * @param okHttpClient parameter used for getting details from okHttp client.
+         * @param okHttpRequest parameter used for getting details from okHttp request and get it's body,header,url and method values.
+         * @param okHttpURLConnection parameter used for getting details from okHttpUrlConnection and get it's response code , error message , response message .
+         * Variables:
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var runnableList is used for getting queue list.
+         * @var workQueueLinked is used for executing the first member in the runnableList.
+         * Exceptions:
+         * @throws exception if controlLogInit value is false.
+         */
+        fun callOkHttpRequestDetails(
+            okHttpClient: OkHttpClient? = null,
+            okHttpRequest: Request? = null,
+            okHttpURLConnection: HttpURLConnection? = null
+        ) {
+            if (controlLogInit) {
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put {
+                        takeOkHttpDetails(
+                            okHttpClient = okHttpClient,
+                            okHttpRequest = okHttpRequest,
+                            okHttpURLConnection = okHttpURLConnection
+                        )
+                    }
+                }
+                runnableList.add(Runnable {
+                    takeOkHttpDetails(
+                        okHttpClient = okHttpClient,
+                        okHttpRequest = okHttpRequest,
+                        okHttpURLConnection = okHttpURLConnection
                     )
                 })
             } else {
@@ -497,13 +593,13 @@ class LoggerBird : LifecycleObserver {
         ) {
             if (controlLogInit) {
                 if (runnableList.isEmpty()) {
-                    workQueueLinked.put(Runnable {
+                    workQueueLinked.put {
                         takeRetrofitRequestDetails(
                             retrofit = retrofit,
                             response = response,
                             request = request
                         )
-                    })
+                    }
                 }
                 runnableList.add(Runnable {
                     takeRetrofitRequestDetails(
@@ -532,9 +628,9 @@ class LoggerBird : LifecycleObserver {
         fun callRealmDetails(realm: Realm? = null, realmModel: RealmModel? = null) {
             if (controlLogInit) {
                 if (runnableList.isEmpty()) {
-                    workQueueLinked.put(Runnable {
+                    workQueueLinked.put {
                         takeRealmDetails(realm = realm, realmModel = realmModel)
-                    })
+                    }
                 }
                 runnableList.add(Runnable {
                     takeRealmDetails(
@@ -568,7 +664,7 @@ class LoggerBird : LifecycleObserver {
         }
 
         //In progress method.
-        fun takeRecyclerViewDetails(recyclerView: RecyclerView, resources: Resources?) {
+        private fun takeRecyclerViewDetails(recyclerView: RecyclerView, resources: Resources?) {
             try {
                 val stringBuilderRecyclerViewItem: StringBuilder = StringBuilder()
                 val recyclerViewList: ArrayList<Any> = ArrayList()
@@ -636,9 +732,9 @@ class LoggerBird : LifecycleObserver {
             throwable: Throwable? = null
         ) {
             if (runnableList.isEmpty()) {
-                workQueueLinked.put(Runnable {
+                workQueueLinked.put {
                     takeExceptionDetails(exception = exception, tag = tag, throwable = throwable)
-                })
+                }
             }
             runnableList.add(Runnable {
                 takeExceptionDetails(
@@ -712,54 +808,247 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-        /**
-         * This Method Takes CPU and Processor Details of Android Device
-         * Variables:
-         * @var stringBuffer is used for getting cpu information from /proc/cpuinfo
-         * @var file is used for get cpu info to the file
-         * Excepitons:
-         * @throws exception if logInit method return value is false.
-         */
-        fun takeDeviceCpuDetails(): String {
-
-            val stringBuffer = StringBuffer()
-
-            if (controlLogInit) {
-                try {
-                    stringBuffer.append("abi: ").append(Build.CPU_ABI).append("\n")
-
-                    if (File("/proc/cpuinfo").exists()) {
-                        try {
-                            val file = File("/proc/cpuinfo")
-                            file.bufferedReader().forEachLine { stringBuffer.append(it + "\n") }
-
-                        } catch (e: java.lang.Exception) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        Log.d(cpuInfoErrorTag, "Cpu Information directiory not found")
-                    }
-
-                    Log.d(cpuInfoTag, stringBuffer.toString())
-                    return stringBuffer.toString()
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    saveExceptionDetails()
-                }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
-            }
-            return stringBuffer.toString()
-        }
-
         //In progress method.
         fun callOldSecessionFile(tag: String?) {
             if (runnableList.isEmpty()) {
-                workQueueLinked.put(Runnable { saveSessionIntoOldSessionFile() })
+                workQueueLinked.put { saveSessionIntoOldSessionFile() }
             }
             runnableList.add(Runnable { saveSessionIntoOldSessionFile() })
         }
+
+        /**
+         * This Method Takes Device Information Details
+         * Variables:
+         * @var deviceId is used for obtain device id of user.
+         * @var deviceSerial is used for getting device serial.
+         * @var device is used for getting device info.
+         * @var deviceModel is used for getting device model.
+         * @var deviceType is used for getting device type.
+         * @var deviceUser is used to get user of device.
+         * @var sdkVersion is used for getting sdk version of device.
+         * @var manufacturer is used for getting manufacturer of device.
+         * @var host is used for getting host of device.
+         * @var hardware is used for getting hardware details of device.
+         * @var deviceBrand is used to get brand name of device.
+         * @var product is used for getting product info.
+         * @var stringBuilderBuild is used for printing details.
+         */
+        private fun takeDeviceInformationDetails() {
+            val deviceId = Build.ID
+            val deviceSerial = Build.FINGERPRINT
+            val device = Build.DEVICE
+            val deviceModel = Build.MODEL
+            val deviceType = Build.TYPE
+            val deviceUser = Build.USER
+            val sdkVersion = Build.VERSION.SDK_INT
+            val manufacturer = Build.MANUFACTURER
+            val host = Build.HOST
+            val hardware = Build.HARDWARE
+            val deviceBrand = Build.BRAND
+            val product = Build.PRODUCT
+            stringBuilderBuild = StringBuilder()
+            stringBuilderBuild.append(
+                "Device Information:" + "\n"
+                        + "ID:" + deviceId + "\n"
+                        + "SERIAL: " + deviceSerial + "\n"
+                        + "DEVICE:" + device + "\n"
+                        + "DEVICE MODEL:" + deviceModel + "\n"
+                        + "DEVICE TYPE:" + deviceType + "\n"
+                        + "USER:" + deviceUser + "\n"
+                        + "SDK VERSION:" + sdkVersion + "\n"
+                        + "MANUFACTURER:" + manufacturer + "\n"
+                        + "HOST:" + host + "\n"
+                        + "HARDWARE:" + hardware + "\n"
+                        + "BRAND:" + deviceBrand + "\n"
+                        + "PRODUCT:" + product + "\n"
+            )
+            takeDevicePerformanceDetails()
+        }
+
+        /**This Method Takes Device Performance Details
+         *Variables:
+         * @var availableMemory returns available memory on device.
+         * @var totalMemory returns total memory on device.
+         * @var lowMemory returns true if system considers memory is low.
+         * @var runtimeMaxMemory returns maximum amount of memory that application uses in runtime.
+         * @var runtimeTotalMemory returns total amount of memory in runtime.
+         * @var runtimeFreeMemory returns free amount of memory in runtime.
+         * @var availableProcessors returns number of available processors.
+         * @var usedMemorySize returns extraction freeMemory from totalMemory.
+         * @var cpuAbi returns cpu abi.
+         * @var stringBuilderCpuAbi is used for printing details of cpu abi's.
+         * @var sendNetworkUsage returns number of bytes that transmitted across mobile networks.
+         * @var receivedNetworkUsage returns number of bytes that received across mobile networks.
+         * @var battery status gets information of battery percentage with using receiver.
+         * @var battery level is used for getting battery level information.
+         * @var battery scale is used for getting battery level information.
+         * @var battery gives the battery percentage of device.
+         * @var stringBuilderBuild is used for printing details.
+         * Exceptions:
+         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         */
+        private fun takeDevicePerformanceDetails() {
+            try {
+                val stringBuilderCpuAbi: StringBuilder = StringBuilder()
+                val cpuAbi: String
+                val memoryInfo = ActivityManager.MemoryInfo()
+                val activityManager: ActivityManager =
+                    context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                activityManager.getMemoryInfo(memoryInfo)
+                val runtime: Runtime = Runtime.getRuntime()
+                val availableMemory = memoryInfo.availMem / 1048576L
+                val totalMemory = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    memoryInfo.totalMem / 1048576L
+                } else {
+                    null
+                }
+                val lowMemory = memoryInfo.lowMemory
+                val runtimeMaxMemory = runtime.maxMemory() / 1048576L
+                val runtimeTotalMemory = runtime.totalMemory() / 1048576L
+                val runtimeFreeMemory = runtime.freeMemory() / 1048576L
+                val availableProcessors = runtime.availableProcessors()
+                val usedMemorySize = (runtimeTotalMemory - runtimeFreeMemory)
+                cpuAbi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    for (cpuAbiItem in Build.SUPPORTED_ABIS.iterator()) {
+                        stringBuilderCpuAbi.append(cpuAbiItem + "\n")
+                    }
+                    stringBuilderCpuAbi.toString()
+                } else {
+                    Build.CPU_ABI.toString()
+                }
+                val sendNetworkUsage = android.net.TrafficStats.getMobileTxBytes()
+                val receivedNetworkUsage = android.net.TrafficStats.getMobileRxBytes()
+                val batteryStatus = context.registerReceiver(
+                    null,
+                    IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                )
+                var batteryLevel = -1
+                var batteryScale = 1
+                if (batteryStatus != null) {
+                    batteryLevel =
+                        batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, batteryLevel)
+                    batteryScale =
+                        batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, batteryScale)
+                }
+                val battery = batteryLevel / batteryScale.toFloat() * 100
+                stringBuilderBuild.append(
+                    "Available Memory:$availableMemory MB\nTotal Memory:$totalMemory MB\nRuntime Max Memory: $runtimeMaxMemory MB \n" +
+                            "Runtime Total Memory:$runtimeTotalMemory MB\nRuntime Free Memory:$runtimeFreeMemory MB\nLow Memory: ${lowMemory.toString().trim()}\nAvailable Processors:$availableProcessors\n"
+                            + "Used Memory Size:$usedMemorySize MB\nCPU ABI:${cpuAbi.trim()}\nNetwork Usage(Send):$sendNetworkUsage Bytes\nNetwork Usage(Received):$receivedNetworkUsage Bytes\n"
+                            + "Battery:${battery.toString().trim()}\n "
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                callEnqueue()
+                callExceptionDetails(
+                    exception = e,
+                    tag = Constants.performanceTag
+                )
+            }
+        }
+
+        /**
+         * This Method Takes CPU and Processor Details of Android Device
+         * Variables:
+         * @var workQueueLinked.controlRunnable is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallCpu is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var current time used for getting local time of your devices.
+         * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
+         * @var stringBuilderCpu used for printing details.
+         * @var stringBuffer is used for getting cpu information from /proc/cpuinfo
+         * @var fileCpuInfo is used for getting reference of cpuinfo file.
+         * Exceptions:
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         */
+        private fun takeCpuDetails() {
+            workQueueLinked.controlRunnable = true
+            coroutineCallCpu.async {
+                if (controlLogInit) {
+                    try {
+                        stringBuilderCpu = StringBuilder()
+                        val date = Calendar.getInstance().time
+                        val formatter = SimpleDateFormat.getDateTimeInstance()
+                        formattedTime = formatter.format(date)
+                        stringBuilderCpu.append(formattedTime + ":" + Constants.cpuTag + "\n")
+                        val fileCpuInfo = File("/proc/cpuinfo")
+                        if (fileCpuInfo.exists()) {
+                            fileCpuInfo.bufferedReader()
+                                .forEachLine { stringBuilderCpu.append(it + "\n") }
+                        } else {
+                            stringBuilderCpu.append("Cpu Information directory not found")
+                        }
+                        saveCpuDetails()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        callEnqueue()
+                        callExceptionDetails(
+                            exception = e,
+                            tag = Constants.cpuTag
+                        )
+                    }
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
+                }
+            }
+        }
+
+        /**This Method Determines Whether Memory is Overused.
+         * Parameters:
+         * @param threshold takes threshold value to determine whether memory is overused.
+         * Variables:
+         * @var workQueueLinked.controlRunnable is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallMemoryUsageDetails is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var current time used for getting local time of your devices.
+         * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
+         * @var stringBuilderMemoryUsage is used for printing details.
+         * @var runtimeTotalMemory returns total amount of memory in runtime.
+         * @var runtimeFreeMemory returns free amount of memory in runtime.
+         * @var usedMemorySize returns extraction freeMemory from totalMemory that gives exact usage of application in memory
+         * @var memoryOverused returns true if memory usage exceeds the threshold value.
+         * Exceptions:
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         */
+        private fun takeMemoryUsageDetails(threshold: Long?) {
+            workQueueLinked.controlRunnable = true
+            coroutineCallMemoryUsageDetails.async {
+                if (controlLogInit) {
+                    try {
+                        stringBuilderMemoryUsage = StringBuilder()
+                        val date = Calendar.getInstance().time
+                        val formatter = SimpleDateFormat.getDateTimeInstance()
+                        formattedTime = formatter.format(date)
+                        val runtime: Runtime = Runtime.getRuntime()
+                        val runtimeTotalMemory = runtime.totalMemory()
+                        val runtimeFreeMemory = runtime.freeMemory()
+                        val usedMemorySize = (runtimeTotalMemory - runtimeFreeMemory)
+                        if (threshold != null) {
+                            memoryThreshold = threshold
+                        }
+                        if (usedMemorySize > memoryThreshold) {
+                            memoryOverused = true
+                            stringBuilderMemoryUsage.append("Memory Overused: $memoryOverused\nMemory Usage: $usedMemorySize Bytes\n")
+                        }
+                        saveMemoryUsageDetails()
+
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        callEnqueue()
+                        callExceptionDetails(
+                            exception = e,
+                            tag = Constants.memoryUsageTag
+                        )
+                    }
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
+                }
+            }
+        }
+
 
         /**
          * This Method Takes Component Details.
@@ -772,7 +1061,7 @@ class LoggerBird : LifecycleObserver {
          * @var coroutineCallComponent is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second)
-         * @var stringBuilderComponent used for printing details.
+         * @var stringBuilderComponent is used for printing details.
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
@@ -816,204 +1105,10 @@ class LoggerBird : LifecycleObserver {
                             tag = Constants.componentTag
                         )
                     }
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
                 }
             }
-        }
-
-        /**This Method Determines Whether Memory is Overused
-         * Parameters:
-         * @param memoryThreshold takes threshold value to determine whether memory is overused.
-         * Variables:
-         * @var runtimeTotalMemory returns total amount of memory in runtime.
-         * @var runtimeFreeMemory returns free amount of memory in runtime.
-         * @var usedMemorySize returns extraction freeMemory from totalMemory that gives exact usage of application in memory
-         * @var memoryOverused returns true if memory usage exceeds the threshold value.
-         * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
-         * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         */
-
-        fun takeMemoryUsageDetails(threshold: Long?): String {
-            if (controlLogInit) {
-                try {
-                    stringBuilderMemoryUsageDetails = StringBuilder()
-
-                    val runtime: Runtime = Runtime.getRuntime()
-                    val runtimeTotalMemory = runtime.totalMemory()
-                    val runtimeFreeMemory = runtime.freeMemory()
-                    val usedMemorySize = (runtimeTotalMemory - runtimeFreeMemory)
-                    val memoryOverused: Boolean
-
-                    val date = Calendar.getInstance().time
-                    val formatter = SimpleDateFormat.getDateTimeInstance()
-                    formattedTime = formatter.format(date)
-
-                    if (threshold != null) {
-                        memoryThreshold = threshold
-                    }
-
-                    if (usedMemorySize > memoryThreshold) {
-                        memoryOverused = true
-                        stringBuilderMemoryUsageDetails.append("\n\nMemory Overused: $memoryOverused\nMemory Usage: $usedMemorySize Bytes")
-                    }
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    saveExceptionDetails()
-                }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
-            }
-
-            return stringBuilderMemoryUsageDetails.toString()
-        }
-
-        /**This Method Takes Device Performance Details
-         *Variables:
-         * @var availableMemory returns available memory on device.
-         * @var totalMemory returns total memory on device.
-         * @var lowMemory returns true if system considers memory is low.
-         * @var runtimeMaxMemory returns maximum amount of memory that application uses in runtime.
-         * @var runtimeTotalMemory returns total amount of memory in runtime.
-         * @var runtimeFreeMemory returns free amount of memory in runtime.
-         * @var availableProcessors returns number of available processors.
-         * @var usedMemorySize returns extraction freeMemory from totalMemory.
-         * @var cpuAbi returns cpu abi.
-         * @var sendNetworkUsage returns number of bytes that ransmitted across mobile networks.
-         * @var receivedNetworkUsage returns number of bytes that received across mobile networks.
-         * @var battery status gets information of battery percentage with using receiver.
-         * @var battery level is used for getting battery level information.
-         * @var battery scale is used for getting battery level information.
-         * @var battery gives the battery percentage of device.
-         * @return device information with a string builder.
-         * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         */
-        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-        fun takeDevicePerformanceDetails() {
-            if (controlLogInit) {
-                try {
-                    val memoryInfo = ActivityManager.MemoryInfo()
-                    val activityManager: ActivityManager =
-                        context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                    activityManager.getMemoryInfo(memoryInfo)
-                    val runtime: Runtime = Runtime.getRuntime()
-
-                    val availableMemory = memoryInfo.availMem / 1048576L
-                    val totalMemory = memoryInfo.totalMem / 1048576L
-                    val lowMemory = memoryInfo.lowMemory
-                    val runtimeMaxMemory = runtime.maxMemory() / 1048576L
-                    val runtimeTotalMemory = runtime.totalMemory() / 1048576L
-                    val runtimeFreeMemory = runtime.freeMemory() / 1048576L
-                    val availableProcessors = runtime.availableProcessors()
-                    val usedMemorySize = (runtimeTotalMemory - runtimeFreeMemory)
-                    val cpuAbi = Build.CPU_ABI.toString()
-                    val sendNetworkUsage = android.net.TrafficStats.getMobileTxBytes()
-                    val receivedNetworkUsage = android.net.TrafficStats.getMobileRxBytes()
-
-                    val batteryStatus = context.registerReceiver(
-                        null,
-                        IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-                    )
-                    var batteryLevel = -1
-                    var batteryScale = 1
-                    if (batteryStatus != null) {
-                        batteryLevel =
-                            batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, batteryLevel)
-                        batteryScale =
-                            batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, batteryScale)
-                    }
-                    val battery = batteryLevel / batteryScale.toFloat() * 100
-
-                    val date = Calendar.getInstance().time
-                    val formatter = SimpleDateFormat.getDateTimeInstance()
-                    formattedTime = formatter.format(date)
-
-                    stringBuilderPerformanceDetails.append(
-                        "\n Formatted Time : $formattedTime\nAvailable Memory: $availableMemory MB\nTotal Memory: $totalMemory MB\nRuntime Max Memory: $runtimeMaxMemory MB \n" +
-                                "Runtime Total Memory: $runtimeTotalMemory MB\n Runtime Free Memory: $runtimeFreeMemory MB\nLow Memory: $lowMemory\n Available Processors: $availableProcessors\n"
-                                + "Used Memory Size: $usedMemorySize MB \n CPU ABI: $cpuAbi\n Network Usage(Send): $sendNetworkUsage Bytes\n Network Usage(Received): $receivedNetworkUsage Bytes\n"
-                                + "Battery: $battery\n "
-                    )
-
-                    Log.d(devicePerformanceTag, stringBuilderPerformanceDetails.toString())
-
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    saveExceptionDetails()
-                }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
-            }
-        }
-
-        /**
-         * This Method Takes Device Information Details
-         * Variables:
-         * @var deviceId is used for obtain device id of user.
-         * @var deviceSerial is used for getting device serial.
-         * @var device is used for getting device info.
-         * @var deviceModel is used for getting device model.
-         * @var deviceType is used for getting device type.
-         * @var deviceUser is used to get user of device.
-         * @var sdkVersion is used for getting sdk version of device.
-         * @var manufacturer is used for getting manufacturer of device.
-         * @var host is used for getting host of device.
-         * @var hardware is used for getting hardware details of device.
-         * @var deviceBrand is used to get brand name of device.
-         * @var product is used for getting product info.
-         * @return device information with a string builder.
-         * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         */
-        fun takeDeviceInformationDetails(): String {
-            if (controlLogInit) {
-                try {
-                    val deviceId = Build.ID
-                    val deviceSerial = Build.FINGERPRINT
-                    val device = Build.DEVICE
-                    val deviceModel = Build.MODEL
-                    val deviceType = Build.TYPE
-                    val deviceUser = Build.USER
-                    val sdkVersion = Build.VERSION.SDK_INT
-                    val manufacturer = Build.MANUFACTURER
-                    val host = Build.HOST
-                    val hardware = Build.HARDWARE
-                    val deviceBrand = Build.BRAND
-                    val product = Build.PRODUCT
-
-                    stringBuilderBuild = StringBuilder()
-                    stringBuilderBuild.append(
-                        "Device Information:" + "\n"
-                                + "ID:" + deviceId + "\n"
-                                + "SERIAL: " + deviceSerial + "\n"
-                                + "DEVICE:" + device + "\n"
-                                + "DEVICE MODEL:" + deviceModel + "\n"
-                                + "DEVICE TYPE:" + deviceType + "\n"
-                                + "USER:" + deviceUser + "\n"
-                                + "SDK VERSION:" + sdkVersion + "\n"
-                                + "MANUFACTURER:" + manufacturer + "\n"
-                                + "HOST:" + host + "\n"
-                                + "HARDWARE:" + hardware + "\n"
-                                + "BRAND:" + deviceBrand + "\n"
-                                + "PRODUCT:" + product + "\n"
-                    )
-
-                    Log.d(deviceInfoTag, stringBuilderBuild.toString())
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    takeExceptionDetails(e, Constants.deviceInfoTag)
-                    saveExceptionDetails()
-                }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
-            }
-            return stringBuilderBuild.toString()
         }
 
         /**
@@ -1023,7 +1118,7 @@ class LoggerBird : LifecycleObserver {
          * @var LoggerBirdService.onDestroyMessage is used for detecting that application is killed.
          * @var controlLogInit is used for getting logInit method return value.
          * @var coroutineCallLifeCycle is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var stringBuilderLifeCycle used for printing details.
+         * @var stringBuilderLifeCycle is used for printing details.
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
@@ -1032,8 +1127,9 @@ class LoggerBird : LifecycleObserver {
             workQueueLinked.controlRunnable = true
             if (LoggerBirdService.onDestroyMessage != null) {
                 if (controlLogInit) {
-                    stringBuilderLifeCycle = StringBuilder()
                     try {
+                        stringBuilderLifeCycle = StringBuilder()
+                        stringBuilderLifeCycle.append(Constants.lifeCycleTag + ":" + "\n")
                         if (Companion::fragmentLifeCycleObserver.isInitialized) {
                             if (fragmentLifeCycleObserver.returnFragmentLifeCycleState().isNotEmpty()) {
                                 for (classList in fragmentLifeCycleObserver.returnClassList()) {
@@ -1066,7 +1162,7 @@ class LoggerBird : LifecycleObserver {
                         callEnqueue()
                         callExceptionDetails(
                             exception = e,
-                            tag = Constants.lifeCycleTag
+                            tag = Constants.activityTag
                         )
                     }
                 } else {
@@ -1075,8 +1171,9 @@ class LoggerBird : LifecycleObserver {
             } else {
                 coroutineCallLifeCycle.async {
                     if (controlLogInit) {
-                        stringBuilderLifeCycle = StringBuilder()
                         try {
+                            stringBuilderLifeCycle = StringBuilder()
+                            stringBuilderLifeCycle.append(Constants.lifeCycleTag + ":" + "\n")
                             if (Companion::fragmentLifeCycleObserver.isInitialized) {
                                 if (fragmentLifeCycleObserver.returnFragmentLifeCycleState().isNotEmpty()) {
                                     for (classList in fragmentLifeCycleObserver.returnClassList()) {
@@ -1108,7 +1205,7 @@ class LoggerBird : LifecycleObserver {
                             callEnqueue()
                             callExceptionDetails(
                                 exception = e,
-                                tag = Constants.lifeCycleTag
+                                tag = Constants.activityTag
                             )
                         }
 
@@ -1117,14 +1214,6 @@ class LoggerBird : LifecycleObserver {
                     }
                 }
             }
-        }
-
-
-        //adnan improved this method probably will be deleted.
-        private fun takeBuilderDetails(): String {
-            stringBuilderBuild = StringBuilder()
-            stringBuilderBuild.append("Device Information:" + "\n" + "ID:" + Build.ID + "\n" + "DEVICE:" + Build.DEVICE + "\n" + "DEVICE MODEL:" + Build.MODEL + "\n" + "DEVICE TYPE:" + Build.TYPE + "\n" + "USER:" + Build.USER + "\n" + "SDK VERSION:" + Build.VERSION.SDK_INT + "\n" + "MANUFACTURER:" + Build.MANUFACTURER + "\n" + "HOST:" + Build.HOST + "HARDWARE:" + Build.HARDWARE + "\n")
-            return stringBuilderBuild.toString()
         }
 
         /**
@@ -1137,7 +1226,7 @@ class LoggerBird : LifecycleObserver {
          * @var coroutineCallAnalytic is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
-         * @var stringBuilderAnalyticsManager used for printing the details.
+         * @var stringBuilderAnalyticsManager is used for printing the details.
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
@@ -1184,7 +1273,7 @@ class LoggerBird : LifecycleObserver {
          * @var workQueueLinked.controlRunnable is used for locking queue class when there is a execution of transaction in the queue.
          * @var controlLogInit is used for getting logInit method return value.
          * @var coroutineCallFragment is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var stringBuilderFragmentManager used for printing the details.
+         * @var stringBuilderFragmentManager is used for printing the details.
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
@@ -1230,7 +1319,7 @@ class LoggerBird : LifecycleObserver {
          * @var coroutineCallHttpRequest is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
-         * @var stringBuilderHttp used for printing the details.
+         * @var stringBuilderHttp used is for printing the details.
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
@@ -1279,7 +1368,7 @@ class LoggerBird : LifecycleObserver {
          * @var gson used for converting a json format to the String format.
          * @var prettyJson is the value of billingFlowParams sku's details from json format to the String format.
          * @var responseMessage is the outcome message according to the response code comes from billingResult.
-         * @var stringBuilderSkuDetailList used for printing the details.
+         * @var stringBuilderSkuDetailList is used for printing the details.
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
@@ -1367,8 +1456,8 @@ class LoggerBird : LifecycleObserver {
          * @var coroutineCallRetrofit is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
-         * @var stringBuilderRetrofit used for printing the details.
-         * @var stringBuilderQuery used for printing the details of query that gathered from request.
+         * @var stringBuilderRetrofit is used for printing the details.
+         * @var stringBuilderQuery is used for printing the details of query that gathered from request.
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
@@ -1401,7 +1490,7 @@ class LoggerBird : LifecycleObserver {
                             }
                         }
                         withContext(Dispatchers.IO) {
-                            coroutineRetrofitTask.async {
+                            coroutineCallRetrofitTask.async {
                                 withContext(Dispatchers.IO) {
                                     stringBuilderRetrofit.append("\n" + formattedTime + ":" + Constants.retrofitTag + "\n" + "Retrofit Request Code:" + response?.code + " " + "Response Message:" + response?.message + "\n" + "Retrofit Url:" + retrofit?.baseUrl() + " " + "Request Url:" + request?.url + "\n" + "Response Success:" + response?.isSuccessful + "\n" + "Request Method:" + request?.method + "\n" + stringBuilderQuery.toString() + "Response Value:" + response?.body?.string())
                                     saveRetrofitRequestDetails()
@@ -1422,6 +1511,119 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+
+        /**
+         * This Method Takes OkHttp Request Details.
+         * Parameters:
+         * @param okHttpClient parameter used for getting details from okHttp client.
+         * @param okHttpRequest parameter used for getting details from okHttp request and get it's body,header,url and method values.
+         * @param okHttpURLConnection parameter used for getting details from okHttpUrlConnection and get it's response code , error message , response message .
+         * Variables:
+         * @var workQueueLinked.controlRunnable is used for locking queue class when there is a execution of transaction in the queue.
+         * @var controlLogInit is used for getting logInit method return value.
+         * @var coroutineCallOkHttpClient is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
+         * @var current time used for getting local time of your devices.
+         * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
+         * @var stringBuilderOkHttp is used for printing the details.
+         * Exceptions:
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if logInit method return value is false.
+         */
+        private fun takeOkHttpDetails(
+            okHttpClient: OkHttpClient? = null,
+            okHttpRequest: Request? = null,
+            okHttpURLConnection: HttpURLConnection?
+        ) {
+            workQueueLinked.controlRunnable = true
+            coroutineCallOkHttpClient.async {
+                if (controlLogInit) {
+                    try {
+                        stringBuilderOkHttp = StringBuilder()
+                        val date = Calendar.getInstance().time
+                        val formatter = SimpleDateFormat.getDateInstance()
+                        formattedTime = formatter.format(date)
+                        val okHttpClientInterceptors = okHttpClient?.interceptors
+                        val okHttpClientTimeOut = okHttpClient?.connectTimeoutMillis
+                        val okHttpRequestHeaders = okHttpRequest?.headers
+                        val okHttpRequestUrl = okHttpRequest?.url
+                        val okHttpRequestMethod = okHttpRequest?.method
+                        val okHttpConnectionResponseCode = okHttpURLConnection?.responseCode
+                        val okHttpConnectionError = okHttpURLConnection?.errorStream
+                        val okHttpConnectionResponse = okHttpURLConnection?.responseMessage
+                        stringBuilderOkHttp.append(
+                            "\n"
+                                    + formattedTime + " " + Constants.okHttpTag + "\n"
+                                    + "okHttp Client Interceptors: $okHttpClientInterceptors \n"
+                                    + stringBuilderInterceptor.toString() + "\n"
+                                    + "okHttp Client Connection Time Out: $okHttpClientTimeOut \n"
+                                    + "okHttp Request Headers: $okHttpRequestHeaders \n"
+                                    + "okHttp Request Url: $okHttpRequestUrl \n"
+                                    + "okHttp Request Method: $okHttpRequestMethod \n"
+                                    + "okHttp Connection Response Code: $okHttpConnectionResponseCode \n"
+                                    + "okHttp Connection Error: $okHttpConnectionError \n"
+                                    + "okHttp Connection Response: $okHttpConnectionResponse \n"
+                        )
+                        saveOkHttpRequestDetails()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        callEnqueue()
+                        callExceptionDetails(
+                            exception = e,
+                            tag = Constants.okHttpTag
+                        )
+                    }
+                } else {
+                    throw LoggerBirdException(Constants.logInitErrorMessage)
+                }
+            }
+        }
+
+        /**
+         * This method creates a HttpClient as an OkHttp Client to Intercept Retrofit Logs
+         * Variables:
+         * @var LoggerBirdGeneralInterceptor returns an interceptor that observes request and response flow with JSON request body.
+         * @var LoggerBirdHttpClient returns a okHttp client with LogOkHttpInterceptor classes.
+         * Exceptions:
+         * @throws exception if logInit method return value is false
+         */
+        fun loggerBirdInterceptorClient(): OkHttpClient? {
+            var loggerBirdHttpClient: OkHttpClient? = null
+            if (controlLogInit) {
+                try {
+                    val internetConnectionUtil = InternetConnectionUtil()
+                    if (internetConnectionUtil.checkNetworkConnection(context = context)) {
+                        if (internetConnectionUtil.makeHttpRequest() == 200) {
+                            val loggerBirdGeneralInterceptor = HttpLoggingInterceptor()
+                            loggerBirdGeneralInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+                            loggerBirdHttpClient = OkHttpClient().newBuilder()
+                                .addInterceptor(LogOkHttpInterceptor())
+                                .addInterceptor(LogOkHttpErrorInterceptor())
+                                .addInterceptor(LogOkHttpAuthenticationInterceptor())
+                                .addNetworkInterceptor(LogOkHttpCacheInterceptor())
+                                .addInterceptor(loggerBirdGeneralInterceptor)
+                                .build()
+                        } else {
+                            throw LoggerBirdException(
+                                Constants.internetErrorMessage
+                            )
+                        }
+                    } else {
+                        throw LoggerBirdException(
+                            Constants.networkErrorMessage
+                        )
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callEnqueue()
+                    callExceptionDetails(exception = e, tag = Constants.okHttpTag)
+                }
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+            return loggerBirdHttpClient
+        }
+
         /**
          * This Method Takes Realm Details.
          * Parameters:
@@ -1433,7 +1635,7 @@ class LoggerBird : LifecycleObserver {
          * @var coroutineCallRealm is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
-         * @var stringBuilderRealm used for printing the details.
+         * @var stringBuilderRealm is used for printing the details.
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
@@ -1482,7 +1684,7 @@ class LoggerBird : LifecycleObserver {
          * @var coroutineCallException is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
          * @var current time used for getting local time of your devices.
          * @var formatted time used for formatting time as "HH:mm:ss.SSS".(hour,minute,second,split second).
-         * @var stringBuilderException used for printing the details.
+         * @var stringBuilderException is used for printing the details.
          * Exceptions:
          * @throws exception if logInit method return value is false.
          */
@@ -1748,8 +1950,9 @@ class LoggerBird : LifecycleObserver {
                     }
                     if (!filePath.exists()) {
                         filePath.createNewFile()
+                        takeDeviceInformationDetails()
                         filePath.appendText(
-                            takeBuilderDetails()
+                            stringBuilderBuild.toString()
                         )
                         filePath.appendText(stringBuilderComponent.toString())
                     } else {
@@ -1815,8 +2018,9 @@ class LoggerBird : LifecycleObserver {
                     }
                     if (!filePath.exists()) {
                         filePath.createNewFile()
+                        takeDeviceInformationDetails()
                         filePath.appendText(
-                            takeBuilderDetails()
+                            stringBuilderBuild.toString()
                         )
                         filePath.appendText(
                             stringBuilderLifeCycle.toString()
@@ -1850,13 +2054,9 @@ class LoggerBird : LifecycleObserver {
                     callEnqueue()
                     callExceptionDetails(
                         exception = e,
-                        tag = Constants.lifeCycleTag
+                        tag = Constants.activityTag
                     )
                 }
-            } else {
-                throw LoggerBirdException(
-                    Constants.saveErrorMessage + Constants.lifeCycleMethodTag
-                )
             }
         }
 
@@ -1888,8 +2088,9 @@ class LoggerBird : LifecycleObserver {
                     }
                     if (!filePath.exists()) {
                         filePath.createNewFile()
+                        takeDeviceInformationDetails()
                         filePath.appendText(
-                            takeBuilderDetails()
+                            stringBuilderBuild.toString()
                         )
                         filePath.appendText(
                             stringBuilderFragmentManager.toString()
@@ -1925,10 +2126,6 @@ class LoggerBird : LifecycleObserver {
                         tag = Constants.fragmentManagerTag
                     )
                 }
-            } else {
-                throw LoggerBirdException(
-                    Constants.saveErrorMessage + Constants.fragmentManagerMethodTag
-                )
             }
         }
 
@@ -1959,8 +2156,9 @@ class LoggerBird : LifecycleObserver {
                     }
                     if (!filePath.exists()) {
                         filePath.createNewFile()
+                        takeDeviceInformationDetails()
                         filePath.appendText(
-                            takeBuilderDetails()
+                            stringBuilderBuild.toString()
                         )
                         filePath.appendText(
                             stringBuilderAnalyticsManager.toString()
@@ -1997,10 +2195,6 @@ class LoggerBird : LifecycleObserver {
                     )
                 }
 
-            } else {
-                throw LoggerBirdException(
-                    Constants.saveErrorMessage + Constants.analyticsMethodTag
-                )
             }
         }
 
@@ -2032,8 +2226,9 @@ class LoggerBird : LifecycleObserver {
                     }
                     if (!filePath.exists()) {
                         filePath.createNewFile()
+                        takeDeviceInformationDetails()
                         filePath.appendText(
-                            takeBuilderDetails()
+                            stringBuilderBuild.toString()
                         )
                         filePath.appendText(
                             stringBuilderHttp.toString()
@@ -2069,10 +2264,6 @@ class LoggerBird : LifecycleObserver {
                         tag = Constants.httpTag
                     )
                 }
-            } else {
-                throw LoggerBirdException(
-                    Constants.saveErrorMessage + Constants.htppRequestMethodTag
-                )
             }
         }
 
@@ -2104,8 +2295,9 @@ class LoggerBird : LifecycleObserver {
                     }
                     if (!filePath.exists()) {
                         filePath.createNewFile()
+                        takeDeviceInformationDetails()
                         filePath.appendText(
-                            takeBuilderDetails()
+                            stringBuilderBuild.toString()
                         )
                         filePath.appendText(
                             stringBuilderInAPurchase.toString()
@@ -2141,15 +2333,80 @@ class LoggerBird : LifecycleObserver {
                         tag = Constants.inAPurchaseTag
                     )
                 }
-            } else {
-                throw LoggerBirdException(
-                    Constants.saveErrorMessage + Constants.inAPurchaseMethodTag
-                )
             }
         }
 
         /**
-         * This Method Saves RetrofitRequest Details To Txt File.
+         * This Method Saves OkHttp Request Details To Txt File.
+         * Variables:
+         * @var fileDirectory is used for getting default file path which is data->data->your project package name->files.
+         * @var filePathName is used for getting desired file name that given in logInit method.
+         * @var if filePathName is not null then filePath takes data->data->your project package name->files->"filePathName".txt or if filePathName is null then filePath takes data->data->your project package name->files->logger_bird_details.txt.
+         * @var stringBuilderOkHttp prints retrofit details.
+         * @var stringBuilderExceedFileWriterLimit is used for printing deleted content from real file to temporary file.
+         * Exceptions:
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         */
+        private fun saveOkHttpRequestDetails() {
+            if (stringBuilderOkHttp.isNotEmpty()) {
+                try {
+                    fileDirectory = context.filesDir
+                    filePath = if (filePathName != null) {
+                        File(
+                            fileDirectory,
+                            "$filePathName.txt"
+                        )
+                    } else {
+                        File(
+                            fileDirectory,
+                            "logger_bird_details.txt"
+                        )
+                    }
+                    if (!filePath.exists()) {
+                        filePath.createNewFile()
+                        takeDeviceInformationDetails()
+                        filePath.appendText(
+                            stringBuilderBuild.toString()
+                        )
+                        filePath.appendText(
+                            stringBuilderOkHttp.toString()
+                        )
+                    } else {
+                        if (filePath.length() > fileLimit) {
+                            stringBuilderExceedFileWriterLimit.append(
+                                stringBuilderOkHttp.toString()
+                            )
+                        } else {
+                            filePath.appendText(
+                                stringBuilderOkHttp.toString()
+                            )
+                        }
+                    }
+//                            if (rootView != null) {
+//                                withContext(Dispatchers.Main) {
+//                                    attachRootView(rootView)
+//                                }
+//                            }
+                    callEnqueue()
+                    if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                        exceededFileLimitWriter(
+                            stringBuilder = stringBuilderExceedFileWriterLimit,
+                            file = filePath
+                        )
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callEnqueue()
+                    callExceptionDetails(
+                        exception = e,
+                        tag = Constants.okHttpTag
+                    )
+                }
+            }
+        }
+
+        /**
+         * This Method Saves Retrofit Request Details To Txt File.
          * Variables:
          * @var fileDirectory is used for getting default file path which is data->data->your project package name->files.
          * @var filePathName is used for getting desired file name that given in logInit method.
@@ -2176,8 +2433,9 @@ class LoggerBird : LifecycleObserver {
                     }
                     if (!filePath.exists()) {
                         filePath.createNewFile()
+                        takeDeviceInformationDetails()
                         filePath.appendText(
-                            takeBuilderDetails()
+                            stringBuilderBuild.toString()
                         )
                         filePath.appendText(
                             stringBuilderRetrofit.toString()
@@ -2213,10 +2471,6 @@ class LoggerBird : LifecycleObserver {
                         tag = Constants.retrofitTag
                     )
                 }
-            } else {
-                throw LoggerBirdException(
-                    Constants.saveErrorMessage + Constants.retrofitMethodTag
-                )
             }
         }
 
@@ -2248,8 +2502,9 @@ class LoggerBird : LifecycleObserver {
                     }
                     if (!filePath.exists()) {
                         filePath.createNewFile()
+                        takeDeviceInformationDetails()
                         filePath.appendText(
-                            takeBuilderDetails()
+                            stringBuilderBuild.toString()
                         )
                         filePath.appendText(
                             stringBuilderRealm.toString()
@@ -2281,78 +2536,133 @@ class LoggerBird : LifecycleObserver {
                         tag = Constants.realmTag
                     )
                 }
-            } else {
-                throw LoggerBirdException(
-                    Constants.saveErrorMessage + Constants.realmMethodTag
-                )
             }
         }
 
         /**
-         * This Method Saves DevicePerformance Details To Txt File.
-         * Parameters:
-         * @param file allow user modify the file they want to create for saving their Device Performance Details , otherwise it will save your file to the devices data->data->your project package name->files->device_performance_details with an default name device_performance_details.
+         * This Method Saves Performance Details To Txt File.
          * Variables:
-         * @var controlLogInit is used for getting logInit method return value.
-         * @var coroutineCallDevicePerformance is used for call the method in coroutine scope(Dispatchers.IO) which leads method to be called random thread which is different from main thread as asynchronously.
-         * @var defaultFileDirectory is used for getting default file path which is data->data->your project package name->files
-         * @var defaultFilePath is used for getting defaultFileDirectory and default file name("device_performance_details")
-         * Exceptions:
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-         * @throws exception if logInit method return value is false.
-         * @throws exception if log instance is empty.
+         * @var fileDirectory is used for getting default file path which is data->data->your project package name->files.
+         * @var filePathName is used for getting desired file name that given in logInit method.
+         * @var if filePathName is not null then filePath takes data->data->your project package name->files->"filePathName".txt or if filePathName is null then filePath takes data->data->your project package name->files->logger_bird_details.txt.
+         * @var stringBuilderPerformanceDetails prints performance details.
+         * @var stringBuilderExceedFileWriterLimit is used for printing deleted content from real file to temporary file.
+         * Exception:
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        fun saveDevicePerformanceDetails(
-            file: File? = null
+        private fun saveMemoryUsageDetails(
         ) {
-            if (controlLogInit) {
-                if (stringBuilderPerformanceDetails.isNotEmpty()) {
-                    coroutineCallDevicePerformance.async {
-                        //                        try {
-//                            if (file != null) {
-//                                if (!file.exists()) {
-//                                    withContext(Dispatchers.IO) {
-//                                        file.createNewFile()
-//                                        file.appendText(takeDeviceInformationDetails())
-//                                    }
-//                                }
-//                                file.appendText(
-//                                    stringBuilderPerformanceDetails.toString()
-//                                )
-//                            } else {
-//                                defaultFileDirectory = context.filesDir
-//                                defaultFilePath = File(
-//                                    defaultFileDirectory, "device_performance_details.txt"
-//                                )
-//                                if (!defaultFilePath.exists()) {
-//                                    withContext(Dispatchers.IO) {
-//                                        defaultFilePath.createNewFile()
-//                                        defaultFilePath.appendText(
-//                                            takeDeviceInformationDetails()
-//                                        )
-//                                    }
-//                                }
-//                                defaultFilePath.appendText(
-//                                    stringBuilderPerformanceDetails.toString()
-//                                )
-//                            }
-//                            stringBuilderPerformanceDetails = StringBuilder()
-//                        } catch (e: Exception) {
-//                            e.printStackTrace()
-//                            takeExceptionDetails(
-//                                e,
-//                                Constants.devicePerformanceTag
-//                            )
-//                            saveExceptionDetails()
-//                        }
+            if (stringBuilderMemoryUsage.isNotEmpty()) {
+                try {
+                    fileDirectory = context.filesDir
+                    filePath = if (filePathName != null) {
+                        File(
+                            fileDirectory,
+                            "$filePathName.txt"
+                        )
+                    } else {
+                        File(
+                            fileDirectory,
+                            "logger_bird_details.txt"
+                        )
                     }
-                } else {
-                    throw LoggerBirdException(
-                        Constants.saveErrorMessage + Constants.devicePerformanceTag
-                    )
+                    if (!filePath.exists()) {
+                        filePath.createNewFile()
+                        takeDeviceInformationDetails()
+                        filePath.appendText(
+                            stringBuilderBuild.toString()
+                        )
+                        filePath.appendText(
+                            stringBuilderMemoryUsage.toString()
+                        )
+                    } else {
+                        if (filePath.length() > fileLimit) {
+                            stringBuilderExceedFileWriterLimit.append(
+                                stringBuilderMemoryUsage.toString()
+                            )
+                        } else {
+                            filePath.appendText(
+                                stringBuilderMemoryUsage.toString()
+                            )
+                        }
+                    }
+                    if (!memoryOverused) {
+                        callEnqueue()
+                        if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                            exceededFileLimitWriter(
+                                stringBuilder = stringBuilderExceedFileWriterLimit,
+                                file = filePath
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callEnqueue()
+                    callExceptionDetails(exception = e, tag = Constants.memoryUsageTag)
                 }
-            } else {
-                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+        }
+
+
+        /**
+         * This Method Saves Cpu Details To Txt File.
+         * Variables:
+         * @var fileDirectory is used for getting default file path which is data->data->your project package name->files.
+         * @var filePathName is used for getting desired file name that given in logInit method.
+         * @var if filePathName is not null then filePath takes data->data->your project package name->files->"filePathName".txt or if filePathName is null then filePath takes data->data->your project package name->files->logger_bird_details.txt.
+         * @var stringBuilderCpuDetails prints cpu details.
+         * @var stringBuilderExceedFileWriterLimit is used for printing deleted content from real file to temporary file.
+         * Exception:
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         */
+        private fun saveCpuDetails() {
+            if (stringBuilderCpu.isNotEmpty()) {
+                try {
+                    fileDirectory = context.filesDir
+                    filePath = if (filePathName != null) {
+                        File(
+                            fileDirectory,
+                            "$filePathName.txt"
+                        )
+                    } else {
+                        File(
+                            fileDirectory,
+                            "logger_bird_details.txt"
+                        )
+                    }
+                    if (!filePath.exists()) {
+                        filePath.createNewFile()
+                        takeDeviceInformationDetails()
+                        filePath.appendText(
+                            stringBuilderBuild.toString()
+                        )
+                        filePath.appendText(
+                            stringBuilderCpu.toString()
+                        )
+                    } else {
+                        if (filePath.length() > fileLimit) {
+                            stringBuilderExceedFileWriterLimit.append(
+                                stringBuilderCpu.toString()
+                            )
+                        } else {
+                            filePath.appendText(
+                                stringBuilderCpu.toString()
+                            )
+                        }
+                    }
+                    callEnqueue()
+                    if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
+                        exceededFileLimitWriter(
+                            stringBuilder = stringBuilderExceedFileWriterLimit,
+                            file = filePath
+                        )
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callEnqueue()
+                    callExceptionDetails(exception = e, tag = Constants.cpuTag)
+                }
             }
         }
 
@@ -2385,8 +2695,9 @@ class LoggerBird : LifecycleObserver {
                     }
                     if (!filePath.exists()) {
                         filePath.createNewFile()
+                        takeDeviceInformationDetails()
                         filePath.appendText(
-                            takeBuilderDetails()
+                            stringBuilderBuild.toString()
                         )
                         filePath.appendText(
                             stringBuilderException.toString()
@@ -2416,29 +2727,33 @@ class LoggerBird : LifecycleObserver {
                         )
                     }
                     if (uncaughtExceptionHandlerController) {
+                        uncaughtExceptionHandlerController = false
                         EmailUtil.sendUnhandledException(
                             file = filePath,
                             context = context
                         )
                         saveSessionIntoOldSessionFile()
-                        android.os.Process.killProcess(android.os.Process.myPid());
-                        exitProcess(0);
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-            } else {
-                throw LoggerBirdException(
-                    Constants.saveErrorMessage + Constants.exceptionMethodTag
-                )
             }
         }
 
-        //In progress method.
+        /**
+         * This Method Saves Details File Into Old Session File.
+         * Variables:
+         * @var scannerOldSessionFile is used for getting current content of filePath
+         * @var oldSessionFile is used for creating old session version of file.
+         * @var filePathName is used for getting desired file name that given in logInit method.
+         * @var stringBuilderMemoryUsage is used for printing content of LoggerBirdMemoryService into the file.
+         * Exception:
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         */
         private fun saveSessionIntoOldSessionFile() {
             try {
-                val scannerOldSecessionFile = Scanner(filePath)
-                val oldSecessionFile = if (filePathName != null) {
+                val scannerOldSessionFile = Scanner(filePath)
+                val oldSessionFile = if (filePathName != null) {
                     File(
                         filePath.path.substringBeforeLast("/"),
                         filePathName + "_old_session.txt"
@@ -2449,19 +2764,22 @@ class LoggerBird : LifecycleObserver {
                         "logger_bird_details_old_session.txt"
                     )
                 }
-                if (oldSecessionFile.exists()) {
-                    oldSecessionFile.delete()
-                    oldSecessionFile.createNewFile()
+                if (oldSessionFile.exists()) {
+                    oldSessionFile.delete()
+                    oldSessionFile.createNewFile()
                 } else {
-                    oldSecessionFile.createNewFile()
+                    oldSessionFile.createNewFile()
                 }
                 do {
-                    oldSecessionFile.appendText(
-                        scannerOldSecessionFile.nextLine() + "\n"
+                    oldSessionFile.appendText(
+                        scannerOldSessionFile.nextLine() + "\n"
                     )
-                } while (scannerOldSecessionFile.hasNextLine())
+                } while (scannerOldSessionFile.hasNextLine())
+                oldSessionFile.appendText(LoggerBirdMemoryService.stringBuilderMemoryUsage.toString())
                 filePath.delete()
-                filePath = oldSecessionFile
+                filePath = oldSessionFile
+                android.os.Process.killProcess(android.os.Process.myPid());
+                exitProcess(0);
             } catch (e: Exception) {
                 e.printStackTrace()
                 callEnqueue()
@@ -2510,6 +2828,16 @@ class LoggerBird : LifecycleObserver {
         //dummy method might be useful for future implementation and changes for taking stringBuilderRealm instance.
         internal fun returnStringBuilderRealm(): StringBuilder {
             return stringBuilderRealm
+        }
+
+        //dummy method might be useful for future implementation and changes for taking stringBuilderPerformance instance.
+        internal fun returnStringBuilderPerformance(): StringBuilder {
+            return stringBuilderPerformance
+        }
+
+        //dummy method might be useful for future implementation and changes for taking stringBuilderCpu instance.
+        internal fun returnStringBuilderCpu(): StringBuilder {
+            return stringBuilderCpu
         }
 
         //dummy method might be useful for future implementation and changes for taking stringBuilderException instance.

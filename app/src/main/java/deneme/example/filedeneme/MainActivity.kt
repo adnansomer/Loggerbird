@@ -28,6 +28,7 @@ import loggerbird.LoggerBird
 import io.reactivex.disposables.Disposable
 import okhttp3.FormBody
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Response
 import okhttp3.Request
@@ -65,11 +66,7 @@ class MainActivity : AppCompatActivity() {
     private val transformer: Transformer = transformerFactory.newTransformer()
     //private var recyclerViewList:ArrayList<RecyclerModel> = ArrayList()
     var disposable: Disposable? = null
-    var retrofit: Retrofit = ApiServiceInterface.createObject()
-    val ApiService by lazy {
-        ApiServiceInterface.create(this)
-//
-    }
+
     private var coroutineCallComponent = CoroutineScope(Dispatchers.IO)
 
 
@@ -117,6 +114,7 @@ class MainActivity : AppCompatActivity() {
             for (x in 1..5) {
                 LoggerBird.callComponentDetails(view = button_add, resources = button_add.resources)
                 LoggerBird.callLifeCycleDetails()
+                LoggerBird.callCpuDetails()
                 throw NullPointerException("unhandled exception")
             }
 
@@ -188,9 +186,9 @@ class MainActivity : AppCompatActivity() {
 
         button_performance.setOnClickListener {
 
-            LoggerBird.takeDeviceInformationDetails()
-            LoggerBird.takeDevicePerformanceDetails()
-            LoggerBird.takeDeviceCpuDetails()
+            //            LoggerBird.takeDeviceInformationDetails()
+//            LoggerBird.takeDevicePerformanceDetails()
+//            LoggerBird.takeDeviceCpuDetails()
 
 
         }
@@ -198,9 +196,13 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun beginSearch(srsearch: String, context: Context) {
-
+        var retrofit: Retrofit? = ApiServiceInterface.createObject()
+        val ApiService by lazy {
+            ApiServiceInterface.create(this)
+//
+        }
         ApiService.run {
-            hitCountCheck("query", "json", "search", srsearch).enqueue(object :
+            hitCountCheck().enqueue(object :
                 Callback<RetroFitModel.Result> {
                 override fun onFailure(call: Call<RetroFitModel.Result>, t: Throwable) {
                     t.printStackTrace()
@@ -213,7 +215,7 @@ class MainActivity : AppCompatActivity() {
                     Log.d("response", "response Success!")
 
                     val httpUrl: HttpUrl = HttpUrl.Builder()
-                        .scheme("https")
+                        .scheme("http")
                         .host("api.plos.org")
                         .addPathSegment("search")
                         .addQueryParameter("q", "DNA")
@@ -227,17 +229,18 @@ class MainActivity : AppCompatActivity() {
                         .url(httpUrl)
                         .post(fromBodyBuilder.build())
                         .build()
+
 //                    coroutineCallInternet.async {
 //
 //                       // LoggerBird.saveRetrofitRequestDetails()
 //                    }
-                    for (i in 0..10) {
-                        LoggerBird.callRetrofitRequestDetails(
-                            response = ApiServiceInterface.httpClient(
-                                request
-                            ), request = request
-                        )
-                    }
+//                    for (i in 0..10) {
+//                        LoggerBird.callRetrofitRequestDetails(
+//                            response = ApiServiceInterface.httpClient(
+//                                request
+//                            ), request = request
+//                        )
+//                    }
 
 
                     //  LogDeneme.saveRetrofitRequestDetails()

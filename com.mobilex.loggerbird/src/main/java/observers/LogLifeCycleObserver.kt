@@ -24,6 +24,7 @@ internal class LogLifeCycleObserver() :
     companion object {
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
+        internal var returnLifeCycleClassName: String? = null
     }
 
     init {
@@ -43,6 +44,7 @@ internal class LogLifeCycleObserver() :
             deRegisterLifeCycle()
             this.context = context
             ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+            returnLifeCycleClassName = context.javaClass.simpleName
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -88,7 +90,7 @@ internal class LogLifeCycleObserver() :
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onCreate"
-            stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            stringBuilderLifeCycleObserver.append(Constants.activityTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
             if (classList.isEmpty()) {
                 classList.add(context.javaClass.simpleName)
             }
@@ -126,7 +128,7 @@ internal class LogLifeCycleObserver() :
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onStart"
-            stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            stringBuilderLifeCycleObserver.append(Constants.activityTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -154,7 +156,7 @@ internal class LogLifeCycleObserver() :
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onResume"
-            stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            stringBuilderLifeCycleObserver.append(Constants.activityTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -181,7 +183,7 @@ internal class LogLifeCycleObserver() :
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onPause"
-            stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            stringBuilderLifeCycleObserver.append(Constants.activityTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -209,7 +211,7 @@ internal class LogLifeCycleObserver() :
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onStop"
-            stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            stringBuilderLifeCycleObserver.append(Constants.activityTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -236,7 +238,7 @@ internal class LogLifeCycleObserver() :
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onDestroy"
-            stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            stringBuilderLifeCycleObserver.append(Constants.activityTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()

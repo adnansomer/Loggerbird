@@ -1,8 +1,8 @@
-
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.Future
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+
 //thread class might be useful for future.
 class LogThreadPoolExecutorUtil(
     corePoolSize: Int,
@@ -11,10 +11,11 @@ class LogThreadPoolExecutorUtil(
     unit: TimeUnit?,
     workQueue: BlockingQueue<Runnable>?
 ) : ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue) {
-    val workQueueUtil:BlockingQueue<Runnable>? = workQueue
+    val workQueueUtil: BlockingQueue<Runnable>? = workQueue
     override fun getQueue(): BlockingQueue<Runnable> {
         return super.getQueue()
     }
+
     override fun execute(command: Runnable) {
         super.execute(command)
     }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.IBinder
 import constants.Constants
 import loggerbird.LoggerBird
+import observers.LogLifeCycleObserver
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
@@ -36,11 +37,18 @@ internal class LoggerBirdService() : Service() {
      * @param intent used for getting context reference from the Activity.
      * @param flags (no idea).
      * @param startId (no idea).
-     * @return IBinder value.
+     * @return START_NOT_STICKY value.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        intentService = intent
-        return START_STICKY
+        try {
+            intentService = intent
+//            LoggerBird.callMemoryUsageDetails(threshold = null)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.serviceTag)
+        }
+        return START_NOT_STICKY
     }
 
     /**
@@ -62,7 +70,7 @@ internal class LoggerBirdService() : Service() {
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onDestroy"
             onDestroyMessage =
-                " " + Constants.lifeCycleTag + ":" + intentService!!.component!!.className + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.activityTag + ":" + LogLifeCycleObserver.returnLifeCycleClassName + " " + "${formattedTime}:${currentLifeCycleState}\n"
             LoggerBird.takeLifeCycleDetails()
         } catch (e: Exception) {
             e.printStackTrace()
