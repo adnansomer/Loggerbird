@@ -2,26 +2,23 @@ package deneme.example.filedeneme
 
 import android.content.Context
 import android.os.AsyncTask
+import loggerbird.LoggerBird
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Query
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import retrofit2.Call
 import retrofit2.http.POST
 import java.util.concurrent.TimeUnit
 import okhttp3.Response
+import java.lang.Exception
 
 
 interface ApiServiceInterface {
 
-    @POST("api.php")
+    @POST("search?q=DNA&q=DNA2&q=DNA3&z=title%3ARNA ")
     fun hitCountCheck(
-        @Query("action") action: String,
-        @Query("format") format: String,
-        @Query("list") list: String,
-        @Query("srsearch") srsearch: String
     ):
             Call<RetroFitModel.Result>
 
@@ -37,7 +34,8 @@ interface ApiServiceInterface {
                 .addConverterFactory(
                     GsonConverterFactory.create()
                 )
-                .baseUrl("https://api.plos.org")
+                .baseUrl("http://api.plos.org")
+                .client(LoggerBird.loggerBirdInterceptorClient())
                 .build()
 
 //            LogDeneme.saveAllDetails(fileName ="berk_deneme",retrofit =retrofit,context = context)
@@ -45,18 +43,19 @@ interface ApiServiceInterface {
             return retrofit.create(ApiServiceInterface::class.java)
         }
 
-        fun createObject(): Retrofit {
-            val retrofit = Retrofit.Builder()
-//                .addCallAdapterFactory(
-//                    RxJava2CallAdapterFactory.create()
-//                )
-                .addConverterFactory(
-                    GsonConverterFactory.create()
-                )
-                .baseUrl("https://api.plos.org")
-                .client(deneme.example.filedeneme.ApiServiceInterface.Companion.client)
-                .build()
-
+        fun createObject(): Retrofit? {
+            var retrofit:Retrofit? = null
+            try {
+                retrofit= Retrofit.Builder() .addConverterFactory(
+                        GsonConverterFactory.create()
+                    )
+                    .baseUrl("http://api.plos.org")
+                    .client(client)
+                    .client(LoggerBird.loggerBirdInterceptorClient()!!)
+                    .build()
+            }catch (e:Exception){
+                e.printStackTrace()
+            }
             return retrofit
         }
 
@@ -76,7 +75,6 @@ interface ApiServiceInterface {
             .writeTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .build()
-
     }
 }
 

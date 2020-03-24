@@ -7,14 +7,14 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import constants.Constants
 import loggerbird.LoggerBird
-import java.io.Serializable
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
 //LogLifeCycleObserver class is used for attaching lifecycle observer for your current activity.
-internal class LogLifeCycleObserver() : LifecycleObserver {
+internal class LogLifeCycleObserver() :
+    LifecycleObserver {
     //Global variables.
     private var stringBuilderLifeCycleObserver: StringBuilder = StringBuilder()
     private lateinit var context: Context
@@ -24,41 +24,53 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
     companion object {
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
+        internal var returnLifeCycleClassName: String? = null
     }
 
     init {
-        stringBuilderLifeCycleObserver.append("\n"+"Life Cycle Details:"+"\n")
+        stringBuilderLifeCycleObserver.append("\n" + "Life Cycle Details:" + "\n")
     }
 
     /**
      * This Method Register A LifeCycle Observer For The Current Activity.
      * Parameters:
      * @param context is for getting reference from the application context , you must deploy this parameter.
+     * Variables:
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     fun registerLifeCycle(context: Context) {
         try {
             deRegisterLifeCycle()
             this.context = context
             ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+            returnLifeCycleClassName = context.javaClass.simpleName
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.activityLifeCycleObserverTag
+            )
         }
     }
 
     /**
      * This Method DeRegister A LifeCycle Observer From The Current Activity.
+     * Variables:
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     fun deRegisterLifeCycle() {
         try {
             ProcessLifecycleOwner.get().lifecycle.removeObserver(this)
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.activityLifeCycleObserverTag
+            )
         }
     }
 
@@ -69,7 +81,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
      * @var classList will take list of activities.
      * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onCreateListener() {
@@ -78,7 +90,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onCreate"
-            stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            stringBuilderLifeCycleObserver.append(Constants.activityTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
             if (classList.isEmpty()) {
                 classList.add(context.javaClass.simpleName)
             }
@@ -91,7 +103,11 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.activityLifeCycleObserverTag
+            )
         }
     }
 
@@ -102,7 +118,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
      * @var classList will take list of activities.
      * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -112,11 +128,13 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onStart"
-            stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            stringBuilderLifeCycleObserver.append(Constants.activityTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(
-                exception = e
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.activityLifeCycleObserverTag
             )
         }
     }
@@ -128,7 +146,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
      * @var classList will take list of activities.
      * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -138,10 +156,14 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onResume"
-            stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            stringBuilderLifeCycleObserver.append(Constants.activityTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.activityLifeCycleObserverTag
+            )
         }
     }
 
@@ -152,7 +174,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
      * @var classList will take list of activities.
      * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     private fun onPauseListener() {
@@ -161,12 +183,17 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onPause"
-            stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            stringBuilderLifeCycleObserver.append(Constants.activityTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.activityLifeCycleObserverTag
+            )
         }
     }
+
 
     /**
      * This Method Called When LifeCycle Observer Detect's OnDestroy State In The Current Activity Or Fragment.
@@ -175,30 +202,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
      * @var classList will take list of activities.
      * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
      * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-     */
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    internal fun onDestroyListener() {
-        try {
-            val date = Calendar.getInstance().time
-            val formatter = SimpleDateFormat.getDateTimeInstance()
-            formattedTime = formatter.format(date)
-            currentLifeCycleState = "onDestroy"
-            stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
-        } catch (e: Exception) {
-            e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
-        }
-    }
-
-    /**
-     * This Method Called When LifeCycle Observer Detect's OnDestroy State In The Current Activity Or Fragment.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var classList will take list of activities.
-     * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
-     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private fun onStopListener() {
@@ -207,12 +211,44 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onStop"
-            stringBuilderLifeCycleObserver.append(" " + Constants.lifeCycleTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            stringBuilderLifeCycleObserver.append(Constants.activityTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.activityLifeCycleObserverTag
+            )
         }
     }
+
+    /**
+     * This Method Called When LifeCycle Observer Detect's OnDestroy State In The Current Activity Or Fragment.
+     * Variables:
+     * @var currentLifeCycle states takes current state as a String in the life cycle.
+     * @var classList will take list of activities.
+     * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
+     * Exceptions:
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    internal fun onDestroyListener() {
+        try {
+            val date = Calendar.getInstance().time
+            val formatter = SimpleDateFormat.getDateTimeInstance()
+            formattedTime = formatter.format(date)
+            currentLifeCycleState = "onDestroy"
+            stringBuilderLifeCycleObserver.append(Constants.activityTag + ":" + context.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.activityLifeCycleObserverTag
+            )
+        }
+    }
+
 
     /**
      * This Method Is Used For Printing Observer Outcome.
@@ -220,14 +256,14 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
      * @var stringBuilderLifeCycleObserver will print activity details.
      * @return String value.
      */
-    fun returnActivityLifeCycleState(): String {
+    internal fun returnActivityLifeCycleState(): String {
         return stringBuilderLifeCycleObserver.toString()
     }
 
     /**
      * This Method Re-Creates Instantiation For stringBuilderLifeCycleObserver.
      */
-    fun refreshLifeCycleObserverState() {
+    internal fun refreshLifeCycleObserverState() {
         stringBuilderLifeCycleObserver = StringBuilder()
     }
 
@@ -237,7 +273,7 @@ internal class LogLifeCycleObserver() : LifecycleObserver {
      * @var classList takes list of activities that are called with this observer.
      * @return ArrayList<String>.
      */
-    fun returnClassList(): ArrayList<String> {
+    internal fun returnClassList(): ArrayList<String> {
         return classList
     }
 

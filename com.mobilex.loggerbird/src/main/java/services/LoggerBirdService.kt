@@ -3,11 +3,8 @@ package services
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
-import androidx.fragment.app.FragmentManager
 import constants.Constants
 import loggerbird.LoggerBird
-import observers.LogFragmentLifeCycleObserver
 import observers.LogLifeCycleObserver
 import java.lang.Exception
 import java.text.SimpleDateFormat
@@ -40,17 +37,24 @@ internal class LoggerBirdService() : Service() {
      * @param intent used for getting context reference from the Activity.
      * @param flags (no idea).
      * @param startId (no idea).
-     * @return IBinder value.
+     * @return START_NOT_STICKY value.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        intentService = intent
-        return START_STICKY
+        try {
+            intentService = intent
+//            LoggerBird.callMemoryUsageDetails(threshold = null)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.serviceTag)
+        }
+        return START_NOT_STICKY
     }
 
     /**
      * This Method Called When Service Detect's An  OnBind State In The Current Activity.
      * Parameters:
-     * @param intent used for getting context reference from the Activity.
+     * @param rootIntent used for getting context reference from the Activity.
      * Variables:
      * @var currentLifeCycleState states takes current state as a String in the Activity life cycle.
      * @var onDestroyMessage used for providing detail's for stringBuilder in LoggerBird.takelifeCycleDetails.
@@ -66,11 +70,12 @@ internal class LoggerBirdService() : Service() {
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onDestroy"
             onDestroyMessage =
-                " " + Constants.lifeCycleTag + ":" + intentService!!.component!!.className + " " + "${formattedTime}:${currentLifeCycleState}\n"
+                " " + Constants.activityTag + ":" + LogLifeCycleObserver.returnLifeCycleClassName + " " + "${formattedTime}:${currentLifeCycleState}\n"
             LoggerBird.takeLifeCycleDetails()
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBird.takeExceptionDetails(e)
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.serviceTag)
         }
     }
 

@@ -6,49 +6,41 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.net.Uri
-import android.os.AsyncTask
-import android.os.Build
-import android.os.Bundle
-import android.os.Looper
-import android.util.Log
-import android.view.View
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import android.os.*
 import androidx.appcompat.app.AppCompatActivity
+import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.adjust.sdk.Constants.BASE_URL
-import io.reactivex.disposables.Disposable
-import io.realm.Realm
-import io.realm.RealmConfiguration
-import io.realm.Sort
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import loggerbird.LoggerBird
-import loggerbird.LoggerBird.Companion.LoggerBirdHttpClient
-import loggerbird.LoggerBird.Companion.takeRetrofitRequestDetails
-import okhttp3.FormBody
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.logging.HttpLoggingInterceptor
-import org.json.JSONObject
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import androidx.appcompat.app.AlertDialog
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
+import android.view.View
+import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import io.realm.Realm
+import io.realm.RealmConfiguration
+import io.realm.Sort
+import kotlinx.coroutines.*
+import loggerbird.LoggerBird
+import io.reactivex.disposables.Disposable
+import okhttp3.FormBody
+import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
+import retrofit2.Call
+import retrofit2.Response
+import okhttp3.Request
+import retrofit2.Callback
+import retrofit2.Retrofit
+import org.json.JSONObject;
+import java.lang.NullPointerException
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
 
 
-class MainActivity : AppCompatActivity(){
+class MainActivity : AppCompatActivity() {
     private var logs: String = ""
     private var follows: String = "0"
     private var followers: String = "0"
@@ -62,24 +54,21 @@ class MainActivity : AppCompatActivity(){
     private var getFilePath: String = ""
     private var counterlist = arrayListOf<RealmItem>()
     private val coroutineCallInternet = CoroutineScope(Dispatchers.IO)
-    private val coroutineCallDatabase = CoroutineScope(Dispatchers.IO)
+    private val coroutineCall = CoroutineScope(Dispatchers.IO)
     private lateinit var realmInstance: Realm
     private lateinit var realmInstanceInsert: Realm
     private lateinit var realmLooper: Looper
     var stringBuilderComponent: java.lang.StringBuilder = java.lang.StringBuilder()
     lateinit var fileDirectoryException: File
     lateinit var fileDirectoryRetrofit: File
-    private lateinit var jsonObject:JSONObject
-    private val transformerFactory:TransformerFactory=TransformerFactory.newInstance()
-    private  val  transformer:Transformer=transformerFactory.newTransformer()
+    private lateinit var jsonObject: JSONObject
+    private val transformerFactory: TransformerFactory = TransformerFactory.newInstance()
+    private val transformer: Transformer = transformerFactory.newTransformer()
     //private var recyclerViewList:ArrayList<RecyclerModel> = ArrayList()
     var disposable: Disposable? = null
-    var retrofit: Retrofit = ApiServiceInterface.createObject()
-    val ApiService by lazy {
-        ApiServiceInterface.create(this)
-//
-    }
+
     private var coroutineCallComponent = CoroutineScope(Dispatchers.IO)
+
 
 //    val TAG_ACTIVITY_NAME:String="MainActivity"
 //    val TAG_ONCREATE:String="Activity In OnCreate State"
@@ -88,13 +77,13 @@ class MainActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.d("life_cycle_state_create",this.lifecycle.currentState.name)
+        Log.d("life_cycle_state_create", this.lifecycle.currentState.name)
 //        progressBar=findViewById(R.id.progressBar)
-        val intent:Intent=getIntent()
-        val uri:Uri? = intent.data
-        Log.d("deep_link_url",uri.toString())
+        val intent: Intent = getIntent()
+        val uri: Uri? = intent.data
+        Log.d("deep_link_url", uri.toString())
         //addRecyclerViewList()
-        recycler_view.layoutManager=LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
+        recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
         //recycler_view.adapter=RecyclerViewAdapter(recyclerViewList)
         LoggerBird.logInit(context = this)
@@ -110,7 +99,6 @@ class MainActivity : AppCompatActivity(){
         adapter.notifyDataSetChanged() */
 
 
-
 //        LogDeneme.logLifeCycleDetails()
 //        LogDeneme.logAttach()
         permissions()
@@ -120,53 +108,32 @@ class MainActivity : AppCompatActivity(){
         }
         LoggerBird.logInit(context = this)
         button_add.setOnClickListener() {
-            //adapter.notifyItemRemoved(0)
+            val filePathTest: File = File(this.filesDir, "logger_bird_details.txt")
+            val rootView: ViewGroup =
+                (this as Activity).window.decorView.findViewById(android.R.id.content);
+            for (x in 1..5) {
+                LoggerBird.callComponentDetails(view = button_add, resources = button_add.resources)
+                LoggerBird.callLifeCycleDetails()
+                LoggerBird.callCpuDetails()
+                throw NullPointerException("unhandled exception")
+            }
 
-//            throw NullPointerException("button is null")
-//            for( i in 0..100){
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
-//                LogDeneme.logComponentDetails(view=recycler_view,resources = recycler_view.resources)
+            try {
 
-//            }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+
+//            LoggerBird.callEnqueue()
+
+
 // )
 //            LogDeneme.saveComponentDetails()
-            LoggerBird.takeComponentDetails(view=recycler_view,resources = recycler_view.resources)
             //LoggerBird.saveComponentDetails()
 //            val emailFile:File=File(this.filesDir,"component_details.txt")
-//            val rootView:ViewGroup=(this as Activity).window.decorView.findViewById(android.R.id.content);
+
 //            LogDeneme.sendLogDetailsAsEmail(file=emailFile,context = this,rootView = rootView )
 
 
@@ -198,20 +165,20 @@ class MainActivity : AppCompatActivity(){
 //            }
         }
         button_read_logs.setOnClickListener(View.OnClickListener {
-            beginSearch("dog",this)
-           // LogDeneme.saveComponentDetails(view=button_read_logs,resources = button_read_logs.resources)
+            beginSearch("dog", this)
+            // LogDeneme.saveComponentDetails(view=button_read_logs,resources = button_read_logs.resources)
             //            LogDeneme.saveComponentDetails(null,button_read_logs,button_read_logs.resources,this)
 //            LogDeneme.saveComponentDetails(null,null,null,this)
 //            writeTextFile()
         })
 
         button_next_activity.setOnClickListener({
-//            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
+            //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
 //            LogDeneme.saveAllDetails(context=this)
             //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
-           // LoggerBird.saveLifeCycleDetails()
+            // LoggerBird.saveLifeCycleDetails()
 
-            LoggerBird.takeLifeCycleDetails()
+//            LoggerBird.takeLifeCycleDetails()
 
 
             startActivity(Intent(this@MainActivity, Main2Activity::class.java))
@@ -219,90 +186,23 @@ class MainActivity : AppCompatActivity(){
 
         button_performance.setOnClickListener {
 
-            /*val logging = HttpLoggingInterceptor()
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY)
-
-            val retrofit: Retrofit = Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(LoggerBirdHttpClient())
-                .build()*/
-
-/*
-            val interceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
-            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-
-            val client: OkHttpClient = OkHttpClient.Builder().addInterceptor(interceptor).addInterceptor(interceptor).build()
-
-            val retrofit = Retrofit.Builder()
-                .baseUrl("https://backend.example.com")
-                .client(LoggerBirdHttpClient())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()*/
-            getCurrentData()
-
+            //            LoggerBird.takeDeviceInformationDetails()
+//            LoggerBird.takeDevicePerformanceDetails()
+//            LoggerBird.takeDeviceCpuDetails()
 
 
         }
     }
-    companion object {
-
-        var BaseUrl = "http://api.openweathermap.org/"
-        var AppId = "2e65127e909e178d0af311a81f39948c"
-        var lat = "35"
-        var lon = "139"
-    }
-
-    fun getCurrentData() {
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BaseUrl)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(LoggerBirdHttpClient())
-            .build()
-        val service = retrofit.create(WeatherService::class.java)
-        val call = service.getCurrentWeatherData(lat, lon, AppId)
-        var weatherData : String?
-        call.enqueue(object : Callback<WeatherResponse> {
-            override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>) {
-                if (response.code() == 200) {
-                    val weatherResponse = response.body()!!
-
-                    val stringBuilder = "Country: " +
-                            weatherResponse.sys!!.country +
-                            "\n" +
-                            "Temperature: " +
-                            weatherResponse.main!!.temp +
-                            "\n" +
-                            "Temperature(Min): " +
-                            weatherResponse.main!!.temp_min +
-                            "\n" +
-                            "Temperature(Max): " +
-                            weatherResponse.main!!.temp_max +
-                            "\n" +
-                            "Humidity: " +
-                            weatherResponse.main!!.humidity +
-                            "\n" +
-                            "Pressure: " +
-                            weatherResponse.main!!.pressure
-
-                     //weatherData!!.text = stringBuilder
-                }
-            }
-
-            override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
-                //weatherData!!.text = t.message
-            }
-        })}
 
 
-
-
-
-
-private fun beginSearch(srsearch: String, context: Context) {
-
+    private fun beginSearch(srsearch: String, context: Context) {
+        var retrofit: Retrofit? = ApiServiceInterface.createObject()
+        val ApiService by lazy {
+            ApiServiceInterface.create(this)
+//
+        }
         ApiService.run {
-            hitCountCheck("query", "json", "search", srsearch).enqueue(object :
+            hitCountCheck().enqueue(object :
                 Callback<RetroFitModel.Result> {
                 override fun onFailure(call: Call<RetroFitModel.Result>, t: Throwable) {
                     t.printStackTrace()
@@ -315,31 +215,36 @@ private fun beginSearch(srsearch: String, context: Context) {
                     Log.d("response", "response Success!")
 
                     val httpUrl: HttpUrl = HttpUrl.Builder()
-                        .scheme("https")
+                        .scheme("http")
                         .host("api.plos.org")
                         .addPathSegment("search")
                         .addQueryParameter("q", "DNA")
                         .addQueryParameter("q", "DNA2")
                         .addQueryParameter("q", "DNA3")
-                        .addQueryParameter("z","title:RNA")
+                        .addQueryParameter("z", "title:RNA")
                         .build();
 
                     val fromBodyBuilder = FormBody.Builder()
-                    val request= Request.Builder()
+                    val request = Request.Builder()
                         .url(httpUrl)
                         .post(fromBodyBuilder.build())
                         .build()
-                    coroutineCallInternet.async {
-                        for ( x in 0..10 ){
-                        LoggerBird.takeRetrofitRequestDetails(response= ApiServiceInterface.httpClient(
-                            request
-                        ),request=request)
-                       // LoggerBird.saveRetrofitRequestDetails()
-                    }}
+
+//                    coroutineCallInternet.async {
+//
+//                       // LoggerBird.saveRetrofitRequestDetails()
+//                    }
+//                    for (i in 0..10) {
+//                        LoggerBird.callRetrofitRequestDetails(
+//                            response = ApiServiceInterface.httpClient(
+//                                request
+//                            ), request = request
+//                        )
+//                    }
 
 
-                  //  LogDeneme.saveRetrofitRequestDetails()
-                  //  LogDeneme.saveAllDetails(response=ApiServiceInterface.httpClient(request),context = context,request=request)
+                    //  LogDeneme.saveRetrofitRequestDetails()
+                    //  LogDeneme.saveAllDetails(response=ApiServiceInterface.httpClient(request),context = context,request=request)
 
                 }
             })
@@ -347,6 +252,7 @@ private fun beginSearch(srsearch: String, context: Context) {
 
 
     }
+
     private fun checkEmpty(): Boolean {
         follows = editText_follows.text.toString();
         followers = editText_followers.text.toString()
@@ -434,10 +340,10 @@ private fun beginSearch(srsearch: String, context: Context) {
         if (controlWriteStoragePermission == PackageManager.PERMISSION_GRANTED && controlReadStoragePermission == PackageManager.PERMISSION_GRANTED && controlInternetPermission == PackageManager.PERMISSION_GRANTED && controlNetworkPermission == PackageManager.PERMISSION_GRANTED) {
             return true
         } else if (controlWriteStoragePermission != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                    WRITE_STORAGE_REQUEST_CODE
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                WRITE_STORAGE_REQUEST_CODE
             )
             permissions()
         } else if (controlReadStoragePermission != PackageManager.PERMISSION_GRANTED) {
@@ -518,18 +424,17 @@ private fun beginSearch(srsearch: String, context: Context) {
 
     override fun onStart() {
         super.onStart()
-        Log.d("life_cycle_state_start",this.lifecycle.currentState.name)
+        Log.d("life_cycle_state_start", this.lifecycle.currentState.name)
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d("life_cycle_state_pause",this.lifecycle.currentState.name)
+        Log.d("life_cycle_state_pause", this.lifecycle.currentState.name)
     }
 
     override fun onStop() {
         super.onStop()
     }
-
 
 
     private suspend fun httpRequest(url: String?): String {
@@ -729,7 +634,6 @@ private fun beginSearch(srsearch: String, context: Context) {
         )
         return stringBuilderComponent.toString()
     }
-
 
 
 }
