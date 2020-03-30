@@ -7,10 +7,32 @@
     android:id="@+id/main_activity_2"
     tools:context="deneme.example.filedeneme.Main2Activity">
 
+
+
     <Button
         android:id="@+id/button_dummy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:text="Button" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/button_dummy"
+        android:src="@drawable/cici_kus"/>
+
+    <LinearLayout
+        android:id="@+id/linear_cici"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/cici"
+        android:orientation="vertical">
+    </LinearLayout>
 </RelativeLayout>

@@ -30,9 +30,9 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name="deneme.example.filedeneme.FragmentMain3"></activity>
         <activity android:name="deneme.example.filedeneme.Main2Activity" />
-        <activity android:name="deneme.example.filedeneme.MainActivity">
+        <activity android:name="deneme.example.filedeneme.MainActivity"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

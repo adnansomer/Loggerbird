@@ -20,12 +20,15 @@ import java.net.URL
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import deneme.example.filedeneme.ApiServiceInterface.Companion.client
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.Sort
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import io.reactivex.disposables.Disposable
+import loggerbird.LoggerBird.Companion.loggerBirdInterceptorClient
 import okhttp3.FormBody
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -35,6 +38,7 @@ import okhttp3.Request
 import retrofit2.Callback
 import retrofit2.Retrofit
 import org.json.JSONObject;
+import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.NullPointerException
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
@@ -64,11 +68,83 @@ class MainActivity : AppCompatActivity() {
     private lateinit var jsonObject: JSONObject
     private val transformerFactory: TransformerFactory = TransformerFactory.newInstance()
     private val transformer: Transformer = transformerFactory.newTransformer()
-    //private var recyclerViewList:ArrayList<RecyclerModel> = ArrayList()
+    private var recyclerViewList:ArrayList<RecyclerModel> = ArrayList()
     var disposable: Disposable? = null
-
+    private lateinit var adapter:RecyclerViewAdapter
     private var coroutineCallComponent = CoroutineScope(Dispatchers.IO)
+    companion object {
+        var BaseUrl = "http://api.openweathermap.org/"
+        var AppId = "2e65127e909e178d0af311a81f39948c"
+        var lat = "35"
+        var lon = "139"
+    }
+    init {
+        LoggerBird.logAttachLifeCycleObservers(context = this)
+    }
+    fun getCurrentData() {
+        val retrofit = Retrofit.Builder()
+            .baseUrl(BaseUrl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        val service = retrofit.create(WeatherService::class.java)
+        val call = service.getCurrentWeatherData(lat, lon, AppId)
+        call.enqueue(object : Callback<WeatherResponse> {
+            override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>) {
+                if (response.code() == 200) {
 
+                    val weatherResponse = response.body()!!
+                    Log.d("weather_response",response.body().toString())
+                    val stringBuilder = "Country: " +
+                            weatherResponse.sys!!.country +
+                            "\n" +
+                            "Temperature: " +
+                            weatherResponse.main!!.temp +
+                            "\n" +
+                            "Temperature(Min): " +
+                            weatherResponse.main!!.temp_min +
+                            "\n" +
+                            "Temperature(Max): " +
+                            weatherResponse.main!!.temp_max +
+                            "\n" +
+                            "Humidity: " +
+                            weatherResponse.main!!.humidity +
+                            "\n" +
+                            "Pressure: " +
+                            weatherResponse.main!!.pressure
+//                    val httpUrl: HttpUrl = HttpUrl.Builder()
+//                        .scheme("http")
+//                        .host("api.openweathermap.org")
+//                        .addPathSegment("data")
+//                        .addPathSegment("2.5")
+//                        .addPathSegment("weather")
+//                        .addQueryParameter("lat","35")
+//                        .addQueryParameter("lon","139")
+//                        .addQueryParameter("APPID","2e65127e909e178d0af311a81f39948c")
+//                        .addPathSegment("search")
+//                        .addQueryParameter("q", "DNA")
+//                        .addQueryParameter("q", "DNA2")
+//                        .addQueryParameter("q", "DNA3")
+//                        .addQueryParameter("z", "title:RNA")
+//                        .build();
+//
+//                    val fromBodyBuilder = FormBody.Builder()
+//                    val request = Request.Builder()
+//                        .url("http://api.openweathermap.org/data/2.5/weather?&lat=35&lon=139&APPID=2e65127e909e178d0af311a81f39948c")
+//                        .post(fromBodyBuilder.build())
+//                        .build()
+                    coroutineCallInternet.async {
+                    val getUrl: URL = URL("http://api.openweathermap.org/data/2.5/weather?&lat=35&lon=139&APPID=2e65127e909e178d0af311a81f39948c ")
+                            val internetConnection: HttpURLConnection = getUrl.openConnection() as HttpURLConnection
+//                        val responseDummy = client.newCall(request).execute()
+                            LoggerBird.callOkHttpRequestDetails(url = "https://api.openweathermap.org/data/2.5/weather?&lat=35&lon=139&APPID=2e65127e909e178d0af311a81f39948c",okHttpURLConnection = internetConnection)
+                    }
+                    //weatherData!!.text = stringBuilder
+                }
+            }
+            override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
+                //weatherData!!.text = t.message
+            }
+        })}
 
 //    val TAG_ACTIVITY_NAME:String="MainActivity"
 //    val TAG_ONCREATE:String="Activity In OnCreate State"
@@ -82,21 +158,16 @@ class MainActivity : AppCompatActivity() {
         val intent: Intent = getIntent()
         val uri: Uri? = intent.data
         Log.d("deep_link_url", uri.toString())
-        //addRecyclerViewList()
+        addRecyclerViewList()
         recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-
-        //recycler_view.adapter=RecyclerViewAdapter(recyclerViewList)
-        LoggerBird.logInit(context = this)
-/*
-        val adapter:RecyclerViewAdapter=RecyclerViewAdapter(recyclerViewList)
+        adapter= RecyclerViewAdapter(recyclerViewList)
         recycler_view.adapter=adapter
         LoggerBird.registerRecyclerViewObservers(recycler_view)
-        addRecyclerViewList()
-        adapter.notifyDataSetChanged()
-        recyclerViewList.removeAt(0)
-        adapter.notifyDataSetChanged()
-        recyclerViewList.add(RecyclerModel("deneme"))
-        adapter.notifyDataSetChanged() */
+        LoggerBird.logInit(this)
+
+
+
+
 
 
 //        LogDeneme.logLifeCycleDetails()
@@ -106,24 +177,26 @@ class MainActivity : AppCompatActivity() {
             implementRealm()
 
         }
-        LoggerBird.logInit(context = this)
         button_add.setOnClickListener() {
             val filePathTest: File = File(this.filesDir, "logger_bird_details.txt")
-            val rootView: ViewGroup =
-                (this as Activity).window.decorView.findViewById(android.R.id.content);
-            for (x in 1..5) {
-                LoggerBird.callComponentDetails(view = button_add, resources = button_add.resources)
-                LoggerBird.callLifeCycleDetails()
-                LoggerBird.callCpuDetails()
-                throw NullPointerException("unhandled exception")
-            }
 
-            try {
-
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            recyclerViewList.removeAt(0)
+            recyclerViewList.add(RecyclerModel("hello how are you"))
+            adapter.notifyDataSetChanged()
+            LoggerBird.callComponentDetails(view=recycler_view,resources = recycler_view.resources)
+//            for (x in 1..5) {
+//                LoggerBird.callComponentDetails(view = button_add, resources = button_add.resources)
+//                LoggerBird.callLifeCycleDetails()
+//                LoggerBird.callCpuDetails()
+//                throw NullPointerException("unhandled exception")
+//            }
+//
+//            try {
+//
+//
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
 
 
 //            LoggerBird.callEnqueue()
@@ -165,7 +238,8 @@ class MainActivity : AppCompatActivity() {
 //            }
         }
         button_read_logs.setOnClickListener(View.OnClickListener {
-            beginSearch("dog", this)
+            getCurrentData()
+//            beginSearch("dog", this)
             // LogDeneme.saveComponentDetails(view=button_read_logs,resources = button_read_logs.resources)
             //            LogDeneme.saveComponentDetails(null,button_read_logs,button_read_logs.resources,this)
 //            LogDeneme.saveComponentDetails(null,null,null,this)
@@ -193,7 +267,16 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
+    private fun addRecyclerViewList(){
+        recyclerViewList.add(RecyclerModel("berk"))
+        recyclerViewList.add(RecyclerModel("berk1"))
+        recyclerViewList.add(RecyclerModel("berk2"))
+        recyclerViewList.add(RecyclerModel("berk3"))
+        recyclerViewList.add(RecyclerModel("berk4"))
+        recyclerViewList.add(RecyclerModel("berk5"))
+        recyclerViewList.add(RecyclerModel("berk6"))
 
+    }
 
     private fun beginSearch(srsearch: String, context: Context) {
         var retrofit: Retrofit? = ApiServiceInterface.createObject()
@@ -216,12 +299,12 @@ class MainActivity : AppCompatActivity() {
 
                     val httpUrl: HttpUrl = HttpUrl.Builder()
                         .scheme("http")
-                        .host("api.plos.org")
-                        .addPathSegment("search")
-                        .addQueryParameter("q", "DNA")
-                        .addQueryParameter("q", "DNA2")
-                        .addQueryParameter("q", "DNA3")
-                        .addQueryParameter("z", "title:RNA")
+                        .host("api.openweathermap.org")
+//                        .addPathSegment("search")
+//                        .addQueryParameter("q", "DNA")
+//                        .addQueryParameter("q", "DNA2")
+//                        .addQueryParameter("q", "DNA3")
+//                        .addQueryParameter("z", "title:RNA")
                         .build();
 
                     val fromBodyBuilder = FormBody.Builder()
@@ -229,6 +312,7 @@ class MainActivity : AppCompatActivity() {
                         .url(httpUrl)
                         .post(fromBodyBuilder.build())
                         .build()
+
 
 //                    coroutineCallInternet.async {
 //

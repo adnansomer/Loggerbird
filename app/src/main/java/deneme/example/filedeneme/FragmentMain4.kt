@@ -21,7 +21,7 @@ class FragmentMain4 : Fragment() {
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view: View =inflater.inflate(R.layout.fragment_main4, container, false)
-        LoggerBird.logInit(context!!,fragmentManager = fragmentManager)
+//        LoggerBird.logInit(context!!,fragmentManager = fragmentManager)
 
         bundle.putString("id", "1")
         bundle.putString("item", "berk")

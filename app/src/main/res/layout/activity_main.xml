@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/main_activity_layout"
+    android:background="@color/colorWhite"
     tools:context="deneme.example.filedeneme.MainActivity">
 
 

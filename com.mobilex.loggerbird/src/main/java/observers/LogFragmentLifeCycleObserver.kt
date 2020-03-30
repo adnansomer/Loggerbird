@@ -13,7 +13,6 @@ import java.util.*
 
 //LogFragmentCycleObserver class is used for attaching lifecycle observer for your current fragment.
 internal class LogFragmentLifeCycleObserver(
-    fragmentManager: FragmentManager?
 ) :
     FragmentManager.FragmentLifecycleCallbacks() {
     //Global variables.

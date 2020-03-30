@@ -39,5 +39,10 @@ internal class Constants {
         const val performanceTag: String = "Performance"
         const val memoryUsageTag = "Memory Usage"
         const val cpuTag: String = "Cpu"
+        const val screenShotTag:String = "Screenshot"
+        const val floatingActionButtonTag:String="Floating Action Button"
+        const val audioRecordingTag:String="Audio Recording"
+        const val audioStartRecordingTag:String="Audio Start Recording"
+        const val audioStopRecordingTag:String="Audio Stop recording"
     }
 }

@@ -18,7 +18,8 @@ internal class LoggerBirdService() : Service() {
 
     //Static global variables:
     companion object {
-        var onDestroyMessage: String? = null
+       // internal var onDestroyMessage: String? = null
+        internal var controlServiceOnDestroyState:Boolean = false
     }
 
     /**
@@ -65,12 +66,13 @@ internal class LoggerBirdService() : Service() {
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         try {
-            val date = Calendar.getInstance().time
-            val formatter = SimpleDateFormat.getDateTimeInstance()
-            formattedTime = formatter.format(date)
-            currentLifeCycleState = "onDestroy"
-            onDestroyMessage =
-                " " + Constants.activityTag + ":" + LogLifeCycleObserver.returnLifeCycleClassName + " " + "${formattedTime}:${currentLifeCycleState}\n"
+            controlServiceOnDestroyState=true
+//            val date = Calendar.getInstance().time
+//            val formatter = SimpleDateFormat.getDateTimeInstance()
+//            formattedTime = formatter.format(date)
+//            currentLifeCycleState = "onDestroy"
+//            onDestroyMessage =
+//                " " + Constants.activityTag + ":" + LogLifeCycleObserver.returnLifeCycleClassName + " " + "${formattedTime}:${currentLifeCycleState}\n"
             LoggerBird.takeLifeCycleDetails()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -80,14 +82,14 @@ internal class LoggerBirdService() : Service() {
     }
 
     /**
-     * This Method Called When Service Detect's An  OnCreate State In The Current Activity.
+     * This Method Called When Service Created.
      */
     override fun onCreate() {
         super.onCreate()
     }
 
     /**
-     * This Method Called When Service Detect's An  OnDestroy State In The Current Activity.
+     * This Method Called When Service Destroyed.
      */
     override fun onDestroy() {
         super.onDestroy()

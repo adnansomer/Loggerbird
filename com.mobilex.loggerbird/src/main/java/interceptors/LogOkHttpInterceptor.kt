@@ -2,6 +2,7 @@ package interceptors
 
 import loggerbird.LoggerBird
 import okhttp3.*
+import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 
 /**

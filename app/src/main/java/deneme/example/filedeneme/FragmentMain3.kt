@@ -27,7 +27,7 @@ class FragmentMain3 : Fragment() {
     ): View? {
         val view: View = inflater.inflate(R.layout.fragment_main3, container, false)
         Log.d("super_class", FragmentMain3::class.java.superclass!!.simpleName)
-        LoggerBird.logInit(context!!,fragmentManager = fragmentManager)
+//        LoggerBird.logInit(context!!,fragmentManager = fragmentManager)
 //        LogDeneme.logAttach()
 //        LogDeneme.logFragmentAttach()
         return view
@@ -39,11 +39,11 @@ class FragmentMain3 : Fragment() {
         button_dummy_2.setOnClickListener() {
 //            LoggerBird.takeLifeCycleDetails()
             //LoggerBird.saveLifeCycleDetails()
-            fragmentManager?.beginTransaction()
-                ?.add(
-                    R.id.main_activity_2,
-                    FragmentMain4.newInstance(), "FragmentMain4")
-                ?.commit ()
+                fragmentManager?.beginTransaction()
+                    ?.add(
+                        R.id.main_activity_2,
+                        FragmentMain4.newInstance(), "FragmentMain4")
+                    ?.commit ()
 //            Log.d("fragment",LogDeneme.logFragmentDetails(context!!,FragmentMain3.javaClass))
         }
     }
