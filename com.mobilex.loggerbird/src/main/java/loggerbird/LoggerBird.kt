@@ -56,7 +56,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 import kotlinx.android.synthetic.main.fragment_logger_bird.*
-import services.LoggerBirdVideoService
+
 
 //LoggerBird class is the general logging class for this library.
 class LoggerBird : LifecycleObserver {
@@ -226,7 +226,7 @@ class LoggerBird : LifecycleObserver {
          */
         private fun logAttachLifeCycleObservers(context: Context) {
 //            context.applicationContext.registerComponentCallbacks()
-            activityLifeCycleObserver = LogActivityLifeCycleObserver()
+            activityLifeCycleObserver = LogActivityLifeCycleObserver(contextMetrics = context)
             (context as Application).registerActivityLifecycleCallbacks(activityLifeCycleObserver)
 //                lifeCycleObserver = LogLifeCycleObserver()
 //                lifeCycleObserver.registerLifeCycle(context)
@@ -251,8 +251,9 @@ class LoggerBird : LifecycleObserver {
          * This Method Detaches A LifeCycle Observer From The Current Activity.
          */
         fun logDetachObserver() {
-            if (Companion::lifeCycleObserver.isInitialized) {
-                lifeCycleObserver.deRegisterLifeCycle()
+            if (Companion::activityLifeCycleObserver.isInitialized) {
+                (context as Application).unregisterActivityLifecycleCallbacks(
+                    activityLifeCycleObserver)
             }
         }
 
@@ -2816,12 +2817,25 @@ class LoggerBird : LifecycleObserver {
 
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             if(controlLogInit){
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    if(resultCode==Activity.RESULT_OK && data != null){
-                        activityLifeCycleObserver.takeVideoRecording(requestCode=requestCode,resultCode = resultCode,data = data)
+                try {
+                    LogActivityLifeCycleObserver.controlPermissionRequest = false
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        if(resultCode==Activity.RESULT_OK && data != null){
+                            activityLifeCycleObserver.callVideoRecording(
+                                requestCode = requestCode,
+                                resultCode = resultCode,
+                                data = data
+                            )
+                        }
+                        LogActivityLifeCycleObserver.callEnqueue()
+                    }else{
+                        throw LoggerBirdException(Constants.videoRecordingSdkTag+"current min is:"+Build.VERSION.SDK_INT)
                     }
-                }else{
-                    throw LoggerBirdException(Constants.videoRecordingSdkTag+"current min is:"+Build.VERSION.SDK_INT)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    LogActivityLifeCycleObserver.callEnqueue()
+                    callEnqueue()
+                    callExceptionDetails(exception = e , tag = Constants.onActivityResultTag)
                 }
             }else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)

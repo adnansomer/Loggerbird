@@ -48,5 +48,7 @@ internal class Constants {
         const val audioStopRecordingTag:String="Audio Stop recording"
         const val videoRecordingTag:String="Video Recording"
         const val videoRecordingSdkTag:String="Call requires API level 21"
+        const val foregroundServiceVideo:String = "Foreground Service Video"
+        const val onActivityResultTag:String = "onActivityResult"
     }
 }

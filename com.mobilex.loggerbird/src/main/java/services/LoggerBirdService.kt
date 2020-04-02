@@ -43,7 +43,6 @@ internal class LoggerBirdService() : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
             intentService = intent
-//            LoggerBird.callMemoryUsageDetails(threshold = null)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()

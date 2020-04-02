@@ -26,7 +26,6 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat.requestPermissions
@@ -34,20 +33,21 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mobilex.loggerbird.R
 import constants.Constants
+import exception.LoggerBirdException
+import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
 import listeners.FloatingActionButtonAnimationListener
 import listeners.FloatingActionButtonOnTouchListener
+import services.LoggerBirdForegroundServiceVideo
+import utils.LinkedBlockingQueueUtil
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.Runnable
 
-class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCallbacks {
+class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Application.ActivityLifecycleCallbacks {
     //Global variables.
     private var stringBuilderBundle: StringBuilder = StringBuilder()
     private lateinit var floating_action_button: FloatingActionButton
@@ -61,6 +61,7 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var coroutineCallForegroundService: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudio: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var audioRecording = false
     private var videoRecording = false
@@ -75,10 +76,11 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
     private var mediaProjection: MediaProjection? = null
     private var virtualDisplay: VirtualDisplay? = null
     private lateinit var mediaProjectionCallback: MediaProjectionCallback
-    private var mediaRecorderVideo: MediaRecorder? = null
+    private var mediaRecorderVideo: MediaRecorder?  = MediaRecorder()
     private var requestCode: Int = 0
     private var resultCode: Int = 0
     private var dataIntent: Intent? = null
+    private lateinit var intentForegroundServiceVideo: Intent
 
 
     //Static global variables.
@@ -100,7 +102,18 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
         private var DISPLAY_WIDTH = 1080
         private var DISPLAY_HEIGHT = 1920
         private val ORIENTATIONS = SparseIntArray()
-        private var controlPermissionRequest: Boolean = false
+        internal var controlPermissionRequest: Boolean = false
+        private var runnableList: ArrayList<Runnable> = ArrayList()
+        private var workQueueLinked: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
+        internal fun callEnqueue() {
+            workQueueLinked.controlRunnable = false
+            if (runnableList.size > 0) {
+                runnableList.removeAt(0)
+                if (runnableList.size > 0) {
+                    workQueueLinked.put(runnableList[0])
+                }
+            }
+        }
     }
 
     init {
@@ -139,6 +152,11 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         try {
             this.context = activity
+            val metrics = DisplayMetrics()
+            (context as Activity).windowManager.defaultDisplay.getMetrics(metrics)
+            screenDensity = metrics.densityDpi
+            DISPLAY_HEIGHT = metrics.heightPixels
+            DISPLAY_WIDTH = metrics.widthPixels
             LoggerBird.fragmentLifeCycleObserver =
                 LogFragmentLifeCycleObserver()
             (activity as AppCompatActivity).supportFragmentManager.registerFragmentLifecycleCallbacks(
@@ -173,6 +191,9 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
 
     override fun onActivityStarted(activity: Activity) {
         try {
+            if (this::rootView.isInitialized && this::view.isInitialized) {
+                (rootView as ViewGroup).removeView(view)
+            }
             val rootView: ViewGroup =
                 activity.window.decorView.findViewById(android.R.id.content)
             val view: View = LayoutInflater.from(activity)
@@ -195,7 +216,11 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
                 view.findViewById(R.id.fragment_floating_action_button_video)
             floating_action_button_audio =
                 view.findViewById(R.id.fragment_floating_action_button_audio)
-            checkOldCoordinates()
+
+            if(videoRecording){
+                floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
+            }
+//            checkOldCoordinates()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 buttonClicks()
             }
@@ -235,8 +260,8 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
     override fun onActivityPaused(activity: Activity) {
         try {
             controlOldCoordinates = true
-            if (!controlPermissionRequest) {
-                (rootView as ViewGroup).removeView(view)
+            if (controlPermissionRequest) {
+                stopForegroundServiceVideo()
             }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
@@ -353,7 +378,7 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
         }
 
         floating_action_button_video.setOnClickListener {
-            takeVideoRecording(
+            callVideoRecording(
                 requestCode = requestCode,
                 resultCode = resultCode,
                 data = dataIntent
@@ -436,6 +461,7 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
         ) {
+            controlPermissionRequest = true
             requestPermissions(
                 (context as Activity),
                 arrayOf(
@@ -453,6 +479,7 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
                 Manifest.permission.RECORD_AUDIO
             )
         ) {
+            controlPermissionRequest = true
             requestPermissions(
                 (context as Activity),
                 arrayOf(
@@ -597,8 +624,20 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
         }
     }
 
+    private fun takeForegroundService() {
+        workQueueLinked.controlRunnable = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            intentForegroundServiceVideo =
+                Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
+            startForegroundServiceVideo()
+        } else {
+            callEnqueue()
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    internal fun takeVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
+    private fun takeVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
+        workQueueLinked.controlRunnable = true
         if (checkWriteExternalStoragePermission() && checkAudioPermission()) {
             coroutineCallVideo.async {
                 try {
@@ -620,6 +659,7 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    callEnqueue()
                     LoggerBird.callEnqueue()
                     LoggerBird.callExceptionDetails(
                         exception = e,
@@ -655,11 +695,12 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
             withContext(Dispatchers.Main) {
                 Toast.makeText(context, "Screen recording started", Toast.LENGTH_SHORT)
                     .show()
+                mediaProjectionCallback = MediaProjectionCallback()
+                mediaProjection!!.registerCallback(mediaProjectionCallback, null)
+                virtualDisplay = createVirtualDisplay()
+                floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
+                callEnqueue()
             }
-            mediaProjectionCallback = MediaProjectionCallback()
-            mediaProjection!!.registerCallback(mediaProjectionCallback, null)
-            virtualDisplay = createVirtualDisplay()
-            floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
         } else {
             controlPermissionRequest = true
             (context as Activity).startActivityForResult(
@@ -672,12 +713,6 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initRecorder() {
         try {
-            val metrics = DisplayMetrics()
-            (context as Activity).windowManager.defaultDisplay.getMetrics(metrics)
-            screenDensity = metrics.densityDpi
-            mediaRecorderVideo = MediaRecorder()
-            DISPLAY_HEIGHT = metrics.heightPixels
-            DISPLAY_WIDTH = metrics.widthPixels
             mediaRecorderVideo!!.setAudioSource(MediaRecorder.AudioSource.MIC)
             mediaRecorderVideo!!.setVideoSource(MediaRecorder.VideoSource.SURFACE)
             mediaRecorderVideo!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
@@ -701,6 +736,9 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
             videoRecording = true
         } catch (e: Exception) {
             e.printStackTrace()
+            callEnqueue()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.videoRecordingTag)
         }
     }
 
@@ -727,6 +765,8 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
             virtualDisplay!!.release()
         }
         destroyMediaProjection()
+        stopForegroundServiceVideo()
+        callEnqueue()
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -768,10 +808,59 @@ class LogActivityLifeCycleObserver : Activity(), Application.ActivityLifecycleCa
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun startForegroundServiceVideo() {
+        Log.d("start_foreground", "Foreground Service started!!!!!")
+        (context as Activity).startForegroundService(intentForegroundServiceVideo)
+    }
+
+    private fun stopForegroundServiceVideo() {
+        (context as Activity).stopService(intentForegroundServiceVideo)
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    internal fun callVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (LoggerBird.isLogInitAttached()) {
+            callForegroundService()
+            if (runnableList.isEmpty()) {
+                workQueueLinked.put {
+                    takeVideoRecording(
+                        requestCode = requestCode,
+                        resultCode = resultCode,
+                        data = data
+                    )
+                }
+            }
+            runnableList.add(Runnable {
+                takeVideoRecording(requestCode = requestCode, resultCode = resultCode, data = data)
+            })
+        } else {
+            throw LoggerBirdException(Constants.logInitErrorMessage)
+        }
+    }
+
+    private fun callForegroundService() {
+        if (LoggerBird.isLogInitAttached()) {
+            if(!videoRecording){
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put {
+                        takeForegroundService()
+                    }
+                }
+                runnableList.add(Runnable {
+                    takeForegroundService()
+                })
+            }
+        } else {
+            throw LoggerBirdException(Constants.logInitErrorMessage)
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {
         override fun onStop() {
-            stopScreenRecord()
+//            stopScreenRecord()
         }
     }
 }

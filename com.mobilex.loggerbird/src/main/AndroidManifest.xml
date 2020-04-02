@@ -16,7 +16,9 @@
             android:enabled="true"
             android:exported="true" />
         <service android:name="services.LoggerBirdService" />
-        <service android:name="services.LoggerBirdVideoService" />
+        <service android:name="services.LoggerBirdForegroundServiceVideo"
+            android:foregroundServiceType="mediaProjection"
+            />
     </application>
 
 </manifest>
