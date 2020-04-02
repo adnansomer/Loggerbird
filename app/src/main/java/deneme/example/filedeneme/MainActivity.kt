@@ -19,6 +19,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ComponentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import deneme.example.filedeneme.ApiServiceInterface.Companion.client
@@ -42,6 +43,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.NullPointerException
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -79,7 +81,7 @@ class MainActivity : AppCompatActivity() {
         var lon = "139"
     }
     init {
-        LoggerBird.logAttachLifeCycleObservers(context = this)
+//        LoggerBird.logAttachLifeCycleObservers(context = this)
     }
     fun getCurrentData() {
         val retrofit = Retrofit.Builder()
@@ -154,6 +156,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Log.d("life_cycle_state_create", this.lifecycle.currentState.name)
+//        LoggerBird.logInit(context = this)
 //        progressBar=findViewById(R.id.progressBar)
         val intent: Intent = getIntent()
         val uri: Uri? = intent.data
@@ -163,7 +166,8 @@ class MainActivity : AppCompatActivity() {
         adapter= RecyclerViewAdapter(recyclerViewList)
         recycler_view.adapter=adapter
         LoggerBird.registerRecyclerViewObservers(recycler_view)
-        LoggerBird.logInit(this)
+
+        (this as androidx.activity.ComponentActivity).prepareCall(OnActivityResultContract(),OnActivityResultListener())
 
 
 
@@ -402,6 +406,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     private fun permissions(): Boolean {
         val controlWriteStoragePermission: Int = ContextCompat.checkSelfPermission(
             this,
@@ -493,6 +498,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        LoggerBird.onActivityResult(requestCode=requestCode,resultCode = resultCode,data = data)
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == Read_STORAGE_REQUEST_CODE) {
                 val fileUri: Uri

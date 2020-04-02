@@ -449,7 +449,7 @@ internal class LogFragmentLifeCycleObserver(
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentDestroyed"
             stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState}\n"
+                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()

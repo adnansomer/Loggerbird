@@ -1,5 +1,7 @@
 package constants
 
+import java.lang.StringBuilder
+
 //Constant class.
 internal class Constants {
     companion object {
@@ -44,5 +46,7 @@ internal class Constants {
         const val audioRecordingTag:String="Audio Recording"
         const val audioStartRecordingTag:String="Audio Start Recording"
         const val audioStopRecordingTag:String="Audio Stop recording"
+        const val videoRecordingTag:String="Video Recording"
+        const val videoRecordingSdkTag:String="Call requires API level 21"
     }
 }

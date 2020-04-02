@@ -9,11 +9,10 @@ import android.widget.FrameLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import observers.LogActivityLifeCycleObserver
 
 
 class FloatingActionButtonOnTouchListener(
-    private val context: Context,
-    private val layout: FrameLayout,
     private val floatingActionButtonScreenShot: FloatingActionButton,
     private val floatingActionButtonVideo: FloatingActionButton,
     private val floatingActionButtonAudio: FloatingActionButton
@@ -30,20 +29,8 @@ class FloatingActionButtonOnTouchListener(
     private var isOpen = false
     private lateinit var fabOpen: Animation
     private lateinit var fabClose: Animation
-    private var controlPositionLocking: Boolean = false
-
-    private var coroutineCallOnTouchListener: CoroutineScope = CoroutineScope(Dispatchers.IO)
-
-    init {
-//        fabOpen = AnimationUtils.loadAnimation(context, R.anim.fab_open)
-//        fabOpen.setAnimationListener(FloatingActionButtonAnimationListener(context =context,floatingActionButtonAudio =floatingActionButtonAudio))
-//        fabClose = AnimationUtils.loadAnimation(context, R.anim.fab_close)
-//        fabClose.setAnimationListener(FloatingActionButtonAnimationListener(context=context,floatingActionButtonAudio = floatingActionButtonAudio))
-    }
 
     override fun onTouch(view: View, event: MotionEvent): Boolean {
-
-
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 viewDx = view.x - event.rawX
@@ -77,49 +64,42 @@ class FloatingActionButtonOnTouchListener(
                     view.x = ((view.parent as ViewGroup).width.toFloat() - view.width)
                     floatingActionButtonScreenShot.x =
                         (view.x - floatingActionButtonScreenShot.width)
-                    floatingActionButtonVideo.x = (view.x - floatingActionButtonVideo.width)-100
-                    floatingActionButtonAudio.x = (view.x - floatingActionButtonAudio.width)-200
+                    floatingActionButtonVideo.x = (view.x - floatingActionButtonVideo.width) - 100
+                    floatingActionButtonAudio.x = (view.x - floatingActionButtonAudio.width) - 200
                 } else if (event.rawX + 3 * (viewDx) < 0) {
                     view.x = 0F
-                        floatingActionButtonScreenShot.x=floatingActionButtonScreenShot.width.toFloat()
-                        floatingActionButtonVideo.x=floatingActionButtonVideo.width.toFloat()+100
-                        floatingActionButtonAudio.x=floatingActionButtonAudio.width.toFloat()+200
+                    floatingActionButtonScreenShot.x =
+                        floatingActionButtonScreenShot.width.toFloat()
+                    floatingActionButtonVideo.x = floatingActionButtonVideo.width.toFloat() + 100
+                    floatingActionButtonAudio.x = floatingActionButtonAudio.width.toFloat() + 200
                 }
                 if ((view.parent as ViewGroup).height < (event.rawY + viewDy + 3 * (view.height))) {
                     view.y = ((view.parent as ViewGroup).height.toFloat() - view.height)
                     floatingActionButtonScreenShot.y =
                         (view.y - floatingActionButtonScreenShot.height)
-                    floatingActionButtonVideo.y = (view.y - floatingActionButtonVideo.height)-100
-                    floatingActionButtonAudio.y = (view.y - floatingActionButtonAudio.height)-200
+                    floatingActionButtonVideo.y = (view.y - floatingActionButtonVideo.height) - 100
+                    floatingActionButtonAudio.y = (view.y - floatingActionButtonAudio.height) - 200
                 } else if (event.rawY + 3 * (viewDy) < 0) {
                     view.y = 0F
-                        floatingActionButtonScreenShot.y=floatingActionButtonScreenShot.height.toFloat()
-                        floatingActionButtonVideo.y=floatingActionButtonVideo.height.toFloat()+100
-                        floatingActionButtonAudio.y=floatingActionButtonAudio.height.toFloat()+200
+                    floatingActionButtonScreenShot.y =
+                        floatingActionButtonScreenShot.height.toFloat()
+                    floatingActionButtonVideo.y = floatingActionButtonVideo.height.toFloat() + 100
+                    floatingActionButtonAudio.y = floatingActionButtonAudio.height.toFloat() + 200
                 }
+                LogActivityLifeCycleObserver.floatingActionButtonLastDx = view.x
+                LogActivityLifeCycleObserver.floatingActionButtonLastDy = view.y
+                LogActivityLifeCycleObserver.floatingActionButtonScreenShotLastDx = floatingActionButtonScreenShot.x
+                LogActivityLifeCycleObserver.floatingActionButtonScreenShotLastDy = floatingActionButtonScreenShot.y
+                LogActivityLifeCycleObserver.floatingActionButtonVideoLastDx = floatingActionButtonVideo.x
+                LogActivityLifeCycleObserver.floatingActionButtonVideoLastDy = floatingActionButtonVideo.y
+                LogActivityLifeCycleObserver.floatingActionButtonAudioLastDx = floatingActionButtonAudio.x
+                LogActivityLifeCycleObserver.floatingActionButtonAudioLastDy = floatingActionButtonAudio.y
                 lastAction = MotionEvent.ACTION_UP
             }
         }
 
+
         return false
     }
-
-    private fun animationVisibility() {
-        if (isOpen) {
-            floatingActionButtonVideo.startAnimation(fabClose)
-            floatingActionButtonAudio.startAnimation(fabClose)
-            floatingActionButtonScreenShot.startAnimation(fabClose)
-//            fragment_floating_action_button.startAnimation(fabRClockwise)
-            isOpen = false
-        } else {
-            floatingActionButtonVideo.startAnimation(fabOpen)
-            floatingActionButtonAudio.startAnimation(fabOpen)
-            floatingActionButtonScreenShot.startAnimation(fabOpen)
-
-//            fragment_floating_action_button.startAnimation(fabRAntiClockwise)
-            isOpen = true
-        }
-    }
-
 
 }

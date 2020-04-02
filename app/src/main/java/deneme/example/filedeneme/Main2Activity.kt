@@ -1,5 +1,6 @@
 package deneme.example.filedeneme
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
@@ -36,30 +37,19 @@ class Main2Activity : AppCompatActivity(), PurchasesUpdatedListener {
     private lateinit var imageViewCombined: ImageView
     private var handler: Handler = Handler()
 
-    init {
-        LoggerBird.logAttachLifeCycleObservers(context = this)
-
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
-//        LoggerBird.logInit(context = this)
         Log.d("super_class", Main2Activity::class.java.superclass!!.simpleName)
         setupBillingClient()
         blurImage()
         button_dummy.setOnClickListener(View.OnClickListener {
-            handler.post {
-
-            }
-
-//            supportFragmentManager
-//                .beginTransaction()
-//                .replace(
-//                    R.id.main_activity_2,
-//                    FragmentMain3.newInstance(), "FragmentMain3")
-//                .commit()
-//            startActivity(Intent(this,FragmentMain3::class.java))
-//            LogDeneme.saveComponentDetails(context = this,view = button_dummy,resources = button_dummy.resources)
+            supportFragmentManager
+                .beginTransaction()
+                .replace(
+                    R.id.main_activity_2,
+                    FragmentMain3.newInstance(), "FragmentMain3")
+                .commit()
         })
     }
 

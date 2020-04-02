@@ -5,12 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
-import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.os.BatteryManager
-import android.text.Layout
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,8 +16,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
@@ -28,7 +24,6 @@ import com.google.gson.GsonBuilder
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
-import fragments.FragmentLoggerBird
 import interceptors.LogOkHttpAuthenticationInterceptor
 import interceptors.LogOkHttpCacheInterceptor
 import interceptors.LogOkHttpErrorInterceptor
@@ -61,6 +56,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 import kotlinx.android.synthetic.main.fragment_logger_bird.*
+import services.LoggerBirdVideoService
 
 //LoggerBird class is the general logging class for this library.
 class LoggerBird : LifecycleObserver {
@@ -108,7 +104,7 @@ class LoggerBird : LifecycleObserver {
         private var formattedTime: String? = null
         private var fileLimit: Long = 2097152
         private lateinit var lifeCycleObserver: LogLifeCycleObserver
-        private lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
+        internal lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
         private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver =
             LogRecyclerViewAdapterDataObserver()
         private var recyclerViewScrollListener: LogRecyclerViewScrollListener =
@@ -135,6 +131,8 @@ class LoggerBird : LifecycleObserver {
         private var memoryThreshold: Long = 4180632L
         private lateinit var intentServiceMemory: Intent
         private lateinit var activityLifeCycleObserver: LogActivityLifeCycleObserver
+        internal var stringBuilderActivityLifeCycleObserver: StringBuilder = StringBuilder()
+        internal var classList: ArrayList<String> = ArrayList()
 
 
         //---------------Public Methods:---------------//
@@ -161,6 +159,8 @@ class LoggerBird : LifecycleObserver {
             context: Context,
             filePathName: String? = null
         ): Boolean {
+            this.context = context
+            this.filePathName = filePathName
             if (!controlLogInit) {
                 fileDirectory = context.filesDir
                 if (filePathName != null) {
@@ -181,9 +181,8 @@ class LoggerBird : LifecycleObserver {
                 workQueueLinked = LinkedBlockingQueueUtil()
                 val logcatObserver = UnhandledExceptionObserver()
                 Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
+                logAttachLifeCycleObservers(context = context)
             }
-            this.context = context
-            this.filePathName = filePathName
 
 //            threadPoolExecutor= LogThreadPoolExecutorUtil(
 //                corePoolSize = corePoolSize,
@@ -192,28 +191,23 @@ class LoggerBird : LifecycleObserver {
 //                workQueue = workQueueLinked,
 //                unit = timeUnit
 //            )
-//            fragmentManager?.beginTransaction()
-//                ?.add(
-//                    R.id.main_activity_2,
-//                    FragmentLoggerBird.newInstance(), "FragmentLoggerBird")
-//                ?.commit ()
-            val rootView: ViewGroup =
-                (context as Activity).window.decorView.findViewById(android.R.id.content)
-            val view: View = LayoutInflater.from(context)
-                .inflate(
-                    R.layout.fragment_logger_bird,
-                    rootView,
-                    false
-                )
+//            val rootView: ViewGroup =
+//                (context as Activity).window.decorView.findViewById(android.R.id.content)
+//            val view: View = LayoutInflater.from(context)
+//                .inflate(
+//                    R.layout.fragment_logger_bird,
+//                    rootView,
+//                    false
+//                )
 //            val supportFragmentManager = (context as AppCompatActivity).supportFragmentManager
 //            supportFragmentManager.beginTransaction()
 //                .replace((rootView as View).id,FragmentLoggerBird.newInstance(viewFragment = rootView as View,context = context),"FragmentLoggerBird").commit()
-
-            val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            context.addContentView(view, layoutParams)
+//
+//            val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
+//                ViewGroup.LayoutParams.MATCH_PARENT,
+//                ViewGroup.LayoutParams.MATCH_PARENT
+//            )
+//            context.addContentView(view, layoutParams)
             controlLogInit = true
             return controlLogInit
         }
@@ -230,15 +224,10 @@ class LoggerBird : LifecycleObserver {
          * @var recyclerviewItemObserver might be useful in the future(in progress).
          * @return Boolean value.
          */
-        fun logAttachLifeCycleObservers(context: Context) {
+        private fun logAttachLifeCycleObservers(context: Context) {
+//            context.applicationContext.registerComponentCallbacks()
             activityLifeCycleObserver = LogActivityLifeCycleObserver()
-            (context as Activity).registerActivityLifecycleCallbacks(activityLifeCycleObserver)
-            fragmentLifeCycleObserver =
-                LogFragmentLifeCycleObserver()
-            (context as AppCompatActivity).supportFragmentManager.registerFragmentLifecycleCallbacks(
-                fragmentLifeCycleObserver,
-                true
-            )
+            (context as Application).registerActivityLifecycleCallbacks(activityLifeCycleObserver)
 //                lifeCycleObserver = LogLifeCycleObserver()
 //                lifeCycleObserver.registerLifeCycle(context)
 //            recyclerViewItemObserver = LogDataSetObserver(context)
@@ -2822,6 +2811,20 @@ class LoggerBird : LifecycleObserver {
                     exception = e,
                     tag = Constants.saveSessionOldFileTag
                 )
+            }
+        }
+
+        fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            if(controlLogInit){
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    if(resultCode==Activity.RESULT_OK && data != null){
+                        activityLifeCycleObserver.takeVideoRecording(requestCode=requestCode,resultCode = resultCode,data = data)
+                    }
+                }else{
+                    throw LoggerBirdException(Constants.videoRecordingSdkTag+"current min is:"+Build.VERSION.SDK_INT)
+                }
+            }else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
 
