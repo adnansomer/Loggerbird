@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.drawable.VectorDrawable
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.MediaRecorder
@@ -19,12 +20,10 @@ import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
-import android.view.LayoutInflater
-import android.view.Surface
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -35,19 +34,19 @@ import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.*
+import listeners.*
 import loggerbird.LoggerBird
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import listeners.FloatingActionButtonAnimationListener
-import listeners.FloatingActionButtonOnTouchListener
 import services.LoggerBirdForegroundServiceVideo
 import utils.LinkedBlockingQueueUtil
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.Runnable
 
-class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Application.ActivityLifecycleCallbacks {
+class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
+    Application.ActivityLifecycleCallbacks {
     //Global variables.
     private var stringBuilderBundle: StringBuilder = StringBuilder()
     private lateinit var floating_action_button: FloatingActionButton
@@ -57,11 +56,9 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
     private lateinit var context: Context
     private lateinit var view: View
     private lateinit var rootView: View
-    private var controlOldCoordinates: Boolean = false
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private var coroutineCallForegroundService: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudio: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var audioRecording = false
     private var videoRecording = false
@@ -76,7 +73,7 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
     private var mediaProjection: MediaProjection? = null
     private var virtualDisplay: VirtualDisplay? = null
     private lateinit var mediaProjectionCallback: MediaProjectionCallback
-    private var mediaRecorderVideo: MediaRecorder?  = MediaRecorder()
+    private var mediaRecorderVideo: MediaRecorder? = MediaRecorder()
     private var requestCode: Int = 0
     private var resultCode: Int = 0
     private var dataIntent: Intent? = null
@@ -84,18 +81,18 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
 
 
     //Static global variables.
-    companion object {
+    internal companion object {
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
         internal var returnActivityLifeCycleClassName: String? = null
-        internal var floatingActionButtonLastDx: Float = 0F
-        internal var floatingActionButtonScreenShotLastDx: Float = 0F
-        internal var floatingActionButtonVideoLastDx: Float = 0F
-        internal var floatingActionButtonAudioLastDx: Float = 0F
-        internal var floatingActionButtonLastDy: Float = 0F
-        internal var floatingActionButtonScreenShotLastDy: Float = 0F
-        internal var floatingActionButtonVideoLastDy: Float = 0F
-        internal var floatingActionButtonAudioLastDy: Float = 0f
+        internal var floatingActionButtonLastDx: Float? = null
+        internal var floatingActionButtonScreenShotLastDx: Float? = null
+        internal var floatingActionButtonVideoLastDx: Float? = null
+        internal var floatingActionButtonAudioLastDx: Float? = null
+        internal var floatingActionButtonLastDy: Float? = null
+        internal var floatingActionButtonScreenShotLastDy: Float? = null
+        internal var floatingActionButtonVideoLastDy: Float? = null
+        internal var floatingActionButtonAudioLastDy: Float? = null
         private const val REQUEST_CODE_VIDEO = 1000
         private const val REQUEST_CODE_AUDIO_PERMISSION = 2001
         private const val REQUEST_CODE_WRITE_EXTERNAL_STORAGE_PERMISSION = 2002
@@ -114,6 +111,7 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
                 }
             }
         }
+
     }
 
     init {
@@ -179,6 +177,7 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
                     LoggerBird.classList.add(activity.javaClass.simpleName)
                 }
             }
+
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -191,39 +190,7 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
 
     override fun onActivityStarted(activity: Activity) {
         try {
-            if (this::rootView.isInitialized && this::view.isInitialized) {
-                (rootView as ViewGroup).removeView(view)
-            }
-            val rootView: ViewGroup =
-                activity.window.decorView.findViewById(android.R.id.content)
-            val view: View = LayoutInflater.from(activity)
-                .inflate(
-                    R.layout.fragment_logger_bird,
-                    rootView,
-                    false
-                )
-            val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            activity.addContentView(view, layoutParams)
-            this.rootView = rootView
-            this.view = view
-            floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-            floating_action_button_screenshot =
-                view.findViewById(R.id.fragment_floating_action_button_screenshot)
-            floating_action_button_video =
-                view.findViewById(R.id.fragment_floating_action_button_video)
-            floating_action_button_audio =
-                view.findViewById(R.id.fragment_floating_action_button_audio)
-
-            if(videoRecording){
-                floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
-            }
-//            checkOldCoordinates()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                buttonClicks()
-            }
+            initializeFloatingActionButton(activity = activity)
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -259,7 +226,7 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
 
     override fun onActivityPaused(activity: Activity) {
         try {
-            controlOldCoordinates = true
+            takeOldCoordinates()
             if (controlPermissionRequest) {
                 stopForegroundServiceVideo()
             }
@@ -339,6 +306,42 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
         return LoggerBird.stringBuilderActivityLifeCycleObserver.toString()
     }
 
+
+    private fun initializeFloatingActionButton(activity: Activity) {
+        if (this::rootView.isInitialized && this::view.isInitialized) {
+            (rootView as ViewGroup).removeView(view)
+        }
+        val rootView: ViewGroup =
+            activity.window.decorView.findViewById(android.R.id.content)
+        val view: View = LayoutInflater.from(activity)
+            .inflate(
+                R.layout.fragment_logger_bird,
+                rootView,
+                false
+            )
+        val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        activity.addContentView(view, layoutParams)
+        this.rootView = rootView
+        this.view = view
+        floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
+        floating_action_button_screenshot =
+            view.findViewById(R.id.fragment_floating_action_button_screenshot)
+        floating_action_button_video =
+            view.findViewById(R.id.fragment_floating_action_button_video)
+        floating_action_button_audio =
+            view.findViewById(R.id.fragment_floating_action_button_audio)
+        if (videoRecording) {
+            floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
+        }
+        attachFloatingActionButtonLayoutListener()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            buttonClicks()
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun buttonClicks() {
@@ -351,21 +354,21 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
         )
         floating_action_button.setOnClickListener {
             coroutineCallAnimation.async {
-                fabOpen = AnimationUtils.loadAnimation(context, R.anim.fab_open)
-                fabClose = AnimationUtils.loadAnimation(context, R.anim.fab_close)
+                //                fabOpen = AnimationUtils.loadAnimation(context, R.anim.fab_open)
+//                fabClose = AnimationUtils.loadAnimation(context, R.anim.fab_close)
                 withContext(Dispatchers.Main) {
-                    fabOpen.setAnimationListener(
-                        FloatingActionButtonAnimationListener(
-                            context = context,
-                            floatingActionButtonAudio = floating_action_button_audio
-                        )
-                    )
-                    fabClose.setAnimationListener(
-                        FloatingActionButtonAnimationListener(
-                            context = context,
-                            floatingActionButtonAudio = floating_action_button_audio
-                        )
-                    )
+                    //                    fabOpen.setAnimationListener(
+//                        FloatingActionButtonAnimationListener(
+//                            context = context,
+//                            floatingActionButtonAudio = floating_action_button_audio
+//                        )
+//                    )
+//                    fabClose.setAnimationListener(
+//                        FloatingActionButtonAnimationListener(
+//                            context = context,
+//                            floatingActionButtonAudio = floating_action_button_audio
+//                        )
+//                    )
                     animationVisibility()
                 }
             }
@@ -386,9 +389,46 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
         }
     }
 
+    private fun attachFloatingActionButtonLayoutListener() {
+        floating_action_button.viewTreeObserver.addOnGlobalLayoutListener(
+            FloatingActionButtonGlobalLayoutListener(
+                floatingActionButton = floating_action_button
+            )
+        )
+        floating_action_button_screenshot.viewTreeObserver.addOnGlobalLayoutListener(
+            FloatingActionButtonScreenshotGlobalLayoutListener(floatingActionButtonScreenshot = floating_action_button_screenshot)
+        )
+        floating_action_button_video.viewTreeObserver.addOnGlobalLayoutListener(
+            FloatingActionButtonVideoGlobalLayoutListener(floatingActionButtonVideo = floating_action_button_video)
+        )
+
+        floating_action_button_audio.viewTreeObserver.addOnGlobalLayoutListener(
+            FloatingActionButtonAudioGlobalLayoutListener(floatingActionButtonAudio = floating_action_button_audio)
+        )
+    }
+
+//    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+//    private fun removeFloatingActionButtonLayoutListener() {
+//        floating_action_button.viewTreeObserver.removeOnGlobalLayoutListener(
+//            FloatingActionButtonGlobalLayoutListener()
+//        )
+//        floating_action_button_screenshot.viewTreeObserver.removeOnGlobalLayoutListener(
+//            FloatingActionButtonScreenshotGlobalLayoutListener()
+//        )
+//        floating_action_button_video.viewTreeObserver.removeOnGlobalLayoutListener(
+//            FloatingActionButtonVideoGlobalLayoutListener()
+//        )
+//        floating_action_button_audio.viewTreeObserver.removeOnGlobalLayoutListener(
+//            FloatingActionButtonAudioGlobalLayoutListener()
+//        )
+//    }
+
     private fun animationVisibility() {
         if (isOpen) {
             isOpen = false
+            floating_action_button_video.animate().cancel()
+            floating_action_button_audio.animate().cancel()
+            floating_action_button_screenshot.animate().cancel()
             floating_action_button_video.animate().alphaBy(1.0F)
             floating_action_button_video.animate().alpha(0.0F)
             floating_action_button_video.animate().scaleXBy(1.0F)
@@ -396,7 +436,7 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
             floating_action_button_video.animate().scaleYBy(1.0F)
             floating_action_button_video.animate().scaleY(0.0F)
             floating_action_button_video.animate().rotation(360F)
-            floating_action_button_video.animate().setDuration(200L)
+            floating_action_button_video.animate().duration = 200L
             floating_action_button_video.animate().start()
             floating_action_button_screenshot.animate().alphaBy(1.0F)
             floating_action_button_screenshot.animate().alpha(0.0F)
@@ -405,7 +445,7 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
             floating_action_button_screenshot.animate().scaleYBy(1.0F)
             floating_action_button_screenshot.animate().scaleY(0.0F)
             floating_action_button_screenshot.animate().rotation(360F)
-            floating_action_button_screenshot.animate().setDuration(200L)
+            floating_action_button_screenshot.animate().duration = 200L
             floating_action_button_screenshot.animate().start()
             floating_action_button_audio.animate().alphaBy(1.0F)
             floating_action_button_audio.animate().alpha(0.0F)
@@ -414,12 +454,14 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
             floating_action_button_audio.animate().scaleYBy(1.0F)
             floating_action_button_audio.animate().scaleY(0.0F)
             floating_action_button_audio.animate().rotation(360F)
-            floating_action_button_audio.animate().setDuration(200L)
+            floating_action_button_audio.animate().duration = 200L
             floating_action_button_audio.animate().start()
             floating_action_button.setImageResource(R.drawable.ic_add_black_24dp)
-            floating_action_button.animate().rotationBy(180F)
         } else {
             isOpen = true
+            floating_action_button_video.animate().cancel()
+            floating_action_button_audio.animate().cancel()
+            floating_action_button_screenshot.animate().cancel()
             floating_action_button_screenshot.visibility = View.VISIBLE
             floating_action_button_screenshot.animate().alphaBy(0.0F)
             floating_action_button_screenshot.animate().alpha(1.0F)
@@ -428,7 +470,7 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
             floating_action_button_screenshot.animate().scaleYBy(0.0F)
             floating_action_button_screenshot.animate().scaleY(1.0F)
             floating_action_button_screenshot.animate().rotation(360F)
-            floating_action_button_screenshot.animate().setDuration(200L)
+            floating_action_button_screenshot.animate().duration = 200L
             floating_action_button_screenshot.animate().start()
             floating_action_button_audio.visibility = View.VISIBLE
             floating_action_button_audio.animate().alphaBy(0.0F)
@@ -438,7 +480,7 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
             floating_action_button_audio.animate().scaleYBy(0.0F)
             floating_action_button_audio.animate().scaleY(1.0F)
             floating_action_button_audio.animate().rotation(360F)
-            floating_action_button_audio.animate().setDuration(200L)
+            floating_action_button_audio.animate().duration = 200L
             floating_action_button_audio.animate().start()
             floating_action_button_video.visibility = View.VISIBLE
             floating_action_button_video.animate().alphaBy(0.0F)
@@ -448,10 +490,9 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
             floating_action_button_video.animate().scaleYBy(0.0F)
             floating_action_button_video.animate().scaleY(1.0F)
             floating_action_button_video.animate().rotation(360F)
-            floating_action_button_video.animate().setDuration(200L)
+            floating_action_button_video.animate().duration = 200L
             floating_action_button_video.animate().start()
-            floating_action_button.animate().rotationBy(180F)
-            floating_action_button.setImageResource(R.drawable.ic_add_red_24dp)
+            floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
         }
     }
 
@@ -785,28 +826,17 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
         destroyMediaProjection()
     }
 
-    private fun checkOldCoordinates() {
-        if (controlOldCoordinates) {
-            Log.d("old_coordinates", floating_action_button.x.toString())
-            floating_action_button.x =
-                floatingActionButtonLastDx
-            floating_action_button.y =
-                floatingActionButtonLastDy
-            floating_action_button_screenshot.x =
-                floatingActionButtonScreenShotLastDx
-            floating_action_button_screenshot.y =
-                floatingActionButtonScreenShotLastDy
-            floating_action_button_video.x =
-                floatingActionButtonVideoLastDx
-            floating_action_button_video.y =
-                floatingActionButtonVideoLastDy
-            floating_action_button_audio.x =
-                floatingActionButtonAudioLastDx
-            floating_action_button_audio.y =
-                floatingActionButtonAudioLastDy
-            controlOldCoordinates = false
-        }
+    private fun takeOldCoordinates() {
+        floatingActionButtonLastDx = floating_action_button.x
+        floatingActionButtonLastDy = floating_action_button.y
+        floatingActionButtonScreenShotLastDx = floating_action_button_screenshot.x
+        floatingActionButtonScreenShotLastDy = floating_action_button_screenshot.y
+        floatingActionButtonVideoLastDx = floating_action_button_video.x
+        floatingActionButtonVideoLastDy = floating_action_button_video.y
+        floatingActionButtonAudioLastDx = floating_action_button_audio.x
+        floatingActionButtonAudioLastDy = floating_action_button_audio.y
     }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun startForegroundServiceVideo() {
@@ -842,7 +872,7 @@ class LogActivityLifeCycleObserver(contextMetrics:Context) : Activity(), Applica
 
     private fun callForegroundService() {
         if (LoggerBird.isLogInitAttached()) {
-            if(!videoRecording){
+            if (!videoRecording) {
                 if (runnableList.isEmpty()) {
                     workQueueLinked.put {
                         takeForegroundService()

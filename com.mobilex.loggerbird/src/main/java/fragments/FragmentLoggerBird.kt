@@ -236,7 +236,7 @@ class FragmentLoggerBird(private val viewFragment: View, private val mContext: C
             fragment_floating_action_button_video.animate().setDuration(200L)
             fragment_floating_action_button_video.animate().start()
             fragment_floating_action_button.animate().rotationBy(180F)
-            fragment_floating_action_button.setImageResource(R.drawable.ic_add_red_24dp)
+            fragment_floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
         }
     }
 

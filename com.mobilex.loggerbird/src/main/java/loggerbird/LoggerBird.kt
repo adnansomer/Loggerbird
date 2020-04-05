@@ -682,6 +682,7 @@ class LoggerBird : LifecycleObserver {
                 var tempView: View
                 var tempViewGroup: ViewGroup
                 var tempTextView: TextView
+                recyclerViewItemObserver = LogDataSetObserver(context = context)
                 recyclerViewItemObserver.takeObserverList()
                 for (recyclerViewItem in 0..recyclerView.adapter!!.itemCount) {
                     if (recyclerView.getChildAt(recyclerViewItem) != null) {

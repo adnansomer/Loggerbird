@@ -43,6 +43,7 @@ internal class Constants {
         const val cpuTag: String = "Cpu"
         const val screenShotTag:String = "Screenshot"
         const val floatingActionButtonTag:String="Floating Action Button"
+        const val floatingActionButtonOnTouchTag:String="Floating Action Button On Touch"
         const val audioRecordingTag:String="Audio Recording"
         const val audioStartRecordingTag:String="Audio Start Recording"
         const val audioStopRecordingTag:String="Audio Stop recording"
@@ -50,5 +51,8 @@ internal class Constants {
         const val videoRecordingSdkTag:String="Call requires API level 21"
         const val foregroundServiceVideo:String = "Foreground Service Video"
         const val onActivityResultTag:String = "onActivityResult"
+        const val floatingActionButtonScreenshotTag:String = "Floating Action Button Screenshot"
+        const val floatingActionButtonVideoTag:String = "Floating Action Button Video"
+        const val floatingActionButtonAudioTag:String = "Floating Action Button Audio"
     }
 }
