@@ -50,12 +50,10 @@ import utils.InternetConnectionUtil
 import utils.LinkedBlockingQueueUtil
 import java.io.File
 import java.net.HttpURLConnection
-import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
-import kotlinx.android.synthetic.main.fragment_logger_bird.*
 
 
 //LoggerBird class is the general logging class for this library.

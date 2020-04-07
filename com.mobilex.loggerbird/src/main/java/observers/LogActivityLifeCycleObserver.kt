@@ -29,6 +29,8 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
+import androidx.core.view.get
+import androidx.core.view.size
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mobilex.loggerbird.R
 import constants.Constants
@@ -78,6 +80,8 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
     private var resultCode: Int = 0
     private var dataIntent: Intent? = null
     private lateinit var intentForegroundServiceVideo: Intent
+    private lateinit var initializeFloatingActionButton: Runnable
+    private lateinit var takeOldCoordinates:Runnable
 
 
     //Static global variables.
@@ -157,10 +161,12 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             DISPLAY_WIDTH = metrics.widthPixels
             LoggerBird.fragmentLifeCycleObserver =
                 LogFragmentLifeCycleObserver()
-            (activity as AppCompatActivity).supportFragmentManager.registerFragmentLifecycleCallbacks(
-                LoggerBird.fragmentLifeCycleObserver,
-                true
-            )
+            if((activity is AppCompatActivity)){
+                (activity as AppCompatActivity).supportFragmentManager.registerFragmentLifecycleCallbacks(
+                    LoggerBird.fragmentLifeCycleObserver,
+                    true
+                )
+            }
             returnActivityLifeCycleClassName = activity.javaClass.simpleName
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
@@ -188,9 +194,17 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     override fun onActivityStarted(activity: Activity) {
         try {
-            initializeFloatingActionButton(activity = activity)
+            if(activity is AppCompatActivity){
+                initializeFloatingActionButton = Runnable {
+                    initializeFloatingActionButton(activity = activity)
+                }
+                val rootView: ViewGroup =
+                    activity.window.decorView.findViewById(android.R.id.content)
+                rootView.viewTreeObserver.addOnWindowFocusChangeListener(LayoutWindowFocusChangeListener(initializeFloatingActionButton = initializeFloatingActionButton ))
+            }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -226,7 +240,9 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
 
     override fun onActivityPaused(activity: Activity) {
         try {
-            takeOldCoordinates()
+            if(activity is AppCompatActivity){
+                takeOldCoordinates()
+            }
             if (controlPermissionRequest) {
                 stopForegroundServiceVideo()
             }
@@ -313,8 +329,13 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         }
         val rootView: ViewGroup =
             activity.window.decorView.findViewById(android.R.id.content)
+//        if(!activity.hasWindowFocus()){
+//            if(rootView.size>0){
+//                rootView = (rootView[rootView.size - 1] as ViewGroup)
+//            }
+//        }
         val view: View = LayoutInflater.from(activity)
-            .inflate(
+                .inflate(
                 R.layout.fragment_logger_bird,
                 rootView,
                 false
@@ -827,14 +848,22 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
     }
 
     private fun takeOldCoordinates() {
-        floatingActionButtonLastDx = floating_action_button.x
-        floatingActionButtonLastDy = floating_action_button.y
-        floatingActionButtonScreenShotLastDx = floating_action_button_screenshot.x
-        floatingActionButtonScreenShotLastDy = floating_action_button_screenshot.y
-        floatingActionButtonVideoLastDx = floating_action_button_video.x
-        floatingActionButtonVideoLastDy = floating_action_button_video.y
-        floatingActionButtonAudioLastDx = floating_action_button_audio.x
-        floatingActionButtonAudioLastDy = floating_action_button_audio.y
+        if(this::floating_action_button.isInitialized){
+            floatingActionButtonLastDx = floating_action_button.x
+            floatingActionButtonLastDy = floating_action_button.y
+        }
+        if(this::floating_action_button_screenshot.isInitialized){
+            floatingActionButtonScreenShotLastDx = floating_action_button_screenshot.x
+            floatingActionButtonScreenShotLastDy = floating_action_button_screenshot.y
+        }
+        if(this::floating_action_button_video.isInitialized){
+            floatingActionButtonVideoLastDx = floating_action_button_video.x
+            floatingActionButtonVideoLastDy = floating_action_button_video.y
+        }
+        if(this::floating_action_button_audio.isInitialized){
+            floatingActionButtonAudioLastDx = floating_action_button_audio.x
+            floatingActionButtonAudioLastDy = floating_action_button_audio.y
+        }
     }
 
 

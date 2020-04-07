@@ -51,6 +51,9 @@ class Main2Activity : AppCompatActivity(), PurchasesUpdatedListener {
                     FragmentMain3.newInstance(), "FragmentMain3")
                 .commit()
         })
+        button_dummy_2.setOnClickListener{
+            startActivity(Intent(this@Main2Activity,Main3Activity::class.java))
+        }
     }
 
     override fun onStart() {
