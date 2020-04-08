@@ -41,7 +41,7 @@ class Main2Activity : AppCompatActivity(), PurchasesUpdatedListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
         Log.d("super_class", Main2Activity::class.java.superclass!!.simpleName)
-        setupBillingClient()
+//        setupBillingClient()
         blurImage()
         button_dummy.setOnClickListener(View.OnClickListener {
             supportFragmentManager

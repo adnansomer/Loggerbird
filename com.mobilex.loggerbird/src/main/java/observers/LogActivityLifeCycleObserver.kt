@@ -77,7 +77,7 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
     private lateinit var mediaProjectionCallback: MediaProjectionCallback
     private var mediaRecorderVideo: MediaRecorder? = MediaRecorder()
     private var requestCode: Int = 0
-    private var resultCode: Int = 0
+    private var resultCode: Int = -1
     private var dataIntent: Intent? = null
     private lateinit var intentForegroundServiceVideo: Intent
     private lateinit var initializeFloatingActionButton: Runnable
@@ -198,12 +198,16 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
     override fun onActivityStarted(activity: Activity) {
         try {
             if(activity is AppCompatActivity){
-                initializeFloatingActionButton = Runnable {
-                    initializeFloatingActionButton(activity = activity)
-                }
-                val rootView: ViewGroup =
-                    activity.window.decorView.findViewById(android.R.id.content)
-                rootView.viewTreeObserver.addOnWindowFocusChangeListener(LayoutWindowFocusChangeListener(initializeFloatingActionButton = initializeFloatingActionButton ))
+                initializeFloatingActionButton(activity = activity)
+//                initializeFloatingActionButton = Runnable {
+//                    initializeFloatingActionButton(activity = activity)
+//                }
+//                takeOldCoordinates = Runnable {
+////                    takeOldCoordinates()
+//                }
+//                val rootView: ViewGroup =
+//                    activity.window.decorView.findViewById(android.R.id.content)
+//                rootView.viewTreeObserver.addOnWindowFocusChangeListener(LayoutWindowFocusChangeListener(initializeFloatingActionButton = initializeFloatingActionButton,takeOldCoordinates = takeOldCoordinates))
             }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
@@ -820,15 +824,16 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun stopScreenRecord() {
-        videoRecording = false
-        mediaRecorderVideo!!.stop()
-        mediaRecorderVideo!!.reset()
+        if(videoRecording){
+            mediaRecorderVideo!!.stop()
+            mediaRecorderVideo!!.reset()
+        }
         if (virtualDisplay != null) {
             virtualDisplay!!.release()
         }
         destroyMediaProjection()
         stopForegroundServiceVideo()
-        callEnqueue()
+        videoRecording = false
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -881,6 +886,12 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     internal fun callVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
         if (LoggerBird.isLogInitAttached()) {
+//            if(this::intentForegroundServiceVideo.isInitialized){
+//                stopForegroundServiceVideo()
+//            }
+            workQueueLinked.controlRunnable = false
+            runnableList.clear()
+            workQueueLinked.clear()
             callForegroundService()
             if (runnableList.isEmpty()) {
                 workQueueLinked.put {
