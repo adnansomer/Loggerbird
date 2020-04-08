@@ -153,12 +153,6 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         try {
-            this.context = activity
-            val metrics = DisplayMetrics()
-            (context as Activity).windowManager.defaultDisplay.getMetrics(metrics)
-            screenDensity = metrics.densityDpi
-            DISPLAY_HEIGHT = metrics.heightPixels
-            DISPLAY_WIDTH = metrics.widthPixels
             LoggerBird.fragmentLifeCycleObserver =
                 LogFragmentLifeCycleObserver()
             if((activity is AppCompatActivity)){
@@ -197,6 +191,12 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     override fun onActivityStarted(activity: Activity) {
         try {
+            this.context = activity
+            val metrics = DisplayMetrics()
+            (context as Activity).windowManager.defaultDisplay.getMetrics(metrics)
+            screenDensity = metrics.densityDpi
+            DISPLAY_HEIGHT = metrics.heightPixels
+            DISPLAY_WIDTH = metrics.widthPixels
             if(activity is AppCompatActivity){
                 initializeFloatingActionButton(activity = activity)
 //                initializeFloatingActionButton = Runnable {

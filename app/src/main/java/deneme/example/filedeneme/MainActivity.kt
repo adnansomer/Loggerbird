@@ -176,11 +176,11 @@ class MainActivity : AppCompatActivity() {
 
 //        LogDeneme.logLifeCycleDetails()
 //        LogDeneme.logAttach()
-        permissions()
-        if (permissions()) {
-            implementRealm()
-
-        }
+//        permissions()
+//        if (permissions()) {
+//            implementRealm()
+//
+//        }
         button_add.setOnClickListener() {
             val filePathTest: File = File(this.filesDir, "logger_bird_details.txt")
 
