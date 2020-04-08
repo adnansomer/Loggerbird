@@ -8,7 +8,6 @@ import java.util.concurrent.LinkedBlockingQueue
 internal class LinkedBlockingQueueUtil : LinkedBlockingQueue<Runnable>() {
     //Global variables.
     var controlRunnable: Boolean = false
-
     override fun put(e: Runnable) {
         try {
             if (!controlRunnable) {

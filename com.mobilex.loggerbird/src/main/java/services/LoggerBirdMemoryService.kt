@@ -59,7 +59,7 @@ internal class LoggerBirdMemoryService : Service() {
     }
 
     /**
-     * This Method Called When Service In onDestroy State
+     * This Method Called When Service In onDestroy State.
      */
     override fun onDestroy() {
         super.onDestroy()

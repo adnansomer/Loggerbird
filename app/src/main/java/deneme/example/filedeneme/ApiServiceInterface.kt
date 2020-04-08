@@ -34,8 +34,9 @@ interface ApiServiceInterface {
                 .addConverterFactory(
                     GsonConverterFactory.create()
                 )
-                .baseUrl("http://api.plos.org")
-                .client(LoggerBird.loggerBirdInterceptorClient())
+                .baseUrl("http://api.openweathermap.org")
+                .client(client)
+                .client(LoggerBird.loggerBirdInterceptorClient()!!)
                 .build()
 
 //            LogDeneme.saveAllDetails(fileName ="berk_deneme",retrofit =retrofit,context = context)
@@ -51,7 +52,6 @@ interface ApiServiceInterface {
                     )
                     .baseUrl("http://api.plos.org")
                     .client(client)
-                    .client(LoggerBird.loggerBirdInterceptorClient()!!)
                     .build()
             }catch (e:Exception){
                 e.printStackTrace()

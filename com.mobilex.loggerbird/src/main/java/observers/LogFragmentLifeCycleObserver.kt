@@ -13,7 +13,6 @@ import java.util.*
 
 //LogFragmentCycleObserver class is used for attaching lifecycle observer for your current fragment.
 internal class LogFragmentLifeCycleObserver(
-    fragmentManager: FragmentManager?
 ) :
     FragmentManager.FragmentLifecycleCallbacks() {
     //Global variables.
@@ -450,7 +449,7 @@ internal class LogFragmentLifeCycleObserver(
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentDestroyed"
             stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState}\n"
+                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()

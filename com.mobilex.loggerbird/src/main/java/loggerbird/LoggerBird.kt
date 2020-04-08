@@ -1,6 +1,6 @@
 package loggerbird
 
-import android.app.ActivityManager
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -36,15 +36,13 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import observers.LogFragmentLifeCycleObserver
 import observers.LogLifeCycleObserver
-import okhttp3.Request
-import okhttp3.Response
 import retrofit2.Retrofit
 import utils.EmailUtil
 import listeners.LogRecyclerViewChildAttachStateChangeListener
 import listeners.LogRecyclerViewItemTouchListener
 import listeners.LogRecyclerViewScrollListener
 import observers.*
-import okhttp3.OkHttpClient
+import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import services.LoggerBirdMemoryService
 import services.LoggerBirdService
@@ -56,6 +54,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
+
 
 //LoggerBird class is the general logging class for this library.
 class LoggerBird : LifecycleObserver {
@@ -99,10 +98,11 @@ class LoggerBird : LifecycleObserver {
         private var coroutineCallException: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineCallRetrofitTask: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineCallEmailTask = CoroutineScope(Dispatchers.IO)
+        private var coroutineCallInterceptorClient: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var formattedTime: String? = null
         private var fileLimit: Long = 2097152
         private lateinit var lifeCycleObserver: LogLifeCycleObserver
-        private lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
+        internal lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
         private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver =
             LogRecyclerViewAdapterDataObserver()
         private var recyclerViewScrollListener: LogRecyclerViewScrollListener =
@@ -128,6 +128,9 @@ class LoggerBird : LifecycleObserver {
         private var defaultProgressBarView: View? = null
         private var memoryThreshold: Long = 4180632L
         private lateinit var intentServiceMemory: Intent
+        private lateinit var activityLifeCycleObserver: LogActivityLifeCycleObserver
+        internal var stringBuilderActivityLifeCycleObserver: StringBuilder = StringBuilder()
+        internal var classList: ArrayList<String> = ArrayList()
 
 
         //---------------Public Methods:---------------//
@@ -152,9 +155,10 @@ class LoggerBird : LifecycleObserver {
 
         fun logInit(
             context: Context,
-            filePathName: String? = null,
-            fragmentManager: FragmentManager? = null
+            filePathName: String? = null
         ): Boolean {
+            this.context = context
+            this.filePathName = filePathName
             if (!controlLogInit) {
                 fileDirectory = context.filesDir
                 if (filePathName != null) {
@@ -175,14 +179,9 @@ class LoggerBird : LifecycleObserver {
                 workQueueLinked = LinkedBlockingQueueUtil()
                 val logcatObserver = UnhandledExceptionObserver()
                 Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
+                logAttachLifeCycleObservers(context = context)
             }
-            this.context = context
-            this.filePathName = filePathName
-            controlLogInit =
-                logAttach(
-                    context,
-                    fragmentManager
-                )
+
 //            threadPoolExecutor= LogThreadPoolExecutorUtil(
 //                corePoolSize = corePoolSize,
 //                maximumPoolSize = maximumPoolSize,
@@ -190,6 +189,24 @@ class LoggerBird : LifecycleObserver {
 //                workQueue = workQueueLinked,
 //                unit = timeUnit
 //            )
+//            val rootView: ViewGroup =
+//                (context as Activity).window.decorView.findViewById(android.R.id.content)
+//            val view: View = LayoutInflater.from(context)
+//                .inflate(
+//                    R.layout.fragment_logger_bird,
+//                    rootView,
+//                    false
+//                )
+//            val supportFragmentManager = (context as AppCompatActivity).supportFragmentManager
+//            supportFragmentManager.beginTransaction()
+//                .replace((rootView as View).id,FragmentLoggerBird.newInstance(viewFragment = rootView as View,context = context),"FragmentLoggerBird").commit()
+//
+//            val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
+//                ViewGroup.LayoutParams.MATCH_PARENT,
+//                ViewGroup.LayoutParams.MATCH_PARENT
+//            )
+//            context.addContentView(view, layoutParams)
+            controlLogInit = true
             return controlLogInit
         }
 
@@ -205,19 +222,13 @@ class LoggerBird : LifecycleObserver {
          * @var recyclerviewItemObserver might be useful in the future(in progress).
          * @return Boolean value.
          */
-        private fun logAttach(context: Context, fragmentManager: FragmentManager? = null): Boolean {
-            if (fragmentManager != null) {
-                fragmentLifeCycleObserver =
-                    LogFragmentLifeCycleObserver(
-                        fragmentManager = fragmentManager
-                    )
-                fragmentManager.registerFragmentLifecycleCallbacks(fragmentLifeCycleObserver, true)
-            } else {
-                lifeCycleObserver = LogLifeCycleObserver()
-                lifeCycleObserver.registerLifeCycle(context)
-            }
-            //recyclerViewItemObserver = LogDataSetObserver(context)
-            return true
+        private fun logAttachLifeCycleObservers(context: Context) {
+//            context.applicationContext.registerComponentCallbacks()
+            activityLifeCycleObserver = LogActivityLifeCycleObserver(contextMetrics = context)
+            (context as Application).registerActivityLifecycleCallbacks(activityLifeCycleObserver)
+//                lifeCycleObserver = LogLifeCycleObserver()
+//                lifeCycleObserver.registerLifeCycle(context)
+//            recyclerViewItemObserver = LogDataSetObserver(context)
         }
 
         /**
@@ -238,8 +249,9 @@ class LoggerBird : LifecycleObserver {
          * This Method Detaches A LifeCycle Observer From The Current Activity.
          */
         fun logDetachObserver() {
-            if (Companion::lifeCycleObserver.isInitialized) {
-                lifeCycleObserver.deRegisterLifeCycle()
+            if (Companion::activityLifeCycleObserver.isInitialized) {
+                (context as Application).unregisterActivityLifecycleCallbacks(
+                    activityLifeCycleObserver)
             }
         }
 
@@ -547,24 +559,21 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if controlLogInit value is false.
          */
         fun callOkHttpRequestDetails(
-            okHttpClient: OkHttpClient? = null,
-            okHttpRequest: Request? = null,
+            url: String? = null,
             okHttpURLConnection: HttpURLConnection? = null
         ) {
             if (controlLogInit) {
                 if (runnableList.isEmpty()) {
                     workQueueLinked.put {
                         takeOkHttpDetails(
-                            okHttpClient = okHttpClient,
-                            okHttpRequest = okHttpRequest,
+                            url = url,
                             okHttpURLConnection = okHttpURLConnection
                         )
                     }
                 }
                 runnableList.add(Runnable {
                     takeOkHttpDetails(
-                        okHttpClient = okHttpClient,
-                        okHttpRequest = okHttpRequest,
+                        url = url,
                         okHttpURLConnection = okHttpURLConnection
                     )
                 })
@@ -671,6 +680,7 @@ class LoggerBird : LifecycleObserver {
                 var tempView: View
                 var tempViewGroup: ViewGroup
                 var tempTextView: TextView
+                recyclerViewItemObserver = LogDataSetObserver(context = context)
                 recyclerViewItemObserver.takeObserverList()
                 for (recyclerViewItem in 0..recyclerView.adapter!!.itemCount) {
                     if (recyclerView.getChildAt(recyclerViewItem) != null) {
@@ -1125,10 +1135,9 @@ class LoggerBird : LifecycleObserver {
          */
         internal fun takeLifeCycleDetails() {
             workQueueLinked.controlRunnable = true
-            if (LoggerBirdService.onDestroyMessage != null) {
+            if (LoggerBirdService.controlServiceOnDestroyState) {
                 if (controlLogInit) {
                     try {
-                        stringBuilderLifeCycle = StringBuilder()
                         stringBuilderLifeCycle.append(Constants.lifeCycleTag + ":" + "\n")
                         if (Companion::fragmentLifeCycleObserver.isInitialized) {
                             if (fragmentLifeCycleObserver.returnFragmentLifeCycleState().isNotEmpty()) {
@@ -1143,19 +1152,22 @@ class LoggerBird : LifecycleObserver {
                                     }
                                 }
                             }
-                        } else if (lifeCycleObserver.returnActivityLifeCycleState().isNotEmpty()) {
-                            for (classList in lifeCycleObserver.returnClassList()) {
-                                stringBuilderLifeCycle.append("$classList:\n")
-                                for (stateList in lifeCycleObserver.returnActivityLifeCycleState().split(
-                                    "\n"
-                                )) {
-                                    if (stateList.contains(classList)) {
-                                        stringBuilderLifeCycle.append(stateList + "\n")
+                        }
+                        if (Companion::activityLifeCycleObserver.isInitialized) {
+                            if (activityLifeCycleObserver.returnActivityLifeCycleState().isNotEmpty()) {
+                                for (classList in activityLifeCycleObserver.returnClassList()) {
+                                    stringBuilderLifeCycle.append("$classList:\n")
+                                    for (stateList in activityLifeCycleObserver.returnActivityLifeCycleState().split(
+                                        "\n"
+                                    )) {
+                                        if (stateList.contains(classList)) {
+                                            stringBuilderLifeCycle.append(stateList + "\n")
+                                        }
                                     }
                                 }
                             }
                         }
-                        stringBuilderLifeCycle.append(LoggerBirdService.onDestroyMessage)
+//                        stringBuilderLifeCycle.append(LoggerBirdService.onDestroyMessage)
                         saveLifeCycleDetails()
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -1187,14 +1199,17 @@ class LoggerBird : LifecycleObserver {
                                         }
                                     }
                                 }
-                            } else if (lifeCycleObserver.returnActivityLifeCycleState().isNotEmpty()) {
-                                for (classList in lifeCycleObserver.returnClassList()) {
-                                    stringBuilderLifeCycle.append("$classList:\n")
-                                    for (stateList in lifeCycleObserver.returnActivityLifeCycleState().split(
-                                        "\n"
-                                    )) {
-                                        if (stateList.contains(classList)) {
-                                            stringBuilderLifeCycle.append(stateList + "\n")
+                            }
+                            if (Companion::activityLifeCycleObserver.isInitialized) {
+                                if (activityLifeCycleObserver.returnActivityLifeCycleState().isNotEmpty()) {
+                                    for (classList in activityLifeCycleObserver.returnClassList()) {
+                                        stringBuilderLifeCycle.append("$classList:\n")
+                                        for (stateList in activityLifeCycleObserver.returnActivityLifeCycleState().split(
+                                            "\n"
+                                        )) {
+                                            if (stateList.contains(classList)) {
+                                                stringBuilderLifeCycle.append(stateList + "\n")
+                                            }
                                         }
                                     }
                                 }
@@ -1530,9 +1545,8 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if logInit method return value is false.
          */
         private fun takeOkHttpDetails(
-            okHttpClient: OkHttpClient? = null,
-            okHttpRequest: Request? = null,
-            okHttpURLConnection: HttpURLConnection?
+            url: String? = null,
+            okHttpURLConnection: HttpURLConnection? = null
         ) {
             workQueueLinked.controlRunnable = true
             coroutineCallOkHttpClient.async {
@@ -1542,6 +1556,15 @@ class LoggerBird : LifecycleObserver {
                         val date = Calendar.getInstance().time
                         val formatter = SimpleDateFormat.getDateInstance()
                         formattedTime = formatter.format(date)
+                        val okHttpClient: OkHttpClient? = loggerBirdInterceptorClient()
+                        var okHttpRequest: Request? = null
+                        val fromBodyBuilder = FormBody.Builder()
+                        if (url != null) {
+                            okHttpRequest = Request.Builder()
+                                .url(url)
+                                .post(fromBodyBuilder.build())
+                                .build()
+                        }
                         val okHttpClientInterceptors = okHttpClient?.interceptors
                         val okHttpClientTimeOut = okHttpClient?.connectTimeoutMillis
                         val okHttpRequestHeaders = okHttpRequest?.headers
@@ -1550,20 +1573,26 @@ class LoggerBird : LifecycleObserver {
                         val okHttpConnectionResponseCode = okHttpURLConnection?.responseCode
                         val okHttpConnectionError = okHttpURLConnection?.errorStream
                         val okHttpConnectionResponse = okHttpURLConnection?.responseMessage
-                        stringBuilderOkHttp.append(
-                            "\n"
-                                    + formattedTime + " " + Constants.okHttpTag + "\n"
-                                    + "okHttp Client Interceptors: $okHttpClientInterceptors \n"
-                                    + stringBuilderInterceptor.toString() + "\n"
-                                    + "okHttp Client Connection Time Out: $okHttpClientTimeOut \n"
-                                    + "okHttp Request Headers: $okHttpRequestHeaders \n"
-                                    + "okHttp Request Url: $okHttpRequestUrl \n"
-                                    + "okHttp Request Method: $okHttpRequestMethod \n"
-                                    + "okHttp Connection Response Code: $okHttpConnectionResponseCode \n"
-                                    + "okHttp Connection Error: $okHttpConnectionError \n"
-                                    + "okHttp Connection Response: $okHttpConnectionResponse \n"
-                        )
-                        saveOkHttpRequestDetails()
+                        var okHttpResponse: Response? = null
+                        withContext(Dispatchers.IO) {
+                            if (okHttpRequest != null) {
+                                okHttpResponse = okHttpClient?.newCall(okHttpRequest)?.execute()
+                            }
+                            stringBuilderOkHttp.append(
+                                "\n" + formattedTime + " " + Constants.okHttpTag + "\n"
+                                        + "okHttp Client Interceptors: $okHttpClientInterceptors \n"
+                                        + stringBuilderInterceptor.toString() + "\n"
+                                        + "okHttp Client Connection Time Out: $okHttpClientTimeOut \n"
+                                        + "okHttp Request Headers: $okHttpRequestHeaders \n"
+                                        + "okHttp Request Url: $okHttpRequestUrl \n"
+                                        + "okHttp Request Method: $okHttpRequestMethod \n"
+                                        + "okHttp Connection Response Code: $okHttpConnectionResponseCode \n"
+                                        + "okHttp Connection Error: $okHttpConnectionError \n"
+                                        + "okHttp Connection Response: $okHttpConnectionResponse \n"
+                                        + "okHttp Response Body:${okHttpResponse?.body?.string()} \n"
+                            )
+                            saveOkHttpRequestDetails()
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
                         callEnqueue()
@@ -1592,21 +1621,16 @@ class LoggerBird : LifecycleObserver {
                 try {
                     val internetConnectionUtil = InternetConnectionUtil()
                     if (internetConnectionUtil.checkNetworkConnection(context = context)) {
-                        if (internetConnectionUtil.makeHttpRequest() == 200) {
-                            val loggerBirdGeneralInterceptor = HttpLoggingInterceptor()
-                            loggerBirdGeneralInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-                            loggerBirdHttpClient = OkHttpClient().newBuilder()
-                                .addInterceptor(LogOkHttpInterceptor())
-                                .addInterceptor(LogOkHttpErrorInterceptor())
-                                .addInterceptor(LogOkHttpAuthenticationInterceptor())
-                                .addNetworkInterceptor(LogOkHttpCacheInterceptor())
-                                .addInterceptor(loggerBirdGeneralInterceptor)
-                                .build()
-                        } else {
-                            throw LoggerBirdException(
-                                Constants.internetErrorMessage
-                            )
-                        }
+                        val loggerBirdGeneralInterceptor = HttpLoggingInterceptor()
+                        loggerBirdGeneralInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+                        loggerBirdHttpClient = OkHttpClient().newBuilder()
+                            .addInterceptor(LogOkHttpInterceptor())
+                            .addInterceptor(LogOkHttpErrorInterceptor())
+                            .addInterceptor(LogOkHttpAuthenticationInterceptor())
+                            .addNetworkInterceptor(LogOkHttpCacheInterceptor())
+                            .addInterceptor(loggerBirdGeneralInterceptor)
+                            .build()
+
                     } else {
                         throw LoggerBirdException(
                             Constants.networkErrorMessage
@@ -2046,7 +2070,7 @@ class LoggerBird : LifecycleObserver {
                             file = filePath
                         )
                     }
-                    if (LoggerBirdService.onDestroyMessage != null) {
+                    if (LoggerBirdService.controlServiceOnDestroyState) {
                         saveSessionIntoOldSessionFile()
                     }
                 } catch (e: Exception) {
@@ -2787,6 +2811,33 @@ class LoggerBird : LifecycleObserver {
                     exception = e,
                     tag = Constants.saveSessionOldFileTag
                 )
+            }
+        }
+
+        fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            if(controlLogInit){
+                try {
+                    LogActivityLifeCycleObserver.controlPermissionRequest = false
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        if(resultCode==Activity.RESULT_OK && data != null){
+                            activityLifeCycleObserver.callVideoRecording(
+                                requestCode = requestCode,
+                                resultCode = resultCode,
+                                data = data
+                            )
+                        }
+                        LogActivityLifeCycleObserver.callEnqueue()
+                    }else{
+                        throw LoggerBirdException(Constants.videoRecordingSdkTag+"current min is:"+Build.VERSION.SDK_INT)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    LogActivityLifeCycleObserver.callEnqueue()
+                    callEnqueue()
+                    callExceptionDetails(exception = e , tag = Constants.onActivityResultTag)
+                }
+            }else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
 

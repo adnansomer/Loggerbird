@@ -1,5 +1,7 @@
 package constants
 
+import java.lang.StringBuilder
+
 //Constant class.
 internal class Constants {
     companion object {
@@ -39,5 +41,18 @@ internal class Constants {
         const val performanceTag: String = "Performance"
         const val memoryUsageTag = "Memory Usage"
         const val cpuTag: String = "Cpu"
+        const val screenShotTag:String = "Screenshot"
+        const val floatingActionButtonTag:String="Floating Action Button"
+        const val floatingActionButtonOnTouchTag:String="Floating Action Button On Touch"
+        const val audioRecordingTag:String="Audio Recording"
+        const val audioStartRecordingTag:String="Audio Start Recording"
+        const val audioStopRecordingTag:String="Audio Stop recording"
+        const val videoRecordingTag:String="Video Recording"
+        const val videoRecordingSdkTag:String="Call requires API level 21"
+        const val foregroundServiceVideo:String = "Foreground Service Video"
+        const val onActivityResultTag:String = "onActivityResult"
+        const val floatingActionButtonScreenshotTag:String = "Floating Action Button Screenshot"
+        const val floatingActionButtonVideoTag:String = "Floating Action Button Video"
+        const val floatingActionButtonAudioTag:String = "Floating Action Button Audio"
     }
 }
