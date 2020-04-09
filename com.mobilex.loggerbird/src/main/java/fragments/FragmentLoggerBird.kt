@@ -105,29 +105,6 @@ class FragmentLoggerBird(private val viewFragment: View, private val mContext: C
     }
 
 
-//    private fun buttonVisibility() {
-//        if (fragment_floating_action_button_audio.visibility == View.GONE) {
-//            fragment_floating_action_button_audio.visibility = View.VISIBLE
-//        } else {
-//            fragment_floating_action_button_audio.visibility = View.GONE
-//            // handlerTemp.postDelayed(Runnable {},3000)
-//        }
-//        if (fragment_floating_action_button_video.visibility == View.GONE) {
-//            fragment_floating_action_button_video.visibility = View.VISIBLE
-//            // handler.postDelayed(Runnable { },500)
-//        } else {
-//            fragment_floating_action_button_video.visibility = View.GONE
-//            //handler.postDelayed(Runnable {   },500)
-//        }
-//        if (fragment_floating_action_button_screenshot.visibility == View.GONE) {
-//            fragment_floating_action_button_screenshot.visibility = View.VISIBLE
-//            // handlerTemp.postDelayed(Runnable { },3000)
-//        } else {
-//            fragment_floating_action_button_screenshot.visibility = View.GONE
-//        }
-//    }
-
-
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun buttonClicks() {
         fragment_floating_action_button.setOnTouchListener(
@@ -162,7 +139,7 @@ class FragmentLoggerBird(private val viewFragment: View, private val mContext: C
             takeScreenShot(viewFragment = viewFragment, context = mContext)
         }
         fragment_floating_action_button_audio.setOnClickListener {
-            takeAudioRecording()
+            //takeAudioRecording()
         }
 
         fragment_floating_action_button_video.setOnClickListener {

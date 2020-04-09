@@ -17,6 +17,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
         android:gravity="center"
+        android:visibility="gone"
         android:orientation="horizontal">
 
         <TextView
@@ -63,6 +64,7 @@
         android:layout_below="@id/linearLayout_profile"
         android:layout_marginTop="10dp"
         android:gravity="center"
+        android:visibility="gone"
         android:layout_centerHorizontal="true"
         >
         <TextView
@@ -90,6 +92,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -177,6 +180,7 @@
         android:text="performance" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:id="@+id/recycler_view"
         android:layout_alignParentBottom="true"
