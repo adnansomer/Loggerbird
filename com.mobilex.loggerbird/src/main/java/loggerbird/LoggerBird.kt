@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
@@ -224,7 +225,7 @@ class LoggerBird : LifecycleObserver {
          */
         private fun logAttachLifeCycleObservers(context: Context) {
 //            context.applicationContext.registerComponentCallbacks()
-            activityLifeCycleObserver = LogActivityLifeCycleObserver(contextMetrics = context)
+            activityLifeCycleObserver = LogActivityLifeCycleObserver()
             (context as Application).registerActivityLifecycleCallbacks(activityLifeCycleObserver)
 //                lifeCycleObserver = LogLifeCycleObserver()
 //                lifeCycleObserver.registerLifeCycle(context)
@@ -2825,6 +2826,8 @@ class LoggerBird : LifecycleObserver {
                                 resultCode = resultCode,
                                 data = data
                             )
+                        }else{
+                            Toast.makeText(context, "Permission denied!",Toast.LENGTH_SHORT).show()
                         }
                         LogActivityLifeCycleObserver.callEnqueue()
                     }else{
@@ -2837,6 +2840,32 @@ class LoggerBird : LifecycleObserver {
                     callExceptionDetails(exception = e , tag = Constants.onActivityResultTag)
                 }
             }else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+        }
+        fun onRequestPermissionResult(requestCode: Int,permissions: Array<out String>,grantResults: IntArray){
+            if(controlLogInit){
+                try{
+                    var permissionCounter = 0
+                    LogActivityLifeCycleObserver.controlPermissionRequest = false
+                    do {
+                        if(permissions[permissionCounter] == "android.permission.WRITE_EXTERNAL_STORAGE" || permissions[permissionCounter] == "android.permission.RECORD_AUDIO"){
+                            if(grantResults[0]==0){
+                                Toast.makeText(context, "Permission granted!",Toast.LENGTH_SHORT).show()
+                            }else{
+                                Toast.makeText(context, "Permission denied!",Toast.LENGTH_SHORT).show()
+                            }
+
+                        }
+                        permissionCounter++
+                    }while (permissions.iterator().hasNext())
+                }catch (e:Exception){
+                    e.printStackTrace()
+                    LogActivityLifeCycleObserver.callEnqueue()
+                    callEnqueue()
+                    callExceptionDetails(exception = e , tag =Constants.onPermissionResultTag )
+                }
+            }else{
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }

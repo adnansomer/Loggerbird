@@ -512,6 +512,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int,
+//        permissions: Array<out String>,
+//        grantResults: IntArray
+//    ) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//        LoggerBird.onRequestPermissionResult(requestCode=requestCode , permissions = permissions , grantResults = grantResults)
+//    }
+
     override fun onStart() {
         super.onStart()
         Log.d("life_cycle_state_start", this.lifecycle.currentState.name)
@@ -525,6 +534,7 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
     }
+
 
 
     private suspend fun httpRequest(url: String?): String {

@@ -9,14 +9,18 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.PixelFormat
 import android.graphics.drawable.VectorDrawable
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.text.Layout
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
@@ -29,6 +33,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.core.view.get
 import androidx.core.view.size
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -47,7 +52,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.lang.Runnable
 
-class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
+class LogActivityLifeCycleObserver : Activity(),
     Application.ActivityLifecycleCallbacks {
     //Global variables.
     private var stringBuilderBundle: StringBuilder = StringBuilder()
@@ -81,7 +86,7 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
     private var dataIntent: Intent? = null
     private lateinit var intentForegroundServiceVideo: Intent
     private lateinit var initializeFloatingActionButton: Runnable
-    private lateinit var takeOldCoordinates:Runnable
+    private lateinit var takeOldCoordinates: Runnable
 
 
     //Static global variables.
@@ -97,15 +102,20 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         internal var floatingActionButtonScreenShotLastDy: Float? = null
         internal var floatingActionButtonVideoLastDy: Float? = null
         internal var floatingActionButtonAudioLastDy: Float? = null
-        private const val REQUEST_CODE_VIDEO = 1000
-        private const val REQUEST_CODE_AUDIO_PERMISSION = 2001
-        private const val REQUEST_CODE_WRITE_EXTERNAL_STORAGE_PERMISSION = 2002
+        internal const val REQUEST_CODE_VIDEO = 1000
+        internal const val REQUEST_CODE_AUDIO_PERMISSION = 2001
+        internal const val REQUEST_CODE_WRITE_EXTERNAL_STORAGE_PERMISSION = 2002
+        internal const val REQUEST_CODE_DRAW_OTHER_APP_SETTINGS = 2003
         private var DISPLAY_WIDTH = 1080
         private var DISPLAY_HEIGHT = 1920
         private val ORIENTATIONS = SparseIntArray()
         internal var controlPermissionRequest: Boolean = false
         private var runnableList: ArrayList<Runnable> = ArrayList()
         private var workQueueLinked: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
+        private var controlVideoPermission: Boolean = false
+        private var controlAudioPermission: Boolean = false
+        private var controlDrawableSettingsPermission: Boolean = false
+        private var controlWriteExternalPermission: Boolean = false
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
             if (runnableList.size > 0) {
@@ -155,7 +165,7 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         try {
             LoggerBird.fragmentLifeCycleObserver =
                 LogFragmentLifeCycleObserver()
-            if((activity is AppCompatActivity)){
+            if ((activity is AppCompatActivity)) {
                 (activity as AppCompatActivity).supportFragmentManager.registerFragmentLifecycleCallbacks(
                     LoggerBird.fragmentLifeCycleObserver,
                     true
@@ -188,7 +198,7 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityStarted(activity: Activity) {
         try {
             this.context = activity
@@ -197,17 +207,8 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             screenDensity = metrics.densityDpi
             DISPLAY_HEIGHT = metrics.heightPixels
             DISPLAY_WIDTH = metrics.widthPixels
-            if(activity is AppCompatActivity){
+            if (activity is AppCompatActivity) {
                 initializeFloatingActionButton(activity = activity)
-//                initializeFloatingActionButton = Runnable {
-//                    initializeFloatingActionButton(activity = activity)
-//                }
-//                takeOldCoordinates = Runnable {
-////                    takeOldCoordinates()
-//                }
-//                val rootView: ViewGroup =
-//                    activity.window.decorView.findViewById(android.R.id.content)
-//                rootView.viewTreeObserver.addOnWindowFocusChangeListener(LayoutWindowFocusChangeListener(initializeFloatingActionButton = initializeFloatingActionButton,takeOldCoordinates = takeOldCoordinates))
             }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
@@ -224,9 +225,26 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityResumed(activity: Activity) {
         try {
+            if (controlPermissionRequest) {
+                when {
+                    controlWriteExternalPermission -> {
+                        checkWriteExternalStoragePermissionResult()
+                    }
+                    controlAudioPermission -> {
+                        checkAudioPermissionResult()
+                    }
+                    controlDrawableSettingsPermission -> {
+                        checkDrawOtherAppPermissionResult(activity = activity)
+                    }
+                }
+            }
             controlPermissionRequest = false
+            controlWriteExternalPermission = false
+            controlAudioPermission = false
+            controlVideoPermission = false
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -242,9 +260,10 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onActivityPaused(activity: Activity) {
         try {
-            if(activity is AppCompatActivity){
+            if (activity is AppCompatActivity) {
                 takeOldCoordinates()
             }
             if (controlPermissionRequest) {
@@ -327,28 +346,45 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeFloatingActionButton(activity: Activity) {
         if (this::rootView.isInitialized && this::view.isInitialized) {
             (rootView as ViewGroup).removeView(view)
         }
-        val rootView: ViewGroup =
-            activity.window.decorView.findViewById(android.R.id.content)
-//        if(!activity.hasWindowFocus()){
-//            if(rootView.size>0){
-//                rootView = (rootView[rootView.size - 1] as ViewGroup)
-//            }
-//        }
-        val view: View = LayoutInflater.from(activity)
-                .inflate(
-                R.layout.fragment_logger_bird,
-                rootView,
-                false
-            )
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        val view: View
         val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
-        activity.addContentView(view, layoutParams)
+        view = LayoutInflater.from(activity)
+            .inflate(
+                R.layout.fragment_logger_bird,
+                rootView,
+                false
+            )
+        if (Settings.canDrawOverlays(activity)) {
+            val windowManagerParams: WindowManager.LayoutParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+            activity.windowManager.addView(view, windowManagerParams)
+        } else {
+            activity.addContentView(view, layoutParams)
+        }
         this.rootView = rootView
         this.view = view
         floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
@@ -367,8 +403,8 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun buttonClicks() {
         floating_action_button.setOnTouchListener(
             FloatingActionButtonOnTouchListener(
@@ -378,11 +414,14 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             )
         )
         floating_action_button.setOnClickListener {
-            coroutineCallAnimation.async {
-                //                fabOpen = AnimationUtils.loadAnimation(context, R.anim.fab_open)
+            if (!Settings.canDrawOverlays(context)) {
+                checkDrawOtherAppPermission(activity = (context as Activity))
+            } else {
+                coroutineCallAnimation.async {
+                    //                fabOpen = AnimationUtils.loadAnimation(context, R.anim.fab_open)
 //                fabClose = AnimationUtils.loadAnimation(context, R.anim.fab_close)
-                withContext(Dispatchers.Main) {
-                    //                    fabOpen.setAnimationListener(
+                    withContext(Dispatchers.Main) {
+                        //                    fabOpen.setAnimationListener(
 //                        FloatingActionButtonAnimationListener(
 //                            context = context,
 //                            floatingActionButtonAudio = floating_action_button_audio
@@ -394,23 +433,24 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
 //                            floatingActionButtonAudio = floating_action_button_audio
 //                        )
 //                    )
-                    animationVisibility()
+                        animationVisibility()
+                    }
                 }
             }
-        }
-        floating_action_button_screenshot.setOnClickListener {
-            takeScreenShot(view = view, context = context)
-        }
-        floating_action_button_audio.setOnClickListener {
-            takeAudioRecording()
-        }
+            floating_action_button_screenshot.setOnClickListener {
+                takeScreenShot(view = view, context = context)
+            }
+            floating_action_button_audio.setOnClickListener {
+                takeAudioRecording()
+            }
 
-        floating_action_button_video.setOnClickListener {
-            callVideoRecording(
-                requestCode = requestCode,
-                resultCode = resultCode,
-                data = dataIntent
-            )
+            floating_action_button_video.setOnClickListener {
+                callVideoRecording(
+                    requestCode = requestCode,
+                    resultCode = resultCode,
+                    data = dataIntent
+                )
+            }
         }
     }
 
@@ -431,22 +471,6 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             FloatingActionButtonAudioGlobalLayoutListener(floatingActionButtonAudio = floating_action_button_audio)
         )
     }
-
-//    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-//    private fun removeFloatingActionButtonLayoutListener() {
-//        floating_action_button.viewTreeObserver.removeOnGlobalLayoutListener(
-//            FloatingActionButtonGlobalLayoutListener()
-//        )
-//        floating_action_button_screenshot.viewTreeObserver.removeOnGlobalLayoutListener(
-//            FloatingActionButtonScreenshotGlobalLayoutListener()
-//        )
-//        floating_action_button_video.viewTreeObserver.removeOnGlobalLayoutListener(
-//            FloatingActionButtonVideoGlobalLayoutListener()
-//        )
-//        floating_action_button_audio.viewTreeObserver.removeOnGlobalLayoutListener(
-//            FloatingActionButtonAudioGlobalLayoutListener()
-//        )
-//    }
 
     private fun animationVisibility() {
         if (isOpen) {
@@ -528,6 +552,7 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             )
         ) {
             controlPermissionRequest = true
+            controlWriteExternalPermission = true
             requestPermissions(
                 (context as Activity),
                 arrayOf(
@@ -539,6 +564,22 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         return true
     }
 
+    private fun checkWriteExternalStoragePermissionResult() {
+        if (PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        ) {
+            Toast.makeText(context, "Permission Denied!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(
+                context,
+                "Permission Write External Storage Granted!",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     private fun checkAudioPermission(): Boolean {
         if (PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(
                 context,
@@ -546,6 +587,7 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             )
         ) {
             controlPermissionRequest = true
+            controlAudioPermission = true
             requestPermissions(
                 (context as Activity),
                 arrayOf(
@@ -557,17 +599,43 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         return true
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode == REQUEST_CODE_AUDIO_PERMISSION) {
-            Toast.makeText(context, "Permission Granted!", Toast.LENGTH_SHORT).show()
-        } else if (requestCode == REQUEST_CODE_WRITE_EXTERNAL_STORAGE_PERMISSION) {
-            Toast.makeText(context, "Permission Granted!", Toast.LENGTH_SHORT).show()
+    private fun checkAudioPermissionResult() {
+        if (PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.RECORD_AUDIO
+            )
+        ) {
+            Toast.makeText(context, "Permission Audio Denied!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Permission Audio Granted!", Toast.LENGTH_SHORT).show()
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun checkDrawOtherAppPermission(activity: Activity) {
+        controlPermissionRequest = true
+        controlDrawableSettingsPermission = true
+        val intent: Intent = Intent(
+            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+            Uri.parse("package:" + activity.packageName)
+        )
+        activity.startActivityForResult(intent, REQUEST_CODE_DRAW_OTHER_APP_SETTINGS)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun checkDrawOtherAppPermissionResult(activity: Activity) {
+        if (!Settings.canDrawOverlays(activity)) {
+            Toast.makeText(activity, "Permission DrawOtherApp Settings Denied!", Toast.LENGTH_SHORT)
+                .show()
+        } else {
+            Toast.makeText(
+                activity,
+                "Permission DrawOtherApp Settings Granted!",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
 
     private fun createScreenShot(view: View): Bitmap {
         val viewScreenShot: View = (view.parent as View)
@@ -733,9 +801,10 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
                     )
                 }
             }
-        } else {
-            Toast.makeText(context, "Permission Denied!", Toast.LENGTH_SHORT).show()
         }
+//        else {
+//            Toast.makeText(context, "Permission Denied!", Toast.LENGTH_SHORT).show()
+//        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -824,7 +893,7 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun stopScreenRecord() {
-        if(videoRecording){
+        if (videoRecording) {
             mediaRecorderVideo!!.stop()
             mediaRecorderVideo!!.reset()
         }
@@ -853,19 +922,19 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
     }
 
     private fun takeOldCoordinates() {
-        if(this::floating_action_button.isInitialized){
+        if (this::floating_action_button.isInitialized) {
             floatingActionButtonLastDx = floating_action_button.x
             floatingActionButtonLastDy = floating_action_button.y
         }
-        if(this::floating_action_button_screenshot.isInitialized){
+        if (this::floating_action_button_screenshot.isInitialized) {
             floatingActionButtonScreenShotLastDx = floating_action_button_screenshot.x
             floatingActionButtonScreenShotLastDy = floating_action_button_screenshot.y
         }
-        if(this::floating_action_button_video.isInitialized){
+        if (this::floating_action_button_video.isInitialized) {
             floatingActionButtonVideoLastDx = floating_action_button_video.x
             floatingActionButtonVideoLastDy = floating_action_button_video.y
         }
-        if(this::floating_action_button_audio.isInitialized){
+        if (this::floating_action_button_audio.isInitialized) {
             floatingActionButtonAudioLastDx = floating_action_button_audio.x
             floatingActionButtonAudioLastDy = floating_action_button_audio.y
         }

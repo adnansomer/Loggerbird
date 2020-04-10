@@ -7,18 +7,14 @@ import constants.Constants
 import loggerbird.LoggerBird
 import observers.LogLifeCycleObserver
 import java.lang.Exception
-import java.text.SimpleDateFormat
-import java.util.*
+
 
 internal class LoggerBirdService() : Service() {
     //Global variables:
     private var intentService: Intent? = null
-    private var currentLifeCycleState: String? = null
-    private var formattedTime: String? = null
 
     //Static global variables:
     companion object {
-       // internal var onDestroyMessage: String? = null
         internal var controlServiceOnDestroyState:Boolean = false
     }
 
@@ -66,12 +62,6 @@ internal class LoggerBirdService() : Service() {
         super.onTaskRemoved(rootIntent)
         try {
             controlServiceOnDestroyState=true
-//            val date = Calendar.getInstance().time
-//            val formatter = SimpleDateFormat.getDateTimeInstance()
-//            formattedTime = formatter.format(date)
-//            currentLifeCycleState = "onDestroy"
-//            onDestroyMessage =
-//                " " + Constants.activityTag + ":" + LogLifeCycleObserver.returnLifeCycleClassName + " " + "${formattedTime}:${currentLifeCycleState}\n"
             LoggerBird.takeLifeCycleDetails()
         } catch (e: Exception) {
             e.printStackTrace()
