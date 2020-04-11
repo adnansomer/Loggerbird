@@ -378,28 +378,18 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         )
         floating_action_button.setOnClickListener {
             coroutineCallAnimation.async {
-                //                fabOpen = AnimationUtils.loadAnimation(context, R.anim.fab_open)
-//                fabClose = AnimationUtils.loadAnimation(context, R.anim.fab_close)
                 withContext(Dispatchers.Main) {
-                    //                    fabOpen.setAnimationListener(
-//                        FloatingActionButtonAnimationListener(
-//                            context = context,
-//                            floatingActionButtonAudio = floating_action_button_audio
-//                        )
-//                    )
-//                    fabClose.setAnimationListener(
-//                        FloatingActionButtonAnimationListener(
-//                            context = context,
-//                            floatingActionButtonAudio = floating_action_button_audio
-//                        )
-//                    )
                     animationVisibility()
                 }
             }
         }
         floating_action_button_screenshot.setOnClickListener {
-            takeScreenShot(view = view, context = context)
+            floating_action_button.visibility = View.GONE
+            floating_action_button_screenshot.visibility = View.GONE
+            floating_action_button_audio.visibility = View.GONE
+            floating_action_button_video.visibility = View.GONE
 
+            takeScreenShot(view = view, context = context)
 
         }
         floating_action_button_audio.setOnClickListener {
@@ -482,7 +472,8 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             floating_action_button_audio.animate().rotation(360F)
             floating_action_button_audio.animate().duration = 200L
             floating_action_button_audio.animate().start()
-            floating_action_button.setImageResource(R.drawable.ic_add_black_24dp)
+            floating_action_button.animate().rotationBy(360F).start()
+
         } else {
             isOpen = true
             floating_action_button_video.animate().cancel()
@@ -518,7 +509,8 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             floating_action_button_video.animate().rotation(360F)
             floating_action_button_video.animate().duration = 200L
             floating_action_button_video.animate().start()
-            floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
+            floating_action_button.animate().rotationBy(360F).start()
+
         }
     }
 
@@ -576,6 +568,7 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             viewScreenShot.width,
             viewScreenShot.height,
             Bitmap.Config.ARGB_8888
+
         )
         val canvas = Canvas(bitmap)
         viewScreenShot.draw(canvas)
@@ -606,7 +599,7 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
                         Toast.makeText(context, "ScreenShot Taken!", Toast.LENGTH_SHORT).show()
                         val screenshotIntent = Intent(context as Activity, PaintActivity::class.java).putExtra("BitmapScreenshot",byteArray)
                         context.startActivity(screenshotIntent)
-                        finish()
+
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

@@ -4,9 +4,9 @@ import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -24,6 +24,7 @@ import com.mobilex.loggerbird.R
 import kotlinx.android.synthetic.main.activity_paint.*
 import kotlinx.android.synthetic.main.activity_paint.view.*
 import kotlinx.android.synthetic.main.brush_width_layout.view.*
+import observers.LogActivityLifeCycleObserver
 import yuku.ambilwarna.AmbilWarnaDialog
 
 
@@ -32,6 +33,7 @@ class PaintActivity : Activity() {
     val REQUEST_WRITE_EXTERNAL = 1
     private var isOpen = false
     private var bitmap : Bitmap? = null
+    private lateinit var screenShot : Drawable
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -43,32 +45,46 @@ class PaintActivity : Activity() {
         windowManager.defaultDisplay.getMetrics(metrics)
         paintView.init(metrics)
 
+        screenShot = convertBitmapToDrawable()
+        paintView.background = screenShot
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            getWindow().setNavigationBarColor(getResources().getColor(R.color.colorBlack))
+            getWindow().setStatusBarColor(getResources().getColor(R.color.colorBlack))
+        }
+    }
+
+    private fun convertBitmapToDrawable() : Drawable{
+
         val byteArray : ByteArray? = intent.getByteArrayExtra("BitmapScreenshot")
         bitmap = BitmapFactory.decodeByteArray(byteArray,0,byteArray!!.size)
         val drawable: Drawable = BitmapDrawable(bitmap)
 
-        denemeview.background = drawable
-
+        return drawable
 
     }
+
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onStart() {
         super.onStart()
 
-        buttonClicks()
-
         paint_floating_action_button.setOnClickListener {
             animationVisibility()
         }
 
+
+        buttonClicks()
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicks() : Boolean {
+
         paint_floating_action_button_save.setOnClickListener {
             requestPermission()
             showFileSavingDialog()
         }
+
 
         paint_floating_action_button_brush.setOnClickListener {
             showLineWidthSetterDialog()
@@ -83,20 +99,123 @@ class PaintActivity : Activity() {
 
         }
 
+
         paint_floating_action_button_erase.setOnClickListener {
             if(paintView.eraserEnabled) {
-                paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
+                paint_floating_action_button_erase.setBackgroundResource(R.drawable.ic_backspace_white_24dp)
                 paintView.disableEraser()
             }
             else{
-                paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_red_24dp)
+                paint_floating_action_button_erase.setBackgroundResource(R.drawable.ic_backspace_red_24dp)
                 paintView.enableEraser()
+                paintView.clear()
             }
 
         }
-
         return true
     }
+
+
+    private fun requestPermission() : Boolean {
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                REQUEST_WRITE_EXTERNAL
+            )
+        }
+        return true
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private var clearDialogClickListener: DialogInterface.OnClickListener =
+        DialogInterface.OnClickListener { dialog, which ->
+            when (which) {
+                DialogInterface.BUTTON_POSITIVE -> {
+                    paintView.clearAllPaths()
+                    Toast.makeText(applicationContext,"Deleted",Toast.LENGTH_SHORT).show()
+                    if(paintView.eraserEnabled){
+                        paintView.disableEraser()
+                        paintView.eraserEnabled = false
+                            //paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_white_24dp)
+                    }
+                }
+                DialogInterface.BUTTON_NEGATIVE -> {
+                    dialog.dismiss()
+                    Toast.makeText(applicationContext,"Delete cancelled",Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun showClearConfirmationDialog(){
+        val builder = AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
+        builder.setMessage("Are you sure you want to delete your drawing?")
+            .setTitle("Delete Screenshot")
+            .setPositiveButton("Yes", clearDialogClickListener)
+            .setNegativeButton("No", clearDialogClickListener)
+            .show()
+    }
+
+    private fun showLineWidthSetterDialog(){
+        val lineWidthDialog = AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
+
+        val inflater = LayoutInflater.from(this@PaintActivity)
+        val seekView = inflater.inflate(R.layout.brush_width_layout, null)
+
+        seekView.brushWidthSeekText.text = "Current width: " + paintView.getBrushWidth()
+
+        seekView.brushWidthSeek.max = 100
+        seekView.brushWidthSeek.progress = paintView.getBrushWidth()
+        seekView.brushWidthSeek.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                seekView.brushWidthSeekText.text = "Current width : $i"
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+            }
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+            }
+        })
+
+        lineWidthDialog.setTitle("Please select brush width")
+        lineWidthDialog.setView(seekView)
+        lineWidthDialog.setPositiveButton("OK") { dialog, _ ->
+            run {
+                dialog.dismiss()
+                paintView.setBrushWidth(seekView.brushWidthSeek.progress)
+            }
+        }
+        lineWidthDialog.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+        lineWidthDialog.create()
+        lineWidthDialog.show()
+
+    }
+
+    private fun showFileSavingDialog(){
+        var fileName: String
+        val builder = AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
+        builder.setTitle("File name")
+
+        val input = EditText(this)
+
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        builder.setView(input)
+
+        builder.setPositiveButton(
+            "OK"
+        ) {
+                _, _ -> fileName = input.text.toString()
+            paintView.saveImage(fileName)
+            Toast.makeText(this,"Save completed", Toast.LENGTH_SHORT).show()
+        }
+
+        builder.setNegativeButton(
+            "Cancel"
+        ) { dialog, which -> dialog.cancel() }
+
+        builder.show()
+    }
+
 
     private fun animationVisibility() {
         if (isOpen) {
@@ -218,95 +337,6 @@ class PaintActivity : Activity() {
         }
     }
 
-    private fun requestPermission() : Boolean {
-        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                REQUEST_WRITE_EXTERNAL
-            )
-        }
-        return true
-    }
-
-    private var clearDialogClickListener: DialogInterface.OnClickListener =
-        DialogInterface.OnClickListener { dialog, which ->
-            when (which) {
-                DialogInterface.BUTTON_POSITIVE -> {
-                    paintView.clear()
-                }
-                DialogInterface.BUTTON_NEGATIVE -> {
-                }
-            }
-        }
-
-    private fun showClearConfirmationDialog(){
-        val builder = AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
-        builder.setMessage("Are you sure you want to delete?")
-            .setTitle("Delete Screenshot")
-            .setPositiveButton("Yes", clearDialogClickListener)
-            .setNegativeButton("No", clearDialogClickListener)
-            .show()
-    }
-
-    private fun showLineWidthSetterDialog(){
-        val lineWidthDialog = AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
-
-        val inflater = LayoutInflater.from(this@PaintActivity)
-        val seekView = inflater.inflate(R.layout.brush_width_layout, null)
-
-        seekView.brushWidthSeekText.text = "Current width: " + paintView.getBrushWidth()
-
-        seekView.brushWidthSeek.max = 100
-        seekView.brushWidthSeek.progress = paintView.getBrushWidth()
-        seekView.brushWidthSeek.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
-                // Display the current progress of SeekBar
-                seekView.brushWidthSeekText.text = "Current width : $i"
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
-            }
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-            }
-        })
-
-        lineWidthDialog.setTitle("Please select brush width")
-        lineWidthDialog.setView(seekView)
-        lineWidthDialog.setPositiveButton("OK") { dialog, _ ->
-            run {
-                dialog.dismiss()
-                paintView.setBrushWidth(seekView.brushWidthSeek.progress)
-            }
-        }
-        lineWidthDialog.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-        lineWidthDialog.create()
-        lineWidthDialog.show()
-
-    }
-
-    private fun showFileSavingDialog(){
-        var fileName: String
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("File name")
-
-        val input = EditText(this)
-
-        input.inputType = InputType.TYPE_CLASS_TEXT
-        builder.setView(input)
-
-        builder.setPositiveButton(
-            "OK"
-        ) {
-                _, _ -> fileName = input.text.toString()
-            paintView.saveImage(fileName)
-            Toast.makeText(this,"Save completed", Toast.LENGTH_SHORT).show()
-        }
-        builder.setNegativeButton(
-            "Cancel"
-        ) { dialog, which -> dialog.cancel() }
-
-        builder.show()
-    }
 
     private fun showColorPickerDialog(){
 
@@ -316,13 +346,12 @@ class PaintActivity : Activity() {
 
             override fun onOk(dialog: AmbilWarnaDialog, color: Int) {
                 if(paintView.eraserEnabled){
-                    paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
+                    //paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
                     paintView.disableEraser()
                 }
                 paintView.setBrushColor(color)
             }
         })
-
 
         colorPicker.dialog.setTitle("Select color")
         colorPicker.show()

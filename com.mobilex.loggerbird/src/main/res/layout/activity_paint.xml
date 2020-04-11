@@ -7,17 +7,11 @@
     android:layout_height="match_parent"
     tools:context="paint.PaintActivity">
 
+
     <paint.PaintView
         android:id="@+id/paintView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    </paint.PaintView>
-
-    <View
-        android:id="@+id/denemeview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"></View>
+        android:layout_height="match_parent"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/paint_floating_action_button_save"
@@ -33,7 +27,6 @@
         app:borderWidth="0dp"
         android:backgroundTint="@color/colorFab"
         android:src="@drawable/ic_done_black_24dp"/>
-
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/paint_floating_action_button_erase"
@@ -88,15 +81,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
-        android:layout_marginBottom="90dp"
         android:layout_marginRight="40dp"
-        app:fabSize="mini"
-        app:pressedTranslationZ="12dp"
-        android:elevation="6dp"
-        app:borderWidth="0dp"
+        android:layout_marginBottom="90dp"
         android:backgroundTint="@color/colorFab"
+        android:elevation="6dp"
+        android:src="@drawable/ic_brush_black_24dp"
         android:visibility="invisible"
-        android:src="@drawable/ic_brush_black_24dp"/>
+        app:borderWidth="0dp"
+        app:fabSize="mini"
+        app:pressedTranslationZ="12dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/paint_floating_action_button"
@@ -113,3 +106,9 @@
 
 
 </FrameLayout>
+
+
+
+
+
+

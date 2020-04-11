@@ -64,7 +64,7 @@
         app:pressedTranslationZ="12dp"
         android:elevation="6dp"
         app:fabSize="normal"
-        android:backgroundTint="@color/colorMiniFab"
+        android:backgroundTint="@color/colorBlack"
         app:borderWidth="0dp"
-        android:src="@drawable/ic_add_black_24dp"/>
+        android:src="@drawable/loggerbird"/>
 </FrameLayout>

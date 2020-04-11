@@ -7,8 +7,11 @@ import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.View
+import kotlinx.android.synthetic.main.activity_paint.view.*
+import java.io.File
 import java.io.FileOutputStream
-import java.util.ArrayList
+import java.util.*
+
 
 class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
 
@@ -16,15 +19,16 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private var mY: Float = 0.toFloat()
     private var mPath: Path? = null
     private val mPaint: Paint = Paint()
+    private val undonePaths = ArrayList<FingerPath>()
     private val paths = ArrayList<FingerPath>()
     private var brushColor: Int = 0
-    private var bgColor = DEFAULT_BG_COLOR
     private var brushWidth: Int = 0
     private var mBitmap: Bitmap? = null
     private var mCanvas: Canvas? = null
     private val mBitMapPaint = Paint(Paint.DITHER_FLAG)
     private var lastBrushColor: Int = 0
     var eraserEnabled = false
+
 
     init {
         mPaint.isAntiAlias = true
@@ -41,11 +45,12 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
         var BRUSH_SIZE = 10
         val DEFAULT_BRUSH_COLOR = Color.BLACK
-        val DEFAULT_BG_COLOR = Color.WHITE
         private val TOUCH_TOLERANCE = 4.0f
     }
 
     fun init(metrics: DisplayMetrics) {
+
+        undonePaths.clear()
 
         val height = metrics.heightPixels
         val width = metrics.widthPixels
@@ -58,8 +63,20 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
     }
 
+    fun clearAllPaths() {
+
+        paths.removeAll(paths)
+        mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        mPath = Path()
+        invalidate()
+
+        mCanvas = Canvas(mBitmap!!)
+        brushColor = brushColor
+        brushWidth = brushWidth
+    }
+
     fun clear() {
-        bgColor = DEFAULT_BG_COLOR
+
         paths.clear()
         invalidate()
     }
@@ -67,7 +84,6 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     override fun onDraw(canvas: Canvas) {
 
         canvas.save()
-        mCanvas!!.drawColor(bgColor)
 
         for (fp in paths) {
             mPaint.color = fp.color
@@ -82,6 +98,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     private fun touchStart(x: Float, y: Float) {
+
         mPath = Path()
         val fp = FingerPath(brushColor, brushWidth, mPath)
         paths.add(fp)
@@ -93,6 +110,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     private fun touchMove(x: Float, y: Float) {
+
         val dx = Math.abs(x - mX)
         val dy = Math.abs(y - mY)
 
@@ -112,7 +130,13 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
         val bitmap = Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        val dir = Environment.getExternalStorageDirectory().path + "/Pictures/" + filename + ".png"
+        val fileDirectory: File = context.filesDir
+        val filePath = File(
+            fileDirectory,
+            "logger_bird_screenshot" + System.currentTimeMillis().toString() + ".png"
+        )
+
+        val dir = filePath
         try{
             val os = FileOutputStream(dir)
             this.draw(canvas)
@@ -145,7 +169,6 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                 invalidate()
             }
         }
-
         invalidate()
         return true
     }
@@ -171,14 +194,15 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     fun enableEraser(){
-
         eraserEnabled = true
         lastBrushColor = brushColor
-        brushColor = DEFAULT_BG_COLOR
+        mPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR)) //image composition library ic ice gecen layoutlarin harmanlanmasi***
+        brushColor = Color.TRANSPARENT
     }
 
     fun disableEraser(){
         eraserEnabled = false
+        mPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.SRC))
         brushColor = lastBrushColor
     }
 }
