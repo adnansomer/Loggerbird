@@ -6,22 +6,22 @@ import androidx.annotation.RequiresApi
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import constants.Constants
 import loggerbird.LoggerBird
-import observers.LogActivityLifeCycleObserver
+import services.LoggerBirdService
 
 class FloatingActionButtonVideoGlobalLayoutListener(private val floatingActionButtonVideo: FloatingActionButton? = null) :
     ViewTreeObserver.OnGlobalLayoutListener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onGlobalLayout() {
         try {
-            if (LogActivityLifeCycleObserver.floatingActionButtonVideoLastDx != null && LogActivityLifeCycleObserver.floatingActionButtonVideoLastDy != null) {
+            if (LoggerBirdService.floatingActionButtonVideoLastDx != null && LoggerBirdService.floatingActionButtonVideoLastDy != null) {
                 floatingActionButtonVideo?.x =
-                    LogActivityLifeCycleObserver.floatingActionButtonVideoLastDx!!
+                    LoggerBirdService.floatingActionButtonVideoLastDx!!
                 floatingActionButtonVideo?.y =
-                    LogActivityLifeCycleObserver.floatingActionButtonVideoLastDy!!
+                    LoggerBirdService.floatingActionButtonVideoLastDy!!
             }
-            floatingActionButtonVideo?.viewTreeObserver?.removeOnGlobalLayoutListener(
-                this
-            )
+//            floatingActionButtonVideo?.viewTreeObserver?.removeOnGlobalLayoutListener(
+//                this
+//            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()

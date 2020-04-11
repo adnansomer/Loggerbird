@@ -130,34 +130,34 @@ class FragmentLoggerBird(private val viewFragment: View, private val mContext: C
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun buttonClicks() {
-        fragment_floating_action_button.setOnTouchListener(
-            FloatingActionButtonOnTouchListener(
-                floatingActionButtonScreenShot = fragment_floating_action_button_screenshot,
-                floatingActionButtonVideo = fragment_floating_action_button_video,
-                floatingActionButtonAudio = fragment_floating_action_button_audio
-            )
-        )
-        fragment_floating_action_button.setOnClickListener {
-            coroutineCallAnimation.async {
-                fabOpen = AnimationUtils.loadAnimation(context, R.anim.fab_open)
-                fabClose = AnimationUtils.loadAnimation(context, R.anim.fab_close)
-                withContext(Dispatchers.Main) {
-                    fabOpen.setAnimationListener(
-                        FloatingActionButtonAnimationListener(
-                            context = mContext,
-                            floatingActionButtonAudio = fragment_floating_action_button_audio
-                        )
-                    )
-                    fabClose.setAnimationListener(
-                        FloatingActionButtonAnimationListener(
-                            context = mContext,
-                            floatingActionButtonAudio = fragment_floating_action_button_audio
-                        )
-                    )
-                    animationVisibility()
-                }
-            }
-        }
+//        fragment_floating_action_button.setOnTouchListener(
+//            FloatingActionButtonOnTouchListener(
+//                floatingActionButtonScreenShot = fragment_floating_action_button_screenshot,
+//                floatingActionButtonVideo = fragment_floating_action_button_video,
+//                floatingActionButtonAudio = fragment_floating_action_button_audio
+//            )
+//        )
+//        fragment_floating_action_button.setOnClickListener {
+//            coroutineCallAnimation.async {
+//                fabOpen = AnimationUtils.loadAnimation(context, R.anim.fab_open)
+//                fabClose = AnimationUtils.loadAnimation(context, R.anim.fab_close)
+//                withContext(Dispatchers.Main) {
+//                    fabOpen.setAnimationListener(
+//                        FloatingActionButtonAnimationListener(
+//                            context = mContext,
+//                            floatingActionButtonAudio = fragment_floating_action_button_audio
+//                        )
+//                    )
+//                    fabClose.setAnimationListener(
+//                        FloatingActionButtonAnimationListener(
+//                            context = mContext,
+//                            floatingActionButtonAudio = fragment_floating_action_button_audio
+//                        )
+//                    )
+//                    animationVisibility()
+//                }
+//            }
+//        }
         fragment_floating_action_button_screenshot.setOnClickListener {
             takeScreenShot(viewFragment = viewFragment, context = mContext)
         }
@@ -201,8 +201,8 @@ class FragmentLoggerBird(private val viewFragment: View, private val mContext: C
             fragment_floating_action_button_audio.animate().rotation(360F)
             fragment_floating_action_button_audio.animate().setDuration(200L)
             fragment_floating_action_button_audio.animate().start()
-            fragment_floating_action_button.setImageResource(R.drawable.ic_add_black_24dp)
-            fragment_floating_action_button.animate().rotationBy(180F)
+//            fragment_floating_action_button.setImageResource(R.drawable.ic_add_black_24dp)
+//            fragment_floating_action_button.animate().rotationBy(180F)
         } else {
             isOpen = true
             fragment_floating_action_button_screenshot.visibility = VISIBLE
@@ -235,8 +235,8 @@ class FragmentLoggerBird(private val viewFragment: View, private val mContext: C
             fragment_floating_action_button_video.animate().rotation(360F)
             fragment_floating_action_button_video.animate().setDuration(200L)
             fragment_floating_action_button_video.animate().start()
-            fragment_floating_action_button.animate().rotationBy(180F)
-            fragment_floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
+//            fragment_floating_action_button.animate().rotationBy(180F)
+//            fragment_floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
         }
     }
 

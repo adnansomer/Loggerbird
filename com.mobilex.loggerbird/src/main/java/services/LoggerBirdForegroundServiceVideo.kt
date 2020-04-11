@@ -28,7 +28,7 @@ class LoggerBirdForegroundServiceVideo : Service() {
             createNotificationChannel()
         } catch (e: Exception) {
             e.printStackTrace()
-            LogActivityLifeCycleObserver.callEnqueue()
+            LoggerBirdService.callEnqueue()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.foregroundServiceVideo)
         }
@@ -43,10 +43,10 @@ class LoggerBirdForegroundServiceVideo : Service() {
                 .setSmallIcon(R.drawable.loggerbird_icon)
                 .build()
             startForeground(5, notification)
-            LogActivityLifeCycleObserver.callEnqueue()
+            LoggerBirdService.callEnqueue()
         } catch (e: Exception) {
             e.printStackTrace()
-            LogActivityLifeCycleObserver.callEnqueue()
+            LoggerBirdService.callEnqueue()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e , tag = Constants.foregroundServiceVideo)
         }
