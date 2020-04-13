@@ -12,8 +12,10 @@ import android.graphics.Canvas
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.MediaRecorder
+import android.media.RingtoneManager
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -44,7 +46,6 @@ import services.LoggerBirdForegroundServiceVideo
 import utils.LinkedBlockingQueueUtil
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -562,8 +563,11 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         }
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun createScreenShot(view: View): Bitmap {
-        val viewScreenShot: View = (view.parent as View)
+
+        val viewScreenShot: View = (view.rootView as View)
         val bitmap: Bitmap = Bitmap.createBitmap(
             viewScreenShot.width,
             viewScreenShot.height,
@@ -580,16 +584,16 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             coroutineCallScreenShot.async {
                 val fileDirectory: File = context.filesDir
                 var byteArray: ByteArray? = null
-                val filePath = File(
-                    fileDirectory,
-                    "logger_bird_screenshot" + System.currentTimeMillis().toString() + ".png"
-                )
+//                val filePath = File(
+//                    fileDirectory,
+//                    "logger_bird_screenshot" + System.currentTimeMillis().toString() + ".png"
+//                )
                 try {
                     withContext(Dispatchers.IO) {
-                        filePath.createNewFile()
-                        val fileOutputStream = FileOutputStream(filePath)
-                        createScreenShot(view = view).compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream)
-                        fileOutputStream.close()
+//                        filePath.createNewFile()
+//                        val fileOutputStream = FileOutputStream(filePath)
+//                        createScreenShot(view = view).compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream)
+//                        fileOutputStream.close()
 
                         val bStream = ByteArrayOutputStream()
                         createScreenShot(view = view).compress(Bitmap.CompressFormat.PNG, 100, bStream)

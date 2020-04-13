@@ -3,10 +3,10 @@ package paint
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.DialogInterface
-import android.content.Intent
+import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -15,26 +15,26 @@ import android.text.InputType
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.EditText
-import android.widget.SeekBar
-import android.widget.Toast
+import android.view.ViewGroup
+import android.view.Window
+import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import com.divyanshu.colorseekbar.ColorSeekBar
+import com.google.android.material.snackbar.Snackbar
 import com.mobilex.loggerbird.R
 import kotlinx.android.synthetic.main.activity_paint.*
-import kotlinx.android.synthetic.main.activity_paint.view.*
-import kotlinx.android.synthetic.main.brush_width_layout.view.*
-import observers.LogActivityLifeCycleObserver
-import yuku.ambilwarna.AmbilWarnaDialog
+import kotlinx.android.synthetic.main.activity_paint_save_dialog.view.*
+import kotlinx.android.synthetic.main.activity_paint_seek_view.view.*
+import kotlinx.android.synthetic.main.activity_paint_seek_view.view.brushWidthSeekText
+import kotlinx.android.synthetic.main.activity_paint_seek_view_color.view.*
 
 
 class PaintActivity : Activity() {
 
     val REQUEST_WRITE_EXTERNAL = 1
-    private var isOpen = false
     private var bitmap : Bitmap? = null
     private lateinit var screenShot : Drawable
-
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,11 +47,21 @@ class PaintActivity : Activity() {
 
         screenShot = convertBitmapToDrawable()
         paintView.background = screenShot
+        //paintView.setBackgroundResource(R.drawable.screenshot_1586760803)
 
-        if (Build.VERSION.SDK_INT >= 21) {
-            getWindow().setNavigationBarColor(getResources().getColor(R.color.colorBlack))
-            getWindow().setStatusBarColor(getResources().getColor(R.color.colorBlack))
+
+        if(Build.VERSION.SDK_INT >= 21) {
+            getWindow().setNavigationBarColor(getResources().getColor(R.color.black))
+            getWindow().setStatusBarColor(getResources().getColor(R.color.black))
         }
+
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_FULLSCREEN
+                //or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                )
     }
 
     private fun convertBitmapToDrawable() : Drawable{
@@ -61,18 +71,16 @@ class PaintActivity : Activity() {
         val drawable: Drawable = BitmapDrawable(bitmap)
 
         return drawable
-
     }
-
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onStart() {
         super.onStart()
 
         paint_floating_action_button.setOnClickListener {
-            animationVisibility()
+            paint_floating_action_button.isExpanded = !paint_floating_action_button.isExpanded
+            paint_floating_action_button.isActivated = paint_floating_action_button.isExpanded
         }
-
 
         buttonClicks()
     }
@@ -81,40 +89,84 @@ class PaintActivity : Activity() {
     private fun buttonClicks() : Boolean {
 
         paint_floating_action_button_save.setOnClickListener {
-            requestPermission()
-            showFileSavingDialog()
+            if(requestPermission()) {
+                showFileSavingDialog()
+            }
         }
-
 
         paint_floating_action_button_brush.setOnClickListener {
             showLineWidthSetterDialog()
         }
 
         paint_floating_action_button_delete.setOnClickListener {
-            showClearConfirmationDialog()
+            showDeleteSnackbar()
         }
 
         paint_floating_action_button_palette.setOnClickListener {
-            showColorPickerDialog()
-
+            showColorChooseDialog()
         }
 
 
         paint_floating_action_button_erase.setOnClickListener {
             if(paintView.eraserEnabled) {
-                paint_floating_action_button_erase.setBackgroundResource(R.drawable.ic_backspace_white_24dp)
+                paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
                 paintView.disableEraser()
             }
             else{
-                paint_floating_action_button_erase.setBackgroundResource(R.drawable.ic_backspace_red_24dp)
+                paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_red_24dp)
                 paintView.enableEraser()
                 paintView.clear()
             }
 
         }
+
         return true
     }
 
+    private fun showDeleteSnackbar() {
+
+        val objLayoutParams : LinearLayout.LayoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        val snackbar = Snackbar.make(this.findViewById(android.R.id.content), "delete", Snackbar.LENGTH_INDEFINITE)
+
+        val layout : Snackbar.SnackbarLayout = snackbar.view as Snackbar.SnackbarLayout
+
+        val parentParams : FrameLayout.LayoutParams = layout.layoutParams as FrameLayout.LayoutParams
+        parentParams.setMargins(0,0,0,-50)
+        layout.setLayoutParams(parentParams)
+        layout.setPadding(0, 0, 0, -50)
+        layout.setLayoutParams(parentParams)
+
+        val snackView : View = layoutInflater.inflate(R.layout.activity_paint_save_snackbar,null)
+
+        val messageTextView : TextView =  snackView.findViewById(R.id.message_text_view) as TextView
+        messageTextView.setText("Are you sure you want to delete?")
+
+        val textViewOne : TextView = snackView.findViewById(R.id.snackbar_yes)
+        textViewOne.setText("YES")
+
+        textViewOne.setOnClickListener {
+
+            Snackbar.make(it, "Deleted!", Snackbar.LENGTH_SHORT).show()
+            paintView.clearAllPaths()
+
+            if(paintView.eraserEnabled){
+                paintView.disableEraser()
+                paintView.eraserEnabled = false
+                paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
+            }
+        }
+
+        val textViewTwo : TextView = snackView.findViewById(R.id.snackbar_no)
+        textViewTwo.setText("NO")
+
+        textViewTwo.setOnClickListener {
+            Snackbar.make(it, "Cancelled!", Snackbar.LENGTH_SHORT)
+                .show()
+        }
+
+        layout.addView(snackView, objLayoutParams)
+        snackbar.show()
+    }
 
     private fun requestPermission() : Boolean {
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -127,59 +179,76 @@ class PaintActivity : Activity() {
         return true
     }
 
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private var clearDialogClickListener: DialogInterface.OnClickListener =
-        DialogInterface.OnClickListener { dialog, which ->
-            when (which) {
-                DialogInterface.BUTTON_POSITIVE -> {
-                    paintView.clearAllPaths()
-                    Toast.makeText(applicationContext,"Deleted",Toast.LENGTH_SHORT).show()
-                    if(paintView.eraserEnabled){
-                        paintView.disableEraser()
-                        paintView.eraserEnabled = false
-                            //paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_white_24dp)
-                    }
-                }
-                DialogInterface.BUTTON_NEGATIVE -> {
-                    dialog.dismiss()
-                    Toast.makeText(applicationContext,"Delete cancelled",Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+    private fun showColorChooseDialog() {
 
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun showClearConfirmationDialog(){
-        val builder = AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
-        builder.setMessage("Are you sure you want to delete your drawing?")
-            .setTitle("Delete Screenshot")
-            .setPositiveButton("Yes", clearDialogClickListener)
-            .setNegativeButton("No", clearDialogClickListener)
-            .show()
-    }
-
-    private fun showLineWidthSetterDialog(){
-        val lineWidthDialog = AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
-
+        val colorPickerDialog = AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK)
         val inflater = LayoutInflater.from(this@PaintActivity)
-        val seekView = inflater.inflate(R.layout.brush_width_layout, null)
+        val paintSeekView = inflater.inflate(R.layout.activity_paint_seek_view_color, null)
 
-        seekView.brushWidthSeekText.text = "Current width: " + paintView.getBrushWidth()
+        val colorSeekBar = paintSeekView.color_seek_bar
+        var selectedColor : Int = 0
 
-        seekView.brushWidthSeek.max = 100
-        seekView.brushWidthSeek.progress = paintView.getBrushWidth()
-        seekView.brushWidthSeek.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
-                seekView.brushWidthSeekText.text = "Current width : $i"
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
-            }
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
+        colorSeekBar.setOnColorChangeListener(object: ColorSeekBar.OnColorChangeListener{
+            override fun onColorChangeListener(color: Int) {
+                if(paintView.eraserEnabled){
+                    paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
+                    paintView.disableEraser()
+                }
+                selectedColor = color
+                paintSeekView.setBackgroundColor(color)
+
             }
         })
 
-        lineWidthDialog.setTitle("Please select brush width")
+        colorPickerDialog.setPositiveButton("Apply") { dialog, _ ->
+            run {
+                paintView.setBrushColor(selectedColor)
+                dialog.dismiss()
+            }
+        }
+        colorPickerDialog.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+
+        colorPickerDialog.setView(paintSeekView)
+        colorPickerDialog.create()
+        colorPickerDialog.show()
+
+    }
+
+    private fun showLineWidthSetterDialog(){
+
+        val lineWidthDialog = AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+
+        val inflater = LayoutInflater.from(this@PaintActivity)
+        val seekView = inflater.inflate(R.layout.activity_paint_seek_view, null)
+
+        seekView.brushWidthSeek.max = 100
+        seekView.brushWidthSeek.progress = paintView.getBrushWidth()
+
+        seekView.brush_increase.setOnClickListener {
+            seekView.brushWidthSeek.progress = seekView.brushWidthSeek.progress + 1
+            paintView.setBrushWidth(seekView.brushWidthSeek.progress)
+        }
+
+        seekView.brush_decrease.setOnClickListener {
+            seekView.brushWidthSeek.progress = seekView.brushWidthSeek.progress - 1
+            paintView.setBrushWidth(seekView.brushWidthSeek.progress)
+        }
+
+        seekView.brushWidthSeek.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                seekView.brushWidthSeekText.text = "Current width : $i%"
+
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                seekView.brushWidthSeekText.text = "Brush width is adjusting"
+            }
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                seekView.brushWidthSeekText.text = "Adjust your brush width"
+            }
+        })
+
         lineWidthDialog.setView(seekView)
-        lineWidthDialog.setPositiveButton("OK") { dialog, _ ->
+        lineWidthDialog.setPositiveButton("Apply") { dialog, _ ->
             run {
                 dialog.dismiss()
                 paintView.setBrushWidth(seekView.brushWidthSeek.progress)
@@ -188,173 +257,29 @@ class PaintActivity : Activity() {
         lineWidthDialog.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
         lineWidthDialog.create()
         lineWidthDialog.show()
-
     }
+
 
     private fun showFileSavingDialog(){
+
+        val saveDialog = AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+        val inflater = LayoutInflater.from(this@PaintActivity)
+        val saveView = inflater.inflate(R.layout.activity_paint_save_dialog, null)
+
         var fileName: String
-        val builder = AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
-        builder.setTitle("File name")
 
-        val input = EditText(this)
+        saveDialog.setView(saveView)
 
-        input.inputType = InputType.TYPE_CLASS_TEXT
-        builder.setView(input)
-
-        builder.setPositiveButton(
-            "OK"
-        ) {
-                _, _ -> fileName = input.text.toString()
+        saveDialog.setPositiveButton("OK") { _, _ -> fileName = saveView.paint_save_issue.text.toString()
             paintView.saveImage(fileName)
-            Toast.makeText(this,"Save completed", Toast.LENGTH_SHORT).show()
+            Snackbar.make(paintView, "Successfully saved!", Snackbar.LENGTH_SHORT).show()
         }
 
-        builder.setNegativeButton(
+        saveDialog.setNegativeButton(
             "Cancel"
-        ) { dialog, which -> dialog.cancel() }
+        ) { dialog, _ -> dialog.cancel() }
 
-        builder.show()
-    }
+        saveDialog.show()
 
-
-    private fun animationVisibility() {
-        if (isOpen) {
-            isOpen = false
-
-            paint_floating_action_button_brush.animate().alphaBy(1.0F)
-            paint_floating_action_button_brush.animate().alpha(0.0F)
-            paint_floating_action_button_brush.animate().scaleXBy(1.0F)
-            paint_floating_action_button_brush.animate().scaleX(0.0F)
-            paint_floating_action_button_brush.animate().scaleYBy(1.0F)
-            paint_floating_action_button_brush.animate().scaleY(0.0F)
-            paint_floating_action_button_brush.animate().rotation(360F)
-            paint_floating_action_button_brush.animate().setDuration(400L)
-            paint_floating_action_button_brush.animate().start()
-
-            paint_floating_action_button_delete.animate().alphaBy(1.0F)
-            paint_floating_action_button_delete.animate().alpha(0.0F)
-            paint_floating_action_button_delete.animate().scaleXBy(1.0F)
-            paint_floating_action_button_delete.animate().scaleX(0.0F)
-            paint_floating_action_button_delete.animate().scaleYBy(1.0F)
-            paint_floating_action_button_delete.animate().scaleY(0.0F)
-            paint_floating_action_button_delete.animate().rotation(360F)
-            paint_floating_action_button_delete.animate().setDuration(400L)
-            paint_floating_action_button_delete.animate().start()
-
-            paint_floating_action_button_erase.animate().alphaBy(1.0F)
-            paint_floating_action_button_erase.animate().alpha(0.0F)
-            paint_floating_action_button_erase.animate().scaleXBy(1.0F)
-            paint_floating_action_button_erase.animate().scaleX(0.0F)
-            paint_floating_action_button_erase.animate().scaleYBy(1.0F)
-            paint_floating_action_button_erase.animate().scaleY(0.0F)
-            paint_floating_action_button_erase.animate().rotation(360F)
-            paint_floating_action_button_erase.animate().setDuration(400L)
-            paint_floating_action_button_erase.animate().start()
-
-            paint_floating_action_button_palette.animate().alphaBy(1.0F)
-            paint_floating_action_button_palette.animate().alpha(0.0F)
-            paint_floating_action_button_palette.animate().scaleXBy(1.0F)
-            paint_floating_action_button_palette.animate().scaleX(0.0F)
-            paint_floating_action_button_palette.animate().scaleYBy(1.0F)
-            paint_floating_action_button_palette.animate().scaleY(0.0F)
-            paint_floating_action_button_palette.animate().rotation(360F)
-            paint_floating_action_button_palette.animate().setDuration(400L)
-            paint_floating_action_button_palette.animate().start()
-
-            paint_floating_action_button_save.animate().alphaBy(1.0F)
-            paint_floating_action_button_save.animate().alpha(0.0F)
-            paint_floating_action_button_save.animate().scaleXBy(1.0F)
-            paint_floating_action_button_save.animate().scaleX(0.0F)
-            paint_floating_action_button_save.animate().scaleYBy(1.0F)
-            paint_floating_action_button_save.animate().scaleY(0.0F)
-            paint_floating_action_button_save.animate().rotation(360F)
-            paint_floating_action_button_save.animate().setDuration(400L)
-            paint_floating_action_button_save.animate().start()
-
-            paint_floating_action_button.animate().rotationBy(180F)
-
-        } else {
-            isOpen = true
-
-            paint_floating_action_button_brush.visibility = View.VISIBLE
-            paint_floating_action_button_brush.animate().alphaBy(0.0F)
-            paint_floating_action_button_brush.animate().alpha(1.0F)
-            paint_floating_action_button_brush.animate().scaleXBy(0.0F)
-            paint_floating_action_button_brush.animate().scaleX(1.0F)
-            paint_floating_action_button_brush.animate().scaleYBy(0.0F)
-            paint_floating_action_button_brush.animate().scaleY(1.0F)
-            paint_floating_action_button_brush.animate().rotation(360F)
-            paint_floating_action_button_brush.animate().setDuration(500L)
-            paint_floating_action_button_brush.animate().start()
-
-            paint_floating_action_button_delete.visibility = View.VISIBLE
-            paint_floating_action_button_delete.animate().alphaBy(0.0F)
-            paint_floating_action_button_delete.animate().alpha(1.0F)
-            paint_floating_action_button_delete.animate().scaleXBy(0.0F)
-            paint_floating_action_button_delete.animate().scaleX(1.0F)
-            paint_floating_action_button_delete.animate().scaleYBy(0.0F)
-            paint_floating_action_button_delete.animate().scaleY(1.0F)
-            paint_floating_action_button_delete.animate().rotation(360F)
-            paint_floating_action_button_delete.animate().setDuration(500L)
-            paint_floating_action_button_delete.animate().start()
-
-            paint_floating_action_button_erase.visibility = View.VISIBLE
-            paint_floating_action_button_erase.animate().alphaBy(0.0F)
-            paint_floating_action_button_erase.animate().alpha(1.0F)
-            paint_floating_action_button_erase.animate().scaleXBy(0.0F)
-            paint_floating_action_button_erase.animate().scaleX(1.0F)
-            paint_floating_action_button_erase.animate().scaleYBy(0.0F)
-            paint_floating_action_button_erase.animate().scaleY(1.0F)
-            paint_floating_action_button_erase.animate().rotation(360F)
-            paint_floating_action_button_erase.animate().setDuration(500L)
-            paint_floating_action_button_erase.animate().start()
-
-            paint_floating_action_button_palette.visibility = View.VISIBLE
-            paint_floating_action_button_palette.animate().alphaBy(0.0F)
-            paint_floating_action_button_palette.animate().alpha(1.0F)
-            paint_floating_action_button_palette.animate().scaleXBy(0.0F)
-            paint_floating_action_button_palette.animate().scaleX(1.0F)
-            paint_floating_action_button_palette.animate().scaleYBy(0.0F)
-            paint_floating_action_button_palette.animate().scaleY(1.0F)
-            paint_floating_action_button_palette.animate().rotation(360F)
-            paint_floating_action_button_palette.animate().setDuration(500L)
-            paint_floating_action_button_palette.animate().start()
-
-            paint_floating_action_button_save.visibility = View.VISIBLE
-            paint_floating_action_button_save.animate().alphaBy(0.0F)
-            paint_floating_action_button_save.animate().alpha(1.0F)
-            paint_floating_action_button_save.animate().scaleXBy(0.0F)
-            paint_floating_action_button_save.animate().scaleX(1.0F)
-            paint_floating_action_button_save.animate().scaleYBy(0.0F)
-            paint_floating_action_button_save.animate().scaleY(1.0F)
-            paint_floating_action_button_save.animate().rotation(360F)
-            paint_floating_action_button_save.animate().setDuration(500L)
-            paint_floating_action_button_save.animate().start()
-
-            paint_floating_action_button.
-            paint_floating_action_button.animate().rotationBy(180F)
-
-        }
-    }
-
-
-    private fun showColorPickerDialog(){
-
-        val colorPicker = AmbilWarnaDialog(this, paintView.getBrushColor(), object : AmbilWarnaDialog.OnAmbilWarnaListener {
-            override fun onCancel(dialog: AmbilWarnaDialog) {
-            }
-
-            override fun onOk(dialog: AmbilWarnaDialog, color: Int) {
-                if(paintView.eraserEnabled){
-                    //paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
-                    paintView.disableEraser()
-                }
-                paintView.setBrushColor(color)
-            }
-        })
-
-        colorPicker.dialog.setTitle("Select color")
-        colorPicker.show()
     }
 }
-

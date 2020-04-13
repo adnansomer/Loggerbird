@@ -1,4 +1,4 @@
-package fragments
+package paint
 
 import android.animation.*
 import android.content.Context
@@ -14,7 +14,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.transformation.ExpandableTransformationBehavior
 import java.util.ArrayList
 
-class EmitExpandableTransformationBehavior @JvmOverloads constructor(
+class PaintFabAnimation @JvmOverloads constructor(
     context: Context? = null,
     attrs: AttributeSet? = null
 ) : ExpandableTransformationBehavior(context, attrs) {

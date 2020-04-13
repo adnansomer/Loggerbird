@@ -133,7 +133,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         val fileDirectory: File = context.filesDir
         val filePath = File(
             fileDirectory,
-            "logger_bird_screenshot" + System.currentTimeMillis().toString() + ".png"
+            "loggerbird_screenshot_$filename.png"
         )
 
         val dir = filePath

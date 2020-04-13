@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:id="@+id/fragment_layout"
     tools:context="fragments.FragmentLoggerBird">
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_audio"
         android:layout_width="wrap_content"
@@ -23,6 +24,7 @@
         app:borderWidth="0dp"
         android:backgroundTint="@color/colorFab"
         android:src="@drawable/ic_mic_black_24dp"/>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_video"
         android:layout_width="wrap_content"
@@ -40,6 +42,7 @@
         app:borderWidth="0dp"
         android:backgroundTint="@color/colorFab"
         android:src="@drawable/ic_videocam_black_24dp"/>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_screenshot"
         android:layout_width="wrap_content"
@@ -55,6 +58,7 @@
         android:backgroundTint="@color/colorFab"
         android:visibility="invisible"
         android:src="@drawable/ic_photo_camera_black_24dp"/>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button"
         android:layout_width="wrap_content"
@@ -64,7 +68,8 @@
         app:pressedTranslationZ="12dp"
         android:elevation="6dp"
         app:fabSize="normal"
-        android:backgroundTint="@color/colorBlack"
+        android:backgroundTint="@color/black"
         app:borderWidth="0dp"
-        android:src="@drawable/loggerbird"/>
+        android:src="@drawable/ic_add_white_24dp"/>
+
 </FrameLayout>

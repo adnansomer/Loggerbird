@@ -14,7 +14,6 @@ import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.Surface

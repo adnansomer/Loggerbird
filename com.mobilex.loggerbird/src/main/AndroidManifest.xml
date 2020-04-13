@@ -12,8 +12,9 @@
 
     <application>
         <activity android:name="paint.PaintActivity"
-            android:theme="@style/AppTheme">
+                android:theme="@style/AppTheme">
         </activity>
+
         <activity android:name="observers.LogActivityLifeCycleObserver" />
 
         <service
