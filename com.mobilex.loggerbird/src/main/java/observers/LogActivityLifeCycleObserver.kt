@@ -9,43 +9,46 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.drawable.VectorDrawable
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.MediaRecorder
+import android.media.RingtoneManager
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Surface
+import android.view.View
+import android.view.ViewGroup
 import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
-import androidx.core.view.get
-import androidx.core.view.size
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import listeners.*
 import loggerbird.LoggerBird
+import paint.PaintActivity
+import services.LoggerBirdForegroundServiceVideo
+import utils.LinkedBlockingQueueUtil
+import java.io.ByteArrayOutputStream
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import services.LoggerBirdForegroundServiceVideo
-import utils.LinkedBlockingQueueUtil
-import java.io.File
-import java.io.FileOutputStream
-import java.lang.Runnable
 
 class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
     Application.ActivityLifecycleCallbacks {
@@ -352,12 +355,9 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         this.rootView = rootView
         this.view = view
         floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-        floating_action_button_screenshot =
-            view.findViewById(R.id.fragment_floating_action_button_screenshot)
-        floating_action_button_video =
-            view.findViewById(R.id.fragment_floating_action_button_video)
-        floating_action_button_audio =
-            view.findViewById(R.id.fragment_floating_action_button_audio)
+        floating_action_button_screenshot = view.findViewById(R.id.fragment_floating_action_button_screenshot)
+        floating_action_button_video = view.findViewById(R.id.fragment_floating_action_button_video)
+        floating_action_button_audio = view.findViewById(R.id.fragment_floating_action_button_audio)
         if (videoRecording) {
             floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
         }
@@ -379,27 +379,19 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         )
         floating_action_button.setOnClickListener {
             coroutineCallAnimation.async {
-                //                fabOpen = AnimationUtils.loadAnimation(context, R.anim.fab_open)
-//                fabClose = AnimationUtils.loadAnimation(context, R.anim.fab_close)
                 withContext(Dispatchers.Main) {
-                    //                    fabOpen.setAnimationListener(
-//                        FloatingActionButtonAnimationListener(
-//                            context = context,
-//                            floatingActionButtonAudio = floating_action_button_audio
-//                        )
-//                    )
-//                    fabClose.setAnimationListener(
-//                        FloatingActionButtonAnimationListener(
-//                            context = context,
-//                            floatingActionButtonAudio = floating_action_button_audio
-//                        )
-//                    )
                     animationVisibility()
                 }
             }
         }
         floating_action_button_screenshot.setOnClickListener {
+            floating_action_button.visibility = View.GONE
+            floating_action_button_screenshot.visibility = View.GONE
+            floating_action_button_audio.visibility = View.GONE
+            floating_action_button_video.visibility = View.GONE
+
             takeScreenShot(view = view, context = context)
+
         }
         floating_action_button_audio.setOnClickListener {
             takeAudioRecording()
@@ -481,7 +473,8 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             floating_action_button_audio.animate().rotation(360F)
             floating_action_button_audio.animate().duration = 200L
             floating_action_button_audio.animate().start()
-            floating_action_button.setImageResource(R.drawable.ic_add_black_24dp)
+            floating_action_button.animate().rotationBy(360F).start()
+
         } else {
             isOpen = true
             floating_action_button_video.animate().cancel()
@@ -517,7 +510,8 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             floating_action_button_video.animate().rotation(360F)
             floating_action_button_video.animate().duration = 200L
             floating_action_button_video.animate().start()
-            floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
+            floating_action_button.animate().rotationBy(360F).start()
+
         }
     }
 
@@ -569,12 +563,16 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         }
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun createScreenShot(view: View): Bitmap {
-        val viewScreenShot: View = (view.parent as View)
+
+        val viewScreenShot: View = (view.rootView as View)
         val bitmap: Bitmap = Bitmap.createBitmap(
             viewScreenShot.width,
             viewScreenShot.height,
             Bitmap.Config.ARGB_8888
+
         )
         val canvas = Canvas(bitmap)
         viewScreenShot.draw(canvas)
@@ -585,23 +583,27 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         if (checkWriteExternalStoragePermission()) {
             coroutineCallScreenShot.async {
                 val fileDirectory: File = context.filesDir
-                val filePath = File(
-                    fileDirectory,
-                    "logger_bird_screenshot" + System.currentTimeMillis().toString() + ".png"
-                )
+                var byteArray: ByteArray? = null
+//                val filePath = File(
+//                    fileDirectory,
+//                    "logger_bird_screenshot" + System.currentTimeMillis().toString() + ".png"
+//                )
                 try {
                     withContext(Dispatchers.IO) {
-                        filePath.createNewFile()
-                        val fileOutputStream = FileOutputStream(filePath)
-                        createScreenShot(view = view).compress(
-                            Bitmap.CompressFormat.PNG,
-                            100,
-                            fileOutputStream
-                        )
-                        fileOutputStream.close()
+//                        filePath.createNewFile()
+//                        val fileOutputStream = FileOutputStream(filePath)
+//                        createScreenShot(view = view).compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream)
+//                        fileOutputStream.close()
+
+                        val bStream = ByteArrayOutputStream()
+                        createScreenShot(view = view).compress(Bitmap.CompressFormat.PNG, 100, bStream)
+                        byteArray = bStream.toByteArray()
                     }
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "ScreenShot Taken!", Toast.LENGTH_SHORT).show()
+                        val screenshotIntent = Intent(context as Activity, PaintActivity::class.java).putExtra("BitmapScreenshot",byteArray)
+                        context.startActivity(screenshotIntent)
+
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -746,7 +748,6 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             stopScreenRecord()
         }
     }
-
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private suspend fun shareScreen() {
