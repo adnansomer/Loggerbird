@@ -26,21 +26,12 @@ class FloatingActionButtonOnTouchListener(
 ) : View.OnTouchListener {
     private var windowManagerDx: Float = 0F
     private var windowManagerDy: Float = 0F
-    private var floatingActionButtonDx: Float = 0F
-    private var floatingActionButtonDy: Float = 0F
-    private var floatingActionButtonScreenShotDx: Float = 0F
-    private var floatingActionButtonScreenShotDy: Float = 0F
-    private var floatingActionButtonVideoDx: Float = 0F
-    private var floatingActionButtonVideoDy: Float = 0F
-    private var floatingActionButtonAudioDx: Float = 0F
-    private var floatingActionButtonAudioDy: Float = 0F
     private var lastAction: Int = 0
     private val deviceWidth = Resources.getSystem().displayMetrics.widthPixels
     private val deviceHeight = Resources.getSystem().displayMetrics.heightPixels
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onTouch(view: View, event: MotionEvent): Boolean {
         try {
-            resetOldCoordinates()
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     floatingActionButtonScreenShot.visibility = View.GONE
@@ -48,14 +39,6 @@ class FloatingActionButtonOnTouchListener(
                     floatingActionButtonAudio.visibility = View.GONE
                     windowManagerDx = windowManagerParams.x - event.rawX
                     windowManagerDy = windowManagerParams.y - event.rawY
-                    floatingActionButtonDx = floatingActionButton.x - event.rawX
-                    floatingActionButtonDy = floatingActionButton.y - event.rawY
-                    floatingActionButtonScreenShotDx = floatingActionButtonScreenShot.x - event.rawX
-                    floatingActionButtonScreenShotDy = floatingActionButtonScreenShot.y - event.rawY
-                    floatingActionButtonVideoDx = floatingActionButtonVideo.x - event.rawX
-                    floatingActionButtonVideoDy = floatingActionButtonVideo.y - event.rawY
-                    floatingActionButtonAudioDx = floatingActionButtonAudio.x - event.rawX
-                    floatingActionButtonAudioDy = floatingActionButtonAudio.y - event.rawY
                     lastAction = MotionEvent.ACTION_DOWN
                 }
                 MotionEvent.ACTION_MOVE -> {
@@ -178,16 +161,5 @@ class FloatingActionButtonOnTouchListener(
             )
         }
         return false
-    }
-
-    private fun resetOldCoordinates() {
-        LoggerBirdService.floatingActionButtonLastDx = null
-        LoggerBirdService.floatingActionButtonLastDy = null
-        LoggerBirdService.floatingActionButtonScreenShotLastDx = null
-        LoggerBirdService.floatingActionButtonScreenShotLastDy = null
-        LoggerBirdService.floatingActionButtonAudioLastDx = null
-        LoggerBirdService.floatingActionButtonAudioLastDy = null
-        LoggerBirdService.floatingActionButtonVideoLastDx = null
-        LoggerBirdService.floatingActionButtonVideoLastDy = null
     }
 }

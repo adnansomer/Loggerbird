@@ -1,20 +1,26 @@
 package paint
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
-import android.os.Environment
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.View
-import kotlinx.android.synthetic.main.activity_paint.view.*
+import constants.Constants
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
+import loggerbird.LoggerBird
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
+import kotlin.math.abs
 
 
-class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
-
+class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    View(context, attrs) {
     private var mX: Float = 0.toFloat()
     private var mY: Float = 0.toFloat()
     private var mPath: Path? = null
@@ -27,7 +33,9 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private var mCanvas: Canvas? = null
     private val mBitMapPaint = Paint(Paint.DITHER_FLAG)
     private var lastBrushColor: Int = 0
-    var eraserEnabled = false
+    internal var eraserEnabled = false
+    private lateinit var paintView:View
+    private val coroutineCallPaint: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
 
     init {
@@ -42,119 +50,143 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     companion object {
-
         var BRUSH_SIZE = 10
-        val DEFAULT_BRUSH_COLOR = Color.BLACK
-        private val TOUCH_TOLERANCE = 4.0f
+        const val DEFAULT_BRUSH_COLOR = Color.BLACK
+        private const val TOUCH_TOLERANCE = 4.0f
     }
 
-    fun init(metrics: DisplayMetrics) {
-
-        undonePaths.clear()
-
-        val height = metrics.heightPixels
-        val width = metrics.widthPixels
-
-        mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        mCanvas = Canvas(mBitmap!!)
-
-        brushColor = DEFAULT_BRUSH_COLOR
-        brushWidth = BRUSH_SIZE
-
+    internal fun init(metrics: DisplayMetrics) {
+        try {
+            undonePaths.clear()
+            val height = metrics.heightPixels
+            val width = metrics.widthPixels
+            mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            mCanvas = Canvas(mBitmap!!)
+            brushColor = DEFAULT_BRUSH_COLOR
+            brushWidth = BRUSH_SIZE
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintViewTag)
+        }
     }
 
-    fun clearAllPaths() {
-
-        paths.removeAll(paths)
-        mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        mPath = Path()
-        invalidate()
-
-        mCanvas = Canvas(mBitmap!!)
-        brushColor = brushColor
-        brushWidth = brushWidth
+    internal fun clearAllPaths() {
+        try {
+            paths.removeAll(paths)
+            mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            mPath = Path()
+            invalidate()
+            mCanvas = Canvas(mBitmap!!)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintViewTag)
+        }
     }
 
-    fun clear() {
-
-        paths.clear()
-        invalidate()
+    internal fun clear() {
+        try {
+            paths.clear()
+            invalidate()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintViewTag)
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
-
-        canvas.save()
-
-        for (fp in paths) {
-            mPaint.color = fp.color
-            mPaint.strokeWidth = fp.strokeWidth.toFloat()
-            mPaint.maskFilter = null
-
-            mCanvas!!.drawPath(fp.path!!, mPaint)
+        try {
+            canvas.save()
+            for (fp in paths) {
+                mPaint.color = fp.color
+                mPaint.strokeWidth = fp.strokeWidth.toFloat()
+                mPaint.maskFilter = null
+                mCanvas!!.drawPath(fp.path!!, mPaint)
+            }
+            canvas.drawBitmap(mBitmap!!, 0f, 0f, mBitMapPaint)
+            canvas.restore()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintViewTag)
         }
-
-        canvas.drawBitmap(mBitmap!!, 0f, 0f, mBitMapPaint)
-        canvas.restore()
     }
 
     private fun touchStart(x: Float, y: Float) {
-
-        mPath = Path()
-        val fp = FingerPath(brushColor, brushWidth, mPath)
-        paths.add(fp)
-
-        mPath!!.reset()
-        mPath!!.moveTo(x, y)
-        mX = x
-        mY = y
+        try {
+            mPath = Path()
+            val fp = FingerPath(brushColor, brushWidth, mPath)
+            paths.add(fp)
+            mPath!!.reset()
+            mPath!!.moveTo(x, y)
+            mX = x
+            mY = y
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintViewTag)
+        }
     }
 
     private fun touchMove(x: Float, y: Float) {
-
-        val dx = Math.abs(x - mX)
-        val dy = Math.abs(y - mY)
-
-        if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-            mPath!!.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2)
-            mX = x
-            mY = y
+        try {
+            val dx = abs(x - mX)
+            val dy = abs(y - mY)
+            if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+                mPath!!.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2)
+                mX = x
+                mY = y
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintViewTag)
         }
     }
 
     private fun touchUp() {
-
-        mPath!!.lineTo(mX, mY)
-    }
-
-    fun saveImage(filename: String){
-
-        val bitmap = Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        val fileDirectory: File = context.filesDir
-        val filePath = File(
-            fileDirectory,
-            "loggerbird_screenshot_$filename.png"
-        )
-
-        val dir = filePath
-        try{
-            val os = FileOutputStream(dir)
-            this.draw(canvas)
-
-            bitmap.compress(Bitmap.CompressFormat.PNG,100, os)
-            os.flush()
-            os.close()
-        }
-        catch(e : Exception){
+        try {
+            mPath!!.lineTo(mX, mY)
+        } catch (e: Exception) {
             e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintViewTag)
         }
     }
 
-    override fun onTouchEvent(event: MotionEvent): Boolean {
+    internal fun saveImage(filename: String) {
+        paintView = this
+        val context:Context = this.context
+        coroutineCallPaint.async {
+            try {
+                val bitmap = Bitmap.createBitmap(paintView.width,paintView.height, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(bitmap)
+                val fileDirectory: File = context.filesDir
+                val filePath = File(
+                    fileDirectory,
+                    "loggerbird_screenshot_"+System.currentTimeMillis().toString()+"_"+filename+".png"
+                )
+                val os = FileOutputStream(filePath)
+                paintView.draw(canvas)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, os)
+                withContext(Dispatchers.IO) {
+                    os.flush()
+                    os.close()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintViewTag)
+            }
+        }
+    }
 
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent): Boolean {
         val x = event.x
         val y = event.y
-
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 touchStart(x, y)
@@ -173,37 +205,46 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         return true
     }
 
-    fun getBrushColor(): Int{
-
+    internal fun getBrushColor(): Int {
         return brushColor
     }
 
-    fun setBrushColor(color: Int){
-
+    internal fun setBrushColor(color: Int) {
         this.brushColor = color
     }
 
-    fun getBrushWidth(): Int{
-
+    internal fun getBrushWidth(): Int {
         return brushWidth
     }
 
-    fun setBrushWidth(width: Int){
-
+    internal fun setBrushWidth(width: Int) {
         this.brushWidth = width
     }
 
-    fun enableEraser(){
-        eraserEnabled = true
-        lastBrushColor = brushColor
-        mPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR)) //image composition library ic ice gecen layoutlarin harmanlanmasi***
-        brushColor = Color.TRANSPARENT
+    internal fun enableEraser() {
+        try {
+            eraserEnabled = true
+            lastBrushColor = brushColor
+            mPaint.xfermode =
+                PorterDuffXfermode(PorterDuff.Mode.CLEAR) //image composition library ic ice gecen layoutlarin harmanlanmasi***
+            brushColor = Color.TRANSPARENT
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintViewTag)
+        }
     }
 
-    fun disableEraser(){
-        eraserEnabled = false
-        mPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.SRC))
-        brushColor = lastBrushColor
+    internal fun disableEraser() {
+        try {
+            eraserEnabled = false
+            mPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
+            brushColor = lastBrushColor
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintViewTag)
+        }
     }
 }
 
