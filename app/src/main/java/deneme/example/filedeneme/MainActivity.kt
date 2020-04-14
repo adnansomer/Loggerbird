@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
     private val transformer: Transformer = transformerFactory.newTransformer()
     private var recyclerViewList:ArrayList<RecyclerModel> = ArrayList()
     var disposable: Disposable? = null
-    private lateinit var adapter:RecyclerViewAdapter
+    //private lateinit var adapter:RecyclerViewAdapter
     private var coroutineCallComponent = CoroutineScope(Dispatchers.IO)
     companion object {
         var BaseUrl = "http://api.openweathermap.org/"
@@ -163,8 +163,8 @@ class MainActivity : AppCompatActivity() {
         Log.d("deep_link_url", uri.toString())
         addRecyclerViewList()
         recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        adapter= RecyclerViewAdapter(recyclerViewList)
-        recycler_view.adapter=adapter
+        //adapter= RecyclerViewAdapter(recyclerViewList)
+        //recycler_view.adapter=adapter
         LoggerBird.registerRecyclerViewObservers(recycler_view)
 
         (this as androidx.activity.ComponentActivity).prepareCall(OnActivityResultContract(),OnActivityResultListener())
@@ -182,12 +182,12 @@ class MainActivity : AppCompatActivity() {
 //
 //        }
         button_add.setOnClickListener() {
-            val filePathTest: File = File(this.filesDir, "logger_bird_details.txt")
+           // val filePathTest: File = File(this.filesDir, "logger_bird_details.txt")
 
-            recyclerViewList.removeAt(0)
-            recyclerViewList.add(RecyclerModel("hello how are you"))
-            adapter.notifyDataSetChanged()
-            LoggerBird.callComponentDetails(view=recycler_view,resources = recycler_view.resources)
+            //recyclerViewList.removeAt(0)
+            //recyclerViewList.add(RecyclerModel("hello how are you"))
+            //adapter.notifyDataSetChanged()
+            //LoggerBird.callComponentDetails(view=recycler_view,resources = recycler_view.resources)
 //            for (x in 1..5) {
 //                LoggerBird.callComponentDetails(view = button_add, resources = button_add.resources)
 //                LoggerBird.callLifeCycleDetails()
@@ -259,7 +259,7 @@ class MainActivity : AppCompatActivity() {
 //            LoggerBird.takeLifeCycleDetails()
 
 
-            startActivity(Intent(this@MainActivity, Main2Activity::class.java))
+            startActivity(Intent(this@MainActivity, Main3Activity::class.java))
         })
 
         button_performance.setOnClickListener {
@@ -272,14 +272,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun addRecyclerViewList(){
-        recyclerViewList.add(RecyclerModel("berk"))
-        recyclerViewList.add(RecyclerModel("berk1"))
-        recyclerViewList.add(RecyclerModel("berk2"))
-        recyclerViewList.add(RecyclerModel("berk3"))
-        recyclerViewList.add(RecyclerModel("berk4"))
-        recyclerViewList.add(RecyclerModel("berk5"))
-        recyclerViewList.add(RecyclerModel("berk6"))
-
+//        recyclerViewList.add(RecyclerModel("berk"))
+//        recyclerViewList.add(RecyclerModel("berk1"))
+//        recyclerViewList.add(RecyclerModel("berk2"))
+//        recyclerViewList.add(RecyclerModel("berk3"))
+//        recyclerViewList.add(RecyclerModel("berk4"))
+//        recyclerViewList.add(RecyclerModel("berk5"))
+//        recyclerViewList.add(RecyclerModel("berk6"))
+//
     }
 
     private fun beginSearch(srsearch: String, context: Context) {

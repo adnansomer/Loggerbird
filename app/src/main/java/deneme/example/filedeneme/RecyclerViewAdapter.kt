@@ -1,36 +1,46 @@
-package deneme.example.filedeneme
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.BitmapImageViewTarget
+import deneme.example.filedeneme.R
+import deneme.example.filedeneme.RecyclerModel
 
-class RecyclerViewAdapter(val nameList : ArrayList<RecyclerModel>) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>()  {
-
-    class ViewHolder(view : View) : RecyclerView.ViewHolder(view) {
-
-        val personName : TextView = view.findViewById(R.id.recycler_view_name)
-
-        fun bindItems(item: RecyclerModel) {
-            personName.setText(item.name)
-
-        }
-    }
+class RecyclerViewAdapter(val countryList: ArrayList<RecyclerModel>) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>()  {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_item, parent, false)
-        return ViewHolder(view)
-
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_item, parent, false))
     }
 
     override fun getItemCount(): Int {
-        return nameList.size
+        return countryList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItems(nameList.get(position))
+
+        holder.bindItems(countryList[position])
+
+    }
+
+    class ViewHolder(view : View) : RecyclerView.ViewHolder(view) {
+
+        fun bindItems(item : RecyclerModel){
+
+            val countryName = itemView.findViewById<TextView>(R.id.recycler_view_name)
+            //val countryImage = itemView.findViewById<ImageView>(R.id.recycler_view_img)
+            countryName.setText(item.name)
+
+//            Glide.with(itemView.context)
+//                .load(item.imageUrl)
+//                .placeholder(R.drawable.ic_android_black_100dp)
+//                .into(countryImage)
+
+        }
+
     }
 
 }

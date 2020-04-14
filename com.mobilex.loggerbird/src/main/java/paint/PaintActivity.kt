@@ -95,7 +95,7 @@ class PaintActivity : Activity() {
         }
 
         paint_floating_action_button_brush.setOnClickListener {
-            showLineWidthSetterDialog()
+            showBrushWidthSetterDialog()
         }
 
         paint_floating_action_button_delete.setOnClickListener {
@@ -214,7 +214,7 @@ class PaintActivity : Activity() {
 
     }
 
-    private fun showLineWidthSetterDialog(){
+    private fun showBrushWidthSetterDialog(){
 
         val lineWidthDialog = AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK)
 
