@@ -68,67 +68,96 @@ class FloatingActionButtonOnTouchListener(
                     )
                 }
                 MotionEvent.ACTION_UP -> {
-                    if (deviceWidth < (event.rawX +  (floatingActionButton.width))) {
+                    if (deviceWidth < (event.rawX + (floatingActionButton.width))) {
                         windowManagerParams.x = deviceWidth / 2
                         Log.d("corner", "a")
-//                        floatingActionButtonScreenShot.x =
-//                            (floatingActionButton.x - floatingActionButtonScreenShot.width).toFloat()
-//                        floatingActionButtonVideo.x =
-//                            (floatingActionButton.x- floatingActionButtonVideo.width).toFloat()
-//                        floatingActionButtonAudio.x =
-//                            (floatingActionButton.x - floatingActionButtonAudio.width).toFloat()
-//                        floatingActionButtonScreenShot.y = windowManagerParams.y.toFloat()
-//                        floatingActionButtonVideo.y =  windowManagerParams.y.toFloat()
-//                        floatingActionButtonAudio.y = windowManagerParams.y.toFloat()
-                    } else if (event.rawX -  (floatingActionButton.width) < 0) {
+                        (floatingActionButton.layoutParams as FrameLayout.LayoutParams).setMargins(450,0,0,0)
+                        (floatingActionButtonScreenShot.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            150,
+                            0,
+                            0,
+                            0
+                        )
+                        (floatingActionButtonVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            300,
+                            0,
+                            0,
+                            0
+                        )
+                        (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            0,
+                            0,
+                            0,
+                            0
+                        )
+                    } else if (event.rawX - (floatingActionButton.width) < 0) {
                         Log.d("corner", "b")
                         windowManagerParams.x = -(deviceWidth / 2)
-                      //  ((floatingActionButton.parent as FrameLayout).layoutParams as FrameLayout.LayoutParams).gravity = Gravity.START
-                        (floatingActionButton.layoutParams as FrameLayout.LayoutParams).gravity = Gravity.START
-                        (floatingActionButtonScreenShot.layoutParams as FrameLayout.LayoutParams).marginStart = 150
-                        (floatingActionButtonVideo.layoutParams as FrameLayout.LayoutParams).marginStart= 300
-                        (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).marginStart = 450
-//                        floatingActionButton.x = 0F
-//                        floatingActionButtonScreenShot.x =
-//                            (windowManagerParams.x + 50).toFloat()
-//                        floatingActionButtonVideo.x =
-//                            (windowManagerParams.x + 100).toFloat()
-//                        floatingActionButtonAudio.x =
-//                            (windowManagerParams.x + 150).toFloat()
-//                        floatingActionButtonScreenShot.y =  windowManagerParams.y.toFloat()
-//                        floatingActionButtonVideo.y = windowManagerParams.y.toFloat()
-//                        floatingActionButtonAudio.y = windowManagerParams.y.toFloat()
+                        (floatingActionButton.layoutParams as FrameLayout.LayoutParams).setMargins(0,0,0,0)
+                        (floatingActionButtonScreenShot.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            150,
+                            0,
+                            0,
+                            0
+                        )
+                        (floatingActionButtonVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            300,
+                            0,
+                            0,
+                            0
+                        )
+                        (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            450,
+                            0,
+                            0,
+                            0
+                        )
                     }
                     if (deviceHeight < (event.rawY + (floatingActionButton.height))) {
                         Log.d("corner", "c")
                         windowManagerParams.y = (deviceHeight / 2)
-//                        floatingActionButton.y = (deviceHeight - floatingActionButton.height).toFloat()
-//                        floatingActionButtonScreenShot.y =
-//                            (windowManagerParams.y - floatingActionButtonScreenShot.height).toFloat()
-//                        floatingActionButtonVideo.y =
-//                            (windowManagerParams.y - floatingActionButtonVideo.height).toFloat()
-//                        floatingActionButtonAudio.y =
-//                            (windowManagerParams.y - floatingActionButtonAudio.height).toFloat()
-//                        floatingActionButtonScreenShot.x =  windowManagerParams.x.toFloat()
-//                        floatingActionButtonVideo.x =  windowManagerParams.x.toFloat()
-//                        floatingActionButtonAudio.x =  windowManagerParams.x.toFloat()
-                    } else if (event.rawY -  (floatingActionButton.height) < 0) {
+                        (floatingActionButton.layoutParams as FrameLayout.LayoutParams).setMargins(0,450,0,0)
+                        (floatingActionButtonScreenShot.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            0,
+                            0,
+                            0,
+                            0
+                        )
+                        (floatingActionButtonVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            0,
+                            300,
+                            0,
+                            0
+                        )
+                        (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            0,
+                            150,
+                            0,
+                            0
+                        )
+
+                    } else if (event.rawY - (floatingActionButton.height) < 0) {
                         Log.d("corner", "d")
                         windowManagerParams.y = -(deviceHeight / 2)
-                        (floatingActionButton.layoutParams as FrameLayout.LayoutParams).gravity = Gravity.START
-                        (floatingActionButtonScreenShot.layoutParams as FrameLayout.LayoutParams).marginEnd = 150
-                        (floatingActionButtonVideo.layoutParams as FrameLayout.LayoutParams).marginEnd= 300
-                        (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).marginEnd = 450
-////                        floatingActionButton.y = 0F
-////                        floatingActionButtonScreenShot.y =
-////                            floatingActionButtonScreenShot.height.toFloat()
-////                        floatingActionButtonVideo.y =
-////                            floatingActionButtonVideo.height.toFloat()
-////                        floatingActionButtonAudio.y =
-////                            floatingActionButtonAudio.height.toFloat()
-//                        floatingActionButtonScreenShot.x =  windowManagerParams.x.toFloat()
-//                        floatingActionButtonVideo.x =  windowManagerParams.x.toFloat()
-//                        floatingActionButtonAudio.x =  windowManagerParams.x.toFloat()
+                        (floatingActionButton.layoutParams as FrameLayout.LayoutParams).setMargins(0,0,0,0)
+                        (floatingActionButtonScreenShot.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            0,
+                            150,
+                            0,
+                            0
+                        )
+                        (floatingActionButtonVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            0,
+                            300,
+                            0,
+                            0
+                        )
+                        (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            0,
+                            450,
+                            0,
+                            0
+                        )
                     }
                     lastAction = MotionEvent.ACTION_UP
                     windowManager.updateViewLayout(

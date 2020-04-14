@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.net.Uri
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
@@ -19,9 +22,13 @@ import java.net.HttpURLConnection
 import java.net.URL
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.app.ComponentActivity
+import androidx.core.view.drawToBitmap
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions.bitmapTransform
 import deneme.example.filedeneme.ApiServiceInterface.Companion.client
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -29,6 +36,8 @@ import io.realm.Sort
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import io.reactivex.disposables.Disposable
+import jp.wasabeef.glide.transformations.BlurTransformation
+import kotlinx.android.synthetic.main.recycler_view_item.*
 import loggerbird.LoggerBird.Companion.loggerBirdInterceptorClient
 import okhttp3.FormBody
 import okhttp3.HttpUrl
@@ -43,7 +52,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.NullPointerException
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
-
 
 
 class MainActivity : AppCompatActivity() {
@@ -70,19 +78,22 @@ class MainActivity : AppCompatActivity() {
     private lateinit var jsonObject: JSONObject
     private val transformerFactory: TransformerFactory = TransformerFactory.newInstance()
     private val transformer: Transformer = transformerFactory.newTransformer()
-    private var recyclerViewList:ArrayList<RecyclerModel> = ArrayList()
+    private var recyclerViewList: ArrayList<RecyclerModel> = ArrayList()
     var disposable: Disposable? = null
-    private lateinit var adapter:RecyclerViewAdapter
+    private lateinit var adapter: RecyclerViewAdapter
     private var coroutineCallComponent = CoroutineScope(Dispatchers.IO)
+
     companion object {
         var BaseUrl = "http://api.openweathermap.org/"
         var AppId = "2e65127e909e178d0af311a81f39948c"
         var lat = "35"
         var lon = "139"
     }
+
     init {
 //        LoggerBird.logAttachLifeCycleObservers(context = this)
     }
+
     fun getCurrentData() {
         val retrofit = Retrofit.Builder()
             .baseUrl(BaseUrl)
@@ -91,11 +102,14 @@ class MainActivity : AppCompatActivity() {
         val service = retrofit.create(WeatherService::class.java)
         val call = service.getCurrentWeatherData(lat, lon, AppId)
         call.enqueue(object : Callback<WeatherResponse> {
-            override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>) {
+            override fun onResponse(
+                call: Call<WeatherResponse>,
+                response: Response<WeatherResponse>
+            ) {
                 if (response.code() == 200) {
 
                     val weatherResponse = response.body()!!
-                    Log.d("weather_response",response.body().toString())
+                    Log.d("weather_response", response.body().toString())
                     val stringBuilder = "Country: " +
                             weatherResponse.sys!!.country +
                             "\n" +
@@ -135,18 +149,25 @@ class MainActivity : AppCompatActivity() {
 //                        .post(fromBodyBuilder.build())
 //                        .build()
                     coroutineCallInternet.async {
-                    val getUrl: URL = URL("http://api.openweathermap.org/data/2.5/weather?&lat=35&lon=139&APPID=2e65127e909e178d0af311a81f39948c ")
-                            val internetConnection: HttpURLConnection = getUrl.openConnection() as HttpURLConnection
+                        val getUrl: URL =
+                            URL("http://api.openweathermap.org/data/2.5/weather?&lat=35&lon=139&APPID=2e65127e909e178d0af311a81f39948c ")
+                        val internetConnection: HttpURLConnection =
+                            getUrl.openConnection() as HttpURLConnection
 //                        val responseDummy = client.newCall(request).execute()
-                            LoggerBird.callOkHttpRequestDetails(url = "https://api.openweathermap.org/data/2.5/weather?&lat=35&lon=139&APPID=2e65127e909e178d0af311a81f39948c",okHttpURLConnection = internetConnection)
+                        LoggerBird.callOkHttpRequestDetails(
+                            url = "https://api.openweathermap.org/data/2.5/weather?&lat=35&lon=139&APPID=2e65127e909e178d0af311a81f39948c",
+                            okHttpURLConnection = internetConnection
+                        )
                     }
                     //weatherData!!.text = stringBuilder
                 }
             }
+
             override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
                 //weatherData!!.text = t.message
             }
-        })}
+        })
+    }
 
 //    val TAG_ACTIVITY_NAME:String="MainActivity"
 //    val TAG_ONCREATE:String="Activity In OnCreate State"
@@ -163,15 +184,14 @@ class MainActivity : AppCompatActivity() {
         Log.d("deep_link_url", uri.toString())
         addRecyclerViewList()
         recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        adapter= RecyclerViewAdapter(recyclerViewList)
-        recycler_view.adapter=adapter
+        adapter = RecyclerViewAdapter(this,recyclerViewList)
+        recycler_view.adapter = adapter
         LoggerBird.registerRecyclerViewObservers(recycler_view)
 
-        (this as androidx.activity.ComponentActivity).prepareCall(OnActivityResultContract(),OnActivityResultListener())
-
-
-
-
+        (this as androidx.activity.ComponentActivity).prepareCall(
+            OnActivityResultContract(),
+            OnActivityResultListener()
+        )
 
 
 //        LogDeneme.logLifeCycleDetails()
@@ -187,7 +207,10 @@ class MainActivity : AppCompatActivity() {
             recyclerViewList.removeAt(0)
             recyclerViewList.add(RecyclerModel("hello how are you"))
             adapter.notifyDataSetChanged()
-            LoggerBird.callComponentDetails(view=recycler_view,resources = recycler_view.resources)
+            LoggerBird.callComponentDetails(
+                view = recycler_view,
+                resources = recycler_view.resources
+            )
 //            for (x in 1..5) {
 //                LoggerBird.callComponentDetails(view = button_add, resources = button_add.resources)
 //                LoggerBird.callLifeCycleDetails()
@@ -271,7 +294,8 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
-    private fun addRecyclerViewList(){
+
+    private fun addRecyclerViewList() {
         recyclerViewList.add(RecyclerModel("berk"))
         recyclerViewList.add(RecyclerModel("berk1"))
         recyclerViewList.add(RecyclerModel("berk2"))
@@ -498,7 +522,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        LoggerBird.onActivityResult(requestCode=requestCode,resultCode = resultCode,data = data)
+        LoggerBird.onActivityResult(requestCode = requestCode, resultCode = resultCode, data = data)
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == Read_STORAGE_REQUEST_CODE) {
                 val fileUri: Uri
@@ -534,7 +558,6 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
     }
-
 
 
     private suspend fun httpRequest(url: String?): String {
@@ -736,55 +759,54 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-}
-
-class AsyncHttpRequst(val url: String) : AsyncTask<Void, Void, String>() {
+    class AsyncHttpRequst(val url: String) : AsyncTask<Void, Void, String>() {
 
 
-    override fun doInBackground(vararg params: Void?): String? {
-        // ...
+        override fun doInBackground(vararg params: Void?): String? {
+            // ...
 
-        var result: String = ""
-        val inputStream: InputStream
-        val getUrl: URL = URL(url)
+            var result: String = ""
+            val inputStream: InputStream
+            val getUrl: URL = URL(url)
 
-        try {
-            val internetConnection: HttpURLConnection = getUrl.openConnection() as HttpURLConnection
+            try {
+                val internetConnection: HttpURLConnection =
+                    getUrl.openConnection() as HttpURLConnection
 
-            internetConnection.connect()
+                internetConnection.connect()
 
-            inputStream = internetConnection.inputStream
+                inputStream = internetConnection.inputStream
 
-            if (inputStream != null) {
-                val stringBuffer = StringBuffer()
-                val inputStreamReader = InputStreamReader(inputStream)
-                val bufferedReader = BufferedReader(inputStreamReader)
+                if (inputStream != null) {
+                    val stringBuffer = StringBuffer()
+                    val inputStreamReader = InputStreamReader(inputStream)
+                    val bufferedReader = BufferedReader(inputStreamReader)
 
-                while (bufferedReader.readLine() != null) {
-                    result = stringBuffer.append(bufferedReader.readLine()).toString()
+                    while (bufferedReader.readLine() != null) {
+                        result = stringBuffer.append(bufferedReader.readLine()).toString()
+                    }
+
+                } else {
+                    Log.d("http", "Request Failure with:" + inputStream)
                 }
-
-            } else {
-                Log.d("http", "Request Failure with:" + inputStream)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+
+
+            return result
+        }
+
+        override fun onPreExecute() {
+            super.onPreExecute()
+            // ...
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            // ...
         }
 
 
-        return result
     }
-
-    override fun onPreExecute() {
-        super.onPreExecute()
-        // ...
-    }
-
-    override fun onPostExecute(result: String?) {
-        super.onPostExecute(result)
-        // ...
-    }
-
-
 }
-

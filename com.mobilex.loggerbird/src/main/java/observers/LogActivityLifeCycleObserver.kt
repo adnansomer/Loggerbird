@@ -68,9 +68,11 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         try {
             this.context = activity
-            loggerBirdService.initializeActivity(activity = activity)
-            intentService = Intent(context, loggerBirdService.javaClass)
-            context.startService(intentService)
+            if (!this::intentService.isInitialized) {
+                loggerBirdService.initializeActivity(activity = activity)
+                intentService = Intent(context, loggerBirdService.javaClass)
+                context.startService(intentService)
+            }
             LoggerBird.fragmentLifeCycleObserver =
                 LogFragmentLifeCycleObserver()
             if ((activity is AppCompatActivity)) {

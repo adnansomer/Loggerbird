@@ -25,6 +25,7 @@ import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
 import android.view.animation.Animation
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -41,7 +42,9 @@ import kotlinx.coroutines.withContext
 import listeners.*
 import loggerbird.LoggerBird
 import observers.LogActivityLifeCycleObserver
+import paint.PaintActivity
 import utils.LinkedBlockingQueueUtil
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
@@ -110,6 +113,7 @@ internal class LoggerBirdService : Service() {
         internal var controlDrawableSettingsPermission: Boolean = false
         internal var controlWriteExternalPermission: Boolean = false
         internal lateinit var intentForegroundServiceVideo: Intent
+        internal lateinit var screenshotBitmap: Bitmap
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
             if (runnableList.size > 0) {
@@ -280,6 +284,25 @@ internal class LoggerBirdService : Service() {
             view.findViewById(R.id.fragment_floating_action_button_video)
         floating_action_button_audio =
             view.findViewById(R.id.fragment_floating_action_button_audio)
+        (floating_action_button_screenshot.layoutParams as FrameLayout.LayoutParams).setMargins(
+            0,
+            150,
+            0,
+            0
+        )
+        (floating_action_button_video.layoutParams as FrameLayout.LayoutParams).setMargins(
+            0,
+            300,
+            0,
+            0
+        )
+        (floating_action_button_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
+            0,
+            450,
+            0,
+            0
+        )
+
         if (videoRecording) {
             floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
         }
@@ -402,6 +425,9 @@ internal class LoggerBirdService : Service() {
             floating_action_button_audio.animate().rotation(360F)
             floating_action_button_audio.animate().duration = 200L
             floating_action_button_audio.animate().start()
+            floating_action_button_screenshot.visibility = View.GONE
+            floating_action_button_video.visibility = View.GONE
+            floating_action_button_audio.visibility = View.GONE
             floating_action_button.setImageResource(R.drawable.ic_add_black_24dp)
         } else {
             isOpen = true
@@ -484,7 +510,7 @@ internal class LoggerBirdService : Service() {
     private fun checkDrawOtherAppPermission(activity: Activity) {
         controlPermissionRequest = true
         controlDrawableSettingsPermission = true
-        val intent: Intent = Intent(
+        val intent = Intent(
             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
             Uri.parse("package:" + activity.packageName)
         )
@@ -507,23 +533,38 @@ internal class LoggerBirdService : Service() {
         if (checkWriteExternalStoragePermission()) {
             coroutineCallScreenShot.async {
                 val fileDirectory: File = context.filesDir
-                val filePath = File(
-                    fileDirectory,
-                    "logger_bird_screenshot" + System.currentTimeMillis().toString() + ".png"
-                )
+                var byteArray: ByteArray? = null
+//                val filePath = File(
+//                    fileDirectory,
+//                    "logger_bird_screenshot" + System.currentTimeMillis().toString() + ".png"
+//                )
                 try {
                     withContext(Dispatchers.IO) {
-                        filePath.createNewFile()
-                        val fileOutputStream = FileOutputStream(filePath)
-                        createScreenShot(view = view).compress(
-                            Bitmap.CompressFormat.PNG,
-                            100,
-                            fileOutputStream
-                        )
-                        fileOutputStream.close()
+                        //                        filePath.createNewFile()
+//                        val fileOutputStream = FileOutputStream(filePath)
+//                        createScreenShot(view = view).compress(
+//                            Bitmap.CompressFormat.PNG,
+//                            100,
+//                            fileOutputStream
+//                        )
+//                        fileOutputStream.close()
+//                        val bStream = ByteArrayOutputStream()
+//                        createScreenShot(view = view).compress(Bitmap.CompressFormat.PNG, 100, bStream)
+//                        byteArray = bStream.toByteArray()
+
+                        screenshotBitmap = createScreenShot(view = view)
                     }
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "ScreenShot Taken!", Toast.LENGTH_SHORT).show()
+//                        val screenshotIntent = Intent(
+//                            context as Activity,
+//                            PaintActivity::class.java
+//                        ).putExtra("BitmapScreenshot", byteArray)
+                        val screenshotIntent = Intent(
+                            context as Activity,
+                            PaintActivity::class.java
+                        )
+                        context.startActivity(screenshotIntent)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

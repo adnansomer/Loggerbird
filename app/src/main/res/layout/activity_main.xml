@@ -176,12 +176,23 @@
         android:layout_below="@id/button_next_activity"
         android:text="performance" />
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/cici"
+        />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        >
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:id="@+id/recycler_view"
-        android:layout_alignParentBottom="true"
-        android:layout_height="wrap_content" />
 
+        android:layout_height="wrap_content" />
+    </FrameLayout>
     <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyle"

@@ -12,6 +12,9 @@
 
     <application>
         <activity android:name="observers.LogActivityLifeCycleObserver"/>
+        <activity android:name="paint.PaintActivity"
+            android:theme="@style/AppTheme">
+        </activity>
         <service
             android:name="services.LoggerBirdMemoryService"
             android:enabled="true"
