@@ -47,7 +47,7 @@ class PaintActivity : Activity() {
 
         screenShot = convertBitmapToDrawable()
         paintView.background = screenShot
-        //paintView.setBackgroundResource(R.drawable.screenshot_1586760803)
+        //paintView.setBackgroundResource(R.drawable.screenshot_aura)
 
 
         if(Build.VERSION.SDK_INT >= 21) {
@@ -59,9 +59,7 @@ class PaintActivity : Activity() {
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_FULLSCREEN
-                //or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                )
+                or View.SYSTEM_UI_FLAG_FULLSCREEN)
     }
 
     private fun convertBitmapToDrawable() : Drawable{
@@ -105,7 +103,6 @@ class PaintActivity : Activity() {
         paint_floating_action_button_palette.setOnClickListener {
             showColorChooseDialog()
         }
-
 
         paint_floating_action_button_erase.setOnClickListener {
             if(paintView.eraserEnabled) {
@@ -181,12 +178,18 @@ class PaintActivity : Activity() {
 
     private fun showColorChooseDialog() {
 
-        val colorPickerDialog = AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+        val colorPickerDialog =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                AlertDialog.Builder(this,android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            } else {
+                AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+            }
+
         val inflater = LayoutInflater.from(this@PaintActivity)
         val paintSeekView = inflater.inflate(R.layout.activity_paint_seek_view_color, null)
 
         val colorSeekBar = paintSeekView.color_seek_bar
-        var selectedColor : Int = 0
+        var selectedColor = 0
 
         colorSeekBar.setOnColorChangeListener(object: ColorSeekBar.OnColorChangeListener{
             override fun onColorChangeListener(color: Int) {
@@ -214,9 +217,17 @@ class PaintActivity : Activity() {
 
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     private fun showBrushWidthSetterDialog(){
 
-        val lineWidthDialog = AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+        val lineWidthDialog =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                AlertDialog.Builder(this,android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            } else {
+                AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+            }
+
 
         val inflater = LayoutInflater.from(this@PaintActivity)
         val seekView = inflater.inflate(R.layout.activity_paint_seek_view, null)
@@ -260,9 +271,17 @@ class PaintActivity : Activity() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     private fun showFileSavingDialog(){
 
-        val saveDialog = AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+        val saveDialog =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                AlertDialog.Builder(this,android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            } else {
+                AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+            }
+
+
         val inflater = LayoutInflater.from(this@PaintActivity)
         val saveView = inflater.inflate(R.layout.activity_paint_save_dialog, null)
 

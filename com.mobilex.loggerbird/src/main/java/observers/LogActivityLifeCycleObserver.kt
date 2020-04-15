@@ -26,6 +26,7 @@ import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
+import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -455,6 +456,7 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             floating_action_button_video.animate().rotation(360F)
             floating_action_button_video.animate().duration = 200L
             floating_action_button_video.animate().start()
+
             floating_action_button_screenshot.animate().alphaBy(1.0F)
             floating_action_button_screenshot.animate().alpha(0.0F)
             floating_action_button_screenshot.animate().scaleXBy(1.0F)
@@ -462,8 +464,11 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
             floating_action_button_screenshot.animate().scaleYBy(1.0F)
             floating_action_button_screenshot.animate().scaleY(0.0F)
             floating_action_button_screenshot.animate().rotation(360F)
+            floating_action_button_screenshot.animate().setInterpolator(OvershootInterpolator())
             floating_action_button_screenshot.animate().duration = 200L
+
             floating_action_button_screenshot.animate().start()
+
             floating_action_button_audio.animate().alphaBy(1.0F)
             floating_action_button_audio.animate().alpha(0.0F)
             floating_action_button_audio.animate().scaleXBy(1.0F)
@@ -563,7 +568,6 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         }
     }
 
-
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun createScreenShot(view: View): Bitmap {
 
@@ -579,21 +583,16 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         return bitmap
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun takeScreenShot(view: View, context: Context) {
         if (checkWriteExternalStoragePermission()) {
             coroutineCallScreenShot.async {
-                val fileDirectory: File = context.filesDir
+
                 var byteArray: ByteArray? = null
-//                val filePath = File(
-//                    fileDirectory,
-//                    "logger_bird_screenshot" + System.currentTimeMillis().toString() + ".png"
-//                )
+
                 try {
                     withContext(Dispatchers.IO) {
-//                        filePath.createNewFile()
-//                        val fileOutputStream = FileOutputStream(filePath)
-//                        createScreenShot(view = view).compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream)
-//                        fileOutputStream.close()
 
                         val bStream = ByteArrayOutputStream()
                         createScreenShot(view = view).compress(Bitmap.CompressFormat.PNG, 100, bStream)
@@ -872,7 +871,6 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
         }
     }
 
-
     @RequiresApi(Build.VERSION_CODES.O)
     private fun startForegroundServiceVideo() {
         Log.d("start_foreground", "Foreground Service started!!!!!")
@@ -882,7 +880,6 @@ class LogActivityLifeCycleObserver(contextMetrics: Context) : Activity(),
     private fun stopForegroundServiceVideo() {
         (context as Activity).stopService(intentForegroundServiceVideo)
     }
-
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     internal fun callVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {

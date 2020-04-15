@@ -14,7 +14,7 @@
         <eightbitlab.com.blurview.BlurView
             android:id="@+id/blurView"
             android:layout_width="match_parent"
-            android:layout_height="100dp">
+            android:layout_height="200dp">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
