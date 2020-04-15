@@ -124,25 +124,6 @@ internal class LoggerBirdService : Service() {
             }
 
         }
-
-        internal fun takeOldCoordinates() {
-            if (this::floating_action_button.isInitialized) {
-                floatingActionButtonLastDx = floating_action_button.x
-                floatingActionButtonLastDy = floating_action_button.y
-            }
-            if (this::floating_action_button_screenshot.isInitialized) {
-                floatingActionButtonScreenShotLastDx = floating_action_button_screenshot.x
-                floatingActionButtonScreenShotLastDy = floating_action_button_screenshot.y
-            }
-            if (this::floating_action_button_video.isInitialized) {
-                floatingActionButtonVideoLastDx = floating_action_button_video.x
-                floatingActionButtonVideoLastDy = floating_action_button_video.y
-            }
-            if (this::floating_action_button_audio.isInitialized) {
-                floatingActionButtonAudioLastDx = floating_action_button_audio.x
-                floatingActionButtonAudioLastDy = floating_action_button_audio.y
-            }
-        }
     }
 
     init {
@@ -560,11 +541,17 @@ internal class LoggerBirdService : Service() {
 //                            context as Activity,
 //                            PaintActivity::class.java
 //                        ).putExtra("BitmapScreenshot", byteArray)
-                        val screenshotIntent = Intent(
-                            context as Activity,
-                            PaintActivity::class.java
-                        )
-                        context.startActivity(screenshotIntent)
+//                        val screenshotIntent = Intent(
+//                            context as Activity,
+//                            PaintActivity::class.java
+//                        )
+//                        context.startActivity(screenshotIntent)
+                        val loggerBirdPaintService = LoggerBirdPaintService()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            loggerBirdPaintService.initializeActivity(activity = activity)
+                        }
+                        val screenshotServiceIntent=Intent(context,loggerBirdPaintService.javaClass)
+                        context.startService(screenshotServiceIntent)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
