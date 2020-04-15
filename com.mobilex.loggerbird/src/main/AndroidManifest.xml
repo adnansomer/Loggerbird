@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-
     package="com.mobilex.loggerbird">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -8,23 +7,23 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application>
+        <activity android:name="observers.LogActivityLifeCycleObserver"/>
         <activity android:name="paint.PaintActivity"
-                android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme">
         </activity>
-
-        <activity android:name="observers.LogActivityLifeCycleObserver" />
-
         <service
             android:name="services.LoggerBirdMemoryService"
             android:enabled="true"
             android:exported="true" />
         <service android:name="services.LoggerBirdService" />
-        <service
-            android:name="services.LoggerBirdForegroundServiceVideo"
-            android:foregroundServiceType="mediaProjection" />
+        <service android:name="services.LoggerBirdPaintService"/>
+        <service android:name="services.LoggerBirdForegroundServiceVideo"
+            android:foregroundServiceType="mediaProjection"
+            />
     </application>
 
 </manifest>

@@ -51,8 +51,13 @@ internal class Constants {
         const val videoRecordingSdkTag:String="Call requires API level 21"
         const val foregroundServiceVideo:String = "Foreground Service Video"
         const val onActivityResultTag:String = "onActivityResult"
+        const val onPermissionResultTag:String = "onPermissionResult"
         const val floatingActionButtonScreenshotTag:String = "Floating Action Button Screenshot"
         const val floatingActionButtonVideoTag:String = "Floating Action Button Video"
         const val floatingActionButtonAudioTag:String = "Floating Action Button Audio"
+        const val paintViewTag:String = "Paint View"
+        const val paintActivityTag:String = "Paint Activity"
+        const val paintFabAnimationTag:String = "Paint Fab Animation"
+        const val floatingActionButtonPaintTag:String = "Floating Action Button Paint"
     }
 }

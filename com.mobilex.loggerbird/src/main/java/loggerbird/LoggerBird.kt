@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
@@ -113,7 +114,6 @@ class LoggerBird : LifecycleObserver {
             LogRecyclerViewItemTouchListener()
         private lateinit var workQueueLinked: LinkedBlockingQueueUtil
         private lateinit var recyclerViewItemObserver: LogDataSetObserver
-        private lateinit var intentService: Intent
         private lateinit var textViewFileReader: TextView
         private lateinit var buttonFileReader: Button
         private var memoryOverused: Boolean = false
@@ -131,6 +131,7 @@ class LoggerBird : LifecycleObserver {
         private lateinit var activityLifeCycleObserver: LogActivityLifeCycleObserver
         internal var stringBuilderActivityLifeCycleObserver: StringBuilder = StringBuilder()
         internal var classList: ArrayList<String> = ArrayList()
+        private val loggerBirdService:LoggerBirdService = LoggerBirdService()
 
 
         //---------------Public Methods:---------------//
@@ -172,8 +173,6 @@ class LoggerBird : LifecycleObserver {
                         filePath.delete()
                     }
                 }
-                intentService = Intent(context, LoggerBirdService::class.java)
-                context.startService(intentService)
                 intentServiceMemory = Intent(context, LoggerBirdMemoryService::class.java)
                 context.startService(intentServiceMemory)
                 workQueueLinked = LinkedBlockingQueueUtil()
@@ -189,23 +188,6 @@ class LoggerBird : LifecycleObserver {
 //                workQueue = workQueueLinked,
 //                unit = timeUnit
 //            )
-//            val rootView: ViewGroup =
-//                (context as Activity).window.decorView.findViewById(android.R.id.content)
-//            val view: View = LayoutInflater.from(context)
-//                .inflate(
-//                    R.layout.fragment_logger_bird,
-//                    rootView,
-//                    false
-//                )
-//            val supportFragmentManager = (context as AppCompatActivity).supportFragmentManager
-//            supportFragmentManager.beginTransaction()
-//                .replace((rootView as View).id,FragmentLoggerBird.newInstance(viewFragment = rootView as View,context = context),"FragmentLoggerBird").commit()
-//
-//            val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
-//                ViewGroup.LayoutParams.MATCH_PARENT,
-//                ViewGroup.LayoutParams.MATCH_PARENT
-//            )
-//            context.addContentView(view, layoutParams)
             controlLogInit = true
             return controlLogInit
         }
@@ -224,7 +206,7 @@ class LoggerBird : LifecycleObserver {
          */
         private fun logAttachLifeCycleObservers(context: Context) {
 //            context.applicationContext.registerComponentCallbacks()
-            activityLifeCycleObserver = LogActivityLifeCycleObserver(contextMetrics = context)
+            activityLifeCycleObserver = LogActivityLifeCycleObserver(loggerBirdService = loggerBirdService)
             (context as Application).registerActivityLifecycleCallbacks(activityLifeCycleObserver)
 //                lifeCycleObserver = LogLifeCycleObserver()
 //                lifeCycleObserver.registerLifeCycle(context)
@@ -2817,26 +2799,54 @@ class LoggerBird : LifecycleObserver {
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             if(controlLogInit){
                 try {
-                    LogActivityLifeCycleObserver.controlPermissionRequest = false
+                    LoggerBirdService.controlPermissionRequest = false
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         if(resultCode==Activity.RESULT_OK && data != null){
-                            activityLifeCycleObserver.callVideoRecording(
+                            loggerBirdService.callVideoRecording(
                                 requestCode = requestCode,
                                 resultCode = resultCode,
                                 data = data
                             )
+                        }else{
+                            Toast.makeText(context, "Permission denied!",Toast.LENGTH_SHORT).show()
                         }
-                        LogActivityLifeCycleObserver.callEnqueue()
+                        LoggerBirdService.callEnqueue()
                     }else{
                         throw LoggerBirdException(Constants.videoRecordingSdkTag+"current min is:"+Build.VERSION.SDK_INT)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    LogActivityLifeCycleObserver.callEnqueue()
+                    LoggerBirdService.callEnqueue()
                     callEnqueue()
                     callExceptionDetails(exception = e , tag = Constants.onActivityResultTag)
                 }
             }else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+        }
+        fun onRequestPermissionResult(requestCode: Int,permissions: Array<out String>,grantResults: IntArray){
+            if(controlLogInit){
+                try{
+                    var permissionCounter = 0
+                   LoggerBirdService.controlPermissionRequest = false
+                    do {
+                        if(permissions[permissionCounter] == "android.permission.WRITE_EXTERNAL_STORAGE" || permissions[permissionCounter] == "android.permission.RECORD_AUDIO"){
+                            if(grantResults[0]==0){
+                                Toast.makeText(context, "Permission granted!",Toast.LENGTH_SHORT).show()
+                            }else{
+                                Toast.makeText(context, "Permission denied!",Toast.LENGTH_SHORT).show()
+                            }
+
+                        }
+                        permissionCounter++
+                    }while (permissions.iterator().hasNext())
+                }catch (e:Exception){
+                    e.printStackTrace()
+                   LoggerBirdService.callEnqueue()
+                    callEnqueue()
+                    callExceptionDetails(exception = e , tag =Constants.onPermissionResultTag )
+                }
+            }else{
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }

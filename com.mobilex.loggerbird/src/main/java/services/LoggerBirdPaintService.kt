@@ -1,20 +1,29 @@
-package paint
+package services
 
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.Service
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.PixelFormat
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.os.Bundle
+import android.os.IBinder
+import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.SeekBar
+import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.divyanshu.colorseekbar.ColorSeekBar
 import com.google.android.material.snackbar.Snackbar
@@ -22,71 +31,139 @@ import com.mobilex.loggerbird.R
 import constants.Constants
 import kotlinx.android.synthetic.main.activity_paint.*
 import kotlinx.android.synthetic.main.activity_paint_save_dialog.view.*
+import kotlinx.android.synthetic.main.activity_paint_save_dialog.view.brushWidthSeekText
 import kotlinx.android.synthetic.main.activity_paint_seek_view.view.*
-import kotlinx.android.synthetic.main.activity_paint_seek_view.view.brushWidthSeekText
 import kotlinx.android.synthetic.main.activity_paint_seek_view_color.view.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import listeners.FloatingActionButtonPaintOnTouchListener
+import kotlinx.coroutines.*
+import listeners.FloatingActionButtonPaintGlobalLayoutListener
 import loggerbird.LoggerBird
-import services.LoggerBirdService
+import java.lang.Exception
 
-
-class PaintActivity() : Activity() {
+internal class LoggerBirdPaintService : Service() {
+    private var intentService: Intent? = null
+    private lateinit var context: Context
+    private lateinit var activity: Activity
     private val REQUEST_WRITE_EXTERNAL = 1
     private lateinit var screenShot: Drawable
     private val coroutineCallPaintActivity: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_paint)
-        coroutineCallPaintActivity.async {
+    private lateinit var windowManager: Any
+    private lateinit var windowManagerParams: WindowManager.LayoutParams
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        try {
+            intentService = intent
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.serviceTag)
+        }
+        return START_NOT_STICKY
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopSelf()
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    internal fun initializeActivity(activity: Activity) {
+        this.context = activity
+        this.activity = activity
             try {
-                val metrics = DisplayMetrics()
-                windowManager.defaultDisplay.getMetrics(metrics)
-                paintView.init(metrics)
-                screenShot = convertBitmapToDrawable()
-                paintView.background = screenShot
-//        paintView.setBackgroundResource(R.drawable.screenshot_1586760803)
-                if (Build.VERSION.SDK_INT >= 23) {
-                    window.navigationBarColor = resources.getColor(R.color.black, theme)
-                    window.statusBarColor = resources.getColor(R.color.black, theme)
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        window.navigationBarColor = resources.getColor(R.color.black)
-                        window.statusBarColor = resources.getColor(R.color.black)
+                val rootView: ViewGroup =
+                    activity.window.decorView.findViewById(android.R.id.content)
+                val view: View
+//                val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
+//                    ViewGroup.LayoutParams.MATCH_PARENT,
+//                    ViewGroup.LayoutParams.MATCH_PARENT
+//                )
+                view = LayoutInflater.from(activity)
+                    .inflate(
+                        R.layout.activity_paint,
+                        rootView,
+                        false
+                    )
+                if (Settings.canDrawOverlays(activity)) {
+                    windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        WindowManager.LayoutParams(
+                            WindowManager.LayoutParams.WRAP_CONTENT,
+                            WindowManager.LayoutParams.WRAP_CONTENT,
+                            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                            PixelFormat.TRANSLUCENT
+                        )
+                    } else {
+                        WindowManager.LayoutParams(
+                            WindowManager.LayoutParams.MATCH_PARENT,
+                            WindowManager.LayoutParams.MATCH_PARENT,
+                            WindowManager.LayoutParams.TYPE_APPLICATION,
+                            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                            PixelFormat.TRANSLUCENT
+                        )
                     }
+                    val paintRunnable = Runnable {initializePaintView()}
+                    view.viewTreeObserver.addOnGlobalLayoutListener(FloatingActionButtonPaintGlobalLayoutListener(paintRunnable = paintRunnable , view = view))
+                    windowManager = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                        (windowManager as WindowManager).addView(view, windowManagerParams)
                 }
-                window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
+            }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializePaintView(){
+        try {
+            val metrics = DisplayMetrics()
+            activity.windowManager.defaultDisplay.getMetrics(metrics)
+            activity.paintView.init(metrics)
+            screenShot = convertBitmapToDrawable()
+            activity.paintView.background = screenShot
+//        paintView.setBackgroundResource(R.drawable.screenshot_1586760803)
+            if (Build.VERSION.SDK_INT >= 23) {
+                activity.window.navigationBarColor =
+                    resources.getColor(R.color.black, theme)
+                activity.window.statusBarColor =
+                    resources.getColor(R.color.black, theme)
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    activity.window.navigationBarColor =
+                        resources.getColor(R.color.black)
+                    activity.window.statusBarColor = resources.getColor(R.color.black)
+                }
+            }
+            activity.window.decorView.systemUiVisibility =
+                (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                         or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         or View.SYSTEM_UI_FLAG_FULLSCREEN
                         //or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                         )
-            } catch (e: Exception) {
-                e.printStackTrace()
-                LoggerBird.callEnqueue()
-                LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
-            }
-        }
-    }
-
-    private fun convertBitmapToDrawable(): Drawable {
-        return BitmapDrawable(resources, LoggerBirdService.screenshotBitmap)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    override fun onStart() {
-        super.onStart()
-        try {
             buttonClicks()
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
         }
+    }
+
+    private fun convertBitmapToDrawable(): Drawable {
+        return BitmapDrawable(activity.resources, LoggerBirdService.screenshotBitmap)
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -103,35 +180,37 @@ class PaintActivity() : Activity() {
 //            floatingActionButtonPaintPalette = paint_floating_action_button_palette,
 //            floatingActionButtonPaintSave = paint_floating_action_button_save
 //        ))
-        paint_floating_action_button.setOnClickListener {
-            paint_floating_action_button.isExpanded = !paint_floating_action_button.isExpanded
-            paint_floating_action_button.isActivated = paint_floating_action_button.isExpanded
+        activity.paint_floating_action_button.setOnClickListener {
+            activity.paint_floating_action_button.isExpanded =
+                !activity.paint_floating_action_button.isExpanded
+            activity.paint_floating_action_button.isActivated =
+                activity.paint_floating_action_button.isExpanded
         }
-        paint_floating_action_button_save.setOnClickListener {
+        activity.paint_floating_action_button_save.setOnClickListener {
             if (requestPermission()) {
                 showFileSavingDialog()
             }
         }
 
-        paint_floating_action_button_brush.setOnClickListener {
+        activity.paint_floating_action_button_brush.setOnClickListener {
             showBrushWidthSetterDialog()
         }
 
-        paint_floating_action_button_delete.setOnClickListener {
+        activity.paint_floating_action_button_delete.setOnClickListener {
             showDeleteSnackBar()
         }
 
-        paint_floating_action_button_palette.setOnClickListener {
+        activity.paint_floating_action_button_palette.setOnClickListener {
             showColorChooseDialog()
         }
-        paint_floating_action_button_erase.setOnClickListener {
-            if (paintView.eraserEnabled) {
-                paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
-                paintView.disableEraser()
+        activity.paint_floating_action_button_erase.setOnClickListener {
+            if (activity.paintView.eraserEnabled) {
+                activity.paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
+                activity.paintView.disableEraser()
             } else {
-                paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_red_24dp)
-                paintView.enableEraser()
-                paintView.clear()
+                activity.paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_red_24dp)
+                activity.paintView.enableEraser()
+                activity.paintView.clear()
             }
 
         }
@@ -146,7 +225,7 @@ class PaintActivity() : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             val snackBarDelete = Snackbar.make(
-                this.findViewById(android.R.id.content),
+                activity.findViewById(android.R.id.content),
                 "delete",
                 Snackbar.LENGTH_INDEFINITE
             )
@@ -157,9 +236,13 @@ class PaintActivity() : Activity() {
             layout.layoutParams = parentParams
             layout.setPadding(0, 0, 0, -50)
             layout.layoutParams = parentParams
-            val rootView: ViewGroup = window.decorView.findViewById(android.R.id.content)
+            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             val snackView: View =
-                layoutInflater.inflate(R.layout.activity_paint_save_snackbar, rootView, false)
+                activity.layoutInflater.inflate(
+                    R.layout.activity_paint_save_snackbar,
+                    rootView,
+                    false
+                )
             val messageTextView: TextView =
                 snackView.findViewById(R.id.message_text_view) as TextView
             messageTextView.text = "Are you sure you want to delete?"
@@ -167,11 +250,11 @@ class PaintActivity() : Activity() {
             textViewYes.text = "YES"
             textViewYes.setOnClickListener {
                 Snackbar.make(it, "Deleted!", Snackbar.LENGTH_SHORT).show()
-                paintView.clearAllPaths()
-                if (paintView.eraserEnabled) {
-                    paintView.disableEraser()
-                    paintView.eraserEnabled = false
-                    paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
+                activity.paintView.clearAllPaths()
+                if (activity.paintView.eraserEnabled) {
+                    activity.paintView.disableEraser()
+                    activity.paintView.eraserEnabled = false
+                    activity.paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
                 }
             }
             val textViewNo: TextView = snackView.findViewById(R.id.snackbar_no)
@@ -193,12 +276,13 @@ class PaintActivity() : Activity() {
         }
     }
 
+
     private fun requestPermission(): Boolean {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                activity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 REQUEST_WRITE_EXTERNAL
             )
         }
@@ -213,17 +297,17 @@ class PaintActivity() : Activity() {
                 } else {
                     AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK)
                 }
-            val inflater = LayoutInflater.from(this@PaintActivity)
-            val rootView: ViewGroup = window.decorView.findViewById(android.R.id.content)
+            val inflater = LayoutInflater.from(activity)
+            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             val paintSeekView =
                 inflater.inflate(R.layout.activity_paint_seek_view_color, rootView, false)
             val colorSeekBar = paintSeekView.color_seek_bar
             var selectedColor = 0
             colorSeekBar.setOnColorChangeListener(object : ColorSeekBar.OnColorChangeListener {
                 override fun onColorChangeListener(color: Int) {
-                    if (paintView.eraserEnabled) {
-                        paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
-                        paintView.disableEraser()
+                    if (activity.paintView.eraserEnabled) {
+                        activity.paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
+                        activity.paintView.disableEraser()
                     }
                     selectedColor = color
                     paintSeekView.setBackgroundColor(color)
@@ -232,7 +316,7 @@ class PaintActivity() : Activity() {
             })
             colorPickerDialog.setPositiveButton("Apply") { dialog, _ ->
                 run {
-                    paintView.setBrushColor(selectedColor)
+                    activity.paintView.setBrushColor(selectedColor)
                     dialog.dismiss()
                 }
             }
@@ -255,19 +339,19 @@ class PaintActivity() : Activity() {
                 } else {
                     AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK)
                 }
-            val inflater = LayoutInflater.from(this@PaintActivity)
-            val rootView: ViewGroup = window.decorView.findViewById(android.R.id.content)
+            val inflater = LayoutInflater.from(activity)
+            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             val seekView = inflater.inflate(R.layout.activity_paint_seek_view, rootView, false)
             seekView.brushWidthSeek.max = 100
-            seekView.brushWidthSeek.progress = paintView.getBrushWidth()
+            seekView.brushWidthSeek.progress = activity.paintView.getBrushWidth()
             seekView.brush_increase.setOnClickListener {
                 seekView.brushWidthSeek.progress = seekView.brushWidthSeek.progress + 1
-                paintView.setBrushWidth(seekView.brushWidthSeek.progress)
+                activity.paintView.setBrushWidth(seekView.brushWidthSeek.progress)
             }
 
             seekView.brush_decrease.setOnClickListener {
                 seekView.brushWidthSeek.progress = seekView.brushWidthSeek.progress - 1
-                paintView.setBrushWidth(seekView.brushWidthSeek.progress)
+                activity.paintView.setBrushWidth(seekView.brushWidthSeek.progress)
             }
 
             seekView.brushWidthSeek.setOnSeekBarChangeListener(object :
@@ -289,7 +373,7 @@ class PaintActivity() : Activity() {
             lineWidthDialog.setPositiveButton("Apply") { dialog, _ ->
                 run {
                     dialog.dismiss()
-                    paintView.setBrushWidth(seekView.brushWidthSeek.progress)
+                    activity.paintView.setBrushWidth(seekView.brushWidthSeek.progress)
                 }
             }
             lineWidthDialog.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
@@ -305,15 +389,15 @@ class PaintActivity() : Activity() {
     private fun showFileSavingDialog() {
         try {
             val saveDialog = AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK)
-            val inflater = LayoutInflater.from(this@PaintActivity)
+            val inflater = LayoutInflater.from(activity)
             val saveView = inflater.inflate(R.layout.activity_paint_save_dialog, null)
             var fileName: String
             saveDialog.setView(saveView)
             saveDialog.setPositiveButton("OK") { _, _ ->
                 fileName = saveView.paint_save_issue.text.toString()
-                paintView.saveImage(fileName)
+                activity.paintView.saveImage(fileName)
                 val snackBarFileSaving: Snackbar =
-                    Snackbar.make(paintView, "Successfully saved!", Snackbar.LENGTH_SHORT)
+                    Snackbar.make(activity.paintView, "Successfully saved!", Snackbar.LENGTH_SHORT)
                 snackBarFileSaving.setAction("Dismiss") {
                     snackBarFileSaving.dismiss()
                 }.show()
