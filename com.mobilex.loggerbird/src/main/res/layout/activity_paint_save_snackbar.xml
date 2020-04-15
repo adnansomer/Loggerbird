@@ -24,7 +24,7 @@
         android:layout_weight=".2"
         android:gravity="center"
         android:text="NO"
-        android:textColor="@color/colorWhite"/>
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/snackbar_yes"
@@ -33,6 +33,6 @@
         android:layout_weight=".2"
         android:gravity="center"
         android:text="YES"
-        android:textColor="@color/colorWhite"/>
+        android:textColor="@color/white"/>
 
 </LinearLayout>

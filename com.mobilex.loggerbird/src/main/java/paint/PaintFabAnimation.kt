@@ -12,6 +12,8 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.transformation.ExpandableTransformationBehavior
+import constants.Constants
+import loggerbird.LoggerBird
 import java.util.ArrayList
 
 class PaintFabAnimation @JvmOverloads constructor(
@@ -36,33 +38,35 @@ class PaintFabAnimation @JvmOverloads constructor(
         expanded: Boolean,
         isAnimating: Boolean
     ): AnimatorSet {
-
-        if (child !is ViewGroup) {
-            return AnimatorSet()
-        }
-
-        val animations = ArrayList<Animator>()
-
-        if (expanded) {
-            createExpandAnimation(child, isAnimating, animations)
-        } else {
-            createCollapseAnimation(child, animations)
-        }
-
         val set = AnimatorSet()
-        set.playTogether(animations)
-        set.addListener(
-            onStart = {
-                if (expanded) {
-                    child.isVisible = true
-                }
-            },
-            onEnd = {
-                if (!expanded) {
-                    child.isInvisible = true
-                }
+        try {
+            if (child !is ViewGroup) {
+                return AnimatorSet()
             }
-        )
+            val animations = ArrayList<Animator>()
+            if (expanded) {
+                createExpandAnimation(child, isAnimating, animations)
+            } else {
+                createCollapseAnimation(child, animations)
+            }
+            set.playTogether(animations)
+            set.addListener(
+                onStart = {
+                    if (expanded) {
+                        child.isVisible = true
+                    }
+                },
+                onEnd = {
+                    if (!expanded) {
+                        child.isInvisible = true
+                    }
+                }
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e , tag = Constants.paintFabAnimationTag)
+        }
         return set
     }
 
@@ -71,60 +75,72 @@ class PaintFabAnimation @JvmOverloads constructor(
         currentlyAnimating: Boolean,
         animations: MutableList<Animator>
     ) {
-        if (!currentlyAnimating) {
-            child.children.forEach {
-                it.alpha = 0f
-                it.scaleX = 0.4f
-                it.scaleY = 0.4f
+        try {
+            if (!currentlyAnimating) {
+                child.children.forEach {
+                    it.alpha = 0f
+                    it.scaleX = 0.4f
+                    it.scaleY = 0.4f
+                }
             }
-        }
-        val delays = List(child.childCount) {
-            it * EXPAND_DELAY
-        }.reversed().asSequence()
-        val scaleXHolder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1f)
-        val scaleYHolder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f)
-        val alphaHolder = PropertyValuesHolder.ofFloat(View.ALPHA, 1f)
-        val animators = child.children.zip(delays) { view, delay ->
-            ObjectAnimator.ofPropertyValuesHolder(
-                view,
-                scaleXHolder,
-                scaleYHolder,
-                alphaHolder
-            ).apply {
-                duration = EXPAND_DURATION
-                startDelay = delay
+            val delays = List(child.childCount) {
+                it * EXPAND_DELAY
+            }.reversed().asSequence()
+            val scaleXHolder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1f)
+            val scaleYHolder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f)
+            val alphaHolder = PropertyValuesHolder.ofFloat(View.ALPHA, 1f)
+            val animators = child.children.zip(delays) { view, delay ->
+                ObjectAnimator.ofPropertyValuesHolder(
+                    view,
+                    scaleXHolder,
+                    scaleYHolder,
+                    alphaHolder
+                ).apply {
+                    duration = EXPAND_DURATION
+                    startDelay = delay
+                }
+            }.toList()
+            val animatorSet = AnimatorSet().apply {
+                playTogether(animators)
             }
-        }.toList()
-        val animatorSet = AnimatorSet().apply {
-            playTogether(animators)
+            animations.add(animatorSet)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e , tag = Constants.paintFabAnimationTag)
         }
-        animations.add(animatorSet)
     }
 
     private fun createCollapseAnimation(
         child: ViewGroup,
         animations: MutableList<Animator>
     ) {
-        val delays = List(child.childCount) {
-            it * COLLAPSE_DELAY
-        }.asSequence()
-        val scaleXHolder = PropertyValuesHolder.ofFloat(View.SCALE_X, 0.4f)
-        val scaleYHolder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 0.4f)
-        val alphaHolder = PropertyValuesHolder.ofFloat(View.ALPHA, 0f)
-        val animators = child.children.zip(delays) { view, delay ->
-            ObjectAnimator.ofPropertyValuesHolder(
-                view,
-                scaleXHolder,
-                scaleYHolder,
-                alphaHolder
-            ).apply {
-                duration = COLLAPSE_DURATION
-                startDelay = delay
+        try {
+            val delays = List(child.childCount) {
+                it * COLLAPSE_DELAY
+            }.asSequence()
+            val scaleXHolder = PropertyValuesHolder.ofFloat(View.SCALE_X, 0.4f)
+            val scaleYHolder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 0.4f)
+            val alphaHolder = PropertyValuesHolder.ofFloat(View.ALPHA, 0f)
+            val animators = child.children.zip(delays) { view, delay ->
+                ObjectAnimator.ofPropertyValuesHolder(
+                    view,
+                    scaleXHolder,
+                    scaleYHolder,
+                    alphaHolder
+                ).apply {
+                    duration = COLLAPSE_DURATION
+                    startDelay = delay
+                }
+            }.toList()
+            val animatorSet = AnimatorSet().apply {
+                playTogether(animators)
             }
-        }.toList()
-        val animatorSet = AnimatorSet().apply {
-            playTogether(animators)
+            animations.add(animatorSet)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e , tag = Constants.paintFabAnimationTag)
         }
-        animations.add(animatorSet)
     }
 }
