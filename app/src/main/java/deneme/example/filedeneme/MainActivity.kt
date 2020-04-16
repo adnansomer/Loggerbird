@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity() {
             val filePathTest: File = File(this.filesDir, "logger_bird_details.txt")
 
             recyclerViewList.removeAt(0)
-            recyclerViewList.add(RecyclerModel("hello how are you"))
+//            recyclerViewList.add(RecyclerModel("hello how are you"))
             adapter.notifyDataSetChanged()
             LoggerBird.callComponentDetails(
                 view = recycler_view,
@@ -296,13 +296,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addRecyclerViewList() {
-        recyclerViewList.add(RecyclerModel("berk"))
-        recyclerViewList.add(RecyclerModel("berk1"))
-        recyclerViewList.add(RecyclerModel("berk2"))
-        recyclerViewList.add(RecyclerModel("berk3"))
-        recyclerViewList.add(RecyclerModel("berk4"))
-        recyclerViewList.add(RecyclerModel("berk5"))
-        recyclerViewList.add(RecyclerModel("berk6"))
+//        recyclerViewList.add(RecyclerModel("berk"))
+//        recyclerViewList.add(RecyclerModel("berk1"))
+//        recyclerViewList.add(RecyclerModel("berk2"))
+//        recyclerViewList.add(RecyclerModel("berk3"))
+//        recyclerViewList.add(RecyclerModel("berk4"))
+//        recyclerViewList.add(RecyclerModel("berk5"))
+//        recyclerViewList.add(RecyclerModel("berk6"))
 
     }
 

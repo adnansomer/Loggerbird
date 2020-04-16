@@ -1,6 +1,7 @@
 package paint
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.pm.PackageManager
@@ -17,6 +18,7 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import com.divyanshu.colorseekbar.ColorSeekBar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.mobilex.loggerbird.R
 import constants.Constants
@@ -81,6 +83,7 @@ class PaintActivity() : Activity() {
     override fun onStart() {
         super.onStart()
         try {
+            LoggerBirdService.floatingActionButtonView.visibility = View.GONE
             buttonClicks()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -89,20 +92,17 @@ class PaintActivity() : Activity() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicks(): Boolean {
-//        val windowManager:View = window.decorView.findViewById(android.R.id.content)
-//        paint_floating_action_button.setOnTouchListener(FloatingActionButtonPaintOnTouchListener(
-//            windowManager = (windowManager as WindowManager),
-//            windowManagerView = paintView,
-//            windowManagerParams = paintView.layoutParams,
-//            floatingActionButtonPaint = paint_floating_action_button,
-//            floatingActionButtonPaintBrush = paint_floating_action_button_brush,
-//            floatingActionButtonPaintDelete = paint_floating_action_button_delete,
-//            floatingActionButtonPaintErase = paint_floating_action_button_erase,
-//            floatingActionButtonPaintPalette = paint_floating_action_button_palette,
-//            floatingActionButtonPaintSave = paint_floating_action_button_save
-//        ))
+        paint_floating_action_button.setOnTouchListener(FloatingActionButtonPaintOnTouchListener(
+            floatingActionButtonPaint = paint_floating_action_button,
+            floatingActionButtonPaintSave = paint_floating_action_button_save,
+            floatingActionButtonPaintPalette = paint_floating_action_button_palette,
+            floatingActionButtonPaintErase = paint_floating_action_button_erase,
+            floatingActionButtonPaintDelete = paint_floating_action_button_delete,
+            floatingActionButtonPaintBrush = paint_floating_action_button_brush
+        ))
         paint_floating_action_button.setOnClickListener {
             paint_floating_action_button.isExpanded = !paint_floating_action_button.isExpanded
             paint_floating_action_button.isActivated = paint_floating_action_button.isExpanded
@@ -327,5 +327,10 @@ class PaintActivity() : Activity() {
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
     }
 }

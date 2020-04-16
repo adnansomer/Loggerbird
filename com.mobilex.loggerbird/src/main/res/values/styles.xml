@@ -25,17 +25,5 @@
         <item name="rippleColor">@color/secondaryColor</item>
     </style>
 
-    <style name="AppTheme.FabSpeedDial" parent="Theme.MaterialComponents">
-        <item name="android:backgroundTint">@color/white</item>
-        <item name="android:windowFullscreen">true</item>>
-        <item name="borderWidth">0dp</item>
-    </style>
-    <style name="AppTheme.Fab" parent="Theme.MaterialComponents">
-        <item name="android:tint">@color/white</item>
-        <item name="android:backgroundTint">@color/black</item>
-        <item name="borderWidth">0dp</item>
-        <item name="android:windowFullscreen">true</item>>
-        <item name="rippleColor">@color/secondaryColor</item>
-    </style>
 
 </resources>

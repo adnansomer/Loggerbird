@@ -26,7 +26,6 @@ class Main3Activity : AppCompatActivity() {
             Log.d("childview",layoutInflater.factory.toString() + " " + "counter:" + childCounter)
             childCounter++
         }
-        button_dummy_4.setOnClickListener {
             val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -57,6 +56,5 @@ class Main3Activity : AppCompatActivity() {
            }
         }
 
-    }
 
 }

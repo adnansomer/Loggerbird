@@ -85,6 +85,7 @@ internal class LoggerBirdService : Service() {
 
     //Static global variables:
     internal companion object {
+        internal lateinit var floatingActionButtonView:View
         private lateinit var floating_action_button: FloatingActionButton
         private lateinit var floating_action_button_screenshot: FloatingActionButton
         private lateinit var floating_action_button_video: FloatingActionButton
@@ -254,10 +255,11 @@ internal class LoggerBirdService : Service() {
             windowManager = activity.getSystemService(Context.WINDOW_SERVICE)!!
             (windowManager as WindowManager).addView(view, windowManagerParams)
         } else {
-            activity.addContentView(view, layoutParams)
+            checkDrawOtherAppPermission(activity = (context as Activity))
         }
         this.rootView = rootView
         this.view = view
+        floatingActionButtonView = view
         floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
         floating_action_button_screenshot =
             view.findViewById(R.id.fragment_floating_action_button_screenshot)
@@ -291,6 +293,11 @@ internal class LoggerBirdService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             buttonClicks()
         }
+    }
+
+    internal fun initializeNewActivity(activity: Activity){
+        this.activity = activity
+        this.context = activity
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -537,21 +544,18 @@ internal class LoggerBirdService : Service() {
                     }
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "ScreenShot Taken!", Toast.LENGTH_SHORT).show()
-//                        val screenshotIntent = Intent(
-//                            context as Activity,
-//                            PaintActivity::class.java
-//                        ).putExtra("BitmapScreenshot", byteArray)
-//                        val screenshotIntent = Intent(
-//                            context as Activity,
-//                            PaintActivity::class.java
-//                        )
-//                        context.startActivity(screenshotIntent)
-                        val loggerBirdPaintService = LoggerBirdPaintService()
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            loggerBirdPaintService.initializeActivity(activity = activity)
-                        }
-                        val screenshotServiceIntent=Intent(context,loggerBirdPaintService.javaClass)
-                        context.startService(screenshotServiceIntent)
+                        val paintActivity = PaintActivity()
+                        val screenshotIntent = Intent(
+                            context as Activity,
+                            paintActivity.javaClass
+                        )
+                        context.startActivity(screenshotIntent)
+//                        val loggerBirdPaintService = LoggerBirdPaintService()
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                            loggerBirdPaintService.initializeActivity(activity = activity)
+//                        }
+//                        val screenshotServiceIntent=Intent(context,loggerBirdPaintService.javaClass)
+//                        context.startService(screenshotServiceIntent)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

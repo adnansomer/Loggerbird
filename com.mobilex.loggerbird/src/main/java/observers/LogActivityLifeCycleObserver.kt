@@ -111,6 +111,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityStarted(activity: Activity) {
         try {
+            loggerBirdService.initializeNewActivity(activity = activity)
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
