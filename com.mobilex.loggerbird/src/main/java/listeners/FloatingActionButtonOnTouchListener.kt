@@ -7,6 +7,7 @@ import android.view.*
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.mobilex.loggerbird.R
 import constants.Constants
 import loggerbird.LoggerBird
 
@@ -34,6 +35,7 @@ class FloatingActionButtonOnTouchListener(
                     floatingActionButtonScreenShot.visibility = View.GONE
                     floatingActionButtonVideo.visibility = View.GONE
                     floatingActionButtonAudio.visibility = View.GONE
+                    floatingActionButton.setImageResource(R.drawable.ic_add_black_24dp)
                     windowManagerDx = windowManagerParams.x - event.rawX
                     windowManagerDy = windowManagerParams.y - event.rawY
                     lastAction = MotionEvent.ACTION_DOWN
@@ -139,6 +141,10 @@ class FloatingActionButtonOnTouchListener(
                             0
                         )
                     }
+                    floatingActionButton.setImageResource(R.drawable.ic_close_black_24dp)
+                    floatingActionButtonScreenShot.visibility = View.VISIBLE
+                    floatingActionButtonVideo.visibility = View.VISIBLE
+                    floatingActionButtonAudio.visibility = View.VISIBLE
                     lastAction = MotionEvent.ACTION_UP
                     windowManager.updateViewLayout(
                         windowManagerView,
@@ -147,9 +153,6 @@ class FloatingActionButtonOnTouchListener(
 
                 }
             }
-            floatingActionButtonScreenShot.visibility = View.VISIBLE
-            floatingActionButtonVideo.visibility = View.VISIBLE
-            floatingActionButtonAudio.visibility = View.VISIBLE
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()

@@ -161,24 +161,28 @@ class LoggerBird : LifecycleObserver {
             this.context = context
             this.filePathName = filePathName
             if (!controlLogInit) {
-                fileDirectory = context.filesDir
-                if (filePathName != null) {
-                    filePath = File(fileDirectory, "$filePathName.txt")
-                    if (filePath.exists()) {
-                        filePath.delete()
+                try {
+                    fileDirectory = context.filesDir
+                    if (filePathName != null) {
+                        filePath = File(fileDirectory, "$filePathName.txt")
+                        if (filePath.exists()) {
+                            filePath.delete()
+                        }
+                    } else {
+                        filePath = File(fileDirectory, "logger_bird_details.txt")
+                        if (filePath.exists()) {
+                            filePath.delete()
+                        }
                     }
-                } else {
-                    filePath = File(fileDirectory, "logger_bird_details.txt")
-                    if (filePath.exists()) {
-                        filePath.delete()
-                    }
+                    intentServiceMemory = Intent(context, LoggerBirdMemoryService::class.java)
+                    context.startService(intentServiceMemory)
+                    workQueueLinked = LinkedBlockingQueueUtil()
+                    val logcatObserver = UnhandledExceptionObserver()
+                    Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
+                    logAttachLifeCycleObservers(context = context)
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-                intentServiceMemory = Intent(context, LoggerBirdMemoryService::class.java)
-                context.startService(intentServiceMemory)
-                workQueueLinked = LinkedBlockingQueueUtil()
-                val logcatObserver = UnhandledExceptionObserver()
-                Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
-                logAttachLifeCycleObservers(context = context)
             }
 
 //            threadPoolExecutor= LogThreadPoolExecutorUtil(
