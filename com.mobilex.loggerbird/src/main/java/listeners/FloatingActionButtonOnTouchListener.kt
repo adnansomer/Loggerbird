@@ -5,14 +5,11 @@ import android.os.Build
 import android.util.Log
 import android.view.*
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import androidx.annotation.RequiresApi
-import androidx.core.view.marginStart
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import constants.Constants
 import loggerbird.LoggerBird
-import services.LoggerBirdService
-import javax.mail.Quota
+
 
 
 class FloatingActionButtonOnTouchListener(
@@ -147,11 +144,12 @@ class FloatingActionButtonOnTouchListener(
                         windowManagerView,
                         windowManagerParams
                     )
-                    floatingActionButtonScreenShot.visibility = View.VISIBLE
-                    floatingActionButtonVideo.visibility = View.VISIBLE
-                    floatingActionButtonAudio.visibility = View.VISIBLE
+
                 }
             }
+            floatingActionButtonScreenShot.visibility = View.VISIBLE
+            floatingActionButtonVideo.visibility = View.VISIBLE
+            floatingActionButtonAudio.visibility = View.VISIBLE
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()

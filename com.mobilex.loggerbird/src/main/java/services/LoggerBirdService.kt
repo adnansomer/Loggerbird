@@ -85,7 +85,7 @@ internal class LoggerBirdService : Service() {
 
     //Static global variables:
     internal companion object {
-        internal lateinit var floatingActionButtonView:View
+        internal lateinit var floatingActionButtonView: View
         private lateinit var floating_action_button: FloatingActionButton
         private lateinit var floating_action_button_screenshot: FloatingActionButton
         private lateinit var floating_action_button_video: FloatingActionButton
@@ -295,7 +295,7 @@ internal class LoggerBirdService : Service() {
         }
     }
 
-    internal fun initializeNewActivity(activity: Activity){
+    internal fun initializeNewActivity(activity: Activity) {
         this.activity = activity
         this.context = activity
     }
@@ -383,35 +383,14 @@ internal class LoggerBirdService : Service() {
     private fun animationVisibility() {
         if (isOpen) {
             isOpen = false
-            floating_action_button_video.animate().cancel()
-            floating_action_button_audio.animate().cancel()
-            floating_action_button_screenshot.animate().cancel()
-            floating_action_button_video.animate().alphaBy(1.0F)
-            floating_action_button_video.animate().alpha(0.0F)
-            floating_action_button_video.animate().scaleXBy(1.0F)
-            floating_action_button_video.animate().scaleX(0.0F)
-            floating_action_button_video.animate().scaleYBy(1.0F)
-            floating_action_button_video.animate().scaleY(0.0F)
-            floating_action_button_video.animate().rotation(360F)
-            floating_action_button_video.animate().duration = 200L
+            floating_action_button_video.animate().rotation(-360F)
+            floating_action_button_video.animate().duration = 400L
             floating_action_button_video.animate().start()
-            floating_action_button_screenshot.animate().alphaBy(1.0F)
-            floating_action_button_screenshot.animate().alpha(0.0F)
-            floating_action_button_screenshot.animate().scaleXBy(1.0F)
-            floating_action_button_screenshot.animate().scaleX(0.0F)
-            floating_action_button_screenshot.animate().scaleYBy(1.0F)
-            floating_action_button_screenshot.animate().scaleY(0.0F)
-            floating_action_button_screenshot.animate().rotation(360F)
-            floating_action_button_screenshot.animate().duration = 200L
+            floating_action_button_screenshot.animate().rotation(-360F)
+            floating_action_button_screenshot.animate().duration = 400L
             floating_action_button_screenshot.animate().start()
-            floating_action_button_audio.animate().alphaBy(1.0F)
-            floating_action_button_audio.animate().alpha(0.0F)
-            floating_action_button_audio.animate().scaleXBy(1.0F)
-            floating_action_button_audio.animate().scaleX(0.0F)
-            floating_action_button_audio.animate().scaleYBy(1.0F)
-            floating_action_button_audio.animate().scaleY(0.0F)
-            floating_action_button_audio.animate().rotation(360F)
-            floating_action_button_audio.animate().duration = 200L
+            floating_action_button_audio.animate().rotation(-360F)
+            floating_action_button_audio.animate().duration = 400L
             floating_action_button_audio.animate().start()
             floating_action_button_screenshot.visibility = View.GONE
             floating_action_button_video.visibility = View.GONE
@@ -419,38 +398,17 @@ internal class LoggerBirdService : Service() {
             floating_action_button.setImageResource(R.drawable.ic_add_black_24dp)
         } else {
             isOpen = true
-            floating_action_button_video.animate().cancel()
-            floating_action_button_audio.animate().cancel()
-            floating_action_button_screenshot.animate().cancel()
             floating_action_button_screenshot.visibility = View.VISIBLE
-            floating_action_button_screenshot.animate().alphaBy(0.0F)
-            floating_action_button_screenshot.animate().alpha(1.0F)
-            floating_action_button_screenshot.animate().scaleXBy(0.0F)
-            floating_action_button_screenshot.animate().scaleX(1.0F)
-            floating_action_button_screenshot.animate().scaleYBy(0.0F)
-            floating_action_button_screenshot.animate().scaleY(1.0F)
             floating_action_button_screenshot.animate().rotation(360F)
-            floating_action_button_screenshot.animate().duration = 200L
+            floating_action_button_screenshot.animate().duration = 400L
             floating_action_button_screenshot.animate().start()
             floating_action_button_audio.visibility = View.VISIBLE
-            floating_action_button_audio.animate().alphaBy(0.0F)
-            floating_action_button_audio.animate().alpha(1.0F)
-            floating_action_button_audio.animate().scaleXBy(0.0F)
-            floating_action_button_audio.animate().scaleX(1.0F)
-            floating_action_button_audio.animate().scaleYBy(0.0F)
-            floating_action_button_audio.animate().scaleY(1.0F)
             floating_action_button_audio.animate().rotation(360F)
-            floating_action_button_audio.animate().duration = 200L
+            floating_action_button_audio.animate().duration = 400L
             floating_action_button_audio.animate().start()
             floating_action_button_video.visibility = View.VISIBLE
-            floating_action_button_video.animate().alphaBy(0.0F)
-            floating_action_button_video.animate().alpha(1.0F)
-            floating_action_button_video.animate().scaleXBy(0.0F)
-            floating_action_button_video.animate().scaleX(1.0F)
-            floating_action_button_video.animate().scaleYBy(0.0F)
-            floating_action_button_video.animate().scaleY(1.0F)
             floating_action_button_video.animate().rotation(360F)
-            floating_action_button_video.animate().duration = 200L
+            floating_action_button_video.animate().duration = 400L
             floating_action_button_video.animate().start()
             floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
         }

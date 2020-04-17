@@ -7,6 +7,7 @@ import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -16,6 +17,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import com.divyanshu.colorseekbar.ColorSeekBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -39,6 +41,7 @@ class PaintActivity() : Activity() {
     private val REQUEST_WRITE_EXTERNAL = 1
     private lateinit var screenShot: Drawable
     private val coroutineCallPaintActivity: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var controlButtonVisibility: Boolean = true
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +87,7 @@ class PaintActivity() : Activity() {
         super.onStart()
         try {
             LoggerBirdService.floatingActionButtonView.visibility = View.GONE
+            setButtonDefaultMargins()
             buttonClicks()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -92,27 +96,78 @@ class PaintActivity() : Activity() {
         }
     }
 
+    private fun setButtonDefaultMargins() {
+        (paint_floating_action_button.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            150
+        )
+        (paint_floating_action_button_brush.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            300
+        )
+        (paint_floating_action_button_palette.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            450
+        )
+        (paint_floating_action_button_delete.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            600
+        )
+        (paint_floating_action_button_erase.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            750
+        )
+        (paint_floating_action_button_back.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            900
+        )
+        (paint_floating_action_button_save.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            1050
+        )
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun buttonClicks(): Boolean {
-        paint_floating_action_button.setOnTouchListener(FloatingActionButtonPaintOnTouchListener(
-            floatingActionButtonPaint = paint_floating_action_button,
-            floatingActionButtonPaintSave = paint_floating_action_button_save,
-            floatingActionButtonPaintPalette = paint_floating_action_button_palette,
-            floatingActionButtonPaintErase = paint_floating_action_button_erase,
-            floatingActionButtonPaintDelete = paint_floating_action_button_delete,
-            floatingActionButtonPaintBrush = paint_floating_action_button_brush
-        ))
+    private fun buttonClicks() {
+        paint_floating_action_button.setOnTouchListener(
+            FloatingActionButtonPaintOnTouchListener(
+                floatingActionButtonPaint = paint_floating_action_button,
+                floatingActionButtonPaintSave = paint_floating_action_button_save,
+                floatingActionButtonPaintBack = paint_floating_action_button_back,
+                floatingActionButtonPaintPalette = paint_floating_action_button_palette,
+                floatingActionButtonPaintErase = paint_floating_action_button_erase,
+                floatingActionButtonPaintDelete = paint_floating_action_button_delete,
+                floatingActionButtonPaintBrush = paint_floating_action_button_brush
+            )
+        )
         paint_floating_action_button.setOnClickListener {
-            paint_floating_action_button.isExpanded = !paint_floating_action_button.isExpanded
-            paint_floating_action_button.isActivated = paint_floating_action_button.isExpanded
+            animationVisibility()
+//            paint_floating_action_button.isExpanded = !paint_floating_action_button.isExpanded
+//            paint_floating_action_button.isActivated = paint_floating_action_button.isExpanded
         }
         paint_floating_action_button_save.setOnClickListener {
             if (requestPermission()) {
                 showFileSavingDialog()
             }
         }
+        paint_floating_action_button_back.setOnClickListener {
 
+        }
         paint_floating_action_button_brush.setOnClickListener {
             showBrushWidthSetterDialog()
         }
@@ -135,8 +190,6 @@ class PaintActivity() : Activity() {
             }
 
         }
-
-        return true
     }
 
     private fun showDeleteSnackBar() {
@@ -333,4 +386,64 @@ class PaintActivity() : Activity() {
         super.onPause()
         LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
     }
+
+    private fun animationVisibility() {
+        if (!controlButtonVisibility) {
+            controlButtonVisibility = true
+            paint_floating_action_button_brush.animate().rotation(-360F)
+            paint_floating_action_button_brush.animate().duration = 400L
+            paint_floating_action_button_brush.animate().start()
+            paint_floating_action_button_palette.animate().rotation(-360F)
+            paint_floating_action_button_palette.animate().duration = 400L
+            paint_floating_action_button_palette.animate().start()
+            paint_floating_action_button_delete.animate().rotation(-360F)
+            paint_floating_action_button_delete.animate().duration = 400L
+            paint_floating_action_button_delete.animate().start()
+            paint_floating_action_button_erase.animate().rotation(-360F)
+            paint_floating_action_button_erase.animate().duration = 400L
+            paint_floating_action_button_erase.animate().start()
+            paint_floating_action_button_back.animate().rotation(-360F)
+            paint_floating_action_button_back.animate().duration = 400L
+            paint_floating_action_button_back.animate().start()
+            paint_floating_action_button_save.animate().rotation(-360F)
+            paint_floating_action_button_save.animate().duration = 400L
+            paint_floating_action_button_save.animate().start()
+            paint_floating_action_button_brush.visibility = View.GONE
+            paint_floating_action_button_palette.visibility = View.GONE
+            paint_floating_action_button_delete.visibility = View.GONE
+            paint_floating_action_button_erase.visibility = View.GONE
+            paint_floating_action_button_back.visibility = View.GONE
+            paint_floating_action_button_save.visibility = View.GONE
+            paint_floating_action_button.setImageResource(R.drawable.ic_add_white_24dp)
+        } else {
+            controlButtonVisibility = false
+            paint_floating_action_button_brush.visibility = View.VISIBLE
+            paint_floating_action_button_brush.animate().rotation(360F)
+            paint_floating_action_button_brush.animate().duration = 400L
+            paint_floating_action_button_brush.animate().start()
+            paint_floating_action_button_palette.visibility = View.VISIBLE
+            paint_floating_action_button_palette.animate().rotation(360F)
+            paint_floating_action_button_palette.animate().duration = 400L
+            paint_floating_action_button_palette.animate().start()
+            paint_floating_action_button_delete.visibility = View.VISIBLE
+            paint_floating_action_button_delete.animate().rotation(360F)
+            paint_floating_action_button_delete.animate().duration = 400L
+            paint_floating_action_button_delete.animate().start()
+            paint_floating_action_button_erase.visibility = View.VISIBLE
+            paint_floating_action_button_erase.animate().rotation(360F)
+            paint_floating_action_button_erase.animate().duration = 400L
+            paint_floating_action_button_erase.animate().start()
+            paint_floating_action_button_back.visibility = View.VISIBLE
+            paint_floating_action_button_back.animate().rotation(360F)
+            paint_floating_action_button_back.animate().duration = 400L
+            paint_floating_action_button_back.animate().start()
+            paint_floating_action_button_save.visibility = View.VISIBLE
+            paint_floating_action_button_save.animate().rotation(360F)
+            paint_floating_action_button_save.animate().duration = 400L
+            paint_floating_action_button_save.animate().start()
+            paint_floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
+        }
+    }
+
+
 }
