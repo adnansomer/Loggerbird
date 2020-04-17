@@ -2,7 +2,6 @@ package listeners
 
 import android.os.Build
 import android.view.ViewTreeObserver
-import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import constants.Constants
@@ -20,9 +19,6 @@ class FloatingActionButtonGlobalLayoutListener(
                 floatingActionButton?.x = LoggerBirdService.floatingActionButtonLastDx!!
                 floatingActionButton?.y = LoggerBirdService.floatingActionButtonLastDy!!
             }
-//            floatingActionButton?.viewTreeObserver?.removeOnGlobalLayoutListener(
-//                this
-//            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
