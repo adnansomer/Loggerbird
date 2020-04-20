@@ -1,29 +1,29 @@
 package paint
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.PictureInPictureParams
+import android.content.Context
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.util.Rational
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.*
-import android.widget.Toast.LENGTH_LONG
 import androidx.annotation.RequiresApi
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import com.divyanshu.colorseekbar.ColorSeekBar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.mobilex.loggerbird.R
-import com.todo.shakeit.core.ShakeIt
-import com.todo.shakeit.core.ShakeListener
 import constants.Constants
 import kotlinx.android.synthetic.main.activity_paint.*
 import kotlinx.android.synthetic.main.activity_paint_save_dialog.view.*
@@ -33,30 +33,37 @@ import kotlinx.android.synthetic.main.activity_paint_seek_view_color.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import listeners.FloatingActionButtonPaintOnTouchListener
 import loggerbird.LoggerBird
 import services.LoggerBirdService
+
 
 class PaintActivity : Activity() {
     private val REQUEST_WRITE_EXTERNAL = 1
     private lateinit var screenShot: Drawable
     private val coroutineCallPaintActivity: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private var onStopCalled = false
-
+    private var controlButtonVisibility: Boolean = true
+    companion object{
+        private lateinit var activity:Activity
+        internal fun closeActivitySession(){
+            if(Companion::activity.isInitialized){
+                activity.finish()
+            }
+        }
+    }
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_paint)
-
-
+        activity = this
         coroutineCallPaintActivity.async {
             try {
-
                 val metrics = DisplayMetrics()
                 windowManager.defaultDisplay.getMetrics(metrics)
                 paintView.init(metrics)
                 screenShot = convertBitmapToDrawable()
                 paintView.background = screenShot
-                //paintView.setBackgroundResource(R.drawable.screenshot_aura)
+//        paintView.setBackgroundResource(R.drawable.screenshot_1586760803)
                 if (Build.VERSION.SDK_INT >= 23) {
                     window.navigationBarColor = resources.getColor(R.color.black, theme)
                     window.statusBarColor = resources.getColor(R.color.black, theme)
@@ -72,8 +79,7 @@ class PaintActivity : Activity() {
                         or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         or View.SYSTEM_UI_FLAG_FULLSCREEN
                         //or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                )
-
+                        )
             } catch (e: Exception) {
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
@@ -86,12 +92,12 @@ class PaintActivity : Activity() {
         return BitmapDrawable(resources, LoggerBirdService.screenshotBitmap)
     }
 
-
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onStart() {
         super.onStart()
         try {
-
+            LoggerBirdService.floatingActionButtonView.visibility = View.GONE
+            setButtonDefaultMargins()
             buttonClicks()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -100,45 +106,78 @@ class PaintActivity : Activity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    private fun setButtonDefaultMargins() {
+        (paint_floating_action_button.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            150
+        )
+        (paint_floating_action_button_brush.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            300
+        )
+        (paint_floating_action_button_palette.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            450
+        )
+        (paint_floating_action_button_delete.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            600
+        )
+        (paint_floating_action_button_erase.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            750
+        )
+        (paint_floating_action_button_back.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            900
+        )
+        (paint_floating_action_button_save.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
+            0,
+            0,
+            0,
+            1050
+        )
     }
 
-    override fun onPause() {
-        super.onPause()
-    }
-
-    override fun onStop() {
-        onStopCalled = true
-        super.onStop()
-    }
-
-    override fun onDestroy() {
-        onStopCalled = true
-        super.onDestroy()
-    }
-
+    @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun buttonClicks() : Boolean {
-
+    private fun buttonClicks() {
+        paint_floating_action_button.setOnTouchListener(
+            FloatingActionButtonPaintOnTouchListener(
+                floatingActionButtonPaint = paint_floating_action_button,
+                floatingActionButtonPaintSave = paint_floating_action_button_save,
+                floatingActionButtonPaintBack = paint_floating_action_button_back,
+                floatingActionButtonPaintPalette = paint_floating_action_button_palette,
+                floatingActionButtonPaintErase = paint_floating_action_button_erase,
+                floatingActionButtonPaintDelete = paint_floating_action_button_delete,
+                floatingActionButtonPaintBrush = paint_floating_action_button_brush
+            )
+        )
         paint_floating_action_button.setOnClickListener {
-            paint_floating_action_button.isExpanded = !paint_floating_action_button.isExpanded
-            paint_floating_action_button.isActivated = paint_floating_action_button.isExpanded
+            animationVisibility()
+//            paint_floating_action_button.isExpanded = !paint_floating_action_button.isExpanded
+//            paint_floating_action_button.isActivated = paint_floating_action_button.isExpanded
         }
-
         paint_floating_action_button_save.setOnClickListener {
             if (requestPermission()) {
                 showFileSavingDialog()
             }
         }
         paint_floating_action_button_back.setOnClickListener {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                pictureInPictureMode()
-            } else {
-                finish()
-            }
-        }
 
+        }
         paint_floating_action_button_brush.setOnClickListener {
             showBrushWidthSetterDialog()
         }
@@ -161,44 +200,6 @@ class PaintActivity : Activity() {
             }
 
         }
-
-        return true
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun pictureInPictureMode() {
-        // Calculate the aspect ratio of the PiP screen.
-        val aspectRatio = Rational(9,16)
-        val mPictureInPictureParamsBuilder = PictureInPictureParams.Builder()
-        mPictureInPictureParamsBuilder.setAspectRatio(aspectRatio)
-        enterPictureInPictureMode(mPictureInPictureParamsBuilder.build())
-    }
-
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?) {
-
-        if (isInPictureInPictureMode) {
-
-            paint_floating_action_button.visibility = View.GONE
-            paint_floating_action_button_save.visibility = View.GONE
-            paint_floating_action_button_back.visibility = View.GONE
-            paint_floating_action_button_brush.visibility = View.GONE
-            paint_floating_action_button_delete.visibility = View.GONE
-            paint_floating_action_button_palette.visibility = View.GONE
-            paint_floating_action_button_erase.visibility = View.GONE
-        } else {
-            //Restore ui
-            if (onStopCalled) {
-                finish()
-            }
-
-            paint_floating_action_button.visibility = View.VISIBLE
-            paint_floating_action_button_save.visibility = View.VISIBLE
-            paint_floating_action_button_back.visibility = View.VISIBLE
-            paint_floating_action_button_brush.visibility = View.VISIBLE
-            paint_floating_action_button_delete.visibility = View.VISIBLE
-            paint_floating_action_button_palette.visibility = View.VISIBLE
-            paint_floating_action_button_erase.visibility = View.VISIBLE
-        }
     }
 
     private fun showDeleteSnackBar() {
@@ -207,21 +208,23 @@ class PaintActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-
-            val snackBarDelete = Snackbar.make(this.findViewById(android.R.id.content), "delete", Snackbar.LENGTH_INDEFINITE)
-
+            val snackBarDelete = Snackbar.make(
+                this.findViewById(android.R.id.content),
+                "delete",
+                Snackbar.LENGTH_INDEFINITE
+            )
             val layout: Snackbar.SnackbarLayout = snackBarDelete.view as Snackbar.SnackbarLayout
-
             val parentParams: FrameLayout.LayoutParams =
                 layout.layoutParams as FrameLayout.LayoutParams
-                parentParams.setMargins(0, 0, 0, -50)
-                layout.layoutParams = parentParams
-                layout.setPadding(0, 0, 0, -50)
-                layout.layoutParams = parentParams
+            parentParams.setMargins(0, 0, 0, -50)
+            layout.layoutParams = parentParams
+            layout.setPadding(0, 0, 0, -50)
+            layout.layoutParams = parentParams
             val rootView: ViewGroup = window.decorView.findViewById(android.R.id.content)
-            val snackView: View = layoutInflater.inflate(R.layout.activity_paint_save_snackbar, rootView, false)
-            val messageTextView: TextView = snackView.findViewById(R.id.message_text_view) as TextView
-
+            val snackView: View =
+                layoutInflater.inflate(R.layout.activity_paint_save_snackbar, rootView, false)
+            val messageTextView: TextView =
+                snackView.findViewById(R.id.message_text_view) as TextView
             messageTextView.text = "Are you sure you want to delete?"
             val textViewYes: TextView = snackView.findViewById(R.id.snackbar_yes)
             textViewYes.text = "YES"
@@ -368,21 +371,20 @@ class PaintActivity : Activity() {
             val inflater = LayoutInflater.from(this@PaintActivity)
             val saveView = inflater.inflate(R.layout.activity_paint_save_dialog, null)
             var fileName: String
-
             saveDialog.setView(saveView)
-
             saveDialog.setPositiveButton("OK") { _, _ ->
                 fileName = saveView.paint_save_issue.text.toString()
                 paintView.saveImage(fileName)
-
-                Toast.makeText(this,"Successfully saved!",Toast.LENGTH_SHORT).show()
-
+                val snackBarFileSaving: Snackbar =
+                    Snackbar.make(paintView, "Successfully saved!", Snackbar.LENGTH_SHORT)
+                snackBarFileSaving.setAction("Dismiss") {
+                    snackBarFileSaving.dismiss()
+                }.show()
                 finish()
             }
             saveDialog.setNegativeButton(
                 "Cancel"
             ) { dialog, _ -> dialog.cancel() }
-
             saveDialog.show()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -391,4 +393,70 @@ class PaintActivity : Activity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
+    }
+
+    private fun animationVisibility() {
+        if (!controlButtonVisibility) {
+            controlButtonVisibility = true
+            paint_floating_action_button_brush.animate().rotation(-360F)
+            paint_floating_action_button_brush.animate().duration = 400L
+            paint_floating_action_button_brush.animate().start()
+            paint_floating_action_button_palette.animate().rotation(-360F)
+            paint_floating_action_button_palette.animate().duration = 400L
+            paint_floating_action_button_palette.animate().start()
+            paint_floating_action_button_delete.animate().rotation(-360F)
+            paint_floating_action_button_delete.animate().duration = 400L
+            paint_floating_action_button_delete.animate().start()
+            paint_floating_action_button_erase.animate().rotation(-360F)
+            paint_floating_action_button_erase.animate().duration = 400L
+            paint_floating_action_button_erase.animate().start()
+            paint_floating_action_button_back.animate().rotation(-360F)
+            paint_floating_action_button_back.animate().duration = 400L
+            paint_floating_action_button_back.animate().start()
+            paint_floating_action_button_save.animate().rotation(-360F)
+            paint_floating_action_button_save.animate().duration = 400L
+            paint_floating_action_button_save.animate().start()
+            paint_floating_action_button_brush.visibility = View.GONE
+            paint_floating_action_button_palette.visibility = View.GONE
+            paint_floating_action_button_delete.visibility = View.GONE
+            paint_floating_action_button_erase.visibility = View.GONE
+            paint_floating_action_button_back.visibility = View.GONE
+            paint_floating_action_button_save.visibility = View.GONE
+            paint_floating_action_button.setImageResource(R.drawable.ic_add_white_24dp)
+        } else {
+            controlButtonVisibility = false
+            paint_floating_action_button_brush.visibility = View.VISIBLE
+            paint_floating_action_button_brush.animate().rotation(360F)
+            paint_floating_action_button_brush.animate().duration = 400L
+            paint_floating_action_button_brush.animate().start()
+            paint_floating_action_button_palette.visibility = View.VISIBLE
+            paint_floating_action_button_palette.animate().rotation(360F)
+            paint_floating_action_button_palette.animate().duration = 400L
+            paint_floating_action_button_palette.animate().start()
+            paint_floating_action_button_delete.visibility = View.VISIBLE
+            paint_floating_action_button_delete.animate().rotation(360F)
+            paint_floating_action_button_delete.animate().duration = 400L
+            paint_floating_action_button_delete.animate().start()
+            paint_floating_action_button_erase.visibility = View.VISIBLE
+            paint_floating_action_button_erase.animate().rotation(360F)
+            paint_floating_action_button_erase.animate().duration = 400L
+            paint_floating_action_button_erase.animate().start()
+            paint_floating_action_button_back.visibility = View.VISIBLE
+            paint_floating_action_button_back.animate().rotation(360F)
+            paint_floating_action_button_back.animate().duration = 400L
+            paint_floating_action_button_back.animate().start()
+            paint_floating_action_button_save.visibility = View.VISIBLE
+            paint_floating_action_button_save.animate().rotation(360F)
+            paint_floating_action_button_save.animate().duration = 400L
+            paint_floating_action_button_save.animate().start()
+            paint_floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
+        }
+    }
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
+    }
 }

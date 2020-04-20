@@ -5,14 +5,12 @@ import android.os.Build
 import android.util.Log
 import android.view.*
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import androidx.annotation.RequiresApi
-import androidx.core.view.marginStart
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.mobilex.loggerbird.R
 import constants.Constants
 import loggerbird.LoggerBird
-import services.LoggerBirdService
-import javax.mail.Quota
+
 
 
 class FloatingActionButtonOnTouchListener(
@@ -37,6 +35,7 @@ class FloatingActionButtonOnTouchListener(
                     floatingActionButtonScreenShot.visibility = View.GONE
                     floatingActionButtonVideo.visibility = View.GONE
                     floatingActionButtonAudio.visibility = View.GONE
+                    floatingActionButton.setImageResource(R.drawable.ic_add_black_24dp)
                     windowManagerDx = windowManagerParams.x - event.rawX
                     windowManagerDy = windowManagerParams.y - event.rawY
                     lastAction = MotionEvent.ACTION_DOWN
@@ -142,14 +141,16 @@ class FloatingActionButtonOnTouchListener(
                             0
                         )
                     }
+                    floatingActionButton.setImageResource(R.drawable.ic_close_black_24dp)
+                    floatingActionButtonScreenShot.visibility = View.VISIBLE
+                    floatingActionButtonVideo.visibility = View.VISIBLE
+                    floatingActionButtonAudio.visibility = View.VISIBLE
                     lastAction = MotionEvent.ACTION_UP
                     windowManager.updateViewLayout(
                         windowManagerView,
                         windowManagerParams
                     )
-                    floatingActionButtonScreenShot.visibility = View.VISIBLE
-                    floatingActionButtonVideo.visibility = View.VISIBLE
-                    floatingActionButtonAudio.visibility = View.VISIBLE
+
                 }
             }
         } catch (e: Exception) {
