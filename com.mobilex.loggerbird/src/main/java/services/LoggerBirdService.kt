@@ -308,17 +308,6 @@ internal class LoggerBirdService : Service() {
     @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("ClickableViewAccessibility")
     private fun buttonClicks() {
-        floating_action_button.setOnTouchListener(
-            FloatingActionButtonOnTouchListener(
-                windowManager = (windowManager as WindowManager),
-                windowManagerView = view,
-                windowManagerParams = windowManagerParams,
-                floatingActionButton = floating_action_button,
-                floatingActionButtonScreenShot = floating_action_button_screenshot,
-                floatingActionButtonVideo = floating_action_button_video,
-                floatingActionButtonAudio = floating_action_button_audio
-            )
-        )
         floating_action_button.setOnClickListener {
             if (!Settings.canDrawOverlays(context)) {
                 checkDrawOtherAppPermission(activity = (context as Activity))
@@ -365,6 +354,17 @@ internal class LoggerBirdService : Service() {
                 }
             }
         }
+        floating_action_button.setOnTouchListener(
+            FloatingActionButtonOnTouchListener(
+                windowManager = (windowManager as WindowManager),
+                windowManagerView = view,
+                windowManagerParams = windowManagerParams,
+                floatingActionButton = floating_action_button,
+                floatingActionButtonScreenShot = floating_action_button_screenshot,
+                floatingActionButtonVideo = floating_action_button_video,
+                floatingActionButtonAudio = floating_action_button_audio
+            )
+        )
     }
 
     private fun attachFloatingActionButtonLayoutListener() {

@@ -239,7 +239,10 @@ class PaintActivity : Activity() {
             val textViewYes: TextView = snackView.findViewById(R.id.snackbar_yes)
             textViewYes.text = "YES"
             textViewYes.setOnClickListener {
-                Snackbar.make(it, "Deleted!", Snackbar.LENGTH_SHORT).show()
+                val snackbarYes : Snackbar = Snackbar.make(it, "Deleted!", Snackbar.LENGTH_SHORT)
+                snackbarYes.setAction("Dismiss") {
+                    snackbarYes.dismiss()
+                }.show()
                 paintView.clearAllPaths()
                 if (paintView.eraserEnabled) {
                     paintView.disableEraser()
