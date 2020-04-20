@@ -106,6 +106,12 @@ class FloatingActionButtonPaintOnTouchListener(
                 MotionEvent.ACTION_UP -> {
                     if (deviceWidth < (event.rawX + (floatingActionButtonPaint.width))) {
                         Log.d("corner", "a")
+                        floatingActionButtonPaintBrush.y = view.y
+                        floatingActionButtonPaintPalette.y = view.y
+                        floatingActionButtonPaintDelete.y = view.y
+                        floatingActionButtonPaintErase.y = view.y
+                        floatingActionButtonPaintBack.y = view.y
+                        floatingActionButtonPaintSave.y = view.y
                         view.x = deviceWidth.toFloat() - view.width
                         floatingActionButtonPaintBrush.x =
                             (view.x - floatingActionButtonPaintBrush.width)
@@ -119,15 +125,15 @@ class FloatingActionButtonPaintOnTouchListener(
                             (view.x - floatingActionButtonPaintBack.width) - 600
                         floatingActionButtonPaintSave.x =
                             (view.x - floatingActionButtonPaintSave.width) - 750
+
+                    } else if (event.rawX - (floatingActionButtonPaint.width) < 0) {
+                        Log.d("corner", "b")
                         floatingActionButtonPaintBrush.y = view.y
                         floatingActionButtonPaintPalette.y = view.y
                         floatingActionButtonPaintDelete.y = view.y
                         floatingActionButtonPaintErase.y = view.y
                         floatingActionButtonPaintBack.y = view.y
                         floatingActionButtonPaintSave.y = view.y
-
-                    } else if (event.rawX - (floatingActionButtonPaint.width) < 0) {
-                        Log.d("corner", "b")
                         view.x = 0F
                         floatingActionButtonPaintBrush.x =
                             floatingActionButtonPaintBrush.width.toFloat()
@@ -141,12 +147,6 @@ class FloatingActionButtonPaintOnTouchListener(
                             floatingActionButtonPaintBack.width.toFloat() + 600
                         floatingActionButtonPaintSave.x =
                             floatingActionButtonPaintSave.width.toFloat() + 750
-                        floatingActionButtonPaintBrush.y = view.y
-                        floatingActionButtonPaintPalette.y = view.y
-                        floatingActionButtonPaintDelete.y = view.y
-                        floatingActionButtonPaintErase.y = view.y
-                        floatingActionButtonPaintBack.y = view.y
-                        floatingActionButtonPaintSave.y = view.y
                     }
                     if (deviceHeight < (event.rawY + (floatingActionButtonPaint.height))) {
                         Log.d("corner", "c")

@@ -14,6 +14,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import constants.Constants
+import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import java.text.SimpleDateFormat
 import java.util.*
@@ -27,6 +28,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
     private var stringBuilderBundle: StringBuilder = StringBuilder()
     private lateinit var context: Context
     private lateinit var intentService: Intent
+    private var coroutineCallService: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     //Static global variables.
     internal companion object {
@@ -70,8 +72,10 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             this.context = activity
             if (!this::intentService.isInitialized) {
                 loggerBirdService.initializeActivity(activity = activity)
-                intentService = Intent(context, loggerBirdService.javaClass)
-                context.startService(intentService)
+                coroutineCallService.async {
+                    intentService = Intent(context, loggerBirdService.javaClass)
+                    context.startService(intentService)
+                }
             }
             LoggerBird.fragmentLifeCycleObserver =
                 LogFragmentLifeCycleObserver()
@@ -205,6 +209,12 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
 
     override fun onActivityDestroyed(activity: Activity) {
         try {
+//            if(coroutineCallService.isActive){
+//                coroutineCallService.cancel()
+//            }
+            if (!this::intentService.isInitialized) {
+                stopService(intentService)
+            }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)

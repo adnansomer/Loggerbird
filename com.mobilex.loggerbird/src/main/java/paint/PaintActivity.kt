@@ -4,14 +4,17 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.util.Rational
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,14 +46,17 @@ class PaintActivity : Activity() {
     private lateinit var screenShot: Drawable
     private val coroutineCallPaintActivity: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlButtonVisibility: Boolean = true
-    companion object{
-        private lateinit var activity:Activity
-        internal fun closeActivitySession(){
-            if(Companion::activity.isInitialized){
+    private var onStopCalled = false
+
+    companion object {
+        private lateinit var activity: Activity
+        internal fun closeActivitySession() {
+            if (Companion::activity.isInitialized) {
                 activity.finish()
             }
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,8 +82,8 @@ class PaintActivity : Activity() {
                 window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_FULLSCREEN
+//                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                        or View.SYSTEM_UI_FLAG_FULLSCREEN
                         //or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                         )
             } catch (e: Exception) {
@@ -176,7 +182,11 @@ class PaintActivity : Activity() {
             }
         }
         paint_floating_action_button_back.setOnClickListener {
-
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                pictureInPictureMode()
+            } else {
+                finish()
+            }
         }
         paint_floating_action_button_brush.setOnClickListener {
             showBrushWidthSetterDialog()
@@ -455,8 +465,66 @@ class PaintActivity : Activity() {
             paint_floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun pictureInPictureMode() {
+        coroutineCallPaintActivity.async {
+            try {
+                val aspectRatio = Rational(9, 16)
+                val mPictureInPictureParamsBuilder = PictureInPictureParams.Builder()
+                mPictureInPictureParamsBuilder.setAspectRatio(aspectRatio)
+                enterPictureInPictureMode(mPictureInPictureParamsBuilder.build())
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
+            }
+        }
+    }
+
     override fun onBackPressed() {
         super.onBackPressed()
         finish()
     }
+
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration?
+    ) {
+        if (isInPictureInPictureMode) {
+            paint_floating_action_button.visibility = View.GONE
+            paint_floating_action_button_save.visibility = View.GONE
+            paint_floating_action_button_back.visibility = View.GONE
+            paint_floating_action_button_brush.visibility = View.GONE
+            paint_floating_action_button_delete.visibility = View.GONE
+            paint_floating_action_button_palette.visibility = View.GONE
+            paint_floating_action_button_erase.visibility = View.GONE
+        } else {
+            if (onStopCalled) {
+                finish()
+            }
+            paint_floating_action_button.visibility = View.VISIBLE
+            paint_floating_action_button_save.visibility = View.VISIBLE
+            paint_floating_action_button_back.visibility = View.VISIBLE
+            paint_floating_action_button_brush.visibility = View.VISIBLE
+            paint_floating_action_button_delete.visibility = View.VISIBLE
+            paint_floating_action_button_palette.visibility = View.VISIBLE
+            paint_floating_action_button_erase.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        onStopCalled = true
+        LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
+    }
+    override fun onResume() {
+        super.onResume()
+        LoggerBirdService.floatingActionButtonView.visibility = View.GONE
+    }
+//    override fun onDestroy() {
+//        super.onDestroy()
+////        onStopCalled = true
+////        LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
+//    }
 }

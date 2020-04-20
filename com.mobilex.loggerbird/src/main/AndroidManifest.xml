@@ -13,6 +13,14 @@
     <application>
         <activity android:name="observers.LogActivityLifeCycleObserver"/>
         <activity android:name="paint.PaintActivity"
+            android:exported="true"
+            android:enabled="true"
+            android:resizeableActivity="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:taskAffinity="paint.PaintActivity"
+            android:supportsPictureInPicture="true"
+            android:autoRemoveFromRecents="true"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme">
         </activity>
         <service

@@ -200,8 +200,12 @@ internal class LoggerBirdService : Service() {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onDestroy() {
         super.onDestroy()
-        destroyMediaProjection()
-        stopSelf()
+        try {
+            destroyMediaProjection()
+//            stopSelf()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
