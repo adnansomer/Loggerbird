@@ -182,11 +182,11 @@ class MainActivity : AppCompatActivity() {
         val intent: Intent = getIntent()
         val uri: Uri? = intent.data
         Log.d("deep_link_url", uri.toString())
-        addRecyclerViewList()
-        recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        adapter = RecyclerViewAdapter(this,recyclerViewList)
-        recycler_view.adapter = adapter
-        LoggerBird.registerRecyclerViewObservers(recycler_view)
+        //addRecyclerViewList()
+//        recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+//        adapter = RecyclerViewAdapter(this,recyclerViewList)
+//        recycler_view.adapter = adapter
+//        LoggerBird.registerRecyclerViewObservers(recycler_view)
 
         (this as androidx.activity.ComponentActivity).prepareCall(
             OnActivityResultContract(),
@@ -204,8 +204,8 @@ class MainActivity : AppCompatActivity() {
         button_add.setOnClickListener() {
             val filePathTest: File = File(this.filesDir, "logger_bird_details.txt")
 
-            recyclerViewList.removeAt(0)
-            recyclerViewList.add(RecyclerModel("hello how are you"))
+            //recyclerViewList.removeAt(0)
+            //recyclerViewList.add(RecyclerModel("hello how are you"))
             adapter.notifyDataSetChanged()
             LoggerBird.callComponentDetails(
                 view = recycler_view,
@@ -282,7 +282,7 @@ class MainActivity : AppCompatActivity() {
 //            LoggerBird.takeLifeCycleDetails()
 
 
-            startActivity(Intent(this@MainActivity, Main2Activity::class.java))
+            startActivity(Intent(this@MainActivity, Main3Activity::class.java))
         })
 
         button_performance.setOnClickListener {
@@ -295,16 +295,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun addRecyclerViewList() {
-        recyclerViewList.add(RecyclerModel("berk"))
-        recyclerViewList.add(RecyclerModel("berk1"))
-        recyclerViewList.add(RecyclerModel("berk2"))
-        recyclerViewList.add(RecyclerModel("berk3"))
-        recyclerViewList.add(RecyclerModel("berk4"))
-        recyclerViewList.add(RecyclerModel("berk5"))
-        recyclerViewList.add(RecyclerModel("berk6"))
-
-    }
+//    private fun addRecyclerViewList() {
+//        recyclerViewList.add(RecyclerModel("berk"))
+//        recyclerViewList.add(RecyclerModel("berk1"))
+//        recyclerViewList.add(RecyclerModel("berk2"))
+//        recyclerViewList.add(RecyclerModel("berk3"))
+//        recyclerViewList.add(RecyclerModel("berk4"))
+//        recyclerViewList.add(RecyclerModel("berk5"))
+//        recyclerViewList.add(RecyclerModel("berk6"))
+//
+//    }
 
     private fun beginSearch(srsearch: String, context: Context) {
         var retrofit: Retrofit? = ApiServiceInterface.createObject()

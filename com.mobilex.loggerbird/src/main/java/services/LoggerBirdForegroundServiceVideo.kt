@@ -1,14 +1,19 @@
 package services
 
+import android.Manifest
+import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.mobilex.loggerbird.R
 import constants.Constants
 import loggerbird.LoggerBird
@@ -28,6 +33,7 @@ class LoggerBirdForegroundServiceVideo : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
             createNotificationChannel()
+
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBirdService.callEnqueue()
@@ -36,6 +42,7 @@ class LoggerBirdForegroundServiceVideo : Service() {
         }
         return START_NOT_STICKY
     }
+
 
     private fun startLoggerBirdForegroundServiceVideo() {
         try {

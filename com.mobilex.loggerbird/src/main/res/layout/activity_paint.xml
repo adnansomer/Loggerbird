@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/paint_main_layout">
+    android:id="@+id/main_paint">
 
     <paint.PaintView
         android:id="@+id/paintView"
@@ -22,48 +22,65 @@
         app:layout_anchorGravity="top|center_horizontal"
         app:layout_behavior="paint.PaintFabAnimation">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/paint_floating_action_button_save"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/AppTheme.FabSpeedDial"
-        app:borderWidth="0dp"
-        app:fabSize="mini"
-        app:srcCompat="@drawable/ic_done_black_24dp"/>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/paint_floating_action_button_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/AppTheme.FabSpeedDial"
+            app:borderWidth="0dp"
+            app:fabSize="mini"
+            app:elevation="0dp"
+            app:srcCompat="@drawable/ic_done_black_24dp"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/paint_floating_action_button_erase"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/AppTheme.FabSpeedDial"
-        app:borderWidth="0dp"
-        app:fabSize="mini"
-        app:srcCompat="@drawable/ic_backspace_black_24dp"/>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/paint_floating_action_button_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/AppTheme.FabSpeedDial"
+            app:borderWidth="0dp"
+            app:fabSize="mini"
+            app:elevation="0dp"
+            app:srcCompat="@drawable/ic_arrow_back_black_24dp"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/paint_floating_action_button_erase"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/AppTheme.FabSpeedDial"
+            app:borderWidth="0dp"
+            app:fabSize="mini"
+            app:elevation="0dp"
+            app:srcCompat="@drawable/ic_backspace_black_24dp"/>
 
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/paint_floating_action_button_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/AppTheme.FabSpeedDial"
-        app:borderWidth="0dp"
-        app:fabSize="mini"
-        app:srcCompat="@drawable/ic_delete_black_24dp"/>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/paint_floating_action_button_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/AppTheme.FabSpeedDial"
+            app:borderWidth="0dp"
+            app:fabSize="mini"
+            app:elevation="0dp"
+            app:srcCompat="@drawable/ic_delete_black_24dp"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/paint_floating_action_button_palette"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/AppTheme.FabSpeedDial"
-        app:borderWidth="0dp"
-        app:fabSize="mini"
-        app:srcCompat="@drawable/ic_palette_black_24dp"/>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/paint_floating_action_button_palette"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/AppTheme.FabSpeedDial"
+            app:borderWidth="0dp"
+            app:fabSize="mini"
+            app:elevation="0dp"
+            app:srcCompat="@drawable/ic_palette_black_24dp"/>
+
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/paint_floating_action_button_brush"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/AppTheme.FabSpeedDial"
             app:fabSize="mini"
+            app:elevation="0dp"
             app:srcCompat="@drawable/ic_brush_black_24dp" />
 
     </LinearLayout>

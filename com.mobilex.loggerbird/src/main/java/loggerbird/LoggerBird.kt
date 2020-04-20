@@ -104,14 +104,10 @@ class LoggerBird : LifecycleObserver {
         private var fileLimit: Long = 2097152
         private lateinit var lifeCycleObserver: LogLifeCycleObserver
         internal lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
-        private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver =
-            LogRecyclerViewAdapterDataObserver()
-        private var recyclerViewScrollListener: LogRecyclerViewScrollListener =
-            LogRecyclerViewScrollListener()
-        private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener =
-            LogRecyclerViewChildAttachStateChangeListener()
-        private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener =
-            LogRecyclerViewItemTouchListener()
+        private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver = LogRecyclerViewAdapterDataObserver()
+        private var recyclerViewScrollListener: LogRecyclerViewScrollListener = LogRecyclerViewScrollListener()
+        private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener = LogRecyclerViewChildAttachStateChangeListener()
+        private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener = LogRecyclerViewItemTouchListener()
         private lateinit var workQueueLinked: LinkedBlockingQueueUtil
         private lateinit var recyclerViewItemObserver: LogDataSetObserver
         private lateinit var textViewFileReader: TextView

@@ -12,36 +12,42 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabSize="normal"
-        android:backgroundTint="@color/colorMiniFab"
         app:borderWidth="0dp"
-        android:src="@drawable/ic_add_black_24dp"/>
+        app:elevation="0dp"
+        style="@style/AppTheme.Fab"
+        android:src="@drawable/loggerbird"/>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_audio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabSize="normal"
         android:visibility="gone"
-        android:backgroundTint="@color/colorFab"
+        app:elevation="0dp"
         app:borderWidth="0dp"
+        style="@style/AppTheme.FabSpeedDial"
         android:src="@drawable/ic_mic_black_24dp"/>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_video"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabSize="normal"
         android:visibility="gone"
-        android:backgroundTint="@color/colorFab"
         app:borderWidth="0dp"
+        app:elevation="0dp"
+        style="@style/AppTheme.FabSpeedDial"
         android:src="@drawable/ic_videocam_black_24dp"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_screenshot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/colorFab"
         android:src="@drawable/ic_photo_camera_black_24dp"
         android:visibility="gone"
+        style="@style/AppTheme.FabSpeedDial"
         app:borderWidth="0dp"
+        app:elevation="0dp"
         app:fabSize="normal" />
 
 </FrameLayout>

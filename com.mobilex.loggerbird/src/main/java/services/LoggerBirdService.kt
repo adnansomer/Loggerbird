@@ -11,6 +11,8 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
+import android.graphics.Typeface
+import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.MediaRecorder
@@ -27,12 +29,16 @@ import android.view.*
 import android.view.animation.Animation
 import android.widget.FrameLayout
 import android.widget.Toast
+import android.widget.Toast.LENGTH_LONG
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import com.irozon.sneaker.Sneaker
 import com.mobilex.loggerbird.R
+import com.todo.shakeit.core.ShakeListener
 import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
@@ -44,13 +50,11 @@ import loggerbird.LoggerBird
 import observers.LogActivityLifeCycleObserver
 import paint.PaintActivity
 import utils.LinkedBlockingQueueUtil
-import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
 import java.lang.Exception
 
 
-internal class LoggerBirdService : Service() {
+internal class LoggerBirdService : Service(),ShakeDetector.Listener{
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
@@ -82,6 +86,9 @@ internal class LoggerBirdService : Service() {
     private var dataIntent: Intent? = null
     private lateinit var initializeFloatingActionButton: Runnable
     private lateinit var takeOldCoordinates: Runnable
+    var isShaked : Boolean = false
+
+
 
     //Static global variables:
     internal companion object {
@@ -114,6 +121,9 @@ internal class LoggerBirdService : Service() {
         internal var controlWriteExternalPermission: Boolean = false
         internal lateinit var intentForegroundServiceVideo: Intent
         internal lateinit var screenshotBitmap: Bitmap
+
+
+
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
             if (runnableList.size > 0) {
@@ -132,6 +142,7 @@ internal class LoggerBirdService : Service() {
         ORIENTATIONS.append(Surface.ROTATION_180, 270)
         ORIENTATIONS.append(Surface.ROTATION_270, 180)
     }
+
 
     /**
      * This Method Called When Service Detect's An  OnBind State In The Current Activity.
@@ -152,8 +163,13 @@ internal class LoggerBirdService : Service() {
      * @return START_NOT_STICKY value.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
         try {
+            val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            val sd = ShakeDetector(this)
+            sd.start(sensorManager)
             intentService = intent
+
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -188,9 +204,11 @@ internal class LoggerBirdService : Service() {
     /**
      * This Method Called When Service Created.
      */
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate() {
         super.onCreate()
     }
+
 
     /**
      * This Method Called When Service Destroyed.
@@ -200,6 +218,12 @@ internal class LoggerBirdService : Service() {
         super.onDestroy()
         destroyMediaProjection()
         stopSelf()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    internal fun initializeNewActivity(activity: Activity){
+        this.activity = activity
+        this.context = activity
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -217,7 +241,15 @@ internal class LoggerBirdService : Service() {
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun initializeFloatingActionButton(activity: Activity) {
+    override fun hearShake() {
+        Toast.makeText(applicationContext,"adnan",Toast.LENGTH_LONG).show()
+        initializeActivity(activity = activity)
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    internal fun initializeFloatingActionButton(activity: Activity) {
+
         if (this::rootView.isInitialized && this::view.isInitialized) {
             (rootView as ViewGroup).removeView(view)
         }
@@ -254,7 +286,11 @@ internal class LoggerBirdService : Service() {
             windowManager = activity.getSystemService(Context.WINDOW_SERVICE)!!
             (windowManager as WindowManager).addView(view, windowManagerParams)
         } else {
-            activity.addContentView(view, layoutParams)
+
+            if (activity is AppCompatActivity) {
+                checkDrawOtherAppPermission(activity = (context as Activity))
+            }
+
         }
         this.rootView = rootView
         this.view = view
@@ -273,13 +309,13 @@ internal class LoggerBirdService : Service() {
         )
         (floating_action_button_video.layoutParams as FrameLayout.LayoutParams).setMargins(
             0,
-            300,
+            310,
             0,
             0
         )
         (floating_action_button_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
             0,
-            450,
+            460,
             0,
             0
         )
@@ -312,29 +348,11 @@ internal class LoggerBirdService : Service() {
                 checkDrawOtherAppPermission(activity = (context as Activity))
             } else {
                 animationVisibility()
-//                coroutineCallAnimation.async {
-//                    //                fabOpen = AnimationUtils.loadAnimation(context, R.anim.fab_open)
-////                fabClose = AnimationUtils.loadAnimation(context, R.anim.fab_close)
-//                    withContext(Dispatchers.Main) {
-//                        //                    fabOpen.setAnimationListener(
-////                        FloatingActionButtonAnimationListener(
-////                            context = context,
-////                            floatingActionButtonAudio = floating_action_button_audio
-////                        )
-////                    )
-////                    fabClose.setAnimationListener(
-////                        FloatingActionButtonAnimationListener(
-////                            context = context,
-////                            floatingActionButtonAudio = floating_action_button_audio
-////                        )
-////                    )
-//
-//                    }
-//                }
             }
             floating_action_button_screenshot.setOnClickListener {
                 if (floating_action_button_screenshot.visibility == View.VISIBLE) {
                     takeScreenShot(view = activity.window.decorView.rootView, context = context)
+
                 }
             }
             floating_action_button_audio.setOnClickListener {
@@ -345,11 +363,7 @@ internal class LoggerBirdService : Service() {
 
             floating_action_button_video.setOnClickListener {
                 if (floating_action_button_video.visibility == View.VISIBLE) {
-                    callVideoRecording(
-                        requestCode = requestCode,
-                        resultCode = resultCode,
-                        data = dataIntent
-                    )
+                    callVideoRecording(requestCode = requestCode, resultCode = resultCode, data = dataIntent)
                 }
             }
         }
@@ -376,76 +390,38 @@ internal class LoggerBirdService : Service() {
     private fun animationVisibility() {
         if (isOpen) {
             isOpen = false
-            floating_action_button_video.animate().cancel()
-            floating_action_button_audio.animate().cancel()
-            floating_action_button_screenshot.animate().cancel()
-            floating_action_button_video.animate().alphaBy(1.0F)
-            floating_action_button_video.animate().alpha(0.0F)
-            floating_action_button_video.animate().scaleXBy(1.0F)
-            floating_action_button_video.animate().scaleX(0.0F)
-            floating_action_button_video.animate().scaleYBy(1.0F)
-            floating_action_button_video.animate().scaleY(0.0F)
-            floating_action_button_video.animate().rotation(360F)
-            floating_action_button_video.animate().duration = 200L
+
+            floating_action_button_video.animate().rotation(-360F)
+            floating_action_button_video.animate().duration = 300L
             floating_action_button_video.animate().start()
-            floating_action_button_screenshot.animate().alphaBy(1.0F)
-            floating_action_button_screenshot.animate().alpha(0.0F)
-            floating_action_button_screenshot.animate().scaleXBy(1.0F)
-            floating_action_button_screenshot.animate().scaleX(0.0F)
-            floating_action_button_screenshot.animate().scaleYBy(1.0F)
-            floating_action_button_screenshot.animate().scaleY(0.0F)
-            floating_action_button_screenshot.animate().rotation(360F)
-            floating_action_button_screenshot.animate().duration = 200L
+
+            floating_action_button_screenshot.animate().rotation(-360F)
+            floating_action_button_screenshot.animate().duration = 300L
             floating_action_button_screenshot.animate().start()
-            floating_action_button_audio.animate().alphaBy(1.0F)
-            floating_action_button_audio.animate().alpha(0.0F)
-            floating_action_button_audio.animate().scaleXBy(1.0F)
-            floating_action_button_audio.animate().scaleX(0.0F)
-            floating_action_button_audio.animate().scaleYBy(1.0F)
-            floating_action_button_audio.animate().scaleY(0.0F)
-            floating_action_button_audio.animate().rotation(360F)
-            floating_action_button_audio.animate().duration = 200L
+
+            floating_action_button_audio.animate().rotation(-360F)
+            floating_action_button_audio.animate().duration = 300L
             floating_action_button_audio.animate().start()
+
             floating_action_button_screenshot.visibility = View.GONE
             floating_action_button_video.visibility = View.GONE
             floating_action_button_audio.visibility = View.GONE
-            floating_action_button.setImageResource(R.drawable.ic_add_black_24dp)
         } else {
             isOpen = true
-            floating_action_button_video.animate().cancel()
-            floating_action_button_audio.animate().cancel()
-            floating_action_button_screenshot.animate().cancel()
             floating_action_button_screenshot.visibility = View.VISIBLE
-            floating_action_button_screenshot.animate().alphaBy(0.0F)
-            floating_action_button_screenshot.animate().alpha(1.0F)
-            floating_action_button_screenshot.animate().scaleXBy(0.0F)
-            floating_action_button_screenshot.animate().scaleX(1.0F)
-            floating_action_button_screenshot.animate().scaleYBy(0.0F)
-            floating_action_button_screenshot.animate().scaleY(1.0F)
             floating_action_button_screenshot.animate().rotation(360F)
-            floating_action_button_screenshot.animate().duration = 200L
+            floating_action_button_screenshot.animate().duration = 300L
             floating_action_button_screenshot.animate().start()
+
             floating_action_button_audio.visibility = View.VISIBLE
-            floating_action_button_audio.animate().alphaBy(0.0F)
-            floating_action_button_audio.animate().alpha(1.0F)
-            floating_action_button_audio.animate().scaleXBy(0.0F)
-            floating_action_button_audio.animate().scaleX(1.0F)
-            floating_action_button_audio.animate().scaleYBy(0.0F)
-            floating_action_button_audio.animate().scaleY(1.0F)
             floating_action_button_audio.animate().rotation(360F)
-            floating_action_button_audio.animate().duration = 200L
+            floating_action_button_audio.animate().duration = 300L
             floating_action_button_audio.animate().start()
+
             floating_action_button_video.visibility = View.VISIBLE
-            floating_action_button_video.animate().alphaBy(0.0F)
-            floating_action_button_video.animate().alpha(1.0F)
-            floating_action_button_video.animate().scaleXBy(0.0F)
-            floating_action_button_video.animate().scaleX(1.0F)
-            floating_action_button_video.animate().scaleYBy(0.0F)
-            floating_action_button_video.animate().scaleY(1.0F)
             floating_action_button_video.animate().rotation(360F)
-            floating_action_button_video.animate().duration = 200L
+            floating_action_button_video.animate().duration = 300L
             floating_action_button_video.animate().start()
-            floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
         }
     }
 
@@ -487,8 +463,11 @@ internal class LoggerBirdService : Service() {
         return true
     }
 
+
+
     @RequiresApi(Build.VERSION_CODES.M)
     private fun checkDrawOtherAppPermission(activity: Activity) {
+
         controlPermissionRequest = true
         controlDrawableSettingsPermission = true
         val intent = Intent(
@@ -511,10 +490,11 @@ internal class LoggerBirdService : Service() {
     }
 
     private fun takeScreenShot(view: View, context: Context) {
+
         if (checkWriteExternalStoragePermission()) {
             coroutineCallScreenShot.async {
                 val fileDirectory: File = context.filesDir
-                var byteArray: ByteArray? = null
+                val byteArray: ByteArray? = null
 //                val filePath = File(
 //                    fileDirectory,
 //                    "logger_bird_screenshot" + System.currentTimeMillis().toString() + ".png"
@@ -537,21 +517,24 @@ internal class LoggerBirdService : Service() {
                     }
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "ScreenShot Taken!", Toast.LENGTH_SHORT).show()
-//                        val screenshotIntent = Intent(
-//                            context as Activity,
-//                            PaintActivity::class.java
-//                        ).putExtra("BitmapScreenshot", byteArray)
+                        val screenshotIntent = Intent(
+                            context as Activity,
+                            PaintActivity::class.java
+                        ).putExtra("BitmapScreenshot", byteArray)
 //                        val screenshotIntent = Intent(
 //                            context as Activity,
 //                            PaintActivity::class.java
 //                        )
-//                        context.startActivity(screenshotIntent)
-                        val loggerBirdPaintService = LoggerBirdPaintService()
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            loggerBirdPaintService.initializeActivity(activity = activity)
-                        }
-                        val screenshotServiceIntent=Intent(context,loggerBirdPaintService.javaClass)
-                        context.startService(screenshotServiceIntent)
+                        screenshotIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        context.startActivity(screenshotIntent)
+
+
+//                        val loggerBirdPaintService = LoggerBirdPaintService()
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                            loggerBirdPaintService.initializeActivity(activity = activity)
+//                        }
+//                        val screenshotServiceIntent=Intent(context,loggerBirdPaintService.javaClass)
+//                        context.startService(screenshotServiceIntent)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -643,8 +626,7 @@ internal class LoggerBirdService : Service() {
     private fun takeForegroundService() {
         workQueueLinked.controlRunnable = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            intentForegroundServiceVideo =
-                Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
+            intentForegroundServiceVideo = Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
             startForegroundServiceVideo()
         } else {
             callEnqueue()
@@ -698,11 +680,9 @@ internal class LoggerBirdService : Service() {
         }
     }
 
-
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private suspend fun shareScreen() {
-        projectManager =
-            (context as Activity).getSystemService(Activity.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        projectManager = (context).getSystemService(Activity.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         if (dataIntent != null && resultCode == Activity.RESULT_OK) {
             mediaProjection = projectManager!!.getMediaProjection(
                 resultCode,
@@ -735,9 +715,7 @@ internal class LoggerBirdService : Service() {
             mediaRecorderVideo!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
             val fileDirectory: File = context.filesDir
             filePath = File(
-                fileDirectory,
-                "logger_bird_video" + System.currentTimeMillis()
-                    .toString() + ".mp4"
+                fileDirectory, "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4"
             )
             mediaRecorderVideo!!.setOutputFile(filePath.path)
             mediaRecorderVideo!!.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
@@ -761,16 +739,8 @@ internal class LoggerBirdService : Service() {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun createVirtualDisplay(): VirtualDisplay? {
-        return mediaProjection!!.createVirtualDisplay(
-            "LoggerBirdFragment",
-            DISPLAY_WIDTH,
-            DISPLAY_HEIGHT,
-            screenDensity,
-            DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-            mediaRecorderVideo!!.surface,
-            null,
-            null
-        )
+        return mediaProjection!!.createVirtualDisplay("LoggerBirdFragment", DISPLAY_WIDTH, DISPLAY_HEIGHT, screenDensity,
+            DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mediaRecorderVideo!!.surface, null, null)
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -806,7 +776,6 @@ internal class LoggerBirdService : Service() {
     private fun stopForegroundServiceVideo() {
         (context as Activity).stopService(intentForegroundServiceVideo)
     }
-
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     internal fun callVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -858,4 +827,8 @@ internal class LoggerBirdService : Service() {
 //            stopScreenRecord()
         }
     }
+
+
+
+
 }

@@ -6,9 +6,11 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -19,10 +21,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import services.LoggerBirdService
+import services.ShakeDetector
 
 internal class LogActivityLifeCycleObserver(private val loggerBirdService: LoggerBirdService) :
     Activity(),
-    Application.ActivityLifecycleCallbacks {
+    Application.ActivityLifecycleCallbacks{
     //Global variables.
     private var stringBuilderBundle: StringBuilder = StringBuilder()
     private lateinit var context: Context
@@ -69,12 +72,13 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
         try {
             this.context = activity
             if (!this::intentService.isInitialized) {
-                loggerBirdService.initializeActivity(activity = activity)
                 intentService = Intent(context, loggerBirdService.javaClass)
                 context.startService(intentService)
+                loggerBirdService.initializeActivity(activity = activity)
+                //loggerBirdService.initializeFloatingActionButton(activity = activity)
+
             }
-            LoggerBird.fragmentLifeCycleObserver =
-                LogFragmentLifeCycleObserver()
+            LoggerBird.fragmentLifeCycleObserver = LogFragmentLifeCycleObserver()
             if ((activity is AppCompatActivity)) {
                 activity.supportFragmentManager.registerFragmentLifecycleCallbacks(
                     LoggerBird.fragmentLifeCycleObserver,
@@ -115,6 +119,8 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onStart"
+            loggerBirdService.initializeNewActivity(activity = activity)
+
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
@@ -125,6 +131,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             )
         }
     }
+
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityResumed(activity: Activity) {
@@ -234,6 +241,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
      */
     internal fun returnClassList(): ArrayList<String> {
         return LoggerBird.classList
+
     }
 
     /**
@@ -287,4 +295,5 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             ).show()
         }
     }
+
 }

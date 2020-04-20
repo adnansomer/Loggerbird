@@ -68,7 +68,11 @@ dependencies {
     implementation "androidx.activity:activity-ktx:1.2.0-alpha02"
     implementation 'com.google.android.material:material:1.2.0-alpha05'
     implementation 'com.divyanshu.colorseekbar:colorseekbar:1.0.2'
+    implementation 'com.github.tushardhole:shakeit:0.0.2'
+    implementation 'com.irozon.sneaker:sneaker:2.0.0'
+    
 }
 repositories {
+    maven { url "https://jitpack.io" }
     mavenCentral()
 }

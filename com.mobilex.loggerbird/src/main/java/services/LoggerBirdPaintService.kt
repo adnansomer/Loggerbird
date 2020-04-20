@@ -181,10 +181,8 @@ internal class LoggerBirdPaintService : Service() {
 //            floatingActionButtonPaintSave = paint_floating_action_button_save
 //        ))
         activity.paint_floating_action_button.setOnClickListener {
-            activity.paint_floating_action_button.isExpanded =
-                !activity.paint_floating_action_button.isExpanded
-            activity.paint_floating_action_button.isActivated =
-                activity.paint_floating_action_button.isExpanded
+            activity.paint_floating_action_button.isExpanded = !activity.paint_floating_action_button.isExpanded
+            activity.paint_floating_action_button.isActivated = activity.paint_floating_action_button.isExpanded
         }
         activity.paint_floating_action_button_save.setOnClickListener {
             if (requestPermission()) {
@@ -358,7 +356,6 @@ internal class LoggerBirdPaintService : Service() {
                 SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                     seekView.brushWidthSeekText.text = "Current width : $i%"
-
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {
@@ -406,6 +403,7 @@ internal class LoggerBirdPaintService : Service() {
                 "Cancel"
             ) { dialog, _ -> dialog.cancel() }
             saveDialog.show()
+
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
