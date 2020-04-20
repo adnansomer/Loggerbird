@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.mobilex.loggerbird.R
 import constants.Constants
 import loggerbird.LoggerBird
 
@@ -41,6 +42,7 @@ class FloatingActionButtonPaintOnTouchListener(
         try {
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+                    floatingActionButtonPaint.setImageResource(R.drawable.ic_add_white_24dp)
                     floatingActionButtonPaintSave.visibility = View.GONE
                     floatingActionButtonPaintBack.visibility = View.GONE
                     floatingActionButtonPaintBrush.visibility = View.GONE
@@ -191,15 +193,16 @@ class FloatingActionButtonPaintOnTouchListener(
                             floatingActionButtonPaintSave.height.toFloat() + 750
 
                     }
+                    floatingActionButtonPaint.setImageResource(R.drawable.ic_close_black_24dp)
+                    floatingActionButtonPaintSave.visibility = View.VISIBLE
+                    floatingActionButtonPaintBrush.visibility = View.VISIBLE
+                    floatingActionButtonPaintDelete.visibility = View.VISIBLE
+                    floatingActionButtonPaintPalette.visibility = View.VISIBLE
+                    floatingActionButtonPaintErase.visibility = View.VISIBLE
+                    floatingActionButtonPaintBack.visibility = View.VISIBLE
                     lastAction = MotionEvent.ACTION_UP
                 }
             }
-            floatingActionButtonPaintSave.visibility = View.VISIBLE
-            floatingActionButtonPaintBrush.visibility = View.VISIBLE
-            floatingActionButtonPaintDelete.visibility = View.VISIBLE
-            floatingActionButtonPaintPalette.visibility = View.VISIBLE
-            floatingActionButtonPaintErase.visibility = View.VISIBLE
-            floatingActionButtonPaintBack.visibility = View.VISIBLE
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()

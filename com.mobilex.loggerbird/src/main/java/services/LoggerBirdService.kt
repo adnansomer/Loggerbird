@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
@@ -502,6 +503,7 @@ internal class LoggerBirdService : Service() {
                     }
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "ScreenShot Taken!", Toast.LENGTH_SHORT).show()
+                       PaintActivity.closeActivitySession()
                         val paintActivity = PaintActivity()
                         val screenshotIntent = Intent(
                             context as Activity,
@@ -521,8 +523,6 @@ internal class LoggerBirdService : Service() {
                     LoggerBird.callExceptionDetails(exception = e, tag = Constants.screenShotTag)
                 }
             }
-        } else {
-            Toast.makeText(context, "Permission Denied!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -563,8 +563,6 @@ internal class LoggerBirdService : Service() {
                     )
                 }
             }
-        } else {
-            Toast.makeText(context, "Permission Denied!", Toast.LENGTH_SHORT).show()
         }
     }
 

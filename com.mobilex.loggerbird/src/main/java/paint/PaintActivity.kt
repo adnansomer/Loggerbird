@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -37,15 +38,24 @@ import loggerbird.LoggerBird
 import services.LoggerBirdService
 
 
-class PaintActivity() : Activity() {
+class PaintActivity : Activity() {
     private val REQUEST_WRITE_EXTERNAL = 1
     private lateinit var screenShot: Drawable
     private val coroutineCallPaintActivity: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlButtonVisibility: Boolean = true
+    companion object{
+        private lateinit var activity:Activity
+        internal fun closeActivitySession(){
+            if(Companion::activity.isInitialized){
+                activity.finish()
+            }
+        }
+    }
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_paint)
+        activity = this
         coroutineCallPaintActivity.async {
             try {
                 val metrics = DisplayMetrics()
@@ -370,6 +380,7 @@ class PaintActivity() : Activity() {
                 snackBarFileSaving.setAction("Dismiss") {
                     snackBarFileSaving.dismiss()
                 }.show()
+                finish()
             }
             saveDialog.setNegativeButton(
                 "Cancel"
@@ -444,6 +455,8 @@ class PaintActivity() : Activity() {
             paint_floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
         }
     }
-
-
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
+    }
 }
