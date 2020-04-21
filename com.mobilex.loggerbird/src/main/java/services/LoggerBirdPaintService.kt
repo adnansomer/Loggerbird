@@ -80,49 +80,49 @@ internal class LoggerBirdPaintService : Service() {
     internal fun initializeActivity(activity: Activity) {
         this.context = activity
         this.activity = activity
-            try {
-                val rootView: ViewGroup =
-                    activity.window.decorView.findViewById(android.R.id.content)
-                val view: View
+        try {
+            val rootView: ViewGroup =
+                activity.window.decorView.findViewById(android.R.id.content)
+            val view: View
 //                val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
 //                    ViewGroup.LayoutParams.MATCH_PARENT,
 //                    ViewGroup.LayoutParams.MATCH_PARENT
 //                )
-                view = LayoutInflater.from(activity)
-                    .inflate(
-                        R.layout.activity_paint,
-                        rootView,
-                        false
+            view = LayoutInflater.from(activity)
+                .inflate(
+                    R.layout.activity_paint,
+                    rootView,
+                    false
+                )
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
                     )
-                if (Settings.canDrawOverlays(activity)) {
-                    windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        WindowManager.LayoutParams(
-                            WindowManager.LayoutParams.WRAP_CONTENT,
-                            WindowManager.LayoutParams.WRAP_CONTENT,
-                            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                            PixelFormat.TRANSLUCENT
-                        )
-                    } else {
-                        WindowManager.LayoutParams(
-                            WindowManager.LayoutParams.MATCH_PARENT,
-                            WindowManager.LayoutParams.MATCH_PARENT,
-                            WindowManager.LayoutParams.TYPE_APPLICATION,
-                            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                            PixelFormat.TRANSLUCENT
-                        )
-                    }
-                    val paintRunnable = Runnable {initializePaintView()}
-                    view.viewTreeObserver.addOnGlobalLayoutListener(FloatingActionButtonPaintGlobalLayoutListener(paintRunnable = paintRunnable , view = view))
-                    windowManager = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                        (windowManager as WindowManager).addView(view, windowManagerParams)
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
                 }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                LoggerBird.callEnqueue()
-                LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
+                val paintRunnable = Runnable {initializePaintView()}
+                view.viewTreeObserver.addOnGlobalLayoutListener(FloatingActionButtonPaintGlobalLayoutListener(paintRunnable = paintRunnable , view = view))
+                windowManager = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                (windowManager as WindowManager).addView(view, windowManagerParams)
             }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -180,10 +180,11 @@ internal class LoggerBirdPaintService : Service() {
 //            floatingActionButtonPaintPalette = paint_floating_action_button_palette,
 //            floatingActionButtonPaintSave = paint_floating_action_button_save
 //        ))
-
         activity.paint_floating_action_button.setOnClickListener {
-            activity.paint_floating_action_button.isExpanded = !activity.paint_floating_action_button.isExpanded
-            activity.paint_floating_action_button.isActivated = activity.paint_floating_action_button.isExpanded
+            activity.paint_floating_action_button.isExpanded =
+                !activity.paint_floating_action_button.isExpanded
+            activity.paint_floating_action_button.isActivated =
+                activity.paint_floating_action_button.isExpanded
         }
         activity.paint_floating_action_button_save.setOnClickListener {
             if (requestPermission()) {
@@ -275,6 +276,7 @@ internal class LoggerBirdPaintService : Service() {
         }
     }
 
+
     private fun requestPermission(): Boolean {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED
@@ -356,6 +358,7 @@ internal class LoggerBirdPaintService : Service() {
                 SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                     seekView.brushWidthSeekText.text = "Current width : $i%"
+
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {
@@ -403,7 +406,6 @@ internal class LoggerBirdPaintService : Service() {
                 "Cancel"
             ) { dialog, _ -> dialog.cancel() }
             saveDialog.show()
-
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()

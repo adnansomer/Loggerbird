@@ -4,12 +4,10 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import observers.LogActivityLifeCycleObserver
 import java.util.*
 
 /**
- * Detects phone shaking. If more than 75% of the samples taken in the past 0.5s are
- * accelerating.
+ * Detects phone shaking.
  *
  */
 class ShakeDetector(private val listener: Listener) : SensorEventListener {
@@ -55,8 +53,7 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
     }
 
     /**
-     * Stops listening.  Safe to call when already stopped.  Ignored on devices
-     * without appropriate hardware.
+     * Stops listening.
      */
     fun stop() {
         if (accelerometer != null) {
@@ -133,7 +130,7 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
             }
         }
 
-        /** Removes all samples from this queue.  */
+        /** Removes all samples from this queue. */
         fun clear() {
             while (oldest != null) {
                 val removed: Sample = oldest as Sample
@@ -176,8 +173,7 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
         }
 
         /**
-         * Returns true if we have enough samples and more than 3/4 of those samples
-         * are accelerating.
+         * Returns true if we have enough samples and more than 3/4 of those samples are accelerating.
          */
         val isShaking: Boolean
             get() = newest != null && oldest != null && newest!!.timestamp - oldest!!.timestamp >= MIN_WINDOW_SIZE && acceleratingCount >= (sampleCount shr 1) + (sampleCount shr 2)

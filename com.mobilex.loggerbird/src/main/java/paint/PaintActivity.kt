@@ -79,10 +79,10 @@ class PaintActivity : Activity() {
                 }
                 window.decorView.systemUiVisibility = (
                         View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        //or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_FULLSCREEN
+                                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                //or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                or View.SYSTEM_UI_FLAG_FULLSCREEN
                         //or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                         )
             } catch (e: Exception) {
@@ -101,7 +101,7 @@ class PaintActivity : Activity() {
     override fun onStart() {
         super.onStart()
         try {
-            LoggerBirdService.floatingActionButtonView.visibility = View.GONE
+            //LoggerBirdService.floatingActionButtonView.visibility = View.GONE
             setButtonDefaultMargins()
             buttonClicks()
         } catch (e: Exception) {
@@ -451,11 +451,6 @@ class PaintActivity : Activity() {
         LoggerBirdService.floatingActionButtonView.visibility = View.GONE
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
-    }
-
     private fun animationVisibility() {
         if (!controlButtonVisibility) {
             controlButtonVisibility = true
@@ -483,7 +478,6 @@ class PaintActivity : Activity() {
             paint_floating_action_button_erase.visibility = View.GONE
             paint_floating_action_button_back.visibility = View.GONE
             paint_floating_action_button_save.visibility = View.GONE
-            paint_floating_action_button.setImageResource(R.drawable.ic_add_white_24dp)
         } else {
             controlButtonVisibility = false
             paint_floating_action_button_brush.visibility = View.VISIBLE
@@ -510,7 +504,6 @@ class PaintActivity : Activity() {
             paint_floating_action_button_save.animate().rotation(360F)
             paint_floating_action_button_save.animate().duration = 400L
             paint_floating_action_button_save.animate().start()
-            paint_floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
         }
     }
 
