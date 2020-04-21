@@ -208,11 +208,6 @@ internal class LoggerBirdService : Service() {
         }
     }
 
-    internal fun initializeNewActivity(activity: Activity) {
-        this.activity = activity
-        this.context = activity
-    }
-
     @RequiresApi(Build.VERSION_CODES.M)
     internal fun initializeActivity(activity: Activity) {
         this.activity = activity
@@ -303,6 +298,11 @@ internal class LoggerBirdService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             buttonClicks()
         }
+    }
+
+    internal fun initializeNewActivity(activity: Activity) {
+        this.activity = activity
+        this.context = activity
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
