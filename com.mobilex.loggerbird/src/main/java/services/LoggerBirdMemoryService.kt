@@ -54,8 +54,12 @@ internal class LoggerBirdMemoryService : Service() {
      * This Method Called When Service In onTaskRemoved State and stops observing memory consumption
      */
     override fun onTaskRemoved(rootIntent: Intent?) {
-        stopMemoryUsage()
         super.onTaskRemoved(rootIntent)
+        try {
+            stopMemoryUsage()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -63,7 +67,12 @@ internal class LoggerBirdMemoryService : Service() {
      */
     override fun onDestroy() {
         super.onDestroy()
-        stopSelf()
+        try {
+            stopMemoryUsage()
+//            stopSelf()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     /**
