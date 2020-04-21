@@ -42,7 +42,7 @@ class Main2Activity : AppCompatActivity(), PurchasesUpdatedListener {
         setContentView(R.layout.activity_main2)
         Log.d("super_class", Main2Activity::class.java.superclass!!.simpleName)
 //        setupBillingClient()
-        blurImage()
+
         button_dummy.setOnClickListener(View.OnClickListener {
             supportFragmentManager
                 .beginTransaction()
@@ -101,7 +101,7 @@ class Main2Activity : AppCompatActivity(), PurchasesUpdatedListener {
     }
 
     fun onLoadProductsClicked() {
-        convertJson()
+
         if (billingClient.isReady) {
             skuDetailsParams = SkuDetailsParams
                 .newBuilder()
@@ -180,77 +180,8 @@ class Main2Activity : AppCompatActivity(), PurchasesUpdatedListener {
         }
     }
 
-    private fun convertJson() {
-        val gson = GsonBuilder().create()
-        var skulDummy: String = gson.toJson(skuList)
-        var intCounter: Int = 0
-        do {
-
-            jsonObject.put(intCounter.toString(), skuList.get(intCounter))
-            intCounter++
-            if (skuList.size == intCounter) {
-                break
-            }
-        } while (skuList.iterator().hasNext())
-    }
-
-    private fun blurImage() {
-        handler.post {
-//            imageViewTemp = ImageView(this)
-//            imageViewTemp = imageView
-//            imageViewTemp.setImageBitmap(takeScreenShot(view = imageViewTemp))
-
-            imageViewTempBlur = ImageView(this)
-            imageViewTempBlur = imageView
-            imageViewTempBlur.setImageBitmap(takeScreenShotWithBlur(view = imageViewTempBlur))
-
-//
-//            imageViewCombined = ImageView(this)
-//            imageViewCombined.setImageBitmap(combineImages(imageViewTemp, imageViewTempBlur))
-//            linear_cici.background = imageViewCombined.drawable
-        }
 
 
-    }
 
-    private fun takeScreenShotWithBlur(view: View): Bitmap {
-//        val viewTemp: View = (view.parent as View)
-        val bitmap: Bitmap = Bitmap.createBitmap(
-            (linear_cici.width - imageViewTempBlur.width),
-            (linear_cici.height - imageViewTempBlur.height),
-            Bitmap.Config.ARGB_8888
-        )
-        val canvas = Canvas(bitmap)
-        view.draw(canvas)
-        Glide.with(this)
-            .load(imageViewTempBlur.drawToBitmap())
-            .apply(bitmapTransform(BlurTransformation()))
-            .apply(bitmapTransform(BlurTransformation()))
-            .into(imageViewTempBlur)
-        return bitmap
-    }
 
-    private fun takeScreenShot(view: View): Bitmap {
-        val bitmap: Bitmap = Bitmap.createBitmap(
-            (imageViewTemp.width),
-            (imageViewTemp.height),
-            Bitmap.Config.ARGB_8888
-        )
-        val canvas = Canvas(bitmap)
-        view.draw(canvas)
-        return bitmap
-    }
-
-    private fun combineImages(view: View, viewBlur: View): Bitmap {
-        val bitmap: Bitmap = Bitmap.createBitmap(
-            (linear_cici.width),
-            (linear_cici.height),
-            Bitmap.Config.ARGB_8888
-        )
-        val canvas = Canvas(bitmap)
-        canvas.drawBitmap((imageViewTemp.drawable as BitmapDrawable).bitmap,0f,0f,null)
-        canvas.drawBitmap((imageViewTempBlur.drawable as BitmapDrawable).bitmap,bitmap.width.toFloat(),bitmap.height.toFloat(),null)
-        return bitmap
-
-    }
 }

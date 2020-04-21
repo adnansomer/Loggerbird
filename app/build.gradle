@@ -29,6 +29,7 @@ android {
         // but continue the build even when errors are found:
         abortOnError false
     }
+
 }
 
 dependencies {
@@ -60,4 +61,5 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     implementation 'jp.wasabeef:glide-transformations:4.0.0'
     implementation 'com.eightbitlab:blurview:1.6.3'
+
 }

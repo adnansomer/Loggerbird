@@ -400,7 +400,7 @@ internal class LoggerBirdService : Service() {
             floating_action_button_screenshot.visibility = View.GONE
             floating_action_button_video.visibility = View.GONE
             floating_action_button_audio.visibility = View.GONE
-            floating_action_button.setImageResource(R.drawable.ic_add_black_24dp)
+
         } else {
             isOpen = true
             floating_action_button_screenshot.visibility = View.VISIBLE
@@ -415,7 +415,7 @@ internal class LoggerBirdService : Service() {
             floating_action_button_video.animate().rotation(360F)
             floating_action_button_video.animate().duration = 400L
             floating_action_button_video.animate().start()
-            floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
+
         }
     }
 
@@ -507,7 +507,7 @@ internal class LoggerBirdService : Service() {
                     }
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "ScreenShot Taken!", Toast.LENGTH_SHORT).show()
-                       PaintActivity.closeActivitySession()
+                        PaintActivity.closeActivitySession()
                         val paintActivity = PaintActivity()
                         val screenshotIntent = Intent(
                             context as Activity,

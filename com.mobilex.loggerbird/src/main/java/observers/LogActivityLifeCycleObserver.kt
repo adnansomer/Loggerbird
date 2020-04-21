@@ -35,6 +35,8 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
         internal var returnActivityLifeCycleClassName: String? = null
+        lateinit var currentActivity: Activity
+        lateinit var currentContext: Context
     }
 
     init {
@@ -70,6 +72,10 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         try {
             this.context = activity
+
+            currentContext = activity
+            currentActivity = activity
+
             if (!this::intentService.isInitialized) {
                 loggerBirdService.initializeActivity(activity = activity)
                 coroutineCallService.async {

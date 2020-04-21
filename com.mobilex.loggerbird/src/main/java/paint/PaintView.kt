@@ -225,8 +225,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         try {
             eraserEnabled = true
             lastBrushColor = brushColor
-            mPaint.xfermode =
-                PorterDuffXfermode(PorterDuff.Mode.CLEAR) //image composition library ic ice gecen layoutlarin harmanlanmasi***
+            mPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
             brushColor = Color.TRANSPARENT
         } catch (e: Exception) {
             e.printStackTrace()
