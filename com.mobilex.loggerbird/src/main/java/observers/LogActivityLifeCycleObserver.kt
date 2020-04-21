@@ -6,29 +6,24 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import constants.Constants
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import services.LoggerBirdService
-import services.ShakeDetector
 
 internal class LogActivityLifeCycleObserver(private val loggerBirdService: LoggerBirdService) :
     Activity(),
-    Application.ActivityLifecycleCallbacks{
+    Application.ActivityLifecycleCallbacks {
     //Global variables.
     private var stringBuilderBundle: StringBuilder = StringBuilder()
     private lateinit var context: Context
@@ -36,20 +31,15 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
     private var coroutineCallService: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     //Static global variables.
-    companion object {
+    internal companion object {
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
         internal var returnActivityLifeCycleClassName: String? = null
-
-        lateinit var currentActivity : Activity
-        lateinit var currentContext : Context
     }
 
     init {
         LoggerBird.stringBuilderActivityLifeCycleObserver.append("\n" + "Life Cycle Details:" + "\n")
     }
-
-
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
         try {
@@ -76,23 +66,10 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
         }
     }
 
-
-
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         try {
             this.context = activity
-            currentActivity = activity
-            currentContext = activity
-
-//            if (!this::intentService.isInitialized) {
-//                intentService = Intent(context, loggerBirdService.javaClass)
-//                context.startService(intentService)
-//                loggerBirdService.initializeActivity(activity = activity)
-//                //loggerBirdService.initializeFloatingActionButton(activity = activity)
-//
-//            }
-
             if (!this::intentService.isInitialized) {
                 loggerBirdService.initializeActivity(activity = activity)
                 coroutineCallService.async {
@@ -100,9 +77,8 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
                     context.startService(intentService)
                 }
             }
-
-
-            LoggerBird.fragmentLifeCycleObserver = LogFragmentLifeCycleObserver()
+            LoggerBird.fragmentLifeCycleObserver =
+                LogFragmentLifeCycleObserver()
             if ((activity is AppCompatActivity)) {
                 activity.supportFragmentManager.registerFragmentLifecycleCallbacks(
                     LoggerBird.fragmentLifeCycleObserver,
@@ -138,15 +114,12 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityStarted(activity: Activity) {
-        //currentActivity = activity
-        //currentContext = activity
         try {
             loggerBirdService.initializeNewActivity(activity = activity)
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onStart"
-            loggerBirdService.initializeNewActivity(activity = activity)
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
@@ -157,7 +130,6 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             )
         }
     }
-
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityResumed(activity: Activity) {
@@ -237,10 +209,12 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
 
     override fun onActivityDestroyed(activity: Activity) {
         try {
+//            if(coroutineCallService.isActive){
+//                coroutineCallService.cancel()
+//            }
             if (!this::intentService.isInitialized) {
                 stopService(intentService)
             }
-
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -271,7 +245,6 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
      */
     internal fun returnClassList(): ArrayList<String> {
         return LoggerBird.classList
-
     }
 
     /**
@@ -325,5 +298,4 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             ).show()
         }
     }
-
 }

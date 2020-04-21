@@ -106,94 +106,93 @@ class FloatingActionButtonPaintOnTouchListener(
                 MotionEvent.ACTION_UP -> {
                     if (deviceWidth < (event.rawX + (floatingActionButtonPaint.width))) {
                         Log.d("corner", "a")
-                        view.x = deviceWidth.toFloat() - view.width
-                        floatingActionButtonPaintBrush.x =
-                            (view.x - floatingActionButtonPaintBrush.width)
-                        floatingActionButtonPaintPalette.x =
-                            (view.x - floatingActionButtonPaintPalette.width) - 150
-                        floatingActionButtonPaintDelete.x =
-                            (view.x - floatingActionButtonPaintDelete.width) - 300
-                        floatingActionButtonPaintErase.x =
-                            (view.x - floatingActionButtonPaintErase.width) - 450
-                        floatingActionButtonPaintBack.x =
-                            (view.x - floatingActionButtonPaintBack.width) - 600
-                        floatingActionButtonPaintSave.x =
-                            (view.x - floatingActionButtonPaintSave.width) - 750
                         floatingActionButtonPaintBrush.y = view.y
                         floatingActionButtonPaintPalette.y = view.y
                         floatingActionButtonPaintDelete.y = view.y
                         floatingActionButtonPaintErase.y = view.y
                         floatingActionButtonPaintBack.y = view.y
                         floatingActionButtonPaintSave.y = view.y
+                        view.x = deviceWidth.toFloat() - view.width
+                        floatingActionButtonPaintBrush.x =
+                            (view.x - view.width)
+                        floatingActionButtonPaintPalette.x =
+                            (view.x - view.width) - 150
+                        floatingActionButtonPaintDelete.x =
+                            (view.x - view.width) - 300
+                        floatingActionButtonPaintErase.x =
+                            (view.x - view.width) - 450
+                        floatingActionButtonPaintBack.x =
+                            (view.x - view.width) - 600
+                        floatingActionButtonPaintSave.x =
+                            (view.x - view.width) - 750
 
                     } else if (event.rawX - (floatingActionButtonPaint.width) < 0) {
                         Log.d("corner", "b")
-                        view.x = 0F
-                        floatingActionButtonPaintBrush.x =
-                            floatingActionButtonPaintBrush.width.toFloat()
-                        floatingActionButtonPaintPalette.x =
-                            floatingActionButtonPaintPalette.width.toFloat() + 150
-                        floatingActionButtonPaintDelete.x =
-                            floatingActionButtonPaintDelete.width.toFloat() + 300
-                        floatingActionButtonPaintErase.x =
-                            floatingActionButtonPaintErase.width.toFloat() + 450
-                        floatingActionButtonPaintBack.x =
-                            floatingActionButtonPaintBack.width.toFloat() + 600
-                        floatingActionButtonPaintSave.x =
-                            floatingActionButtonPaintSave.width.toFloat() + 750
                         floatingActionButtonPaintBrush.y = view.y
                         floatingActionButtonPaintPalette.y = view.y
                         floatingActionButtonPaintDelete.y = view.y
                         floatingActionButtonPaintErase.y = view.y
                         floatingActionButtonPaintBack.y = view.y
                         floatingActionButtonPaintSave.y = view.y
+                        view.x = 0F
+                        floatingActionButtonPaintBrush.x =
+                            view.width.toFloat()
+                        floatingActionButtonPaintPalette.x =
+                            view.width.toFloat() + 150
+                        floatingActionButtonPaintDelete.x =
+                            view.width.toFloat() + 300
+                        floatingActionButtonPaintErase.x =
+                            view.width.toFloat() + 450
+                        floatingActionButtonPaintBack.x =
+                            view.width.toFloat() + 600
+                        floatingActionButtonPaintSave.x =
+                            view.width.toFloat() + 750
                     }
                     if (deviceHeight < (event.rawY + (floatingActionButtonPaint.height))) {
                         Log.d("corner", "c")
-                        view.y = deviceHeight.toFloat() - view.height
                         floatingActionButtonPaintBrush.x = view.x
                         floatingActionButtonPaintPalette.x = view.x
                         floatingActionButtonPaintDelete.x = view.x
                         floatingActionButtonPaintErase.x = view.x
                         floatingActionButtonPaintBack.x = view.x
                         floatingActionButtonPaintSave.x = view.x
+                        view.y = deviceHeight.toFloat() - view.height
                         floatingActionButtonPaintBrush.y =
-                            (view.y - floatingActionButtonPaintBrush.height)
+                            (view.y - view.height)
                         floatingActionButtonPaintPalette.y =
-                            (view.y - floatingActionButtonPaintPalette.height) - 150
+                            (view.y - view.height) - 150
                         floatingActionButtonPaintDelete.y =
-                            (view.y - floatingActionButtonPaintDelete.height) - 300
+                            (view.y - view.height) - 300
                         floatingActionButtonPaintErase.y =
-                            (view.y - floatingActionButtonPaintErase.height) - 450
+                            (view.y - view.height) - 450
                         floatingActionButtonPaintBack.y =
-                            (view.y - floatingActionButtonPaintBack.height) - 600
+                            (view.y - view.height) - 600
                         floatingActionButtonPaintSave.y =
-                            (view.y - floatingActionButtonPaintSave.height) - 750
+                            (view.y - view.height) - 750
 
                     } else if (event.rawY - (floatingActionButtonPaint.height) < 0) {
                         Log.d("corner", "d")
-                        view.y = 0F
                         floatingActionButtonPaintBrush.x = view.x
                         floatingActionButtonPaintPalette.x = view.x
                         floatingActionButtonPaintDelete.x = view.x
                         floatingActionButtonPaintErase.x = view.x
                         floatingActionButtonPaintBack.x = view.x
                         floatingActionButtonPaintSave.x = view.x
+                        view.y = 0F
                         floatingActionButtonPaintBrush.y =
-                            floatingActionButtonPaintBrush.height.toFloat()
+                            view.height.toFloat()
                         floatingActionButtonPaintPalette.y =
-                            floatingActionButtonPaintPalette.height.toFloat() + 150
+                            view.height.toFloat() + 150
                         floatingActionButtonPaintDelete.y =
-                            floatingActionButtonPaintDelete.height.toFloat() + 300
+                            view.height.toFloat() + 300
                         floatingActionButtonPaintErase.y =
-                            floatingActionButtonPaintErase.height.toFloat() + 450
+                            view.height.toFloat() + 450
                         floatingActionButtonPaintBack.y =
-                            floatingActionButtonPaintBack.height.toFloat() + 600
+                            view.height.toFloat() + 600
                         floatingActionButtonPaintSave.y =
-                            floatingActionButtonPaintSave.height.toFloat() + 750
+                            view.height.toFloat() + 750
 
                     }
-                    floatingActionButtonPaint.performClick()
 //                    floatingActionButtonPaint.setImageResource(R.drawable.ic_close_black_24dp)
 //                    floatingActionButtonPaintSave.visibility = View.VISIBLE
 //                    floatingActionButtonPaintBrush.visibility = View.VISIBLE
@@ -201,10 +200,9 @@ class FloatingActionButtonPaintOnTouchListener(
 //                    floatingActionButtonPaintPalette.visibility = View.VISIBLE
 //                    floatingActionButtonPaintErase.visibility = View.VISIBLE
 //                    floatingActionButtonPaintBack.visibility = View.VISIBLE
+                    floatingActionButtonPaint.performClick()
                     lastAction = MotionEvent.ACTION_UP
-
                 }
-
             }
         } catch (e: Exception) {
             e.printStackTrace()

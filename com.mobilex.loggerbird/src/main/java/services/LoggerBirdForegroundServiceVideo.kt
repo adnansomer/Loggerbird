@@ -74,6 +74,7 @@ class LoggerBirdForegroundServiceVideo : Service() {
         return super.onUnbind(intent)
     }
 
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(

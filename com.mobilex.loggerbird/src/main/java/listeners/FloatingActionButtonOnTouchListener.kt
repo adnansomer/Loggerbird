@@ -35,7 +35,7 @@ class FloatingActionButtonOnTouchListener(
                     floatingActionButtonScreenShot.visibility = View.GONE
                     floatingActionButtonVideo.visibility = View.GONE
                     floatingActionButtonAudio.visibility = View.GONE
-                    floatingActionButton.setImageResource(R.drawable.loggerbird)
+                    floatingActionButton.setImageResource(R.drawable.ic_add_black_24dp)
                     windowManagerDx = windowManagerParams.x - event.rawX
                     windowManagerDy = windowManagerParams.y - event.rawY
                     lastAction = MotionEvent.ACTION_DOWN
@@ -141,16 +141,16 @@ class FloatingActionButtonOnTouchListener(
                             0
                         )
                     }
-                    floatingActionButton.setImageResource(R.drawable.loggerbird)
-                    floatingActionButtonScreenShot.visibility = View.VISIBLE
-                    floatingActionButtonVideo.visibility = View.VISIBLE
-                    floatingActionButtonAudio.visibility = View.VISIBLE
+//                    floatingActionButton.setImageResource(R.drawable.ic_close_black_24dp)
+//                    floatingActionButtonScreenShot.visibility = View.VISIBLE
+//                    floatingActionButtonVideo.visibility = View.VISIBLE
+//                    floatingActionButtonAudio.visibility = View.VISIBLE
+                    floatingActionButton.performClick()
                     lastAction = MotionEvent.ACTION_UP
                     windowManager.updateViewLayout(
                         windowManagerView,
                         windowManagerParams
                     )
-
                 }
             }
         } catch (e: Exception) {
@@ -161,6 +161,6 @@ class FloatingActionButtonOnTouchListener(
                 tag = Constants.floatingActionButtonOnTouchTag
             )
         }
-        return false
+        return true
     }
 }

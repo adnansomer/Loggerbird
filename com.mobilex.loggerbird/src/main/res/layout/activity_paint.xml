@@ -2,9 +2,9 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/paint_main_layout"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
     <paint.PaintView
         android:id="@+id/paintView"
         android:layout_width="match_parent"
@@ -41,6 +41,7 @@
         app:borderWidth="0dp"
         app:elevation="0dp"
         app:fabSize="normal"
+        app:layout_behavior="paint.PaintFabAnimation"
         app:srcCompat="@drawable/ic_backspace_black_24dp" />
 
 
@@ -82,11 +83,11 @@
         style="@style/AppTheme.Fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
         app:fabSize="normal"
         app:elevation="0dp"
         app:borderWidth="0dp"
-        app:srcCompat="@drawable/ic_add_white_24dp"
-        android:layout_gravity="bottom|end"/>
+        app:srcCompat="@drawable/ic_add_white_24dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
