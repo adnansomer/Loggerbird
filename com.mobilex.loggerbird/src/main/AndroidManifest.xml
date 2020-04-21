@@ -13,7 +13,7 @@
     <application>
         <activity android:name="observers.LogActivityLifeCycleObserver"
             android:enabled="true"
-            android:exported="true"/>
+            />
         <activity android:name="paint.PaintActivity"
                 android:exported="true"
                 android:enabled="true"
@@ -33,8 +33,9 @@
         <service android:name="services.LoggerBirdPaintService" />
         <service android:name="services.LoggerBirdForegroundServiceVideo"
                  android:foregroundServiceType="mediaProjection"
+                 android:stopWithTask="true"
                  android:enabled="true"
-                 android:exported="true" />
+                 android:exported="false" />
 
     </application>
 

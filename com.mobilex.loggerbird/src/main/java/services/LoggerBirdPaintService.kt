@@ -180,6 +180,7 @@ internal class LoggerBirdPaintService : Service() {
 //            floatingActionButtonPaintPalette = paint_floating_action_button_palette,
 //            floatingActionButtonPaintSave = paint_floating_action_button_save
 //        ))
+
         activity.paint_floating_action_button.setOnClickListener {
             activity.paint_floating_action_button.isExpanded = !activity.paint_floating_action_button.isExpanded
             activity.paint_floating_action_button.isActivated = activity.paint_floating_action_button.isExpanded
@@ -273,7 +274,6 @@ internal class LoggerBirdPaintService : Service() {
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
         }
     }
-
 
     private fun requestPermission(): Boolean {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)

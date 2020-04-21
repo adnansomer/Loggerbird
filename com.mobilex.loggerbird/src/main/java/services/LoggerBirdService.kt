@@ -3,15 +3,14 @@ package services
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Application
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.PixelFormat
+import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.MediaRecorder
@@ -28,12 +27,16 @@ import android.view.*
 import android.view.animation.Animation
 import android.widget.FrameLayout
 import android.widget.Toast
+import android.widget.Toast.LENGTH_LONG
+import android.widget.Toast.makeText
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mobilex.loggerbird.R
+import com.todo.shakeit.core.ShakeIt
+import com.todo.shakeit.core.ShakeListener
 import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
@@ -45,13 +48,10 @@ import loggerbird.LoggerBird
 import observers.LogActivityLifeCycleObserver
 import paint.PaintActivity
 import utils.LinkedBlockingQueueUtil
-import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
-import java.lang.Exception
 
 
-internal class LoggerBirdService : Service() {
+internal class LoggerBirdService : Service(), ShakeDetector.Listener {
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
@@ -156,6 +156,10 @@ internal class LoggerBirdService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
             intentService = intent
+            val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            val sd = ShakeDetector(this)
+            sd.start(sensorManager)
+
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -191,7 +195,9 @@ internal class LoggerBirdService : Service() {
      * This Method Called When Service Created.
      */
     override fun onCreate() {
+
         super.onCreate()
+
     }
 
     /**
@@ -202,6 +208,12 @@ internal class LoggerBirdService : Service() {
         super.onDestroy()
         destroyMediaProjection()
         stopSelf()
+    }
+
+
+    internal fun initializeNewActivity(activity: Activity) {
+        this.activity = activity
+        this.context = activity
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -216,6 +228,15 @@ internal class LoggerBirdService : Service() {
         if (activity is AppCompatActivity) {
             initializeFloatingActionButton(activity = activity)
         }
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    override fun hearShake() {
+        initializeActivity(activity = LogActivityLifeCycleObserver.currentActivity)
+//        if(activity is AppCompatActivity){
+//            initializeFloatingActionButton(activity = activity)
+//        }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -235,7 +256,7 @@ internal class LoggerBirdService : Service() {
                 rootView,
                 false
             )
-        if (Settings.canDrawOverlays(activity)) {
+        if (Settings.canDrawOverlays(LogActivityLifeCycleObserver.currentActivity)) {
             windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams(
                     WindowManager.LayoutParams.WRAP_CONTENT,
@@ -253,10 +274,10 @@ internal class LoggerBirdService : Service() {
                     PixelFormat.TRANSLUCENT
                 )
             }
-            windowManager = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            windowManager = LogActivityLifeCycleObserver.currentActivity.getSystemService(Context.WINDOW_SERVICE)!!
             (windowManager as WindowManager).addView(view, windowManagerParams)
         } else {
-            checkDrawOtherAppPermission(activity = (context as Activity))
+            checkDrawOtherAppPermission(activity = LogActivityLifeCycleObserver.currentContext as Activity)
         }
         this.rootView = rootView
         this.view = view
@@ -296,10 +317,6 @@ internal class LoggerBirdService : Service() {
         }
     }
 
-    internal fun initializeNewActivity(activity: Activity) {
-        this.activity = activity
-        this.context = activity
-    }
 
     @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("ClickableViewAccessibility")
@@ -396,7 +413,7 @@ internal class LoggerBirdService : Service() {
             floating_action_button_screenshot.visibility = View.GONE
             floating_action_button_video.visibility = View.GONE
             floating_action_button_audio.visibility = View.GONE
-            floating_action_button.setImageResource(R.drawable.ic_add_black_24dp)
+            floating_action_button.setImageResource(R.drawable.loggerbird)
         } else {
             isOpen = true
             floating_action_button_screenshot.visibility = View.VISIBLE
@@ -411,7 +428,7 @@ internal class LoggerBirdService : Service() {
             floating_action_button_video.animate().rotation(360F)
             floating_action_button_video.animate().duration = 400L
             floating_action_button_video.animate().start()
-            floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
+            floating_action_button.setImageResource(R.drawable.loggerbird)
         }
     }
 
@@ -670,12 +687,13 @@ internal class LoggerBirdService : Service() {
             )
             initRecorder()
             withContext(Dispatchers.Main) {
+                floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
                 Toast.makeText(context, "Screen recording started", Toast.LENGTH_SHORT)
                     .show()
                 mediaProjectionCallback = MediaProjectionCallback()
                 mediaProjection!!.registerCallback(mediaProjectionCallback, null)
                 virtualDisplay = createVirtualDisplay()
-                floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
+
                 callEnqueue()
             }
         } else {
@@ -694,11 +712,8 @@ internal class LoggerBirdService : Service() {
             mediaRecorderVideo!!.setVideoSource(MediaRecorder.VideoSource.SURFACE)
             mediaRecorderVideo!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
             val fileDirectory: File = context.filesDir
-            filePath = File(
-                fileDirectory,
-                "logger_bird_video" + System.currentTimeMillis()
-                    .toString() + ".mp4"
-            )
+            filePath = File(fileDirectory, "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4")
+
             mediaRecorderVideo!!.setOutputFile(filePath.path)
             mediaRecorderVideo!!.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
             mediaRecorderVideo!!.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
@@ -765,6 +780,7 @@ internal class LoggerBirdService : Service() {
 
     private fun stopForegroundServiceVideo() {
         (context as Activity).stopService(intentForegroundServiceVideo)
+
     }
 
 
@@ -818,4 +834,8 @@ internal class LoggerBirdService : Service() {
 //            stopScreenRecord()
         }
     }
+
+
+
+
 }

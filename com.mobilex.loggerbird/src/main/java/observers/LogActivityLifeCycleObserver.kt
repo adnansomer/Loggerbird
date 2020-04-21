@@ -16,6 +16,9 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import constants.Constants
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import loggerbird.LoggerBird
 import java.text.SimpleDateFormat
 import java.util.*
@@ -30,17 +33,23 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
     private var stringBuilderBundle: StringBuilder = StringBuilder()
     private lateinit var context: Context
     private lateinit var intentService: Intent
+    private var coroutineCallService: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     //Static global variables.
-    internal companion object {
+    companion object {
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
         internal var returnActivityLifeCycleClassName: String? = null
+
+        lateinit var currentActivity : Activity
+        lateinit var currentContext : Context
     }
 
     init {
         LoggerBird.stringBuilderActivityLifeCycleObserver.append("\n" + "Life Cycle Details:" + "\n")
     }
+
+
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
         try {
@@ -67,17 +76,32 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
         }
     }
 
+
+
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         try {
             this.context = activity
-            if (!this::intentService.isInitialized) {
-                intentService = Intent(context, loggerBirdService.javaClass)
-                context.startService(intentService)
-                loggerBirdService.initializeActivity(activity = activity)
-                //loggerBirdService.initializeFloatingActionButton(activity = activity)
+            currentActivity = activity
+            currentContext = activity
 
+//            if (!this::intentService.isInitialized) {
+//                intentService = Intent(context, loggerBirdService.javaClass)
+//                context.startService(intentService)
+//                loggerBirdService.initializeActivity(activity = activity)
+//                //loggerBirdService.initializeFloatingActionButton(activity = activity)
+//
+//            }
+
+            if (!this::intentService.isInitialized) {
+                loggerBirdService.initializeActivity(activity = activity)
+                coroutineCallService.async {
+                    intentService = Intent(context, loggerBirdService.javaClass)
+                    context.startService(intentService)
+                }
             }
+
+
             LoggerBird.fragmentLifeCycleObserver = LogFragmentLifeCycleObserver()
             if ((activity is AppCompatActivity)) {
                 activity.supportFragmentManager.registerFragmentLifecycleCallbacks(
@@ -114,6 +138,8 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityStarted(activity: Activity) {
+        //currentActivity = activity
+        //currentContext = activity
         try {
             loggerBirdService.initializeNewActivity(activity = activity)
             val date = Calendar.getInstance().time
@@ -121,7 +147,6 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onStart"
             loggerBirdService.initializeNewActivity(activity = activity)
-
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
@@ -212,6 +237,10 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
 
     override fun onActivityDestroyed(activity: Activity) {
         try {
+            if (!this::intentService.isInitialized) {
+                stopService(intentService)
+            }
+
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)

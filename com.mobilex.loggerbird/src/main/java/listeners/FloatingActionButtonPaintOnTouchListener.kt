@@ -193,15 +193,18 @@ class FloatingActionButtonPaintOnTouchListener(
                             floatingActionButtonPaintSave.height.toFloat() + 750
 
                     }
-                    floatingActionButtonPaint.setImageResource(R.drawable.ic_close_black_24dp)
-                    floatingActionButtonPaintSave.visibility = View.VISIBLE
-                    floatingActionButtonPaintBrush.visibility = View.VISIBLE
-                    floatingActionButtonPaintDelete.visibility = View.VISIBLE
-                    floatingActionButtonPaintPalette.visibility = View.VISIBLE
-                    floatingActionButtonPaintErase.visibility = View.VISIBLE
-                    floatingActionButtonPaintBack.visibility = View.VISIBLE
+                    floatingActionButtonPaint.performClick()
+//                    floatingActionButtonPaint.setImageResource(R.drawable.ic_close_black_24dp)
+//                    floatingActionButtonPaintSave.visibility = View.VISIBLE
+//                    floatingActionButtonPaintBrush.visibility = View.VISIBLE
+//                    floatingActionButtonPaintDelete.visibility = View.VISIBLE
+//                    floatingActionButtonPaintPalette.visibility = View.VISIBLE
+//                    floatingActionButtonPaintErase.visibility = View.VISIBLE
+//                    floatingActionButtonPaintBack.visibility = View.VISIBLE
                     lastAction = MotionEvent.ACTION_UP
+
                 }
+
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -211,7 +214,7 @@ class FloatingActionButtonPaintOnTouchListener(
                 tag = Constants.floatingActionButtonPaintTag
             )
         }
-        return false
+        return true
     }
     //    private fun reverseLayout(){
 //        val viewList :ArrayList<View> = ArrayList()

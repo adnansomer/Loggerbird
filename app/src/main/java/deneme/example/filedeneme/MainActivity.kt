@@ -325,21 +325,21 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     Log.d("response", "response Success!")
 
-                    val httpUrl: HttpUrl = HttpUrl.Builder()
-                        .scheme("http")
-                        .host("api.openweathermap.org")
-//                        .addPathSegment("search")
-//                        .addQueryParameter("q", "DNA")
-//                        .addQueryParameter("q", "DNA2")
-//                        .addQueryParameter("q", "DNA3")
-//                        .addQueryParameter("z", "title:RNA")
-                        .build();
-
-                    val fromBodyBuilder = FormBody.Builder()
-                    val request = Request.Builder()
-                        .url(httpUrl)
-                        .post(fromBodyBuilder.build())
-                        .build()
+//                    val httpUrl: HttpUrl = HttpUrl.Builder()
+//                        .scheme("http")
+//                        .host("api.openweathermap.org")
+////                        .addPathSegment("search")
+////                        .addQueryParameter("q", "DNA")
+////                        .addQueryParameter("q", "DNA2")
+////                        .addQueryParameter("q", "DNA3")
+////                        .addQueryParameter("z", "title:RNA")
+//                        .build();
+//
+//                    val fromBodyBuilder = FormBody.Builder()
+//                    val request = Request.Builder()
+//                        .url(httpUrl)
+//                        .post(fromBodyBuilder.build())
+//                        .build()
 
 
 //                    coroutineCallInternet.async {
