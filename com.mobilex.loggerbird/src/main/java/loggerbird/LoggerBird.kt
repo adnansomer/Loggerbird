@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.os.BatteryManager
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
@@ -2804,6 +2806,7 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+        @RequiresApi(Build.VERSION_CODES.M)
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             if (controlLogInit) {
                 try {
@@ -2815,6 +2818,8 @@ class LoggerBird : LifecycleObserver {
                                 resultCode = resultCode,
                                 data = data
                             )
+                        }else if(Settings.canDrawOverlays(context) && requestCode !=LoggerBirdService.REQUEST_CODE_VIDEO){
+                            Toast.makeText(context, "Permission Granted!", Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(context, "Permission denied!", Toast.LENGTH_SHORT).show()
                         }

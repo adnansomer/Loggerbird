@@ -12,6 +12,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PixelFormat
+import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.MediaRecorder
@@ -19,6 +20,7 @@ import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
 import android.util.DisplayMetrics
@@ -48,17 +50,18 @@ import utils.LinkedBlockingQueueUtil
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.Serializable
 import java.lang.Exception
 
 
-internal class LoggerBirdService : Service() {
+internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
     private lateinit var context: Context
     private lateinit var view: View
     private lateinit var rootView: View
-    private lateinit var windowManager: Any
+    private var windowManager: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -81,8 +84,10 @@ internal class LoggerBirdService : Service() {
     private var requestCode: Int = 0
     private var resultCode: Int = -1
     private var dataIntent: Intent? = null
+    private lateinit var logActivityLifeCycleObserver: LogActivityLifeCycleObserver
     private lateinit var initializeFloatingActionButton: Runnable
     private lateinit var takeOldCoordinates: Runnable
+
 
     //Static global variables:
     internal companion object {
@@ -126,6 +131,10 @@ internal class LoggerBirdService : Service() {
             }
 
         }
+        internal fun resetEnqueue(){
+            runnableList.clear()
+            workQueueLinked.controlRunnable = false
+        }
     }
 
     init {
@@ -153,9 +162,16 @@ internal class LoggerBirdService : Service() {
      * @param startId (no idea).
      * @return START_NOT_STICKY value.
      */
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
             intentService = intent
+            val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            val sd = ShakeDetector(this)
+            sd.start(sensorManager)
+            logActivityLifeCycleObserver =
+                LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
+            initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -212,91 +228,93 @@ internal class LoggerBirdService : Service() {
     internal fun initializeActivity(activity: Activity) {
         this.activity = activity
         this.context = activity
+//        if (activity is AppCompatActivity) {
+//            initializeFloatingActionButton(activity = activity)
+//        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeFloatingActionButton(activity: Activity) {
         val metrics = DisplayMetrics()
         (context as Activity).windowManager.defaultDisplay.getMetrics(metrics)
         screenDensity = metrics.densityDpi
         DISPLAY_HEIGHT = metrics.heightPixels
         DISPLAY_WIDTH = metrics.widthPixels
-        if (activity is AppCompatActivity) {
-            initializeFloatingActionButton(activity = activity)
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun initializeFloatingActionButton(activity: Activity) {
-        if (this::rootView.isInitialized && this::view.isInitialized) {
-            (rootView as ViewGroup).removeView(view)
-        }
-        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
-        val view: View
-        val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-        view = LayoutInflater.from(activity)
-            .inflate(
-                R.layout.fragment_logger_bird,
-                rootView,
-                false
-            )
-        if (Settings.canDrawOverlays(activity)) {
-            windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                    PixelFormat.TRANSLUCENT
-                )
-            } else {
-                WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.TYPE_APPLICATION,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                    PixelFormat.TRANSLUCENT
-                )
-            }
-            windowManager = activity.getSystemService(Context.WINDOW_SERVICE)!!
-            (windowManager as WindowManager).addView(view, windowManagerParams)
+        if (windowManager != null && this::view.isInitialized) {
+            (windowManager as WindowManager).removeViewImmediate(view)
+            windowManager = null
         } else {
-            checkDrawOtherAppPermission(activity = (context as Activity))
-        }
-        this.rootView = rootView
-        this.view = view
-        floatingActionButtonView = view
-        floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-        floating_action_button_screenshot =
-            view.findViewById(R.id.fragment_floating_action_button_screenshot)
-        floating_action_button_video =
-            view.findViewById(R.id.fragment_floating_action_button_video)
-        floating_action_button_audio =
-            view.findViewById(R.id.fragment_floating_action_button_audio)
-        (floating_action_button_screenshot.layoutParams as FrameLayout.LayoutParams).setMargins(
-            0,
-            150,
-            0,
-            0
-        )
-        (floating_action_button_video.layoutParams as FrameLayout.LayoutParams).setMargins(
-            0,
-            300,
-            0,
-            0
-        )
-        (floating_action_button_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
-            0,
-            450,
-            0,
-            0
-        )
+            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+            val view: View
+            val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            view = LayoutInflater.from(activity)
+                .inflate(
+                    R.layout.fragment_logger_bird,
+                    rootView,
+                    false
+                )
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+                windowManager = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                (windowManager as WindowManager).addView(view, windowManagerParams)
+                this.rootView = rootView
+                this.view = view
+                floatingActionButtonView = view
+                floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
+                floating_action_button_screenshot =
+                    view.findViewById(R.id.fragment_floating_action_button_screenshot)
+                floating_action_button_video =
+                    view.findViewById(R.id.fragment_floating_action_button_video)
+                floating_action_button_audio =
+                    view.findViewById(R.id.fragment_floating_action_button_audio)
+                (floating_action_button_screenshot.layoutParams as FrameLayout.LayoutParams).setMargins(
+                    0,
+                    150,
+                    0,
+                    0
+                )
+                (floating_action_button_video.layoutParams as FrameLayout.LayoutParams).setMargins(
+                    0,
+                    300,
+                    0,
+                    0
+                )
+                (floating_action_button_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                    0,
+                    450,
+                    0,
+                    0
+                )
 
-        if (videoRecording) {
-            floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
-        }
+                if (videoRecording) {
+                    floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
+                }
 //        attachFloatingActionButtonLayoutListener()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            buttonClicks()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    buttonClicks()
+                }
+            } else {
+                checkDrawOtherAppPermission(activity = (context as Activity))
+            }
         }
     }
 
@@ -507,7 +525,7 @@ internal class LoggerBirdService : Service() {
                     }
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "ScreenShot Taken!", Toast.LENGTH_SHORT).show()
-                       PaintActivity.closeActivitySession()
+                        PaintActivity.closeActivitySession()
                         val paintActivity = PaintActivity()
                         val screenshotIntent = Intent(
                             context as Activity,
@@ -611,17 +629,17 @@ internal class LoggerBirdService : Service() {
                 Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
             startForegroundServiceVideo()
         } else {
-            callEnqueue()
+            resetEnqueue()
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    private fun takeVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
+   internal fun takeVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
         workQueueLinked.controlRunnable = true
         if (checkWriteExternalStoragePermission() && checkAudioPermission()) {
             coroutineCallVideo.async {
                 try {
-                    if (!videoRecording) {
+                    if (!videoRecording ) {
                         this@LoggerBirdService.requestCode = requestCode
                         this@LoggerBirdService.resultCode = resultCode
                         this@LoggerBirdService.dataIntent = data
@@ -639,7 +657,7 @@ internal class LoggerBirdService : Service() {
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    callEnqueue()
+                    resetEnqueue()
                     LoggerBird.callEnqueue()
                     LoggerBird.callExceptionDetails(
                         exception = e,
@@ -814,6 +832,12 @@ internal class LoggerBirdService : Service() {
         } else {
             throw LoggerBirdException(Constants.logInitErrorMessage)
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    override fun hearShake() {
+        Log.d("shake", "shake fired!!")
+        initializeFloatingActionButton(activity = this.activity)
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

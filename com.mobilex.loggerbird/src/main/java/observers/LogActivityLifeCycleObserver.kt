@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -20,6 +21,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import services.LoggerBirdService
+import utils.LinkedBlockingQueueUtil
+import java.io.Serializable
 
 internal class LogActivityLifeCycleObserver(private val loggerBirdService: LoggerBirdService) :
     Activity(),
@@ -27,6 +30,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
     //Global variables.
     private var stringBuilderBundle: StringBuilder = StringBuilder()
     private lateinit var context: Context
+    private lateinit var activity: Activity
     private lateinit var intentService: Intent
     private var coroutineCallService: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -35,6 +39,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
         internal var returnActivityLifeCycleClassName: String? = null
+        internal lateinit var logActivityLifeCycleObserverInstance: LogActivityLifeCycleObserver
     }
 
     init {
@@ -69,11 +74,12 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         try {
+            this.activity = activity
             this.context = activity
             if (!this::intentService.isInitialized) {
-                loggerBirdService.initializeActivity(activity = activity)
+                logActivityLifeCycleObserverInstance = this
                 coroutineCallService.async {
-                    intentService = Intent(context, loggerBirdService.javaClass)
+                    intentService = Intent(context,loggerBirdService.javaClass)
                     context.startService(intentService)
                 }
             }
@@ -275,7 +281,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
         ) {
-            Toast.makeText(context, "Permission Denied!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Permission Write External Storage Denied!", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(
                 context,
@@ -298,4 +304,9 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             ).show()
         }
     }
+
+    internal fun activityInstance(): Activity {
+        return this.activity
+    }
+
 }

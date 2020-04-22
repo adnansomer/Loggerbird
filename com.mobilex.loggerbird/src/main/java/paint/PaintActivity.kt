@@ -47,7 +47,6 @@ class PaintActivity : Activity() {
     private val coroutineCallPaintActivity: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlButtonVisibility: Boolean = true
     private var onStopCalled = false
-
     companion object {
         private lateinit var activity: Activity
         internal fun closeActivitySession() {
