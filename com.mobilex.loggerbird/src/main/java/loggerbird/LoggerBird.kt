@@ -2815,7 +2815,7 @@ class LoggerBird : LifecycleObserver {
                     LoggerBirdService.controlPermissionRequest = false
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         if (resultCode == Activity.RESULT_OK && data != null) {
-                            loggerBirdService.takeVideoRecording(
+                            loggerBirdService.callVideoRecording(
                                 requestCode = requestCode,
                                 resultCode = resultCode,
                                 data = data

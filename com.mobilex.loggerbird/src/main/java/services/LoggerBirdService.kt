@@ -167,9 +167,9 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
             intentService = intent
-            val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            val sd = ShakeDetector(this)
-            sd.start(sensorManager)
+//            val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+//            val sd = ShakeDetector(this)
+//            sd.start(sensorManager)
             logActivityLifeCycleObserver =
                 LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
@@ -229,9 +229,9 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     internal fun initializeActivity(activity: Activity) {
         this.activity = activity
         this.context = activity
-//        if (activity is AppCompatActivity) {
-//            initializeFloatingActionButton(activity = activity)
-//        }
+        if (activity is AppCompatActivity) {
+            initializeFloatingActionButton(activity = activity)
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)

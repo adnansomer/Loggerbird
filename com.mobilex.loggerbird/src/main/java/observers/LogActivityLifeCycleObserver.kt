@@ -153,6 +153,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
                     }
                 }
             }
+            LoggerBirdService.controlDrawableSettingsPermission = false
             LoggerBirdService.controlPermissionRequest = false
             LoggerBirdService.controlWriteExternalPermission = false
             LoggerBirdService.controlAudioPermission = false
