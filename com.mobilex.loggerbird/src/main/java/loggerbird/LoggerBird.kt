@@ -213,6 +213,8 @@ class LoggerBird : LifecycleObserver {
          */
         private fun logAttachLifeCycleObservers(context: Context) {
 //            context.applicationContext.registerComponentCallbacks()
+//            val intentService = Intent(context, loggerBirdService.javaClass)
+//            context.startService(intentService)
             activityLifeCycleObserver =
                 LogActivityLifeCycleObserver(loggerBirdService = loggerBirdService)
             (context as Application).registerActivityLifecycleCallbacks(activityLifeCycleObserver)
@@ -2813,13 +2815,14 @@ class LoggerBird : LifecycleObserver {
                     LoggerBirdService.controlPermissionRequest = false
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         if (resultCode == Activity.RESULT_OK && data != null) {
-                            loggerBirdService.callVideoRecording(
+                            loggerBirdService.takeVideoRecording(
                                 requestCode = requestCode,
                                 resultCode = resultCode,
                                 data = data
                             )
-                        }else if(Settings.canDrawOverlays(context) && requestCode !=LoggerBirdService.REQUEST_CODE_VIDEO){
-                            Toast.makeText(context, "Permission Granted!", Toast.LENGTH_SHORT).show()
+                        } else if (Settings.canDrawOverlays(context) && requestCode != LoggerBirdService.REQUEST_CODE_VIDEO) {
+                            Toast.makeText(context, "Permission Granted!", Toast.LENGTH_SHORT)
+                                .show()
                         } else {
                             Toast.makeText(context, "Permission denied!", Toast.LENGTH_SHORT).show()
                         }

@@ -229,9 +229,9 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     internal fun initializeActivity(activity: Activity) {
         this.activity = activity
         this.context = activity
-        if (activity is AppCompatActivity) {
-            initializeFloatingActionButton(activity = activity)
-        }
+//        if (activity is AppCompatActivity) {
+//            initializeFloatingActionButton(activity = activity)
+//        }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
