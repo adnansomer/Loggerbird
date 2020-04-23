@@ -142,6 +142,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         ORIENTATIONS.append(Surface.ROTATION_90, 0)
         ORIENTATIONS.append(Surface.ROTATION_180, 270)
         ORIENTATIONS.append(Surface.ROTATION_270, 180)
+        Log.d("service","service_init")
     }
 
     /**
@@ -228,18 +229,13 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     internal fun initializeActivity(activity: Activity) {
         this.activity = activity
         this.context = activity
-//        if (activity is AppCompatActivity) {
-//            initializeFloatingActionButton(activity = activity)
-//        }
+        if (activity is AppCompatActivity) {
+            initializeFloatingActionButton(activity = activity)
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeFloatingActionButton(activity: Activity) {
-        val metrics = DisplayMetrics()
-        (context as Activity).windowManager.defaultDisplay.getMetrics(metrics)
-        screenDensity = metrics.densityDpi
-        DISPLAY_HEIGHT = metrics.heightPixels
-        DISPLAY_WIDTH = metrics.widthPixels
         if (windowManager != null && this::view.isInitialized) {
             (windowManager as WindowManager).removeViewImmediate(view)
             windowManager = null
@@ -364,7 +360,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
 
             floating_action_button_video.setOnClickListener {
                 if (floating_action_button_video.visibility == View.VISIBLE) {
-                    callVideoRecording(
+                    takeVideoRecording(
                         requestCode = requestCode,
                         resultCode = resultCode,
                         data = dataIntent
@@ -690,16 +686,16 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                 resultCode,
                 dataIntent!!
             )
-            initRecorder()
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Screen recording started", Toast.LENGTH_SHORT)
-                    .show()
                 mediaProjectionCallback = MediaProjectionCallback()
                 mediaProjection!!.registerCallback(mediaProjectionCallback, null)
                 virtualDisplay = createVirtualDisplay()
+                Toast.makeText(context, "Screen recording started", Toast.LENGTH_SHORT)
+                    .show()
                 floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
                 callEnqueue()
             }
+            initRecorder()
         } else {
             controlPermissionRequest = true
             (context as Activity).startActivityForResult(
@@ -743,6 +739,11 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun createVirtualDisplay(): VirtualDisplay? {
+        val metrics = DisplayMetrics()
+        (context as Activity).windowManager.defaultDisplay.getMetrics(metrics)
+        screenDensity = metrics.densityDpi
+        DISPLAY_HEIGHT = metrics.heightPixels
+        DISPLAY_WIDTH = metrics.widthPixels
         return mediaProjection!!.createVirtualDisplay(
             "LoggerBirdFragment",
             DISPLAY_WIDTH,

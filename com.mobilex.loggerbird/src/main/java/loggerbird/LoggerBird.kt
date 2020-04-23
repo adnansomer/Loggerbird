@@ -2823,7 +2823,7 @@ class LoggerBird : LifecycleObserver {
                         } else {
                             Toast.makeText(context, "Permission denied!", Toast.LENGTH_SHORT).show()
                         }
-                        LoggerBirdService.callEnqueue()
+//                        LoggerBirdService.callEnqueue()
                     } else {
                         throw LoggerBirdException(Constants.videoRecordingSdkTag + "current min is:" + Build.VERSION.SDK_INT)
                     }

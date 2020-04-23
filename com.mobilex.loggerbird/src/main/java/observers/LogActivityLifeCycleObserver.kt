@@ -79,7 +79,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             if (!this::intentService.isInitialized) {
                 logActivityLifeCycleObserverInstance = this
                 coroutineCallService.async {
-                    intentService = Intent(context,loggerBirdService.javaClass)
+                    intentService = Intent(context,LoggerBirdService::class.java)
                     context.startService(intentService)
                 }
             }
