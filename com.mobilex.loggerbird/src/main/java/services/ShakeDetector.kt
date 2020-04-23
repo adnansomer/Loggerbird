@@ -237,7 +237,7 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
     companion object {
         const val SENSITIVITY_LIGHT = 11
         const val SENSITIVITY_MEDIUM = 13
-        const val SENSITIVITY_HARD = 15
-        private const val DEFAULT_ACCELERATION_THRESHOLD = SENSITIVITY_LIGHT
+        const val SENSITIVITY_HARD = 17
+        private const val DEFAULT_ACCELERATION_THRESHOLD = SENSITIVITY_HARD
     }
 }

@@ -159,6 +159,7 @@ class LoggerBird : LifecycleObserver {
             if (!controlLogInit) {
                 try {
                     logAttachLifeCycleObservers(context = context)
+
                     workQueueLinked = LinkedBlockingQueueUtil()
                     val logcatObserver = UnhandledExceptionObserver()
                     Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
@@ -201,48 +202,6 @@ class LoggerBird : LifecycleObserver {
             controlLogInit = true
             return controlLogInit
         }
-
-//        fun logInit(
-//            context: Context,
-//            filePathName: String? = null
-//        ): Boolean {
-//            this.context = context
-//            this.filePathName = filePathName
-//            if (!controlLogInit) {
-//                try {
-//                    fileDirectory = context.filesDir
-//                    if (filePathName != null) {
-//                        filePath = File(fileDirectory, "$filePathName.txt")
-//                        if (filePath.exists()) {
-//                            filePath.delete()
-//                        }
-//                    } else {
-//                        filePath = File(fileDirectory, "logger_bird_details.txt")
-//                        if (filePath.exists()) {
-//                            filePath.delete()
-//                        }
-//                    }
-//                    intentServiceMemory = Intent(context, LoggerBirdMemoryService::class.java)
-//                    context.startService(intentServiceMemory)
-//                    workQueueLinked = LinkedBlockingQueueUtil()
-//                    val logcatObserver = UnhandledExceptionObserver()
-//                    Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
-//                    logAttachLifeCycleObservers(context = context)
-//                } catch (e: Exception) {
-//                    e.printStackTrace()
-//                }
-//            }
-//
-////            threadPoolExecutor= LogThreadPoolExecutorUtil(
-////                corePoolSize = corePoolSize,
-////                maximumPoolSize = maximumPoolSize,
-////                keepAliveTime = keepAliveTime,
-////                workQueue = workQueueLinked,
-////                unit = timeUnit
-////            )
-//            controlLogInit = true
-//            return controlLogInit
-//        }
 
 
         /**
