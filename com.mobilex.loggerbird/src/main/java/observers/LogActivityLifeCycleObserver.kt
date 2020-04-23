@@ -21,10 +21,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import services.LoggerBirdService
-import utils.LinkedBlockingQueueUtil
-import java.io.Serializable
 
-internal class LogActivityLifeCycleObserver(private val loggerBirdService: LoggerBirdService) :
+internal class LogActivityLifeCycleObserver() :
     Activity(),
     Application.ActivityLifecycleCallbacks {
     //Global variables.
@@ -79,7 +77,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             logActivityLifeCycleObserverInstance = this
             if (!this::intentService.isInitialized) {
                 coroutineCallService.async {
-                    intentService = Intent(context,loggerBirdService.javaClass)
+                    intentService = Intent(context, LoggerBirdService::class.java)
                     context.startService(intentService)
                 }
             }
@@ -121,7 +119,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityStarted(activity: Activity) {
         try {
-            loggerBirdService.initializeNewActivity(activity = activity)
+            LoggerBirdService.loggerBirdService.initializeNewActivity(activity = activity)
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -148,16 +146,16 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
                     LoggerBirdService.controlAudioPermission -> {
                         checkAudioPermissionResult()
                     }
-                    LoggerBirdService.controlDrawableSettingsPermission -> {
-                        checkDrawOtherAppPermissionResult(activity = activity)
+                    LoggerBirdService.controlDrawableSettingsPermission ->{
+//                        LoggerBirdService.sd.start(sensorManager = LoggerBirdService.sensorManager)
                     }
                 }
             }
-            LoggerBirdService.controlDrawableSettingsPermission = false
             LoggerBirdService.controlPermissionRequest = false
             LoggerBirdService.controlWriteExternalPermission = false
             LoggerBirdService.controlAudioPermission = false
             LoggerBirdService.controlVideoPermission = false
+            LoggerBirdService.controlDrawableSettingsPermission = false
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -179,9 +177,9 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             if (activity is AppCompatActivity) {
 //               LoggerBirdService.takeOldCoordinates()
             }
-            if (LoggerBirdService.controlPermissionRequest) {
-                (context as Activity).stopService(LoggerBirdService.intentForegroundServiceVideo)
-            }
+//            if (LoggerBirdService.controlPermissionRequest) {
+//                (context as Activity).stopService(LoggerBirdService.intentForegroundServiceVideo)
+//            }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -219,9 +217,9 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
 //            if(coroutineCallService.isActive){
 //                coroutineCallService.cancel()
 //            }
-            if (!this::intentService.isInitialized) {
-                stopService(intentService)
-            }
+//            if (!this::intentService.isInitialized) {
+//                stopService(intentService)
+//            }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -282,7 +280,8 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
         ) {
-            Toast.makeText(context, "Permission Write External Storage Denied!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Permission Write External Storage Denied!", Toast.LENGTH_SHORT)
+                .show()
         } else {
             Toast.makeText(
                 context,

@@ -69,7 +69,7 @@ internal class LoggerBirdMemoryService : Service() {
         super.onDestroy()
         try {
             stopMemoryUsage()
-            //stopSelf()
+//            stopSelf()
         } catch (e: Exception) {
             e.printStackTrace()
         }

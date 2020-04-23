@@ -132,7 +132,7 @@ class LoggerBird : LifecycleObserver {
         private lateinit var activityLifeCycleObserver: LogActivityLifeCycleObserver
         internal var stringBuilderActivityLifeCycleObserver: StringBuilder = StringBuilder()
         internal var classList: ArrayList<String> = ArrayList()
-        private val loggerBirdService: LoggerBirdService = LoggerBirdService()
+//        private val loggerBirdService: LoggerBirdService = LoggerBirdService()
 
 
         //---------------Public Methods:---------------//
@@ -216,7 +216,7 @@ class LoggerBird : LifecycleObserver {
 //            val intentService = Intent(context, loggerBirdService.javaClass)
 //            context.startService(intentService)
             activityLifeCycleObserver =
-                LogActivityLifeCycleObserver(loggerBirdService = loggerBirdService)
+                LogActivityLifeCycleObserver()
             (context as Application).registerActivityLifecycleCallbacks(activityLifeCycleObserver)
 //                lifeCycleObserver = LogLifeCycleObserver()
 //                lifeCycleObserver.registerLifeCycle(context)
@@ -2065,7 +2065,7 @@ class LoggerBird : LifecycleObserver {
                     }
                     if (LoggerBirdService.controlServiceOnDestroyState) {
                         saveSessionIntoOldSessionFile()
-                        context.stopService(intentServiceMemory)
+//                        context.stopService(intentServiceMemory)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -2815,7 +2815,7 @@ class LoggerBird : LifecycleObserver {
                     LoggerBirdService.controlPermissionRequest = false
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         if (resultCode == Activity.RESULT_OK && data != null) {
-                            loggerBirdService.callVideoRecording(
+                                LoggerBirdService.loggerBirdService.callVideoRecording(
                                 requestCode = requestCode,
                                 resultCode = resultCode,
                                 data = data

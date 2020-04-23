@@ -47,10 +47,7 @@ import loggerbird.LoggerBird
 import observers.LogActivityLifeCycleObserver
 import paint.PaintActivity
 import utils.LinkedBlockingQueueUtil
-import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
-import java.io.Serializable
 import java.lang.Exception
 
 
@@ -121,6 +118,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         internal var controlWriteExternalPermission: Boolean = false
         internal lateinit var intentForegroundServiceVideo: Intent
         internal lateinit var screenshotBitmap: Bitmap
+        internal lateinit var loggerBirdService:LoggerBirdService
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
             if (runnableList.size > 0) {
@@ -142,6 +140,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         ORIENTATIONS.append(Surface.ROTATION_90, 0)
         ORIENTATIONS.append(Surface.ROTATION_180, 270)
         ORIENTATIONS.append(Surface.ROTATION_270, 180)
+        loggerBirdService = this
         Log.d("service","service_init")
     }
 
@@ -167,9 +166,9 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
             intentService = intent
-//            val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-//            val sd = ShakeDetector(this)
-//            sd.start(sensorManager)
+            val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            val sd = ShakeDetector(this)
+            sd.start(sensorManager)
             logActivityLifeCycleObserver =
                 LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
@@ -229,9 +228,9 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     internal fun initializeActivity(activity: Activity) {
         this.activity = activity
         this.context = activity
-        if (activity is AppCompatActivity) {
-            initializeFloatingActionButton(activity = activity)
-        }
+//        if (activity is AppCompatActivity) {
+//            initializeFloatingActionButton(activity = activity)
+//        }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -360,7 +359,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
 
             floating_action_button_video.setOnClickListener {
                 if (floating_action_button_video.visibility == View.VISIBLE) {
-                    takeVideoRecording(
+                    callVideoRecording(
                         requestCode = requestCode,
                         resultCode = resultCode,
                         data = dataIntent
@@ -686,6 +685,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                 resultCode,
                 dataIntent!!
             )
+            initRecorder()
             withContext(Dispatchers.Main) {
                 mediaProjectionCallback = MediaProjectionCallback()
                 mediaProjection!!.registerCallback(mediaProjectionCallback, null)
@@ -695,7 +695,6 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                 floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
                 callEnqueue()
             }
-            initRecorder()
         } else {
             controlPermissionRequest = true
             (context as Activity).startActivityForResult(
@@ -838,7 +837,13 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun hearShake() {
         Log.d("shake", "shake fired!!")
-        initializeFloatingActionButton(activity = this.activity)
+        if(this::rootView.isInitialized){
+            if(rootView.hasFocus()){
+                initializeFloatingActionButton(activity = this.activity)
+            }
+        }else{
+            initializeFloatingActionButton(activity = this.activity)
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
