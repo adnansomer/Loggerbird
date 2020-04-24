@@ -150,6 +150,12 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
             }
             return false
         }
+        internal fun controlFloatingActionButtonView():Boolean{
+            if(this::floatingActionButtonView.isInitialized){
+                return true
+            }
+            return false
+        }
     }
 
     init {
@@ -433,7 +439,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
             floating_action_button_screenshot.visibility = View.GONE
             floating_action_button_video.visibility = View.GONE
             floating_action_button_audio.visibility = View.GONE
-            floating_action_button.setImageResource(R.drawable.ic_add_black_24dp)
+//            floating_action_button.setImageResource(R.drawable.)
         } else {
             isOpen = true
             floating_action_button_screenshot.visibility = View.VISIBLE
@@ -448,7 +454,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
             floating_action_button_video.animate().rotation(360F)
             floating_action_button_video.animate().duration = 400L
             floating_action_button_video.animate().start()
-            floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
+//            floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
         }
     }
 

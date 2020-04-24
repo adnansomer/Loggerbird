@@ -540,12 +540,16 @@ class PaintActivity : Activity() {
     override fun onStop() {
         super.onStop()
         onStopCalled = true
-        LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
+        if(LoggerBirdService.controlFloatingActionButtonView()){
+            LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        LoggerBirdService.floatingActionButtonView.visibility = View.GONE
+        if(LoggerBirdService.controlFloatingActionButtonView()){
+            LoggerBirdService.floatingActionButtonView.visibility = View.GONE
+        }
     }
 //    override fun onDestroy() {
 //        super.onDestroy()
