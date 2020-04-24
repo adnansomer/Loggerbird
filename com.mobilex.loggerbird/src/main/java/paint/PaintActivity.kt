@@ -14,6 +14,7 @@ import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.util.Log
 import android.util.Rational
 import android.view.LayoutInflater
 import android.view.View
@@ -50,6 +51,7 @@ class PaintActivity : Activity() {
 
     companion object {
         private lateinit var activity: Activity
+        internal var controlPaintInPictureState:Boolean = false
         internal fun closeActivitySession() {
             if (Companion::activity.isInitialized) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -478,6 +480,7 @@ class PaintActivity : Activity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun pictureInPictureMode() {
+        controlPaintInPictureState = true
         coroutineCallPaintActivity.async {
             try {
                 val aspectRatio = Rational(9, 16)
@@ -551,9 +554,8 @@ class PaintActivity : Activity() {
             LoggerBirdService.floatingActionButtonView.visibility = View.GONE
         }
     }
-//    override fun onDestroy() {
-//        super.onDestroy()
-////        onStopCalled = true
-////        LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
-//    }
+    override fun onDestroy() {
+        super.onDestroy()
+        controlPaintInPictureState = false
+    }
 }

@@ -374,7 +374,11 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
             }
             floating_action_button_screenshot.setOnClickListener {
                 if (floating_action_button_screenshot.visibility == View.VISIBLE) {
-                    takeScreenShot(view = activity.window.decorView.rootView, context = context)
+                    if(!PaintActivity.controlPaintInPictureState){
+                        takeScreenShot(view = activity.window.decorView.rootView, context = context)
+                    }else{
+                        Toast.makeText(context, "Please save your drawing or remove it , in order to proceed!", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
             floating_action_button_audio.setOnClickListener {
