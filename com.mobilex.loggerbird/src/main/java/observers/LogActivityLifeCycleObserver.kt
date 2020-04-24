@@ -119,7 +119,9 @@ internal class LogActivityLifeCycleObserver() :
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityStarted(activity: Activity) {
         try {
-            LoggerBirdService.loggerBirdService.initializeNewActivity(activity = activity)
+            if(LoggerBirdService.controlLoggerBirdServiceInit()){
+                LoggerBirdService.loggerBirdService.initializeNewActivity(activity = activity)
+            }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -147,6 +149,7 @@ internal class LogActivityLifeCycleObserver() :
                         checkAudioPermissionResult()
                     }
                     LoggerBirdService.controlDrawableSettingsPermission ->{
+                        checkDrawOtherAppPermissionResult(activity = activity)
 //                        LoggerBirdService.sd.start(sensorManager = LoggerBirdService.sensorManager)
                     }
                 }
@@ -174,12 +177,11 @@ internal class LogActivityLifeCycleObserver() :
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onActivityPaused(activity: Activity) {
         try {
-            if (activity is AppCompatActivity) {
-//               LoggerBirdService.takeOldCoordinates()
+            if (LoggerBirdService.controlPermissionRequest) {
+                if(LoggerBirdService.controlIntentForegroundServiceVideo()){
+                    (context as Activity).stopService(LoggerBirdService.intentForegroundServiceVideo)
+                }
             }
-//            if (LoggerBirdService.controlPermissionRequest) {
-//                (context as Activity).stopService(LoggerBirdService.intentForegroundServiceVideo)
-//            }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -293,6 +295,7 @@ internal class LogActivityLifeCycleObserver() :
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun checkDrawOtherAppPermissionResult(activity: Activity) {
+        LoggerBirdService.sd.start(sensorManager = LoggerBirdService.sensorManager)
         if (!Settings.canDrawOverlays(activity)) {
             Toast.makeText(activity, "Permission DrawOtherApp Settings Denied!", Toast.LENGTH_SHORT)
                 .show()

@@ -2812,23 +2812,23 @@ class LoggerBird : LifecycleObserver {
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             if (controlLogInit) {
                 try {
-                    LoggerBirdService.controlPermissionRequest = false
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        if (resultCode == Activity.RESULT_OK && data != null) {
+                    if (!LoggerBirdService.controlVideoPermission && !LoggerBirdService.controlDrawableSettingsPermission && !LoggerBirdService.controlAudioPermission) {
+                        LoggerBirdService.controlPermissionRequest = false
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            if (resultCode == Activity.RESULT_OK && data != null) {
                                 LoggerBirdService.loggerBirdService.callVideoRecording(
-                                requestCode = requestCode,
-                                resultCode = resultCode,
-                                data = data
-                            )
-                        } else if (Settings.canDrawOverlays(context) && requestCode != LoggerBirdService.REQUEST_CODE_VIDEO) {
-                            Toast.makeText(context, "Permission Granted!", Toast.LENGTH_SHORT)
-                                .show()
-                        } else {
-                            Toast.makeText(context, "Permission denied!", Toast.LENGTH_SHORT).show()
-                        }
+                                    requestCode = requestCode,
+                                    resultCode = resultCode,
+                                    data = data
+                                )
+                            } else {
+                                Toast.makeText(context, "Permission denied!", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
 //                        LoggerBirdService.callEnqueue()
-                    } else {
-                        throw LoggerBirdException(Constants.videoRecordingSdkTag + "current min is:" + Build.VERSION.SDK_INT)
+                        } else {
+                            throw LoggerBirdException(Constants.videoRecordingSdkTag + "current min is:" + Build.VERSION.SDK_INT)
+                        }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

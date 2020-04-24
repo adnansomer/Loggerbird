@@ -47,10 +47,18 @@ class PaintActivity : Activity() {
     private val coroutineCallPaintActivity: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlButtonVisibility: Boolean = true
     private var onStopCalled = false
+
     companion object {
         private lateinit var activity: Activity
         internal fun closeActivitySession() {
             if (Companion::activity.isInitialized) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    if(activity.isInPictureInPictureMode){
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                            reversePictureInPictureMode()
+                        }
+                    }
+                }
                 activity.finish()
             }
         }
@@ -238,7 +246,7 @@ class PaintActivity : Activity() {
             val textViewYes: TextView = snackView.findViewById(R.id.snackbar_yes)
             textViewYes.text = "YES"
             textViewYes.setOnClickListener {
-                val snackbarYes : Snackbar = Snackbar.make(it, "Deleted!", Snackbar.LENGTH_SHORT)
+                val snackbarYes: Snackbar = Snackbar.make(it, "Deleted!", Snackbar.LENGTH_SHORT)
                 snackbarYes.setAction("Dismiss") {
                     snackbarYes.dismiss()
                 }.show()
@@ -483,6 +491,20 @@ class PaintActivity : Activity() {
             }
         }
     }
+    @RequiresApi(Build.VERSION_CODES.O)
+    internal fun reversePictureInPictureMode() {
+        try {
+            val aspectRatio = Rational(1, 1)
+            val mPictureInPictureParamsBuilder = PictureInPictureParams.Builder()
+            mPictureInPictureParamsBuilder.setAspectRatio(aspectRatio)
+            enterPictureInPictureMode(mPictureInPictureParamsBuilder.build())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
+        }
+    }
+
 
     override fun onBackPressed() {
         super.onBackPressed()
@@ -520,6 +542,7 @@ class PaintActivity : Activity() {
         onStopCalled = true
         LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
     }
+
     override fun onResume() {
         super.onResume()
         LoggerBirdService.floatingActionButtonView.visibility = View.GONE

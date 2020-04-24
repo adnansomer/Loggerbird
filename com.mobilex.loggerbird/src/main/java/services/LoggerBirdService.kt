@@ -118,7 +118,9 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         internal var controlWriteExternalPermission: Boolean = false
         internal lateinit var intentForegroundServiceVideo: Intent
         internal lateinit var screenshotBitmap: Bitmap
-        internal lateinit var loggerBirdService:LoggerBirdService
+        internal lateinit var loggerBirdService: LoggerBirdService
+        internal lateinit var sd: ShakeDetector
+        internal lateinit var sensorManager:SensorManager
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
             if (runnableList.size > 0) {
@@ -129,9 +131,24 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
             }
 
         }
-        internal fun resetEnqueue(){
+
+        internal fun resetEnqueue() {
             runnableList.clear()
             workQueueLinked.controlRunnable = false
+        }
+
+        internal fun controlIntentForegroundServiceVideo(): Boolean {
+            if (this::intentForegroundServiceVideo.isInitialized) {
+                return true
+            }
+            return false
+        }
+
+        internal fun controlLoggerBirdServiceInit(): Boolean {
+            if (Companion::loggerBirdService.isInitialized) {
+                return true
+            }
+            return false
         }
     }
 
@@ -141,7 +158,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         ORIENTATIONS.append(Surface.ROTATION_180, 270)
         ORIENTATIONS.append(Surface.ROTATION_270, 180)
         loggerBirdService = this
-        Log.d("service","service_init")
+        Log.d("service", "service_init")
     }
 
     /**
@@ -166,8 +183,8 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
             intentService = intent
-            val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            val sd = ShakeDetector(this)
+            sensorManager =  getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            sd = ShakeDetector(this)
             sd.start(sensorManager)
             logActivityLifeCycleObserver =
                 LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
@@ -302,6 +319,9 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
 
                 if (videoRecording) {
                     floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
+                }
+                if (audioRecording) {
+                    floating_action_button_audio.setImageResource(R.drawable.ic_mic_off_black_24dp)
                 }
 //        attachFloatingActionButtonLayoutListener()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -474,6 +494,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     private fun checkDrawOtherAppPermission(activity: Activity) {
         controlPermissionRequest = true
         controlDrawableSettingsPermission = true
+        sd.stop()
         val intent = Intent(
             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
             Uri.parse("package:" + activity.packageName)
@@ -495,6 +516,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
 
     private fun takeScreenShot(view: View, context: Context) {
         if (checkWriteExternalStoragePermission()) {
+            PaintActivity.closeActivitySession()
             coroutineCallScreenShot.async {
                 val fileDirectory: File = context.filesDir
                 var byteArray: ByteArray? = null
@@ -520,7 +542,6 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                     }
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "ScreenShot Taken!", Toast.LENGTH_SHORT).show()
-                        PaintActivity.closeActivitySession()
                         val paintActivity = PaintActivity()
                         val screenshotIntent = Intent(
                             context as Activity,
@@ -629,12 +650,12 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-   internal fun takeVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
+    internal fun takeVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
         workQueueLinked.controlRunnable = true
         if (checkWriteExternalStoragePermission() && checkAudioPermission()) {
             coroutineCallVideo.async {
                 try {
-                    if (!videoRecording ) {
+                    if (!videoRecording) {
                         this@LoggerBirdService.requestCode = requestCode
                         this@LoggerBirdService.resultCode = resultCode
                         this@LoggerBirdService.dataIntent = data
@@ -837,13 +858,14 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun hearShake() {
         Log.d("shake", "shake fired!!")
-        if(this::rootView.isInitialized){
-            if(rootView.hasFocus()){
-                initializeFloatingActionButton(activity = this.activity)
-            }
-        }else{
-            initializeFloatingActionButton(activity = this.activity)
-        }
+        initializeFloatingActionButton(activity = this.activity)
+//        if(this::rootView.isInitialized){
+//            if(rootView.hasFocus()){
+//                initializeFloatingActionButton(activity = this.activity)
+//            }
+//        }else{
+//            initializeFloatingActionButton(activity = this.activity)
+//        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
