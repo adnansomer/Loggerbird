@@ -35,7 +35,6 @@ class FloatingActionButtonOnTouchListener(
                     floatingActionButtonScreenShot.visibility = View.GONE
                     floatingActionButtonVideo.visibility = View.GONE
                     floatingActionButtonAudio.visibility = View.GONE
-                    floatingActionButton.setImageResource(R.drawable.ic_add_black_24dp)
                     windowManagerDx = windowManagerParams.x - event.rawX
                     windowManagerDy = windowManagerParams.y - event.rawY
                     lastAction = MotionEvent.ACTION_DOWN

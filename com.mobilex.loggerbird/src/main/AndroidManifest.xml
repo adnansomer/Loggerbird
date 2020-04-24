@@ -11,27 +11,32 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application>
-        <activity android:name="observers.LogActivityLifeCycleObserver"/>
-        <activity android:name="paint.PaintActivity"
-            android:exported="true"
+        <activity android:name="observers.LogActivityLifeCycleObserver"
             android:enabled="true"
-            android:resizeableActivity="true"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:taskAffinity="paint.PaintActivity"
-            android:supportsPictureInPicture="true"
-            android:autoRemoveFromRecents="true"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme">
-        </activity>
-        <service
-            android:name="services.LoggerBirdMemoryService"
-            android:enabled="true"
-            android:exported="true" />
-        <service android:name="services.LoggerBirdService" />
-        <service android:name="services.LoggerBirdPaintService"/>
-        <service android:name="services.LoggerBirdForegroundServiceVideo"
-            android:foregroundServiceType="mediaProjection"
             />
+        <activity android:name="paint.PaintActivity"
+                android:exported="true"
+                android:enabled="true"
+                android:resizeableActivity="true"
+                android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+                android:taskAffinity="paint.PaintActivity"
+                android:supportsPictureInPicture="true"
+                android:autoRemoveFromRecents="true"
+                android:launchMode="singleTop"
+                android:theme="@style/AppTheme">
+        </activity>
+
+        <service android:name="services.LoggerBirdMemoryService"
+                 android:enabled="true"
+                 android:exported="true" />
+        <service android:name="services.LoggerBirdService" />
+        <service android:name="services.LoggerBirdPaintService" />
+        <service android:name="services.LoggerBirdForegroundServiceVideo"
+                 android:foregroundServiceType="mediaProjection"
+                 android:stopWithTask="true"
+                 android:enabled="true"
+                 android:exported="false" />
+
     </application>
 
 </manifest>
