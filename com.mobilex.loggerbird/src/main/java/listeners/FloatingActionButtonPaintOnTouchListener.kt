@@ -2,8 +2,11 @@ package listeners
 
 import android.content.res.Resources
 import android.util.Log
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mobilex.loggerbird.R
 import constants.Constants
@@ -37,11 +40,13 @@ class FloatingActionButtonPaintOnTouchListener(
     private var lastAction: Int = 0
     private val deviceWidth = Resources.getSystem().displayMetrics.widthPixels
     private val deviceHeight = Resources.getSystem().displayMetrics.heightPixels
+    private var controlLayoutGravity = false
 
     override fun onTouch(view: View, event: MotionEvent): Boolean {
         try {
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+//                    adjustGravity()
                     floatingActionButtonPaint.setImageResource(R.drawable.ic_add_white_24dp)
                     floatingActionButtonPaintSave.visibility = View.GONE
                     floatingActionButtonPaintBack.visibility = View.GONE
@@ -106,6 +111,7 @@ class FloatingActionButtonPaintOnTouchListener(
                 MotionEvent.ACTION_UP -> {
                     if (deviceWidth < (event.rawX + (floatingActionButtonPaint.width))) {
                         Log.d("corner", "a")
+                        controlLayoutGravity= true
                         floatingActionButtonPaintBrush.y = view.y
                         floatingActionButtonPaintPalette.y = view.y
                         floatingActionButtonPaintDelete.y = view.y
@@ -128,6 +134,7 @@ class FloatingActionButtonPaintOnTouchListener(
 
                     } else if (event.rawX - (floatingActionButtonPaint.width) < 0) {
                         Log.d("corner", "b")
+                        controlLayoutGravity= true
                         floatingActionButtonPaintBrush.y = view.y
                         floatingActionButtonPaintPalette.y = view.y
                         floatingActionButtonPaintDelete.y = view.y
@@ -150,6 +157,7 @@ class FloatingActionButtonPaintOnTouchListener(
                     }
                     if (deviceHeight < (event.rawY + (floatingActionButtonPaint.height))) {
                         Log.d("corner", "c")
+                        controlLayoutGravity= true
                         floatingActionButtonPaintBrush.x = view.x
                         floatingActionButtonPaintPalette.x = view.x
                         floatingActionButtonPaintDelete.x = view.x
@@ -172,6 +180,7 @@ class FloatingActionButtonPaintOnTouchListener(
 
                     } else if (event.rawY - (floatingActionButtonPaint.height) < 0) {
                         Log.d("corner", "d")
+                        controlLayoutGravity= true
                         floatingActionButtonPaintBrush.x = view.x
                         floatingActionButtonPaintPalette.x = view.x
                         floatingActionButtonPaintDelete.x = view.x
@@ -200,6 +209,7 @@ class FloatingActionButtonPaintOnTouchListener(
 //                    floatingActionButtonPaintPalette.visibility = View.VISIBLE
 //                    floatingActionButtonPaintErase.visibility = View.VISIBLE
 //                    floatingActionButtonPaintBack.visibility = View.VISIBLE
+                    adjustGravity()
                     floatingActionButtonPaint.performClick()
                     lastAction = MotionEvent.ACTION_UP
                 }
@@ -227,4 +237,15 @@ class FloatingActionButtonPaintOnTouchListener(
 //            viewMinFabLayout.addView(childView)
 //        }
 //    }
+    private fun adjustGravity(){
+        if(controlLayoutGravity){
+            (floatingActionButtonPaintBrush.layoutParams as  CoordinatorLayout.LayoutParams).gravity = Gravity.NO_GRAVITY
+            (floatingActionButtonPaintPalette.layoutParams as  CoordinatorLayout.LayoutParams).gravity = Gravity.NO_GRAVITY
+            (floatingActionButtonPaintDelete.layoutParams as  CoordinatorLayout.LayoutParams).gravity = Gravity.NO_GRAVITY
+            (floatingActionButtonPaintErase.layoutParams as  CoordinatorLayout.LayoutParams).gravity = Gravity.NO_GRAVITY
+            (floatingActionButtonPaintBack.layoutParams as  CoordinatorLayout.LayoutParams).gravity = Gravity.NO_GRAVITY
+            (floatingActionButtonPaintSave.layoutParams as  CoordinatorLayout.LayoutParams).gravity = Gravity.NO_GRAVITY
+            controlLayoutGravity = false
+        }
+    }
 }

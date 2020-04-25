@@ -14,6 +14,7 @@ import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.util.Log
 import android.util.Rational
 import android.view.LayoutInflater
 import android.view.View
@@ -50,8 +51,16 @@ class PaintActivity : Activity() {
 
     companion object {
         private lateinit var activity: Activity
+        internal var controlPaintInPictureState:Boolean = false
         internal fun closeActivitySession() {
             if (Companion::activity.isInitialized) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    if(activity.isInPictureInPictureMode){
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                            reversePictureInPictureMode()
+                        }
+                    }
+                }
                 activity.finish()
             }
         }
@@ -239,7 +248,7 @@ class PaintActivity : Activity() {
             val textViewYes: TextView = snackView.findViewById(R.id.snackbar_yes)
             textViewYes.text = "YES"
             textViewYes.setOnClickListener {
-                val snackbarYes : Snackbar = Snackbar.make(it, "Deleted!", Snackbar.LENGTH_SHORT)
+                val snackbarYes: Snackbar = Snackbar.make(it, "Deleted!", Snackbar.LENGTH_SHORT)
                 snackbarYes.setAction("Dismiss") {
                     snackbarYes.dismiss()
                 }.show()
@@ -471,6 +480,7 @@ class PaintActivity : Activity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun pictureInPictureMode() {
+        controlPaintInPictureState = true
         coroutineCallPaintActivity.async {
             try {
                 val aspectRatio = Rational(9, 16)
@@ -484,6 +494,20 @@ class PaintActivity : Activity() {
             }
         }
     }
+    @RequiresApi(Build.VERSION_CODES.O)
+    internal fun reversePictureInPictureMode() {
+        try {
+            val aspectRatio = Rational(1, 1)
+            val mPictureInPictureParamsBuilder = PictureInPictureParams.Builder()
+            mPictureInPictureParamsBuilder.setAspectRatio(aspectRatio)
+            enterPictureInPictureMode(mPictureInPictureParamsBuilder.build())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
+        }
+    }
+
 
     override fun onBackPressed() {
         super.onBackPressed()
@@ -519,15 +543,19 @@ class PaintActivity : Activity() {
     override fun onStop() {
         super.onStop()
         onStopCalled = true
-        LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
+        if(LoggerBirdService.controlFloatingActionButtonView()){
+            LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
+        }
     }
+
     override fun onResume() {
         super.onResume()
-        LoggerBirdService.floatingActionButtonView.visibility = View.GONE
+        if(LoggerBirdService.controlFloatingActionButtonView()){
+            LoggerBirdService.floatingActionButtonView.visibility = View.GONE
+        }
     }
-//    override fun onDestroy() {
-//        super.onDestroy()
-////        onStopCalled = true
-////        LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
-//    }
+    override fun onDestroy() {
+        super.onDestroy()
+        controlPaintInPictureState = false
+    }
 }

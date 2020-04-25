@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -21,12 +22,13 @@ import java.util.*
 import kotlin.collections.ArrayList
 import services.LoggerBirdService
 
-internal class LogActivityLifeCycleObserver(private val loggerBirdService: LoggerBirdService) :
+internal class LogActivityLifeCycleObserver() :
     Activity(),
     Application.ActivityLifecycleCallbacks {
     //Global variables.
     private var stringBuilderBundle: StringBuilder = StringBuilder()
     private lateinit var context: Context
+    private lateinit var activity: Activity
     private lateinit var intentService: Intent
     private var coroutineCallService: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -35,8 +37,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
         internal var returnActivityLifeCycleClassName: String? = null
-        lateinit var currentActivity: Activity
-        lateinit var currentContext: Context
+        internal lateinit var logActivityLifeCycleObserverInstance: LogActivityLifeCycleObserver
     }
 
     init {
@@ -71,15 +72,12 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         try {
+            this.activity = activity
             this.context = activity
-
-            currentContext = activity
-            currentActivity = activity
-
+            logActivityLifeCycleObserverInstance = this
             if (!this::intentService.isInitialized) {
-                loggerBirdService.initializeActivity(activity = activity)
                 coroutineCallService.async {
-                    intentService = Intent(context, loggerBirdService.javaClass)
+                    intentService = Intent(context, LoggerBirdService::class.java)
                     context.startService(intentService)
                 }
             }
@@ -121,7 +119,9 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityStarted(activity: Activity) {
         try {
-            loggerBirdService.initializeNewActivity(activity = activity)
+            if(LoggerBirdService.controlLoggerBirdServiceInit()){
+                LoggerBirdService.loggerBirdService.initializeNewActivity(activity = activity)
+            }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -148,8 +148,9 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
                     LoggerBirdService.controlAudioPermission -> {
                         checkAudioPermissionResult()
                     }
-                    LoggerBirdService.controlDrawableSettingsPermission -> {
+                    LoggerBirdService.controlDrawableSettingsPermission ->{
                         checkDrawOtherAppPermissionResult(activity = activity)
+//                        LoggerBirdService.sd.start(sensorManager = LoggerBirdService.sensorManager)
                     }
                 }
             }
@@ -157,6 +158,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             LoggerBirdService.controlWriteExternalPermission = false
             LoggerBirdService.controlAudioPermission = false
             LoggerBirdService.controlVideoPermission = false
+            LoggerBirdService.controlDrawableSettingsPermission = false
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -175,11 +177,10 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onActivityPaused(activity: Activity) {
         try {
-            if (activity is AppCompatActivity) {
-//               LoggerBirdService.takeOldCoordinates()
-            }
             if (LoggerBirdService.controlPermissionRequest) {
-                (context as Activity).stopService(LoggerBirdService.intentForegroundServiceVideo)
+                if(LoggerBirdService.controlIntentForegroundServiceVideo()){
+                    (context as Activity).stopService(LoggerBirdService.intentForegroundServiceVideo)
+                }
             }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
@@ -218,9 +219,9 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
 //            if(coroutineCallService.isActive){
 //                coroutineCallService.cancel()
 //            }
-            if (!this::intentService.isInitialized) {
-                stopService(intentService)
-            }
+//            if (!this::intentService.isInitialized) {
+//                stopService(intentService)
+//            }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -281,7 +282,8 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
         ) {
-            Toast.makeText(context, "Permission Denied!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Permission Write External Storage Denied!", Toast.LENGTH_SHORT)
+                .show()
         } else {
             Toast.makeText(
                 context,
@@ -293,6 +295,7 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun checkDrawOtherAppPermissionResult(activity: Activity) {
+        LoggerBirdService.sd.start(sensorManager = LoggerBirdService.sensorManager)
         if (!Settings.canDrawOverlays(activity)) {
             Toast.makeText(activity, "Permission DrawOtherApp Settings Denied!", Toast.LENGTH_SHORT)
                 .show()
@@ -304,4 +307,9 @@ internal class LogActivityLifeCycleObserver(private val loggerBirdService: Logge
             ).show()
         }
     }
+
+    internal fun activityInstance(): Activity {
+        return this.activity
+    }
+
 }
