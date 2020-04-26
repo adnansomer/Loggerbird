@@ -17,6 +17,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
 import androidx.recyclerview.widget.RecyclerView
@@ -150,6 +151,49 @@ class LoggerBird : LifecycleObserver {
          * @return Boolean value.
          */
 
+//        fun logInit(
+//            context: Context,
+//            filePathName: String? = null
+//        ): Boolean {
+//            this.context = context
+//            this.filePathName = filePathName
+//            if (!controlLogInit) {
+//                try {
+//                    logAttachLifeCycleObservers(context = context)
+//                    fileDirectory = context.filesDir
+//                    if (filePathName != null) {
+//                        filePath = File(fileDirectory, "$filePathName.txt")
+//                        if (filePath.exists()) {
+//                            filePath.delete()
+//                        }
+//                    } else {
+//                        filePath = File(fileDirectory, "logger_bird_details.txt")
+//                        if (filePath.exists()) {
+//                            filePath.delete()
+//                        }
+//                    }
+//                    workQueueLinked = LinkedBlockingQueueUtil()
+//                    val logcatObserver = UnhandledExceptionObserver()
+//                    Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
+//                    coroutineCallMemoryService.async {
+//                        intentServiceMemory = Intent(context, LoggerBirdMemoryService::class.java)
+//                        context.startService(intentServiceMemory)
+//                    }
+//                } catch (e: Exception) {
+//                    e.printStackTrace()
+//                }
+//            }
+////            threadPoolExecutor= LogThreadPoolExecutorUtil(
+////                corePoolSize = corePoolSize,
+////                maximumPoolSize = maximumPoolSize,
+////                keepAliveTime = keepAliveTime,
+////                workQueue = workQueueLinked,
+////                unit = timeUnit
+////            )
+//            controlLogInit = true
+//            return controlLogInit
+//        }
+
         fun logInit(
             context: Context,
             filePathName: String? = null
@@ -159,7 +203,6 @@ class LoggerBird : LifecycleObserver {
             if (!controlLogInit) {
                 try {
                     logAttachLifeCycleObservers(context = context)
-
                     workQueueLinked = LinkedBlockingQueueUtil()
                     val logcatObserver = UnhandledExceptionObserver()
                     Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
@@ -202,6 +245,7 @@ class LoggerBird : LifecycleObserver {
             controlLogInit = true
             return controlLogInit
         }
+
 
 
         /**
@@ -2810,34 +2854,68 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+        @RequiresApi(Build.VERSION_CODES.M)
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-            if(controlLogInit){
+            if (controlLogInit) {
                 try {
-                    LoggerBirdService.controlPermissionRequest = false
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        if(resultCode==Activity.RESULT_OK && data != null){
-                            loggerBirdService.callVideoRecording(
-                                requestCode = requestCode,
-                                resultCode = resultCode,
-                                data = data
-                            )
-                        }else{
-                            Toast.makeText(context, "Permission denied!",Toast.LENGTH_SHORT).show()
+                    if (!LoggerBirdService.controlVideoPermission && !LoggerBirdService.controlDrawableSettingsPermission && !LoggerBirdService.controlAudioPermission) {
+                        LoggerBirdService.controlPermissionRequest = false
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            if (resultCode == Activity.RESULT_OK && data != null) {
+                                LoggerBirdService.loggerBirdService.callVideoRecording(
+                                    requestCode = requestCode,
+                                    resultCode = resultCode,
+                                    data = data
+                                )
+                            } else {
+                                Toast.makeText(context, "Permission denied!", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+//                        LoggerBirdService.callEnqueue()
+                        } else {
+                            throw LoggerBirdException(Constants.videoRecordingSdkTag + "current min is:" + Build.VERSION.SDK_INT)
                         }
-                        LoggerBirdService.callEnqueue()
-                    }else{
-                        throw LoggerBirdException(Constants.videoRecordingSdkTag+"current min is:"+Build.VERSION.SDK_INT)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     LoggerBirdService.callEnqueue()
                     callEnqueue()
-                    callExceptionDetails(exception = e , tag = Constants.onActivityResultTag)
+                    callExceptionDetails(exception = e, tag = Constants.onActivityResultTag)
                 }
-            }else {
+            } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
+
+//        fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//            if(controlLogInit){
+//                try {
+//                    LoggerBirdService.controlPermissionRequest = false
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                        if(resultCode==Activity.RESULT_OK && data != null){
+//                            loggerBirdService.callVideoRecording(
+//                                requestCode = requestCode,
+//                                resultCode = resultCode,
+//                                data = data
+//                            )
+//                        }else{
+//                            Toast.makeText(context, "Permission denied!",Toast.LENGTH_SHORT).show()
+//                        }
+//                        LoggerBirdService.callEnqueue()
+//                    }else{
+//                        throw LoggerBirdException(Constants.videoRecordingSdkTag+"current min is:"+Build.VERSION.SDK_INT)
+//                    }
+//                } catch (e: Exception) {
+//                    e.printStackTrace()
+//                    LoggerBirdService.callEnqueue()
+//                    callEnqueue()
+//                    callExceptionDetails(exception = e , tag = Constants.onActivityResultTag)
+//                }
+//            }else {
+//                throw LoggerBirdException(Constants.logInitErrorMessage)
+//            }
+//        }
+
         fun onRequestPermissionResult(requestCode: Int,permissions: Array<out String>,grantResults: IntArray){
             if(controlLogInit){
                 try{

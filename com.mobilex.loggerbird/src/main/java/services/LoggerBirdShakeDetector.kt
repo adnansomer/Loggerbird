@@ -10,7 +10,7 @@ import java.util.*
  * Detects phone shaking.
  *
  */
-class ShakeDetector(private val listener: Listener) : SensorEventListener {
+class LoggerBirdShakeDetector(private val listener: Listener) : SensorEventListener {
     /**
      * When the magnitude of total acceleration exceeds this
      * value, the phone is accelerating.
@@ -90,6 +90,11 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
     /** Sets the acceleration threshold sensitivity.  */
     fun setSensitivity(accelerationThreshold: Int) {
         this.accelerationThreshold = accelerationThreshold
+    }
+
+    fun getSensitivity() : Int{
+        this.accelerationThreshold=accelerationThreshold
+        return accelerationThreshold
     }
 
     /** Queue of samples. Keeps a running average.  */
@@ -237,7 +242,7 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
     companion object {
         const val SENSITIVITY_LIGHT = 11
         const val SENSITIVITY_MEDIUM = 13
-        const val SENSITIVITY_HARD = 17
-        private const val DEFAULT_ACCELERATION_THRESHOLD = SENSITIVITY_HARD
+        const val SENSITIVITY_HARD = 15
+        private const val DEFAULT_ACCELERATION_THRESHOLD = SENSITIVITY_LIGHT
     }
 }

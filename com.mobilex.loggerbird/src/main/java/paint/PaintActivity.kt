@@ -204,6 +204,7 @@ class PaintActivity : Activity() {
                 paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_red_24dp)
                 paintView.enableEraser()
                 paintView.clear()
+
             }
 
         }

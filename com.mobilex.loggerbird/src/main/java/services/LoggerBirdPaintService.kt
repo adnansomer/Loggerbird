@@ -133,7 +133,6 @@ internal class LoggerBirdPaintService : Service() {
             activity.paintView.init(metrics)
             screenShot = convertBitmapToDrawable()
             activity.paintView.background = screenShot
-//        paintView.setBackgroundResource(R.drawable.screenshot_1586760803)
             if (Build.VERSION.SDK_INT >= 23) {
                 activity.window.navigationBarColor =
                     resources.getColor(R.color.black, theme)
