@@ -20,6 +20,7 @@ import com.google.gson.GsonBuilder
 import jp.wasabeef.glide.transformations.BlurTransformation
 import kotlinx.android.synthetic.main.activity_main2.*
 import org.json.JSONObject
+import java.io.Serializable
 
 
 class Main2Activity : AppCompatActivity(), PurchasesUpdatedListener {
