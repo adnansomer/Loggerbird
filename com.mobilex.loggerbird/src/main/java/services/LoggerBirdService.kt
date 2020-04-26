@@ -45,13 +45,16 @@ import kotlinx.coroutines.withContext
 import listeners.*
 import loggerbird.LoggerBird
 import observers.LogActivityLifeCycleObserver
+import org.aviran.cookiebar2.CookieBar
+import org.aviran.cookiebar2.CookieBarDismissListener
+import org.aviran.cookiebar2.OnActionClickListener
 import paint.PaintActivity
 import utils.LinkedBlockingQueueUtil
 import java.io.File
 import java.lang.Exception
 
 
-internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
+internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
@@ -84,6 +87,10 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     private lateinit var logActivityLifeCycleObserver: LogActivityLifeCycleObserver
     private lateinit var initializeFloatingActionButton: Runnable
     private lateinit var takeOldCoordinates: Runnable
+    private var isFabEnable: Boolean = false
+    private var isActivateDialogShown: Boolean = false
+    private var isCloseDialogShown: Boolean = false
+
 
 
     //Static global variables:
@@ -119,7 +126,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         internal lateinit var intentForegroundServiceVideo: Intent
         internal lateinit var screenshotBitmap: Bitmap
         internal lateinit var loggerBirdService: LoggerBirdService
-        internal lateinit var sd: ShakeDetector
+        internal lateinit var sd: LoggerBirdShakeDetector
         internal lateinit var sensorManager:SensorManager
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
@@ -190,10 +197,9 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         try {
             intentService = intent
             sensorManager =  getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            sd = ShakeDetector(this)
+            sd = LoggerBirdShakeDetector(this)
             sd.start(sensorManager)
-            logActivityLifeCycleObserver =
-                LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
+            logActivityLifeCycleObserver = LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
         } catch (e: Exception) {
             e.printStackTrace()
@@ -256,12 +262,48 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
 //        }
     }
 
+
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun initializeFloatingActionButton(activity: Activity) {
+    override fun hearShake() {
+
+        if (!isFabEnable) {
+            if(!isActivateDialogShown) {
+                CookieBar.build(this.activity)
+                    .setTitle("LoggerBird")
+                    .setMessage("Do you want to activate Loggerbird?")
+                    .setIcon(R.drawable.loggerbird)
+                    .setEnableAutoDismiss(false)
+                    .setSwipeToDismiss(true)
+                    .setAction("Activate", OnActionClickListener {initializeFloatingActionButton(activity = this.activity) } )
+                    .setCookieListener(CookieBarDismissListener { isActivateDialogShown = false })
+                    .show()
+                isActivateDialogShown = true
+            }
+
+        } else {
+
+            removeFloatingActionButton(activity = this.activity)
+            CookieBar.build(this.activity)
+                .setMessage("Loggerbird is closed!")
+                .setSwipeToDismiss(true)
+                .setDuration(1000)
+                .show()
+            isFabEnable = false
+        }
+    }
+
+
+    private fun removeFloatingActionButton(activity: Activity){
         if (windowManager != null && this::view.isInitialized) {
             (windowManager as WindowManager).removeViewImmediate(view)
             windowManager = null
-        } else {
+        }
+        isActivateDialogShown = false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeFloatingActionButton(activity: Activity) {
+
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             val view: View
             val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
@@ -329,14 +371,14 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                 if (audioRecording) {
                     floating_action_button_audio.setImageResource(R.drawable.ic_mic_off_black_24dp)
                 }
-//        attachFloatingActionButtonLayoutListener()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     buttonClicks()
                 }
+                isFabEnable = true
             } else {
                 checkDrawOtherAppPermission(activity = (context as Activity))
             }
-        }
+
     }
 
     internal fun initializeNewActivity(activity: Activity) {
@@ -352,32 +394,13 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                 checkDrawOtherAppPermission(activity = (context as Activity))
             } else {
                 animationVisibility()
-//                coroutineCallAnimation.async {
-//                    //                fabOpen = AnimationUtils.loadAnimation(context, R.anim.fab_open)
-////                fabClose = AnimationUtils.loadAnimation(context, R.anim.fab_close)
-//                    withContext(Dispatchers.Main) {
-//                        //                    fabOpen.setAnimationListener(
-////                        FloatingActionButtonAnimationListener(
-////                            context = context,
-////                            floatingActionButtonAudio = floating_action_button_audio
-////                        )
-////                    )
-////                    fabClose.setAnimationListener(
-////                        FloatingActionButtonAnimationListener(
-////                            context = context,
-////                            floatingActionButtonAudio = floating_action_button_audio
-////                        )
-////                    )
-//
-//                    }
-//                }
             }
             floating_action_button_screenshot.setOnClickListener {
                 if (floating_action_button_screenshot.visibility == View.VISIBLE) {
                     if(!PaintActivity.controlPaintInPictureState){
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
                     }else{
-                        Toast.makeText(context, "Please save your drawing or remove it , in order to proceed!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Please save or remove your drawing before take a screenshot", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -863,19 +886,6 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         } else {
             throw LoggerBirdException(Constants.logInitErrorMessage)
         }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    override fun hearShake() {
-        Log.d("shake", "shake fired!!")
-        initializeFloatingActionButton(activity = this.activity)
-//        if(this::rootView.isInitialized){
-//            if(rootView.hasFocus()){
-//                initializeFloatingActionButton(activity = this.activity)
-//            }
-//        }else{
-//            initializeFloatingActionButton(activity = this.activity)
-//        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
