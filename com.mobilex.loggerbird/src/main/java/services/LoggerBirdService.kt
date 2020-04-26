@@ -3,14 +3,12 @@ package services
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Application
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
@@ -20,7 +18,6 @@ import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
 import android.util.DisplayMetrics
@@ -31,7 +28,6 @@ import android.view.animation.Animation
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -51,10 +47,9 @@ import org.aviran.cookiebar2.OnActionClickListener
 import paint.PaintActivity
 import utils.LinkedBlockingQueueUtil
 import java.io.File
-import java.lang.Exception
 
 
-internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener {
+internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
@@ -400,7 +395,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if(!PaintActivity.controlPaintInPictureState){
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
                     }else{
-                        Toast.makeText(context, "Please save or remove your drawing before take a screenshot", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Please save or remove your drawing before take a screenshot", Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -580,7 +575,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             context as Activity,
                             paintActivity.javaClass
                         )
+
                         context.startActivity(screenshotIntent)
+                        context.overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left)
+
 //                        val loggerBirdPaintService = LoggerBirdPaintService()
 //                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                            loggerBirdPaintService.initializeActivity(activity = activity)
