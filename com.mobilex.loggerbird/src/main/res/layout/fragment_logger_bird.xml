@@ -7,6 +7,7 @@
     android:id="@+id/fragment_layout"
     tools:context="fragments.FragmentLoggerBird">
 
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button"
         style="@style/AppTheme.Fab"

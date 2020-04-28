@@ -25,7 +25,9 @@ import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
 import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -43,7 +45,6 @@ import loggerbird.LoggerBird
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
 import org.aviran.cookiebar2.CookieBarDismissListener
-import org.aviran.cookiebar2.OnActionClickListener
 import paint.PaintActivity
 import utils.LinkedBlockingQueueUtil
 import java.io.File
@@ -252,9 +253,6 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
     internal fun initializeActivity(activity: Activity) {
         this.activity = activity
         this.context = activity
-//        if (activity is AppCompatActivity) {
-//            initializeFloatingActionButton(activity = activity)
-//        }
     }
 
 
@@ -263,30 +261,46 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
 
         if (!isFabEnable) {
             if(!isActivateDialogShown) {
-                CookieBar.build(this.activity)
-                    .setTitle("LoggerBird")
+
+                CookieBar.build(activity)
+                    .setCustomView(R.layout.loggerbird_activate_popup)
+                    .setTitle("Loggerbird")
                     .setMessage("Do you want to activate Loggerbird?")
                     .setIcon(R.drawable.loggerbird)
+                    .setCustomViewInitializer ( CookieBar.CustomViewInitializer() {
+
+                        val txtActivate = it.findViewById<TextView>(R.id.btn_action_activate)
+                        val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
+
+                        val txtActivateListener = View.OnClickListener {
+                            initializeFloatingActionButton(activity = activity)
+                            CookieBar.dismiss(activity)}
+                        val txtDismissListener = View.OnClickListener {
+                            sd.stop()
+                            CookieBar.dismiss(activity)}
+
+                        txtActivate.setOnClickListener(txtActivateListener)
+                        txtDismiss.setOnClickListener(txtDismissListener)
+
+                    })
                     .setEnableAutoDismiss(false)
                     .setSwipeToDismiss(true)
-                    .setAction("Activate", OnActionClickListener {initializeFloatingActionButton(activity = this.activity) } )
                     .setCookieListener(CookieBarDismissListener { isActivateDialogShown = false })
                     .show()
                 isActivateDialogShown = true
             }
 
         } else {
-
             removeFloatingActionButton(activity = this.activity)
-            CookieBar.build(this.activity)
+            CookieBar.build(activity)
                 .setMessage("Loggerbird is closed!")
+                .setBackgroundColor(R.color.colorPrimaryDark)
                 .setSwipeToDismiss(true)
                 .setDuration(1000)
                 .show()
             isFabEnable = false
         }
     }
-
 
     private fun removeFloatingActionButton(activity: Activity){
         if (windowManager != null && this::view.isInitialized) {
@@ -569,7 +583,7 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
                         screenshotBitmap = createScreenShot(view = view)
                     }
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "ScreenShot Taken!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Screenshot taken!", Toast.LENGTH_SHORT).show()
                         val paintActivity = PaintActivity()
                         val screenshotIntent = Intent(
                             context as Activity,
@@ -713,9 +727,6 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
                 }
             }
         }
-//        else {
-//            Toast.makeText(context, "Permission Denied!", Toast.LENGTH_SHORT).show()
-//        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -765,8 +776,7 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
             val fileDirectory: File = context.filesDir
             filePath = File(
                 fileDirectory,
-                "logger_bird_video" + System.currentTimeMillis()
-                    .toString() + ".mp4"
+                "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4"
             )
             mediaRecorderVideo!!.setOutputFile(filePath.path)
             mediaRecorderVideo!!.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)

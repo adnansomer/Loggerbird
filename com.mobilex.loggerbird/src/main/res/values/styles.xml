@@ -1,5 +1,4 @@
 <resources>
-
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
@@ -7,7 +6,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:windowFullscreen">true</item>>
         <item name="colorAccent">@color/colorGray</item>
-        <item name="android:windowAnimationStyle">@style/CustomActivityAnimation</item>
+        <item name="android:windowContentTransitions">true</item>
     </style>
 
     <style name="CustomActivityAnimation" parent="@android:style/Animation.Activity">
@@ -22,7 +21,6 @@
         <item name="android:windowFullscreen">true</item>>
         <item name="borderWidth">0dp</item>
     </style>
-
 
     <style name="AppTheme.Fab" parent="Theme.MaterialComponents">
         <item name="android:tint">@color/white</item>
