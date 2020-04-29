@@ -69,8 +69,6 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
     private var state: Boolean = false
     private lateinit var filePath: File
     private var isOpen = false
-    private lateinit var fabOpen: Animation
-    private lateinit var fabClose: Animation
     private var screenDensity: Int = 0
     private var projectManager: MediaProjectionManager? = null
     private var mediaProjection: MediaProjection? = null
@@ -85,9 +83,6 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
     private lateinit var takeOldCoordinates: Runnable
     private var isFabEnable: Boolean = false
     private var isActivateDialogShown: Boolean = false
-    private var isCloseDialogShown: Boolean = false
-
-
 
     //Static global variables:
     internal companion object {
@@ -274,7 +269,9 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
 
                         val txtActivateListener = View.OnClickListener {
                             initializeFloatingActionButton(activity = activity)
-                            CookieBar.dismiss(activity)}
+                            CookieBar.dismiss(activity)
+                            
+                        }
                         val txtDismissListener = View.OnClickListener {
                             sd.stop()
                             CookieBar.dismiss(activity)}
@@ -294,7 +291,7 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
             removeFloatingActionButton(activity = this.activity)
             CookieBar.build(activity)
                 .setMessage("Loggerbird is closed!")
-                .setBackgroundColor(R.color.colorPrimaryDark)
+                .setBackgroundColor(R.color.colorAccent)
                 .setSwipeToDismiss(true)
                 .setDuration(1000)
                 .show()
