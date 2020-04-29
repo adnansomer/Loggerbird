@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.mobilex.loggerbird.R
 import constants.Constants
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
@@ -270,9 +271,9 @@ internal class LogActivityLifeCycleObserver() :
                 Manifest.permission.RECORD_AUDIO
             )
         ) {
-            Toast.makeText(context, "Permission Audio Denied!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.permission_audio_denied, Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(context, "Permission Audio Granted!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.permission_audio_granted, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -282,12 +283,12 @@ internal class LogActivityLifeCycleObserver() :
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
         ) {
-            Toast.makeText(context, "Permission Write External Storage Denied!", Toast.LENGTH_SHORT)
+            Toast.makeText(context, R.string.permission_write_external_storage_denied, Toast.LENGTH_SHORT)
                 .show()
         } else {
             Toast.makeText(
                 context,
-                "Permission Write External Storage Granted!",
+                R.string.permission_write_external_storage_granted,
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -297,12 +298,12 @@ internal class LogActivityLifeCycleObserver() :
     private fun checkDrawOtherAppPermissionResult(activity: Activity) {
         LoggerBirdService.sd.start(sensorManager = LoggerBirdService.sensorManager)
         if (!Settings.canDrawOverlays(activity)) {
-            Toast.makeText(activity, "Permission DrawOtherApp Settings Denied!", Toast.LENGTH_SHORT)
+            Toast.makeText(activity, R.string.permission_draw_other_apps_denied, Toast.LENGTH_SHORT)
                 .show()
         } else {
             Toast.makeText(
                 activity,
-                "Permission DrawOtherApp Settings Granted!",
+                R.string.permission_draw_other_apps_granted,
                 Toast.LENGTH_SHORT
             ).show()
         }
