@@ -9,7 +9,7 @@ import java.util.*
  * accelerating.
  *
  */
-class ShakeDetector(private val listener: Listener) : SensorEventListener {
+class LoggerBirdShakeDetector(private val listener: Listener) : SensorEventListener {
     /**
      * When the magnitude of total acceleration exceeds this
      * value, the phone is accelerating.

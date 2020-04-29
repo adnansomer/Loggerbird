@@ -3,14 +3,12 @@ package services
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Application
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
@@ -20,7 +18,6 @@ import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
 import android.util.DisplayMetrics
@@ -28,13 +25,15 @@ import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
 import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
@@ -45,13 +44,15 @@ import kotlinx.coroutines.withContext
 import listeners.*
 import loggerbird.LoggerBird
 import observers.LogActivityLifeCycleObserver
+import org.aviran.cookiebar2.CookieBar
+import org.aviran.cookiebar2.CookieBarDismissListener
 import paint.PaintActivity
 import utils.LinkedBlockingQueueUtil
 import java.io.File
-import java.lang.Exception
+import java.util.concurrent.TimeUnit
 
 
-internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
+internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
@@ -70,8 +71,6 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     private var state: Boolean = false
     private lateinit var filePath: File
     private var isOpen = false
-    private lateinit var fabOpen: Animation
-    private lateinit var fabClose: Animation
     private var screenDensity: Int = 0
     private var projectManager: MediaProjectionManager? = null
     private var mediaProjection: MediaProjection? = null
@@ -84,7 +83,8 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     private lateinit var logActivityLifeCycleObserver: LogActivityLifeCycleObserver
     private lateinit var initializeFloatingActionButton: Runnable
     private lateinit var takeOldCoordinates: Runnable
-
+    private var isFabEnable: Boolean = false
+    private var isActivateDialogShown: Boolean = false
 
     //Static global variables:
     internal companion object {
@@ -119,7 +119,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         internal lateinit var intentForegroundServiceVideo: Intent
         internal lateinit var screenshotBitmap: Bitmap
         internal lateinit var loggerBirdService: LoggerBirdService
-        internal lateinit var sd: ShakeDetector
+        internal lateinit var sd: LoggerBirdShakeDetector
         internal lateinit var sensorManager:SensorManager
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
@@ -190,10 +190,9 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         try {
             intentService = intent
             sensorManager =  getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            sd = ShakeDetector(this)
+            sd = LoggerBirdShakeDetector(this)
             sd.start(sensorManager)
-            logActivityLifeCycleObserver =
-                LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
+            logActivityLifeCycleObserver = LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
         } catch (e: Exception) {
             e.printStackTrace()
@@ -251,17 +250,73 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     internal fun initializeActivity(activity: Activity) {
         this.activity = activity
         this.context = activity
-//        if (activity is AppCompatActivity) {
-//            initializeFloatingActionButton(activity = activity)
-//        }
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    override fun hearShake() {
+
+
+
+        if (!isFabEnable) {
+            if(!isActivateDialogShown) {
+
+                CookieBar.build(activity)
+                    .setCustomView(R.layout.loggerbird_activate_popup)
+                    .setTitle("Loggerbird")
+                    .setMessage("Do you want to activate Loggerbird?")
+                    .setIcon(R.drawable.loggerbird)
+                    .setCustomViewInitializer ( CookieBar.CustomViewInitializer() {
+
+                        val txtActivate = it.findViewById<TextView>(R.id.btn_action_activate)
+                        val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
+
+                        txtActivate.setSafeOnClickListener { initializeFloatingActionButton(activity = activity)
+                                                                CookieBar.dismiss(activity)}
+
+                        txtDismiss.setSafeOnClickListener{initializeFloatingActionButton(activity = activity)
+                            CookieBar.dismiss(activity)}
+
+                    })
+                    .setEnableAutoDismiss(false)
+                    .setSwipeToDismiss(true)
+                    .setCookieListener(CookieBarDismissListener { isActivateDialogShown = false })
+                    .show()
+                isActivateDialogShown = true
+            }
+
+        } else {
+            removeFloatingActionButton(activity = this.activity)
+            CookieBar.build(activity)
+                .setMessage("Loggerbird is closed!")
+                .setBackgroundColor(R.color.colorAccent)
+                .setSwipeToDismiss(true)
+                .setDuration(1000)
+                .show()
+            isFabEnable = false
+        }
+    }
+
+
+    @SuppressLint("CheckResult")
+    fun View.setSafeOnClickListener(onClick : (View) -> Unit) {
+        RxView.clicks(this).throttleFirst(2000, TimeUnit.MILLISECONDS).subscribe {
+            onClick(this)
+        }
+    }
+
+
+    private fun removeFloatingActionButton(activity: Activity){
+        if (windowManager != null && this::view.isInitialized) {
+            (windowManager as WindowManager).removeViewImmediate(view)
+            windowManager = null
+        }
+        isActivateDialogShown = false
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeFloatingActionButton(activity: Activity) {
-        if (windowManager != null && this::view.isInitialized) {
-            (windowManager as WindowManager).removeViewImmediate(view)
-            windowManager = null
-        } else {
+
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             val view: View
             val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
@@ -329,14 +384,14 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                 if (audioRecording) {
                     floating_action_button_audio.setImageResource(R.drawable.ic_mic_off_black_24dp)
                 }
-//        attachFloatingActionButtonLayoutListener()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     buttonClicks()
                 }
+                isFabEnable = true
             } else {
                 checkDrawOtherAppPermission(activity = (context as Activity))
             }
-        }
+
     }
 
     internal fun initializeNewActivity(activity: Activity) {
@@ -352,32 +407,13 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                 checkDrawOtherAppPermission(activity = (context as Activity))
             } else {
                 animationVisibility()
-//                coroutineCallAnimation.async {
-//                    //                fabOpen = AnimationUtils.loadAnimation(context, R.anim.fab_open)
-////                fabClose = AnimationUtils.loadAnimation(context, R.anim.fab_close)
-//                    withContext(Dispatchers.Main) {
-//                        //                    fabOpen.setAnimationListener(
-////                        FloatingActionButtonAnimationListener(
-////                            context = context,
-////                            floatingActionButtonAudio = floating_action_button_audio
-////                        )
-////                    )
-////                    fabClose.setAnimationListener(
-////                        FloatingActionButtonAnimationListener(
-////                            context = context,
-////                            floatingActionButtonAudio = floating_action_button_audio
-////                        )
-////                    )
-//
-//                    }
-//                }
             }
             floating_action_button_screenshot.setOnClickListener {
                 if (floating_action_button_screenshot.visibility == View.VISIBLE) {
                     if(!PaintActivity.controlPaintInPictureState){
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
                     }else{
-                        Toast.makeText(context, "Please save your drawing or remove it , in order to proceed!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Please save or remove your drawing before take a screenshot", Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -524,6 +560,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         return bitmap
     }
 
+
     private fun takeScreenShot(view: View, context: Context) {
         if (checkWriteExternalStoragePermission()) {
             PaintActivity.closeActivitySession()
@@ -551,13 +588,16 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                         screenshotBitmap = createScreenShot(view = view)
                     }
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "ScreenShot Taken!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Screenshot taken!", Toast.LENGTH_SHORT).show()
                         val paintActivity = PaintActivity()
                         val screenshotIntent = Intent(
                             context as Activity,
                             paintActivity.javaClass
                         )
+
                         context.startActivity(screenshotIntent)
+                        context.overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left)
+
 //                        val loggerBirdPaintService = LoggerBirdPaintService()
 //                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                            loggerBirdPaintService.initializeActivity(activity = activity)
@@ -692,9 +732,6 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                 }
             }
         }
-//        else {
-//            Toast.makeText(context, "Permission Denied!", Toast.LENGTH_SHORT).show()
-//        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -744,8 +781,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
             val fileDirectory: File = context.filesDir
             filePath = File(
                 fileDirectory,
-                "logger_bird_video" + System.currentTimeMillis()
-                    .toString() + ".mp4"
+                "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4"
             )
             mediaRecorderVideo!!.setOutputFile(filePath.path)
             mediaRecorderVideo!!.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
@@ -863,19 +899,6 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         } else {
             throw LoggerBirdException(Constants.logInitErrorMessage)
         }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    override fun hearShake() {
-        Log.d("shake", "shake fired!!")
-        initializeFloatingActionButton(activity = this.activity)
-//        if(this::rootView.isInitialized){
-//            if(rootView.hasFocus()){
-//                initializeFloatingActionButton(activity = this.activity)
-//            }
-//        }else{
-//            initializeFloatingActionButton(activity = this.activity)
-//        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

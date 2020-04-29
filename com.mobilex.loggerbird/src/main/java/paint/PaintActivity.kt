@@ -48,6 +48,7 @@ class PaintActivity : Activity() {
     private val coroutineCallPaintActivity: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlButtonVisibility: Boolean = true
     private var onStopCalled = false
+    private var pipModeChange = false
 
     companion object {
         private lateinit var activity: Activity
@@ -62,6 +63,7 @@ class PaintActivity : Activity() {
                     }
                 }
                 activity.finish()
+                activity.overridePendingTransition(R.anim.no_animation,R.anim.slide_in_bottom)
             }
         }
     }
@@ -95,6 +97,8 @@ class PaintActivity : Activity() {
 //                        or View.SYSTEM_UI_FLAG_FULLSCREEN
                         //or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                         )
+
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
@@ -278,6 +282,7 @@ class PaintActivity : Activity() {
         }
     }
 
+
     private fun requestPermission(): Boolean {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED
@@ -397,12 +402,21 @@ class PaintActivity : Activity() {
             saveDialog.setPositiveButton("OK") { _, _ ->
                 fileName = saveView.paint_save_issue.text.toString()
                 paintView.saveImage(fileName)
-                val snackBarFileSaving: Snackbar =
-                    Snackbar.make(paintView, "Successfully saved!", Snackbar.LENGTH_SHORT)
-                snackBarFileSaving.setAction("Dismiss") {
-                    snackBarFileSaving.dismiss()
-                }.show()
+//                val snackBarFileSaving: Snackbar =
+//                    Snackbar.make(paintView, "Successfully saved!", Snackbar.LENGTH_SHORT)
+//                snackBarFileSaving.setAction("Dismiss") {
+//                    snackBarFileSaving.dismiss()
+//                }.show()
+                Toast.makeText(activity, "Drawing is successfully saved!", Toast.LENGTH_SHORT).show()
                 finish()
+                overridePendingTransition(R.anim.no_animation,R.anim.slide_in_bottom)
+
+                if(pipModeChange){
+                    Toast.makeText(activity, "Drawing is successfully saved!", Toast.LENGTH_SHORT).show()
+                    finish()
+                    overridePendingTransition(R.anim.slide_in_bottom,R.anim.no_animation)
+                }
+
             }
             saveDialog.setNegativeButton(
                 "Cancel"
@@ -494,31 +508,27 @@ class PaintActivity : Activity() {
             }
         }
     }
-    @RequiresApi(Build.VERSION_CODES.O)
-    internal fun reversePictureInPictureMode() {
-        try {
-            val aspectRatio = Rational(1, 1)
-            val mPictureInPictureParamsBuilder = PictureInPictureParams.Builder()
-            mPictureInPictureParamsBuilder.setAspectRatio(aspectRatio)
-            enterPictureInPictureMode(mPictureInPictureParamsBuilder.build())
-        } catch (e: Exception) {
-            e.printStackTrace()
-            LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
-        }
-    }
-
 
     override fun onBackPressed() {
         super.onBackPressed()
+        Toast.makeText(activity, "Drawing is cancelled!", Toast.LENGTH_SHORT).show()
+        overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
         finish()
+
+        if(pipModeChange){
+            Toast.makeText(activity, "Drawing is cancelled!", Toast.LENGTH_SHORT).show()
+            overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
+            finish()
+        }
     }
 
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration?
     ) {
+
         if (isInPictureInPictureMode) {
+            pipModeChange = true
             paint_floating_action_button.visibility = View.GONE
             paint_floating_action_button_save.visibility = View.GONE
             paint_floating_action_button_back.visibility = View.GONE
@@ -530,6 +540,7 @@ class PaintActivity : Activity() {
             if (onStopCalled) {
                 finish()
             }
+            pipModeChange = true
             paint_floating_action_button.visibility = View.VISIBLE
             paint_floating_action_button_save.visibility = View.VISIBLE
             paint_floating_action_button_back.visibility = View.VISIBLE
@@ -554,6 +565,7 @@ class PaintActivity : Activity() {
             LoggerBirdService.floatingActionButtonView.visibility = View.GONE
         }
     }
+
     override fun onDestroy() {
         super.onDestroy()
         controlPaintInPictureState = false
