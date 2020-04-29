@@ -33,6 +33,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
@@ -48,6 +49,7 @@ import org.aviran.cookiebar2.CookieBarDismissListener
 import paint.PaintActivity
 import utils.LinkedBlockingQueueUtil
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 
 internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener {
@@ -254,6 +256,8 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
     @RequiresApi(Build.VERSION_CODES.M)
     override fun hearShake() {
 
+
+
         if (!isFabEnable) {
             if(!isActivateDialogShown) {
 
@@ -267,17 +271,11 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
                         val txtActivate = it.findViewById<TextView>(R.id.btn_action_activate)
                         val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
 
-                        val txtActivateListener = View.OnClickListener {
-                            initializeFloatingActionButton(activity = activity)
-                            CookieBar.dismiss(activity)
-                            
-                        }
-                        val txtDismissListener = View.OnClickListener {
-                            sd.stop()
-                            CookieBar.dismiss(activity)}
+                        txtActivate.setSafeOnClickListener { initializeFloatingActionButton(activity = activity)
+                                                                CookieBar.dismiss(activity)}
 
-                        txtActivate.setOnClickListener(txtActivateListener)
-                        txtDismiss.setOnClickListener(txtDismissListener)
+                        txtDismiss.setSafeOnClickListener{initializeFloatingActionButton(activity = activity)
+                            CookieBar.dismiss(activity)}
 
                     })
                     .setEnableAutoDismiss(false)
@@ -298,6 +296,15 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
             isFabEnable = false
         }
     }
+
+
+    @SuppressLint("CheckResult")
+    fun View.setSafeOnClickListener(onClick : (View) -> Unit) {
+        RxView.clicks(this).throttleFirst(2000, TimeUnit.MILLISECONDS).subscribe {
+            onClick(this)
+        }
+    }
+
 
     private fun removeFloatingActionButton(activity: Activity){
         if (windowManager != null && this::view.isInitialized) {
@@ -552,6 +559,7 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
         viewScreenShot.draw(canvas)
         return bitmap
     }
+
 
     private fun takeScreenShot(view: View, context: Context) {
         if (checkWriteExternalStoragePermission()) {

@@ -97,6 +97,8 @@ class PaintActivity : Activity() {
 //                        or View.SYSTEM_UI_FLAG_FULLSCREEN
                         //or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                         )
+
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
@@ -279,6 +281,7 @@ class PaintActivity : Activity() {
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
         }
     }
+
 
     private fun requestPermission(): Boolean {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
