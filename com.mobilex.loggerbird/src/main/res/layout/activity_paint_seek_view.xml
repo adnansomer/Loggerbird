@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gray"
@@ -22,7 +21,7 @@
             android:textColor="@color/white"
             android:textSize="18sp"
             android:layout_margin="12dp"
-            android:text="@string/textView_brush_width_adjust">
+            android:text="Adjust your brush width">
         </TextView>
 
 
@@ -31,31 +30,31 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.9">
+        android:layout_weight="0.9"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp">
 
         <ImageView
             android:id="@+id/brush_decrease"
             android:layout_width="28dp"
-            android:layout_height="29dp"
+            android:layout_height="30dp"
             android:contentDescription="@null"
-            app:srcCompat="@drawable/ic_remove_white_24dp"
+            android:src="@drawable/ic_remove_white_24dp"
             android:layout_weight="1"
             android:layout_gravity="center"
-            android:layout_marginStart="10dp"
-            android:layout_marginLeft="10dp"
             android:tint="@color/white" />
 
         <SeekBar
             android:id="@+id/brushWidthSeek"
             android:layout_width="0dp"
-            android:layout_height="5dp"
+            android:layout_height="30dp"
             android:progress="30"
             android:layout_weight="8"
             android:layout_gravity="center"
             android:progressTint="@color/white"
             android:thumbTint="@color/white"
             android:progressBackgroundTint="@color/white" />
-
 
         <ImageView
             android:id="@+id/brush_increase"
@@ -64,10 +63,8 @@
             android:layout_weight="1"
             android:layout_gravity="center"
             android:contentDescription="@null"
-            app:srcCompat="@drawable/ic_add_white_24dp"
-            android:tint="@color/white"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"/>
+            android:src="@drawable/ic_add_white_24dp"
+            android:tint="@color/white" />
 
     </LinearLayout>
 
