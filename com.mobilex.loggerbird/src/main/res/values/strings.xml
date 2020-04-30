@@ -41,6 +41,8 @@
     <string name="logger_bird_floating_action_button_permission_message">Do you want to activate Loggerbird?</string>
     <string name="logger_bird_floating_action_button_activate">Activate</string>
     <string name="logger_bird_floating_action_button_close_message">Loggerbird is closed!</string>
+    <string name="logger_bird_floating_action_button_open_message">Loggerbird is activated!</string>
+
 
     <!-- Layout:-->
     <!-- activity_paint_seek_view-->

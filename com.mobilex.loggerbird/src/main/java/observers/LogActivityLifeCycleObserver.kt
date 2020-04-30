@@ -306,6 +306,7 @@ internal class LogActivityLifeCycleObserver() :
                 R.string.permission_draw_other_apps_granted,
                 Toast.LENGTH_SHORT
             ).show()
+            LoggerBirdService.loggerBirdService.initializeFloatingActionButton(activity = this.activity)
         }
     }
 

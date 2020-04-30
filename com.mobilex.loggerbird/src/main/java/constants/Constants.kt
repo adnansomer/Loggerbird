@@ -59,5 +59,6 @@ internal class Constants {
         const val paintActivityTag:String = "Paint Activity"
         const val paintFabAnimationTag:String = "Paint Fab Animation"
         const val floatingActionButtonPaintTag:String = "Floating Action Button Paint"
+        const val videoRecordingCounterTag:String = "Video Recording Counter"
     }
 }

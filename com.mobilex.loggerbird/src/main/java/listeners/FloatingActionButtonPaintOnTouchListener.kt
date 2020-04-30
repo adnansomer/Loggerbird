@@ -209,7 +209,7 @@ class FloatingActionButtonPaintOnTouchListener(
 //                    floatingActionButtonPaintPalette.visibility = View.VISIBLE
 //                    floatingActionButtonPaintErase.visibility = View.VISIBLE
 //                    floatingActionButtonPaintBack.visibility = View.VISIBLE
-                    adjustGravity()
+//                    adjustGravity()
                     floatingActionButtonPaint.performClick()
                     lastAction = MotionEvent.ACTION_UP
                 }

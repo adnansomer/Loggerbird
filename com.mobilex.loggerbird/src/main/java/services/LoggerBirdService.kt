@@ -3,14 +3,12 @@ package services
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Application
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
@@ -20,7 +18,6 @@ import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
 import android.util.DisplayMetrics
@@ -28,30 +25,29 @@ import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
 import android.view.animation.Animation
-import android.widget.FrameLayout
-import android.widget.Toast
+import android.widget.*
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import listeners.*
 import loggerbird.LoggerBird
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
-import org.aviran.cookiebar2.CookieBarDismissListener
-import org.aviran.cookiebar2.OnActionClickListener
 import paint.PaintActivity
 import utils.LinkedBlockingQueueUtil
 import java.io.File
 import java.lang.Exception
+import java.lang.Runnable
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 
 internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
@@ -89,6 +85,13 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     private lateinit var takeOldCoordinates: Runnable
     private var isFabEnable: Boolean = false
     private var isActivateDialogShown: Boolean = false
+    private var coroutineCallVideoCounter: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var counterVideo: Int = 0
+    private var timerVideo: Timer? = null
+    private var timerTaskVideo: TimerTask? = null
+    private var counterFormatter: SimpleDateFormat =
+        SimpleDateFormat("mm:ss", Locale.getDefault())
+    private lateinit var simpleChronometer: Chronometer
 
 
     //Static global variables:
@@ -98,6 +101,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         private lateinit var floating_action_button_screenshot: FloatingActionButton
         private lateinit var floating_action_button_video: FloatingActionButton
         private lateinit var floating_action_button_audio: FloatingActionButton
+        private lateinit var textView_counter_video: TextView
         internal var controlServiceOnDestroyState: Boolean = false
         internal var floatingActionButtonLastDx: Float? = null
         internal var floatingActionButtonScreenShotLastDx: Float? = null
@@ -263,10 +267,17 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun initializeFloatingActionButton(activity: Activity) {
+    internal fun initializeFloatingActionButton(activity: Activity) {
         if (windowManager != null && this::view.isInitialized) {
             (windowManager as WindowManager).removeViewImmediate(view)
             windowManager = null
+            CookieBar.build(activity)
+                .setMessage(R.string.logger_bird_floating_action_button_close_message)
+                .setSwipeToDismiss(true)
+                .setBackgroundColor(R.color.colorAccent)
+                .setDuration(1000)
+                .show()
+            isFabEnable = false
         } else {
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             val view: View
@@ -310,6 +321,8 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                     view.findViewById(R.id.fragment_floating_action_button_video)
                 floating_action_button_audio =
                     view.findViewById(R.id.fragment_floating_action_button_audio)
+                textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
+                simpleChronometer = view.findViewById(R.id.fragment_chronometer_video)
                 (floating_action_button_screenshot.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
                     150,
@@ -317,6 +330,12 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                     0
                 )
                 (floating_action_button_video.layoutParams as FrameLayout.LayoutParams).setMargins(
+                    0,
+                    300,
+                    0,
+                    0
+                )
+                (textView_counter_video.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
                     300,
                     0,
@@ -339,6 +358,13 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     buttonClicks()
                 }
+                CookieBar.build(activity)
+                    .setMessage(R.string.logger_bird_floating_action_button_open_message)
+                    .setBackgroundColor(R.color.colorAccent)
+                    .setSwipeToDismiss(true)
+                    .setEnableAutoDismiss(true)
+                    .setDuration(1000)
+                    .show()
                 isFabEnable = true
             } else {
                 checkDrawOtherAppPermission(activity = (context as Activity))
@@ -416,7 +442,8 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                 floatingActionButton = floating_action_button,
                 floatingActionButtonScreenShot = floating_action_button_screenshot,
                 floatingActionButtonVideo = floating_action_button_video,
-                floatingActionButtonAudio = floating_action_button_audio
+                floatingActionButtonAudio = floating_action_button_audio,
+                textViewCounterVideo = textView_counter_video
             )
         )
     }
@@ -772,6 +799,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
             mediaRecorderVideo!!.prepare()
             mediaRecorderVideo!!.start()
             videoRecording = true
+            videoCounterStart()
         } catch (e: Exception) {
             e.printStackTrace()
             callEnqueue()
@@ -811,6 +839,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         destroyMediaProjection()
         stopForegroundServiceVideo()
         videoRecording = false
+        videoCounterStop()
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -889,8 +918,22 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                     CookieBar.build(this.activity)
                         .setTitle(resources.getString(R.string.library_name))
                         .setMessage(resources.getString(R.string.logger_bird_floating_action_button_permission_message))
+                        .setCustomView(R.layout.loggerbird_activate_popup)
                         .setIcon(R.drawable.loggerbird)
+                        .setBackgroundColor(R.color.colorAccent)
                         .setEnableAutoDismiss(false)
+                        .setCustomViewInitializer(CookieBar.CustomViewInitializer() {
+                            val txtActivate = it.findViewById<TextView>(R.id.btn_action_activate)
+                            val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
+                            txtActivate.setSafeOnClickListener {
+                                initializeFloatingActionButton(activity = activity)
+                                CookieBar.dismiss(activity)
+                            }
+                            txtDismiss.setSafeOnClickListener {
+                                sd.stop()
+                                CookieBar.dismiss(activity)
+                            }
+                        })
                         .setSwipeToDismiss(true)
                         .setAction(
                             R.string.logger_bird_floating_action_button_activate
@@ -899,13 +942,6 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                         .show()
                     isActivateDialogShown = true
                 }
-            } else {
-                CookieBar.build(activity)
-                    .setMessage(R.string.logger_bird_floating_action_button_close_message)
-                    .setSwipeToDismiss(true)
-                    .setDuration(1000)
-                    .show()
-                isFabEnable = false
             }
         }
 
@@ -919,6 +955,59 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
 //        }
     }
 
+    @SuppressLint("CheckResult")
+    fun View.setSafeOnClickListener(onClick: (View) -> Unit) {
+        RxView.clicks(this).throttleFirst(2000, TimeUnit.MILLISECONDS).subscribe {
+            onClick(this)
+        }
+    }
+
+    private fun videoCounterStart() {
+        coroutineCallVideoCounter.async {
+            try {
+//                    simpleChronometer.format = "Time Running -%s"
+//                    simpleChronometer.start()
+                withContext(Dispatchers.Main) {
+                    textView_counter_video.visibility = View.VISIBLE
+                }
+                counterVideo = 0
+                timerVideo = Timer()
+                timerTaskVideo = object : TimerTask() {
+                    override fun run() {
+                        counterVideo++
+                        activity.runOnUiThread {
+                            val date = Date((counterVideo * 1000).toLong())
+                            textView_counter_video.text = counterFormatter.format(date)
+                        }
+                    }
+                }
+                timerVideo!!.schedule(
+                    timerTaskVideo, 0, 1000
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(
+                    exception = e,
+                    tag = Constants.videoRecordingCounterTag
+                )
+            }
+
+        }
+    }
+
+    private fun videoCounterStop() {
+//        simpleChronometer.stop()
+        activity.runOnUiThread {
+            timerTaskVideo?.cancel()
+            timerVideo?.cancel()
+            timerTaskVideo = null
+            timerVideo = null
+            textView_counter_video.visibility = View.GONE
+            val counterZero = 0
+            textView_counter_video.text = counterZero.toString()
+        }
+    }
 //    private fun removeFloatingActionButton(activity: Activity) {
 //        if (windowManager != null && this::view.isInitialized) {
 //            (windowManager as WindowManager).removeViewImmediate(view)
