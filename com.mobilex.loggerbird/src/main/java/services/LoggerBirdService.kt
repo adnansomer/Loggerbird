@@ -118,11 +118,11 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         private var DISPLAY_WIDTH = 1080
         private var DISPLAY_HEIGHT = 1920
         private val ORIENTATIONS = SparseIntArray()
-        internal var controlPermissionRequest: Boolean = false
+        internal var controlPermissionRequest:Boolean = false
         private var runnableList: ArrayList<Runnable> = ArrayList()
         private var workQueueLinked: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
-        internal var controlVideoPermission: Boolean = false
-        internal var controlAudioPermission: Boolean = false
+        internal var controlVideoPermission:Boolean = false
+        internal var controlAudioPermission:Boolean = false
         internal var controlDrawableSettingsPermission: Boolean = false
         internal var controlWriteExternalPermission: Boolean = false
         internal lateinit var intentForegroundServiceVideo: Intent
