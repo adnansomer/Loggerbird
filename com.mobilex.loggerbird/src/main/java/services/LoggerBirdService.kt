@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 
-internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
+internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
@@ -128,7 +128,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         internal lateinit var intentForegroundServiceVideo: Intent
         internal lateinit var screenshotBitmap: Bitmap
         internal lateinit var loggerBirdService: LoggerBirdService
-        internal lateinit var sd: ShakeDetector
+        internal lateinit var sd: LoggerBirdShakeDetector
         internal lateinit var sensorManager: SensorManager
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
@@ -200,7 +200,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
         try {
             intentService = intent
             sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            sd = ShakeDetector(this)
+            sd = LoggerBirdShakeDetector(this)
             sd.start(sensorManager)
             logActivityLifeCycleObserver =
                 LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
@@ -597,6 +597,7 @@ internal class LoggerBirdService() : Service(), ShakeDetector.Listener {
                             paintActivity.javaClass
                         )
                         context.startActivity(screenshotIntent)
+                        context.overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left)
 //                        val loggerBirdPaintService = LoggerBirdPaintService()
 //                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                            loggerBirdPaintService.initializeActivity(activity = activity)
