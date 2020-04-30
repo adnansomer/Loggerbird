@@ -29,6 +29,7 @@
     <string name="snackbar_brush_width_adjust">Fırça genişliği ayarla</string>
     <string name="snackbar_ok">TAMAM</string>
     <string name="snackbar_successfully_saved">Başaralı bir şekilde kaydedildi!</string>
+    <string name="drawing_cancelled_message">Resim çizme işlemi iptal edildi!</string>
     <!-- LoggerBirdForegroundServiceVideo -->
     <string name="foreground_service_video_notification_title">LoggerBird ekran kaydedicisi çalışıyor.</string>
     <!-- LoggerBirdService -->

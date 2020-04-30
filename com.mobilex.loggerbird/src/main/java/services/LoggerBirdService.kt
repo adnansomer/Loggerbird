@@ -92,7 +92,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var counterFormatter: SimpleDateFormat =
         SimpleDateFormat("mm:ss", Locale.getDefault())
     private lateinit var simpleChronometer: Chronometer
-
+    private lateinit var cookieBar: CookieBar
 
     //Static global variables:
     internal companion object {
@@ -118,11 +118,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         private var DISPLAY_WIDTH = 1080
         private var DISPLAY_HEIGHT = 1920
         private val ORIENTATIONS = SparseIntArray()
-        internal var controlPermissionRequest:Boolean = false
+        internal var controlPermissionRequest: Boolean = false
         private var runnableList: ArrayList<Runnable> = ArrayList()
         private var workQueueLinked: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
-        internal var controlVideoPermission:Boolean = false
-        internal var controlAudioPermission:Boolean = false
+        internal var controlVideoPermission: Boolean = false
+        internal var controlAudioPermission: Boolean = false
         internal var controlDrawableSettingsPermission: Boolean = false
         internal var controlWriteExternalPermission: Boolean = false
         internal lateinit var intentForegroundServiceVideo: Intent
@@ -597,7 +597,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             paintActivity.javaClass
                         )
                         context.startActivity(screenshotIntent)
-                        context.overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left)
+                        context.overridePendingTransition(
+                            R.anim.slide_in_right,
+                            R.anim.slide_out_left
+                        )
 //                        val loggerBirdPaintService = LoggerBirdPaintService()
 //                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                            loggerBirdPaintService.initializeActivity(activity = activity)
@@ -910,41 +913,46 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun hearShake() {
-        Log.d("shake", "shake fired!!")
-        if (Settings.canDrawOverlays(this.activity)) {
-            initializeFloatingActionButton(activity = this.activity)
-        } else {
-            if (!isFabEnable) {
-                if (!isActivateDialogShown) {
-                    CookieBar.build(this.activity)
-                        .setTitle(resources.getString(R.string.library_name))
-                        .setMessage(resources.getString(R.string.logger_bird_floating_action_button_permission_message))
-                        .setCustomView(R.layout.loggerbird_activate_popup)
-                        .setIcon(R.drawable.loggerbird)
-                        .setBackgroundColor(R.color.colorAccent)
-                        .setEnableAutoDismiss(false)
-                        .setCustomViewInitializer(CookieBar.CustomViewInitializer() {
-                            val txtActivate = it.findViewById<TextView>(R.id.btn_action_activate)
-                            val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
-                            txtActivate.setSafeOnClickListener {
-                                initializeFloatingActionButton(activity = activity)
-                                CookieBar.dismiss(activity)
-                            }
-                            txtDismiss.setSafeOnClickListener {
-                                sd.stop()
-                                CookieBar.dismiss(activity)
-                            }
-                        })
-                        .setSwipeToDismiss(true)
-                        .setAction(
-                            R.string.logger_bird_floating_action_button_activate
-                        ) { initializeFloatingActionButton(activity = this.activity) }
-                        .setCookieListener { isActivateDialogShown = false }
-                        .show()
-                    isActivateDialogShown = true
+        try {
+            Log.d("shake", "shake fired!!")
+            if (Settings.canDrawOverlays(this.activity)) {
+                initializeFloatingActionButton(activity = this.activity)
+            } else {
+                if (!isFabEnable) {
+                    if (!isActivateDialogShown) {
+    //                    CookieBar.dismiss(this.activity)
+                        if(this::cookieBar.isInitialized){
+                            (cookieBar.view.parent as ViewGroup).removeView(cookieBar.view)
+                        }
+                        cookieBar = CookieBar.build(this.activity)
+                            .setTitle(resources.getString(R.string.library_name))
+                            .setMessage(resources.getString(R.string.logger_bird_floating_action_button_permission_message))
+                            .setCustomView(R.layout.loggerbird_activate_popup)
+                            .setIcon(R.drawable.loggerbird)
+                            .setBackgroundColor(R.color.colorAccent)
+                            .setEnableAutoDismiss(false)
+                            .setCustomViewInitializer(CookieBar.CustomViewInitializer() {
+                                val txtActivate = it.findViewById<TextView>(R.id.btn_action_activate)
+                                val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
+                                txtActivate.setSafeOnClickListener {
+                                    initializeFloatingActionButton(activity = activity)
+                                    CookieBar.dismiss(activity)
+                                }
+                                txtDismiss.setSafeOnClickListener {
+                                    sd.stop()
+                                    CookieBar.dismiss(activity)
+                                }
+                            })
+                            .setSwipeToDismiss(true)
+                            .setAction(
+                                R.string.logger_bird_floating_action_button_activate
+                            ) { initializeFloatingActionButton(activity = this.activity) }
+                            .setCookieListener { isActivateDialogShown = false }
+                            .show()
+                        isActivateDialogShown = true
+                    }
                 }
             }
-        }
 
 //        initializeFloatingActionButton(activity = this.activity)
 //        if(this::rootView.isInitialized){
@@ -954,6 +962,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //        }else{
 //            initializeFloatingActionButton(activity = this.activity)
 //        }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e ,tag = Constants.shakerTag)
+        }
     }
 
     @SuppressLint("CheckResult")

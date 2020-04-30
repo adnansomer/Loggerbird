@@ -29,6 +29,7 @@
     <string name="snackbar_brush_width_adjust">Adjust your brush width</string>
     <string name="snackbar_ok">OK</string>
     <string name="snackbar_successfully_saved">Successfully saved!</string>
+    <string name="drawing_cancelled_message">Drawing is cancelled!</string>
     <!-- LoggerBirdForegroundServiceVideo -->
     <string name="foreground_service_video_notification_title">LoggerBird screen recording is running.</string>
     <!-- LoggerBirdService -->

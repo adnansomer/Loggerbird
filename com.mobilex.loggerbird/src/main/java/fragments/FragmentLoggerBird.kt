@@ -417,7 +417,8 @@ class FragmentLoggerBird(private val viewFragment: View, private val mContext: C
                                 "Screen recording finished",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            fragment_floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
+//                            fragment_floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
+                            fragment_floating_action_button_video.setBackgroundResource(R.drawable.ic_videocam_black_24dp)
                         }
                     }
                 } catch (e: Exception) {
@@ -499,7 +500,8 @@ class FragmentLoggerBird(private val viewFragment: View, private val mContext: C
             mediaProjection = projectManager!!.getMediaProjection(resultCode, data!!)
             mediaProjection!!.registerCallback(mediaProjectionCallback, null)
             virtualDisplay = createVirtualDisplay()
-            fragment_floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
+//            fragment_floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
+            fragment_floating_action_button_video.setBackgroundResource(R.drawable.ic_videocam_off_black_24dp)
         }else{
             Toast.makeText(mContext, "Screen cast permission denied", Toast.LENGTH_SHORT)
                 .show()
