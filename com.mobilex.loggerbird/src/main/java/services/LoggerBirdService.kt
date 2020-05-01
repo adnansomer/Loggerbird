@@ -93,6 +93,7 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
         private lateinit var floating_action_button_video: FloatingActionButton
         private lateinit var floating_action_button_audio: FloatingActionButton
         private lateinit var video_counter : Chronometer
+        private lateinit var audio_counter: Chronometer
         internal var controlServiceOnDestroyState: Boolean = false
         internal var floatingActionButtonLastDx: Float? = null
         internal var floatingActionButtonScreenShotLastDx: Float? = null
@@ -122,7 +123,9 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
         internal lateinit var sd: LoggerBirdShakeDetector
         internal lateinit var sensorManager:SensorManager
         internal var pauseOffset: Long = 0
-        internal var running : Boolean = false
+        internal var pauseOffsetAudio : Long = 0
+        internal var isVideoRunning : Boolean = false
+        internal var isAudioRunning : Boolean = false
 
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
@@ -153,13 +156,11 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
             }
             return false
         }
+
         internal fun controlFloatingActionButtonView():Boolean{
             if(this::floatingActionButtonView.isInitialized){
                 return true
             }
-
-
-
             return false
         }
     }
@@ -311,7 +312,6 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
         }
     }
 
-
     @RequiresApi(Build.VERSION_CODES.M)
     internal fun initializeFloatingActionButton(activity: Activity) {
 
@@ -365,8 +365,8 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
                 this.rootView = rootView
                 this.view = view
                 floatingActionButtonView = view
-                val themedContext = ContextThemeWrapper(context, R.style.AppTheme_FabSpeedDial)
                 video_counter = view.findViewById(R.id.video_counter)
+                audio_counter = view.findViewById(R.id.audio_counter)
                 floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
                 floating_action_button_screenshot = view.findViewById(R.id.fragment_floating_action_button_screenshot)
                 floating_action_button_video = view.findViewById(R.id.fragment_floating_action_button_video)
@@ -386,12 +386,19 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
 
                 (video_counter.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
-                    302,
+                    300,
                     0,
                     0
                 )
 
                 (floating_action_button_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                    0,
+                    450,
+                    0,
+                    0
+                )
+
+                (audio_counter.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
                     450,
                     0,
@@ -509,6 +516,7 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
             floating_action_button_video.visibility = View.GONE
             floating_action_button_audio.visibility = View.GONE
             video_counter.visibility = View.GONE
+            audio_counter.visibility = View.GONE
 //            floating_action_button.setImageResource(R.drawable.)
         } else {
             isOpen = true
@@ -524,8 +532,10 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
             floating_action_button_video.animate().rotation(360F)
             floating_action_button_video.animate().duration = 400L
             floating_action_button_video.animate().start()
-            if(running){
+            if(isVideoRunning){
             video_counter.visibility = View.VISIBLE}
+            if(isAudioRunning){
+                audio_counter.visibility = View.VISIBLE}
 //            floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
         }
     }
@@ -695,6 +705,9 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
             state = true
             withContext(Dispatchers.Main) {
                 Toast.makeText(context, "Audio recording started", Toast.LENGTH_SHORT).show()
+                audio_counter.visibility = View.VISIBLE
+                audioChoronometerReset()
+                audioChoronometerStart()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -711,6 +724,7 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
                 state = false
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "Audio recording finished", Toast.LENGTH_SHORT).show()
+                    audioChoronometerStop()
                 }
             }
         } catch (e: Exception) {
@@ -805,24 +819,45 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
     }
 
     private fun videoChoronometerStart(){
-        if (!running) {
+        if (!isVideoRunning) {
             video_counter.setBase(SystemClock.elapsedRealtime() - pauseOffset)
             video_counter.start()
-            running = true
+            isVideoRunning = true
         }
     }
 
     private fun videoChoronometerStop() {
-        if (running) {
+        if (isVideoRunning) {
             video_counter.stop()
             pauseOffset = SystemClock.elapsedRealtime() - video_counter.getBase()
-            running = false
+            isVideoRunning = false
         }
     }
 
     private fun videoChoronometerReset() {
         video_counter.setBase(SystemClock.elapsedRealtime())
         pauseOffset = 0
+    }
+
+    private fun audioChoronometerStart(){
+        if (!isAudioRunning) {
+            audio_counter.setBase(SystemClock.elapsedRealtime() - pauseOffsetAudio)
+            audio_counter.start()
+            isAudioRunning = true
+        }
+    }
+
+    private fun audioChoronometerStop() {
+        if (isAudioRunning) {
+            audio_counter.stop()
+            pauseOffsetAudio = SystemClock.elapsedRealtime() - audio_counter.getBase()
+            isAudioRunning = false
+        }
+    }
+
+    private fun audioChoronometerReset() {
+        audio_counter.setBase(SystemClock.elapsedRealtime())
+        pauseOffsetAudio = 0
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
