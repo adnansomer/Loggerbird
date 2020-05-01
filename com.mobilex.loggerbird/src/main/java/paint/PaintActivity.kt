@@ -233,7 +233,7 @@ class PaintActivity : Activity() {
             )
             val snackBarDelete = Snackbar.make(
                 this.findViewById(android.R.id.content),
-                "delete",
+                R.string.snackbar_delete,
                 Snackbar.LENGTH_INDEFINITE
             )
             val layout: Snackbar.SnackbarLayout = snackBarDelete.view as Snackbar.SnackbarLayout
