@@ -13,6 +13,7 @@ import android.graphics.PixelFormat
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
+import android.media.CamcorderProfile
 import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
@@ -63,6 +64,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudio: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var coroutineCallVideoStarter = CoroutineScope(Dispatchers.IO)
     private var audioRecording = false
     private var videoRecording = false
     private var mediaRecorderAudio: MediaRecorder? = null
@@ -760,16 +762,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 resultCode,
                 dataIntent!!
             )
-            initRecorder()
             withContext(Dispatchers.Main) {
                 mediaProjectionCallback = MediaProjectionCallback()
                 mediaProjection!!.registerCallback(mediaProjectionCallback, null)
-                virtualDisplay = createVirtualDisplay()
                 Toast.makeText(context, R.string.screen_recording_start, Toast.LENGTH_SHORT)
                     .show()
                 floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
                 callEnqueue()
             }
+            initRecorder()
         } else {
             controlPermissionRequest = true
             (context as Activity).startActivityForResult(
@@ -782,28 +783,35 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initRecorder() {
         try {
-            mediaRecorderVideo!!.setAudioSource(MediaRecorder.AudioSource.MIC)
-            mediaRecorderVideo!!.setVideoSource(MediaRecorder.VideoSource.SURFACE)
-            mediaRecorderVideo!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-            val fileDirectory: File = context.filesDir
-            filePath = File(
-                fileDirectory,
-                "logger_bird_video" + System.currentTimeMillis()
-                    .toString() + ".mp4"
-            )
-            mediaRecorderVideo!!.setOutputFile(filePath.path)
-            mediaRecorderVideo!!.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
-            mediaRecorderVideo!!.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
-            mediaRecorderVideo!!.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-            mediaRecorderVideo!!.setVideoEncodingBitRate(512 * 1000)
-            mediaRecorderVideo!!.setVideoFrameRate(30)
-            val rotation: Int = (context as Activity).windowManager.defaultDisplay.rotation
-            val orientation: Int = ORIENTATIONS.get(rotation + 90)
-            mediaRecorderVideo!!.setOrientationHint(orientation)
-            mediaRecorderVideo!!.prepare()
-            mediaRecorderVideo!!.start()
-            videoRecording = true
-            videoCounterStart()
+            coroutineCallVideoStarter.async {
+                mediaRecorderVideo!!.setAudioSource(MediaRecorder.AudioSource.MIC)
+                mediaRecorderVideo!!.setVideoSource(MediaRecorder.VideoSource.SURFACE)
+                mediaRecorderVideo!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+                val fileDirectory: File = context.filesDir
+                filePath = File(
+                    fileDirectory,
+                    "logger_bird_video" + System.currentTimeMillis()
+                        .toString() + ".mp4"
+                )
+                mediaRecorderVideo!!.setOutputFile(filePath.path)
+                mediaRecorderVideo!!.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
+                mediaRecorderVideo!!.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
+                mediaRecorderVideo!!.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+                mediaRecorderVideo!!.setVideoEncodingBitRate(1000000000)
+                mediaRecorderVideo!!.setVideoFrameRate(120)
+//                val cameraProfileHigh=CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH)
+//                mediaRecorderVideo!!.setProfile(cameraProfileHigh)
+                val rotation: Int = (context as Activity).windowManager.defaultDisplay.rotation
+                val orientation: Int = ORIENTATIONS.get(rotation + 90)
+                mediaRecorderVideo!!.setOrientationHint(orientation)
+                withContext(Dispatchers.IO){
+                    mediaRecorderVideo!!.prepare()
+                    mediaRecorderVideo!!.start()
+                    videoRecording = true
+                    videoCounterStart()
+                    virtualDisplay = createVirtualDisplay()
+                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             callEnqueue()
@@ -832,7 +840,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    private fun stopScreenRecord() {
+    private suspend fun stopScreenRecord() {
+        withContext(coroutineCallVideoStarter.coroutineContext){
         if (videoRecording) {
             mediaRecorderVideo!!.stop()
             mediaRecorderVideo!!.reset()
@@ -844,6 +853,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         stopForegroundServiceVideo()
         videoRecording = false
         videoCounterStop()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -920,8 +930,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             } else {
                 if (!isFabEnable) {
                     if (!isActivateDialogShown) {
-    //                    CookieBar.dismiss(this.activity)
-                        if(this::cookieBar.isInitialized){
+                        //                    CookieBar.dismiss(this.activity)
+                        if (this::cookieBar.isInitialized) {
                             (cookieBar.view.parent as ViewGroup).removeView(cookieBar.view)
                         }
                         cookieBar = CookieBar.build(this.activity)
@@ -932,7 +942,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             .setBackgroundColor(R.color.colorAccent)
                             .setEnableAutoDismiss(false)
                             .setCustomViewInitializer(CookieBar.CustomViewInitializer() {
-                                val txtActivate = it.findViewById<TextView>(R.id.btn_action_activate)
+                                val txtActivate =
+                                    it.findViewById<TextView>(R.id.btn_action_activate)
                                 val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
                                 txtActivate.setSafeOnClickListener {
                                     initializeFloatingActionButton(activity = activity)
@@ -965,7 +976,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e ,tag = Constants.shakerTag)
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.shakerTag)
         }
     }
 
@@ -989,8 +1000,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 timerTaskVideo = object : TimerTask() {
                     override fun run() {
                         counterVideo++
+                        val date = Date((counterVideo * 1000).toLong())
                         activity.runOnUiThread {
-                            val date = Date((counterVideo * 1000).toLong())
                             textView_counter_video.text = counterFormatter.format(date)
                         }
                     }
