@@ -2822,7 +2822,7 @@ class LoggerBird : LifecycleObserver {
                                     data = data
                                 )
                             } else {
-                                Toast.makeText(context, "Permission denied!", Toast.LENGTH_SHORT)
+                                Toast.makeText(context, R.string.permission_denied, Toast.LENGTH_SHORT)
                                     .show()
                             }
 //                        LoggerBirdService.callEnqueue()
@@ -2853,10 +2853,10 @@ class LoggerBird : LifecycleObserver {
                     do {
                         if (permissions[permissionCounter] == "android.permission.WRITE_EXTERNAL_STORAGE" || permissions[permissionCounter] == "android.permission.RECORD_AUDIO") {
                             if (grantResults[0] == 0) {
-                                Toast.makeText(context, "Permission granted!", Toast.LENGTH_SHORT)
+                                Toast.makeText(context, R.string.permission_granted, Toast.LENGTH_SHORT)
                                     .show()
                             } else {
-                                Toast.makeText(context, "Permission denied!", Toast.LENGTH_SHORT)
+                                Toast.makeText(context, R.string.permission_denied, Toast.LENGTH_SHORT)
                                     .show()
                             }
 

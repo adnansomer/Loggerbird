@@ -14,7 +14,7 @@
         android:layout_weight=".8"
         android:gravity="center_vertical"
         android:textSize="15sp"
-        android:text="Are you sure you want to delete?"
+        android:text="@string/textView_delete_verification"
         android:textColor="@color/white"/>
 
     <TextView
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_weight=".2"
         android:gravity="center"
-        android:text="NO"
+        android:text="@string/textView_no"
         android:textColor="@color/white"/>
 
     <TextView
@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_weight=".2"
         android:gravity="center"
-        android:text="YES"
+        android:text="@string/textView_yes"
         android:textColor="@color/white"/>
 
 </LinearLayout>

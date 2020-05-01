@@ -48,7 +48,7 @@ class LoggerBirdForegroundServiceVideo : Service() {
         try {
             val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             val notification = notificationBuilder.setOngoing(true)
-                .setContentTitle("LoggerBird screen recording is running.")
+                .setContentTitle(resources.getString(R.string.foreground_service_video_notification_title))
                 .setSmallIcon(R.drawable.loggerbird_icon)
                 .build()
             startForeground(5, notification)

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">filedeneme</string>
+    <string name="Main_Activity_button_add">Ekle</string>
+    <string name="Main_Activity_button_read_logs">Log oku</string>
+</resources>

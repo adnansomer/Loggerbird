@@ -4,8 +4,12 @@ import android.content.res.Resources
 import android.os.Build
 import android.util.Log
 import android.view.*
+import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.annotation.RequiresApi
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mobilex.loggerbird.R
 import constants.Constants
@@ -20,7 +24,9 @@ class FloatingActionButtonOnTouchListener(
     private val floatingActionButton: FloatingActionButton,
     private val floatingActionButtonScreenShot: FloatingActionButton,
     private val floatingActionButtonVideo: FloatingActionButton,
-    private val floatingActionButtonAudio: FloatingActionButton
+    private val floatingActionButtonAudio: FloatingActionButton,
+    private val textViewCounterVideo:TextView,
+    private val textViewCounterAudio:TextView
 ) : View.OnTouchListener {
     private var windowManagerDx: Float = 0F
     private var windowManagerDy: Float = 0F
@@ -35,6 +41,8 @@ class FloatingActionButtonOnTouchListener(
                     floatingActionButtonScreenShot.visibility = View.GONE
                     floatingActionButtonVideo.visibility = View.GONE
                     floatingActionButtonAudio.visibility = View.GONE
+                    textViewCounterVideo.visibility = View.GONE
+                    textViewCounterAudio.visibility = View.GONE
                     windowManagerDx = windowManagerParams.x - event.rawX
                     windowManagerDy = windowManagerParams.y - event.rawY
                     lastAction = MotionEvent.ACTION_DOWN
@@ -65,7 +73,19 @@ class FloatingActionButtonOnTouchListener(
                             0,
                             0
                         )
+                        (textViewCounterVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            300,
+                            0,
+                            0,
+                            0
+                        )
                         (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            0,
+                            0,
+                            0,
+                            0
+                        )
+                        (textViewCounterAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
                             0,
                             0,
                             0,
@@ -87,7 +107,19 @@ class FloatingActionButtonOnTouchListener(
                             0,
                             0
                         )
+                        (textViewCounterVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            300,
+                            0,
+                            0,
+                            0
+                        )
                         (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            450,
+                            0,
+                            0,
+                            0
+                        )
+                        (textViewCounterAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
                             450,
                             0,
                             0,
@@ -110,7 +142,19 @@ class FloatingActionButtonOnTouchListener(
                             0,
                             0
                         )
+                        (textViewCounterVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            0,
+                            300,
+                            0,
+                            0
+                        )
                         (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            0,
+                            150,
+                            0,
+                            0
+                        )
+                        (textViewCounterAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
                             0,
                             150,
                             0,
@@ -133,7 +177,19 @@ class FloatingActionButtonOnTouchListener(
                             0,
                             0
                         )
+                        (textViewCounterVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            0,
+                            300,
+                            0,
+                            0
+                        )
                         (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                            0,
+                            450,
+                            0,
+                            0
+                        )
+                        (textViewCounterAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
                             0,
                             450,
                             0,

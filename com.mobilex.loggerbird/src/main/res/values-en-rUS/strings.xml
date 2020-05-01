@@ -44,7 +44,6 @@
     <string name="logger_bird_floating_action_button_close_message">Loggerbird is closed!</string>
     <string name="logger_bird_floating_action_button_open_message">Loggerbird is activated!</string>
 
-
     <!-- Layout:-->
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>

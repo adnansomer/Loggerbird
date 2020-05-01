@@ -311,7 +311,7 @@ internal class LoggerBirdPaintService : Service() {
 
                 }
             })
-            colorPickerDialog.setPositiveButton("Apply") { dialog, _ ->
+                colorPickerDialog.setPositiveButton("Apply") { dialog, _ ->
                 run {
                     activity.paintView.setBrushColor(selectedColor)
                     dialog.dismiss()
