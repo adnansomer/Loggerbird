@@ -5,8 +5,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:id="@+id/fragment_layout"
-    tools:context="fragments.FragmentLoggerBird">
-
+    tools:context="fragments.FragmentLoggerBird"
+    app:layout_behavior="paint.PaintFabAnimation">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button"
@@ -14,10 +14,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabSize="normal"
-        android:backgroundTint="@color/black"
         app:borderWidth="0dp"
         app:elevation="0dp"
         app:srcCompat="@drawable/loggerbird"/>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_audio"
         style="@style/AppTheme.FabSpeedDial"
@@ -25,32 +25,48 @@
         android:layout_height="wrap_content"
         app:fabSize="normal"
         android:visibility="gone"
-        android:backgroundTint="@color/colorFab"
         app:borderWidth="0dp"
-        app:elevation="0dp"
+        app:elevation="1dp"
         app:srcCompat="@drawable/ic_mic_black_24dp"/>
+
+    <Chronometer
+        android:id="@+id/video_counter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_shape"
+        android:elevation="2dp"
+        android:gravity="center"
+        android:text="00:00"
+        android:singleLine="true"
+        android:textColor="@color/white"
+        android:textSize="10sp"
+        app:borderWidth="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/fragment_floating_action_button_video"
+        app:layout_constraintEnd_toEndOf="@id/fragment_floating_action_button_video"/>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_video"
         style="@style/AppTheme.FabSpeedDial"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabSize="normal"
+        android:text="DENEME"
         android:visibility="gone"
-        android:backgroundTint="@color/colorFab"
         app:borderWidth="0dp"
-        app:elevation="0dp"
-        app:srcCompat="@drawable/ic_videocam_black_24dp"/>
+        app:elevation="1dp"
+        app:srcCompat="@drawable/ic_videocam_black_24dp" />
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_screenshot"
         style="@style/AppTheme.FabSpeedDial"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/colorFab"
         app:srcCompat="@drawable/ic_photo_camera_black_24dp"
         android:visibility="gone"
         app:borderWidth="0dp"
-        app:elevation="0dp"
-        app:fabSize="normal" />
+        app:elevation="1dp"
+        app:fabSize="auto" />
 
 </FrameLayout>

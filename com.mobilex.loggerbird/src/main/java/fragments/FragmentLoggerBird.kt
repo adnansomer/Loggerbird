@@ -417,7 +417,7 @@ class FragmentLoggerBird(private val viewFragment: View, private val mContext: C
                                 "Screen recording finished",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            fragment_floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
+                            //fragment_floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
                         }
                     }
                 } catch (e: Exception) {

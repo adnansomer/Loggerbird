@@ -15,6 +15,9 @@ class LoggerBirdShakeDetector(private val listener: Listener) : SensorEventListe
      * value, the phone is accelerating.
      */
     private var accelerationThreshold = DEFAULT_ACCELERATION_THRESHOLD
+    private var lastTime: Long = 0
+
+
     /** Listens for shakes.  */
     interface Listener {
         /** Called on the main thread when the device is shaken.  */
@@ -63,8 +66,13 @@ class LoggerBirdShakeDetector(private val listener: Listener) : SensorEventListe
         val timestamp = event.timestamp
         queue.add(timestamp, accelerating)
         if (queue.isShaking) {
-            queue.clear()
-            listener.hearShake()
+            val current = System.currentTimeMillis()
+            if ((current - lastTime) > 2500L) {
+                queue.clear()
+                listener.hearShake()
+                lastTime = current
+            }
+
         }
     }
     /** Returns true if the device is currently accelerating.  */

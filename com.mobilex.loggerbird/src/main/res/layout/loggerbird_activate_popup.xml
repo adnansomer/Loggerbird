@@ -22,8 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_gravity="center"
-             />
+            android:layout_gravity="center" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -37,8 +36,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
-                android:textStyle="bold"
-                 />
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_message"
@@ -46,8 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:textColor="@android:color/white"
-                android:textSize="14sp"
-                />
+                android:textSize="14sp" />
 
         </LinearLayout>
 

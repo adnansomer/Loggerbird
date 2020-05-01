@@ -1,16 +1,20 @@
 package listeners
 
+import android.content.Context
 import android.content.res.Resources
 import android.os.Build
 import android.util.Log
-import android.view.*
+import android.view.ContextThemeWrapper
+import android.view.MotionEvent
+import android.view.View
+import android.view.WindowManager
 import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mobilex.loggerbird.R
 import constants.Constants
 import loggerbird.LoggerBird
-
 
 
 class FloatingActionButtonOnTouchListener(
@@ -20,8 +24,11 @@ class FloatingActionButtonOnTouchListener(
     private val floatingActionButton: FloatingActionButton,
     private val floatingActionButtonScreenShot: FloatingActionButton,
     private val floatingActionButtonVideo: FloatingActionButton,
-    private val floatingActionButtonAudio: FloatingActionButton
+    private val floatingActionButtonAudio: FloatingActionButton,
+    private val textViewVideo : TextView
+
 ) : View.OnTouchListener {
+
     private var windowManagerDx: Float = 0F
     private var windowManagerDy: Float = 0F
     private var lastAction: Int = 0
@@ -32,9 +39,11 @@ class FloatingActionButtonOnTouchListener(
         try {
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+
                     floatingActionButtonScreenShot.visibility = View.GONE
                     floatingActionButtonVideo.visibility = View.GONE
                     floatingActionButtonAudio.visibility = View.GONE
+
                     windowManagerDx = windowManagerParams.x - event.rawX
                     windowManagerDy = windowManagerParams.y - event.rawY
                     lastAction = MotionEvent.ACTION_DOWN
@@ -93,6 +102,7 @@ class FloatingActionButtonOnTouchListener(
                             0,
                             0
                         )
+
                     }
                     if (deviceHeight < (event.rawY + (floatingActionButton.height))) {
                         Log.d("corner", "c")
@@ -117,6 +127,7 @@ class FloatingActionButtonOnTouchListener(
                             0
                         )
 
+
                     } else if (event.rawY - (floatingActionButton.height) < 0) {
                         Log.d("corner", "d")
                         windowManagerParams.y = -(deviceHeight / 2)
@@ -139,6 +150,7 @@ class FloatingActionButtonOnTouchListener(
                             0,
                             0
                         )
+
                     }
 //                    floatingActionButton.setImageResource(R.drawable.ic_close_black_24dp)
 //                    floatingActionButtonScreenShot.visibility = View.VISIBLE

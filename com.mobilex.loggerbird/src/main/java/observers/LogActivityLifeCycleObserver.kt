@@ -282,14 +282,9 @@ internal class LogActivityLifeCycleObserver() :
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
         ) {
-            Toast.makeText(context, "Permission Write External Storage Denied!", Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(context, "Permission Write External Storage Denied!", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(
-                context,
-                "Permission Write External Storage Granted!",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(context, "Permission Write External Storage Granted!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -297,14 +292,10 @@ internal class LogActivityLifeCycleObserver() :
     private fun checkDrawOtherAppPermissionResult(activity: Activity) {
         LoggerBirdService.sd.start(sensorManager = LoggerBirdService.sensorManager)
         if (!Settings.canDrawOverlays(activity)) {
-            Toast.makeText(activity, "Permission DrawOtherApp Settings Denied!", Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(activity, "Permission DrawOtherApp Settings Denied!", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(
-                activity,
-                "Permission DrawOtherApp Settings Granted!",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(activity, "Permission DrawOtherApp Settings Granted!", Toast.LENGTH_SHORT).show()
+            LoggerBirdService.loggerBirdService.initializeFloatingActionButton(activity = this.activity)
         }
     }
 

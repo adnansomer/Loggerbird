@@ -19,19 +19,17 @@ import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
+import android.os.SystemClock
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.widget.FrameLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.doOnAttach
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
@@ -86,6 +84,7 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
     private var isFabEnable: Boolean = false
     private var isActivateDialogShown: Boolean = false
 
+
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
@@ -93,6 +92,7 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
         private lateinit var floating_action_button_screenshot: FloatingActionButton
         private lateinit var floating_action_button_video: FloatingActionButton
         private lateinit var floating_action_button_audio: FloatingActionButton
+        private lateinit var video_counter : Chronometer
         internal var controlServiceOnDestroyState: Boolean = false
         internal var floatingActionButtonLastDx: Float? = null
         internal var floatingActionButtonScreenShotLastDx: Float? = null
@@ -121,6 +121,9 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
         internal lateinit var loggerBirdService: LoggerBirdService
         internal lateinit var sd: LoggerBirdShakeDetector
         internal lateinit var sensorManager:SensorManager
+        internal var pauseOffset: Long = 0
+        internal var running : Boolean = false
+
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
             if (runnableList.size > 0) {
@@ -154,6 +157,9 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
             if(this::floatingActionButtonView.isInitialized){
                 return true
             }
+
+
+
             return false
         }
     }
@@ -256,47 +262,47 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
     @RequiresApi(Build.VERSION_CODES.M)
     override fun hearShake() {
 
-
-
-        if (!isFabEnable) {
-            if(!isActivateDialogShown) {
-
-                CookieBar.build(activity)
-                    .setCustomView(R.layout.loggerbird_activate_popup)
-                    .setTitle("Loggerbird")
-                    .setMessage("Do you want to activate Loggerbird?")
-                    .setIcon(R.drawable.loggerbird)
-                    .setCustomViewInitializer ( CookieBar.CustomViewInitializer() {
-
-                        val txtActivate = it.findViewById<TextView>(R.id.btn_action_activate)
-                        val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
-
-                        txtActivate.setSafeOnClickListener { initializeFloatingActionButton(activity = activity)
-                                                                CookieBar.dismiss(activity)}
-
-                        txtDismiss.setSafeOnClickListener{initializeFloatingActionButton(activity = activity)
-                            CookieBar.dismiss(activity)}
-
-                    })
-                    .setEnableAutoDismiss(false)
-                    .setSwipeToDismiss(true)
-                    .setCookieListener(CookieBarDismissListener { isActivateDialogShown = false })
-                    .show()
-                isActivateDialogShown = true
-            }
-
+        if (Settings.canDrawOverlays(this.activity)) {
+            initializeFloatingActionButton(activity = this.activity)
         } else {
-            removeFloatingActionButton(activity = this.activity)
-            CookieBar.build(activity)
-                .setMessage("Loggerbird is closed!")
-                .setBackgroundColor(R.color.colorAccent)
-                .setSwipeToDismiss(true)
-                .setDuration(1000)
-                .show()
-            isFabEnable = false
+
+            if (!isFabEnable) {
+                if (!isActivateDialogShown) {
+
+                    CookieBar.build(activity)
+                        .setCustomView(R.layout.loggerbird_activate_popup)
+                        .setTitle("Loggerbird")
+                        .setMessage("Do you want to activate Loggerbird?")
+                        .setIcon(R.drawable.loggerbird)
+                        .setBackgroundColor(R.color.secondaryColor)
+                        .setCustomViewInitializer(CookieBar.CustomViewInitializer() {
+
+                            val txtActivate = it.findViewById<TextView>(R.id.btn_action_activate)
+                            val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
+
+                            txtActivate.setSafeOnClickListener {
+                                initializeFloatingActionButton(activity = activity)
+                                CookieBar.dismiss(activity)
+                            }
+
+                            txtDismiss.setSafeOnClickListener {
+                                sd.stop()
+                                CookieBar.dismiss(activity)
+                            }
+
+                        })
+                        .setEnableAutoDismiss(false)
+                        .setSwipeToDismiss(true)
+                        .setCookieListener(CookieBarDismissListener {
+                            isActivateDialogShown = false
+                        })
+                        .show()
+                    isActivateDialogShown = true
+                }
+
+            }
         }
     }
-
 
     @SuppressLint("CheckResult")
     fun View.setSafeOnClickListener(onClick : (View) -> Unit) {
@@ -306,16 +312,23 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
     }
 
 
-    private fun removeFloatingActionButton(activity: Activity){
+    @RequiresApi(Build.VERSION_CODES.M)
+    internal fun initializeFloatingActionButton(activity: Activity) {
+
         if (windowManager != null && this::view.isInitialized) {
             (windowManager as WindowManager).removeViewImmediate(view)
             windowManager = null
-        }
-        isActivateDialogShown = false
-    }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun initializeFloatingActionButton(activity: Activity) {
+            CookieBar.build(activity)
+                .setMessage("Loggerbird is closed!")
+                .setBackgroundColor(R.color.secondaryColor)
+                .setEnableAutoDismiss(true)
+                .setSwipeToDismiss(true)
+                .setDuration(1000)
+                .show()
+            isFabEnable = false
+
+        }else {
 
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             val view: View
@@ -352,13 +365,12 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
                 this.rootView = rootView
                 this.view = view
                 floatingActionButtonView = view
+                val themedContext = ContextThemeWrapper(context, R.style.AppTheme_FabSpeedDial)
+                video_counter = view.findViewById(R.id.video_counter)
                 floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-                floating_action_button_screenshot =
-                    view.findViewById(R.id.fragment_floating_action_button_screenshot)
-                floating_action_button_video =
-                    view.findViewById(R.id.fragment_floating_action_button_video)
-                floating_action_button_audio =
-                    view.findViewById(R.id.fragment_floating_action_button_audio)
+                floating_action_button_screenshot = view.findViewById(R.id.fragment_floating_action_button_screenshot)
+                floating_action_button_video = view.findViewById(R.id.fragment_floating_action_button_video)
+                floating_action_button_audio = view.findViewById(R.id.fragment_floating_action_button_audio)
                 (floating_action_button_screenshot.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
                     150,
@@ -371,6 +383,14 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
                     0,
                     0
                 )
+
+                (video_counter.layoutParams as FrameLayout.LayoutParams).setMargins(
+                    0,
+                    302,
+                    0,
+                    0
+                )
+
                 (floating_action_button_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
                     450,
@@ -387,11 +407,19 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     buttonClicks()
                 }
+
+                CookieBar.build(activity)
+                    .setMessage("Loggerbird is activated!")
+                    .setBackgroundColor(R.color.secondaryColor)
+                    .setSwipeToDismiss(true)
+                    .setEnableAutoDismiss(true)
+                    .setDuration(1000)
+                    .show()
                 isFabEnable = true
             } else {
                 checkDrawOtherAppPermission(activity = (context as Activity))
             }
-
+        }
     }
 
     internal fun initializeNewActivity(activity: Activity) {
@@ -441,7 +469,8 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
                 floatingActionButton = floating_action_button,
                 floatingActionButtonScreenShot = floating_action_button_screenshot,
                 floatingActionButtonVideo = floating_action_button_video,
-                floatingActionButtonAudio = floating_action_button_audio
+                floatingActionButtonAudio = floating_action_button_audio,
+                textViewVideo = video_counter
             )
         )
     }
@@ -479,6 +508,7 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
             floating_action_button_screenshot.visibility = View.GONE
             floating_action_button_video.visibility = View.GONE
             floating_action_button_audio.visibility = View.GONE
+            video_counter.visibility = View.GONE
 //            floating_action_button.setImageResource(R.drawable.)
         } else {
             isOpen = true
@@ -494,6 +524,8 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
             floating_action_button_video.animate().rotation(360F)
             floating_action_button_video.animate().duration = 400L
             floating_action_button_video.animate().start()
+            if(running){
+            video_counter.visibility = View.VISIBLE}
 //            floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
         }
     }
@@ -713,11 +745,9 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
                     } else {
                         stopScreenRecord()
                         withContext(Dispatchers.Main) {
-                            Toast.makeText(
-                                context,
-                                "Screen recording finished",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Screen recording finished", Toast.LENGTH_SHORT).show()
+                            videoChoronometerStop()
+
                             floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
                         }
                     }
@@ -758,8 +788,10 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
                 mediaProjectionCallback = MediaProjectionCallback()
                 mediaProjection!!.registerCallback(mediaProjectionCallback, null)
                 virtualDisplay = createVirtualDisplay()
-                Toast.makeText(context, "Screen recording started", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(context, "Screen recording started", Toast.LENGTH_SHORT).show()
+                video_counter.visibility = View.VISIBLE
+                videoChoronometerReset()
+                videoChoronometerStart()
                 floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
                 callEnqueue()
             }
@@ -770,6 +802,27 @@ internal class  LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listene
                 REQUEST_CODE_VIDEO
             )
         }
+    }
+
+    private fun videoChoronometerStart(){
+        if (!running) {
+            video_counter.setBase(SystemClock.elapsedRealtime() - pauseOffset)
+            video_counter.start()
+            running = true
+        }
+    }
+
+    private fun videoChoronometerStop() {
+        if (running) {
+            video_counter.stop()
+            pauseOffset = SystemClock.elapsedRealtime() - video_counter.getBase()
+            running = false
+        }
+    }
+
+    private fun videoChoronometerReset() {
+        video_counter.setBase(SystemClock.elapsedRealtime())
+        pauseOffset = 0
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

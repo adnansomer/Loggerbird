@@ -40,7 +40,7 @@ class LoggerBirdForegroundServiceVideo : Service() {
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.foregroundServiceVideo)
         }
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
 
@@ -62,7 +62,7 @@ class LoggerBirdForegroundServiceVideo : Service() {
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        stopSelf()
+        //stopSelf()
         super.onTaskRemoved(rootIntent)
     }
 
