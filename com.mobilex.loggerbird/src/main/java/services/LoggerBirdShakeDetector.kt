@@ -133,7 +133,7 @@ class LoggerBirdShakeDetector(private val listener: Listener) : SensorEventListe
             acceleratingCount = 0
         }
         /** Purges samples with timestamps older than cutoff.  */
-        fun purge(cutoff: Long) {
+        private fun purge(cutoff: Long) {
             while (sampleCount >= MIN_QUEUE_SIZE && oldest != null && cutoff - oldest!!.timestamp > 0
             ) {
                 // Remove sample.
