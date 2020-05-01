@@ -16,6 +16,8 @@ class LoggerBirdShakeDetector(private val listener: Listener) : SensorEventListe
      */
     private var accelerationThreshold = DEFAULT_ACCELERATION_THRESHOLD
     private var lastTime: Long = 0
+
+
     /** Listens for shakes.  */
     interface Listener {
         /** Called on the main thread when the device is shaken.  */
@@ -65,11 +67,12 @@ class LoggerBirdShakeDetector(private val listener: Listener) : SensorEventListe
         queue.add(timestamp, accelerating)
         if (queue.isShaking) {
             val current = System.currentTimeMillis()
-            if ((current - lastTime) > 1500L) {
+            if ((current - lastTime) > 2500L) {
                 queue.clear()
                 listener.hearShake()
                 lastTime = current
             }
+
         }
     }
     /** Returns true if the device is currently accelerating.  */
@@ -133,7 +136,7 @@ class LoggerBirdShakeDetector(private val listener: Listener) : SensorEventListe
             acceleratingCount = 0
         }
         /** Purges samples with timestamps older than cutoff.  */
-        private fun purge(cutoff: Long) {
+        fun purge(cutoff: Long) {
             while (sampleCount >= MIN_QUEUE_SIZE && oldest != null && cutoff - oldest!!.timestamp > 0
             ) {
                 // Remove sample.

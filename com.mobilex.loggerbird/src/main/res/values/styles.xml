@@ -16,17 +16,16 @@
         <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
     </style>
 
-    <style name="AppTheme.FabSpeedDial" parent="Theme.MaterialComponents">
+    <style name="AppTheme.FabSpeedDial">
+        <item name="android:tint">@color/gray</item>
         <item name="android:backgroundTint">@color/white</item>
-        <item name="android:windowFullscreen">true</item>>
         <item name="borderWidth">0dp</item>
     </style>
 
-    <style name="AppTheme.Fab" parent="Theme.MaterialComponents">
+    <style name="AppTheme.Fab">
         <item name="android:tint">@color/white</item>
         <item name="android:backgroundTint">@color/black</item>
         <item name="borderWidth">0dp</item>
-        <item name="android:windowFullscreen">true</item>>
         <item name="rippleColor">@color/secondaryColor</item>
     </style>
 
