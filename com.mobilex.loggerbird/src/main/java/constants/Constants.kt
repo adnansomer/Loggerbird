@@ -62,5 +62,8 @@ internal class Constants {
         const val videoRecordingCounterTag:String = "Video Recording Counter"
         const val audioRecordingCounterTag:String = "Audio Recording Counter"
         const val shakerTag:String = "Shake"
+        const val videoRecordingFileSizeTag:String = "Video Recording File Size"
+        const val audioRecordingFileSizeTag:String = "Audio Recording File Size"
+
     }
 }
