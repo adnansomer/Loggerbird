@@ -41,6 +41,7 @@ import loggerbird.LoggerBird
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
+import utils.EmailUtil
 import utils.LinkedBlockingQueueUtil
 import java.io.File
 import java.lang.Exception
@@ -94,6 +95,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var coroutineCallAudioCounter: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideoFileSize: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudioFileSize: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var coroutineCallFeedback:CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var counterVideo: Int = 0
     private var counterAudio: Int = 0
     private var timerVideo: Timer? = null
@@ -110,6 +112,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var cookieBar: CookieBar
     private lateinit var checkBoxFeedback: CheckBox
     private lateinit var viewFeedback: View
+    private lateinit var floating_action_button_feedback: FloatingActionButton
+    private lateinit var editText_feedback: EditText
 
     //Static global variables:
     internal companion object {
@@ -1326,12 +1330,18 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         PixelFormat.TRANSLUCENT
                     )
                 }
-                windowManagerFeedback = activity.getSystemService(Context.WINDOW_SERVICE)!!
 
+                windowManagerFeedback = activity.getSystemService(Context.WINDOW_SERVICE)!!
                 if (windowManagerFeedback != null) {
                     windowManagerParamsFeedback.gravity = Gravity.BOTTOM
-                    (windowManagerFeedback as WindowManager).addView(viewFeedback, windowManagerParamsFeedback)
-
+                    (windowManagerFeedback as WindowManager).addView(
+                        viewFeedback,
+                        windowManagerParamsFeedback
+                    )
+                    floating_action_button_feedback =
+                        viewFeedback.findViewById(R.id.floating_action_button_feed)
+                    editText_feedback = viewFeedback.findViewById(R.id.editText_feed_back)
+                    buttonClicksFeedback()
                 }
             }
         } catch (e: Exception) {
@@ -1345,6 +1355,36 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         if (windowManagerFeedback != null && this::viewFeedback.isInitialized) {
             (windowManagerFeedback as WindowManager).removeViewImmediate(viewFeedback)
             windowManagerFeedback = null
+        }
+    }
+
+    private fun buttonClicksFeedback() {
+        floating_action_button_feedback.setOnClickListener {
+            sendFeedback()
+        }
+    }
+
+    private fun sendFeedback() {
+        if (editText_feedback.text.trim().isNotEmpty()) {
+            coroutineCallFeedback.async {
+                EmailUtil.sendFeedbackEmail(
+                    context = context,
+                    message = editText_feedback.text.toString()
+                )
+                withContext(Dispatchers.Main){
+                    Toast.makeText(
+                        context,
+                        R.string.feed_back_email_success,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        } else {
+            Toast.makeText(
+                context,
+                R.string.feed_back_email_empty_text,
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

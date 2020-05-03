@@ -66,6 +66,7 @@ internal class EmailUtil {
                             systemTime()
                         )
                         sendSingleEmail(
+                            subject = "log_details",
                             file = file
                         )
                         Log.d(
@@ -124,6 +125,7 @@ internal class EmailUtil {
                             systemTime()
                         )
                         sendSingleEmail(
+                            subject = "unhandled_log_details",
                             file = file
                         )
                         Log.d(
@@ -149,6 +151,47 @@ internal class EmailUtil {
             }
         }
 
+
+        internal fun sendFeedbackEmail(context: Context, message: String) {
+            try {
+                val internetConnectionUtil = InternetConnectionUtil()
+                if (internetConnectionUtil.checkNetworkConnection(
+                        context = context
+                    )
+                ) {
+                    if (internetConnectionUtil.makeHttpRequest() == 200) {
+                        Log.d(
+                            "email_time",
+                            systemTime()
+                        )
+                        sendSingleEmail(
+                            message = message,
+                            subject = "feed_back_details"
+                        )
+                        Log.d(
+                            "email_time",
+                            systemTime()
+                        )
+
+
+                    } else {
+                        throw LoggerBirdException(
+                            Constants.internetErrorMessage
+                        )
+                    }
+                } else {
+                    throw LoggerBirdException(
+                        Constants.networkErrorMessage
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
+            }
+
+        }
+
         //dummy method probably deleted in the future
         private fun systemTime(): String {
             val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
@@ -170,7 +213,7 @@ internal class EmailUtil {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun initializeEmail() {
+        private fun initializeEmail(subject: String? = null) {
             try {
                 properties = Properties()
                 properties["mail.transport.protocol"] = "smtp"
@@ -194,7 +237,7 @@ internal class EmailUtil {
                 multiPart = MimeMultipart()
                 mimeMessage.setFrom(InternetAddress("appcaesars@gmail.com"))
                 mimeMessage.addRecipients(Message.RecipientType.TO, "appcaesars@gmail.com")
-                mimeMessage.subject = "log_details"
+                mimeMessage.subject = subject
                 mimeBodyPart = MimeBodyPart()
                 transport.connect()
             } catch (e: Exception) {
@@ -218,20 +261,24 @@ internal class EmailUtil {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun sendSingleEmail(file: File? = null) {
+        private fun sendSingleEmail(subject: String? = null,message: String? = null, file: File? = null) {
             try {
-                initializeEmail()
-                dataSource = FileDataSource(file?.path)
-                mimeBodyPart.dataHandler = DataHandler(
-                    dataSource
-                )
-                mimeBodyPart.fileName = file?.name
-                multiPart.addBodyPart(
-                    mimeBodyPart
-                )
-                mimeMessage.setContent(
-                    multiPart
-                )
+                initializeEmail(subject = subject)
+                if (file != null) {
+                    dataSource = FileDataSource(file.path)
+                    mimeBodyPart.dataHandler = DataHandler(
+                        dataSource
+                    )
+                    mimeBodyPart.fileName = file.name
+                    multiPart.addBodyPart(
+                        mimeBodyPart
+                    )
+                    mimeMessage.setContent(
+                        multiPart
+                    )
+                }else{
+                    mimeMessage.setContent(message,"text/plain")
+                }
                 transport.sendMessage(
                     mimeMessage,
                     mimeMessage.getRecipients(Message.RecipientType.TO)
