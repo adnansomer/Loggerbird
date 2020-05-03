@@ -53,4 +53,10 @@
     <string name="textView_delete_verification">Silmek istediğinizden emin misiniz?</string>
     <string name="textView_yes">Evet</string>
     <string name="textView_no">Hayır</string>
+    <!-- loggerbird_activate_popup-->
+    <string name="textView_action_dismiss">Bir daha bunu gösterme</string>
+    <string name="textView_action_activate">Aktive et</string>
+    <string name="checkBox_feedback_title">Geri bildirim veriniz!</string>
+    <!-- loggerbird_feedback-->
+    <string name="editText_feedback_title">Geri bildirim veriniz</string>
 </resources>

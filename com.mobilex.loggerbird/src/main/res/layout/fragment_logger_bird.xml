@@ -6,6 +6,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     tools:context="fragments.FragmentLoggerBird">
+
+
     <TextView
         android:id="@+id/fragment_textView_size_video"
         android:layout_width="wrap_content"
@@ -67,7 +69,7 @@
         android:layout_height="wrap_content"
         android:backgroundTint="@color/black"
         app:borderWidth="0dp"
-        app:elevation="1dp"
+        app:elevation="0dp"
         app:fabSize="normal"
         app:srcCompat="@drawable/loggerbird" />
 
@@ -79,7 +81,7 @@
         android:backgroundTint="@color/colorFab"
         android:visibility="gone"
         app:borderWidth="0dp"
-        app:elevation="2dp"
+        app:elevation="0dp"
         app:fabSize="normal"
         app:srcCompat="@drawable/ic_mic_black_24dp" />
 
@@ -92,7 +94,7 @@
         android:backgroundTint="@color/colorFab"
         android:visibility="gone"
         app:borderWidth="0dp"
-        app:elevation="2dp"
+        app:elevation="0dp"
         app:fabSize="normal"
         app:srcCompat="@drawable/ic_photo_camera_black_24dp" />
 
@@ -107,7 +109,6 @@
         android:textStyle="bold"
         android:visibility="gone"
         app:borderWidth="0dp"
-        app:elevation="2dp"
+        app:elevation="0dp"
         app:srcCompat="@drawable/ic_videocam_black_24dp" />
-
 </FrameLayout>

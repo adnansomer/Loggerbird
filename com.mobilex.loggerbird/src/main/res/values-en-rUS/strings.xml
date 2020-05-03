@@ -54,5 +54,11 @@
     <string name="textView_delete_verification">Are you sure you want to delete?</string>
     <string name="textView_yes">YES</string>
     <string name="textView_no">NO</string>
+    <!-- loggerbird_activate_popup-->
+    <string name="textView_action_dismiss">Do not show again</string>
+    <string name="textView_action_activate">Activate</string>
+    <string name="checkBox_feedback_title">Give us feedback!</string>
+    <!-- loggerbird_feedback-->
+    <string name="editText_feedback_title">Give us feedback!</string>
 
 </resources>

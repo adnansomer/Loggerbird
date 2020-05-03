@@ -59,7 +59,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var view: View
     private lateinit var rootView: View
     private var windowManager: Any? = null
+    private var windowManagerFeedback: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -106,6 +108,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         SimpleDateFormat("mm:ss", Locale.getDefault())
     private var fileSizeFormatter: Formatter = Formatter()
     private lateinit var cookieBar: CookieBar
+    private lateinit var checkBoxFeedback: CheckBox
+    private lateinit var viewFeedback: View
 
     //Static global variables:
     internal companion object {
@@ -292,15 +296,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     internal fun initializeFloatingActionButton(activity: Activity) {
         if (windowManager != null && this::view.isInitialized) {
             (windowManager as WindowManager).removeViewImmediate(view)
-            windowManager = null
             CookieBar.build(activity)
                 .setMessage(R.string.logger_bird_floating_action_button_close_message)
                 .setSwipeToDismiss(true)
                 .setBackgroundColor(R.color.colorAccent)
                 .setDuration(1000)
                 .show()
+//            if (checkBoxFeedback.isChecked) {
+//
+//            }
+            initializeFeedBackLayout()
+            windowManager = null
             isFabEnable = false
         } else {
+            removeFeedBackLayout()
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             val view: View
             val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
@@ -1049,6 +1058,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 val txtActivate =
                                     it.findViewById<TextView>(R.id.btn_action_activate)
                                 val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
+                                checkBoxFeedback = it.findViewById(R.id.checkBox_feed_back)
                                 txtActivate.setSafeOnClickListener {
                                     initializeFloatingActionButton(activity = activity)
                                     CookieBar.dismiss(activity)
@@ -1283,6 +1293,58 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 exception = e,
                 tag = Constants.audioRecordingCounterTag
             )
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeFeedBackLayout() {
+        try {
+            if (windowManagerFeedback != null && this::viewFeedback.isInitialized) {
+                (windowManagerFeedback as WindowManager).removeViewImmediate(viewFeedback)
+            }
+            viewFeedback = LayoutInflater.from(activity)
+                .inflate(
+                    R.layout.loggerbird_feedback,
+                    (this.rootView as ViewGroup),
+                    false
+                )
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsFeedback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+                windowManagerFeedback = activity.getSystemService(Context.WINDOW_SERVICE)!!
+
+                if (windowManagerFeedback != null) {
+                    windowManagerParamsFeedback.gravity = Gravity.BOTTOM
+                    (windowManagerFeedback as WindowManager).addView(viewFeedback, windowManagerParamsFeedback)
+
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.feedbackTag)
+        }
+    }
+
+    private fun removeFeedBackLayout() {
+        if (windowManagerFeedback != null && this::viewFeedback.isInitialized) {
+            (windowManagerFeedback as WindowManager).removeViewImmediate(viewFeedback)
+            windowManagerFeedback = null
         }
     }
 
