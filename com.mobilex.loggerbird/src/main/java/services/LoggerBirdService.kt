@@ -70,7 +70,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var mediaRecorderAudio: MediaRecorder? = null
     private var state: Boolean = false
     private lateinit var filePathVideo: File
-    private lateinit var filePathAudio:File
+    private lateinit var filePathAudio: File
     private var isOpen = false
     private lateinit var fabOpen: Animation
     private lateinit var fabClose: Animation
@@ -116,6 +116,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         private lateinit var floating_action_button_audio: FloatingActionButton
         private lateinit var textView_counter_video: Chronometer
         private lateinit var textView_counter_audio: Chronometer
+        private lateinit var textView_video_size: TextView
+        private lateinit var textView_audio_size: TextView
         internal var controlServiceOnDestroyState: Boolean = false
         internal var floatingActionButtonLastDx: Float? = null
         internal var floatingActionButtonScreenShotLastDx: Float? = null
@@ -343,6 +345,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     view.findViewById(R.id.fragment_floating_action_button_audio)
                 textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
                 textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
+                textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
+                textView_audio_size = view.findViewById(R.id.fragment_textView_size_audio)
+
                 (floating_action_button_screenshot.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
                     150,
@@ -361,6 +366,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     0,
                     0
                 )
+                (textView_video_size.layoutParams as FrameLayout.LayoutParams).setMargins(
+                    0,
+                    300,
+                    0,
+                    0
+                )
                 (floating_action_button_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
                     450,
@@ -368,6 +379,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     0
                 )
                 (textView_counter_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                    0,
+                    450,
+                    0,
+                    0
+                )
+                (textView_audio_size.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
                     450,
                     0,
@@ -433,7 +450,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //                    }
 //                }
             }
-            floating_action_button_screenshot.setOnClickListener {
+            floating_action_button_screenshot.setSafeOnClickListener {
                 if (floating_action_button_screenshot.visibility == View.VISIBLE) {
                     if (!PaintActivity.controlPaintInPictureState) {
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
@@ -446,18 +463,19 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     }
                 }
             }
-            floating_action_button_audio.setOnClickListener {
+            floating_action_button_audio.setSafeOnClickListener {
                 if (floating_action_button_audio.visibility == View.VISIBLE) {
                     takeAudioRecording()
                 }
             }
-            textView_counter_audio.setOnClickListener {
+            textView_counter_audio.setSafeOnClickListener {
                 if (textView_counter_audio.visibility == View.VISIBLE) {
                     takeAudioRecording()
                 }
             }
 
-            floating_action_button_video.setOnClickListener {
+
+            floating_action_button_video.setSafeOnClickListener {
                 if (floating_action_button_video.visibility == View.VISIBLE) {
                     callVideoRecording(
                         requestCode = requestCode,
@@ -466,7 +484,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     )
                 }
             }
-            textView_counter_video.setOnClickListener {
+            textView_counter_video.setSafeOnClickListener {
                 if (textView_counter_video.visibility == View.VISIBLE) {
                     callVideoRecording(
                         requestCode = requestCode,
@@ -486,7 +504,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 floatingActionButtonVideo = floating_action_button_video,
                 floatingActionButtonAudio = floating_action_button_audio,
                 textViewCounterVideo = textView_counter_video,
-                textViewCounterAudio = textView_counter_audio
+                textViewCounterAudio = textView_counter_audio,
+                textViewVideoSize = textView_video_size,
+                textViewAudiosize = textView_audio_size
             )
         )
     }
@@ -524,8 +544,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             floating_action_button_screenshot.visibility = View.GONE
             floating_action_button_video.visibility = View.GONE
             textView_counter_video.visibility = View.GONE
+            textView_video_size.visibility = View.GONE
             floating_action_button_audio.visibility = View.GONE
             textView_counter_audio.visibility = View.GONE
+            textView_audio_size.visibility = View.GONE
 //            floating_action_button.setImageResource(R.drawable.)
         } else {
             isOpen = true
@@ -535,6 +557,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             floating_action_button_screenshot.animate().start()
             if (audioRecording) {
                 textView_counter_audio.visibility = View.VISIBLE
+                textView_audio_size.visibility = View.VISIBLE
             } else {
                 floating_action_button_audio.visibility = View.VISIBLE
             }
@@ -543,6 +566,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             floating_action_button_audio.animate().start()
             if (videoRecording) {
                 textView_counter_video.visibility = View.VISIBLE
+                textView_video_size.visibility = View.VISIBLE
             } else {
                 floating_action_button_video.visibility = View.VISIBLE
             }
@@ -694,12 +718,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         withContext(Dispatchers.Main) {
                             floating_action_button_audio.visibility = View.GONE
                             textView_counter_audio.visibility = View.VISIBLE
+                            textView_audio_size.visibility = View.VISIBLE
                             floating_action_button_audio.setImageResource(R.drawable.ic_mic_off_black_24dp)
                         }
                         audioRecording = true
                     } else {
                         withContext(Dispatchers.Main) {
                             textView_counter_audio.visibility = View.GONE
+                            textView_audio_size.visibility = View.GONE
                             floating_action_button_audio.visibility = View.VISIBLE
                             floating_action_button_audio.setImageResource(R.drawable.ic_mic_black_24dp)
                         }
@@ -790,6 +816,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             ).show()
                             videoChronometerStop()
                             textView_counter_video.visibility = View.GONE
+                            textView_video_size.visibility = View.GONE
                             floating_action_button_video.visibility = View.VISIBLE
                             floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
                         }
@@ -838,6 +865,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 floating_action_button_video.visibility = View.GONE
                 floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
                 textView_counter_video.visibility = View.VISIBLE
+                textView_video_size.visibility = View.VISIBLE
                 callEnqueue()
             }
             initRecorder()
@@ -854,33 +882,35 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun initRecorder() {
         try {
             coroutineCallVideoStarter.async {
-                mediaRecorderVideo!!.setAudioSource(MediaRecorder.AudioSource.MIC)
-                mediaRecorderVideo!!.setVideoSource(MediaRecorder.VideoSource.SURFACE)
-                mediaRecorderVideo!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-                val fileDirectory: File = context.filesDir
-                filePathVideo = File(
-                    fileDirectory,
-                    "logger_bird_video" + System.currentTimeMillis()
-                        .toString() + ".mp4"
-                )
-                mediaRecorderVideo!!.setOutputFile(filePathVideo.path)
-                mediaRecorderVideo!!.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
-                mediaRecorderVideo!!.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
-                mediaRecorderVideo!!.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-                mediaRecorderVideo!!.setVideoEncodingBitRate(1000000000)
-                mediaRecorderVideo!!.setVideoFrameRate(120)
+                if (mediaRecorderVideo != null) {
+                    mediaRecorderVideo?.setAudioSource(MediaRecorder.AudioSource.MIC)
+                    mediaRecorderVideo?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
+                    mediaRecorderVideo?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+                    val fileDirectory: File = context.filesDir
+                    filePathVideo = File(
+                        fileDirectory,
+                        "logger_bird_video" + System.currentTimeMillis()
+                            .toString() + ".mp4"
+                    )
+                    mediaRecorderVideo?.setOutputFile(filePathVideo.path)
+                    mediaRecorderVideo?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
+                    mediaRecorderVideo?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
+                    mediaRecorderVideo?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+                    mediaRecorderVideo?.setVideoEncodingBitRate(1000000000)
+                    mediaRecorderVideo?.setVideoFrameRate(120)
 //                val cameraProfileHigh=CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH)
 //                mediaRecorderVideo!!.setProfile(cameraProfileHigh)
-                val rotation: Int = (context as Activity).windowManager.defaultDisplay.rotation
-                val orientation: Int = ORIENTATIONS.get(rotation + 90)
-                mediaRecorderVideo!!.setOrientationHint(orientation)
-                withContext(Dispatchers.IO) {
-                    mediaRecorderVideo!!.prepare()
-                    mediaRecorderVideo!!.start()
-                    videoRecording = true
-                    videoChronometerStart()
-                    virtualDisplay = createVirtualDisplay()
-                    takeVideoFileSize()
+                    val rotation: Int = (context as Activity).windowManager.defaultDisplay.rotation
+                    val orientation: Int = ORIENTATIONS.get(rotation + 90)
+                    mediaRecorderVideo?.setOrientationHint(orientation)
+                    withContext(Dispatchers.IO) {
+                        mediaRecorderVideo?.prepare()
+                        mediaRecorderVideo?.start()
+                        videoRecording = true
+                        videoChronometerStart()
+                        virtualDisplay = createVirtualDisplay()
+                        takeVideoFileSize()
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -914,11 +944,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private suspend fun stopScreenRecord() {
         withContext(coroutineCallVideoStarter.coroutineContext) {
             if (videoRecording) {
-                mediaRecorderVideo!!.stop()
-                mediaRecorderVideo!!.reset()
+                if (mediaRecorderVideo != null) {
+                    mediaRecorderVideo?.stop()
+                    mediaRecorderVideo?.reset()
+                }
             }
             if (virtualDisplay != null) {
-                virtualDisplay!!.release()
+                virtualDisplay?.release()
             }
             destroyMediaProjection()
             stopForegroundServiceVideo()
@@ -1089,7 +1121,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     private fun videoChronometerReset() {
         try {
-            textView_counter_video.base = SystemClock.elapsedRealtime()
+            activity.runOnUiThread {
+                textView_counter_video.base = SystemClock.elapsedRealtime()
+            }
             pauseOffset = 0
         } catch (e: Exception) {
             e.printStackTrace()
@@ -1108,12 +1142,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 timerVideoTaskFileSize = object : TimerTask() {
                     override fun run() {
                         val fileSize = filePathVideo.length()
-                        val sizePrint =
-                            "File size:" + android.text.format.Formatter.formatShortFileSize(
+                        val sizePrintVideo =
+                            android.text.format.Formatter.formatShortFileSize(
                                 activity,
                                 fileSize
                             )
-                        Log.d("file_size_video", sizePrint)
+                        activity.runOnUiThread {
+                            textView_video_size.text = sizePrintVideo
+                        }
+                        Log.d("file_size_video", sizePrintVideo)
                     }
                 }
                 timerVideoFileSize!!.schedule(timerVideoTaskFileSize, 0, 1000)
@@ -1134,6 +1171,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             timerVideoFileSize?.cancel()
             timerVideoTaskFileSize = null
             timerVideoFileSize = null
+            activity.runOnUiThread {
+                textView_video_size.visibility = View.GONE
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -1151,12 +1191,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 timerAudioTaskFileSize = object : TimerTask() {
                     override fun run() {
                         val fileSize = filePathAudio.length()
-                        val sizePrint =
-                            "File size:" + android.text.format.Formatter.formatShortFileSize(
+                        val sizePrintAudio =
+                            android.text.format.Formatter.formatShortFileSize(
                                 activity,
                                 fileSize
                             )
-                        Log.d("file_size_audio", sizePrint)
+                        activity.runOnUiThread {
+                            textView_audio_size.text = sizePrintAudio
+                        }
+                        Log.d("file_size_audio", sizePrintAudio)
                     }
                 }
                 timerAudioFileSize!!.schedule(timerAudioTaskFileSize, 0, 1000)
@@ -1177,6 +1220,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             timerAudioFileSize?.cancel()
             timerAudioTaskFileSize = null
             timerAudioFileSize = null
+            activity.runOnUiThread {
+                textView_audio_size.visibility = View.GONE
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -1226,7 +1272,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     private fun audioChronometerReset() {
         try {
-            textView_counter_audio.base = SystemClock.elapsedRealtime()
+            activity.runOnUiThread {
+                textView_counter_audio.base = SystemClock.elapsedRealtime()
+            }
             pauseOffsetAudio = 0
         } catch (e: Exception) {
             e.printStackTrace()

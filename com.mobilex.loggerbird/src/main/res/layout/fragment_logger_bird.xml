@@ -6,7 +6,36 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     tools:context="fragments.FragmentLoggerBird">
-
+    <TextView
+        android:id="@+id/fragment_textView_size_video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_shape"
+        android:elevation="1dp"
+        android:gravity="center"
+        android:singleLine="true"
+        android:textColor="@color/secondaryColor"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        app:borderWidth="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/fragment_floating_action_button_video"
+        app:layout_constraintEnd_toEndOf="@id/fragment_floating_action_button_video"/>
+    <TextView
+        android:id="@+id/fragment_textView_size_audio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_shape"
+        android:elevation="1dp"
+        android:gravity="center"
+        android:singleLine="true"
+        android:textColor="@color/secondaryColor"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        app:borderWidth="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/fragment_floating_action_button_audio"
+        app:layout_constraintEnd_toEndOf="@id/fragment_floating_action_button_audio"/>
 
     <Chronometer
         android:id="@+id/fragment_textView_counter_video"
