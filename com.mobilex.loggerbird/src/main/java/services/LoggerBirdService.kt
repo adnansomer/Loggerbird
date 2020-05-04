@@ -97,7 +97,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var coroutineCallAudioCounter: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideoFileSize: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudioFileSize: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private var coroutineCallFeedback:CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var coroutineCallFeedback: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var counterVideo: Int = 0
     private var counterAudio: Int = 0
     private var timerVideo: Timer? = null
@@ -116,7 +116,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var viewFeedback: View
     private lateinit var floating_action_button_feedback: FloatingActionButton
     private lateinit var editText_feedback: EditText
-    private val fileLimit:Long = 10485760
+    private val fileLimit: Long = 10485760
     private lateinit var realmInstanceCheckBox: Realm
 
     //Static global variables:
@@ -1060,9 +1060,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 if (!isFabEnable) {
                     if (!isActivateDialogShown) {
                         //                    CookieBar.dismiss(this.activity)
-                        if (this::cookieBar.isInitialized) {
-                            (cookieBar.view.parent as ViewGroup).removeView(cookieBar.view)
-                        }
+//                        if (this::cookieBar.isInitialized) {
+//                            (cookieBar.view.parent as ViewGroup).removeView(cookieBar.view)
+//                        }
                         cookieBar = CookieBar.build(this.activity)
                             .setTitle(resources.getString(R.string.library_name))
                             .setMessage(resources.getString(R.string.logger_bird_floating_action_button_permission_message))
@@ -1174,7 +1174,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 activity,
                                 fileSize
                             )
-                        if(fileSize > fileLimit){
+                        if (fileSize > fileLimit) {
                             callVideoRecording(
                                 requestCode = requestCode,
                                 resultCode = resultCode,
@@ -1230,7 +1230,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 activity,
                                 fileSize
                             )
-                        if(fileSize > fileLimit){
+                        if (fileSize > fileLimit) {
                             takeAudioRecording()
                         }
                         activity.runOnUiThread {
@@ -1356,7 +1356,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                 windowManagerFeedback = activity.getSystemService(Context.WINDOW_SERVICE)!!
                 if (windowManagerFeedback != null) {
-                    windowManagerParamsFeedback.gravity = Gravity.BOTTOM
+//                    windowManagerParamsFeedback.gravity = Gravity.BOTTOM
                     (windowManagerFeedback as WindowManager).addView(
                         viewFeedback,
                         windowManagerParamsFeedback
@@ -1381,7 +1381,18 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun buttonClicksFeedback() {
+        val layoutFeedbackOnTouchListener: LayoutFeedbackOnTouchListener =
+            LayoutFeedbackOnTouchListener(
+                windowManager = (windowManagerFeedback as WindowManager),
+                windowManagerView = viewFeedback,
+                windowManagerParams = windowManagerParamsFeedback
+            )
+        (editText_feedback).setOnTouchListener(
+            layoutFeedbackOnTouchListener
+        )
+        floating_action_button_feedback.setOnTouchListener(layoutFeedbackOnTouchListener)
         floating_action_button_feedback.setSafeOnClickListener {
             sendFeedback()
         }
