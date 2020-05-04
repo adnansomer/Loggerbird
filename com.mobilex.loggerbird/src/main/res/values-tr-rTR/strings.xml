@@ -39,6 +39,8 @@
     <string name="audio_recording_finish">Ses kaydetme işlemi bitti!</string>
     <string name="screen_recording_start">Ekran kaydetme işlemi başladı!</string>
     <string name="screen_recording_finish">Ekran kaydetme işlemi bitti!</string>
+    <string name="feed_back_email_empty_text">Geri bildirim mesajınız boş olamaz!</string>
+    <string name="feed_back_email_success">Geri bildiriminiz için teşekkür ederiz!</string>
     <string name="logger_bird_floating_action_button_permission_message">LoggerBirdü çalıştırmak istermisiniz?</string>
     <string name="logger_bird_floating_action_button_activate">Çalıştır</string>
     <string name="logger_bird_floating_action_button_close_message">LoggerBird kapatıldı!</string>
@@ -53,4 +55,10 @@
     <string name="textView_delete_verification">Silmek istediğinizden emin misiniz?</string>
     <string name="textView_yes">Evet</string>
     <string name="textView_no">Hayır</string>
+    <!-- loggerbird_activate_popup-->
+    <string name="textView_action_dismiss">Bir daha bunu gösterme</string>
+    <string name="textView_action_activate">Aktive et</string>
+    <string name="checkBox_feedback_title">Geri bildirim veriniz!</string>
+    <!-- loggerbird_feedback-->
+    <string name="editText_feedback_title">Geri bildirim veriniz</string>
 </resources>
