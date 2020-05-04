@@ -40,11 +40,17 @@
     <string name="screen_recording_start">Screen recording started!</string>
     <string name="screen_recording_finish">Screen recording finished!</string>
     <string name="feed_back_email_empty_text">Your feedback message cannot be empty!</string>
-    <string name="feed_back_email_success">Thank you for your feedback!</string>
     <string name="logger_bird_floating_action_button_permission_message">Do you want to activate Loggerbird?</string>
     <string name="logger_bird_floating_action_button_activate">Activate</string>
     <string name="logger_bird_floating_action_button_close_message">Loggerbird is closed!</string>
     <string name="logger_bird_floating_action_button_open_message">Loggerbird is activated!</string>
+    <!-- EmailUtil -->
+    <string name="network_check_failure">Invalid network response!</string>
+    <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
+    <string name="email_send_failure">E-mail could not send because of a failure!</string>
+    <string name="feed_back_email_success">Thank you for your feedback!</string>
+    <string name="unhandled_exception_success">Unhandled exception detected,check your e-mail for details!</string>
+    <string name="log_details_success">Log details have been sent to your e-mail!</string>
 
     <!-- Layout:-->
     <!-- activity_paint_seek_view-->

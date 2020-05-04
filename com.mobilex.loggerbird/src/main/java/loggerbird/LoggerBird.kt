@@ -1988,6 +1988,7 @@ class LoggerBird : LifecycleObserver {
 //                                    attachRootView(rootView)
 //                                }
 //                            }
+                    callEnqueue()
                     if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
                         exceededFileLimitWriter(
                             stringBuilder = stringBuilderExceedFileWriterLimit,
@@ -2696,7 +2697,7 @@ class LoggerBird : LifecycleObserver {
          * Exception:
          * @throws exception if error occurs and prints error into logcat.
          */
-        private fun saveExceptionDetails() {
+        private suspend fun saveExceptionDetails() {
             if (stringBuilderException.isNotEmpty()) {
                 try {
                     fileDirectory = context.filesDir
@@ -2746,10 +2747,12 @@ class LoggerBird : LifecycleObserver {
                     }
                     if (uncaughtExceptionHandlerController) {
                         uncaughtExceptionHandlerController = false
-                        EmailUtil.sendUnhandledException(
-                            file = filePath,
-                            context = context
-                        )
+                        withContext(Dispatchers.IO){
+                            EmailUtil.sendUnhandledException(
+                                file = filePath,
+                                context = context
+                            )
+                        }
                         saveSessionIntoOldSessionFile()
                     }
                 } catch (e: Exception) {
