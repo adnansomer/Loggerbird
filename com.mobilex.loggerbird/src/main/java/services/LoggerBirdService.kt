@@ -304,18 +304,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     internal fun initializeFloatingActionButton(activity: Activity) {
         if (windowManager != null && this::view.isInitialized) {
             (windowManager as WindowManager).removeViewImmediate(view)
-//            CookieBar.build(activity)
-//                .setMessage(R.string.logger_bird_floating_action_button_close_message)
-//                .setSwipeToDismiss(true)
-//                .setBackgroundColor(R.color.colorAccent)
-//                .setDuration(1000)
-//                .show()
+
             CookieBar.build(activity)
                 .setCustomView(R.layout.loggerbird_close_popup)
                 .setCustomViewInitializer {
                     val textViewFeedBack = it.findViewById<TextView>(R.id.textView_feed_back_pop_up)
                     textViewFeedBack.setSafeOnClickListener {
                         initializeFeedBackLayout()
+                        CookieBar.dismiss(activity)
                     }
                 }
                 .setSwipeToDismiss(true)
@@ -1059,22 +1055,18 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             } else {
                 if (!isFabEnable) {
                     if (!isActivateDialogShown) {
-                        //                    CookieBar.dismiss(this.activity)
-                        if (this::cookieBar.isInitialized) {
-                            (cookieBar.view.parent as ViewGroup).removeView(cookieBar.view)
-                        }
                         cookieBar = CookieBar.build(this.activity)
                             .setTitle(resources.getString(R.string.library_name))
                             .setMessage(resources.getString(R.string.logger_bird_floating_action_button_permission_message))
                             .setCustomView(R.layout.loggerbird_activate_popup)
                             .setIcon(R.drawable.loggerbird)
+                            .setSwipeToDismiss(true)
+                            .setCookieListener { isActivateDialogShown = false }
                             .setBackgroundColor(R.color.colorAccent)
                             .setEnableAutoDismiss(false)
                             .setCustomViewInitializer(CookieBar.CustomViewInitializer() {
-                                val txtActivate =
-                                    it.findViewById<TextView>(R.id.btn_action_activate)
+                                val txtActivate = it.findViewById<TextView>(R.id.btn_action_activate)
                                 val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
-//                                checkBoxFeedback = it.findViewById(R.id.checkBox_feed_back)
                                 txtActivate.setSafeOnClickListener {
                                     initializeFloatingActionButton(activity = activity)
                                     CookieBar.dismiss(activity)
@@ -1084,11 +1076,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                     CookieBar.dismiss(activity)
                                 }
                             })
-                            .setSwipeToDismiss(true)
-                            .setAction(
-                                R.string.logger_bird_floating_action_button_activate
-                            ) { initializeFloatingActionButton(activity = this.activity) }
-                            .setCookieListener { isActivateDialogShown = false }
                             .show()
                         isActivateDialogShown = true
                     }
