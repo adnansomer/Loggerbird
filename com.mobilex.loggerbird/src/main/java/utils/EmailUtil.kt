@@ -10,10 +10,14 @@ import android.widget.Toast
 import constants.Constants
 import loggerbird.LoggerBird
 import authentication.SMTPAuthenticator
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage
 import com.google.firebase.ml.naturallanguage.smartreply.FirebaseTextMessage
 import com.google.firebase.ml.naturallanguage.smartreply.SmartReplySuggestion
 import com.google.firebase.ml.naturallanguage.smartreply.SmartReplySuggestionResult
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions
 import com.mobilex.loggerbird.R
 import exception.LoggerBirdException
 import kotlinx.coroutines.*
@@ -426,16 +430,66 @@ internal class EmailUtil {
     private fun smartReplyFeedback(context: Context, message: String, toastMessage: String) {
         try {
             coroutineCallSmartReply.async {
-                conversation.add(
-                    FirebaseTextMessage.createForRemoteUser(
-                        message,
-                        System.currentTimeMillis(),
-                        Build.ID
-                    )
+                val languageIdentifier =
+                    FirebaseNaturalLanguage.getInstance().languageIdentification
+                languageIdentifier.identifyLanguage(message).addOnSuccessListener {
+                    when (it) {
+                        "und" -> {
+                            (context as Activity).runOnUiThread {
+                                Toast.makeText(
+                                    context,
+                                    toastMessage,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                        "en" -> {
+                            smartReplyMessage(
+                                message = message,
+                                context = context,
+                                toastMessage = toastMessage
+                            )
+                        }
+                        else -> {
+                            translateMessage(
+                                languageCode = it,
+                                message = message,
+                                context = context,
+                                toastMessage = toastMessage
+                            )
+                        }
+                    }
+
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.smartReplyFeedbackTag)
+        }
+    }
+
+    private fun smartReplyMessage(message: String, context: Context, toastMessage: String) {
+        try {
+            conversation.add(
+                FirebaseTextMessage.createForRemoteUser(
+                    message,
+                    System.currentTimeMillis(),
+                    Build.ID
                 )
-                val smartReply = FirebaseNaturalLanguage.getInstance().smartReply
-                smartReply.suggestReplies(conversation).addOnSuccessListener {
-                    if (it.status == SmartReplySuggestionResult.STATUS_NOT_SUPPORTED_LANGUAGE) {
+            )
+            val smartReply = FirebaseNaturalLanguage.getInstance().smartReply
+            smartReply.suggestReplies(conversation).addOnSuccessListener {
+                if (it.status == SmartReplySuggestionResult.STATUS_NOT_SUPPORTED_LANGUAGE) {
+                    (context as Activity).runOnUiThread {
+                        Toast.makeText(
+                            context,
+                            toastMessage,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else if (it.status == SmartReplySuggestionResult.STATUS_SUCCESS) {
+                    if (it.suggestions.isEmpty()) {
                         (context as Activity).runOnUiThread {
                             Toast.makeText(
                                 context,
@@ -443,8 +497,9 @@ internal class EmailUtil {
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
-                    } else if (it.status == SmartReplySuggestionResult.STATUS_SUCCESS) {
-                        val maxConfidenceMessage: String = it.suggestions[0].text
+                    } else {
+                        val maxConfidenceMessage: String =
+                            it.suggestions[(0 until it.suggestions.size).random()].text
                         (context as Activity).runOnUiThread {
                             Toast.makeText(
                                 context,
@@ -453,8 +508,7 @@ internal class EmailUtil {
                             ).show()
                         }
                     }
-                    smartReply.close()
-                }.addOnFailureListener {
+                }else if (it.status == SmartReplySuggestionResult.STATUS_NO_REPLY){
                     (context as Activity).runOnUiThread {
                         Toast.makeText(
                             context,
@@ -462,13 +516,67 @@ internal class EmailUtil {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                    smartReply.close()
                 }
+                smartReply.close()
+            }.addOnFailureListener {
+                (context as Activity).runOnUiThread {
+                    Toast.makeText(
+                        context,
+                        toastMessage,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                smartReply.close()
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.smartReplyFeedbackTag)
+        }
+    }
+
+    private fun translateMessage(
+        languageCode: String,
+        message: String,
+        context: Context,
+        toastMessage: String
+    ) {
+        try {
+            val options: FirebaseTranslatorOptions =
+                FirebaseTranslatorOptions.Builder().setSourceLanguage(
+                    FirebaseTranslateLanguage.languageForLanguageCode(languageCode)!!
+                ).setTargetLanguage(FirebaseTranslateLanguage.EN)
+                    .build()
+            val translator = FirebaseNaturalLanguage.getInstance().getTranslator(options)
+            translator.downloadModelIfNeeded().addOnSuccessListener {
+                translator.translate(message).addOnSuccessListener {
+                    smartReplyMessage(
+                        message = it,
+                        context = context,
+                        toastMessage = toastMessage
+                    )
+                    translator.close()
+                }.addOnFailureListener {
+                    translator.close()
+                    LoggerBird.callEnqueue()
+                    LoggerBird.callExceptionDetails(
+                        exception = it,
+                        tag = Constants.translateDownloaderTag
+                    )
+
+                }
+            }.addOnFailureListener {
+                translator.close()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(
+                    exception = it,
+                    tag = Constants.translateDownloaderTag
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.translateTag)
         }
     }
 }
