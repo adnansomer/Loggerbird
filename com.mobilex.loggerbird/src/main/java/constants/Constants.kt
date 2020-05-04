@@ -60,10 +60,11 @@ internal class Constants {
         const val paintFabAnimationTag:String = "Paint Fab Animation"
         const val floatingActionButtonPaintTag:String = "Floating Action Button Paint"
         const val videoRecordingCounterTag:String = "Video Recording Counter"
-        const val audioRecordingCounterTag:String = "Audio Recording Counter"
-        const val shakerTag:String = "Shake"
         const val videoRecordingFileSizeTag:String = "Video Recording File Size"
+        const val audioRecordingCounterTag:String = "Audio Recording Counter"
         const val audioRecordingFileSizeTag:String = "Audio Recording File Size"
-
+        const val shakerTag:String = "Shake"
+        const val feedbackTag:String = "Feedback"
+        const val checkboxRealmTag:String = "Checkbox Realm"
     }
 }

@@ -4,9 +4,11 @@ import android.content.Context
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
+import android.widget.Toast
 import constants.Constants
 import loggerbird.LoggerBird
 import authentication.SMTPAuthenticator
+import com.mobilex.loggerbird.R
 import exception.LoggerBirdException
 import kotlinx.coroutines.*
 import java.io.File
@@ -66,7 +68,9 @@ internal class EmailUtil {
                             systemTime()
                         )
                         sendSingleEmail(
-                            file = file
+                            subject = "log_details",
+                            file = file,
+                            context = context
                         )
                         Log.d(
                             "email_time",
@@ -77,11 +81,25 @@ internal class EmailUtil {
                         }
                         LoggerBird.callEnqueue()
                     } else {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                context,
+                                R.string.internet_connection_check_failure,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                         throw LoggerBirdException(
                             Constants.internetErrorMessage
                         )
                     }
                 } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            context,
+                            R.string.network_check_failure,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                     throw LoggerBirdException(
                         Constants.networkErrorMessage
                     )
@@ -89,6 +107,11 @@ internal class EmailUtil {
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     progressBar.visibility = View.GONE
+                    Toast.makeText(
+                        context,
+                        R.string.email_send_failure,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
@@ -108,7 +131,7 @@ internal class EmailUtil {
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws LoggerBirdException if internet or network check gives exceptions.
          */
-        internal fun sendUnhandledException(
+        internal suspend fun sendUnhandledException(
             file: File,
             context: Context
         ) {
@@ -124,7 +147,9 @@ internal class EmailUtil {
                             systemTime()
                         )
                         sendSingleEmail(
-                            file = file
+                            subject = "unhandled_log_details",
+                            file = file,
+                            context = context
                         )
                         Log.d(
                             "email_time",
@@ -133,20 +158,104 @@ internal class EmailUtil {
 
 
                     } else {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                context,
+                                R.string.internet_connection_check_failure,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                         throw LoggerBirdException(
                             Constants.internetErrorMessage
                         )
                     }
                 } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            context,
+                            R.string.network_check_failure,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                     throw LoggerBirdException(
                         Constants.networkErrorMessage
                     )
                 }
             } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        R.string.email_send_failure,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
             }
+        }
+
+
+        internal suspend fun sendFeedbackEmail(context: Context, message: String) {
+            try {
+                val internetConnectionUtil = InternetConnectionUtil()
+                if (internetConnectionUtil.checkNetworkConnection(
+                        context = context
+                    )
+                ) {
+                    if (internetConnectionUtil.makeHttpRequest() == 200) {
+                        Log.d(
+                            "email_time",
+                            systemTime()
+                        )
+                        sendSingleEmail(
+                            message = message,
+                            subject = "feed_back_details",
+                            context = context
+                        )
+                        Log.d(
+                            "email_time",
+                            systemTime()
+                        )
+
+
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                context,
+                                R.string.internet_connection_check_failure,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        throw LoggerBirdException(
+                            Constants.internetErrorMessage
+                        )
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            context,
+                            R.string.network_check_failure,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    throw LoggerBirdException(
+                        Constants.networkErrorMessage
+                    )
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        R.string.email_send_failure,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                e.printStackTrace()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
+            }
+
         }
 
         //dummy method probably deleted in the future
@@ -170,7 +279,7 @@ internal class EmailUtil {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun initializeEmail() {
+        private suspend fun initializeEmail(context: Context, subject: String? = null) {
             try {
                 properties = Properties()
                 properties["mail.transport.protocol"] = "smtp"
@@ -194,10 +303,17 @@ internal class EmailUtil {
                 multiPart = MimeMultipart()
                 mimeMessage.setFrom(InternetAddress("appcaesars@gmail.com"))
                 mimeMessage.addRecipients(Message.RecipientType.TO, "appcaesars@gmail.com")
-                mimeMessage.subject = "log_details"
+                mimeMessage.subject = subject
                 mimeBodyPart = MimeBodyPart()
                 transport.connect()
             } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        R.string.email_send_failure,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
@@ -218,26 +334,70 @@ internal class EmailUtil {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private fun sendSingleEmail(file: File? = null) {
+        private suspend fun sendSingleEmail(
+            context: Context,
+            subject: String,
+            message: String? = null,
+            file: File? = null
+        ) {
             try {
-                initializeEmail()
-                dataSource = FileDataSource(file?.path)
-                mimeBodyPart.dataHandler = DataHandler(
-                    dataSource
-                )
-                mimeBodyPart.fileName = file?.name
-                multiPart.addBodyPart(
-                    mimeBodyPart
-                )
-                mimeMessage.setContent(
-                    multiPart
-                )
-                transport.sendMessage(
-                    mimeMessage,
-                    mimeMessage.getRecipients(Message.RecipientType.TO)
-                )
+                initializeEmail(subject = subject, context = context)
+                if (file != null) {
+                    dataSource = FileDataSource(file.path)
+                    mimeBodyPart.dataHandler = DataHandler(
+                        dataSource
+                    )
+                    mimeBodyPart.fileName = file.name
+                    multiPart.addBodyPart(
+                        mimeBodyPart
+                    )
+                    mimeMessage.setContent(
+                        multiPart
+                    )
+                } else {
+                    mimeMessage.setContent(message, "text/plain")
+                }
+                if (transport.isConnected) {
+                    transport.sendMessage(
+                        mimeMessage,
+                        mimeMessage.getRecipients(Message.RecipientType.TO)
+                    )
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            context,
+                            R.string.email_send_failure,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
                 transport.close()
+                var toastMessage: String? = null
+                when (subject) {
+                    "feed_back_details" -> toastMessage =
+                        context.resources.getString(R.string.feed_back_email_success)
+                    "unhandled_log_details" -> toastMessage =
+                        context.resources.getString(R.string.unhandled_exception_success)
+                    "log_details" -> toastMessage =
+                        context.resources.getString(R.string.log_details_success)
+                }
+                if (toastMessage != null) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            context,
+                            toastMessage,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
             } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        R.string.email_send_failure,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
