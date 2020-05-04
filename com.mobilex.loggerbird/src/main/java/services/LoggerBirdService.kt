@@ -290,7 +290,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             CookieBar.build(activity)
                 .setMessage(R.string.logger_bird_floating_action_button_close_message)
                 .setSwipeToDismiss(true)
-                .setBackgroundColor(R.color.colorAccent)
+                .setBackgroundColor(R.color.colorFab)
                 .setDuration(1000)
                 .show()
             isFabEnable = false
@@ -1018,9 +1018,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 }
                             })
                             .setSwipeToDismiss(true)
-                            .setAction(
-                                R.string.logger_bird_floating_action_button_activate
-                            ) { initializeFloatingActionButton(activity = this.activity) }
+                            .setAction(R.string.logger_bird_floating_action_button_activate) { initializeFloatingActionButton(activity = this.activity) }
                             .setCookieListener { isActivateDialogShown = false }
                             .show()
                         isActivateDialogShown = true
