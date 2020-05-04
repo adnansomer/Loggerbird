@@ -2,6 +2,7 @@ package utils
 
 import android.app.Activity
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
@@ -380,8 +381,22 @@ internal class EmailUtil {
                             context.resources.getString(R.string.log_details_success)
                     }
                     if (toastMessage != null) {
-                        val emailUtil = EmailUtil()
-                        emailUtil.smartReplyFeedback(context = context , subject =  subject , toastMessage = toastMessage)
+                        if (message != null) {
+                            val emailUtil = EmailUtil()
+                            emailUtil.smartReplyFeedback(
+                                context = context,
+                                message = message,
+                                toastMessage = toastMessage
+                            )
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    context,
+                                    R.string.email_send_failure,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
                     }
                 } else {
                     withContext(Dispatchers.Main) {
@@ -408,13 +423,14 @@ internal class EmailUtil {
         }
     }
 
-    private fun smartReplyFeedback(context: Context, subject: String, toastMessage: String) {
+    private fun smartReplyFeedback(context: Context, message: String, toastMessage: String) {
         try {
             coroutineCallSmartReply.async {
                 conversation.add(
-                    FirebaseTextMessage.createForLocalUser(
-                        subject,
-                        System.currentTimeMillis()
+                    FirebaseTextMessage.createForRemoteUser(
+                        message,
+                        System.currentTimeMillis(),
+                        Build.ID
                     )
                 )
                 val smartReply = FirebaseNaturalLanguage.getInstance().smartReply
@@ -428,7 +444,7 @@ internal class EmailUtil {
                             ).show()
                         }
                     } else if (it.status == SmartReplySuggestionResult.STATUS_SUCCESS) {
-                        val maxConfidenceMessage:String= it.suggestions[0].text
+                        val maxConfidenceMessage: String = it.suggestions[0].text
                         (context as Activity).runOnUiThread {
                             Toast.makeText(
                                 context,
@@ -437,6 +453,7 @@ internal class EmailUtil {
                             ).show()
                         }
                     }
+                    smartReply.close()
                 }.addOnFailureListener {
                     (context as Activity).runOnUiThread {
                         Toast.makeText(
@@ -445,6 +462,7 @@ internal class EmailUtil {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
+                    smartReply.close()
                 }
             }
         } catch (e: java.lang.Exception) {
