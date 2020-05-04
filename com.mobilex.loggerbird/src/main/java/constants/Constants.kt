@@ -66,6 +66,7 @@ internal class Constants {
         const val shakerTag:String = "Shake"
         const val feedbackTag:String = "Feedback"
         const val feedbackOnTouchTag:String = "Feedback On Touch"
+        const val smartReplyFeedbackTag:String = "Smart Reply Feedback"
         const val checkboxRealmTag:String = "Checkbox Realm"
     }
 }

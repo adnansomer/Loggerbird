@@ -26,11 +26,16 @@ import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
 import android.view.animation.Animation
+import android.view.textclassifier.ConversationAction
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage
+import com.google.firebase.ml.naturallanguage.smartreply.FirebaseTextMessage
+import com.google.firebase.ml.naturallanguage.smartreply.SmartReplySuggestion
+import com.google.firebase.ml.naturallanguage.smartreply.SmartReplySuggestionResult
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import constants.Constants
@@ -118,7 +123,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var editText_feedback: EditText
     private val fileLimit: Long = 10485760
     private lateinit var realmInstanceCheckBox: Realm
-
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View

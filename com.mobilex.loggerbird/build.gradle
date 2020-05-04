@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'realm-android'
-
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 29
@@ -19,6 +19,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    aaptOptions {
+        noCompress "tflite"
     }
     buildTypes {
         release {
@@ -72,10 +75,12 @@ dependencies {
     implementation 'com.irozon.sneaker:sneaker:2.0.0'
     implementation 'org.aviran.cookiebar2:cookiebar2:1.1.3'
     implementation 'com.jakewharton.rxbinding2:rxbinding-kotlin:2.2.0'
-
+    implementation 'com.google.firebase:firebase-ml-natural-language:22.0.0'
+    implementation 'com.google.firebase:firebase-ml-natural-language-smart-reply-model:20.0.7'
     
 }
 repositories {
     maven { url "https://jitpack.io" }
     mavenCentral()
+    google()
 }

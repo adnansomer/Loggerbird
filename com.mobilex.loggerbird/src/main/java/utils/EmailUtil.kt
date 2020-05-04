@@ -1,5 +1,6 @@
 package utils
 
+import android.app.Activity
 import android.content.Context
 import android.util.Log
 import android.view.View
@@ -8,6 +9,10 @@ import android.widget.Toast
 import constants.Constants
 import loggerbird.LoggerBird
 import authentication.SMTPAuthenticator
+import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage
+import com.google.firebase.ml.naturallanguage.smartreply.FirebaseTextMessage
+import com.google.firebase.ml.naturallanguage.smartreply.SmartReplySuggestion
+import com.google.firebase.ml.naturallanguage.smartreply.SmartReplySuggestionResult
 import com.mobilex.loggerbird.R
 import exception.LoggerBirdException
 import kotlinx.coroutines.*
@@ -28,6 +33,9 @@ import javax.mail.internet.MimeMultipart
 
 //EmailUtil class is used for sending desired logfile as email.
 internal class EmailUtil {
+    private var conversation = ArrayList<FirebaseTextMessage>()
+    private var coroutineCallSmartReply: CoroutineScope = CoroutineScope(Dispatchers.IO)
+
     companion object {
         //Static global variables.
         private lateinit var properties: Properties
@@ -362,6 +370,19 @@ internal class EmailUtil {
                         mimeMessage,
                         mimeMessage.getRecipients(Message.RecipientType.TO)
                     )
+                    var toastMessage: String? = null
+                    when (subject) {
+                        "feed_back_details" -> toastMessage =
+                            context.resources.getString(R.string.feed_back_email_success)
+                        "unhandled_log_details" -> toastMessage =
+                            context.resources.getString(R.string.unhandled_exception_success)
+                        "log_details" -> toastMessage =
+                            context.resources.getString(R.string.log_details_success)
+                    }
+                    if (toastMessage != null) {
+                        val emailUtil = EmailUtil()
+                        emailUtil.smartReplyFeedback(context = context , subject =  subject , toastMessage = toastMessage)
+                    }
                 } else {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
@@ -372,24 +393,6 @@ internal class EmailUtil {
                     }
                 }
                 transport.close()
-                var toastMessage: String? = null
-                when (subject) {
-                    "feed_back_details" -> toastMessage =
-                        context.resources.getString(R.string.feed_back_email_success)
-                    "unhandled_log_details" -> toastMessage =
-                        context.resources.getString(R.string.unhandled_exception_success)
-                    "log_details" -> toastMessage =
-                        context.resources.getString(R.string.log_details_success)
-                }
-                if (toastMessage != null) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            context,
-                            toastMessage,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
@@ -402,6 +405,52 @@ internal class EmailUtil {
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
             }
+        }
+    }
+
+    private fun smartReplyFeedback(context: Context, subject: String, toastMessage: String) {
+        try {
+            coroutineCallSmartReply.async {
+                conversation.add(
+                    FirebaseTextMessage.createForLocalUser(
+                        subject,
+                        System.currentTimeMillis()
+                    )
+                )
+                val smartReply = FirebaseNaturalLanguage.getInstance().smartReply
+                smartReply.suggestReplies(conversation).addOnSuccessListener {
+                    if (it.status == SmartReplySuggestionResult.STATUS_NOT_SUPPORTED_LANGUAGE) {
+                        (context as Activity).runOnUiThread {
+                            Toast.makeText(
+                                context,
+                                toastMessage,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    } else if (it.status == SmartReplySuggestionResult.STATUS_SUCCESS) {
+                        val maxConfidenceMessage:String= it.suggestions[0].text
+                        (context as Activity).runOnUiThread {
+                            Toast.makeText(
+                                context,
+                                maxConfidenceMessage,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }.addOnFailureListener {
+                    (context as Activity).runOnUiThread {
+                        Toast.makeText(
+                            context,
+                            toastMessage,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.smartReplyFeedbackTag)
         }
     }
 }
