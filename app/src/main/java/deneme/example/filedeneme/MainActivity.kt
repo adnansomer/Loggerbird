@@ -202,15 +202,18 @@ class MainActivity : AppCompatActivity() {
 //
 //        }
         button_add.setOnClickListener() {
+
             val filePathTest: File = File(this.filesDir, "logger_bird_details.txt")
 
             //recyclerViewList.removeAt(0)
             //recyclerViewList.add(RecyclerModel("hello how are you"))
-            adapter.notifyDataSetChanged()
-            LoggerBird.callComponentDetails(
-                view = recycler_view,
-                resources = recycler_view.resources
-            )
+//            adapter.notifyDataSetChanged()
+//            LoggerBird.callComponentDetails(
+//                view = recycler_view,
+//                resources = recycler_view.resources
+//            )
+            LoggerBird.callComponentDetails(view = button_add,resources = button_add.resources)
+            LoggerBird.callEmailSender(context = this)
 //            for (x in 1..5) {
 //                LoggerBird.callComponentDetails(view = button_add, resources = button_add.resources)
 //                LoggerBird.callLifeCycleDetails()

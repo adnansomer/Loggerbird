@@ -35,6 +35,8 @@ import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
+import io.realm.Realm
+import io.realm.RealmConfiguration
 import kotlinx.coroutines.*
 import listeners.*
 import loggerbird.LoggerBird
@@ -114,6 +116,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var viewFeedback: View
     private lateinit var floating_action_button_feedback: FloatingActionButton
     private lateinit var editText_feedback: EditText
+    private val fileLimit:Long = 10485760
+    private lateinit var realmInstanceCheckBox: Realm
 
     //Static global variables:
     internal companion object {
@@ -300,16 +304,24 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     internal fun initializeFloatingActionButton(activity: Activity) {
         if (windowManager != null && this::view.isInitialized) {
             (windowManager as WindowManager).removeViewImmediate(view)
+//            CookieBar.build(activity)
+//                .setMessage(R.string.logger_bird_floating_action_button_close_message)
+//                .setSwipeToDismiss(true)
+//                .setBackgroundColor(R.color.colorAccent)
+//                .setDuration(1000)
+//                .show()
             CookieBar.build(activity)
-                .setMessage(R.string.logger_bird_floating_action_button_close_message)
+                .setCustomView(R.layout.loggerbird_close_popup)
+                .setCustomViewInitializer {
+                    val textViewFeedBack = it.findViewById<TextView>(R.id.textView_feed_back_pop_up)
+                    textViewFeedBack.setSafeOnClickListener {
+                        initializeFeedBackLayout()
+                    }
+                }
                 .setSwipeToDismiss(true)
                 .setBackgroundColor(R.color.colorAccent)
-                .setDuration(1000)
+                .setDuration(5000)
                 .show()
-//            if (checkBoxFeedback.isChecked) {
-//
-//            }
-            initializeFeedBackLayout()
             windowManager = null
             isFabEnable = false
         } else {
@@ -1062,7 +1074,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 val txtActivate =
                                     it.findViewById<TextView>(R.id.btn_action_activate)
                                 val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
-                                checkBoxFeedback = it.findViewById(R.id.checkBox_feed_back)
+//                                checkBoxFeedback = it.findViewById(R.id.checkBox_feed_back)
                                 txtActivate.setSafeOnClickListener {
                                     initializeFloatingActionButton(activity = activity)
                                     CookieBar.dismiss(activity)
@@ -1154,6 +1166,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             try {
                 timerVideoFileSize = Timer()
                 timerVideoTaskFileSize = object : TimerTask() {
+                    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
                     override fun run() {
                         val fileSize = filePathVideo.length()
                         val sizePrintVideo =
@@ -1161,6 +1174,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 activity,
                                 fileSize
                             )
+                        if(fileSize > fileLimit){
+                            callVideoRecording(
+                                requestCode = requestCode,
+                                resultCode = resultCode,
+                                data = dataIntent
+                            )
+                        }
                         activity.runOnUiThread {
                             textView_video_size.text = sizePrintVideo
                         }
@@ -1210,6 +1230,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 activity,
                                 fileSize
                             )
+                        if(fileSize > fileLimit){
+                            takeAudioRecording()
+                        }
                         activity.runOnUiThread {
                             textView_audio_size.text = sizePrintAudio
                         }
@@ -1359,25 +1382,26 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     private fun buttonClicksFeedback() {
-        floating_action_button_feedback.setOnClickListener {
+        floating_action_button_feedback.setSafeOnClickListener {
             sendFeedback()
         }
     }
 
     private fun sendFeedback() {
         if (editText_feedback.text.trim().isNotEmpty()) {
+            removeFeedBackLayout()
             coroutineCallFeedback.async {
                 EmailUtil.sendFeedbackEmail(
                     context = context,
                     message = editText_feedback.text.toString()
                 )
-                withContext(Dispatchers.Main){
-                    Toast.makeText(
-                        context,
-                        R.string.feed_back_email_success,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+//                withContext(Dispatchers.Main){
+//                    Toast.makeText(
+//                        context,
+//                        R.string.feed_back_email_success,
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
             }
         } else {
             Toast.makeText(
@@ -1387,6 +1411,28 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             ).show()
         }
     }
+
+//    private fun implementCheckBoxRealm(){
+//        try {
+//            Realm.init(context)
+//            val realmConfig =
+//                RealmConfiguration.Builder().name("logger_bird_checkbox.realm").build()
+//            Realm.setDefaultConfiguration(realmConfig)
+//            realmInstanceCheckBox = Realm.getDefaultInstance()
+//            realmInstanceCheckBox.beginTransaction()
+//            if(checkBoxFeedback.isChecked){
+//                realmInstanceCheckBox.insertOrUpdate(feedbackModel(controlCheckBox = true))
+//            }else{
+//                realmInstanceCheckBox.insertOrUpdate(feedbackModel(controlCheckBox = false))
+//            }
+//            realmInstanceCheckBox.commitTransaction()
+//            realmInstanceCheckBox.close()
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            LoggerBird.callEnqueue()
+//            LoggerBird.callExceptionDetails(exception = e , tag = Constants.checkboxRealmTag)
+//        }
+//    }
 
 
 //    private fun videoCounterStart() {

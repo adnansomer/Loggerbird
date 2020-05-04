@@ -40,11 +40,18 @@
     <string name="screen_recording_start">Ekran kaydetme işlemi başladı!</string>
     <string name="screen_recording_finish">Ekran kaydetme işlemi bitti!</string>
     <string name="feed_back_email_empty_text">Geri bildirim mesajınız boş olamaz!</string>
-    <string name="feed_back_email_success">Geri bildiriminiz için teşekkür ederiz!</string>
     <string name="logger_bird_floating_action_button_permission_message">LoggerBirdü çalıştırmak istermisiniz?</string>
     <string name="logger_bird_floating_action_button_activate">Çalıştır</string>
     <string name="logger_bird_floating_action_button_close_message">LoggerBird kapatıldı!</string>
     <string name="logger_bird_floating_action_button_open_message">Loggerbird açıldı!</string>
+    <!-- EmailUtil -->
+    <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
+    <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
+    <string name="email_send_failure">E-mail bir hatadan dolayı gönderilemedi!</string>
+    <string name="feed_back_email_success">Geri bildiriminiz için teşekkür ederiz!</string>
+    <string name="unhandled_exception_success">Beklenmeyen bir hata gözlemlenildi,detayları için e-mailinizi kontrol ediniz!</string>
+    <string name="log_details_success">log detayları e-mailinize gönderilmiştir!</string>
+
     <!-- Layout:-->
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça genişliği ayarla</string>
