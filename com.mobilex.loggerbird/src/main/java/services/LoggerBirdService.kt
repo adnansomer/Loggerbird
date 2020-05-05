@@ -439,12 +439,16 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         val textViewSessionTime =
                             it.findViewById<TextView>(R.id.textView_session_time_pop_up)
                         textViewSessionTime.text =
-                            resources.getString(R.string.total_session_time) + sessionFormatter.format(totalSessionTime()) + "\n" + resources.getString(R.string.last_session_time) + sessionFormatter.format(lastSessionTime())
+                            resources.getString(R.string.total_session_time) + sessionFormatter.format(
+                                totalSessionTime()
+                            ) + "\n" + resources.getString(R.string.last_session_time) + sessionFormatter.format(
+                                lastSessionTime()
+                            )
                     }
                     .setBackgroundColor(R.color.colorAccent)
                     .setSwipeToDismiss(true)
                     .setEnableAutoDismiss(true)
-                    .setDuration(1000)
+                    .setDuration(3000)
                     .show()
                 isFabEnable = true
             } else {
@@ -894,18 +898,22 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         this@LoggerBirdService.dataIntent = data
                         startScreenRecording()
                     } else {
-                        stopScreenRecord()
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(
-                                context,
-                                R.string.screen_recording_finish,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            videoCounterStop()
-                            textView_counter_video.visibility = View.GONE
-                            textView_video_size.visibility = View.GONE
-                            floating_action_button_video.visibility = View.VISIBLE
-                            floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
+                        if (this@LoggerBirdService::filePathVideo.isInitialized) {
+                            if (this@LoggerBirdService.filePathVideo.length() > 0) {
+                                stopScreenRecord()
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.screen_recording_finish,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    videoCounterStop()
+                                    textView_counter_video.visibility = View.GONE
+                                    textView_video_size.visibility = View.GONE
+                                    floating_action_button_video.visibility = View.VISIBLE
+                                    floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
+                                }
+                            }
                         }
                     }
                 } catch (e: Exception) {
@@ -1500,13 +1508,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun dailySessionTimeRecorder() {
         sessionTimeEnd = System.currentTimeMillis()
         val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
-        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
         with(sharedPref.edit()) {
             putLong(
                 "session_time",
                 sharedPref.getLong("session_time", 0) + sessionDuration
             )
-           commit()
+            commit()
         }
         with(sharedPref.edit()) {
             putLong("last_session_time", sessionDuration)
