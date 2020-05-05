@@ -471,16 +471,16 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 if (floating_action_button_audio.visibility == View.VISIBLE) {
                     takeAudioRecording()
                     floating_action_button.animate()
-                        .rotationBy(180F)
-                        .setDuration(100)
+                        .rotation(360F)
+                        .setDuration(400)
                         .scaleX(1F)
                         .scaleY(1F)
                         .withEndAction {
                             floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
                             floating_action_button.animate()
-                                .rotationBy(180F)   //Complete the rest of the rotation
-                                .setDuration(100)
-                                .scaleX(1F)              //Scaling back to what it was
+                                .rotation(360F)
+                                .setDuration(400)//Complete the rest of the rotation
+                                .scaleX(1F)
                                 .scaleY(1F)
                                 .start();
                         }
@@ -492,8 +492,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 if (textView_counter_audio.visibility == View.VISIBLE) {
                     takeAudioRecording()
                     floating_action_button.animate()
-                        .rotationBy(180F)
-                        .setDuration(100)
+                        .rotation(360F)
+                        .setDuration(400)
                         .scaleX(1F)
                         .scaleY(1F)
                         .withEndAction {
@@ -502,9 +502,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             }else{
                                 floating_action_button.setImageResource(R.drawable.loggerbird)}
                             floating_action_button.animate()
-                                .rotationBy(180F)   //Complete the rest of the rotation
-                                .setDuration(100)
-                                .scaleX(1F)              //Scaling back to what it was
+                                .rotation(360F)   //Complete the rest of the rotation
+                                .setDuration(400)
+                                .scaleX(1F)
                                 .scaleY(1F)
                                 .start();
                         }
@@ -521,17 +521,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         data = dataIntent
                     )
                     floating_action_button.animate()
-                        .rotationBy(180F)
-                        .setDuration(100)
+                        .rotation(360F)
+                        .setDuration(400)
                         .scaleX(1F)
                         .scaleY(1F)
                         .withEndAction {
                             floating_action_button.setBackgroundColor(getColor(R.color.secondaryColor))
                             floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
                             floating_action_button.animate()
-                                .rotationBy(180F)   //Complete the rest of the rotation
-                                .setDuration(100)
-                                .scaleX(1F)              //Scaling back to what it was
+                                .rotation(360F)   //Complete the rest of the rotation
+                                .setDuration(400)
+                                .scaleX(1F)
                                 .scaleY(1F)
                                 .start();
                         }
@@ -546,8 +546,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         data = dataIntent
                     )
                     floating_action_button.animate()
-                        .rotationBy(180F)
-                        .setDuration(100)
+                        .rotation(360F)
+                        .setDuration(400)
                         .scaleX(1F)
                         .scaleY(1F)
                         .withEndAction {
@@ -556,9 +556,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             }else{
                                 floating_action_button.setImageResource(R.drawable.loggerbird)}
                             floating_action_button.animate()
-                                .rotationBy(180F)   //Complete the rest of the rotation
-                                .setDuration(100)
-                                .scaleX(1F)              //Scaling back to what it was
+                                .rotation(360F)   //Complete the rest of the rotation
+                                .setDuration(400)
+                                .scaleX(1F)
                                 .scaleY(1F)
                                 .start();
                         }
@@ -1275,7 +1275,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                 windowManagerFeedback = activity.getSystemService(Context.WINDOW_SERVICE)!!
                 if (windowManagerFeedback != null) {
-                    windowManagerParamsFeedback.gravity = Gravity.BOTTOM
+//                    windowManagerParamsFeedback.gravity = Gravity.BOTTOM
                     (windowManagerFeedback as WindowManager).addView(
                         viewFeedback,
                         windowManagerParamsFeedback
@@ -1300,13 +1300,25 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun buttonClicksFeedback() {
+        val layoutFeedbackOnTouchListener: LayoutFeedbackOnTouchListener =
+            LayoutFeedbackOnTouchListener(
+                windowManager = (windowManagerFeedback as WindowManager),
+                windowManagerView = viewFeedback,
+                windowManagerParams = windowManagerParamsFeedback
+            )
+        (editText_feedback).setOnTouchListener(
+            layoutFeedbackOnTouchListener
+        )
+        floating_action_button_feedback.setOnTouchListener(layoutFeedbackOnTouchListener)
         floating_action_button_feedback.setSafeOnClickListener {
             sendFeedback()
         }
         floating_action_button_feed_close.setSafeOnClickListener {
-            removeFeedBackLayout()
+          removeFeedBackLayout()
         }
+
     }
 
     private fun sendFeedback() {
