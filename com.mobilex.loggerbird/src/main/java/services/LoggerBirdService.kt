@@ -875,18 +875,22 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         this@LoggerBirdService.dataIntent = data
                         startScreenRecording()
                     } else {
-                        stopScreenRecord()
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(
-                                context,
-                                R.string.screen_recording_finish,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            videoCounterStop()
-                            textView_counter_video.visibility = View.GONE
-                            textView_video_size.visibility = View.GONE
-                            floating_action_button_video.visibility = View.VISIBLE
-                            floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
+                        if (this@LoggerBirdService::filePathVideo.isInitialized) {
+                            if (this@LoggerBirdService.filePathVideo.length() > 0) {
+                                stopScreenRecord()
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.screen_recording_finish,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    videoCounterStop()
+                                    textView_counter_video.visibility = View.GONE
+                                    textView_video_size.visibility = View.GONE
+                                    floating_action_button_video.visibility = View.VISIBLE
+                                    floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
+                                }
+                            }
                         }
                     }
                 } catch (e: Exception) {
@@ -929,7 +933,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 textView_counter_video.visibility = View.VISIBLE
                 textView_video_size.visibility = View.VISIBLE
                 floating_action_button.animate()
-                        .rotationBy(360F)
+                        .rotation(360F)
                         .setDuration(200)
                         .scaleX(1F)
                         .scaleY(1F)
@@ -937,11 +941,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             floating_action_button.setBackgroundColor(getColor(R.color.secondaryColor))
                             floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
                             floating_action_button.animate()
-                                .rotationBy(0F)
+                                .rotation(360F)
                                 .setDuration(200)
                                 .scaleX(1F)
                                 .scaleY(1F)
-                                .start();
+                                .start() //review
                         }
                         .start()
 

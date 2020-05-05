@@ -49,6 +49,7 @@ class PaintActivity : Activity() {
     private var controlButtonVisibility: Boolean = true
     private var onStopCalled = false
     private var pipModeChange = false
+    private var lastTime: Long = 0
 
     companion object {
         private lateinit var activity: Activity
@@ -530,6 +531,7 @@ class PaintActivity : Activity() {
     ) {
 
         if (isInPictureInPictureMode) {
+
             pipModeChange = true
             paint_floating_action_button.visibility = View.GONE
             paint_floating_action_button_save.visibility = View.GONE
@@ -540,7 +542,12 @@ class PaintActivity : Activity() {
             paint_floating_action_button_erase.visibility = View.GONE
         } else {
             if (onStopCalled) {
-                finish()
+                val current = System.currentTimeMillis()
+                if ((current - lastTime) > 2500L) {
+                    finish()
+                    lastTime = current
+
+                }
                 fabScreenshotAnimation()
             }
             pipModeChange = true
@@ -576,10 +583,11 @@ class PaintActivity : Activity() {
                     .setDuration(200)
                     .scaleX(1F)
                     .scaleY(1F)
-                    .start();
+                    .start()
             }
             .start()
     }
+
 
     override fun onStop() {
         super.onStop()
