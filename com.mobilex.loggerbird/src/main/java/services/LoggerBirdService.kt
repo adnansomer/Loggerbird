@@ -473,10 +473,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     floating_action_button.animate()
                         .rotation(360F)
                         .setDuration(400)
+                        .scaleX(1F)
+                        .scaleY(1F)
                         .withEndAction {
                             floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
                             floating_action_button.animate()
-                                .rotation(-360F)   //Complete the rest of the rotation
+                                .rotation(360F)
+                                .setDuration(400)//Complete the rest of the rotation
+                                .scaleX(1F)
+                                .scaleY(1F)
                                 .start();
                         }
                         .start()
@@ -489,14 +494,18 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     floating_action_button.animate()
                         .rotation(360F)
                         .setDuration(400)
+                        .scaleX(1F)
+                        .scaleY(1F)
                         .withEndAction {
                             if(videoRecording){
                                 floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
                             }else{
                                 floating_action_button.setImageResource(R.drawable.loggerbird)}
                             floating_action_button.animate()
-                                .rotation(-360F)   //Complete the rest of the rotation
+                                .rotation(360F)   //Complete the rest of the rotation
                                 .setDuration(400)
+                                .scaleX(1F)
+                                .scaleY(1F)
                                 .start();
                         }
                         .start()
@@ -514,12 +523,16 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     floating_action_button.animate()
                         .rotation(360F)
                         .setDuration(400)
+                        .scaleX(1F)
+                        .scaleY(1F)
                         .withEndAction {
                             floating_action_button.setBackgroundColor(getColor(R.color.secondaryColor))
                             floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
                             floating_action_button.animate()
-                                .rotation(-360F)   //Complete the rest of the rotation
+                                .rotation(360F)   //Complete the rest of the rotation
                                 .setDuration(400)
+                                .scaleX(1F)
+                                .scaleY(1F)
                                 .start();
                         }
                         .start()
@@ -535,14 +548,18 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     floating_action_button.animate()
                         .rotation(360F)
                         .setDuration(400)
+                        .scaleX(1F)
+                        .scaleY(1F)
                         .withEndAction {
                             if(audioRecording){
                                 floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
                             }else{
                                 floating_action_button.setImageResource(R.drawable.loggerbird)}
                             floating_action_button.animate()
-                                .rotation(-360F)   //Complete the rest of the rotation
+                                .rotation(360F)   //Complete the rest of the rotation
                                 .setDuration(400)
+                                .scaleX(1F)
+                                .scaleY(1F)
                                 .start();
                         }
                         .start()
