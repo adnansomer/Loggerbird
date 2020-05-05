@@ -6,30 +6,40 @@
     android:layout_gravity="bottom"
     android:background="@color/colorAccent"
     android:gravity="center_vertical"
-    android:orientation="horizontal"
+    android:orientation="vertical"
+    android:paddingBottom="16dp"
     android:paddingLeft="16dp"
-    android:paddingTop="40dp"
     android:paddingRight="16dp"
-    android:paddingBottom="16dp">
+    android:paddingTop="35dp">
 
-
-    <TextView
-        android:id="@+id/textView_close_pop_up"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:gravity="start"
-        android:text="@string/logger_bird_floating_action_button_close_message"
-        android:textColor="@android:color/white"
-        android:textSize="18sp" />
+        android:layout_marginTop="15dp"
+        android:weightSum="2">
 
-    <TextView
-        android:id="@+id/textView_feed_back_pop_up"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/checkBox_feedback_title"
-        android:textColor="@android:color/white"
-        android:textSize="18sp" />
+        <TextView
+            android:id="@+id/textView_close_pop_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="start"
+            android:text="@string/logger_bird_floating_action_button_close_message"
+            android:textColor="@android:color/white"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textView_feed_back_pop_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:text="@string/checkBox_feedback_title"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
 </LinearLayout>
-
 
