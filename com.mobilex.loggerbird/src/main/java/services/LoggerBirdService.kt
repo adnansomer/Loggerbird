@@ -32,6 +32,9 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
+import androidx.preference.Preference
+import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
@@ -99,7 +102,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var coroutineCallAudioCounter: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideoFileSize: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudioFileSize: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private var coroutineCallFeedback:CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var coroutineCallFeedback: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var counterVideo: Int = 0
     private var counterAudio: Int = 0
     private var timerVideo: Timer? = null
@@ -118,8 +121,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var floating_action_button_feedback: FloatingActionButton
     private lateinit var floating_action_button_feed_close: FloatingActionButton
     private lateinit var editText_feedback: EditText
-    private val fileLimit:Long = 10485760
+    private val fileLimit: Long = 10485760
     private var timeWhenStopped: Long = 0
+    private var sessionTimeStart: Long? = null
+    private var sessionTimeEnd: Long? = null
+    private var sessionFormatter: SimpleDateFormat = SimpleDateFormat("mm:ss", Locale.getDefault())
 
     //Static global variables:
     internal companion object {
@@ -263,6 +269,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         try {
+            dailySessionTimeRecorder()
             controlServiceOnDestroyState = true
             LoggerBird.takeLifeCycleDetails()
         } catch (e: Exception) {
@@ -373,43 +380,43 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                 (floating_action_button_screenshot.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
-                    150,
+                    450,
                     0,
                     0
                 )
                 (floating_action_button_video.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
-                    300,
+                    150,
                     0,
                     0
                 )
                 (textView_counter_video.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
-                    300,
+                    150,
                     0,
                     0
                 )
                 (textView_video_size.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
-                    300,
+                    150,
                     0,
                     0
                 )
                 (floating_action_button_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
-                    450,
+                    300,
                     0,
                     0
                 )
                 (textView_counter_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
-                    450,
+                    300,
                     0,
                     0
                 )
                 (textView_audio_size.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
-                    450,
+                    300,
                     0,
                     0
                 )
@@ -427,7 +434,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     buttonClicks()
                 }
                 CookieBar.build(activity)
-                    .setMessage(R.string.logger_bird_floating_action_button_open_message)
+                    .setCustomView(R.layout.loggerbird_start_popup)
+                    .setCustomViewInitializer {
+                        val textViewSessionTime =
+                            it.findViewById<TextView>(R.id.textView_session_time_pop_up)
+                        textViewSessionTime.text =
+                            resources.getString(R.string.total_session_time) + sessionFormatter.format(totalSessionTime()) + "\n" + resources.getString(R.string.last_session_time) + sessionFormatter.format(lastSessionTime())
+                    }
                     .setBackgroundColor(R.color.colorAccent)
                     .setSwipeToDismiss(true)
                     .setEnableAutoDismiss(true)
@@ -497,10 +510,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         .scaleX(1F)
                         .scaleY(1F)
                         .withEndAction {
-                            if(videoRecording){
+                            if (videoRecording) {
                                 floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
-                            }else{
-                                floating_action_button.setImageResource(R.drawable.loggerbird)}
+                            } else {
+                                floating_action_button.setImageResource(R.drawable.loggerbird)
+                            }
                             floating_action_button.animate()
                                 .rotation(360F)   //Complete the rest of the rotation
                                 .setDuration(400)
@@ -551,10 +565,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         .scaleX(1F)
                         .scaleY(1F)
                         .withEndAction {
-                            if(audioRecording){
+                            if (audioRecording) {
                                 floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
-                            }else{
-                                floating_action_button.setImageResource(R.drawable.loggerbird)}
+                            } else {
+                                floating_action_button.setImageResource(R.drawable.loggerbird)
+                            }
                             floating_action_button.animate()
                                 .rotation(360F)   //Complete the rest of the rotation
                                 .setDuration(400)
@@ -953,7 +968,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     mediaRecorderVideo?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
                     mediaRecorderVideo?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
                     val fileDirectory: File = context.filesDir
-                    filePathVideo = File(fileDirectory, "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4")
+                    filePathVideo = File(
+                        fileDirectory,
+                        "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4"
+                    )
                     mediaRecorderVideo?.setOutputFile(filePathVideo.path)
                     mediaRecorderVideo?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
                     mediaRecorderVideo?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
@@ -1088,6 +1106,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         try {
             Log.d("shake", "shake fired!!")
             if (Settings.canDrawOverlays(this.activity)) {
+                sessionTimeStart = System.currentTimeMillis()
                 initializeFloatingActionButton(activity = this.activity)
             } else {
                 if (!isFabEnable) {
@@ -1102,7 +1121,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             .setBackgroundColor(R.color.colorAccent)
                             .setEnableAutoDismiss(false)
                             .setCustomViewInitializer(CookieBar.CustomViewInitializer() {
-                                val txtActivate = it.findViewById<TextView>(R.id.btn_action_activate)
+                                val txtActivate =
+                                    it.findViewById<TextView>(R.id.btn_action_activate)
                                 val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
                                 txtActivate.setSafeOnClickListener {
                                     initializeFloatingActionButton(activity = activity)
@@ -1145,7 +1165,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 activity,
                                 fileSize
                             )
-                        if(fileSize > fileLimit){
+                        if (fileSize > fileLimit) {
                             callVideoRecording(
                                 requestCode = requestCode,
                                 resultCode = resultCode,
@@ -1202,7 +1222,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 activity,
                                 fileSize
                             )
-                        if(fileSize > fileLimit){
+                        if (fileSize > fileLimit) {
                             takeAudioRecording()
                         }
                         activity.runOnUiThread {
@@ -1280,8 +1300,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         viewFeedback,
                         windowManagerParamsFeedback
                     )
-                    floating_action_button_feedback = viewFeedback.findViewById(R.id.floating_action_button_feed)
-                    floating_action_button_feed_close = viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
+                    floating_action_button_feedback =
+                        viewFeedback.findViewById(R.id.floating_action_button_feed)
+                    floating_action_button_feed_close =
+                        viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
                     editText_feedback = viewFeedback.findViewById(R.id.editText_feed_back)
                     buttonClicksFeedback()
                 }
@@ -1316,7 +1338,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             sendFeedback()
         }
         floating_action_button_feed_close.setSafeOnClickListener {
-          removeFeedBackLayout()
+            removeFeedBackLayout()
         }
 
     }
@@ -1474,6 +1496,34 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             )
         }
     }
+
+    private fun dailySessionTimeRecorder() {
+        sessionTimeEnd = System.currentTimeMillis()
+        val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
+        with(sharedPref.edit()) {
+            putLong(
+                "session_time",
+                sharedPref.getLong("session_time", 0) + sessionDuration
+            )
+           commit()
+        }
+        with(sharedPref.edit()) {
+            putLong("last_session_time", sessionDuration)
+            commit()
+        }
+    }
+
+    private fun totalSessionTime(): Long {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        return sharedPref.getLong("session_time", 0)
+    }
+
+    private fun lastSessionTime(): Long {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        return sharedPref.getLong("last_session_time", 0)
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {
