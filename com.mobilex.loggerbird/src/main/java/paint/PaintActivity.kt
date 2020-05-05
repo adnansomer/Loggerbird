@@ -186,8 +186,6 @@ class PaintActivity : Activity() {
         )
         paint_floating_action_button.setOnClickListener {
             animationVisibility()
-//            paint_floating_action_button.isExpanded = !paint_floating_action_button.isExpanded
-//            paint_floating_action_button.isActivated = paint_floating_action_button.isExpanded
         }
         paint_floating_action_button_save.setOnClickListener {
             if (requestPermission()) {
@@ -409,6 +407,7 @@ class PaintActivity : Activity() {
 //                    snackBarFileSaving.dismiss()
 //                }.show()
                 Toast.makeText(activity,  resources.getText(R.string.snackbar_successfully_saved), Toast.LENGTH_SHORT).show()
+                fabScreenshotAnimation()
                 finish()
                 overridePendingTransition(R.anim.no_animation,R.anim.slide_in_bottom)
 
@@ -515,11 +514,13 @@ class PaintActivity : Activity() {
         Toast.makeText(activity, R.string.drawing_cancelled_message, Toast.LENGTH_SHORT).show()
         overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
         finish()
+        fabScreenshotAnimation()
 
         if(pipModeChange){
             Toast.makeText(activity,  R.string.drawing_cancelled_message, Toast.LENGTH_SHORT).show()
             overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
             finish()
+            fabScreenshotAnimation()
         }
     }
 
@@ -540,6 +541,7 @@ class PaintActivity : Activity() {
         } else {
             if (onStopCalled) {
                 finish()
+                fabScreenshotAnimation()
             }
             pipModeChange = true
             paint_floating_action_button.visibility = View.VISIBLE
@@ -552,11 +554,39 @@ class PaintActivity : Activity() {
         }
     }
 
+    private fun fabScreenshotAnimation(){
+        LoggerBirdService.floating_action_button.animate()
+            .rotationBy(360F)
+            .setDuration(200)
+            .scaleX(1F)
+            .scaleY(1F)
+            .withEndAction {
+                when {
+                    LoggerBirdService.audioRecording -> {
+                        LoggerBirdService.floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
+                    }
+                    LoggerBirdService.videoRecording -> (
+                            LoggerBirdService.floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
+                            )
+                    else -> {
+                        LoggerBirdService.floating_action_button.setImageResource(R.drawable.loggerbird)}
+                }
+                LoggerBirdService.floating_action_button.animate()
+                    .rotationBy(0F)
+                    .setDuration(200)
+                    .scaleX(1F)
+                    .scaleY(1F)
+                    .start();
+            }
+            .start()
+    }
+
     override fun onStop() {
         super.onStop()
         onStopCalled = true
         if(LoggerBirdService.controlFloatingActionButtonView()){
             LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
+            LoggerBirdService.screenshotDrawing = false
         }
     }
 
