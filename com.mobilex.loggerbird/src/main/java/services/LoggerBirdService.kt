@@ -471,17 +471,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 if (floating_action_button_audio.visibility == View.VISIBLE) {
                     takeAudioRecording()
                     floating_action_button.animate()
-                        .rotationBy(180F)
-                        .setDuration(100)
-                        .scaleX(1F)
-                        .scaleY(1F)
+                        .rotation(360F)
+                        .setDuration(400)
                         .withEndAction {
                             floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
                             floating_action_button.animate()
-                                .rotationBy(180F)   //Complete the rest of the rotation
-                                .setDuration(100)
-                                .scaleX(1F)              //Scaling back to what it was
-                                .scaleY(1F)
+                                .rotation(-360F)   //Complete the rest of the rotation
                                 .start();
                         }
                         .start()
@@ -492,20 +487,16 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 if (textView_counter_audio.visibility == View.VISIBLE) {
                     takeAudioRecording()
                     floating_action_button.animate()
-                        .rotationBy(180F)
-                        .setDuration(100)
-                        .scaleX(1F)
-                        .scaleY(1F)
+                        .rotation(360F)
+                        .setDuration(400)
                         .withEndAction {
                             if(videoRecording){
                                 floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
                             }else{
                                 floating_action_button.setImageResource(R.drawable.loggerbird)}
                             floating_action_button.animate()
-                                .rotationBy(180F)   //Complete the rest of the rotation
-                                .setDuration(100)
-                                .scaleX(1F)              //Scaling back to what it was
-                                .scaleY(1F)
+                                .rotation(-360F)   //Complete the rest of the rotation
+                                .setDuration(400)
                                 .start();
                         }
                         .start()
@@ -521,18 +512,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         data = dataIntent
                     )
                     floating_action_button.animate()
-                        .rotationBy(180F)
-                        .setDuration(100)
-                        .scaleX(1F)
-                        .scaleY(1F)
+                        .rotation(360F)
+                        .setDuration(400)
                         .withEndAction {
                             floating_action_button.setBackgroundColor(getColor(R.color.secondaryColor))
                             floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
                             floating_action_button.animate()
-                                .rotationBy(180F)   //Complete the rest of the rotation
-                                .setDuration(100)
-                                .scaleX(1F)              //Scaling back to what it was
-                                .scaleY(1F)
+                                .rotation(-360F)   //Complete the rest of the rotation
+                                .setDuration(400)
                                 .start();
                         }
                         .start()
@@ -546,20 +533,16 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         data = dataIntent
                     )
                     floating_action_button.animate()
-                        .rotationBy(180F)
-                        .setDuration(100)
-                        .scaleX(1F)
-                        .scaleY(1F)
+                        .rotation(360F)
+                        .setDuration(400)
                         .withEndAction {
                             if(audioRecording){
                                 floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
                             }else{
                                 floating_action_button.setImageResource(R.drawable.loggerbird)}
                             floating_action_button.animate()
-                                .rotationBy(180F)   //Complete the rest of the rotation
-                                .setDuration(100)
-                                .scaleX(1F)              //Scaling back to what it was
-                                .scaleY(1F)
+                                .rotation(-360F)   //Complete the rest of the rotation
+                                .setDuration(400)
                                 .start();
                         }
                         .start()
@@ -1275,7 +1258,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                 windowManagerFeedback = activity.getSystemService(Context.WINDOW_SERVICE)!!
                 if (windowManagerFeedback != null) {
-                    windowManagerParamsFeedback.gravity = Gravity.BOTTOM
+//                    windowManagerParamsFeedback.gravity = Gravity.BOTTOM
                     (windowManagerFeedback as WindowManager).addView(
                         viewFeedback,
                         windowManagerParamsFeedback
@@ -1315,6 +1298,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         floating_action_button_feedback.setSafeOnClickListener {
             sendFeedback()
         }
+        floating_action_button_feed_close.setSafeOnClickListener {
+          removeFeedBackLayout()
+        }
+
     }
 
     private fun sendFeedback() {
