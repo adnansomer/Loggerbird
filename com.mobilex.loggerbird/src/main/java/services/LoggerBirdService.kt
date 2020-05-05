@@ -1300,12 +1300,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun buttonClicksFeedback() {
+        val layoutFeedbackOnTouchListener: LayoutFeedbackOnTouchListener =
+            LayoutFeedbackOnTouchListener(
+                windowManager = (windowManagerFeedback as WindowManager),
+                windowManagerView = viewFeedback,
+                windowManagerParams = windowManagerParamsFeedback
+            )
+        (editText_feedback).setOnTouchListener(
+            layoutFeedbackOnTouchListener
+        )
+        floating_action_button_feedback.setOnTouchListener(layoutFeedbackOnTouchListener)
         floating_action_button_feedback.setSafeOnClickListener {
             sendFeedback()
-        }
-        floating_action_button_feed_close.setSafeOnClickListener {
-            removeFeedBackLayout()
         }
     }
 
