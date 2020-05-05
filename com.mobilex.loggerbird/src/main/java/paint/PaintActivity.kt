@@ -27,6 +27,7 @@ import androidx.core.app.ActivityCompat
 import com.divyanshu.colorseekbar.ColorSeekBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
+import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import constants.Constants
 import kotlinx.android.synthetic.main.activity_paint.*
@@ -40,6 +41,7 @@ import kotlinx.coroutines.async
 import listeners.FloatingActionButtonPaintOnTouchListener
 import loggerbird.LoggerBird
 import services.LoggerBirdService
+import java.util.concurrent.TimeUnit
 
 
 class PaintActivity : Activity() {
@@ -248,23 +250,29 @@ class PaintActivity : Activity() {
             val messageTextView: TextView =
                 snackView.findViewById(R.id.message_text_view) as TextView
             messageTextView.text = resources.getString(R.string.snackbar_delete_verification)
+
             val textViewYes: TextView = snackView.findViewById(R.id.snackbar_yes)
             textViewYes.text = resources.getString(R.string.snackbar_yes)
-            textViewYes.setOnClickListener {
+            textViewYes.setSafeOnClickListener {
+
                 val snackbarYes: Snackbar = Snackbar.make(it, resources.getString(R.string.snackbar_delete_success), Snackbar.LENGTH_SHORT)
                 snackbarYes.setAction(resources.getString(R.string.snackbar_dismiss)) {
                     snackbarYes.dismiss()
                 }.show()
+
+
                 paintView.clearAllPaths()
                 if (paintView.eraserEnabled) {
                     paintView.disableEraser()
                     paintView.eraserEnabled = false
                     paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
                 }
+
             }
+
             val textViewNo: TextView = snackView.findViewById(R.id.snackbar_no)
             textViewNo.text =  resources.getString(R.string.snackbar_no)
-            textViewNo.setOnClickListener {
+            textViewNo.setSafeOnClickListener {
                 val snackBarNo: Snackbar = Snackbar.make(it,  resources.getString(R.string.snackbar_cancelled), Snackbar.LENGTH_SHORT)
                 snackBarNo.setAction(resources.getString(R.string.snackbar_dismiss)) {
                     snackBarNo.dismiss()
@@ -280,6 +288,14 @@ class PaintActivity : Activity() {
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
         }
     }
+
+    @SuppressLint("CheckResult")
+    fun View.setSafeOnClickListener(onClick: (View) -> Unit) {
+        RxView.clicks(this).throttleFirst(2000, TimeUnit.MILLISECONDS).subscribe {
+            onClick(this)
+        }
+    }
+
 
 
     private fun requestPermission(): Boolean {
@@ -321,6 +337,9 @@ class PaintActivity : Activity() {
             })
             colorPickerDialog.setPositiveButton(resources.getString(R.string.snackbar_apply)) { dialog, _ ->
                 run {
+                    if(selectedColor == 0){
+                        selectedColor = paintView.brushColor
+                    }
                     paintView.setBrushColor(selectedColor)
                     dialog.dismiss()
                 }

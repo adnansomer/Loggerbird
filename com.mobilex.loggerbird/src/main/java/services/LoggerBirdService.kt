@@ -933,7 +933,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 textView_counter_video.visibility = View.VISIBLE
                 textView_video_size.visibility = View.VISIBLE
                 floating_action_button.animate()
-                        .rotation(360F)
+                        .rotationBy(360F)
                         .setDuration(200)
                         .scaleX(1F)
                         .scaleY(1F)
@@ -941,7 +941,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             floating_action_button.setBackgroundColor(getColor(R.color.secondaryColor))
                             floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
                             floating_action_button.animate()
-                                .rotation(360F)
+                                .rotationBy(0F)
                                 .setDuration(200)
                                 .scaleX(1F)
                                 .scaleY(1F)
