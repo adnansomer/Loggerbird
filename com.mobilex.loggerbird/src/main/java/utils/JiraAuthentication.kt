@@ -4,10 +4,12 @@ import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
 import com.atlassian.jira.rest.client.api.domain.Issue
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
+import constants.Constants
 import io.atlassian.util.concurrent.Promise
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import loggerbird.LoggerBird
 import java.net.URI
 
 class JiraAuthentication {
@@ -23,6 +25,8 @@ class JiraAuthentication {
                 Log.d("issue",issue.description!!)
             } catch (e: Exception) {
                 e.printStackTrace()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(exception = e , tag = Constants.jiraAuthenticationtag)
             }
         }
     }
