@@ -17,6 +17,14 @@ android {
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -31,6 +39,17 @@ android {
     }
     aaptOptions {
         noCompress "tflite"
+    }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/jersey-module-version'
     }
 
 }
@@ -66,5 +85,4 @@ dependencies {
     implementation 'com.eightbitlab:blurview:1.6.3'
     implementation 'com.irozon.sneaker:sneaker:2.0.0'
     implementation 'com.jakewharton.rxbinding2:rxbinding-kotlin:2.2.0'
-
 }

@@ -51,6 +51,7 @@ import org.aviran.cookiebar2.CookieBar
 import org.w3c.dom.Text
 import paint.PaintActivity
 import utils.EmailUtil
+import utils.JiraAuthentication
 import utils.LinkedBlockingQueueUtil
 import java.io.File
 import java.text.SimpleDateFormat
@@ -217,6 +218,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         ORIENTATIONS.append(Surface.ROTATION_270, 180)
         loggerBirdService = this
         Log.d("service", "service_init")
+        val jiraAuthentication = JiraAuthentication()
+        jiraAuthentication.callJiraIssue()
     }
 
     /**
