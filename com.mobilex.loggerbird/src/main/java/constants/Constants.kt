@@ -69,6 +69,7 @@ internal class Constants {
         const val smartReplyFeedbackTag:String = "Smart Reply Feedback"
         const val translateTag:String = "Translator"
         const val translateDownloaderTag:String = "Translator Downloader"
+        const val jiraAuthenticationtag:String = "Jira Authentication"
         const val checkboxRealmTag:String = "Checkbox Realm"
     }
 }
