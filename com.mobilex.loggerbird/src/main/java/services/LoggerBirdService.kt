@@ -27,6 +27,8 @@ import android.view.*
 import android.view.animation.Animation
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.preference.Preference
+import androidx.preference.PreferenceManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -113,6 +115,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var floating_action_button_feed_close: FloatingActionButton
     private lateinit var editText_feedback: EditText
     private val fileLimit:Long = 10485760
+    private var sessionTimeStart: Long? = null
+    private var sessionTimeEnd: Long? = null
+    private var sessionFormatter: SimpleDateFormat = SimpleDateFormat("mm:ss", Locale.getDefault())
+
 
     //Static global variables:
     internal companion object {
@@ -255,6 +261,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         try {
+            dailySessionTimeRecorder()
             controlServiceOnDestroyState = true
             LoggerBird.takeLifeCycleDetails()
         } catch (e: Exception) {
@@ -415,13 +422,24 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     buttonClicks()
                 }
                 CookieBar.build(activity)
-                    .setMessage(R.string.logger_bird_floating_action_button_open_message)
+                    .setCustomView(R.layout.loggerbird_start_popup)
+                    .setCustomViewInitializer {
+                        val textViewSessionTime =
+                            it.findViewById<TextView>(R.id.textView_session_time_pop_up)
+                        textViewSessionTime.text =
+                            resources.getString(R.string.total_session_time) + sessionFormatter.format(
+                                totalSessionTime()
+                            ) + "\n" + resources.getString(R.string.last_session_time) + sessionFormatter.format(
+                                lastSessionTime()
+                            )
+                    }
                     .setBackgroundColor(R.color.colorAccent)
                     .setSwipeToDismiss(true)
                     .setEnableAutoDismiss(true)
-                    .setDuration(1000)
+                    .setDuration(3000)
                     .show()
                 isFabEnable = true
+
             } else {
                 checkDrawOtherAppPermission(activity = (context as Activity))
             }
@@ -1454,6 +1472,33 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             )
         }
     }
+
+    private fun dailySessionTimeRecorder() {
+        sessionTimeEnd = System.currentTimeMillis()
+        if(sessionTimeEnd!=null&&sessionTimeStart!=null){
+            val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
+            val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
+            with(sharedPref.edit()) {
+                putLong("session_time", sharedPref.getLong("session_time", 0) + sessionDuration)
+                commit()
+            }
+            with(sharedPref.edit()) {
+                putLong("last_session_time", sessionDuration)
+                commit()
+            }
+        }
+    }
+
+    private fun totalSessionTime(): Long {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        return sharedPref.getLong("session_time", 0)
+    }
+
+    private fun lastSessionTime(): Long {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        return sharedPref.getLong("last_session_time", 0)
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {

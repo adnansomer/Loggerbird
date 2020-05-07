@@ -29,10 +29,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
-import com.mooduplabs.debuggit.DebuggIt
 import constants.Constants
-import io.mehow.squashit.CredentialsProvider
-import io.mehow.squashit.SquashItConfigurator
 import kotlinx.android.synthetic.main.activity_paint.*
 import kotlinx.android.synthetic.main.activity_paint_save_dialog.view.*
 import kotlinx.android.synthetic.main.activity_paint_seek_view.view.*
