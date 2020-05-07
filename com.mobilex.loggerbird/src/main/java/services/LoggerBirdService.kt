@@ -115,7 +115,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var floating_action_button_feed_close: FloatingActionButton
     private lateinit var editText_feedback: EditText
     private val fileLimit:Long = 10485760
-    private var sessionTimeStart: Long? = null
+    private var sessionTimeStart: Long? = System.currentTimeMillis()
     private var sessionTimeEnd: Long? = null
     private var sessionFormatter: SimpleDateFormat = SimpleDateFormat("mm:ss", Locale.getDefault())
 
@@ -1308,7 +1308,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                 windowManagerFeedback = activity.getSystemService(Context.WINDOW_SERVICE)!!
                 if (windowManagerFeedback != null) {
-                    windowManagerParamsFeedback.gravity = Gravity.BOTTOM
+//                    windowManagerParamsFeedback.gravity = Gravity.BOTTOM
                     (windowManagerFeedback as WindowManager).addView(
                         viewFeedback,
                         windowManagerParamsFeedback
@@ -1333,14 +1333,29 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
+
+
+    @SuppressLint("ClickableViewAccessibility")
     private fun buttonClicksFeedback() {
+        val layoutFeedbackOnTouchListener: LayoutFeedbackOnTouchListener =
+            LayoutFeedbackOnTouchListener(
+                windowManager = (windowManagerFeedback as WindowManager),
+                windowManagerView = viewFeedback,
+                windowManagerParams = windowManagerParamsFeedback
+            )
+        (editText_feedback).setOnTouchListener(
+            layoutFeedbackOnTouchListener
+        )
+        floating_action_button_feedback.setOnTouchListener(layoutFeedbackOnTouchListener)
         floating_action_button_feedback.setSafeOnClickListener {
             sendFeedback()
         }
         floating_action_button_feed_close.setSafeOnClickListener {
             removeFeedBackLayout()
         }
+
     }
+
 
     private fun sendFeedback() {
         if (editText_feedback.text.trim().isNotEmpty()) {
