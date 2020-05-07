@@ -117,6 +117,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var counterFormatter: SimpleDateFormat = SimpleDateFormat("mm:ss", Locale.getDefault())
     private var fileSizeFormatter: Formatter = Formatter()
     private lateinit var cookieBar: CookieBar
+    private var cookieBarStart: CookieBar? = null
     private lateinit var checkBoxFeedback: CheckBox
     private lateinit var viewFeedback: View
     private lateinit var floating_action_button_feedback: FloatingActionButton
@@ -316,7 +317,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     internal fun initializeFloatingActionButton(activity: Activity) {
         if (windowManager != null && this::view.isInitialized) {
             (windowManager as WindowManager).removeViewImmediate(view)
-
             CookieBar.build(activity)
                 .setCustomView(R.layout.loggerbird_close_popup)
                 .setCustomViewInitializer {
@@ -436,7 +436,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     buttonClicks()
                 }
-                CookieBar.build(activity)
+                cookieBarStart = CookieBar.build(activity)
                     .setCustomView(R.layout.loggerbird_start_popup)
                     .setCustomViewInitializer {
                         val textViewSessionTime =
@@ -451,7 +451,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     .setBackgroundColor(R.color.colorAccent)
                     .setSwipeToDismiss(true)
                     .setEnableAutoDismiss(true)
-                    .setDuration(3000)
+                    .setDuration(1000)
                     .show()
                 isFabEnable = true
             } else {
@@ -475,17 +475,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 animationVisibility()
             }
             floating_action_button_screenshot.setSafeOnClickListener {
-                if (floating_action_button_screenshot.visibility == View.VISIBLE) {
-                    if (!PaintActivity.controlPaintInPictureState) {
-                        takeScreenShot(view = activity.window.decorView.rootView, context = context)
-                    } else {
-                        Toast.makeText(
-                            context,
-                            R.string.screen_shot_picture_in_picture_warning_message,
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    if (floating_action_button_screenshot.visibility == View.VISIBLE) {
+                        if (!PaintActivity.controlPaintInPictureState) {
+                            takeScreenShot(
+                                view = activity.window.decorView.rootView,
+                                context = context
+                            )
+                        } else {
+                            Toast.makeText(
+                                context,
+                                R.string.screen_shot_picture_in_picture_warning_message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
-                }
             }
             floating_action_button_audio.setSafeOnClickListener {
                 if (floating_action_button_audio.visibility == View.VISIBLE) {
@@ -737,26 +740,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         if (checkWriteExternalStoragePermission()) {
             PaintActivity.closeActivitySession()
             coroutineCallScreenShot.async {
-                val fileDirectory: File = context.filesDir
-                var byteArray: ByteArray? = null
-//                val filePath = File(
-//                    fileDirectory,
-//                    "logger_bird_screenshot" + System.currentTimeMillis().toString() + ".png"
-//                )
                 try {
                     withContext(Dispatchers.IO) {
-                        //                        filePath.createNewFile()
-//                        val fileOutputStream = FileOutputStream(filePath)
-//                        createScreenShot(view = view).compress(
-//                            Bitmap.CompressFormat.PNG,
-//                            100,
-//                            fileOutputStream
-//                        )
-//                        fileOutputStream.close()
-//                        val bStream = ByteArrayOutputStream()
-//                        createScreenShot(view = view).compress(Bitmap.CompressFormat.PNG, 100, bStream)
-//                        byteArray = bStream.toByteArray()
-
                         screenshotBitmap = createScreenShot(view = view)
                     }
                     withContext(Dispatchers.Main) {
@@ -772,12 +757,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             R.anim.slide_in_right,
                             R.anim.slide_out_left
                         )
-//                        val loggerBirdPaintService = LoggerBirdPaintService()
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                            loggerBirdPaintService.initializeActivity(activity = activity)
-//                        }
-//                        val screenshotServiceIntent=Intent(context,loggerBirdPaintService.javaClass)
-//                        context.startService(screenshotServiceIntent)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -1510,19 +1489,21 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     private fun dailySessionTimeRecorder() {
         sessionTimeEnd = System.currentTimeMillis()
-        val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
-        val sharedPref =
-            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
-        with(sharedPref.edit()) {
-            putLong(
-                "session_time",
-                sharedPref.getLong("session_time", 0) + sessionDuration
-            )
-            commit()
-        }
-        with(sharedPref.edit()) {
-            putLong("last_session_time", sessionDuration)
-            commit()
+        if (sessionTimeEnd != null && sessionTimeStart != null) {
+            val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
+            with(sharedPref.edit()) {
+                putLong(
+                    "session_time",
+                    sharedPref.getLong("session_time", 0) + sessionDuration
+                )
+                commit()
+            }
+            with(sharedPref.edit()) {
+                putLong("last_session_time", sessionDuration)
+                commit()
+            }
         }
     }
 
