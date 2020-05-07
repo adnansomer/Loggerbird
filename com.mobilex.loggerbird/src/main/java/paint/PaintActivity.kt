@@ -29,7 +29,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
+import com.mooduplabs.debuggit.DebuggIt
 import constants.Constants
+import io.mehow.squashit.CredentialsProvider
+import io.mehow.squashit.SquashItConfigurator
 import kotlinx.android.synthetic.main.activity_paint.*
 import kotlinx.android.synthetic.main.activity_paint_save_dialog.view.*
 import kotlinx.android.synthetic.main.activity_paint_seek_view.view.*
@@ -296,8 +299,6 @@ class PaintActivity : Activity() {
         }
     }
 
-
-
     private fun requestPermission(): Boolean {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED
@@ -421,11 +422,12 @@ class PaintActivity : Activity() {
             saveDialog.setPositiveButton(resources.getText(R.string.snackbar_ok)) { _, _ ->
                 fileName = saveView.paint_save_issue.text.toString()
                 paintView.saveImage(fileName)
-//                val snackBarFileSaving: Snackbar =
-//                    Snackbar.make(paintView, "Successfully saved!", Snackbar.LENGTH_SHORT)
-//                snackBarFileSaving.setAction("Dismiss") {
-//                    snackBarFileSaving.dismiss()
-//                }.show()
+
+                val snackBarFileSaving: Snackbar =
+                    Snackbar.make(paintView, "Successfully saved!", Snackbar.LENGTH_SHORT)
+                snackBarFileSaving.setAction("Dismiss") {
+                    snackBarFileSaving.dismiss()
+                }.show()
                 Toast.makeText(activity,  resources.getText(R.string.snackbar_successfully_saved), Toast.LENGTH_SHORT).show()
                 fabScreenshotAnimation()
                 finish()

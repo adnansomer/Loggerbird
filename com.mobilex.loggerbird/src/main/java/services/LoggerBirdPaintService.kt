@@ -29,6 +29,8 @@ import com.divyanshu.colorseekbar.ColorSeekBar
 import com.google.android.material.snackbar.Snackbar
 import com.mobilex.loggerbird.R
 import constants.Constants
+import io.mehow.squashit.CredentialsProvider
+import io.mehow.squashit.SquashItConfigurator
 import kotlinx.android.synthetic.main.activity_paint.*
 import kotlinx.android.synthetic.main.activity_paint_save_dialog.view.*
 import kotlinx.android.synthetic.main.activity_paint_save_dialog.view.brushWidthSeekText

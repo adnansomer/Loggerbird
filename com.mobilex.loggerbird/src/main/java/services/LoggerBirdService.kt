@@ -7,7 +7,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
@@ -20,14 +19,12 @@ import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
-import android.os.SystemClock
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
 import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -451,6 +448,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
                     } else {
                         Toast.makeText(context, R.string.screen_shot_picture_in_picture_warning_message, Toast.LENGTH_SHORT).show()
+
                     }
 
                 }
@@ -568,15 +566,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             isOpen = false
             floating_action_button_video.animate()
                 .rotation(-360F)
-                .setDuration(400L)
+                .setDuration(500L)
                 .start()
             floating_action_button_screenshot.animate()
                 .rotation(-360F)
-                .setDuration(400L)
+                .setDuration(500L)
                 .start()
             floating_action_button_audio.animate()
                 .rotation(-360F)
-                .setDuration(400L)
+                .setDuration(500L)
                 .start()
             floating_action_button_screenshot.visibility = View.GONE
             floating_action_button_video.visibility = View.GONE
@@ -590,7 +588,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             floating_action_button_screenshot.visibility = View.VISIBLE
             floating_action_button_screenshot.animate()
                 .rotation(360F)
-                .setDuration(400L)
+                .setDuration(500L)
                 .start()
             if (audioRecording) {
                 textView_counter_audio.visibility = View.VISIBLE
@@ -600,7 +598,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
             floating_action_button_audio.animate()
                 .rotation(360F)
-                .setDuration(400L)
+                .setDuration(500L)
                 .start()
             if (videoRecording) {
                 textView_counter_video.visibility = View.VISIBLE
@@ -610,7 +608,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
             floating_action_button_video.animate()
                 .rotation(360F)
-                .setDuration(400L)
+                .setDuration(500L)
                 .start()
         }
     }
