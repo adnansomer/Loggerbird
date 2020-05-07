@@ -62,7 +62,7 @@ class LoggerBirdForegroundServiceVideo : Service() {
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        //stopSelf()
+//        stopSelf()
         super.onTaskRemoved(rootIntent)
     }
 

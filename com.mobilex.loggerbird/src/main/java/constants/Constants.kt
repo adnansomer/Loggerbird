@@ -65,6 +65,11 @@ internal class Constants {
         const val audioRecordingFileSizeTag:String = "Audio Recording File Size"
         const val shakerTag:String = "Shake"
         const val feedbackTag:String = "Feedback"
+        const val feedbackOnTouchTag:String = "Feedback On Touch"
+        const val smartReplyFeedbackTag:String = "Smart Reply Feedback"
+        const val translateTag:String = "Translator"
+        const val translateDownloaderTag:String = "Translator Downloader"
+        const val jiraAuthenticationtag:String = "Jira Authentication"
         const val checkboxRealmTag:String = "Checkbox Realm"
     }
 }

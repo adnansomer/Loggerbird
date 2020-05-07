@@ -19,22 +19,21 @@
         android:weightSum="2">
 
         <TextView
-            android:id="@+id/textView_close_pop_up"
+            android:id="@+id/textView_start_pop_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="start"
-            android:text="@string/logger_bird_floating_action_button_close_message"
+            android:text="@string/logger_bird_floating_action_button_open_message"
             android:textColor="@android:color/white"
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/textView_feed_back_pop_up"
+            android:id="@+id/textView_session_time_pop_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="end"
-            android:text="@string/checkBox_feedback_title"
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:textStyle="bold" />

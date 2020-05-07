@@ -188,10 +188,10 @@ class MainActivity : AppCompatActivity() {
 //        recycler_view.adapter = adapter
 //        LoggerBird.registerRecyclerViewObservers(recycler_view)
 
-        (this as androidx.activity.ComponentActivity).prepareCall(
-            OnActivityResultContract(),
-            OnActivityResultListener()
-        )
+//        (this as androidx.activity.ComponentActivity).prepareCall(
+//            OnActivityResultContract(),
+//            OnActivityResultListener()
+//        )
 
 
 //        LogDeneme.logLifeCycleDetails()

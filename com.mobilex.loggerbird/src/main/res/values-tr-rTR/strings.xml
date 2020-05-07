@@ -44,6 +44,8 @@
     <string name="logger_bird_floating_action_button_activate">Aktif et</string>
     <string name="logger_bird_floating_action_button_close_message">Loggerbird kapatıldı!</string>
     <string name="logger_bird_floating_action_button_open_message">Loggerbird açıldı!</string>
+    <string name="total_session_time">Toplam yaşam zamanı:</string>
+    <string name="last_session_time">Son oturum zamanı:</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
