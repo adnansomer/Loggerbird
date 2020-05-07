@@ -27,7 +27,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val mPaint: Paint = Paint()
     private val undonePaths = ArrayList<FingerPath>()
     private val paths = ArrayList<FingerPath>()
-    private var brushColor: Int = 0
+    internal var brushColor: Int = 0
     private var brushWidth: Int = 0
     private var mBitmap: Bitmap? = null
     private var mCanvas: Canvas? = null
@@ -76,8 +76,9 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             paths.removeAll(paths)
             mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             mPath = Path()
-            invalidate()
             mCanvas = Canvas(mBitmap!!)
+            invalidate()
+
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -205,11 +206,11 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         return true
     }
 
-    internal fun getBrushColor(): Int {
+    fun getBrushColor(): Int {
         return brushColor
     }
 
-    internal fun setBrushColor(color: Int) {
+    fun setBrushColor(color: Int) {
         this.brushColor = color
     }
 

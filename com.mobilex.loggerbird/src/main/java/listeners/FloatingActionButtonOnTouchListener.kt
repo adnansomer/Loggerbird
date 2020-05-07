@@ -200,7 +200,6 @@ class FloatingActionButtonOnTouchListener(
                             0,
                             0
                         )
-
                     } else if (event.rawY - (floatingActionButton.height) < 0) {
                         Log.d("corner", "d")
                         windowManagerParams.y = -(deviceHeight / 2)

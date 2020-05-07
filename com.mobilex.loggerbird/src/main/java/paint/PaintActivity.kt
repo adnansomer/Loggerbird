@@ -27,6 +27,7 @@ import androidx.core.app.ActivityCompat
 import com.divyanshu.colorseekbar.ColorSeekBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
+import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import constants.Constants
 import kotlinx.android.synthetic.main.activity_paint.*
@@ -40,6 +41,7 @@ import kotlinx.coroutines.async
 import listeners.FloatingActionButtonPaintOnTouchListener
 import loggerbird.LoggerBird
 import services.LoggerBirdService
+import java.util.concurrent.TimeUnit
 
 
 class PaintActivity : Activity() {
@@ -49,6 +51,7 @@ class PaintActivity : Activity() {
     private var controlButtonVisibility: Boolean = true
     private var onStopCalled = false
     private var pipModeChange = false
+    private var lastTime: Long = 0
 
     companion object {
         private lateinit var activity: Activity
@@ -186,8 +189,6 @@ class PaintActivity : Activity() {
         )
         paint_floating_action_button.setOnClickListener {
             animationVisibility()
-//            paint_floating_action_button.isExpanded = !paint_floating_action_button.isExpanded
-//            paint_floating_action_button.isActivated = paint_floating_action_button.isExpanded
         }
         paint_floating_action_button_save.setOnClickListener {
             if (requestPermission()) {
@@ -249,23 +250,29 @@ class PaintActivity : Activity() {
             val messageTextView: TextView =
                 snackView.findViewById(R.id.message_text_view) as TextView
             messageTextView.text = resources.getString(R.string.snackbar_delete_verification)
+
             val textViewYes: TextView = snackView.findViewById(R.id.snackbar_yes)
             textViewYes.text = resources.getString(R.string.snackbar_yes)
-            textViewYes.setOnClickListener {
+            textViewYes.setSafeOnClickListener {
+
                 val snackbarYes: Snackbar = Snackbar.make(it, resources.getString(R.string.snackbar_delete_success), Snackbar.LENGTH_SHORT)
                 snackbarYes.setAction(resources.getString(R.string.snackbar_dismiss)) {
                     snackbarYes.dismiss()
                 }.show()
+
+
                 paintView.clearAllPaths()
                 if (paintView.eraserEnabled) {
                     paintView.disableEraser()
                     paintView.eraserEnabled = false
                     paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
                 }
+
             }
+
             val textViewNo: TextView = snackView.findViewById(R.id.snackbar_no)
             textViewNo.text =  resources.getString(R.string.snackbar_no)
-            textViewNo.setOnClickListener {
+            textViewNo.setSafeOnClickListener {
                 val snackBarNo: Snackbar = Snackbar.make(it,  resources.getString(R.string.snackbar_cancelled), Snackbar.LENGTH_SHORT)
                 snackBarNo.setAction(resources.getString(R.string.snackbar_dismiss)) {
                     snackBarNo.dismiss()
@@ -282,6 +289,12 @@ class PaintActivity : Activity() {
         }
     }
 
+    @SuppressLint("CheckResult")
+    fun View.setSafeOnClickListener(onClick: (View) -> Unit) {
+        RxView.clicks(this).throttleFirst(2000, TimeUnit.MILLISECONDS).subscribe {
+            onClick(this)
+        }
+    }
 
     private fun requestPermission(): Boolean {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -322,6 +335,9 @@ class PaintActivity : Activity() {
             })
             colorPickerDialog.setPositiveButton(resources.getString(R.string.snackbar_apply)) { dialog, _ ->
                 run {
+                    if(selectedColor == 0){
+                        selectedColor = paintView.brushColor
+                    }
                     paintView.setBrushColor(selectedColor)
                     dialog.dismiss()
                 }
@@ -403,12 +419,14 @@ class PaintActivity : Activity() {
             saveDialog.setPositiveButton(resources.getText(R.string.snackbar_ok)) { _, _ ->
                 fileName = saveView.paint_save_issue.text.toString()
                 paintView.saveImage(fileName)
-//                val snackBarFileSaving: Snackbar =
-//                    Snackbar.make(paintView, "Successfully saved!", Snackbar.LENGTH_SHORT)
-//                snackBarFileSaving.setAction("Dismiss") {
-//                    snackBarFileSaving.dismiss()
-//                }.show()
+
+                val snackBarFileSaving: Snackbar =
+                    Snackbar.make(paintView, "Successfully saved!", Snackbar.LENGTH_SHORT)
+                snackBarFileSaving.setAction("Dismiss") {
+                    snackBarFileSaving.dismiss()
+                }.show()
                 Toast.makeText(activity,  resources.getText(R.string.snackbar_successfully_saved), Toast.LENGTH_SHORT).show()
+                fabScreenshotAnimation()
                 finish()
                 overridePendingTransition(R.anim.no_animation,R.anim.slide_in_bottom)
 
@@ -515,11 +533,13 @@ class PaintActivity : Activity() {
         Toast.makeText(activity, R.string.drawing_cancelled_message, Toast.LENGTH_SHORT).show()
         overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
         finish()
+        fabScreenshotAnimation()
 
         if(pipModeChange){
             Toast.makeText(activity,  R.string.drawing_cancelled_message, Toast.LENGTH_SHORT).show()
             overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
             finish()
+            fabScreenshotAnimation()
         }
     }
 
@@ -529,6 +549,7 @@ class PaintActivity : Activity() {
     ) {
 
         if (isInPictureInPictureMode) {
+
             pipModeChange = true
             paint_floating_action_button.visibility = View.GONE
             paint_floating_action_button_save.visibility = View.GONE
@@ -539,7 +560,13 @@ class PaintActivity : Activity() {
             paint_floating_action_button_erase.visibility = View.GONE
         } else {
             if (onStopCalled) {
-                finish()
+                val current = System.currentTimeMillis()
+                if ((current - lastTime) > 2500L) {
+                    finish()
+                    lastTime = current
+
+                }
+                fabScreenshotAnimation()
             }
             pipModeChange = true
             paint_floating_action_button.visibility = View.VISIBLE
@@ -552,11 +579,40 @@ class PaintActivity : Activity() {
         }
     }
 
+    private fun fabScreenshotAnimation(){
+        LoggerBirdService.floating_action_button.animate()
+            .rotationBy(360F)
+            .setDuration(200)
+            .scaleX(1F)
+            .scaleY(1F)
+            .withEndAction {
+                when {
+                    LoggerBirdService.audioRecording -> {
+                        LoggerBirdService.floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
+                    }
+                    LoggerBirdService.videoRecording -> (
+                            LoggerBirdService.floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
+                            )
+                    else -> {
+                        LoggerBirdService.floating_action_button.setImageResource(R.drawable.loggerbird)}
+                }
+                LoggerBirdService.floating_action_button.animate()
+                    .rotationBy(0F)
+                    .setDuration(200)
+                    .scaleX(1F)
+                    .scaleY(1F)
+                    .start()
+            }
+            .start()
+    }
+
+
     override fun onStop() {
         super.onStop()
         onStopCalled = true
         if(LoggerBirdService.controlFloatingActionButtonView()){
             LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
+            LoggerBirdService.screenshotDrawing = false
         }
     }
 
