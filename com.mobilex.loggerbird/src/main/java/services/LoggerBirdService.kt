@@ -906,7 +906,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     } else {
                         if (this@LoggerBirdService::filePathVideo.isInitialized) {
                             if (this@LoggerBirdService.filePathVideo.length() > 0 || controlTimeControllerVideo) {
-                                stopScreenRecord()
                                 withContext(Dispatchers.Main) {
                                     Toast.makeText(
                                         context,
@@ -921,6 +920,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                     if(controlTimeControllerVideo){
                                         filePathVideo.delete()
                                         controlTimeControllerVideo = false
+                                    }
+                                    withContext(Dispatchers.IO){
+                                        stopScreenRecord()
                                     }
                                 }
                             }
@@ -1437,11 +1439,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 Log.d("current_time",controlTimeControllerVideo.toString())
                                 timeControllerVideo = null
 //                                timerTaskVideo?.cancel()
-                                callVideoRecording(
-                                    requestCode = requestCode,
-                                    resultCode = resultCode,
-                                    data = dataIntent
-                                )
+                                activity.runOnUiThread {
+                                    textView_counter_video.performClick()
+                                }
                             }
                         }
                         if(!controlTimeControllerVideo){
