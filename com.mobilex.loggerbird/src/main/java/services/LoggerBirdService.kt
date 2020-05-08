@@ -83,7 +83,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var mediaProjection: MediaProjection? = null
     private var virtualDisplay: VirtualDisplay? = null
     private lateinit var mediaProjectionCallback: MediaProjectionCallback
-    private var mediaRecorderVideo: MediaRecorder? = MediaRecorder()
+    private  var mediaRecorderVideo: MediaRecorder? = null
     private var requestCode: Int = 0
     private var resultCode: Int = -1
     private var dataIntent: Intent? = null
@@ -96,7 +96,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var coroutineCallAudioCounter: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideoFileSize: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudioFileSize: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private var coroutineCallFeedback:CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var coroutineCallFeedback: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var counterVideo: Int = 0
     private var counterAudio: Int = 0
     private var timerVideo: Timer? = null
@@ -114,10 +114,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var floating_action_button_feedback: FloatingActionButton
     private lateinit var floating_action_button_feed_close: FloatingActionButton
     private lateinit var editText_feedback: EditText
-    private val fileLimit:Long = 10485760
+    private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
     private var sessionTimeEnd: Long? = null
     private var sessionFormatter: SimpleDateFormat = SimpleDateFormat("mm:ss", Locale.getDefault())
+    private var timeControllerVideo: Long? = null
+    private var controlTimeControllerVideo:Boolean = false
 
 
     //Static global variables:
@@ -162,7 +164,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         internal var audioRecording = false
         internal var videoRecording = false
         internal var screenshotDrawing = false
-
 
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
@@ -359,9 +360,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 this.view = view
                 floatingActionButtonView = view
                 floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-                floating_action_button_screenshot = view.findViewById(R.id.fragment_floating_action_button_screenshot)
-                floating_action_button_video = view.findViewById(R.id.fragment_floating_action_button_video)
-                floating_action_button_audio = view.findViewById(R.id.fragment_floating_action_button_audio)
+                floating_action_button_screenshot =
+                    view.findViewById(R.id.fragment_floating_action_button_screenshot)
+                floating_action_button_video =
+                    view.findViewById(R.id.fragment_floating_action_button_video)
+                floating_action_button_audio =
+                    view.findViewById(R.id.fragment_floating_action_button_audio)
                 textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
                 textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
                 textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
@@ -465,7 +469,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (!PaintActivity.controlPaintInPictureState) {
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
                     } else {
-                        Toast.makeText(context, R.string.screen_shot_picture_in_picture_warning_message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            R.string.screen_shot_picture_in_picture_warning_message,
+                            Toast.LENGTH_SHORT
+                        ).show()
 
                     }
 
@@ -486,13 +494,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         .scaleX(1F)
                         .scaleY(1F)
                         .withEndAction {
-                            if(videoRecording){
+                            if (videoRecording) {
                                 floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
-                            }else if(screenshotDrawing){
+                            } else if (screenshotDrawing) {
                                 floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
+                            } else {
+                                floating_action_button.setImageResource(R.drawable.loggerbird)
                             }
-                            else{
-                                floating_action_button.setImageResource(R.drawable.loggerbird)}
                             floating_action_button.animate()
                                 .rotationBy(0F)
                                 .setDuration(200)
@@ -526,13 +534,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         .scaleX(1F)
                         .scaleY(1F)
                         .withEndAction {
-                            if(audioRecording){
+                            if (audioRecording) {
                                 floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
-                            }else if(screenshotDrawing){
+                            } else if (screenshotDrawing) {
                                 floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
+                            } else {
+                                floating_action_button.setImageResource(R.drawable.loggerbird)
                             }
-                            else{
-                                floating_action_button.setImageResource(R.drawable.loggerbird)}
                             floating_action_button.animate()
                                 .rotationBy(0F)
                                 .setDuration(200)
@@ -737,11 +745,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             .withEndAction {
                                 when {
                                     audioRecording -> {
-                                        floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp) }
+                                        floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
+                                    }
                                     videoRecording -> (
                                             floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp))
                                     else -> {
-                                        floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)}
+                                        floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
+                                    }
                                 }
                                 floating_action_button.animate()
                                     .rotationBy(0F)
@@ -752,7 +762,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             }
                             .start()
                         context.startActivity(screenshotIntent)
-                        context.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                        context.overridePendingTransition(
+                            R.anim.slide_in_right,
+                            R.anim.slide_out_left
+                        )
 
                     }
                 } catch (e: Exception) {
@@ -892,7 +905,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         startScreenRecording()
                     } else {
                         if (this@LoggerBirdService::filePathVideo.isInitialized) {
-                            if (this@LoggerBirdService.filePathVideo.length() > 0) {
+                            if (this@LoggerBirdService.filePathVideo.length() > 0 || controlTimeControllerVideo) {
                                 stopScreenRecord()
                                 withContext(Dispatchers.Main) {
                                     Toast.makeText(
@@ -905,6 +918,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                     textView_video_size.visibility = View.GONE
                                     floating_action_button_video.visibility = View.VISIBLE
                                     floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
+                                    if(controlTimeControllerVideo){
+                                        filePathVideo.delete()
+                                        controlTimeControllerVideo = false
+                                    }
                                 }
                             }
                         }
@@ -949,21 +966,21 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 textView_counter_video.visibility = View.VISIBLE
                 textView_video_size.visibility = View.VISIBLE
                 floating_action_button.animate()
-                        .rotationBy(360F)
-                        .setDuration(200)
-                        .scaleX(1F)
-                        .scaleY(1F)
-                        .withEndAction {
-                            floating_action_button.setBackgroundColor(getColor(R.color.secondaryColor))
-                            floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
-                            floating_action_button.animate()
-                                .rotationBy(0F)
-                                .setDuration(200)
-                                .scaleX(1F)
-                                .scaleY(1F)
-                                .start() //review
-                        }
-                        .start()
+                    .rotationBy(360F)
+                    .setDuration(200)
+                    .scaleX(1F)
+                    .scaleY(1F)
+                    .withEndAction {
+                        floating_action_button.setBackgroundColor(getColor(R.color.secondaryColor))
+                        floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
+                        floating_action_button.animate()
+                            .rotationBy(0F)
+                            .setDuration(200)
+                            .scaleX(1F)
+                            .scaleY(1F)
+                            .start() //review
+                    }
+                    .start()
 
                 callEnqueue()
             }
@@ -981,12 +998,16 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun initRecorder() {
         try {
             coroutineCallVideoStarter.async {
+                mediaRecorderVideo = MediaRecorder()
                 if (mediaRecorderVideo != null) {
                     mediaRecorderVideo?.setAudioSource(MediaRecorder.AudioSource.MIC)
                     mediaRecorderVideo?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
                     mediaRecorderVideo?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
                     val fileDirectory: File = context.filesDir
-                    filePathVideo = File(fileDirectory, "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4")
+                    filePathVideo = File(
+                        fileDirectory,
+                        "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4"
+                    )
                     mediaRecorderVideo?.setOutputFile(filePathVideo.path)
                     mediaRecorderVideo?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
                     mediaRecorderVideo?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
@@ -1001,7 +1022,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         mediaRecorderVideo?.start()
                         videoRecording = true
                         videoCounterStart()
-                        virtualDisplay = createVirtualDisplay()
+                        if(mediaRecorderVideo!=null){
+                            virtualDisplay = createVirtualDisplay()
+                        }else{
+                            callVideoRecording(
+                                requestCode = requestCode,
+                                resultCode = resultCode,
+                                data = dataIntent
+                            )
+                        }
                         takeVideoFileSize()
                     }
                 }
@@ -1074,28 +1103,34 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     internal fun callVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (LoggerBird.isLogInitAttached()) {
-//            if(this::intentForegroundServiceVideo.isInitialized){
-//                stopForegroundServiceVideo()
-//            }
-            workQueueLinked.controlRunnable = false
-            runnableList.clear()
-            workQueueLinked.clear()
-            callForegroundService()
-            if (runnableList.isEmpty()) {
-                workQueueLinked.put {
-                    takeVideoRecording(
-                        requestCode = requestCode,
-                        resultCode = resultCode,
-                        data = data
-                    )
+        try {
+            if (LoggerBird.isLogInitAttached()) {
+    //            if(this::intentForegroundServiceVideo.isInitialized){
+    //                stopForegroundServiceVideo()
+    //            }
+                workQueueLinked.controlRunnable = false
+                runnableList.clear()
+                workQueueLinked.clear()
+                callForegroundService()
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put {
+                        takeVideoRecording(
+                            requestCode = requestCode,
+                            resultCode = resultCode,
+                            data = data
+                        )
+                    }
                 }
+                runnableList.add(Runnable {
+                    takeVideoRecording(requestCode = requestCode, resultCode = resultCode, data = data)
+                })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
-            runnableList.add(Runnable {
-                takeVideoRecording(requestCode = requestCode, resultCode = resultCode, data = data)
-            })
-        } else {
-            throw LoggerBirdException(Constants.logInitErrorMessage)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e , tag = Constants.videoRecordingTag)
         }
     }
 
@@ -1135,7 +1170,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             .setBackgroundColor(R.color.colorAccent)
                             .setEnableAutoDismiss(false)
                             .setCustomViewInitializer(CookieBar.CustomViewInitializer() {
-                                val txtActivate = it.findViewById<TextView>(R.id.btn_action_activate)
+                                val txtActivate =
+                                    it.findViewById<TextView>(R.id.btn_action_activate)
                                 val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
                                 txtActivate.setSafeOnClickListener {
                                     initializeFloatingActionButton(activity = activity)
@@ -1178,7 +1214,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 activity,
                                 fileSize
                             )
-                        if(fileSize > fileLimit){
+                        if (fileSize > fileLimit) {
                             callVideoRecording(
                                 requestCode = requestCode,
                                 resultCode = resultCode,
@@ -1235,7 +1271,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 activity,
                                 fileSize
                             )
-                        if(fileSize > fileLimit){
+                        if (fileSize > fileLimit) {
                             takeAudioRecording()
                         }
                         activity.runOnUiThread {
@@ -1313,8 +1349,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         viewFeedback,
                         windowManagerParamsFeedback
                     )
-                    floating_action_button_feedback = viewFeedback.findViewById(R.id.floating_action_button_feed)
-                    floating_action_button_feed_close = viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
+                    floating_action_button_feedback =
+                        viewFeedback.findViewById(R.id.floating_action_button_feed)
+                    floating_action_button_feed_close =
+                        viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
                     editText_feedback = viewFeedback.findViewById(R.id.editText_feed_back)
                     buttonClicksFeedback()
                 }
@@ -1332,7 +1370,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             windowManagerFeedback = null
         }
     }
-
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -1391,11 +1428,31 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 counterVideo = 0
                 timerVideo = Timer()
                 timerTaskVideo = object : TimerTask() {
+                    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
                     override fun run() {
-                        val date = Date((counterVideo * 1000).toLong())
-                        counterVideo++
-                        activity.runOnUiThread {
-                            textView_counter_video.text = counterFormatter.format(date)
+                        val currentDate = Calendar.getInstance().time
+                        if (timeControllerVideo != null && !controlTimeControllerVideo) {
+                            if ((currentDate.time - timeControllerVideo!!) > 5000 ) {
+                                controlTimeControllerVideo = true
+                                Log.d("current_time",controlTimeControllerVideo.toString())
+                                timeControllerVideo = null
+//                                timerTaskVideo?.cancel()
+                                callVideoRecording(
+                                    requestCode = requestCode,
+                                    resultCode = resultCode,
+                                    data = dataIntent
+                                )
+                            }
+                        }
+                        if(!controlTimeControllerVideo){
+                            timeControllerVideo = currentDate.time
+                            Log.d("current_time",timeControllerVideo.toString())
+                            Log.d("current_time",controlTimeControllerVideo.toString())
+                            val date = Date((counterVideo * 1000).toLong())
+                            counterVideo++
+                            activity.runOnUiThread {
+                                textView_counter_video.text = counterFormatter.format(date)
+                            }
                         }
                     }
                 }
@@ -1490,9 +1547,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     private fun dailySessionTimeRecorder() {
         sessionTimeEnd = System.currentTimeMillis()
-        if(sessionTimeEnd!=null&&sessionTimeStart!=null){
+        if (sessionTimeEnd != null && sessionTimeStart != null) {
             val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
-            val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
             with(sharedPref.edit()) {
                 putLong("session_time", sharedPref.getLong("session_time", 0) + sessionDuration)
                 commit()
