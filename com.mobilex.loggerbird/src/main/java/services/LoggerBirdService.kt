@@ -27,7 +27,6 @@ import android.view.*
 import android.view.animation.Animation
 import android.widget.*
 import androidx.annotation.RequiresApi
-import androidx.preference.Preference
 import androidx.preference.PreferenceManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -44,7 +43,6 @@ import listeners.*
 import loggerbird.LoggerBird
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
-import org.w3c.dom.Text
 import paint.PaintActivity
 import utils.EmailUtil
 import utils.LinkedBlockingQueueUtil
@@ -82,8 +80,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var projectManager: MediaProjectionManager? = null
     private var mediaProjection: MediaProjection? = null
     private var virtualDisplay: VirtualDisplay? = null
-    private lateinit var mediaProjectionCallback: MediaProjectionCallback
-    private  var mediaRecorderVideo: MediaRecorder? = null
+    private var mediaProjectionCallback: MediaProjectionCallback? = null
+    private var mediaRecorderVideo: MediaRecorder? = null
     private var requestCode: Int = 0
     private var resultCode: Int = -1
     private var dataIntent: Intent? = null
@@ -117,9 +115,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
     private var sessionTimeEnd: Long? = null
-    private var sessionFormatter: SimpleDateFormat = SimpleDateFormat("mm:ss", Locale.getDefault())
+    private lateinit var sessionFormatterTotal: SimpleDateFormat
+    private lateinit var sessionFormatterLastSession: SimpleDateFormat
     private var timeControllerVideo: Long? = null
-    private var controlTimeControllerVideo:Boolean = false
+    private var controlTimeControllerVideo: Boolean = false
+    private lateinit var mediaCodecsFile: File
 
 
     //Static global variables:
@@ -430,10 +430,44 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     .setCustomViewInitializer {
                         val textViewSessionTime =
                             it.findViewById<TextView>(R.id.textView_session_time_pop_up)
+                        sessionFormatterTotal = when {
+                            (totalSessionTime() / 1000) / (60 * 60 * 60 * 60 * 60) >= 1 -> {
+                                SimpleDateFormat("yyyy:mm:dd,HH:mm:ss", Locale.getDefault())
+                            }
+                            (totalSessionTime() / 1000) / (60 * 60 * 60 * 60) >= 1 -> {
+                                SimpleDateFormat("mm:dd,HH:mm:ss", Locale.getDefault())
+                            }
+                            (totalSessionTime() / 1000) / (60 * 60 * 60) >= 1 -> {
+                                SimpleDateFormat("dd,HH:mm:ss", Locale.getDefault())
+                            }
+                            (totalSessionTime() / 1000) / (60 * 60) >= 1 -> {
+                                SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                            }
+                            else -> {
+                                SimpleDateFormat("mm:ss", Locale.getDefault())
+                            }
+                        }
+                        sessionFormatterLastSession = when {
+                            (lastSessionTime() / 1000) / (60 * 60 * 60 * 60 * 60) >= 1 -> {
+                                SimpleDateFormat("yyyy:mm:dd,HH:mm:ss", Locale.getDefault())
+                            }
+                            (lastSessionTime() / 1000) / (60 * 60 * 60 * 60) >= 1 -> {
+                                SimpleDateFormat("mm:dd,HH:mm:ss", Locale.getDefault())
+                            }
+                            (lastSessionTime() / 1000) / (60 * 60 * 60) >= 1 -> {
+                                SimpleDateFormat("dd,HH:mm:ss", Locale.getDefault())
+                            }
+                            (lastSessionTime() / 1000) / (60 * 60) >= 1 -> {
+                                SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                            }
+                            else -> {
+                                SimpleDateFormat("mm:ss", Locale.getDefault())
+                            }
+                        }
                         textViewSessionTime.text =
-                            resources.getString(R.string.total_session_time) + sessionFormatter.format(
+                            resources.getString(R.string.total_session_time) + sessionFormatterTotal.format(
                                 totalSessionTime()
-                            ) + "\n" + resources.getString(R.string.last_session_time) + sessionFormatter.format(
+                            ) + "\n" + resources.getString(R.string.last_session_time) + sessionFormatterLastSession.format(
                                 lastSessionTime()
                             )
                     }
@@ -917,11 +951,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                     textView_video_size.visibility = View.GONE
                                     floating_action_button_video.visibility = View.VISIBLE
                                     floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
-                                    if(controlTimeControllerVideo){
+                                    if (controlTimeControllerVideo) {
                                         filePathVideo.delete()
                                         controlTimeControllerVideo = false
                                     }
-                                    withContext(Dispatchers.IO){
+                                    withContext(Dispatchers.IO) {
+                                        //                                        if(mediaCodecsFile.exists()){
+//
+//                                        }
                                         stopScreenRecord()
                                     }
                                 }
@@ -1010,6 +1047,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         fileDirectory,
                         "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4"
                     )
+                    mediaCodecsFile = File("/data/misc/media/media_codecs_profiling_results.xml")
                     mediaRecorderVideo?.setOutputFile(filePathVideo.path)
                     mediaRecorderVideo?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
                     mediaRecorderVideo?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
@@ -1024,9 +1062,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         mediaRecorderVideo?.start()
                         videoRecording = true
                         videoCounterStart()
-                        if(mediaRecorderVideo!=null){
+                        if (mediaRecorderVideo != null) {
                             virtualDisplay = createVirtualDisplay()
-                        }else{
+                        } else {
                             callVideoRecording(
                                 requestCode = requestCode,
                                 resultCode = resultCode,
@@ -1066,30 +1104,39 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private suspend fun stopScreenRecord() {
-        withContext(coroutineCallVideoStarter.coroutineContext) {
-            if (videoRecording) {
-                if (mediaRecorderVideo != null) {
-                    mediaRecorderVideo?.stop()
-                    mediaRecorderVideo?.reset()
+        try {
+            withContext(coroutineCallVideoStarter.coroutineContext) {
+                if (videoRecording) {
+                    if (mediaRecorderVideo != null) {
+                        mediaRecorderVideo?.stop()
+                        mediaRecorderVideo?.reset()
+                    }
                 }
+                if (virtualDisplay != null) {
+                    virtualDisplay?.release()
+                }
+                destroyMediaProjection()
+                stopForegroundServiceVideo()
+                videoRecording = false
+                stopVideoFileSize()
             }
-            if (virtualDisplay != null) {
-                virtualDisplay?.release()
-            }
-            destroyMediaProjection()
-            stopForegroundServiceVideo()
-            videoRecording = false
-            stopVideoFileSize()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun destroyMediaProjection() {
-        if (mediaProjection != null) {
-            mediaProjection!!.unregisterCallback(mediaProjectionCallback)
-            mediaProjection!!.stop()
-            mediaProjection = null
-            videoRecording = false
+        try {
+            if (mediaProjection != null) {
+                mediaProjection!!.unregisterCallback(mediaProjectionCallback)
+                mediaProjectionCallback = null
+                mediaProjection!!.stop()
+                mediaProjection = null
+                videoRecording = false
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -1100,16 +1147,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     private fun stopForegroundServiceVideo() {
-        (context as Activity).stopService(intentForegroundServiceVideo)
+        try {
+            (context as Activity).stopService(intentForegroundServiceVideo)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     internal fun callVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
         try {
             if (LoggerBird.isLogInitAttached()) {
-    //            if(this::intentForegroundServiceVideo.isInitialized){
-    //                stopForegroundServiceVideo()
-    //            }
+                //            if(this::intentForegroundServiceVideo.isInitialized){
+                //                stopForegroundServiceVideo()
+                //            }
                 workQueueLinked.controlRunnable = false
                 runnableList.clear()
                 workQueueLinked.clear()
@@ -1124,7 +1175,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     }
                 }
                 runnableList.add(Runnable {
-                    takeVideoRecording(requestCode = requestCode, resultCode = resultCode, data = data)
+                    takeVideoRecording(
+                        requestCode = requestCode,
+                        resultCode = resultCode,
+                        data = data
+                    )
                 })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
@@ -1132,7 +1187,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e , tag = Constants.videoRecordingTag)
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.videoRecordingTag)
         }
     }
 
@@ -1434,9 +1489,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     override fun run() {
                         val currentDate = Calendar.getInstance().time
                         if (timeControllerVideo != null && !controlTimeControllerVideo) {
-                            if ((currentDate.time - timeControllerVideo!!) > 5000 ) {
+                            if ((currentDate.time - timeControllerVideo!!) > 5000) {
                                 controlTimeControllerVideo = true
-                                Log.d("current_time",controlTimeControllerVideo.toString())
+                                Log.d("current_time", controlTimeControllerVideo.toString())
                                 timeControllerVideo = null
 //                                timerTaskVideo?.cancel()
                                 activity.runOnUiThread {
@@ -1444,10 +1499,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 }
                             }
                         }
-                        if(!controlTimeControllerVideo){
+                        if (!controlTimeControllerVideo) {
                             timeControllerVideo = currentDate.time
-                            Log.d("current_time",timeControllerVideo.toString())
-                            Log.d("current_time",controlTimeControllerVideo.toString())
+                            Log.d("current_time", timeControllerVideo.toString())
+                            Log.d("current_time", controlTimeControllerVideo.toString())
                             val date = Date((counterVideo * 1000).toLong())
                             counterVideo++
                             activity.runOnUiThread {
@@ -1461,6 +1516,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
+                activity.runOnUiThread {
+                    textView_counter_video.performClick()
+                }
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
@@ -1537,6 +1595,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            activity.runOnUiThread {
+                textView_counter_video.performClick()
+            }
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(
                 exception = e,
@@ -1576,7 +1637,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {
         override fun onStop() {
-//            stopScreenRecord()
+            activity.runOnUiThread {
+                textView_counter_video.performClick()
+            }
         }
     }
 }
