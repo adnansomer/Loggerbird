@@ -6,6 +6,7 @@ import android.app.Activity
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -31,6 +32,8 @@ import androidx.preference.PreferenceManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import constants.Constants
@@ -44,6 +47,7 @@ import loggerbird.LoggerBird
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
+import paint.PaintView
 import utils.EmailUtil
 import utils.LinkedBlockingQueueUtil
 import java.io.File
@@ -120,6 +124,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var timeControllerVideo: Long? = null
     private var controlTimeControllerVideo: Boolean = false
     private lateinit var mediaCodecsFile: File
+    private val arrayListFileName: ArrayList<String> = ArrayList()
 
 
     //Static global variables:
@@ -240,6 +245,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             logActivityLifeCycleObserver =
                 LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
+            deleteOldFiles()
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -263,6 +269,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         super.onTaskRemoved(rootIntent)
         try {
             dailySessionTimeRecorder()
+            addFileList()
             controlServiceOnDestroyState = true
             LoggerBird.takeLifeCycleDetails()
         } catch (e: Exception) {
@@ -431,13 +438,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         val textViewSessionTime =
                             it.findViewById<TextView>(R.id.textView_session_time_pop_up)
                         sessionFormatterTotal = when {
-                            (totalSessionTime() / 1000) / (60 * 60 * 60 * 60 * 60) >= 1 -> {
+                            (totalSessionTime() / 1000) / (60 * 60 * 24 * 30 * 365) >= 1 -> {
                                 SimpleDateFormat("yyyy:mm:dd,HH:mm:ss", Locale.getDefault())
                             }
-                            (totalSessionTime() / 1000) / (60 * 60 * 60 * 60) >= 1 -> {
+                            (totalSessionTime() / 1000) / (60 * 60 * 24 * 30) >= 1 -> {
                                 SimpleDateFormat("mm:dd,HH:mm:ss", Locale.getDefault())
                             }
-                            (totalSessionTime() / 1000) / (60 * 60 * 60) >= 1 -> {
+                            (totalSessionTime() / 1000) / (24 * 60 * 60) >= 1 -> {
                                 SimpleDateFormat("dd,HH:mm:ss", Locale.getDefault())
                             }
                             (totalSessionTime() / 1000) / (60 * 60) >= 1 -> {
@@ -448,13 +455,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             }
                         }
                         sessionFormatterLastSession = when {
-                            (lastSessionTime() / 1000) / (60 * 60 * 60 * 60 * 60) >= 1 -> {
+                            (lastSessionTime() / 1000) / (60 * 60 * 24 * 30 * 365) >= 1 -> {
                                 SimpleDateFormat("yyyy:mm:dd,HH:mm:ss", Locale.getDefault())
                             }
-                            (lastSessionTime() / 1000) / (60 * 60 * 60 * 60) >= 1 -> {
+                            (lastSessionTime() / 1000) / (60 * 60 * 24 * 30) >= 1 -> {
                                 SimpleDateFormat("mm:dd,HH:mm:ss", Locale.getDefault())
                             }
-                            (lastSessionTime() / 1000) / (60 * 60 * 60) >= 1 -> {
+                            (lastSessionTime() / 1000) / (60 * 60 * 24) >= 1 -> {
                                 SimpleDateFormat("dd,HH:mm:ss", Locale.getDefault())
                             }
                             (lastSessionTime() / 1000) / (60 * 60) >= 1 -> {
@@ -740,67 +747,56 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         if (checkWriteExternalStoragePermission()) {
             PaintActivity.closeActivitySession()
             coroutineCallScreenShot.async {
-                val fileDirectory: File = context.filesDir
-                var byteArray: ByteArray? = null
-//                val filePath = File(
-//                    fileDirectory,
-//                    "logger_bird_screenshot" + System.currentTimeMillis().toString() + ".png"
-//                )
                 try {
-                    withContext(Dispatchers.IO) {
-                        //                        filePath.createNewFile()
-//                        val fileOutputStream = FileOutputStream(filePath)
-//                        createScreenShot(view = view).compress(
-//                            Bitmap.CompressFormat.PNG,
-//                            100,
-//                            fileOutputStream
-//                        )
-//                        fileOutputStream.close()
-//                        val bStream = ByteArrayOutputStream()
-//                        createScreenShot(view = view).compress(Bitmap.CompressFormat.PNG, 100, bStream)
-//                        byteArray = bStream.toByteArray()
-
-                        screenshotBitmap = createScreenShot(view = view)
-                        screenshotDrawing = true
-                    }
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, R.string.screen_shot_taken, Toast.LENGTH_SHORT)
-                            .show()
-                        val paintActivity = PaintActivity()
-                        val screenshotIntent = Intent(
-                            context as Activity,
-                            paintActivity.javaClass
-                        )
-                        floating_action_button.animate()
-                            .rotationBy(360F)
-                            .setDuration(200)
-                            .scaleX(1F)
-                            .scaleY(1F)
-                            .withEndAction {
-                                when {
-                                    audioRecording -> {
-                                        floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
+                    if (arrayListFileName.size <= 10) {
+                        withContext(Dispatchers.IO) {
+                            screenshotBitmap = createScreenShot(view = view)
+                            screenshotDrawing = true
+                        }
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, R.string.screen_shot_taken, Toast.LENGTH_SHORT)
+                                .show()
+                            val paintActivity = PaintActivity()
+                            val screenshotIntent = Intent(
+                                context as Activity,
+                                paintActivity.javaClass
+                            )
+                            floating_action_button.animate()
+                                .rotationBy(360F)
+                                .setDuration(200)
+                                .scaleX(1F)
+                                .scaleY(1F)
+                                .withEndAction {
+                                    when {
+                                        audioRecording -> {
+                                            floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
+                                        }
+                                        videoRecording -> (
+                                                floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp))
+                                        else -> {
+                                            floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
+                                        }
                                     }
-                                    videoRecording -> (
-                                            floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp))
-                                    else -> {
-                                        floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
-                                    }
+                                    floating_action_button.animate()
+                                        .rotationBy(0F)
+                                        .setDuration(200)
+                                        .scaleX(1F)
+                                        .scaleY(1F)
+                                        .start()
                                 }
-                                floating_action_button.animate()
-                                    .rotationBy(0F)
-                                    .setDuration(200)
-                                    .scaleX(1F)
-                                    .scaleY(1F)
-                                    .start()
-                            }
-                            .start()
-                        context.startActivity(screenshotIntent)
-                        context.overridePendingTransition(
-                            R.anim.slide_in_right,
-                            R.anim.slide_out_left
-                        )
+                                .start()
+                            context.startActivity(screenshotIntent)
+                            context.overridePendingTransition(
+                                R.anim.slide_in_right,
+                                R.anim.slide_out_left
+                            )
 
+                        }
+
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, R.string.session_file_limit, Toast.LENGTH_SHORT)
+                        }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -817,42 +813,53 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             coroutineCallAudio.async {
                 try {
                     if (!audioRecording) {
-                        val fileDirectory: File = context.filesDir
-                        filePathAudio = File(
-                            fileDirectory,
-                            "logger_bird_audio" + System.currentTimeMillis()
-                                .toString() + "recording.3gpp"
-                        )
-                        mediaRecorderAudio = MediaRecorder()
-                        mediaRecorderAudio?.setAudioSource(MediaRecorder.AudioSource.MIC)
-                        mediaRecorderAudio?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-                        mediaRecorderAudio?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            mediaRecorderAudio?.setOutputFile(filePathAudio)
+                        if (arrayListFileName.size <= 10) {
+                            val fileDirectory: File = context.filesDir
+                            filePathAudio = File(
+                                fileDirectory,
+                                "logger_bird_audio" + System.currentTimeMillis()
+                                    .toString() + "recording.3gpp"
+                            )
+                            addFileNameList(fileName = filePathAudio.absolutePath)
+                            mediaRecorderAudio = MediaRecorder()
+                            mediaRecorderAudio?.setAudioSource(MediaRecorder.AudioSource.MIC)
+                            mediaRecorderAudio?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+                            mediaRecorderAudio?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                mediaRecorderAudio?.setOutputFile(filePathAudio)
+                            } else {
+                                mediaRecorderAudio?.setOutputFile(filePathAudio.path)
+                            }
+                            startAudioRecording()
+                            audioRecording = true
+                            withContext(Dispatchers.Main) {
+                                floating_action_button_audio.visibility = View.GONE
+                                textView_counter_audio.visibility = View.VISIBLE
+                                textView_audio_size.visibility = View.VISIBLE
+                                floating_action_button.animate()
+                                    .rotationBy(360F)
+                                    .setDuration(200)
+                                    .scaleX(1F)
+                                    .scaleY(1F)
+                                    .withEndAction {
+                                        floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
+                                        floating_action_button.animate()
+                                            .rotationBy(0F)
+                                            .setDuration(200)
+                                            .scaleX(1F)
+                                            .scaleY(1F)
+                                            .start()
+                                    }
+                                    .start()
+                            }
                         } else {
-                            mediaRecorderAudio?.setOutputFile(filePathAudio.path)
-                        }
-                        startAudioRecording()
-                        audioRecording = true
-                        withContext(Dispatchers.Main) {
-                            floating_action_button_audio.visibility = View.GONE
-                            textView_counter_audio.visibility = View.VISIBLE
-                            textView_audio_size.visibility = View.VISIBLE
-                            floating_action_button.animate()
-                                .rotationBy(360F)
-                                .setDuration(200)
-                                .scaleX(1F)
-                                .scaleY(1F)
-                                .withEndAction {
-                                    floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
-                                    floating_action_button.animate()
-                                        .rotationBy(0F)
-                                        .setDuration(200)
-                                        .scaleX(1F)
-                                        .scaleY(1F)
-                                        .start()
-                                }
-                                .start()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    context,
+                                    R.string.session_file_limit,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
                     } else {
                         withContext(Dispatchers.Main) {
@@ -933,10 +940,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             coroutineCallVideo.async {
                 try {
                     if (!videoRecording) {
-                        this@LoggerBirdService.requestCode = requestCode
-                        this@LoggerBirdService.resultCode = resultCode
-                        this@LoggerBirdService.dataIntent = data
-                        startScreenRecording()
+                        if (arrayListFileName.size <= 10) {
+                            this@LoggerBirdService.requestCode = requestCode
+                            this@LoggerBirdService.resultCode = resultCode
+                            this@LoggerBirdService.dataIntent = data
+                            startScreenRecording()
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    context,
+                                    R.string.session_file_limit,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
                     } else {
                         if (this@LoggerBirdService::filePathVideo.isInitialized) {
                             if (this@LoggerBirdService.filePathVideo.length() > 0 || controlTimeControllerVideo) {
@@ -1047,6 +1064,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         fileDirectory,
                         "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4"
                     )
+                    addFileNameList(fileName = filePathVideo.absolutePath)
                     mediaCodecsFile = File("/data/misc/media/media_codecs_profiling_results.xml")
                     mediaRecorderVideo?.setOutputFile(filePathVideo.path)
                     mediaRecorderVideo?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
@@ -1633,6 +1651,64 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         return sharedPref.getLong("last_session_time", 0)
     }
 
+    private fun addFileList() {
+        if (getFileList() != null) {
+            arrayListFileName.addAll(getFileList()!!)
+        }
+        arrayListFileName.addAll(PaintView.arrayListFileNameScreenshot)
+        val gson = Gson()
+        val json = gson.toJson(arrayListFileName)
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
+        with(sharedPref.edit()) {
+            putString("file_quantity", json)
+            commit()
+        }
+    }
+
+    private fun getFileList(): ArrayList<String>? {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        val gson = Gson()
+        val json = sharedPref.getString("file_quantity", "")
+        if (json?.isNotEmpty()!!) {
+            return gson.fromJson(json, object : TypeToken<ArrayList<String>>() {}.type)
+        }
+        return null
+    }
+
+    private fun addFileNameList(fileName: String) {
+        arrayListFileName.add(fileName)
+    }
+
+    private fun deleteOldFilesList() {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        val editor: SharedPreferences.Editor = sharedPref.edit()
+        editor.remove("file_quantity")
+        editor.apply()
+    }
+
+    private fun deleteOldFiles() {
+        val arrayListOldFiles: ArrayList<String> = ArrayList()
+        if (getFileList() != null) {
+            arrayListOldFiles.addAll(getFileList()!!)
+            if (arrayListOldFiles.size > 10) {
+                var fileName: File
+                var fileCounter = 0
+                do {
+                    fileName = File(arrayListOldFiles[fileCounter])
+                    if (fileName.exists()) {
+                        fileName.delete()
+                    }
+                    fileCounter++
+                    if (fileCounter == arrayListOldFiles.size) {
+                        break
+                    }
+                } while (arrayListOldFiles.iterator().hasNext())
+                deleteOldFilesList()
+            }
+
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {
