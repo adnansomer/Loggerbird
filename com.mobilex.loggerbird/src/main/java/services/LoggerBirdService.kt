@@ -76,8 +76,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var filePathVideo: File
     private lateinit var filePathAudio: File
     private var isOpen = false
-    private lateinit var fabOpen: Animation
-    private lateinit var fabClose: Animation
     private var screenDensity: Int = 0
     private var projectManager: MediaProjectionManager? = null
     private var mediaProjection: MediaProjection? = null
@@ -317,8 +315,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     }
                 }
                 .setSwipeToDismiss(true)
-                .setBackgroundColor(R.color.colorAccent)
-                .setDuration(5000)
+                .setDuration(3000)
                 .show()
             windowManager = null
             isFabEnable = false
@@ -430,17 +427,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     .setCustomViewInitializer {
                         val textViewSessionTime =
                             it.findViewById<TextView>(R.id.textView_session_time_pop_up)
-                        textViewSessionTime.text =
-                            resources.getString(R.string.total_session_time) + sessionFormatter.format(
-                                totalSessionTime()
-                            ) + "\n" + resources.getString(R.string.last_session_time) + sessionFormatter.format(
-                                lastSessionTime()
-                            )
+//                        textViewSessionTime.text =
+//                            resources.getString(R.string.total_session_time) + sessionFormatter.format(
+//                                totalSessionTime()
+//                            ) + "\n" + resources.getString(R.string.last_session_time) + sessionFormatter.format(
+//                                lastSessionTime()
+//                            )
                     }
-                    .setBackgroundColor(R.color.colorAccent)
                     .setSwipeToDismiss(true)
                     .setEnableAutoDismiss(true)
-                    .setDuration(3000)
                     .show()
                 isFabEnable = true
 
@@ -1169,7 +1164,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             .setIcon(R.drawable.loggerbird)
                             .setSwipeToDismiss(true)
                             .setCookieListener { isActivateDialogShown = false }
-                            .setBackgroundColor(R.color.colorAccent)
                             .setEnableAutoDismiss(false)
                             .setCustomViewInitializer(CookieBar.CustomViewInitializer() {
                                 val txtActivate =
