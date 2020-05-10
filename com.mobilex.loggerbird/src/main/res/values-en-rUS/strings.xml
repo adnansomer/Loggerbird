@@ -44,6 +44,8 @@
     <string name="logger_bird_floating_action_button_activate">Activate</string>
     <string name="logger_bird_floating_action_button_close_message">Loggerbird is closed!</string>
     <string name="logger_bird_floating_action_button_open_message">Loggerbird is activated!</string>
+    <string name="total_session_time">Total life time:</string>
+    <string name="last_session_time">Last session duration:</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
