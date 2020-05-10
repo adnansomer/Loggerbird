@@ -1437,6 +1437,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun audioCounterStop() {
         try {
             activity.runOnUiThread {
+
                 timerTaskAudio?.cancel()
                 timerAudio?.cancel()
                 timerTaskAudio = null
