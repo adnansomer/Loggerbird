@@ -83,7 +83,8 @@ internal class EmailUtil {
                         sendSingleEmail(
                             subject = "log_details",
                             file = file,
-                            context = context
+                            context = context,
+                            progressBar = progressBar
                         )
                         Log.d(
                             "email_time",
@@ -351,9 +352,15 @@ internal class EmailUtil {
             context: Context,
             subject: String,
             message: String? = null,
-            file: File? = null
+            file: File? = null,
+            progressBar: ProgressBar? = null
         ) {
             try {
+                if(progressBar!=null){
+                    withContext(Dispatchers.Main){
+                        progressBar.visibility = View.VISIBLE
+                    }
+                }
                 initializeEmail(subject = subject, context = context)
                 if (file != null) {
                     dataSource = FileDataSource(file.path)
@@ -392,15 +399,16 @@ internal class EmailUtil {
                                 message = message,
                                 toastMessage = toastMessage
                             )
-                        } else {
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(
-                                    context,
-                                    R.string.email_send_failure,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
                         }
+//                        else {
+//                            withContext(Dispatchers.Main) {
+//                                Toast.makeText(
+//                                    context,
+//                                    R.string.email_send_failure,
+//                                    Toast.LENGTH_SHORT
+//                                ).show()
+//                            }
+//                        }
                     }
                 } else {
                     withContext(Dispatchers.Main) {
@@ -409,6 +417,11 @@ internal class EmailUtil {
                             R.string.email_send_failure,
                             Toast.LENGTH_SHORT
                         ).show()
+                    }
+                }
+                if(progressBar!=null){
+                    withContext(Dispatchers.Main){
+                        progressBar.visibility = View.GONE
                     }
                 }
                 transport.close()

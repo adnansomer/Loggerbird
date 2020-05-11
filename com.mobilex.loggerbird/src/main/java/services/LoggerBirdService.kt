@@ -51,7 +51,6 @@ import paint.PaintView
 import utils.EmailUtil
 import utils.LinkedBlockingQueueUtil
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -109,7 +108,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var timerTaskAudio: TimerTask? = null
     private var timerVideoTaskFileSize: TimerTask? = null
     private var timerAudioTaskFileSize: TimerTask? = null
-    private var counterFormatter: SimpleDateFormat = SimpleDateFormat("mm:ss", Locale.getDefault())
     private var fileSizeFormatter: Formatter = Formatter()
     private lateinit var cookieBar: CookieBar
     private lateinit var viewFeedback: View
@@ -119,12 +117,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
     private var sessionTimeEnd: Long? = null
-    private lateinit var sessionFormatterTotal: SimpleDateFormat
-    private lateinit var sessionFormatterLastSession: SimpleDateFormat
     private var timeControllerVideo: Long? = null
     private var controlTimeControllerVideo: Boolean = false
     private lateinit var mediaCodecsFile: File
     private val arrayListFileName: ArrayList<String> = ArrayList()
+    private val coroutineCallFilesAction: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var controlFileAction: Boolean = false
 
 
     //Static global variables:
@@ -245,7 +243,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             logActivityLifeCycleObserver =
                 LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
-            deleteOldFiles()
+            controlActionFiles()
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -437,44 +435,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     .setCustomViewInitializer {
                         val textViewSessionTime =
                             it.findViewById<TextView>(R.id.textView_session_time_pop_up)
-                        sessionFormatterTotal = when {
-                            (totalSessionTime() / 1000) / (60 * 60 * 24 * 30 * 365) >= 1 -> {
-                                SimpleDateFormat("yyyy:mm:dd,HH:mm:ss", Locale.getDefault())
-                            }
-                            (totalSessionTime() / 1000) / (60 * 60 * 24 * 30) >= 1 -> {
-                                SimpleDateFormat("mm:dd,HH:mm:ss", Locale.getDefault())
-                            }
-                            (totalSessionTime() / 1000) / (24 * 60 * 60) >= 1 -> {
-                                SimpleDateFormat("dd,HH:mm:ss", Locale.getDefault())
-                            }
-                            (totalSessionTime() / 1000) / (60 * 60) >= 1 -> {
-                                SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-                            }
-                            else -> {
-                                SimpleDateFormat("mm:ss", Locale.getDefault())
-                            }
-                        }
-                        sessionFormatterLastSession = when {
-                            (lastSessionTime() / 1000) / (60 * 60 * 24 * 30 * 365) >= 1 -> {
-                                SimpleDateFormat("yyyy:mm:dd,HH:mm:ss", Locale.getDefault())
-                            }
-                            (lastSessionTime() / 1000) / (60 * 60 * 24 * 30) >= 1 -> {
-                                SimpleDateFormat("mm:dd,HH:mm:ss", Locale.getDefault())
-                            }
-                            (lastSessionTime() / 1000) / (60 * 60 * 24) >= 1 -> {
-                                SimpleDateFormat("dd,HH:mm:ss", Locale.getDefault())
-                            }
-                            (lastSessionTime() / 1000) / (60 * 60) >= 1 -> {
-                                SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-                            }
-                            else -> {
-                                SimpleDateFormat("mm:ss", Locale.getDefault())
-                            }
-                        }
                         textViewSessionTime.text =
-                            resources.getString(R.string.total_session_time) + sessionFormatterTotal.format(
+                            resources.getString(R.string.total_session_time) + timeStringDay(
                                 totalSessionTime()
-                            ) + "\n" + resources.getString(R.string.last_session_time) + sessionFormatterLastSession.format(
+                            ) + "\n" + resources.getString(R.string.last_session_time) + timeStringDay(
                                 lastSessionTime()
                             )
                     }
@@ -489,6 +453,27 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 checkDrawOtherAppPermission(activity = (context as Activity))
             }
         }
+    }
+
+    private fun timeStringDay(remainingSeconds: Long): String {
+        return String.format(
+            Locale.getDefault(), "%02d:%02d:%02d:%02d", TimeUnit.MILLISECONDS.toDays(remainingSeconds),TimeUnit.MILLISECONDS.toHours(remainingSeconds) - TimeUnit.DAYS.toHours(TimeUnit.MILLISECONDS.toDays(remainingSeconds)),
+            TimeUnit.MILLISECONDS.toMinutes(remainingSeconds) - TimeUnit.HOURS.toMinutes(
+                TimeUnit.MILLISECONDS.toHours(
+                    remainingSeconds
+                )
+            ),
+            TimeUnit.MILLISECONDS.toSeconds(remainingSeconds) - TimeUnit.MINUTES.toSeconds(
+                TimeUnit.MILLISECONDS.toMinutes(
+                    remainingSeconds
+                )
+            )
+        )
+    }
+    private fun timeStringHour(remainingSeconds: Long): String {
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(remainingSeconds),
+            TimeUnit.MILLISECONDS.toMinutes(remainingSeconds) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(remainingSeconds)),
+            TimeUnit.MILLISECONDS.toSeconds(remainingSeconds) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(remainingSeconds)))
     }
 
     internal fun initializeNewActivity(activity: Activity) {
@@ -1231,7 +1216,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         try {
             Log.d("shake", "shake fired!!")
             if (Settings.canDrawOverlays(this.activity)) {
-                initializeFloatingActionButton(activity = this.activity)
+                if (!controlFileAction) {
+                    initializeFloatingActionButton(activity = this.activity)
+                } else {
+                    Toast.makeText(
+                        context,
+                        R.string.files_action_limit,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             } else {
                 if (!isFabEnable) {
                     if (!isActivateDialogShown) {
@@ -1290,11 +1283,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 fileSize
                             )
                         if (fileSize > fileLimit) {
-                            callVideoRecording(
-                                requestCode = requestCode,
-                                resultCode = resultCode,
-                                data = dataIntent
-                            )
+                            timerVideoTaskFileSize?.cancel()
+                            activity.runOnUiThread {
+                                textView_counter_video.performClick()
+                            }
                         }
                         activity.runOnUiThread {
                             textView_video_size.text = sizePrintVideo
@@ -1347,7 +1339,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 fileSize
                             )
                         if (fileSize > fileLimit) {
-                            takeAudioRecording()
+                            timerAudioTaskFileSize?.cancel()
+                            activity.runOnUiThread {
+                                textView_counter_audio.performClick()
+                            }
                         }
                         activity.runOnUiThread {
                             textView_audio_size.text = sizePrintAudio
@@ -1521,10 +1516,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             timeControllerVideo = currentDate.time
                             Log.d("current_time", timeControllerVideo.toString())
                             Log.d("current_time", controlTimeControllerVideo.toString())
-                            val date = Date((counterVideo * 1000).toLong())
+                            val counterTime = (counterVideo*1000).toLong()
                             counterVideo++
                             activity.runOnUiThread {
-                                textView_counter_video.text = counterFormatter.format(date)
+                                textView_counter_video.text = timeStringHour(counterTime)
                             }
                         }
                     }
@@ -1557,10 +1552,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 timerAudio = Timer()
                 timerTaskAudio = object : TimerTask() {
                     override fun run() {
-                        val date = Date((counterAudio * 1000).toLong())
+                        val counterTimer = (counterAudio*1000).toLong()
                         counterAudio++
                         activity.runOnUiThread {
-                            textView_counter_audio.text = counterFormatter.format(date)
+                            textView_counter_audio.text = timeStringHour(counterTimer)
                         }
                     }
                 }
@@ -1685,9 +1680,52 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         val editor: SharedPreferences.Editor = sharedPref.edit()
         editor.remove("file_quantity")
         editor.apply()
+        activity.runOnUiThread {
+            Toast.makeText(
+                context,
+                R.string.files_action_delete_success,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
-    private fun deleteOldFiles() {
+    private fun controlActionFiles() {
+        if (getFileList() != null) {
+            if (getFileList()!!.size > 10) {
+                chooseActionFiles()
+            }
+        }
+    }
+
+    private fun chooseActionFiles() {
+        this.controlFileAction = true
+        CookieBar.build(activity)
+            .setCustomView(R.layout.loggerbird_file_action_popup)
+            .setCustomViewInitializer {
+                val textViewDiscard = it.findViewById<TextView>(R.id.textView_files_action_discard)
+                textViewDiscard.setSafeOnClickListener {
+                    if (this.controlFileAction) {
+                        this.controlFileAction = false
+                        CookieBar.dismiss(activity)
+                        deleteOldFiles()
+                    }
+                }
+                val textViewEmail = it.findViewById<TextView>(R.id.textView_files_action_mail)
+                textViewEmail.setSafeOnClickListener {
+                    if (this.controlFileAction) {
+                        this.controlFileAction = false
+                        CookieBar.dismiss(activity)
+                        sendOldFilesEmail()
+                    }
+                }
+            }
+            .setSwipeToDismiss(false)
+            .setBackgroundColor(R.color.colorAccent)
+            .setEnableAutoDismiss(false)
+            .show()
+    }
+
+    internal fun deleteOldFiles(controlEmailAction: Boolean? = null) {
         val arrayListOldFiles: ArrayList<String> = ArrayList()
         if (getFileList() != null) {
             arrayListOldFiles.addAll(getFileList()!!)
@@ -1701,10 +1739,48 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     }
                     fileCounter++
                     if (fileCounter == arrayListOldFiles.size) {
+                        if (controlEmailAction != null) {
+                            activity.runOnUiThread {
+                                Toast.makeText(
+                                    context,
+                                    R.string.files_action_mail_success,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
                         break
                     }
                 } while (arrayListOldFiles.iterator().hasNext())
                 deleteOldFilesList()
+            }
+
+        }
+    }
+
+    private fun sendOldFilesEmail() {
+        coroutineCallFilesAction.async {
+            try {
+                val arrayListOldFiles: ArrayList<String> = ArrayList()
+                if (getFileList() != null) {
+                    arrayListOldFiles.addAll(getFileList()!!)
+                    var fileName: File
+                    var fileCounter = 0
+                    do {
+                        fileName = File(arrayListOldFiles[fileCounter])
+                        if (fileName.exists()) {
+                            LoggerBird.callEmailSender(context = context, file = fileName)
+                        }
+                        fileCounter++
+                        if (fileCounter == arrayListOldFiles.size) {
+                            LoggerBird.deleteOldFiles(this@LoggerBirdService)
+                            break
+                        }
+                    } while (arrayListOldFiles.iterator().hasNext())
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.actionFileTag)
             }
 
         }

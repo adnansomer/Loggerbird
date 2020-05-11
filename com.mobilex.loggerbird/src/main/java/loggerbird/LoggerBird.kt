@@ -811,6 +811,22 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+        internal fun deleteOldFiles(loggerBirdService: LoggerBirdService){
+            if (controlLogInit) {
+                val controlEmailAction:Boolean = true
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put {
+                        loggerBirdService.deleteOldFiles(controlEmailAction = controlEmailAction)
+                    }
+                }
+                runnableList.add(Runnable {
+                    loggerBirdService.deleteOldFiles(controlEmailAction = controlEmailAction)
+                })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+        }
+
         //In progress method.
         fun callOldSecessionFile(tag: String?) {
             if (runnableList.isEmpty()) {
