@@ -46,6 +46,7 @@
     <string name="logger_bird_floating_action_button_open_message">Loggerbird is activated!</string>
     <string name="total_session_time">Total life time:</string>
     <string name="last_session_time">Last session duration:</string>
+    <string name="session_file_limit">You have achieved maximum save file limit in one session!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>

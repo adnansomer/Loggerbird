@@ -32,7 +32,6 @@
                  android:enabled="true"
                  android:exported="true" />
         <service android:name="services.LoggerBirdService" />
-        <service android:name="services.LoggerBirdPaintService" />
         <service android:name="services.LoggerBirdForegroundServiceVideo"
                  android:foregroundServiceType="mediaProjection"
                  android:stopWithTask="true"
