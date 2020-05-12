@@ -811,16 +811,16 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-        internal fun deleteSingleMediaFile(loggerBirdService: LoggerBirdService){
+        internal fun deleteOldFiles(loggerBirdService: LoggerBirdService){
             if (controlLogInit) {
                 val controlEmailAction:Boolean = true
                 if (runnableList.isEmpty()) {
                     workQueueLinked.put {
-                        loggerBirdService.deleteSingleMediaFile(controlEmailAction = controlEmailAction)
+                        loggerBirdService.deleteOldFiles(controlEmailAction = controlEmailAction)
                     }
                 }
                 runnableList.add(Runnable {
-                    loggerBirdService.deleteSingleMediaFile(controlEmailAction = controlEmailAction)
+                    loggerBirdService.deleteOldFiles(controlEmailAction = controlEmailAction)
                 })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)

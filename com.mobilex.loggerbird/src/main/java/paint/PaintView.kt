@@ -16,6 +16,7 @@ import loggerbird.LoggerBird
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 
@@ -53,6 +54,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         var BRUSH_SIZE = 10
         const val DEFAULT_BRUSH_COLOR = Color.BLACK
         private const val TOUCH_TOLERANCE = 4.0f
+        internal val arrayListFileNameScreenshot:ArrayList<String> = ArrayList()
     }
 
     internal fun init(metrics: DisplayMetrics) {
@@ -169,6 +171,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                     fileDirectory,
                     "loggerbird_screenshot_"+System.currentTimeMillis().toString()+"_"+filename+".png"
                 )
+                arrayListFileNameScreenshot.add(filePath.absolutePath)
                 val os = FileOutputStream(filePath)
                 paintView.draw(canvas)
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, os)

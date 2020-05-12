@@ -71,6 +71,6 @@ internal class Constants {
         const val translateDownloaderTag:String = "Translator Downloader"
         const val jiraAuthenticationtag:String = "Jira Authentication"
         const val checkboxRealmTag:String = "Checkbox Realm"
-        const val singleFileDeleteTag:String = "Single File Delete"
+        const val actionFileTag:String = "Action File"
     }
 }

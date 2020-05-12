@@ -46,6 +46,12 @@
     <string name="logger_bird_floating_action_button_open_message">Loggerbird is activated!</string>
     <string name="total_session_time">Total life time:</string>
     <string name="last_session_time">Last session duration:</string>
+    <string name="session_file_limit">You have achieved maximum save file limit in one session!</string>
+    <string name="files_action_limit">You have achieved maximum save file limit , loggerbird will not be started until file action is choosed!</string>
+    <string name="files_action_mail">Send e-mail and discard!</string>
+    <string name="files_action_discard">Discard files!</string>
+    <string name="files_action_mail_success">Files sent as e-mail successfully!</string>
+    <string name="files_action_delete_success">Files discarded successfully!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>

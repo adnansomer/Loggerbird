@@ -52,6 +52,7 @@ class PaintActivity : Activity() {
     private var onStopCalled = false
     private var pipModeChange = false
     private var lastTime: Long = 0
+    private lateinit var arrayListFileName:ArrayList<String>
 
     companion object {
         private lateinit var activity: Activity
