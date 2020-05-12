@@ -322,6 +322,7 @@ class PaintActivity : Activity() {
                 inflater.inflate(R.layout.activity_paint_seek_view_color, rootView, false)
             val colorSeekBar = paintSeekView.color_seek_bar
             var selectedColor = 0
+
             colorSeekBar.setOnColorChangeListener(object : ColorSeekBar.OnColorChangeListener {
                 override fun onColorChangeListener(color: Int) {
                     if (paintView.eraserEnabled) {
