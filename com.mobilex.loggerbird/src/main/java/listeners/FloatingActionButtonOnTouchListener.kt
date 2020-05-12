@@ -254,7 +254,10 @@ class FloatingActionButtonOnTouchListener(
 //                    floatingActionButtonScreenShot.visibility = View.VISIBLE
 //                    floatingActionButtonVideo.visibility = View.VISIBLE
 //                    floatingActionButtonAudio.visibility = View.VISIBLE
-                    floatingActionButton.performClick()
+
+                    if(!revealLinearLayoutShare.isVisible){
+                        floatingActionButton.performClick()
+                    }
                     lastAction = MotionEvent.ACTION_UP
                     windowManager.updateViewLayout(
                         windowManagerView,

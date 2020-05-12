@@ -376,6 +376,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 textView_share_jira = view.findViewById(R.id.textView_share_jira)
                 textView_dismiss = view.findViewById(R.id.textView_dismiss)
 
+                if(reveal_linear_layout_share.isVisible){
+
+                }
+
                 (floating_action_button_screenshot.layoutParams as FrameLayout.LayoutParams).setMargins(
                     0,
                     450,
@@ -418,6 +422,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     0,
                     0
                 )
+
 
                 if (videoRecording) {
                     //floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
@@ -524,6 +529,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         }
                         .start()
                     reveal_linear_layout_share.visibility = View.VISIBLE
+//                    floating_action_button_audio.visibility = View.GONE
+//                    floating_action_button_screenshot.visibility = View.GONE
+//                    floating_action_button_video.visibility = View.GONE
+//                    textView_counter_video.visibility = View.GONE
+//                    textView_counter_audio.visibility = View.GONE
+                    floating_action_button.performClick()
+
                     shareViewClicks()
 
                 }
@@ -557,10 +569,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 .start()
                         }
                         .start()
-
                     reveal_linear_layout_share.visibility = View.VISIBLE
+                    floating_action_button_audio.visibility = View.GONE
+                    floating_action_button_screenshot.visibility = View.GONE
+                    floating_action_button_video.visibility = View.GONE
+                    textView_counter_video.visibility = View.GONE
+                    textView_counter_audio.visibility = View.GONE
                     shareViewClicks()
-
                 }
             }
         }
@@ -1667,8 +1682,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 }
             }
         }
-
-
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -1680,7 +1693,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         LoggerBird.callEmailSender(context = context, file = filePathMedia)
                         activity.runOnUiThread {
                             reveal_linear_layout_share.visibility = View.GONE
-                            Toast.makeText(context, "Video file is sent", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Media file is sent", Toast.LENGTH_SHORT).show()
                             floating_action_button.animate()
                                 .rotationBy(360F)
                                 .setDuration(200)
