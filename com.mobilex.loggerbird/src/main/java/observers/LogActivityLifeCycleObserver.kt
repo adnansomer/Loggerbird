@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import services.LoggerBirdService
+import java.util.concurrent.TimeUnit
 
 internal class LogActivityLifeCycleObserver() :
     Activity(),
@@ -32,6 +33,10 @@ internal class LogActivityLifeCycleObserver() :
     private lateinit var activity: Activity
     private lateinit var intentService: Intent
     private var coroutineCallService: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var activityStartTime: Long? = null
+    private var activityPauseTime: Long? = null
+    private var totalActivityTime: Long? = 0
+    private var totalTimeSpentInApplication:Long? = 0
 
     //Static global variables.
     internal companion object {
@@ -120,10 +125,11 @@ internal class LogActivityLifeCycleObserver() :
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityStarted(activity: Activity) {
         try {
-            if(LoggerBirdService.controlLoggerBirdServiceInit()){
+            if (LoggerBirdService.controlLoggerBirdServiceInit()) {
                 LoggerBirdService.loggerBirdService.initializeNewActivity(activity = activity)
             }
             val date = Calendar.getInstance().time
+            activityStartTime = date.time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onStart"
@@ -149,7 +155,7 @@ internal class LogActivityLifeCycleObserver() :
                     LoggerBirdService.controlAudioPermission -> {
                         checkAudioPermissionResult()
                     }
-                    LoggerBirdService.controlDrawableSettingsPermission ->{
+                    LoggerBirdService.controlDrawableSettingsPermission -> {
                         checkDrawOtherAppPermissionResult(activity = activity)
 //                        LoggerBirdService.sd.start(sensorManager = LoggerBirdService.sensorManager)
                     }
@@ -161,6 +167,7 @@ internal class LogActivityLifeCycleObserver() :
             LoggerBirdService.controlVideoPermission = false
             LoggerBirdService.controlDrawableSettingsPermission = false
             val date = Calendar.getInstance().time
+            activityStartTime = date.time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onResume"
@@ -179,15 +186,19 @@ internal class LogActivityLifeCycleObserver() :
     override fun onActivityPaused(activity: Activity) {
         try {
             if (LoggerBirdService.controlPermissionRequest) {
-                if(LoggerBirdService.controlIntentForegroundServiceVideo()){
+                if (LoggerBirdService.controlIntentForegroundServiceVideo()) {
                     (context as Activity).stopService(LoggerBirdService.intentForegroundServiceVideo)
                 }
             }
             val date = Calendar.getInstance().time
+            activityPauseTime = date.time
+            totalActivityTime = totalActivityTime!! +  activityPauseTime!! - activityStartTime!!
+            totalTimeSpentInApplication = totalTimeSpentInApplication!! + totalActivityTime!!
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onPause"
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName +" "+"Total time In This Activity:"+ timeString(totalActivityTime!!) +"\n")
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -228,6 +239,7 @@ internal class LogActivityLifeCycleObserver() :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onDestroy"
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName +" "+ "Total activity time:"+ timeString(totalTimeSpentInApplication!!)+"\n")
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -283,7 +295,11 @@ internal class LogActivityLifeCycleObserver() :
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
         ) {
-            Toast.makeText(context, R.string.permission_write_external_storage_denied, Toast.LENGTH_SHORT)
+            Toast.makeText(
+                context,
+                R.string.permission_write_external_storage_denied,
+                Toast.LENGTH_SHORT
+            )
                 .show()
         } else {
             Toast.makeText(
@@ -312,6 +328,22 @@ internal class LogActivityLifeCycleObserver() :
 
     internal fun activityInstance(): Activity {
         return this.activity
+    }
+    private fun timeString(remainingSeconds: Long): String {
+        return String.format(
+            Locale.getDefault(), "%02d:%02d:%02d:%02d", TimeUnit.MILLISECONDS.toDays(remainingSeconds),
+            TimeUnit.MILLISECONDS.toHours(remainingSeconds) - TimeUnit.DAYS.toHours(TimeUnit.MILLISECONDS.toDays(remainingSeconds)),
+            TimeUnit.MILLISECONDS.toMinutes(remainingSeconds) - TimeUnit.HOURS.toMinutes(
+                TimeUnit.MILLISECONDS.toHours(
+                    remainingSeconds
+                )
+            ),
+            TimeUnit.MILLISECONDS.toSeconds(remainingSeconds) - TimeUnit.MINUTES.toSeconds(
+                TimeUnit.MILLISECONDS.toMinutes(
+                    remainingSeconds
+                )
+            )
+        )
     }
 
 }
