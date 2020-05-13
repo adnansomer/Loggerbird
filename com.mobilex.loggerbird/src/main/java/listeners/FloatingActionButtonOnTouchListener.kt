@@ -9,6 +9,8 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.core.view.isVisible
+import com.google.android.material.circularreveal.CircularRevealLinearLayout
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mobilex.loggerbird.R
@@ -28,7 +30,8 @@ class FloatingActionButtonOnTouchListener(
     private val textViewCounterVideo:TextView,
     private val textViewCounterAudio:TextView,
     private val textViewVideoSize:TextView,
-    private val textViewAudiosize:TextView
+    private val textViewAudiosize:TextView,
+    private val revealLinearLayoutShare: CircularRevealLinearLayout
 ) : View.OnTouchListener {
     private var windowManagerDx: Float = 0F
     private var windowManagerDy: Float = 0F
@@ -251,7 +254,10 @@ class FloatingActionButtonOnTouchListener(
 //                    floatingActionButtonScreenShot.visibility = View.VISIBLE
 //                    floatingActionButtonVideo.visibility = View.VISIBLE
 //                    floatingActionButtonAudio.visibility = View.VISIBLE
-                    floatingActionButton.performClick()
+
+                    if(!revealLinearLayoutShare.isVisible){
+                        floatingActionButton.performClick()
+                    }
                     lastAction = MotionEvent.ACTION_UP
                     windowManager.updateViewLayout(
                         windowManagerView,
