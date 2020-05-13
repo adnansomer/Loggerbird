@@ -3,16 +3,9 @@ package utils
 import android.util.Log
 import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
-import com.atlassian.jira.rest.client.api.domain.BasicProject
-import com.atlassian.jira.rest.client.api.domain.BasicUser
-import com.atlassian.jira.rest.client.api.domain.Issue
-import com.atlassian.jira.rest.client.api.domain.IssueType
-import com.atlassian.jira.rest.client.api.domain.input.IssueInput
+import com.atlassian.jira.rest.client.api.domain.*
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
-import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.sun.jersey.api.client.Client
 import com.sun.jersey.api.client.ClientResponse
 import com.sun.jersey.api.client.WebResource
@@ -28,9 +21,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.simple.*;
 import org.json.simple.parser.*;
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
+import java.io.*
 import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
@@ -38,11 +29,11 @@ import java.net.URL
 
 class JiraAuthentication {
     private val coroutineCallJira: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    internal fun callJiraIssue() {
+    internal fun callJiraIssue(filePathName:File? = null) {
         coroutineCallJira.async {
             try {
 //                loginToJira()
-                okHttpJiraAuthentication()
+                okHttpJiraAuthentication(filePathName = filePathName)
 //                okHttpJiraAuthentication()
 //                jiraAuthentication()
 //                val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
@@ -91,7 +82,7 @@ class JiraAuthentication {
         Log.d("response", responseClient.status.toString())
     }
 
-    private fun okHttpJiraAuthentication() {
+    private fun okHttpJiraAuthentication(filePathName: File?) {
         val MEDIA_TYPE: MediaType = "application/json".toMediaTypeOrNull()!!
         val postData: JSONObject = JSONObject()
         postData.put("username", "appcaesars@gmail.com")
@@ -131,11 +122,24 @@ class JiraAuthentication {
 //                    val basicProject = BasicProject(null,"LGB",10004,"LoggerBird")
                     val issueBuilder = IssueInputBuilder("LGB", 10004,"LOGGERBIRD_3!")
                     issueBuilder.setDescription("LoggerBird_2")
-                    val basicUser = BasicUser(null,"Adnan Somer","Adnan Somer")
+                    val basicUser = BasicUser(URI("https://appcaesars.atlassian.net/rest/api/latest/issue/10045"),"Adnan","Adnan")
                     issueBuilder.setAssignee(basicUser)
+//                    issueBuilder.setReporter(basicUser)
+//                    issueBuilder.addProperty()
 //                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
-                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
-                    Log.d("issue",issueCreated)
+//                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
+                    val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
+                    val issueKey  = basicIssue.key
+                    val issueUri = basicIssue.self
+                    if(filePathName != null){
+                        val inputStream = FileInputStream(filePathName)
+                        val issue:Promise<Issue> = restClient.issueClient.getIssue(issueKey)
+                        issueClient.addAttachment(issue.get().attachmentsUri,inputStream,filePathName.absolutePath)
+//                        val issueInput:IssueInput = IssueInput.createWithFields(FieldInput(IssueFieldId.ASSIGNEE_FIELD,ComplexIssueInputFieldValue.with("Adnan","Adnan")))
+//                        issueClient.updateIssue(issueUri,issueInput).claim()
+                    }
+                    Log.d("issue",issueUri.toString())
+                    Log.d("issue",issueKey.toString())
                 } catch (e: Exception) {
                     e.printStackTrace()
                     LoggerBird.callEnqueue()

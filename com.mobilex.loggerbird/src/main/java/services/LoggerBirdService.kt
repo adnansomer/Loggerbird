@@ -127,6 +127,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private val arrayListFileName: ArrayList<String> = ArrayList()
     private val coroutineCallFilesAction: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlFileAction: Boolean = false
+    private  val jiraAuthentication = JiraAuthentication()
 
 
     //Static global variables:
@@ -650,8 +651,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
 
             textView_share_jira.setOnClickListener {
-                val jiraAuthentication = JiraAuthentication()
-                jiraAuthentication.callJiraIssue()
+                jiraAuthentication.callJiraIssue(filePathName = filePathMedia)
             }
 
             textView_discard.setOnClickListener {
