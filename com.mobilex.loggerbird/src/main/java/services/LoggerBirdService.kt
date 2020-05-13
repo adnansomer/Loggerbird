@@ -253,8 +253,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
             controlActionFiles()
-//            val jiraAuthentication = JiraAuthentication()
-//            jiraAuthentication.callJiraIssue()
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -652,7 +650,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
 
             textView_share_jira.setOnClickListener {
-
+                val jiraAuthentication = JiraAuthentication()
+                jiraAuthentication.callJiraIssue()
             }
 
             textView_discard.setOnClickListener {
