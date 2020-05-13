@@ -49,6 +49,7 @@ import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
 import paint.PaintView
 import utils.EmailUtil
+import utils.JiraAuthentication
 import utils.LinkedBlockingQueueUtil
 import java.io.File
 import java.util.*
@@ -244,6 +245,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
             controlActionFiles()
+            val jiraAuthentication = JiraAuthentication()
+            jiraAuthentication.callJiraIssue()
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
