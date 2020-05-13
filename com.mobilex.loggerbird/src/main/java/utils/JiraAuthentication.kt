@@ -1,11 +1,10 @@
 package utils
 
 import android.util.Log
-import com.atlassian.httpclient.api.HttpClient
-import com.atlassian.httpclient.api.Response
 import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
-import com.atlassian.jira.rest.client.api.domain.Issue
+import com.atlassian.jira.rest.client.api.domain.*
+import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
 import com.sun.jersey.api.client.Client
 import com.sun.jersey.api.client.ClientResponse
@@ -17,12 +16,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.apache.http.HttpRequest
-import java.io.IOException
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.simple.*;
+import org.json.simple.parser.*;
+import java.io.*
 import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
@@ -30,10 +29,11 @@ import java.net.URL
 
 class JiraAuthentication {
     private val coroutineCallJira: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    internal fun callJiraIssue() {
+    internal fun callJiraIssue(filePathName:File? = null) {
         coroutineCallJira.async {
             try {
-                okHttpJiraAuthentication()
+//                loginToJira()
+                okHttpJiraAuthentication(filePathName = filePathName)
 //                okHttpJiraAuthentication()
 //                jiraAuthentication()
 //                val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
@@ -82,14 +82,22 @@ class JiraAuthentication {
         Log.d("response", responseClient.status.toString())
     }
 
-    private fun okHttpJiraAuthentication() {
+    private fun okHttpJiraAuthentication(filePathName: File?) {
+        val MEDIA_TYPE: MediaType = "application/json".toMediaTypeOrNull()!!
+        val postData: JSONObject = JSONObject()
+        postData.put("username", "appcaesars@gmail.com")
+        postData.put("password", "N9id4dk3xViS0bcp7olpD37C")
         val auth = String(Base64.encode("appcaesars@gmail.com" + ":" + "N9id4dk3xViS0bcp7olpD37C"))
         val headerAuthorization = "Authorization"
         val headerAuthorizationValue = "Basic$auth"
+        val headerType = "application/json"
         val client: OkHttpClient = OkHttpClient()
+        val body = postData.toString().toRequestBody(MEDIA_TYPE)
         val request: Request =
-            Request.Builder().header(headerAuthorization, headerAuthorizationValue)
-                .url("https://appcaesars.atlassian.net/secure/RapidBoard.jspa?projectKey=LGB&useStoredSettings=true&rapidView=1")
+            Request.Builder()
+                .post(body)
+                .get()
+                .url("https://appcaesars.atlassian.net/browse/LGB-1")
                 .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -97,18 +105,66 @@ class JiraAuthentication {
             }
 
             override fun onResponse(call: Call, response: okhttp3.Response) {
-                val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
-                val jiraServerUri: URI =
-                    URI("https://appcaesars.atlassian.net/secure/RapidBoard.jspa?projectKey=LGB&useStoredSettings=true&rapidView=1")
-                val restClient: JiraRestClient = factory.createWithBasicHttpAuthentication(
-                    jiraServerUri,
-                    "appcaesars@gmail.com",
-                    "umbasta1"
-                )
-                Log.d("response", restClient.searchClient.getFilter(1).claim().description)
-                val promise: Promise<Issue> = restClient.issueClient.getIssue("LGB-1")
-                val issue: Issue = promise.claim()
-                Log.d("issue", issue.description!!)
+                Log.d("response_message", response.message)
+                Log.d("response_code", response.code.toString())
+                Log.d("response", response.body?.string())
+                try {
+                    val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
+                    val jiraServerUri: URI =
+                        URI("https://appcaesars.atlassian.net")
+                    val restClient: JiraRestClient = factory.createWithBasicHttpAuthentication(
+                        jiraServerUri,
+                        "appcaesars@gmail.com",
+                        "uPPXsUw0FabxeOa5CkDm0BAE"
+                    )
+                    val issueClient = restClient.issueClient
+//                    val issueType = IssueType(null,10004,"bug",false,"Assignment LoggerBird",null)
+//                    val basicProject = BasicProject(null,"LGB",10004,"LoggerBird")
+                    val issueBuilder = IssueInputBuilder("LGB", 10004,"LOGGERBIRD_3!")
+                    issueBuilder.setDescription("LoggerBird_2")
+                    val basicUser = BasicUser(URI("https://appcaesars.atlassian.net/rest/api/latest/issue/10045"),"Adnan","Adnan")
+                    issueBuilder.setAssignee(basicUser)
+//                    issueBuilder.setReporter(basicUser)
+//                    issueBuilder.addProperty()
+//                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
+//                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
+                    val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
+                    val issueKey  = basicIssue.key
+                    val issueUri = basicIssue.self
+                    if(filePathName != null){
+                        val inputStream = FileInputStream(filePathName)
+                        val issue:Promise<Issue> = restClient.issueClient.getIssue(issueKey)
+                        issueClient.addAttachment(issue.get().attachmentsUri,inputStream,filePathName.absolutePath)
+//                        val issueInput:IssueInput = IssueInput.createWithFields(FieldInput(IssueFieldId.ASSIGNEE_FIELD,ComplexIssueInputFieldValue.with("Adnan","Adnan")))
+//                        issueClient.updateIssue(issueUri,issueInput).claim()
+                    }
+                    Log.d("issue",issueUri.toString())
+                    Log.d("issue",issueKey.toString())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    LoggerBird.callEnqueue()
+                    LoggerBird.callExceptionDetails(exception = e , tag = Constants.jiraAuthenticationtag)
+                }
+
+//
+//                URI jiraServerUri = new URI("http://localhost:8085/rest/api/2/issue");
+//                JiraRestClient restClient = null;
+//                final AsynchronousJiraRestClientFactory factory = new AsynchronousJiraRestClientFactory();
+//                restClient = factory.createWithBasicHttpAuthentication(jiraServerUri, "Test", "12345");
+//                final IssueRestClient client = restClient.getIssueClient();
+//                IssueInputBuilder issueBuilder = new IssueInputBuilder("PU",1L,"Testing the ISSUES");
+//                issueBuilder.setDescription("issue ssss description");
+//                IssueInput issueInput = issueBuilder.build();
+//                BasicIssue issue = client.createIssue(issueInput).claim();
+//                System.out.println("isss "+issue.toString());
+
+
+
+//                val promise: Promise<Issue> = restClient.issueClient.getIssue("LGB")
+//                val issue: Issue = promise.claim()
+//
+////                val issue = basicIssue.claim()
+//                Log.d("issue",issue.key + "\n" + issue.summary)
             }
         })
     }
@@ -128,4 +184,36 @@ class JiraAuthentication {
 //            LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
 //        }
 //    }
+
+    private fun loginToJira() {
+        var loginResponse: String = ""
+        val url = URL("https://appcaesars.atlassian.net/rest/api/2/issue/createmeta")
+        val conn = (url.openConnection() as HttpURLConnection)
+        conn.doOutput = true
+        conn.requestMethod = "GET"
+        conn.setRequestProperty("Content-Type", "application/json")
+        val input =
+            "{\"username\":\"" + "appcaesars@gmail.com" + "\",\"password\":\"" + "uPPXsUw0FabxeOa5CkDm0BAE" + "\"}"
+        val os = conn.outputStream
+        os.write(input.toByteArray())
+        os.flush()
+        if (conn.responseCode == 200) {
+            val br = BufferedReader(InputStreamReader((conn.inputStream)))
+            while ((br.readLine()) != null) {
+                loginResponse += br.readLine()
+            }
+            Log.d("response_json", parseJiraSession(loginResponse))
+        } else {
+            Log.d("response", conn.responseCode.toString())
+        }
+
+    }
+
+    private fun parseJiraSession(input: String): String {
+        val parser = JSONParser()
+        val obj: Any = parser.parse(input)
+        val jsonObject: JSONObject = (obj as JSONObject)
+        val sessionJsonObject: JSONObject = (jsonObject["session"] as JSONObject)
+        return (sessionJsonObject["value"] as String)
+    }
 }
