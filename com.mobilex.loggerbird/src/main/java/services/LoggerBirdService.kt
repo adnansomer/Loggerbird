@@ -26,12 +26,15 @@ import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
 import android.view.animation.Animation
-import android.widget.*
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.preference.PreferenceManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.preference.PreferenceManager
 import com.google.android.material.circularreveal.CircularRevealLinearLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
@@ -40,6 +43,7 @@ import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
+import kotlinx.android.synthetic.main.activity_paint_seek_view_color.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -252,6 +256,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             logActivityLifeCycleObserver =
                 LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
+
             controlActionFiles()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -550,7 +555,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     textView_counter_audio.visibility = View.GONE
                     textView_counter_video.visibility = View.GONE
                     reveal_linear_layout_share.visibility = View.VISIBLE
-                    floating_action_button.performClick()
                     floating_action_button_audio.visibility = View.GONE
                     shareViewClicks()
                 }
@@ -599,8 +603,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     textView_counter_audio.visibility = View.GONE
                     textView_counter_video.visibility = View.GONE
                     reveal_linear_layout_share.visibility = View.VISIBLE
-                    floating_action_button.performClick()
-                    shareViewClicks()
+                    //shareViewClicks()
 
                 }
             }
@@ -1941,7 +1944,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (filePathMedia.exists()) {
                 filePathMedia.delete()
             }
-
         }
     }
 
@@ -1953,4 +1955,5 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
         }
     }
+
 }
