@@ -570,7 +570,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     textView_counter_audio.visibility = View.GONE
                     textView_counter_video.visibility = View.GONE
                     reveal_linear_layout_share.visibility = View.VISIBLE
-//                    floating_action_button.performClick()
                     floating_action_button_audio.visibility = View.GONE
                     shareViewClicks(filePathMedia = filePathAudio)
                 }
@@ -619,7 +618,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     textView_counter_audio.visibility = View.GONE
                     textView_counter_video.visibility = View.GONE
                     reveal_linear_layout_share.visibility = View.VISIBLE
-//                    floating_action_button.performClick()
                     shareViewClicks(filePathMedia = filePathVideo)
 
                 }
@@ -652,6 +650,25 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
             textView_share_jira.setOnClickListener {
                 jiraAuthentication.callJiraIssue(filePathName = filePathMedia)
+
+                activity.runOnUiThread {
+                    reveal_linear_layout_share.visibility = View.GONE
+                    floating_action_button.animate()
+                        .rotationBy(360F)
+                        .setDuration(200)
+                        .scaleX(1F)
+                        .scaleY(1F)
+                        .withEndAction {
+                            floating_action_button.setImageResource(R.drawable.loggerbird)
+                            floating_action_button.animate()
+                                .rotationBy(0F)
+                                .setDuration(200)
+                                .scaleX(1F)
+                                .scaleY(1F)
+                                .start()
+                        }
+                        .start()
+                }
             }
 
             textView_discard.setOnClickListener {
