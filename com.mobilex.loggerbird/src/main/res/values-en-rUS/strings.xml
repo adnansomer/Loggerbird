@@ -52,6 +52,9 @@
     <string name="files_action_discard">Discard files!</string>
     <string name="files_action_mail_success">Files sent as e-mail successfully!</string>
     <string name="files_action_delete_success">Files discarded successfully!</string>
+    <string name="share_video_delete">Video file is deleted</string>
+    <string name="share_audio_delete">Audio file is deleted</string>
+    <string name="share_file_sent">Media file is sent!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>

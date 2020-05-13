@@ -45,7 +45,6 @@ import android.util.DisplayMetrics
 class FragmentLoggerBird(private val viewFragment: View, private val mContext: Context) :
     Fragment() {
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudio: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var audioRecording = false
@@ -54,8 +53,6 @@ class FragmentLoggerBird(private val viewFragment: View, private val mContext: C
     private var state: Boolean = false
     private lateinit var filePath: File
     private var isOpen = false
-    private lateinit var fabOpen: Animation
-    private lateinit var fabClose: Animation
     private var screenDensity: Int = 0
     private var projectManager: MediaProjectionManager? = null
     private var mediaProjection: MediaProjection? = null

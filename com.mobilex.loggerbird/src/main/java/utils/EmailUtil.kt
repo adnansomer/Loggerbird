@@ -315,8 +315,8 @@ internal class EmailUtil {
                     mailSession
                 )
                 multiPart = MimeMultipart()
-                mimeMessage.setFrom(InternetAddress("appcaesars@gmail.com"))
-                mimeMessage.addRecipients(Message.RecipientType.TO, "appcaesars@gmail.com")
+                mimeMessage.setFrom(InternetAddress("adnansomer@gmail.com"))
+                mimeMessage.addRecipients(Message.RecipientType.TO, "adnansomer@gmail.com")
                 mimeMessage.subject = subject
                 mimeBodyPart = MimeBodyPart()
                 transport.connect()

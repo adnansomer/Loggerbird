@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
-    android:background="@color/colorAccent"
+    android:background="@color/cookieBarColor"
     android:gravity="center_vertical"
     android:orientation="vertical"
     android:paddingBottom="16dp"
@@ -26,7 +26,7 @@
             android:gravity="start"
             android:text="@string/logger_bird_floating_action_button_close_message"
             android:textColor="@android:color/white"
-            android:textSize="14sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/textView_feed_back_pop_up"
@@ -36,8 +36,8 @@
             android:gravity="end"
             android:text="@string/checkBox_feedback_title"
             android:textColor="@android:color/white"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:textSize="13sp"
+            android:textStyle="italic" />
 
     </LinearLayout>
 
