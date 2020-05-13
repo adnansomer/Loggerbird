@@ -411,6 +411,7 @@ class PaintActivity : Activity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun showFileSavingDialog() {
         try {
             val saveDialog = AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK)
@@ -421,7 +422,6 @@ class PaintActivity : Activity() {
             saveDialog.setPositiveButton(resources.getText(R.string.snackbar_ok)) { _, _ ->
                 fileName = saveView.paint_save_issue.text.toString()
                 paintView.saveImage(fileName)
-
                 val snackBarFileSaving: Snackbar =
                     Snackbar.make(paintView, "Successfully saved!", Snackbar.LENGTH_SHORT)
                 snackBarFileSaving.setAction("Dismiss") {
@@ -437,7 +437,6 @@ class PaintActivity : Activity() {
                     finish()
                     overridePendingTransition(R.anim.slide_in_bottom,R.anim.no_animation)
                 }
-
             }
             saveDialog.setNegativeButton(
                 R.string.snackbar_cancel
@@ -581,6 +580,7 @@ class PaintActivity : Activity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun fabScreenshotAnimation(){
         LoggerBirdService.floating_action_button.animate()
             .rotationBy(360F)

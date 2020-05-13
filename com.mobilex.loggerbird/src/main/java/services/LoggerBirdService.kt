@@ -127,7 +127,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private val arrayListFileName: ArrayList<String> = ArrayList()
     private val coroutineCallFilesAction: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlFileAction: Boolean = false
-    private  val jiraAuthentication = JiraAuthentication()
+    private val jiraAuthentication = JiraAuthentication()
 
 
     //Static global variables:
@@ -213,6 +213,34 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 return true
             }
             return false
+        }
+
+        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+        internal fun callShareView(filePathMedia: File? = null) {
+            if (filePathMedia != null) {
+                loggerBirdService.activity.runOnUiThread {
+                    loggerBirdService.shareView(filePathMedia = filePathMedia)
+                }
+            } else {
+                loggerBirdService.activity.runOnUiThread {
+                    reveal_linear_layout_share.visibility = View.GONE
+                    floating_action_button.animate()
+                        .rotationBy(360F)
+                        .setDuration(200)
+                        .scaleX(1F)
+                        .scaleY(1F)
+                        .withEndAction {
+                            floating_action_button.setImageResource(R.drawable.loggerbird)
+                            floating_action_button.animate()
+                                .rotationBy(0F)
+                                .setDuration(200)
+                                .scaleX(1F)
+                                .scaleY(1F)
+                                .start()
+                        }
+                        .start()
+                }
+            }
         }
     }
 
@@ -543,36 +571,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             textView_counter_audio.setSafeOnClickListener {
                 if (textView_counter_audio.visibility == View.VISIBLE) {
                     takeAudioRecording()
-                    floating_action_button.animate()
-                        .rotationBy(360F)
-                        .setDuration(200)
-                        .scaleX(1F)
-                        .scaleY(1F)
-                        .withEndAction {
-                            if (videoRecording) {
-                                floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
-                            } else if (screenshotDrawing) {
-                                floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
-                            } else {
-                                floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
-                            }
-                            floating_action_button.animate()
-                                .rotationBy(0F)
-                                .setDuration(200)
-                                .scaleX(1F)
-                                .scaleY(1F)
-                                .start()
-                        }
-                        .start()
-
-                    floating_action_button_screenshot.visibility = View.GONE
-                    floating_action_button_video.visibility = View.GONE
-                    textView_counter_audio.visibility = View.GONE
-                    textView_counter_video.visibility = View.GONE
-                    reveal_linear_layout_share.visibility = View.VISIBLE
+                    shareView(filePathMedia = filePathAudio)
 //                    floating_action_button.performClick()
-                    floating_action_button_audio.visibility = View.GONE
-                    shareViewClicks(filePathMedia = filePathAudio)
                 }
             }
 
@@ -592,36 +592,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         resultCode = resultCode,
                         data = dataIntent
                     )
-                    floating_action_button.animate()
-                        .rotationBy(360F)
-                        .setDuration(200)
-                        .scaleX(1F)
-                        .scaleY(1F)
-                        .withEndAction {
-                            if (audioRecording) {
-                                floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
-                            } else if (screenshotDrawing) {
-                                floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
-                            } else {
-                                floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
-                            }
-                            floating_action_button.animate()
-                                .rotationBy(0F)
-                                .setDuration(200)
-                                .scaleX(1F)
-                                .scaleY(1F)
-                                .start();
-                        }
-                        .start()
-                    floating_action_button_video.visibility = View.GONE
-                    floating_action_button_screenshot.visibility = View.GONE
-                    floating_action_button_audio.visibility = View.GONE
-                    textView_counter_audio.visibility = View.GONE
-                    textView_counter_video.visibility = View.GONE
-                    reveal_linear_layout_share.visibility = View.VISIBLE
+                    shareView(filePathMedia = filePathVideo)
 //                    floating_action_button.performClick()
-                    shareViewClicks(filePathMedia = filePathVideo)
-
                 }
             }
         }
@@ -641,6 +613,42 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 revealLinearLayoutShare = reveal_linear_layout_share
             )
         )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun shareView(filePathMedia: File) {
+        floating_action_button.animate()
+            .rotationBy(360F)
+            .setDuration(200)
+            .scaleX(1F)
+            .scaleY(1F)
+            .withEndAction {
+                when {
+                    audioRecording -> {
+                        floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
+                    }
+                    screenshotDrawing -> {
+                        floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
+                    }
+                    else -> {
+                        floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
+                    }
+                }
+                floating_action_button.animate()
+                    .rotationBy(0F)
+                    .setDuration(200)
+                    .scaleX(1F)
+                    .scaleY(1F)
+                    .start();
+            }
+            .start()
+        floating_action_button_video.visibility = View.GONE
+        floating_action_button_screenshot.visibility = View.GONE
+        floating_action_button_audio.visibility = View.GONE
+        textView_counter_audio.visibility = View.GONE
+        textView_counter_video.visibility = View.GONE
+        reveal_linear_layout_share.visibility = View.VISIBLE
+        shareViewClicks(filePathMedia = filePathMedia)
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -860,7 +868,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 R.anim.slide_in_right,
                                 R.anim.slide_out_left
                             )
-
                         }
 
                     } else {
