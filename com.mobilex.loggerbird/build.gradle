@@ -108,6 +108,10 @@ dependencies {
     implementation ('com.googlecode.json-simple:json-simple:1.1.1'){
         exclude group: 'org.hamcrest'
     }
+
+    implementation 'com.github.mejdi14:AndroidColorPicker:1.0.2'
+    implementation ('com.google.android.material:material:1.2.0-alpha06')
+    implementation ('com.makeramen:roundedimageview:2.3.0')
 }
 repositories {
     maven { url "https://jitpack.io" }

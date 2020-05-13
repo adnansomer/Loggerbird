@@ -80,7 +80,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var state: Boolean = false
     private lateinit var filePathVideo: File
     private lateinit var filePathAudio: File
-    private lateinit var filePathMedia: File
     private var isOpen = false
     private lateinit var fabOpen: Animation
     private lateinit var fabClose: Animation
@@ -137,10 +136,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         private lateinit var floating_action_button_screenshot: FloatingActionButton
         private lateinit var floating_action_button_video: FloatingActionButton
         private lateinit var floating_action_button_audio: FloatingActionButton
-        private lateinit var reveal_linear_layout_share : CircularRevealLinearLayout
-        private lateinit var textView_send_email : TextView
-        private lateinit var textView_share_jira : TextView
-        private lateinit var textView_discard : TextView
+        private lateinit var reveal_linear_layout_share: CircularRevealLinearLayout
+        private lateinit var textView_send_email: TextView
+        private lateinit var textView_share_jira: TextView
+        private lateinit var textView_discard: TextView
         //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
         private lateinit var textView_counter_audio: TextView
@@ -254,8 +253,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
             controlActionFiles()
-            val jiraAuthentication = JiraAuthentication()
-            jiraAuthentication.callJiraIssue()
+//            val jiraAuthentication = JiraAuthentication()
+//            jiraAuthentication.callJiraIssue()
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -376,9 +375,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 this.view = view
                 floatingActionButtonView = view
                 floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-                floating_action_button_screenshot = view.findViewById(R.id.fragment_floating_action_button_screenshot)
-                floating_action_button_video = view.findViewById(R.id.fragment_floating_action_button_video)
-                floating_action_button_audio = view.findViewById(R.id.fragment_floating_action_button_audio)
+                floating_action_button_screenshot =
+                    view.findViewById(R.id.fragment_floating_action_button_screenshot)
+                floating_action_button_video =
+                    view.findViewById(R.id.fragment_floating_action_button_video)
+                floating_action_button_audio =
+                    view.findViewById(R.id.fragment_floating_action_button_audio)
                 reveal_linear_layout_share = view.findViewById(R.id.reveal_linear_layout_share)
                 textView_send_email = view.findViewById(R.id.textView_send_email)
                 textView_discard = view.findViewById(R.id.textView_discard)
@@ -469,7 +471,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     private fun timeStringDay(remainingSeconds: Long): String {
         return String.format(
-            Locale.getDefault(), "%02d:%02d:%02d:%02d", TimeUnit.MILLISECONDS.toDays(remainingSeconds),TimeUnit.MILLISECONDS.toHours(remainingSeconds) - TimeUnit.DAYS.toHours(TimeUnit.MILLISECONDS.toDays(remainingSeconds)),
+            Locale.getDefault(),
+            "%02d:%02d:%02d:%02d",
+            TimeUnit.MILLISECONDS.toDays(remainingSeconds),
+            TimeUnit.MILLISECONDS.toHours(remainingSeconds) - TimeUnit.DAYS.toHours(
+                TimeUnit.MILLISECONDS.toDays(remainingSeconds)
+            ),
             TimeUnit.MILLISECONDS.toMinutes(remainingSeconds) - TimeUnit.HOURS.toMinutes(
                 TimeUnit.MILLISECONDS.toHours(
                     remainingSeconds
@@ -482,10 +489,21 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             )
         )
     }
+
     private fun timeStringHour(remainingSeconds: Long): String {
-        return String.format(Locale.getDefault(), "%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(remainingSeconds),
-            TimeUnit.MILLISECONDS.toMinutes(remainingSeconds) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(remainingSeconds)),
-            TimeUnit.MILLISECONDS.toSeconds(remainingSeconds) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(remainingSeconds)))
+        return String.format(
+            Locale.getDefault(), "%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(remainingSeconds),
+            TimeUnit.MILLISECONDS.toMinutes(remainingSeconds) - TimeUnit.HOURS.toMinutes(
+                TimeUnit.MILLISECONDS.toHours(
+                    remainingSeconds
+                )
+            ),
+            TimeUnit.MILLISECONDS.toSeconds(remainingSeconds) - TimeUnit.MINUTES.toSeconds(
+                TimeUnit.MILLISECONDS.toMinutes(
+                    remainingSeconds
+                )
+            )
+        )
     }
 
     internal fun initializeNewActivity(activity: Activity) {
@@ -553,9 +571,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     textView_counter_audio.visibility = View.GONE
                     textView_counter_video.visibility = View.GONE
                     reveal_linear_layout_share.visibility = View.VISIBLE
-                    floating_action_button.performClick()
+//                    floating_action_button.performClick()
                     floating_action_button_audio.visibility = View.GONE
-                    shareViewClicks()
+                    shareViewClicks(filePathMedia = filePathAudio)
                 }
             }
 
@@ -602,8 +620,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     textView_counter_audio.visibility = View.GONE
                     textView_counter_video.visibility = View.GONE
                     reveal_linear_layout_share.visibility = View.VISIBLE
-                    floating_action_button.performClick()
-                    shareViewClicks()
+//                    floating_action_button.performClick()
+                    shareViewClicks(filePathMedia = filePathVideo)
 
                 }
             }
@@ -627,11 +645,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun shareViewClicks(){
-        if(reveal_linear_layout_share.isVisible){
-
+    private fun shareViewClicks(filePathMedia: File) {
+        if (reveal_linear_layout_share.isVisible) {
             textView_send_email.setOnClickListener {
-                sendSingleMediaFile()
+                sendSingleMediaFile(filePathMedia = filePathMedia)
             }
 
             textView_share_jira.setOnClickListener {
@@ -874,7 +891,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 "logger_bird_audio" + System.currentTimeMillis()
                                     .toString() + "recording.3gpp"
                             )
-                            filePathMedia = filePathAudio
                             addFileNameList(fileName = filePathAudio.absolutePath)
                             mediaRecorderAudio = MediaRecorder()
                             mediaRecorderAudio?.setAudioSource(MediaRecorder.AudioSource.MIC)
@@ -1115,7 +1131,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         fileDirectory,
                         "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4"
                     )
-                    filePathMedia = filePathVideo
                     addFileNameList(fileName = filePathVideo.absolutePath)
                     mediaCodecsFile = File("/data/misc/media/media_codecs_profiling_results.xml")
                     mediaRecorderVideo?.setOutputFile(filePathVideo.path)
@@ -1569,7 +1584,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             if ((currentDate.time - timeControllerVideo!!) > 5000) {
                                 controlTimeControllerVideo = true
                                 Log.d("current_time", controlTimeControllerVideo.toString())
-                                timeControllerVideo = null
+//                                timeControllerVideo = null
 //                                timerTaskVideo?.cancel()
                                 activity.runOnUiThread {
                                     textView_counter_video.performClick()
@@ -1580,7 +1595,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             timeControllerVideo = currentDate.time
                             Log.d("current_time", timeControllerVideo.toString())
                             Log.d("current_time", controlTimeControllerVideo.toString())
-                            val counterTime = (counterVideo*1000).toLong()
+                            val counterTime = (counterVideo * 1000).toLong()
                             counterVideo++
                             activity.runOnUiThread {
                                 textView_counter_video.text = timeStringHour(counterTime)
@@ -1616,7 +1631,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 timerAudio = Timer()
                 timerTaskAudio = object : TimerTask() {
                     override fun run() {
-                        val counterTimer = (counterAudio*1000).toLong()
+                        val counterTimer = (counterAudio * 1000).toLong()
                         counterAudio++
                         activity.runOnUiThread {
                             textView_counter_audio.text = timeStringHour(counterTimer)
@@ -1641,10 +1656,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun videoCounterStop() {
         try {
             activity.runOnUiThread {
-                timerTaskVideo?.cancel()
-                timerVideo?.cancel()
+                if (timerTaskVideo != null) {
+                    timerTaskVideo?.cancel()
+                }
+                if (timerVideo != null) {
+                    timerVideo?.cancel()
+                }
                 timerTaskVideo = null
                 timerVideo = null
+                timeControllerVideo = null
                 textView_counter_video.visibility = View.GONE
                 val counterZero = 0
                 textView_counter_video.text = counterZero.toString()
@@ -1855,23 +1875,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (filePathVideo.exists()) {
                 filePathVideo.delete()
                 activity.runOnUiThread {
-                    reveal_linear_layout_share.visibility = View.GONE
-                    Toast.makeText(context,R.string.share_video_delete , Toast.LENGTH_SHORT).show()
-                    floating_action_button.animate()
-                        .rotationBy(360F)
-                        .setDuration(200)
-                        .scaleX(1F)
-                        .scaleY(1F)
-                        .withEndAction {
-                            floating_action_button.setImageResource(R.drawable.loggerbird)
-                            floating_action_button.animate()
-                                .rotationBy(0F)
-                                .setDuration(200)
-                                .scaleX(1F)
-                                .scaleY(1F)
-                                .start()
-                        }
-                        .start()
+                    Toast.makeText(context, R.string.share_video_delete, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -1880,58 +1884,61 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (filePathAudio.exists()) {
                 filePathAudio.delete()
                 activity.runOnUiThread {
-                    reveal_linear_layout_share.visibility = View.GONE
                     Toast.makeText(context, R.string.share_audio_delete, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        activity.runOnUiThread {
+            reveal_linear_layout_share.visibility = View.GONE
+            floating_action_button.animate()
+                .rotationBy(360F)
+                .setDuration(200)
+                .scaleX(1F)
+                .scaleY(1F)
+                .withEndAction {
+                    floating_action_button.setImageResource(R.drawable.loggerbird)
                     floating_action_button.animate()
-                        .rotationBy(360F)
+                        .rotationBy(0F)
                         .setDuration(200)
                         .scaleX(1F)
                         .scaleY(1F)
-                        .withEndAction {
-                            floating_action_button.setImageResource(R.drawable.loggerbird)
-                            floating_action_button.animate()
-                                .rotationBy(0F)
-                                .setDuration(200)
-                                .scaleX(1F)
-                                .scaleY(1F)
-                                .start()
-                        }
                         .start()
                 }
-            }
+                .start()
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun sendSingleMediaFile(){
+    private fun sendSingleMediaFile(filePathMedia: File) {
         coroutineCallSendSingleFile.async {
-            try{
-                if (this@LoggerBirdService::filePathMedia.isInitialized) {
-                    if (filePathMedia.exists()) {
-                        LoggerBird.callEmailSender(context = context, file = filePathMedia)
-                        activity.runOnUiThread {
-                            reveal_linear_layout_share.visibility = View.GONE
-                            Toast.makeText(context, R.string.share_file_sent, Toast.LENGTH_SHORT).show()
-                            floating_action_button.animate()
-                                .rotationBy(360F)
-                                .setDuration(200)
-                                .scaleX(1F)
-                                .scaleY(1F)
-                                .withEndAction {
-                                    floating_action_button.setImageResource(R.drawable.loggerbird)
-                                    floating_action_button.animate()
-                                        .rotationBy(0F)
-                                        .setDuration(200)
-                                        .scaleX(1F)
-                                        .scaleY(1F)
-                                        .start()
-                                }
-                                .start()
-                            LoggerBird.deleteSingleMediaFile(this@LoggerBirdService)
-                        }
+            try {
+                if (filePathMedia.exists()) {
+                    LoggerBird.callEmailSender(context = context, file = filePathMedia)
+                    activity.runOnUiThread {
+                        reveal_linear_layout_share.visibility = View.GONE
+                        Toast.makeText(context, R.string.share_file_sent, Toast.LENGTH_SHORT).show()
+                        floating_action_button.animate()
+                            .rotationBy(360F)
+                            .setDuration(200)
+                            .scaleX(1F)
+                            .scaleY(1F)
+                            .withEndAction {
+                                floating_action_button.setImageResource(R.drawable.loggerbird)
+                                floating_action_button.animate()
+                                    .rotationBy(0F)
+                                    .setDuration(200)
+                                    .scaleX(1F)
+                                    .scaleY(1F)
+                                    .start()
+                            }
+                            .start()
+                        LoggerBird.deleteSingleMediaFile(
+                            this@LoggerBirdService,
+                            filePathMedia = filePathMedia
+                        )
                     }
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.singleFileDeleteTag)
@@ -1939,13 +1946,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
-    internal fun deleteSingleMediaFile(controlEmailAction: Boolean? = null) {
-        if (this@LoggerBirdService::filePathMedia.isInitialized) {
-            if (filePathMedia.exists()) {
-                filePathMedia.delete()
-            }
-
+    internal fun deleteSingleMediaFile(controlEmailAction: Boolean? = null, filePathMedia: File) {
+        if (filePathMedia.exists()) {
+            filePathMedia.delete()
         }
+        LoggerBird.callEnqueue()
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
