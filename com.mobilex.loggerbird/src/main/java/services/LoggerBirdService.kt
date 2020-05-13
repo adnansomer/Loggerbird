@@ -623,12 +623,16 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             .scaleX(1F)
             .scaleY(1F)
             .withEndAction {
-                if (audioRecording) {
-                    floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
-                } else if (screenshotDrawing) {
-                    floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
-                } else {
-                    floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
+                when {
+                    audioRecording -> {
+                        floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
+                    }
+                    screenshotDrawing -> {
+                        floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
+                    }
+                    else -> {
+                        floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
+                    }
                 }
                 floating_action_button.animate()
                     .rotationBy(0F)
