@@ -26,18 +26,25 @@ import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
 import android.view.animation.Animation
-import android.widget.*
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.preference.PreferenceManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.preference.PreferenceManager
 import com.google.android.material.circularreveal.CircularRevealLinearLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
+import com.slack.api.Slack
+import com.slack.api.methods.MethodsClient
+import com.slack.api.methods.request.chat.ChatPostMessageRequest
+import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
@@ -593,7 +600,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         data = dataIntent
                     )
                     shareView(filePathMedia = filePathVideo)
-//                    floating_action_button.performClick()
+
                 }
             }
         }
@@ -628,7 +635,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
                     }
                     screenshotDrawing -> {
-                        floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
+                        floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
                     }
                     else -> {
                         floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
@@ -664,7 +671,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
             textView_discard.setOnClickListener {
                 discardMediaFile()
-            }
+                }
 
 //            textView_dismiss.setOnClickListener {
 //                reveal_linear_layout_share.visibility = View.GONE

@@ -4,6 +4,9 @@ import android.util.Log
 import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
 import com.atlassian.jira.rest.client.api.domain.*
+import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue
+import com.atlassian.jira.rest.client.api.domain.input.FieldInput
+import com.atlassian.jira.rest.client.api.domain.input.IssueInput
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
 import com.sun.jersey.api.client.Client
@@ -12,6 +15,7 @@ import com.sun.jersey.api.client.WebResource
 import com.sun.jersey.core.util.Base64
 import constants.Constants
 import io.atlassian.util.concurrent.Promise
+import kotlinx.android.synthetic.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -110,8 +114,7 @@ class JiraAuthentication {
                 Log.d("response", response.body?.string())
                 try {
                     val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
-                    val jiraServerUri: URI =
-                        URI("https://appcaesars.atlassian.net")
+                    val jiraServerUri: URI = URI("https://appcaesars.atlassian.net")
                     val restClient: JiraRestClient = factory.createWithBasicHttpAuthentication(
                         jiraServerUri,
                         "appcaesars@gmail.com",
@@ -122,8 +125,23 @@ class JiraAuthentication {
 //                    val basicProject = BasicProject(null,"LGB",10004,"LoggerBird")
                     val issueBuilder = IssueInputBuilder("LGB", 10004,"LOGGERBIRD_3!")
                     issueBuilder.setDescription("LoggerBird_2")
-                    val basicUser = BasicUser(URI("https://appcaesars.atlassian.net/rest/api/latest/issue/10045"),"Adnan","Adnan")
-                    issueBuilder.setAssignee(basicUser)
+                    issueBuilder.setPriorityId(5) // 1-highest 2-high 3-medium 4-low 5-lowest
+                    //issueBuilder.setReporterName()
+                    //issueBuilder.setAssigneeName("adnan")
+
+
+//                    val basicUserUri = BasicUser.INCOMPLETE_URI
+//                    val basicUser = BasicUser("","caesars App","caesars App")
+//                    issueBuilder.setAssignee(basicUser)
+
+
+
+//                    issueBuilder.setAssignee(basicUser)
+//                    issueBuilder.setAssignee()
+
+//                    val basicUser = BasicUser(issue. ,"Adnan Somer","Adnan Somer")
+
+
 //                    issueBuilder.setReporter(basicUser)
 //                    issueBuilder.addProperty()
 //                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
@@ -135,9 +153,15 @@ class JiraAuthentication {
                         val inputStream = FileInputStream(filePathName)
                         val issue:Promise<Issue> = restClient.issueClient.getIssue(issueKey)
                         issueClient.addAttachment(issue.get().attachmentsUri,inputStream,filePathName.absolutePath)
+//                        val issueInput = IssueInput.createWithFields(FieldInput(IssueFieldId.ASSIGNEE_FIELD, ComplexIssueInputFieldValue.with("Adnan Somer",
+//                        "Adnan Somer")))
+//                        issueClient.updateIssue(issueKey,issueInput).claim()
+                        //issueBuilder.setAssigneeName("2")
+
 //                        val issueInput:IssueInput = IssueInput.createWithFields(FieldInput(IssueFieldId.ASSIGNEE_FIELD,ComplexIssueInputFieldValue.with("Adnan","Adnan")))
 //                        issueClient.updateIssue(issueUri,issueInput).claim()
                     }
+
                     Log.d("issue",issueUri.toString())
                     Log.d("issue",issueKey.toString())
                 } catch (e: Exception) {
