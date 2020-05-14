@@ -3,16 +3,19 @@ package paint
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
+import android.os.Build
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.RequiresApi
 import constants.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
+import services.LoggerBirdService
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -159,6 +162,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun saveImage(filename: String) {
         paintView = this
         val context:Context = this.context
@@ -171,6 +175,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                     fileDirectory,
                     "loggerbird_screenshot_"+System.currentTimeMillis().toString()+"_"+filename+".png"
                 )
+                LoggerBirdService.callShareView(filePathMedia = filePath)
                 arrayListFileNameScreenshot.add(filePath.absolutePath)
                 val os = FileOutputStream(filePath)
                 paintView.draw(canvas)
