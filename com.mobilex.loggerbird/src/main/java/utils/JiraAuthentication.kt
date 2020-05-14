@@ -1,243 +1,174 @@
 package utils
 
+import android.app.Activity
+import android.content.Context
+import android.os.Build
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
-import com.atlassian.jira.rest.client.api.domain.*
-import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue
-import com.atlassian.jira.rest.client.api.domain.input.FieldInput
-import com.atlassian.jira.rest.client.api.domain.input.IssueInput
+import com.atlassian.jira.rest.client.api.domain.BasicUser
+import com.atlassian.jira.rest.client.api.domain.Issue
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
-import com.sun.jersey.api.client.Client
-import com.sun.jersey.api.client.ClientResponse
-import com.sun.jersey.api.client.WebResource
-import com.sun.jersey.core.util.Base64
+import com.mobilex.loggerbird.R
 import constants.Constants
+import exception.LoggerBirdException
 import io.atlassian.util.concurrent.Promise
-import kotlinx.android.synthetic.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.simple.*;
-import org.json.simple.parser.*;
-import java.io.*
-import java.net.HttpURLConnection
+import services.LoggerBirdService
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
 import java.net.URI
-import java.net.URL
 
 
-class JiraAuthentication {
+class JiraAuthentication() {
     private val coroutineCallJira: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    internal fun callJiraIssue(filePathName:File? = null) {
+    private val internetConnectionUtil = InternetConnectionUtil()
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun callJiraIssue(filePathName: File? = null, context: Context, activity: Activity) {
         coroutineCallJira.async {
             try {
-//                loginToJira()
-                okHttpJiraAuthentication(filePathName = filePathName)
-//                okHttpJiraAuthentication()
-//                jiraAuthentication()
-//                val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
-//                val jiraServerUri: URI =
-//                    URI("https://appcaesars.atlassian.net/secure/RapidBoard.jspa?projectKey=LGB&useStoredSettings=true&rapidView=1")
-////                val restClient: JiraRestClient = factory.createWithBasicHttpAuthentication(
-////                    jiraServerUri,
-////                    "appcaesars@gmail.com",
-////                    "N9id4dk3xViS0bcp7olpD37C"
-////                )
-//                val restClient: JiraRestClient = factory.create(
-//                    jiraServerUri,
-//                    "appcaesars@gmail.com",
-//                    "N9id4dk3xViS0bcp7olpD37C"
-//                )
-//                Log.d("response", restClient.searchClient.getFilter(1).claim().description)
-//                val promise: Promise<Issue> = restClient.issueClient.getIssue("LGB-1")
-//                val issue: Issue = promise.claim()
-//                Log.d("issue", issue.description!!)
+                if (internetConnectionUtil.checkNetworkConnection(context = context)) {
+                    okHttpJiraAuthentication(
+                        filePathMediaName = filePathName,
+                        context = context,
+                        activity = activity
+                    )
+                } else {
+                    activity.runOnUiThread {
+                        Toast.makeText(
+                            context,
+                            R.string.network_check_failure,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    throw LoggerBirdException(
+                        Constants.networkErrorMessage
+                    )
+                }
             } catch (e: Exception) {
-                e.printStackTrace()
-                LoggerBird.callEnqueue()
-                LoggerBird.callExceptionDetails(
-                    exception = e,
-                    tag = Constants.jiraAuthenticationtag
-                )
+                jiraExceptionHandler(e = e, filePathName = filePathName)
             }
         }
     }
 
-    private fun jiraAuthentication() {
-        val responseClient: ClientResponse
-        val auth = String(Base64.encode("appcaesars@gmail.com" + ":" + "N9id4dk3xViS0bcp7olpD37C"))
-        val headerAuthorization = "Authorization"
-        val headerAuthorizationValue = "Basic$auth"
-        val headerType = "application/json"
-        val client: Client = Client.create()
-        val webResource: WebResource =
-            client.resource("https://appcaesars.atlassian.net/secure/RapidBoard.jspa?projectKey=LGB&useStoredSettings=true&rapidView=1")
-        responseClient =
-            webResource.header(headerAuthorization, headerAuthorizationValue).type(headerType)
-                .accept(headerType).get(
-                    ClientResponse::class.java
-                )
-
-        Log.d("response", responseClient.status.toString())
-    }
-
-    private fun okHttpJiraAuthentication(filePathName: File?) {
-        val MEDIA_TYPE: MediaType = "application/json".toMediaTypeOrNull()!!
-        val postData: JSONObject = JSONObject()
-        postData.put("username", "appcaesars@gmail.com")
-        postData.put("password", "N9id4dk3xViS0bcp7olpD37C")
-        val auth = String(Base64.encode("appcaesars@gmail.com" + ":" + "N9id4dk3xViS0bcp7olpD37C"))
-        val headerAuthorization = "Authorization"
-        val headerAuthorizationValue = "Basic$auth"
-        val headerType = "application/json"
-        val client: OkHttpClient = OkHttpClient()
-        val body = postData.toString().toRequestBody(MEDIA_TYPE)
+    private fun okHttpJiraAuthentication(
+        filePathMediaName: File?,
+        context: Context,
+        activity: Activity
+    ) {
+        val client = OkHttpClient()
         val request: Request =
             Request.Builder()
-                .post(body)
-                .get()
-                .url("https://appcaesars.atlassian.net/browse/LGB-1")
+                .url("https://appcaesars.atlassian.net")
                 .build()
         client.newCall(request).enqueue(object : Callback {
+            @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
             override fun onFailure(call: Call, e: IOException) {
-                println("error")
+                jiraExceptionHandler(e = e, filePathName = filePathMediaName)
             }
 
-            override fun onResponse(call: Call, response: okhttp3.Response) {
+            @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+            override fun onResponse(call: Call, response: Response) {
                 Log.d("response_message", response.message)
                 Log.d("response_code", response.code.toString())
-                Log.d("response", response.body?.string())
                 try {
-                    val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
-                    val jiraServerUri: URI = URI("https://appcaesars.atlassian.net")
-                    val restClient: JiraRestClient = factory.createWithBasicHttpAuthentication(
-                        jiraServerUri,
-                        "appcaesars@gmail.com",
-                        "uPPXsUw0FabxeOa5CkDm0BAE"
-                    )
-                    val issueClient = restClient.issueClient
-//                    val issueType = IssueType(null,10004,"bug",false,"Assignment LoggerBird",null)
-//                    val basicProject = BasicProject(null,"LGB",10004,"LoggerBird")
-                    val issueBuilder = IssueInputBuilder("LGB", 10004,"LOGGERBIRD_3!")
-                    issueBuilder.setDescription("LoggerBird_2")
-                    issueBuilder.setPriorityId(5) // 1-highest 2-high 3-medium 4-low 5-lowest
-                    //issueBuilder.setReporterName()
-                    //issueBuilder.setAssigneeName("adnan")
-
-
-//                    val basicUserUri = BasicUser.INCOMPLETE_URI
-//                    val basicUser = BasicUser("","caesars App","caesars App")
-//                    issueBuilder.setAssignee(basicUser)
-
-
-
-//                    issueBuilder.setAssignee(basicUser)
-//                    issueBuilder.setAssignee()
-
-//                    val basicUser = BasicUser(issue. ,"Adnan Somer","Adnan Somer")
-
-
-//                    issueBuilder.setReporter(basicUser)
-//                    issueBuilder.addProperty()
-//                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
-//                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
-                    val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
-                    val issueKey  = basicIssue.key
-                    val issueUri = basicIssue.self
-                    if(filePathName != null){
-                        val inputStream = FileInputStream(filePathName)
-                        val issue:Promise<Issue> = restClient.issueClient.getIssue(issueKey)
-                        issueClient.addAttachment(issue.get().attachmentsUri,inputStream,filePathName.absolutePath)
-//                        val issueInput = IssueInput.createWithFields(FieldInput(IssueFieldId.ASSIGNEE_FIELD, ComplexIssueInputFieldValue.with("Adnan Somer",
-//                        "Adnan Somer")))
-//                        issueClient.updateIssue(issueKey,issueInput).claim()
-                        //issueBuilder.setAssigneeName("2")
-
-//                        val issueInput:IssueInput = IssueInput.createWithFields(FieldInput(IssueFieldId.ASSIGNEE_FIELD,ComplexIssueInputFieldValue.with("Adnan","Adnan")))
-//                        issueClient.updateIssue(issueUri,issueInput).claim()
+                    if (response.code in 200..299) {
+                        jiraTask(filePathMediaName = filePathMediaName)
+                        LoggerBirdService.loggerBirdService.finishShareLayout("jira")
+                    } else {
+                        activity.runOnUiThread {
+                            Toast.makeText(
+                                context,
+                                R.string.internet_connection_check_failure,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        throw LoggerBirdException(
+                            Constants.internetErrorMessage
+                        )
                     }
-
-                    Log.d("issue",issueUri.toString())
-                    Log.d("issue",issueKey.toString())
                 } catch (e: Exception) {
-                    e.printStackTrace()
-                    LoggerBird.callEnqueue()
-                    LoggerBird.callExceptionDetails(exception = e , tag = Constants.jiraAuthenticationtag)
+                    jiraExceptionHandler(e = e, filePathName = filePathMediaName)
                 }
-
-//
-//                URI jiraServerUri = new URI("http://localhost:8085/rest/api/2/issue");
-//                JiraRestClient restClient = null;
-//                final AsynchronousJiraRestClientFactory factory = new AsynchronousJiraRestClientFactory();
-//                restClient = factory.createWithBasicHttpAuthentication(jiraServerUri, "Test", "12345");
-//                final IssueRestClient client = restClient.getIssueClient();
-//                IssueInputBuilder issueBuilder = new IssueInputBuilder("PU",1L,"Testing the ISSUES");
-//                issueBuilder.setDescription("issue ssss description");
-//                IssueInput issueInput = issueBuilder.build();
-//                BasicIssue issue = client.createIssue(issueInput).claim();
-//                System.out.println("isss "+issue.toString());
-
-
-
-//                val promise: Promise<Issue> = restClient.issueClient.getIssue("LGB")
-//                val issue: Issue = promise.claim()
-//
-////                val issue = basicIssue.claim()
-//                Log.d("issue",issue.key + "\n" + issue.summary)
             }
         })
     }
 
-//    private fun httpRequestJiraAuthentication() {
-//        try {
-//            val client = HttpClient.newBuilder().build();
-//            val request = HttpRequest.newBuilder()
-//                .uri(URI.create("https://something.com"))
-//                .build();
-//            val response = client.send(request, BodyHandlers.ofString());
-//            println(response.body())
-//
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//            LoggerBird.callEnqueue()
-//            LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
-//        }
-//    }
-
-    private fun loginToJira() {
-        var loginResponse: String = ""
-        val url = URL("https://appcaesars.atlassian.net/rest/api/2/issue/createmeta")
-        val conn = (url.openConnection() as HttpURLConnection)
-        conn.doOutput = true
-        conn.requestMethod = "GET"
-        conn.setRequestProperty("Content-Type", "application/json")
-        val input =
-            "{\"username\":\"" + "appcaesars@gmail.com" + "\",\"password\":\"" + "uPPXsUw0FabxeOa5CkDm0BAE" + "\"}"
-        val os = conn.outputStream
-        os.write(input.toByteArray())
-        os.flush()
-        if (conn.responseCode == 200) {
-            val br = BufferedReader(InputStreamReader((conn.inputStream)))
-            while ((br.readLine()) != null) {
-                loginResponse += br.readLine()
-            }
-            Log.d("response_json", parseJiraSession(loginResponse))
-        } else {
-            Log.d("response", conn.responseCode.toString())
-        }
-
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun jiraExceptionHandler(e: Exception, filePathName: File?) {
+        filePathName?.delete()
+        LoggerBirdService.loggerBirdService.finishShareLayout("jira_error")
+        e.printStackTrace()
+        LoggerBird.callEnqueue()
+        LoggerBird.callExceptionDetails(
+            exception = e,
+            tag = Constants.jiraAuthenticationtag
+        )
     }
 
-    private fun parseJiraSession(input: String): String {
-        val parser = JSONParser()
-        val obj: Any = parser.parse(input)
-        val jsonObject: JSONObject = (obj as JSONObject)
-        val sessionJsonObject: JSONObject = (jsonObject["session"] as JSONObject)
-        return (sessionJsonObject["value"] as String)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun jiraTask(filePathMediaName: File? = null) {
+        val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
+        val jiraServerUri =
+            URI("https://appcaesars.atlassian.net")
+        val restClient: JiraRestClient = factory.createWithBasicHttpAuthentication(
+            jiraServerUri,
+            "appcaesars@gmail.com",
+            "uPPXsUw0FabxeOa5CkDm0BAE"
+        )
+        val issueClient = restClient.issueClient
+//                    val issueType = IssueType(null,10004,"bug",false,"Assignment LoggerBird",null)
+//                    val basicProject = BasicProject(null,"LGB",10004,"LoggerBird")
+        val issueBuilder = IssueInputBuilder("LGB", 10004, "unhandled!")
+        issueBuilder.setDescription("LoggerBird_2")
+        val basicUser = BasicUser(
+            URI("https://appcaesars.atlassian.net/rest/api/latest/issue/10045"),
+            "Adnan",
+            "Adnan"
+        )
+        issueBuilder.setAssignee(basicUser)
+//                    issueBuilder.setReporter(basicUser)
+//                    issueBuilder.addProperty()
+//                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
+//                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
+        val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
+        val issueKey = basicIssue.key
+        val issueUri = basicIssue.self
+        val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
+        if (filePathMediaName != null) {
+            val inputStreamMediaFile = FileInputStream(filePathMediaName)
+            issueClient.addAttachment(
+                issue.get().attachmentsUri,
+                inputStreamMediaFile,
+                filePathMediaName.absolutePath
+            )
+            if (filePathMediaName.exists()) {
+                filePathMediaName.delete()
+            }
+//                        val issueInput:IssueInput = IssueInput.createWithFields(FieldInput(IssueFieldId.ASSIGNEE_FIELD,ComplexIssueInputFieldValue.with("Adnan","Adnan")))
+//                        issueClient.updateIssue(issueUri,issueInput).claim()
+        }
+        val inputStreamSecessionFile =
+            FileInputStream(LoggerBird.filePathSecessionName)
+        issueClient.addAttachment(
+            issue.get().attachmentsUri,
+            inputStreamSecessionFile,
+            LoggerBird.filePathSecessionName.absolutePath
+        )
+        Log.d("issue", issueUri.toString())
+        Log.d("issue", issueKey.toString())
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal suspend fun jiraUnhandledExceptionTask() {
+        withContext(coroutineCallJira.coroutineContext) {
+            jiraTask()
+        }
     }
 }

@@ -1,15 +1,16 @@
 package loggerbird
 
-import android.app.*
+import android.app.Activity
+import android.app.ActivityManager
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
+import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
-import android.os.BatteryManager
-import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -33,23 +34,26 @@ import interceptors.LogOkHttpErrorInterceptor
 import interceptors.LogOkHttpInterceptor
 import io.realm.Realm
 import io.realm.RealmModel
-import kotlinx.coroutines.*
-import observers.LogFragmentLifeCycleObserver
-import observers.LogLifeCycleObserver
-import retrofit2.Retrofit
-import utils.EmailUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import listeners.LogRecyclerViewChildAttachStateChangeListener
 import listeners.LogRecyclerViewItemTouchListener
 import listeners.LogRecyclerViewScrollListener
 import observers.*
-import okhttp3.*
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
 import services.LoggerBirdMemoryService
 import services.LoggerBirdService
+import utils.EmailUtil
 import utils.InternetConnectionUtil
 import utils.LinkedBlockingQueueUtil
 import java.io.File
-import java.lang.Runnable
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
@@ -132,6 +136,7 @@ class LoggerBird : LifecycleObserver {
         private lateinit var activityLifeCycleObserver: LogActivityLifeCycleObserver
         internal var stringBuilderActivityLifeCycleObserver: StringBuilder = StringBuilder()
         internal var classList: ArrayList<String> = ArrayList()
+        internal lateinit var filePathSecessionName: File
 //        private val loggerBirdService: LoggerBirdService = LoggerBirdService()
 
 
@@ -175,6 +180,7 @@ class LoggerBird : LifecycleObserver {
                         if (filePath.exists()) {
                             filePath.delete()
                         }
+                        saveDefaultFileDetails(filePath = filePath)
                     }
                     workQueueLinked = LinkedBlockingQueueUtil()
                     val logcatObserver = UnhandledExceptionObserver()
@@ -183,6 +189,8 @@ class LoggerBird : LifecycleObserver {
                         intentServiceMemory = Intent(context, LoggerBirdMemoryService::class.java)
                         context.startService(intentServiceMemory)
                     }
+                    filePathSecessionName = filePath
+
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -811,9 +819,9 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-        internal fun deleteOldFiles(loggerBirdService: LoggerBirdService){
+        internal fun deleteOldFiles(loggerBirdService: LoggerBirdService) {
             if (controlLogInit) {
-                val controlEmailAction:Boolean = true
+                val controlEmailAction: Boolean = true
                 if (runnableList.isEmpty()) {
                     workQueueLinked.put {
                         loggerBirdService.deleteOldFiles(controlEmailAction = controlEmailAction)
@@ -827,16 +835,26 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-        internal fun deleteSingleMediaFile(loggerBirdService: LoggerBirdService,filePathMedia:File){
+        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+        internal fun deleteSingleMediaFile(
+            loggerBirdService: LoggerBirdService,
+            filePathMedia: File
+        ) {
             if (controlLogInit) {
-                val controlEmailAction:Boolean = true
+                val controlEmailAction = true
                 if (runnableList.isEmpty()) {
                     workQueueLinked.put {
-                        loggerBirdService.deleteSingleMediaFile(controlEmailAction = controlEmailAction,filePathMedia = filePathMedia)
+                        loggerBirdService.deleteSingleMediaFile(
+                            controlEmailAction = controlEmailAction,
+                            filePathMedia = filePathMedia
+                        )
                     }
                 }
                 runnableList.add(Runnable {
-                    loggerBirdService.deleteSingleMediaFile(controlEmailAction = controlEmailAction,filePathMedia = filePathMedia)
+                    loggerBirdService.deleteSingleMediaFile(
+                        controlEmailAction = controlEmailAction,
+                        filePathMedia = filePathMedia
+                    )
                 })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
@@ -1974,6 +1992,18 @@ class LoggerBird : LifecycleObserver {
             stringBuilderExceedFileWriterLimit = StringBuilder()
         }
 
+
+        private fun saveDefaultFileDetails(filePath: File) {
+            if (!filePath.exists()) {
+                filePath.createNewFile()
+                takeDeviceInformationDetails()
+                filePath.appendText(
+                    stringBuilderBuild.toString()
+                )
+            }
+        }
+
+
         /**
          * This Method Saves Component Details To Txt File.
          * Variables:
@@ -2746,7 +2776,9 @@ class LoggerBird : LifecycleObserver {
                         )
                     }
                     if (!filePath.exists()) {
-                        filePath.createNewFile()
+                        withContext(Dispatchers.IO) {
+                            filePath.createNewFile()
+                        }
                         takeDeviceInformationDetails()
                         filePath.appendText(
                             stringBuilderBuild.toString()
@@ -2780,11 +2812,19 @@ class LoggerBird : LifecycleObserver {
                     }
                     if (uncaughtExceptionHandlerController) {
                         uncaughtExceptionHandlerController = false
-                        withContext(Dispatchers.IO){
-                            EmailUtil.sendUnhandledException(
-                                file = filePath,
-                                context = context
-                            )
+                        withContext(Dispatchers.IO) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+//                               LoggerBirdService.loggerBirdService.jiraAuthentication.callJiraIssue(
+//                                   context = context,
+//                                    activity = LoggerBirdService.loggerBirdService.returnActivity()
+//                                )
+                                LoggerBirdService.loggerBirdService.jiraAuthentication.jiraUnhandledExceptionTask()
+                            } else {
+                                EmailUtil.sendUnhandledException(
+                                    file = filePath,
+                                    context = context
+                                )
+                            }
                         }
                         saveSessionIntoOldSessionFile()
                     }
@@ -2858,7 +2898,11 @@ class LoggerBird : LifecycleObserver {
                                     data = data
                                 )
                             } else {
-                                Toast.makeText(context, R.string.permission_denied, Toast.LENGTH_SHORT)
+                                Toast.makeText(
+                                    context,
+                                    R.string.permission_denied,
+                                    Toast.LENGTH_SHORT
+                                )
                                     .show()
                             }
 //                        LoggerBirdService.callEnqueue()
@@ -2889,10 +2933,18 @@ class LoggerBird : LifecycleObserver {
                     do {
                         if (permissions[permissionCounter] == "android.permission.WRITE_EXTERNAL_STORAGE" || permissions[permissionCounter] == "android.permission.RECORD_AUDIO") {
                             if (grantResults[0] == 0) {
-                                Toast.makeText(context, R.string.permission_granted, Toast.LENGTH_SHORT)
+                                Toast.makeText(
+                                    context,
+                                    R.string.permission_granted,
+                                    Toast.LENGTH_SHORT
+                                )
                                     .show()
                             } else {
-                                Toast.makeText(context, R.string.permission_denied, Toast.LENGTH_SHORT)
+                                Toast.makeText(
+                                    context,
+                                    R.string.permission_denied,
+                                    Toast.LENGTH_SHORT
+                                )
                                     .show()
                             }
 

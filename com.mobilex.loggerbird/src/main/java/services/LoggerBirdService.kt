@@ -74,6 +74,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var view: View
     private lateinit var rootView: View
     private var windowManager: Any? = null
+    private var windowManagerProgressBar: Any? = null
     private var windowManagerFeedback: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
@@ -83,6 +84,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var coroutineCallAudio: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideoStarter = CoroutineScope(Dispatchers.IO)
     private val coroutineCallSendSingleFile: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineCallDiscardFile: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var mediaRecorderAudio: MediaRecorder? = null
     private var state: Boolean = false
     private lateinit var filePathVideo: File
@@ -134,8 +136,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private val arrayListFileName: ArrayList<String> = ArrayList()
     private val coroutineCallFilesAction: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlFileAction: Boolean = false
-    private val jiraAuthentication = JiraAuthentication()
-
+    internal val jiraAuthentication = JiraAuthentication()
+    private lateinit var progressBar: ProgressBar
+    private lateinit var progressBarView: View
 
     //Static global variables:
     internal companion object {
@@ -662,14 +665,23 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun shareViewClicks(filePathMedia: File) {
         if (reveal_linear_layout_share.isVisible) {
             textView_send_email.setOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    attachProgressBar()
+                }
                 sendSingleMediaFile(filePathMedia = filePathMedia)
             }
 
             textView_share_jira.setOnClickListener {
-                jiraAuthentication.callJiraIssue(filePathName = filePathMedia)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    attachProgressBar()
+                }
+                jiraAuthentication.callJiraIssue(filePathName = filePathMedia,context = context,activity = activity)
             }
 
             textView_discard.setOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    attachProgressBar()
+                }
                 discardMediaFile()
                 }
 
@@ -1884,24 +1896,64 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun discardMediaFile() {
-        if (this@LoggerBirdService::filePathVideo.isInitialized) {
-            if (filePathVideo.exists()) {
-                filePathVideo.delete()
-                activity.runOnUiThread {
-                    Toast.makeText(context, R.string.share_video_delete, Toast.LENGTH_SHORT).show()
+        coroutineCallDiscardFile.async {
+            try {
+                if (this@LoggerBirdService::filePathVideo.isInitialized) {
+                    if (filePathVideo.exists()) {
+                        filePathVideo.delete()
+                        activity.runOnUiThread {
+                            Toast.makeText(context, R.string.share_video_delete, Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
                 }
-            }
-        }
 
-        if (this@LoggerBirdService::filePathAudio.isInitialized) {
-            if (filePathAudio.exists()) {
-                filePathAudio.delete()
-                activity.runOnUiThread {
-                    Toast.makeText(context, R.string.share_audio_delete, Toast.LENGTH_SHORT).show()
+                if (this@LoggerBirdService::filePathAudio.isInitialized) {
+                    if (filePathAudio.exists()) {
+                        filePathAudio.delete()
+                    }
                 }
+                finishShareLayout(message = "audio")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.discardFileTag)
+                LoggerBird.callEnqueue()
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun sendSingleMediaFile(filePathMedia: File) {
+        coroutineCallSendSingleFile.async {
+            try {
+                if (filePathMedia.exists()) {
+                    LoggerBird.callEmailSender(context = context, file = filePathMedia)
+                    LoggerBird.deleteSingleMediaFile(
+                        this@LoggerBirdService,
+                        filePathMedia = filePathMedia
+                    )
+                }
+            } catch (e: Exception) {
+                finishShareLayout("single_email_error")
+                e.printStackTrace()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.singleFileDeleteTag)
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun finishShareLayout(message:String) {
         activity.runOnUiThread {
+            when (message) {
+                "audio" -> Toast.makeText(context, R.string.share_audio_delete, Toast.LENGTH_SHORT)
+                    .show()
+                "single_email" -> Toast.makeText(context, R.string.share_file_sent, Toast.LENGTH_SHORT).show()
+                "single_email_error" -> Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT).show()
+                "jira" -> Toast.makeText(context, R.string.jira_sent, Toast.LENGTH_SHORT).show()
+                "jira_error" -> Toast.makeText(context, R.string.jira_sent_error, Toast.LENGTH_SHORT).show()
+            }
+            detachProgressBar()
             reveal_linear_layout_share.visibility = View.GONE
             floating_action_button.animate()
                 .rotationBy(360F)
@@ -1922,48 +1974,36 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun sendSingleMediaFile(filePathMedia: File) {
-        coroutineCallSendSingleFile.async {
-            try {
-                if (filePathMedia.exists()) {
-                    LoggerBird.callEmailSender(context = context, file = filePathMedia)
-                    activity.runOnUiThread {
-                        reveal_linear_layout_share.visibility = View.GONE
-                        Toast.makeText(context, R.string.share_file_sent, Toast.LENGTH_SHORT).show()
-                        floating_action_button.animate()
-                            .rotationBy(360F)
-                            .setDuration(200)
-                            .scaleX(1F)
-                            .scaleY(1F)
-                            .withEndAction {
-                                floating_action_button.setImageResource(R.drawable.loggerbird)
-                                floating_action_button.animate()
-                                    .rotationBy(0F)
-                                    .setDuration(200)
-                                    .scaleX(1F)
-                                    .scaleY(1F)
-                                    .start()
-                            }
-                            .start()
-                        LoggerBird.deleteSingleMediaFile(
-                            this@LoggerBirdService,
-                            filePathMedia = filePathMedia
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                LoggerBird.callEnqueue()
-                LoggerBird.callExceptionDetails(exception = e, tag = Constants.singleFileDeleteTag)
-            }
-        }
-    }
-
     internal fun deleteSingleMediaFile(controlEmailAction: Boolean? = null, filePathMedia: File) {
         if (filePathMedia.exists()) {
             filePathMedia.delete()
         }
+        finishShareLayout("single_email")
         LoggerBird.callEnqueue()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun attachProgressBar() {
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        progressBarView = LayoutInflater.from(activity)
+            .inflate(
+                R.layout.default_progressbar,
+                rootView,
+                false
+            )
+        windowManagerProgressBar = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerProgressBar as WindowManager).addView(progressBarView, windowManagerParams)
+        progressBar = progressBarView.findViewById(R.id.progressBar)
+        progressBar.progress
+    }
+
+    private fun detachProgressBar() {
+        if (this::progressBarView.isInitialized) {
+            (windowManagerProgressBar as WindowManager).removeViewImmediate(progressBarView)
+        }
+    }
+    internal fun returnActivity():Activity{
+        return activity
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

@@ -73,5 +73,6 @@ internal class Constants {
         const val checkboxRealmTag:String = "Checkbox Realm"
         const val actionFileTag:String = "Action File"
         const val singleFileDeleteTag:String = "Single File"
+        const val discardFileTag:String = "Discard File"
     }
 }
