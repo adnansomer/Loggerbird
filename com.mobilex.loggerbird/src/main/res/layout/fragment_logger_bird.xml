@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     tools:context="fragments.FragmentLoggerBird">
 
-    <Chronometer
+    <TextView
         android:id="@+id/fragment_textView_counter_video"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,7 +21,7 @@
         app:layout_anchor="@id/fragment_floating_action_button_video"
         app:layout_anchorGravity="center_vertical|center_horizontal" />
 
-    <Chronometer
+    <TextView
         android:id="@+id/fragment_textView_counter_audio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
