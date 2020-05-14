@@ -202,8 +202,8 @@ class MainActivity : AppCompatActivity() {
 //
 //        }
         button_add.setOnClickListener() {
-
-            val filePathTest: File = File(this.filesDir, "logger_bird_details.txt")
+            val filePathTest: File? = null
+            filePathTest!!.createNewFile()
 
             //recyclerViewList.removeAt(0)
             //recyclerViewList.add(RecyclerModel("hello how are you"))
@@ -218,7 +218,7 @@ class MainActivity : AppCompatActivity() {
 //                LoggerBird.callComponentDetails(view = button_add, resources = button_add.resources)
 //                LoggerBird.callLifeCycleDetails()
 //                LoggerBird.callCpuDetails()
-//                throw NullPointerException("unhandled exception")
+
 //            }
 //
 //            try {
