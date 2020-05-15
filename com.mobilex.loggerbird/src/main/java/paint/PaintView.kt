@@ -175,6 +175,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                     fileDirectory,
                     "loggerbird_screenshot_"+System.currentTimeMillis().toString()+"_"+filename+".png"
                 )
+                LoggerBirdService.unhandledFilePathName = filePath
                 LoggerBirdService.callShareView(filePathMedia = filePath)
                 arrayListFileNameScreenshot.add(filePath.absolutePath)
                 val os = FileOutputStream(filePath)

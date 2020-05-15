@@ -71,6 +71,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var windowManagerFeedback: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -180,6 +181,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         internal var audioRecording = false
         internal var videoRecording = false
         internal var screenshotDrawing = false
+        internal var unhandledFilePathName: File? = null
 
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
@@ -550,56 +552,57 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             } else {
                 animationVisibility()
             }
-            floating_action_button_screenshot.setSafeOnClickListener {
-                if (floating_action_button_screenshot.visibility == View.VISIBLE) {
-                    if (!PaintActivity.controlPaintInPictureState) {
-                        takeScreenShot(view = activity.window.decorView.rootView, context = context)
-                    } else {
-                        Toast.makeText(
-                            context,
-                            R.string.screen_shot_picture_in_picture_warning_message,
-                            Toast.LENGTH_SHORT
-                        ).show()
+        }
+        floating_action_button_screenshot.setSafeOnClickListener {
+            if (floating_action_button_screenshot.visibility == View.VISIBLE) {
+                if (!PaintActivity.controlPaintInPictureState) {
+                    takeScreenShot(view = activity.window.decorView.rootView, context = context)
+                } else {
+                    Toast.makeText(
+                        context,
+                        R.string.screen_shot_picture_in_picture_warning_message,
+                        Toast.LENGTH_SHORT
+                    ).show()
 
-                    }
+                }
 
-                }
-            }
-            floating_action_button_audio.setSafeOnClickListener {
-                if (floating_action_button_audio.visibility == View.VISIBLE) {
-                    takeAudioRecording()
-                }
-            }
-
-            textView_counter_audio.setSafeOnClickListener {
-                if (textView_counter_audio.visibility == View.VISIBLE) {
-                    takeAudioRecording()
-                    shareView(filePathMedia = filePathAudio)
-//                    floating_action_button.performClick()
-                }
-            }
-
-            floating_action_button_video.setSafeOnClickListener {
-                if (floating_action_button_video.visibility == View.VISIBLE) {
-                    callVideoRecording(
-                        requestCode = requestCode,
-                        resultCode = resultCode,
-                        data = dataIntent
-                    )
-                }
-            }
-            textView_counter_video.setSafeOnClickListener {
-                if (textView_counter_video.visibility == View.VISIBLE) {
-                    callVideoRecording(
-                        requestCode = requestCode,
-                        resultCode = resultCode,
-                        data = dataIntent
-                    )
-                    shareView(filePathMedia = filePathVideo)
-//                    floating_action_button.performClick()
-                }
             }
         }
+        floating_action_button_audio.setSafeOnClickListener {
+            if (floating_action_button_audio.visibility == View.VISIBLE) {
+                takeAudioRecording()
+            }
+        }
+
+        textView_counter_audio.setSafeOnClickListener {
+            if (textView_counter_audio.visibility == View.VISIBLE) {
+                takeAudioRecording()
+                shareView(filePathMedia = filePathAudio)
+//                    floating_action_button.performClick()
+            }
+        }
+
+        floating_action_button_video.setSafeOnClickListener {
+            if (floating_action_button_video.visibility == View.VISIBLE) {
+                callVideoRecording(
+                    requestCode = requestCode,
+                    resultCode = resultCode,
+                    data = dataIntent
+                )
+            }
+        }
+        textView_counter_video.setSafeOnClickListener {
+            if (textView_counter_video.visibility == View.VISIBLE) {
+                callVideoRecording(
+                    requestCode = requestCode,
+                    resultCode = resultCode,
+                    data = dataIntent
+                )
+                shareView(filePathMedia = filePathVideo)
+//                    floating_action_button.performClick()
+            }
+        }
+
         floating_action_button.setOnTouchListener(
             FloatingActionButtonOnTouchListener(
                 windowManager = (windowManager as WindowManager),
@@ -668,7 +671,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     attachProgressBar()
                 }
-                jiraAuthentication.callJiraIssue(filePathName = filePathMedia,context = context,activity = activity)
+                jiraAuthentication.callJiraIssue(
+                    filePathName = filePathMedia,
+                    context = context,
+                    activity = activity
+                )
             }
 
             textView_discard.setOnClickListener {
@@ -909,6 +916,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 "logger_bird_audio" + System.currentTimeMillis()
                                     .toString() + "recording.3gpp"
                             )
+                            unhandledFilePathName = filePathAudio
                             addFileNameList(fileName = filePathAudio.absolutePath)
                             mediaRecorderAudio = MediaRecorder()
                             mediaRecorderAudio?.setAudioSource(MediaRecorder.AudioSource.MIC)
@@ -1149,6 +1157,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         fileDirectory,
                         "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4"
                     )
+                    unhandledFilePathName = filePathVideo
                     addFileNameList(fileName = filePathVideo.absolutePath)
                     mediaCodecsFile = File("/data/misc/media/media_codecs_profiling_results.xml")
                     mediaRecorderVideo?.setOutputFile(filePathVideo.path)
@@ -1936,15 +1945,27 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun finishShareLayout(message:String) {
+    internal fun finishShareLayout(message: String) {
         activity.runOnUiThread {
             when (message) {
                 "audio" -> Toast.makeText(context, R.string.share_audio_delete, Toast.LENGTH_SHORT)
                     .show()
-                "single_email" -> Toast.makeText(context, R.string.share_file_sent, Toast.LENGTH_SHORT).show()
-                "single_email_error" -> Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT).show()
+                "single_email" -> Toast.makeText(
+                    context,
+                    R.string.share_file_sent,
+                    Toast.LENGTH_SHORT
+                ).show()
+                "single_email_error" -> Toast.makeText(
+                    context,
+                    R.string.share_file_sent_error,
+                    Toast.LENGTH_SHORT
+                ).show()
                 "jira" -> Toast.makeText(context, R.string.jira_sent, Toast.LENGTH_SHORT).show()
-                "jira_error" -> Toast.makeText(context, R.string.jira_sent_error, Toast.LENGTH_SHORT).show()
+                "jira_error" -> Toast.makeText(
+                    context,
+                    R.string.jira_sent_error,
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             detachProgressBar()
             reveal_linear_layout_share.visibility = View.GONE
@@ -1984,8 +2005,28 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 rootView,
                 false
             )
+        windowManagerParamsProgressBar = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT
+            )
+        } else {
+            WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT
+            )
+        }
         windowManagerProgressBar = activity.getSystemService(Context.WINDOW_SERVICE)!!
-        (windowManagerProgressBar as WindowManager).addView(progressBarView, windowManagerParams)
+        (windowManagerProgressBar as WindowManager).addView(
+            progressBarView,
+            windowManagerParamsProgressBar
+        )
         progressBar = progressBarView.findViewById(R.id.progressBar)
         progressBar.progress
     }
@@ -1995,7 +2036,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             (windowManagerProgressBar as WindowManager).removeViewImmediate(progressBarView)
         }
     }
-    internal fun returnActivity():Activity{
+
+    internal fun returnActivity(): Activity {
         return activity
     }
 

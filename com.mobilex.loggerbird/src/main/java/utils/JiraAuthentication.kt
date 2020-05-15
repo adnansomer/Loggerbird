@@ -10,13 +10,17 @@ import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
 import com.atlassian.jira.rest.client.api.domain.BasicUser
 import com.atlassian.jira.rest.client.api.domain.Issue
+import com.atlassian.jira.rest.client.api.domain.User
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
 import io.atlassian.util.concurrent.Promise
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
 import okhttp3.*
 import services.LoggerBirdService
@@ -122,21 +126,26 @@ class JiraAuthentication() {
             "appcaesars@gmail.com",
             "uPPXsUw0FabxeOa5CkDm0BAE"
         )
+        val userClient = restClient.userClient
         val issueClient = restClient.issueClient
 //                    val issueType = IssueType(null,10004,"bug",false,"Assignment LoggerBird",null)
 //                    val basicProject = BasicProject(null,"LGB",10004,"LoggerBird")
-        val issueBuilder = IssueInputBuilder("LGB", 10004, "unhandled!")
+//        val userPromise: Promise<User> =userClient.getUser(restClient.searchClient.searchJql())
+//        val user:User = userPromise.claim()
+        val issueBuilder = IssueInputBuilder("LGB", 10004, "unhandled_berk!")
         issueBuilder.setDescription("LoggerBird_2")
-        val basicUser = BasicUser(
-            URI("https://appcaesars.atlassian.net/rest/api/latest/issue/10045"),
-            "Adnan",
-            "Adnan"
-        )
-        issueBuilder.setAssignee(basicUser)
+//        val basicUser = BasicUser(
+//            null,
+//            user.name,
+//            user.displayName,
+//            user.accountId
+//        )
+//        issueBuilder.setAssignee(basicUser)
 //                    issueBuilder.setReporter(basicUser)
 //                    issueBuilder.addProperty()
 //                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
 //                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
+
         val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
         val issueKey = basicIssue.key
         val issueUri = basicIssue.self
@@ -151,6 +160,7 @@ class JiraAuthentication() {
             if (filePathMediaName.exists()) {
                 filePathMediaName.delete()
             }
+
 //                        val issueInput:IssueInput = IssueInput.createWithFields(FieldInput(IssueFieldId.ASSIGNEE_FIELD,ComplexIssueInputFieldValue.with("Adnan","Adnan")))
 //                        issueClient.updateIssue(issueUri,issueInput).claim()
         }
@@ -168,7 +178,15 @@ class JiraAuthentication() {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal suspend fun jiraUnhandledExceptionTask() {
         withContext(coroutineCallJira.coroutineContext) {
-            jiraTask()
+            try {
+                if(LoggerBirdService.unhandledFilePathName!=null){
+                    jiraTask(filePathMediaName = LoggerBirdService.unhandledFilePathName)
+                }else{
+                    jiraTask()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }
