@@ -498,7 +498,7 @@ class FragmentLoggerBird(private val viewFragment: View, private val mContext: C
             mediaProjection!!.registerCallback(mediaProjectionCallback, null)
             virtualDisplay = createVirtualDisplay()
 //            fragment_floating_action_button_video.setImageResource(R.drawable.ic_videocam_off_black_24dp)
-            fragment_floating_action_button_video.setBackgroundResource(R.drawable.ic_videocam_off_black_24dp)
+//            fragment_floating_action_button_video.setBackgroundResource(R.drawable.ic_videocam_off_black_24dp)
         }else{
             Toast.makeText(mContext, "Screen cast permission denied", Toast.LENGTH_SHORT)
                 .show()
