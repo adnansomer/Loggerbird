@@ -10,6 +10,7 @@ import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
 import com.atlassian.jira.rest.client.api.domain.BasicUser
 import com.atlassian.jira.rest.client.api.domain.Issue
+import com.atlassian.jira.rest.client.api.domain.SearchResult
 import com.atlassian.jira.rest.client.api.domain.User
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
@@ -30,7 +31,7 @@ import java.io.IOException
 import java.net.URI
 
 
-class JiraAuthentication() {
+class JiraAuthentication {
     private val coroutineCallJira: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private val internetConnectionUtil = InternetConnectionUtil()
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -127,13 +128,18 @@ class JiraAuthentication() {
             "uPPXsUw0FabxeOa5CkDm0BAE"
         )
         val userClient = restClient.userClient
+        val searchClient = restClient.searchClient
+        val searchPromise: Promise<SearchResult> = searchClient.searchJql("project = DEN")
+        val search: SearchResult = searchPromise.claim()
+        Log.d("issue", search.issues.count().toString())
         val issueClient = restClient.issueClient
 //                    val issueType = IssueType(null,10004,"bug",false,"Assignment LoggerBird",null)
 //                    val basicProject = BasicProject(null,"LGB",10004,"LoggerBird")
-//        val userPromise: Promise<User> =userClient.getUser(restClient.searchClient.searchJql())
-//        val user:User = userPromise.claim()
-        val issueBuilder = IssueInputBuilder("LGB", 10004, "unhandled_berk!")
+//        val userPromise: Promise<User> = userClient.getUser("appcaesars@gmail.com")
+//        val user: User = userPromise.claim()
+        val issueBuilder = IssueInputBuilder("DEN", 10004, "unhandled_berk!")
         issueBuilder.setDescription("LoggerBird_2")
+        issueBuilder.setAssigneeName("appcaesars@gmail.com")
 //        val basicUser = BasicUser(
 //            null,
 //            user.name,
@@ -141,7 +147,7 @@ class JiraAuthentication() {
 //            user.accountId
 //        )
 //        issueBuilder.setAssignee(basicUser)
-//                    issueBuilder.setReporter(basicUser)
+//        issueBuilder.setReporter(basicUser)
 //                    issueBuilder.addProperty()
 //                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
 //                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
@@ -179,11 +185,7 @@ class JiraAuthentication() {
     internal suspend fun jiraUnhandledExceptionTask() {
         withContext(coroutineCallJira.coroutineContext) {
             try {
-                if(LoggerBirdService.unhandledFilePathName!=null){
-                    jiraTask(filePathMediaName = LoggerBirdService.unhandledFilePathName)
-                }else{
-                    jiraTask()
-                }
+                jiraTask()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
