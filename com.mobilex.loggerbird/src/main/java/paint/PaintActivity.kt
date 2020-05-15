@@ -529,6 +529,7 @@ class PaintActivity : Activity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onBackPressed() {
         super.onBackPressed()
         Toast.makeText(activity, R.string.drawing_cancelled_message, Toast.LENGTH_SHORT).show()
@@ -544,6 +545,7 @@ class PaintActivity : Activity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration?
