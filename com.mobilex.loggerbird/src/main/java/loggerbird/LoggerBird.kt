@@ -2825,8 +2825,8 @@ class LoggerBird : LifecycleObserver {
                                     context = context
                                 )
                             }
+                            saveSessionIntoOldSessionFile()
                         }
-                        saveSessionIntoOldSessionFile()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

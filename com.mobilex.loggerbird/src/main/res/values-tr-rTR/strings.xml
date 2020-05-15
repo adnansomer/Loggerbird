@@ -58,7 +58,7 @@
     <string name="share_file_sent_error">Medya dosyası gönderilmeye çalışırken bir hatayla karşılaşıldı!</string>
     <string name="jira_sent">Jira konusu açıldı!</string>
     <string name="jira_sent_error">Jira dosyası açılmaya çalışırken bir hatayla karşılaşıldı!</string>
-    <string name="media_recording_error">Lütfen önce diger kaydinizi tamamlayin!</string>
+    <string name="media_recording_error">Lütfen önce diğer medya operasyonunuzu tamamlayın!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>

@@ -616,7 +616,6 @@ class PaintActivity : Activity() {
         onStopCalled = true
         if(LoggerBirdService.controlFloatingActionButtonView()){
             LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
-            LoggerBirdService.screenshotDrawing = false
         }
     }
 
@@ -629,6 +628,7 @@ class PaintActivity : Activity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        LoggerBirdService.screenshotDrawing = false
         controlPaintInPictureState = false
     }
 }
