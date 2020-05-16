@@ -82,4 +82,16 @@
     <string name="checkBox_feedback_title">Give us feedback!</string>
     <!-- loggerbird_feedback-->
     <string name="editText_feedback_title">Give us feedback!</string>
+    <!-- loggerbird_jira_popup-->
+    <string name="textView_jira_title">Create Issue</string>
+    <string name="textView_jira_project">Project</string>
+    <string name="textView_jira_issue_type">Issue Type</string>
+    <string name="textView_jira_summary">Summary:</string>
+    <string name="textView_jira_description">Description:</string>
+    <string name="textView_jira_reporter">Reporter</string>
+    <string name="textView_jira_linked_issue">Linked Issues</string>
+    <string name="textView_jira_assignee">Assignee</string>
+    <string name="textView_jira_priority">Priority</string>
+    <string name="button_jira_create">Create</string>
+    <string name="button_jira_cancel">Cancel</string>
 </resources>

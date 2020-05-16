@@ -83,4 +83,16 @@
     <string name="checkBox_feedback_title">Geri bildirim verin</string>
     <!-- loggerbird_feedback-->
     <string name="editText_feedback_title">Geri bildirim verin</string>
+    <!-- loggerbird_jira_popup-->
+    <string name="textView_jira_title">Konu Oluştur</string>
+    <string name="textView_jira_project">Proje</string>
+    <string name="textView_jira_issue_type">Konu Tipi</string>
+    <string name="textView_jira_summary">Özet:</string>
+    <string name="textView_jira_description">Açıklama:</string>
+    <string name="textView_jira_reporter">Bildiren</string>
+    <string name="textView_jira_linked_issue">Bağlantılı Konu</string>
+    <string name="textView_jira_assignee">Sorumlu</string>
+    <string name="textView_jira_priority">Öncelik</string>
+    <string name="button_jira_create">Oluştur</string>
+    <string name="button_jira_cancel">İptal</string>
 </resources>

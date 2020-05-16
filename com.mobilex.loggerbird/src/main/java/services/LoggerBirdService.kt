@@ -1,5 +1,6 @@
 package services
 
+import adapter.RecyclerViewJiraAdapter
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -11,7 +12,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
-import android.graphics.drawable.Drawable
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
@@ -34,6 +34,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.circularreveal.CircularRevealLinearLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
@@ -46,13 +48,13 @@ import com.mobilex.loggerbird.R
 //import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import constants.Constants
 import exception.LoggerBirdException
-import kotlinx.android.synthetic.main.default_progressbar.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import listeners.*
 import loggerbird.LoggerBird
+import models.RecyclerViewJiraModel
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
@@ -76,9 +78,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var windowManager: Any? = null
     private var windowManagerProgressBar: Any? = null
     private var windowManagerFeedback: Any? = null
+    private var windowManagerJira: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsJira: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -125,6 +129,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var fileSizeFormatter: Formatter = Formatter()
     private lateinit var cookieBar: CookieBar
     private lateinit var viewFeedback: View
+    private lateinit var viewJira: View
     private lateinit var floating_action_button_feedback: FloatingActionButton
     private lateinit var floating_action_button_feed_close: FloatingActionButton
     private lateinit var editText_feedback: EditText
@@ -140,6 +145,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     internal val jiraAuthentication = JiraAuthentication()
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarView: View
+    private lateinit var spinnerProject: Spinner
+    private lateinit var spinnerIssueType: Spinner
+    private lateinit var recyclerViewAttachment: RecyclerView
+    private lateinit var editTextSummary: EditText
+    private lateinit var editTextDescription: EditText
+    private lateinit var spinnerReporter: Spinner
+    private lateinit var spinnerLinkedIssue: Spinner
+    private lateinit var spinnerAssignee: Spinner
+    private lateinit var spinnerPriority: Spinner
+    private lateinit var buttonCreate: Button
+    private lateinit var buttonCancel: Button
+    private lateinit var layoutJira: LinearLayout
+    private val arrayListJiraFileName: ArrayList<RecyclerViewJiraModel> = ArrayList()
+    private lateinit var jiraAdapter: RecyclerViewJiraAdapter
 
     //Static global variables:
     internal companion object {
@@ -211,6 +230,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
             return false
         }
+
 
         internal fun controlLoggerBirdServiceInit(): Boolean {
             if (Companion::loggerBirdService.isInitialized) {
@@ -687,14 +707,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
 
             textView_share_jira.setOnClickListener {
+                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    attachProgressBar()
+//                }
+//                jiraAuthentication.callJiraIssue(
+//                    filePathName = filePathMedia,
+//                    context = context,
+//                    activity = activity
+//                )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    attachProgressBar()
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
+                    }
+                    initializeJiraLayout(filePathMedia = filePathMedia)
                 }
-                jiraAuthentication.callJiraIssue(
-                    filePathName = filePathMedia,
-                    context = context,
-                    activity = activity
-                )
             }
 
             textView_discard.setOnClickListener {
@@ -2095,6 +2121,122 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     internal fun returnActivity(): Activity {
         return activity
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeJiraLayout(filePathMedia: File) {
+        try {
+            if (windowManagerJira != null && this::viewJira.isInitialized) {
+                (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
+                arrayListJiraFileName.clear()
+            }
+            viewJira = LayoutInflater.from(activity)
+                .inflate(
+                    R.layout.loggerbird_jira_popup,
+                    (this.rootView as ViewGroup),
+                    false
+                )
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsJira = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerJira = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                if (windowManagerJira != null) {
+                    (windowManagerJira as WindowManager).addView(
+                        viewJira,
+                        windowManagerParamsJira
+                    )
+                    spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
+                    spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
+                    recyclerViewAttachment =
+                        viewJira.findViewById(R.id.recycler_view_jira_attachment)
+                    editTextSummary = viewJira.findViewById(R.id.editText_jira_summary)
+                    editTextDescription = viewJira.findViewById(R.id.editText_jira_description)
+                    spinnerReporter = viewJira.findViewById(R.id.spinner_jira_issue_reporter)
+                    spinnerLinkedIssue =
+                        viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
+                    spinnerAssignee = viewJira.findViewById(R.id.spinner_jira_issue_assignee)
+                    spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
+                    buttonCreate = viewJira.findViewById(R.id.button_jira_create)
+                    buttonCancel = viewJira.findViewById(R.id.button_jira_cancel)
+                    layoutJira = viewJira.findViewById(R.id.layout_jira)
+                    buttonClicksJira(filePathMedia = filePathMedia)
+                    initializeJiraRecyclerView(filePathMedia = filePathMedia)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
+        }
+    }
+
+    private fun removeJiraLayout() {
+        if (windowManagerJira != null && this::viewJira.isInitialized) {
+            (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
+            windowManagerJira = null
+            arrayListJiraFileName.clear()
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun buttonClicksJira(filePathMedia: File) {
+        layoutJira.setOnTouchListener(
+            LayoutJiraOnTouchListener(
+                windowManager = (windowManagerJira as WindowManager),
+                windowManagerView = viewJira,
+                windowManagerParams = windowManagerParamsJira
+            )
+        )
+        buttonCreate.setSafeOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                attachProgressBar()
+            }
+            jiraAuthentication.callJiraIssue(
+                filePathName = filePathMedia,
+                context = context,
+                activity = activity
+            )
+        }
+        buttonCancel.setSafeOnClickListener {
+            removeJiraLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun checkJiraEmpty() {
+        //project,issue-type,summary,reporter,linked issue,assignee,priority must not be empty!
+    }
+
+    private fun addJiraFileNames(filePathMedia: File): ArrayList<RecyclerViewJiraModel> {
+        arrayListJiraFileName.add(RecyclerViewJiraModel(file = filePathMedia))
+        arrayListJiraFileName.add(RecyclerViewJiraModel(file = LoggerBird.filePathSecessionName))
+        return arrayListJiraFileName
+    }
+
+    private fun initializeJiraRecyclerView(filePathMedia: File) {
+        recyclerViewAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        val jiraAdapter = RecyclerViewJiraAdapter(addJiraFileNames(filePathMedia = filePathMedia))
+        recyclerViewAttachment.adapter = jiraAdapter
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

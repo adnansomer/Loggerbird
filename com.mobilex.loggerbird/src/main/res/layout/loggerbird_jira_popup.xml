@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_jira"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@color/jiraBlue"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/textView_jira_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:text="@string/textView_jira_title" />
+
+    <TextView
+        android:id="@+id/textView_jira_project"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:layout_marginTop="10dp"
+        android:text="@string/textView_jira_project" />
+    <Spinner
+        android:id="@+id/spinner_jira_project"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/textView_jira_issue_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:layout_marginTop="10dp"
+        android:text="@string/textView_jira_issue_type" />
+    <Spinner
+        android:id="@+id/spinner_jira_issue_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_jira_attachment"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content" />
+    <EditText
+        android:id="@+id/editText_jira_summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:layout_marginTop="10dp"
+        android:hint="@string/textView_jira_summary"
+        android:textSize="15sp"
+        android:inputType="textPersonName" />
+
+    <EditText
+        android:id="@+id/editText_jira_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:background="@drawable/edit_text_jira_layout"
+        android:lines="8"
+        android:maxLength="90"
+        android:maxLines="8"
+        android:gravity="start"
+        android:padding="10dp"
+        android:layout_marginTop="10dp"
+        android:hint="@string/textView_jira_description"
+        android:singleLine="true"
+        android:textSize="15sp" />
+    <TextView
+        android:id="@+id/textView_jira_reporter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:layout_marginTop="10dp"
+        android:text="@string/textView_jira_reporter" />
+    <Spinner
+        android:id="@+id/spinner_jira_issue_reporter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textView_jira_linked_issues"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:layout_marginTop="10dp"
+        android:text="@string/textView_jira_linked_issue" />
+    <Spinner
+        android:id="@+id/spinner_jira_issue_linked_issues"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/textView_jira_assignee"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:layout_marginTop="10dp"
+        android:text="@string/textView_jira_assignee" />
+    <Spinner
+        android:id="@+id/spinner_jira_issue_assignee"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/textView_jira_priority"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:layout_marginTop="10dp"
+        android:text="@string/textView_jira_priority" />
+    <Spinner
+        android:id="@+id/spinner_jira_issue_priority"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/button_jira_create"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/white"
+                android:text="@string/button_jira_create" />
+
+            <Button
+                android:id="@+id/button_jira_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/white"
+                android:text="@string/button_jira_cancel" />
+        </LinearLayout>
+</LinearLayout>
+
