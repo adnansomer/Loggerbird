@@ -115,25 +115,17 @@ class JiraAuthentication() {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun jiraTask(filePathMediaName: File? = null) {
         val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
-        val jiraServerUri =
-            URI("https://appcaesars.atlassian.net")
-        val restClient: JiraRestClient = factory.createWithBasicHttpAuthentication(
-            jiraServerUri,
-            "appcaesars@gmail.com",
-            "uPPXsUw0FabxeOa5CkDm0BAE"
-        )
+        val jiraServerUri = URI("https://appcaesars.atlassian.net")
+        val restClient: JiraRestClient = factory.createWithBasicHttpAuthentication(jiraServerUri, "appcaesars@gmail.com", "uPPXsUw0FabxeOa5CkDm0BAE")
         val issueClient = restClient.issueClient
 //                    val issueType = IssueType(null,10004,"bug",false,"Assignment LoggerBird",null)
 //                    val basicProject = BasicProject(null,"LGB",10004,"LoggerBird")
         val issueBuilder = IssueInputBuilder("LGB", 10004, "unhandled!")
         issueBuilder.setDescription("LoggerBird_2")
-        val basicUser = BasicUser(
-            URI("https://appcaesars.atlassian.net/rest/api/latest/issue/10045"),
-            "Adnan",
-            "Adnan"
-        )
+        val basicUser = BasicUser(URI("https://appcaesars.atlassian.net/rest/api/latest/issue/10045"), "Adnan", "Adnan")
         issueBuilder.setAssignee(basicUser)
-//                    issueBuilder.setReporter(basicUser)
+
+
 //                    issueBuilder.addProperty()
 //                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
 //                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
@@ -143,19 +135,15 @@ class JiraAuthentication() {
         val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
         if (filePathMediaName != null) {
             val inputStreamMediaFile = FileInputStream(filePathMediaName)
-            issueClient.addAttachment(
-                issue.get().attachmentsUri,
-                inputStreamMediaFile,
-                filePathMediaName.absolutePath
-            )
+            issueClient.addAttachment(issue.get().attachmentsUri, inputStreamMediaFile, filePathMediaName.absolutePath)
+
             if (filePathMediaName.exists()) {
                 filePathMediaName.delete()
             }
 //                        val issueInput:IssueInput = IssueInput.createWithFields(FieldInput(IssueFieldId.ASSIGNEE_FIELD,ComplexIssueInputFieldValue.with("Adnan","Adnan")))
 //                        issueClient.updateIssue(issueUri,issueInput).claim()
         }
-        val inputStreamSecessionFile =
-            FileInputStream(LoggerBird.filePathSecessionName)
+        val inputStreamSecessionFile = FileInputStream(LoggerBird.filePathSecessionName)
         issueClient.addAttachment(
             issue.get().attachmentsUri,
             inputStreamSecessionFile,

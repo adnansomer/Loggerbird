@@ -13,8 +13,7 @@
 
     <application>
         <activity android:name="observers.LogActivityLifeCycleObserver"
-            android:enabled="true"
-            />
+            android:enabled="true" />
         <activity android:name="paint.PaintActivity"
                 android:exported="true"
                 android:enabled="true"

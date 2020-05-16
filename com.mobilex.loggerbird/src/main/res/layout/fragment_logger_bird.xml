@@ -5,6 +5,8 @@
     android:id="@+id/fragment_layout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     tools:context="fragments.FragmentLoggerBird">
 
     <TextView
@@ -70,50 +72,67 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button"
         style="@style/AppTheme.Fab"
+        android:layout_margin="1dp"
+        app:rippleColor="@color/secondaryColor"
+        app:borderWidth="0dp"
+        android:clickable="true"
+        android:elevation="0dp"
+        app:elevation="0dp"
+        app:fabSize="normal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/black"
-        app:borderWidth="0dp"
-        app:elevation="1dp"
-        app:fabSize="normal"
         app:srcCompat="@drawable/loggerbird" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_audio"
+        app:rippleColor="#cfd8dc"
         style="@style/AppTheme.FabSpeedDial"
+        android:layout_margin="1dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/colorFab"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:visibility="gone"
         app:borderWidth="0dp"
+        android:elevation="0dp"
+        android:scaleType="fitCenter"
         app:elevation="1dp"
         app:fabSize="normal"
         app:srcCompat="@drawable/ic_mic_black_24dp" />
 
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_screenshot"
+        app:rippleColor="#cfd8dc"
         style="@style/AppTheme.FabSpeedDial"
         android:layout_width="wrap_content"
+        android:layout_margin="1dp"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/colorFab"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:visibility="gone"
+        android:scaleType="fitCenter"
         app:borderWidth="0dp"
-        app:elevation="1dp"
+        android:elevation="0dp"
+        app:elevation="0dp"
         app:fabSize="normal"
         app:srcCompat="@drawable/ic_photo_camera_black_24dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_video"
+        style="@style/AppTheme.FabSpeedDial"
+        app:rippleColor="#cfd8dc"
         android:layout_width="wrap_content"
+        android:layout_margin="1dp"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/colorFab"
-        android:textAllCaps="false"
         android:textColor="@color/colorBlack"
+        android:scaleType="fitCenter"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:textSize="18sp"
         android:textStyle="bold"
         android:visibility="gone"
         app:borderWidth="0dp"
+        android:elevation="1dp"
         app:elevation="1dp"
         app:fabSize="normal"
         app:srcCompat="@drawable/ic_videocam_black_24dp" />

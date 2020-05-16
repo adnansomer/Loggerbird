@@ -2,7 +2,6 @@
 <resources>
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
     <color name="colorBlack">#000000</color>
     <color name="colorGray">#808080</color>
     <color name="colorFab">#ffffff</color>
@@ -13,4 +12,7 @@
     <color name="secondaryColor">#a00037</color>
     <color name="red">#f20000</color>
     <color name="cookieBarColor">#102027</color>
+    <color name="colorAccent">#E040FB</color>
+    <color name="colorAccentLight">#E1BEE7</color>
+
 </resources>

@@ -11,7 +11,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
-import android.graphics.drawable.Drawable
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
@@ -40,13 +39,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
-import com.slack.api.Slack
-import com.slack.api.methods.MethodsClient
-import com.slack.api.methods.request.chat.ChatPostMessageRequest
-import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import constants.Constants
 import exception.LoggerBirdException
-import kotlinx.android.synthetic.main.default_progressbar.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -288,8 +282,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
             sd = LoggerBirdShakeDetector(this)
             sd.start(sensorManager)
-            logActivityLifeCycleObserver =
-                LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
+            logActivityLifeCycleObserver = LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
             controlActionFiles()
         } catch (e: Exception) {
@@ -412,12 +405,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 this.view = view
                 floatingActionButtonView = view
                 floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-                floating_action_button_screenshot =
-                    view.findViewById(R.id.fragment_floating_action_button_screenshot)
-                floating_action_button_video =
-                    view.findViewById(R.id.fragment_floating_action_button_video)
-                floating_action_button_audio =
-                    view.findViewById(R.id.fragment_floating_action_button_audio)
+                floating_action_button.rippleColor = resources.getColor(R.color.secondaryColor)
+                floating_action_button_screenshot = view.findViewById(R.id.fragment_floating_action_button_screenshot)
+                floating_action_button_video = view.findViewById(R.id.fragment_floating_action_button_video)
+                floating_action_button_audio = view.findViewById(R.id.fragment_floating_action_button_audio)
                 reveal_linear_layout_share = view.findViewById(R.id.reveal_linear_layout_share)
                 textView_send_email = view.findViewById(R.id.textView_send_email)
                 textView_discard = view.findViewById(R.id.textView_discard)
@@ -631,23 +622,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             .scaleX(1F)
             .scaleY(1F)
             .withEndAction {
-                when {
-                    audioRecording -> {
-                        floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
-                    }
-                    screenshotDrawing -> {
-                        floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
-                    }
-                    else -> {
-                        floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
-                    }
-                }
+                floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
                 floating_action_button.animate()
                     .rotationBy(0F)
                     .setDuration(200)
                     .scaleX(1F)
                     .scaleY(1F)
-                    .start();
+                    .start()
             }
             .start()
         floating_action_button_video.visibility = View.GONE
