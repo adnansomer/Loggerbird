@@ -133,52 +133,57 @@ class JiraAuthentication {
         val search: SearchResult = searchPromise.claim()
         Log.d("issue", search.issues.count().toString())
         val issueClient = restClient.issueClient
+//        val issuePromise = issueClient.getIssue("DEN-5")
+//        val issue = issuePromise.claim()
+//        Log.d("issue",issue.summary)
+//        Log.d("issue",issue.description!!)
+//        Log.d("issue",issue.assignee?.displayName)
 //                    val issueType = IssueType(null,10004,"bug",false,"Assignment LoggerBird",null)
 //                    val basicProject = BasicProject(null,"LGB",10004,"LoggerBird")
-//        val userPromise: Promise<User> = userClient.getUser("appcaesars@gmail.com")
-//        val user: User = userPromise.claim()
-        val issueBuilder = IssueInputBuilder("DEN", 10004, "unhandled_berk!")
-        issueBuilder.setDescription("LoggerBird_2")
-        issueBuilder.setAssigneeName("appcaesars@gmail.com")
-//        val basicUser = BasicUser(
-//            null,
-//            user.name,
-//            user.displayName,
-//            user.accountId
+        val userPromise: Promise<User> = userClient.getUser("?accountId=5e3bc6ed3f647d0c99d7fcf2")
+        val user: User = userPromise.claim()
+//        val issueBuilder = IssueInputBuilder("DEN", 10004, "unhandled_berk!")
+//        issueBuilder.setDescription("LoggerBird_2")
+//        issueBuilder.setAssigneeName("0")
+////        val basicUser = BasicUser(
+////            null,
+////            user.name,
+////            user.displayName,
+////            user.accountId
+////        )
+////        issueBuilder.setAssignee(basicUser)
+////        issueBuilder.setReporter(basicUser)
+////                    issueBuilder.addProperty()
+////                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
+////                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
+//
+//        val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
+//        val issueKey = basicIssue.key
+//        val issueUri = basicIssue.self
+//        val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
+//        if (filePathMediaName != null) {
+//            val inputStreamMediaFile = FileInputStream(filePathMediaName)
+//            issueClient.addAttachment(
+//                issue.get().attachmentsUri,
+//                inputStreamMediaFile,
+//                filePathMediaName.absolutePath
+//            )
+//            if (filePathMediaName.exists()) {
+//                filePathMediaName.delete()
+//            }
+//
+////                        val issueInput:IssueInput = IssueInput.createWithFields(FieldInput(IssueFieldId.ASSIGNEE_FIELD,ComplexIssueInputFieldValue.with("Adnan","Adnan")))
+////                        issueClient.updateIssue(issueUri,issueInput).claim()
+//        }
+//        val inputStreamSecessionFile =
+//            FileInputStream(LoggerBird.filePathSecessionName)
+//        issueClient.addAttachment(
+//            issue.get().attachmentsUri,
+//            inputStreamSecessionFile,
+//            LoggerBird.filePathSecessionName.absolutePath
 //        )
-//        issueBuilder.setAssignee(basicUser)
-//        issueBuilder.setReporter(basicUser)
-//                    issueBuilder.addProperty()
-//                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
-//                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
-
-        val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
-        val issueKey = basicIssue.key
-        val issueUri = basicIssue.self
-        val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
-        if (filePathMediaName != null) {
-            val inputStreamMediaFile = FileInputStream(filePathMediaName)
-            issueClient.addAttachment(
-                issue.get().attachmentsUri,
-                inputStreamMediaFile,
-                filePathMediaName.absolutePath
-            )
-            if (filePathMediaName.exists()) {
-                filePathMediaName.delete()
-            }
-
-//                        val issueInput:IssueInput = IssueInput.createWithFields(FieldInput(IssueFieldId.ASSIGNEE_FIELD,ComplexIssueInputFieldValue.with("Adnan","Adnan")))
-//                        issueClient.updateIssue(issueUri,issueInput).claim()
-        }
-        val inputStreamSecessionFile =
-            FileInputStream(LoggerBird.filePathSecessionName)
-        issueClient.addAttachment(
-            issue.get().attachmentsUri,
-            inputStreamSecessionFile,
-            LoggerBird.filePathSecessionName.absolutePath
-        )
-        Log.d("issue", issueUri.toString())
-        Log.d("issue", issueKey.toString())
+//        Log.d("issue", issueUri.toString())
+//        Log.d("issue", issueKey.toString())
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
