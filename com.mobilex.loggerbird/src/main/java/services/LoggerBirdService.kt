@@ -158,7 +158,19 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var buttonCancel: Button
     private lateinit var layoutJira: LinearLayout
     private val arrayListJiraFileName: ArrayList<RecyclerViewJiraModel> = ArrayList()
+    private val arrayListJiraProject: ArrayList<String> = ArrayList()
+    private val arrayListJiraIssueType: ArrayList<String> = ArrayList()
+    private val arrayListJiraReporter: ArrayList<String> = ArrayList()
+    private val arrayListJiraLinkedIssue: ArrayList<String> = ArrayList()
+    private val arrayListJiraAssignee: ArrayList<String> = ArrayList()
+    private val arrayListJiraPriority: ArrayList<String> = ArrayList()
     private lateinit var jiraAdapter: RecyclerViewJiraAdapter
+    private lateinit var spinnerProjectAdapter: ArrayAdapter<String>
+    private lateinit var spinnerIssueTypeAdapter: ArrayAdapter<String>
+    private lateinit var spinnerReporterAdapter: ArrayAdapter<String>
+    private lateinit var spinnerLinkedIssueAdapter: ArrayAdapter<String>
+    private lateinit var spinnerAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var spinnerPriorityAdapter: ArrayAdapter<String>
 
     //Static global variables:
     internal companion object {
@@ -2129,6 +2141,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (windowManagerJira != null && this::viewJira.isInitialized) {
                 (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
                 arrayListJiraFileName.clear()
+                arrayListJiraProject.clear()
+                arrayListJiraIssueType.clear()
+                arrayListJiraReporter.clear()
+                arrayListJiraLinkedIssue.clear()
+                arrayListJiraAssignee.clear()
+                arrayListJiraPriority.clear()
             }
             viewJira = LayoutInflater.from(activity)
                 .inflate(
@@ -2176,6 +2194,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     buttonCancel = viewJira.findViewById(R.id.button_jira_cancel)
                     layoutJira = viewJira.findViewById(R.id.layout_jira)
                     buttonClicksJira(filePathMedia = filePathMedia)
+                    initializeJiraSpinner()
                     initializeJiraRecyclerView(filePathMedia = filePathMedia)
                 }
             }
@@ -2191,6 +2210,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
             windowManagerJira = null
             arrayListJiraFileName.clear()
+            arrayListJiraProject.clear()
+            arrayListJiraIssueType.clear()
+            arrayListJiraReporter.clear()
+            arrayListJiraLinkedIssue.clear()
+            arrayListJiraAssignee.clear()
+            arrayListJiraPriority.clear()
         }
     }
 
@@ -2235,8 +2260,76 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun initializeJiraRecyclerView(filePathMedia: File) {
         recyclerViewAttachment.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        val jiraAdapter = RecyclerViewJiraAdapter(addJiraFileNames(filePathMedia = filePathMedia))
+        jiraAdapter = RecyclerViewJiraAdapter(addJiraFileNames(filePathMedia = filePathMedia))
         recyclerViewAttachment.adapter = jiraAdapter
+    }
+
+    private fun initializeJiraSpinner() {
+        spinnerProjectAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, addJiraProjectNames())
+        spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerProject.adapter = spinnerProjectAdapter
+
+        spinnerIssueTypeAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, addJiraIssueTypes())
+        spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerIssueType.adapter = spinnerIssueTypeAdapter
+
+        spinnerReporterAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, addJiraReporterNames())
+        spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerReporter.adapter = spinnerReporterAdapter
+
+        spinnerLinkedIssueAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, addJiraLinkedIssues())
+        spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
+
+        spinnerAssigneeAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, addJiraAssignee())
+        spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerAssignee.adapter = spinnerAssigneeAdapter
+
+        spinnerPriorityAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, addJiraPriority())
+        spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerPriority.adapter = spinnerPriorityAdapter
+    }
+
+    private fun addJiraProjectNames(): ArrayList<String> {
+        arrayListJiraProject.add("project_a")
+        arrayListJiraProject.add("project_b")
+        return arrayListJiraProject
+    }
+
+    private fun addJiraIssueTypes(): ArrayList<String> {
+        arrayListJiraIssueType.add("issue_type_a")
+        arrayListJiraIssueType.add("issue_type_b")
+        return arrayListJiraIssueType
+    }
+
+    private fun addJiraReporterNames(): ArrayList<String> {
+        arrayListJiraReporter.add("reporter_a")
+        arrayListJiraReporter.add("reporter_b")
+        return arrayListJiraReporter
+    }
+
+    private fun addJiraLinkedIssues(): ArrayList<String> {
+        arrayListJiraLinkedIssue.add("linked_issues_a")
+        arrayListJiraLinkedIssue.add("linked_issues_b")
+        return arrayListJiraLinkedIssue
+    }
+
+    private fun addJiraAssignee(): ArrayList<String> {
+        arrayListJiraAssignee.add("assignee_a")
+        arrayListJiraAssignee.add("assignee_b")
+        return arrayListJiraAssignee
+    }
+
+    private fun addJiraPriority(): ArrayList<String> {
+        arrayListJiraPriority.add("priority_a")
+        arrayListJiraPriority.add("priority_b")
+        return arrayListJiraPriority
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
