@@ -1,5 +1,6 @@
 package services
 
+import adapter.RecyclerViewJiraAdapter
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -33,12 +34,18 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.circularreveal.CircularRevealLinearLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
+//import com.slack.api.Slack
+//import com.slack.api.methods.MethodsClient
+//import com.slack.api.methods.request.chat.ChatPostMessageRequest
+//import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
@@ -47,6 +54,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import listeners.*
 import loggerbird.LoggerBird
+import models.RecyclerViewJiraModel
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
@@ -60,7 +68,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 
-internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener{
+internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
@@ -70,8 +78,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var windowManager: Any? = null
     private var windowManagerProgressBar: Any? = null
     private var windowManagerFeedback: Any? = null
+    private var windowManagerJira: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsJira: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -118,6 +129,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var fileSizeFormatter: Formatter = Formatter()
     private lateinit var cookieBar: CookieBar
     private lateinit var viewFeedback: View
+    private lateinit var viewJira: View
     private lateinit var floating_action_button_feedback: FloatingActionButton
     private lateinit var floating_action_button_feed_close: FloatingActionButton
     private lateinit var editText_feedback: EditText
@@ -133,6 +145,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     internal val jiraAuthentication = JiraAuthentication()
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarView: View
+    private lateinit var spinnerProject: Spinner
+    private lateinit var spinnerIssueType: Spinner
+    private lateinit var recyclerViewAttachment: RecyclerView
+    private lateinit var editTextSummary: EditText
+    private lateinit var editTextDescription: EditText
+    private lateinit var spinnerReporter: Spinner
+    private lateinit var spinnerLinkedIssue: Spinner
+    private lateinit var spinnerAssignee: Spinner
+    private lateinit var spinnerPriority: Spinner
+    private lateinit var buttonCreate: Button
+    private lateinit var buttonCancel: Button
+    private lateinit var layoutJira: LinearLayout
+    private val arrayListJiraFileName: ArrayList<RecyclerViewJiraModel> = ArrayList()
+    private lateinit var jiraAdapter: RecyclerViewJiraAdapter
 
     //Static global variables:
     internal companion object {
@@ -204,6 +230,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
             return false
         }
+
 
         internal fun controlLoggerBirdServiceInit(): Boolean {
             if (Companion::loggerBirdService.isInitialized) {
@@ -282,7 +309,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
             sd = LoggerBirdShakeDetector(this)
             sd.start(sensorManager)
-            logActivityLifeCycleObserver = LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
+            logActivityLifeCycleObserver =
+                LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
             controlActionFiles()
         } catch (e: Exception) {
@@ -405,10 +433,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 this.view = view
                 floatingActionButtonView = view
                 floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-                floating_action_button.rippleColor = resources.getColor(R.color.secondaryColor)
-                floating_action_button_screenshot = view.findViewById(R.id.fragment_floating_action_button_screenshot)
-                floating_action_button_video = view.findViewById(R.id.fragment_floating_action_button_video)
-                floating_action_button_audio = view.findViewById(R.id.fragment_floating_action_button_audio)
+                floating_action_button_screenshot =
+                    view.findViewById(R.id.fragment_floating_action_button_screenshot)
+                floating_action_button_video =
+                    view.findViewById(R.id.fragment_floating_action_button_video)
+                floating_action_button_audio =
+                    view.findViewById(R.id.fragment_floating_action_button_audio)
                 reveal_linear_layout_share = view.findViewById(R.id.reveal_linear_layout_share)
                 textView_send_email = view.findViewById(R.id.textView_send_email)
                 textView_discard = view.findViewById(R.id.textView_discard)
@@ -546,56 +576,72 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             } else {
                 animationVisibility()
             }
-            floating_action_button_screenshot.setSafeOnClickListener {
-                if (floating_action_button_screenshot.visibility == View.VISIBLE) {
-                    if (!PaintActivity.controlPaintInPictureState) {
+        }
+        floating_action_button_screenshot.setSafeOnClickListener {
+            if (floating_action_button_screenshot.visibility == View.VISIBLE) {
+                if (!PaintActivity.controlPaintInPictureState) {
+                    if (!audioRecording && !videoRecording) {
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
                     } else {
-                        Toast.makeText(
-                            context,
-                            R.string.screen_shot_picture_in_picture_warning_message,
-                            Toast.LENGTH_SHORT
-                        ).show()
-
+                        Toast.makeText(context, R.string.media_recording_error, Toast.LENGTH_SHORT)
+                            .show()
                     }
+                } else {
+                    Toast.makeText(
+                        context,
+                        R.string.screen_shot_picture_in_picture_warning_message,
+                        Toast.LENGTH_SHORT
+                    ).show()
 
                 }
+
             }
-            floating_action_button_audio.setSafeOnClickListener {
-                if (floating_action_button_audio.visibility == View.VISIBLE) {
+        }
+        floating_action_button_audio.setSafeOnClickListener {
+            if (floating_action_button_audio.visibility == View.VISIBLE) {
+                if (!videoRecording && !screenshotDrawing) {
                     takeAudioRecording()
-                }
-            }
-
-            textView_counter_audio.setSafeOnClickListener {
-                if (textView_counter_audio.visibility == View.VISIBLE) {
-                    takeAudioRecording()
-                    shareView(filePathMedia = filePathAudio)
-//                    floating_action_button.performClick()
-                }
-            }
-
-            floating_action_button_video.setSafeOnClickListener {
-                if (floating_action_button_video.visibility == View.VISIBLE) {
-                    callVideoRecording(
-                        requestCode = requestCode,
-                        resultCode = resultCode,
-                        data = dataIntent
-                    )
-                }
-            }
-            textView_counter_video.setSafeOnClickListener {
-                if (textView_counter_video.visibility == View.VISIBLE) {
-                    callVideoRecording(
-                        requestCode = requestCode,
-                        resultCode = resultCode,
-                        data = dataIntent
-                    )
-                    shareView(filePathMedia = filePathVideo)
-
+                } else {
+                    Toast.makeText(context, R.string.media_recording_error, Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
+
+        textView_counter_audio.setSafeOnClickListener {
+            if (textView_counter_audio.visibility == View.VISIBLE) {
+                takeAudioRecording()
+                shareView(filePathMedia = filePathAudio)
+//                    floating_action_button.performClick()
+            }
+        }
+
+        floating_action_button_video.setSafeOnClickListener {
+            if (floating_action_button_video.visibility == View.VISIBLE) {
+                if (!audioRecording && !screenshotDrawing) {
+                    callVideoRecording(
+                        requestCode = requestCode,
+                        resultCode = resultCode,
+                        data = dataIntent
+                    )
+                } else {
+                    Toast.makeText(context, R.string.media_recording_error, Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }
+        textView_counter_video.setSafeOnClickListener {
+            if (textView_counter_video.visibility == View.VISIBLE) {
+                callVideoRecording(
+                    requestCode = requestCode,
+                    resultCode = resultCode,
+                    data = dataIntent
+                )
+                shareView(filePathMedia = filePathVideo)
+
+            }
+        }
+
         floating_action_button.setOnTouchListener(
             FloatingActionButtonOnTouchListener(
                 windowManager = (windowManager as WindowManager),
@@ -622,13 +668,23 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             .scaleX(1F)
             .scaleY(1F)
             .withEndAction {
-                floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
+                when {
+                    audioRecording -> {
+                        floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
+                    }
+                    screenshotDrawing -> {
+                        floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
+                    }
+                    else -> {
+                        floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
+                    }
+                }
                 floating_action_button.animate()
                     .rotationBy(0F)
                     .setDuration(200)
                     .scaleX(1F)
                     .scaleY(1F)
-                    .start()
+                    .start();
             }
             .start()
         floating_action_button_video.visibility = View.GONE
@@ -651,10 +707,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
 
             textView_share_jira.setOnClickListener {
+                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    attachProgressBar()
+//                }
+//                jiraAuthentication.callJiraIssue(
+//                    filePathName = filePathMedia,
+//                    context = context,
+//                    activity = activity
+//                )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    attachProgressBar()
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
+                    }
+                    initializeJiraLayout(filePathMedia = filePathMedia)
                 }
-                jiraAuthentication.callJiraIssue(filePathName = filePathMedia,context = context,activity = activity)
             }
 
             textView_discard.setOnClickListener {
@@ -662,7 +728,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     attachProgressBar()
                 }
                 discardMediaFile()
-                }
+            }
 
 //            textView_dismiss.setOnClickListener {
 //                reveal_linear_layout_share.visibility = View.GONE
@@ -827,9 +893,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (arrayListFileName.size <= 10) {
                         withContext(Dispatchers.IO) {
                             screenshotBitmap = createScreenShot(view = view)
-                            screenshotDrawing = true
                         }
                         withContext(Dispatchers.Main) {
+                            screenshotDrawing = true
                             Toast.makeText(context, R.string.screen_shot_taken, Toast.LENGTH_SHORT)
                                 .show()
                             val paintActivity = PaintActivity()
@@ -884,79 +950,75 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun takeAudioRecording() {
-        if(!videoRecording) {
-            if (checkAudioPermission() && checkWriteExternalStoragePermission()) {
-                coroutineCallAudio.async {
-                    try {
-                        if (!audioRecording) {
-                            if (arrayListFileName.size <= 10) {
-                                val fileDirectory: File = context.filesDir
-                                filePathAudio = File(
-                                    fileDirectory,
-                                    "logger_bird_audio" + System.currentTimeMillis()
-                                        .toString() + "recording.3gpp"
-                                )
-                                addFileNameList(fileName = filePathAudio.absolutePath)
-                                mediaRecorderAudio = MediaRecorder()
-                                mediaRecorderAudio?.setAudioSource(MediaRecorder.AudioSource.MIC)
-                                mediaRecorderAudio?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-                                mediaRecorderAudio?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                    mediaRecorderAudio?.setOutputFile(filePathAudio)
-                                } else {
-                                    mediaRecorderAudio?.setOutputFile(filePathAudio.path)
-                                }
-                                startAudioRecording()
-                                audioRecording = true
-                                withContext(Dispatchers.Main) {
-                                    floating_action_button_audio.visibility = View.GONE
-                                    textView_counter_audio.visibility = View.VISIBLE
-                                    textView_audio_size.visibility = View.VISIBLE
-                                    floating_action_button.animate()
-                                        .rotationBy(360F)
-                                        .setDuration(200)
-                                        .scaleX(1F)
-                                        .scaleY(1F)
-                                        .withEndAction {
-                                            floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
-                                            floating_action_button.animate()
-                                                .rotationBy(0F)
-                                                .setDuration(200)
-                                                .scaleX(1F)
-                                                .scaleY(1F)
-                                                .start()
-                                        }
-                                        .start()
-                                }
+        if (checkAudioPermission() && checkWriteExternalStoragePermission()) {
+            coroutineCallAudio.async {
+                try {
+                    if (!audioRecording) {
+                        if (arrayListFileName.size <= 10) {
+                            val fileDirectory: File = context.filesDir
+                            filePathAudio = File(
+                                fileDirectory,
+                                "logger_bird_audio" + System.currentTimeMillis()
+                                    .toString() + "recording.3gpp"
+                            )
+                            addFileNameList(fileName = filePathAudio.absolutePath)
+                            mediaRecorderAudio = MediaRecorder()
+                            mediaRecorderAudio?.setAudioSource(MediaRecorder.AudioSource.MIC)
+                            mediaRecorderAudio?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+                            mediaRecorderAudio?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                mediaRecorderAudio?.setOutputFile(filePathAudio)
                             } else {
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(
-                                        context,
-                                        R.string.session_file_limit,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                                mediaRecorderAudio?.setOutputFile(filePathAudio.path)
+                            }
+                            startAudioRecording()
+                            audioRecording = true
+                            withContext(Dispatchers.Main) {
+                                floating_action_button_audio.visibility = View.GONE
+                                textView_counter_audio.visibility = View.VISIBLE
+                                textView_audio_size.visibility = View.VISIBLE
+                                floating_action_button.animate()
+                                    .rotationBy(360F)
+                                    .setDuration(200)
+                                    .scaleX(1F)
+                                    .scaleY(1F)
+                                    .withEndAction {
+                                        floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
+                                        floating_action_button.animate()
+                                            .rotationBy(0F)
+                                            .setDuration(200)
+                                            .scaleX(1F)
+                                            .scaleY(1F)
+                                            .start()
+                                    }
+                                    .start()
                             }
                         } else {
                             withContext(Dispatchers.Main) {
-                                textView_counter_audio.visibility = View.GONE
-                                textView_audio_size.visibility = View.GONE
+                                Toast.makeText(
+                                    context,
+                                    R.string.session_file_limit,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
-                            stopAudioRecording()
-                            audioRecording = false
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(
-                            exception = e,
-                            tag = Constants.audioRecordingTag
-                        )
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            textView_counter_audio.visibility = View.GONE
+                            textView_audio_size.visibility = View.GONE
+                        }
+                        stopAudioRecording()
+                        audioRecording = false
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    LoggerBird.callEnqueue()
+                    LoggerBird.callExceptionDetails(
+                        exception = e,
+                        tag = Constants.audioRecordingTag
+                    )
                 }
             }
-        }else{
-            Toast.makeText(context,R.string.media_recording_error,Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -1249,42 +1311,38 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     internal fun callVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (!audioRecording) {
-            try {
-                if (LoggerBird.isLogInitAttached()) {
-                    //            if(this::intentForegroundServiceVideo.isInitialized){
-                    //                stopForegroundServiceVideo()
-                    //            }
-                    workQueueLinked.controlRunnable = false
-                    runnableList.clear()
-                    workQueueLinked.clear()
-                    callForegroundService()
-                    if (runnableList.isEmpty()) {
-                        workQueueLinked.put {
-                            takeVideoRecording(
-                                requestCode = requestCode,
-                                resultCode = resultCode,
-                                data = data
-                            )
-                        }
-                    }
-                    runnableList.add(Runnable {
+        try {
+            if (LoggerBird.isLogInitAttached()) {
+                //            if(this::intentForegroundServiceVideo.isInitialized){
+                //                stopForegroundServiceVideo()
+                //            }
+                workQueueLinked.controlRunnable = false
+                runnableList.clear()
+                workQueueLinked.clear()
+                callForegroundService()
+                if (runnableList.isEmpty()) {
+                    workQueueLinked.put {
                         takeVideoRecording(
                             requestCode = requestCode,
                             resultCode = resultCode,
                             data = data
                         )
-                    })
-                } else {
-                    throw LoggerBirdException(Constants.logInitErrorMessage)
+                    }
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                LoggerBird.callEnqueue()
-                LoggerBird.callExceptionDetails(exception = e, tag = Constants.videoRecordingTag)
+                runnableList.add(Runnable {
+                    takeVideoRecording(
+                        requestCode = requestCode,
+                        resultCode = resultCode,
+                        data = data
+                    )
+                })
+            } else {
+                throw LoggerBirdException(Constants.logInitErrorMessage)
             }
-        } else{
-            Toast.makeText(context,R.string.media_recording_error,Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.videoRecordingTag)
         }
     }
 
@@ -1930,14 +1988,30 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun finishShareLayout(message:String) {
+    internal fun finishShareLayout(message: String) {
         activity.runOnUiThread {
             when (message) {
-                "audio" -> Toast.makeText(context, R.string.share_audio_delete, Toast.LENGTH_SHORT).show()
-                "single_email" -> Toast.makeText(context, R.string.share_file_sent, Toast.LENGTH_SHORT).show()
-                "single_email_error" -> Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT).show()
+                "audio" -> Toast.makeText(
+                    context,
+                    R.string.share_audio_delete,
+                    Toast.LENGTH_SHORT
+                ).show()
+                "single_email" -> Toast.makeText(
+                    context,
+                    R.string.share_file_sent,
+                    Toast.LENGTH_SHORT
+                ).show()
+                "single_email_error" -> Toast.makeText(
+                    context,
+                    R.string.share_file_sent_error,
+                    Toast.LENGTH_SHORT
+                ).show()
                 "jira" -> Toast.makeText(context, R.string.jira_sent, Toast.LENGTH_SHORT).show()
-                "jira_error" -> Toast.makeText(context, R.string.jira_sent_error, Toast.LENGTH_SHORT).show()
+                "jira_error" -> Toast.makeText(
+                    context,
+                    R.string.jira_sent_error,
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             detachProgressBar()
             reveal_linear_layout_share.visibility = View.GONE
@@ -1971,10 +2045,30 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.M)
     private fun attachProgressBar() {
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
-        progressBarView = LayoutInflater.from(activity).inflate(R.layout.default_progressbar, rootView, false)
-
+        progressBarView =
+            LayoutInflater.from(activity).inflate(R.layout.default_progressbar, rootView, false)
+        windowManagerParamsProgressBar = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT
+            )
+        } else {
+            WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT
+            )
+        }
         windowManagerProgressBar = activity.getSystemService(Context.WINDOW_SERVICE)!!
-        (windowManagerProgressBar as WindowManager).addView(progressBarView, windowManagerParams)
+        (windowManagerProgressBar as WindowManager).addView(
+            progressBarView,
+            windowManagerParamsProgressBar
+        )
         progressBar = progressBarView.findViewById(R.id.progressBar)
         progressBar.visibility = View.VISIBLE
         progressBar.progress
@@ -1983,7 +2077,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun detachProgressBar() {
-
         Handler().postDelayed({
             floating_action_button.animate()
                 .rotationBy(360F)
@@ -2026,8 +2119,124 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
-    internal fun returnActivity():Activity{
+    internal fun returnActivity(): Activity {
         return activity
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeJiraLayout(filePathMedia: File) {
+        try {
+            if (windowManagerJira != null && this::viewJira.isInitialized) {
+                (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
+                arrayListJiraFileName.clear()
+            }
+            viewJira = LayoutInflater.from(activity)
+                .inflate(
+                    R.layout.loggerbird_jira_popup,
+                    (this.rootView as ViewGroup),
+                    false
+                )
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsJira = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerJira = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                if (windowManagerJira != null) {
+                    (windowManagerJira as WindowManager).addView(
+                        viewJira,
+                        windowManagerParamsJira
+                    )
+                    spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
+                    spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
+                    recyclerViewAttachment =
+                        viewJira.findViewById(R.id.recycler_view_jira_attachment)
+                    editTextSummary = viewJira.findViewById(R.id.editText_jira_summary)
+                    editTextDescription = viewJira.findViewById(R.id.editText_jira_description)
+                    spinnerReporter = viewJira.findViewById(R.id.spinner_jira_issue_reporter)
+                    spinnerLinkedIssue =
+                        viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
+                    spinnerAssignee = viewJira.findViewById(R.id.spinner_jira_issue_assignee)
+                    spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
+                    buttonCreate = viewJira.findViewById(R.id.button_jira_create)
+                    buttonCancel = viewJira.findViewById(R.id.button_jira_cancel)
+                    layoutJira = viewJira.findViewById(R.id.layout_jira)
+                    buttonClicksJira(filePathMedia = filePathMedia)
+                    initializeJiraRecyclerView(filePathMedia = filePathMedia)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
+        }
+    }
+
+    private fun removeJiraLayout() {
+        if (windowManagerJira != null && this::viewJira.isInitialized) {
+            (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
+            windowManagerJira = null
+            arrayListJiraFileName.clear()
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun buttonClicksJira(filePathMedia: File) {
+        layoutJira.setOnTouchListener(
+            LayoutJiraOnTouchListener(
+                windowManager = (windowManagerJira as WindowManager),
+                windowManagerView = viewJira,
+                windowManagerParams = windowManagerParamsJira
+            )
+        )
+        buttonCreate.setSafeOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                attachProgressBar()
+            }
+            jiraAuthentication.callJiraIssue(
+                filePathName = filePathMedia,
+                context = context,
+                activity = activity
+            )
+        }
+        buttonCancel.setSafeOnClickListener {
+            removeJiraLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun checkJiraEmpty() {
+        //project,issue-type,summary,reporter,linked issue,assignee,priority must not be empty!
+    }
+
+    private fun addJiraFileNames(filePathMedia: File): ArrayList<RecyclerViewJiraModel> {
+        arrayListJiraFileName.add(RecyclerViewJiraModel(file = filePathMedia))
+        arrayListJiraFileName.add(RecyclerViewJiraModel(file = LoggerBird.filePathSecessionName))
+        return arrayListJiraFileName
+    }
+
+    private fun initializeJiraRecyclerView(filePathMedia: File) {
+        recyclerViewAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        val jiraAdapter = RecyclerViewJiraAdapter(addJiraFileNames(filePathMedia = filePathMedia))
+        recyclerViewAttachment.adapter = jiraAdapter
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

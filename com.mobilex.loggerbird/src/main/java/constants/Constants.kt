@@ -74,5 +74,6 @@ internal class Constants {
         const val actionFileTag:String = "Action File"
         const val singleFileDeleteTag:String = "Single File"
         const val discardFileTag:String = "Discard File"
+        const val jiraTag:String = "Jira"
     }
 }
