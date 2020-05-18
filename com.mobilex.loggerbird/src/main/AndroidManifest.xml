@@ -11,10 +11,10 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
-    <application>
+    <application
+        android:theme="@style/AppTheme">
         <activity android:name="observers.LogActivityLifeCycleObserver"
-            android:enabled="true"
-            />
+            android:enabled="true" />
         <activity android:name="paint.PaintActivity"
                 android:exported="true"
                 android:enabled="true"
@@ -31,7 +31,8 @@
         <service android:name="services.LoggerBirdMemoryService"
                  android:enabled="true"
                  android:exported="true" />
-        <service android:name="services.LoggerBirdService" />
+        <service android:name="services.LoggerBirdService"
+                 android:theme="@style/AppTheme"/>
         <service android:name="services.LoggerBirdForegroundServiceVideo"
                  android:foregroundServiceType="mediaProjection"
                  android:stopWithTask="true"

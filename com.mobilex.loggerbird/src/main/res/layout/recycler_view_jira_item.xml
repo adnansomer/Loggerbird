@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_marginRight="5dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/attachment_shape"
+    android:layout_marginEnd="5dp"
+    android:layout_marginBottom="5dp">
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -10,27 +15,26 @@
         android:layout_marginStart="10dp"
         android:gravity="center"
         android:orientation="horizontal">
+
         <TextView
             android:id="@+id/textView_file_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="PLACEHOLDER.TXT"
+            android:background="@color/white"
             android:textColor="@color/black"
-            android:textSize="12sp"
-            android:textStyle="bold">
+            android:textSize="12sp">
         </TextView>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        <ImageButton
             android:id="@+id/floating_action_button_cross"
-            style="@style/AppTheme.FabSpeedDial"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginLeft="10dp"
-            android:backgroundTint="@color/colorFab"
-            app:borderWidth="0dp"
-            app:elevation="1dp"
-            app:fabSize="mini"
-            app:srcCompat="@drawable/ic_close_black_24dp" />
+            android:src="@drawable/ic_close_black_24dp"
+            android:background="@color/white">
+        </ImageButton>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>
