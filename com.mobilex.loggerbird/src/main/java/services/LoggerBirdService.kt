@@ -36,6 +36,7 @@ import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.atlassian.jira.rest.client.api.domain.IssueType
 import com.google.android.material.circularreveal.CircularRevealLinearLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
@@ -155,15 +156,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerAssignee: Spinner
     private lateinit var spinnerPriority: Spinner
     private lateinit var buttonCreate: Button
-    private lateinit var buttonCancel: Button
+    internal lateinit var buttonCancel: Button
     private lateinit var layoutJira: LinearLayout
     private val arrayListJiraFileName: ArrayList<RecyclerViewJiraModel> = ArrayList()
-    private val arrayListJiraProject: ArrayList<String> = ArrayList()
-    private val arrayListJiraIssueType: ArrayList<String> = ArrayList()
-    private val arrayListJiraReporter: ArrayList<String> = ArrayList()
-    private val arrayListJiraLinkedIssue: ArrayList<String> = ArrayList()
-    private val arrayListJiraAssignee: ArrayList<String> = ArrayList()
-    private val arrayListJiraPriority: ArrayList<String> = ArrayList()
+    //    private val arrayListJiraProject: ArrayList<String> = ArrayList()
+//    private val arrayListJiraIssueType: ArrayList<String> = ArrayList()
+//    private val arrayListJiraReporter: ArrayList<String> = ArrayList()
+//    private val arrayListJiraLinkedIssue: ArrayList<String> = ArrayList()
+//    private val arrayListJiraAssignee: ArrayList<String> = ArrayList()
+//    private val arrayListJiraPriority: ArrayList<String> = ArrayList()
     private lateinit var jiraAdapter: RecyclerViewJiraAdapter
     private lateinit var spinnerProjectAdapter: ArrayAdapter<String>
     private lateinit var spinnerIssueTypeAdapter: ArrayAdapter<String>
@@ -2141,12 +2142,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (windowManagerJira != null && this::viewJira.isInitialized) {
                 (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
                 arrayListJiraFileName.clear()
-                arrayListJiraProject.clear()
-                arrayListJiraIssueType.clear()
-                arrayListJiraReporter.clear()
-                arrayListJiraLinkedIssue.clear()
-                arrayListJiraAssignee.clear()
-                arrayListJiraPriority.clear()
+//                arrayListJiraProject.clear()
+//                arrayListJiraIssueType.clear()
+//                arrayListJiraReporter.clear()
+//                arrayListJiraLinkedIssue.clear()
+//                arrayListJiraAssignee.clear()
+//                arrayListJiraPriority.clear()
             }
             viewJira = LayoutInflater.from(activity)
                 .inflate(
@@ -2157,16 +2158,16 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsJira = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
                     )
                 } else {
                     WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
@@ -2193,9 +2194,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     buttonCreate = viewJira.findViewById(R.id.button_jira_create)
                     buttonCancel = viewJira.findViewById(R.id.button_jira_cancel)
                     layoutJira = viewJira.findViewById(R.id.layout_jira)
-                    buttonClicksJira(filePathMedia = filePathMedia)
-                    initializeJiraSpinner()
+                    jiraAuthentication.callJiraIssue(
+                        context = context,
+                        activity = activity,
+                        jiraTask = "get"
+                    )
+//                    initializeJiraSpinner(jiraAuthentication.getArrayListProjects(),jiraAuthentication.getArrayListIssueTypes())
                     initializeJiraRecyclerView(filePathMedia = filePathMedia)
+                    buttonClicksJira(filePathMedia=filePathMedia)
                 }
             }
         } catch (e: Exception) {
@@ -2210,12 +2216,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
             windowManagerJira = null
             arrayListJiraFileName.clear()
-            arrayListJiraProject.clear()
-            arrayListJiraIssueType.clear()
-            arrayListJiraReporter.clear()
-            arrayListJiraLinkedIssue.clear()
-            arrayListJiraAssignee.clear()
-            arrayListJiraPriority.clear()
+//            arrayListJiraProject.clear()
+//            arrayListJiraIssueType.clear()
+//            arrayListJiraReporter.clear()
+//            arrayListJiraLinkedIssue.clear()
+//            arrayListJiraAssignee.clear()
+//            arrayListJiraPriority.clear()
         }
     }
 
@@ -2233,10 +2239,24 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 attachProgressBar()
             }
+            jiraAuthentication.gatherJiraSpinnerDetails(
+                spinnerProject = spinnerProject,
+                spinnerIssueType = spinnerIssueType,
+                spinnerLinkedIssues = spinnerLinkedIssue,
+                spinnerAssignee = spinnerAssignee,
+                spinnerReporter = spinnerReporter,
+                spinnerPriority = spinnerPriority
+            )
+            jiraAuthentication.gatherJiraEditTextDetails(
+                editTextSummary = editTextSummary,
+                editTextDescription = editTextDescription
+            )
+            jiraAuthentication.gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems = arrayListJiraFileName)
             jiraAuthentication.callJiraIssue(
                 filePathName = filePathMedia,
                 context = context,
-                activity = activity
+                activity = activity,
+                jiraTask = "create"
             )
         }
         buttonCancel.setSafeOnClickListener {
@@ -2264,73 +2284,80 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         recyclerViewAttachment.adapter = jiraAdapter
     }
 
-    private fun initializeJiraSpinner() {
+    internal fun initializeJiraSpinner(
+        arrayListProjectNames: ArrayList<String>,
+        arrayListIssueTypes: ArrayList<String>,
+//        arrayListReporterNames: ArrayList<String>,
+        arrayListLinkedIssues: ArrayList<String>,
+        arrayListAssignee: ArrayList<String>,
+        arrayListPriority: ArrayList<String>
+    ) {
         spinnerProjectAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, addJiraProjectNames())
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
         spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerProject.adapter = spinnerProjectAdapter
 
         spinnerIssueTypeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, addJiraIssueTypes())
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
         spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerIssueType.adapter = spinnerIssueTypeAdapter
 
-        spinnerReporterAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, addJiraReporterNames())
-        spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerReporter.adapter = spinnerReporterAdapter
+//        spinnerReporterAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListReporterNames)
+//        spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerReporter.adapter = spinnerReporterAdapter
 
         spinnerLinkedIssueAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, addJiraLinkedIssues())
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
         spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
 
         spinnerAssigneeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, addJiraAssignee())
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
         spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerAssignee.adapter = spinnerAssigneeAdapter
 
         spinnerPriorityAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, addJiraPriority())
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
         spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerPriority.adapter = spinnerPriorityAdapter
     }
 
-    private fun addJiraProjectNames(): ArrayList<String> {
-        arrayListJiraProject.add("project_a")
-        arrayListJiraProject.add("project_b")
-        return arrayListJiraProject
-    }
-
-    private fun addJiraIssueTypes(): ArrayList<String> {
-        arrayListJiraIssueType.add("issue_type_a")
-        arrayListJiraIssueType.add("issue_type_b")
-        return arrayListJiraIssueType
-    }
-
-    private fun addJiraReporterNames(): ArrayList<String> {
-        arrayListJiraReporter.add("reporter_a")
-        arrayListJiraReporter.add("reporter_b")
-        return arrayListJiraReporter
-    }
-
-    private fun addJiraLinkedIssues(): ArrayList<String> {
-        arrayListJiraLinkedIssue.add("linked_issues_a")
-        arrayListJiraLinkedIssue.add("linked_issues_b")
-        return arrayListJiraLinkedIssue
-    }
-
-    private fun addJiraAssignee(): ArrayList<String> {
-        arrayListJiraAssignee.add("assignee_a")
-        arrayListJiraAssignee.add("assignee_b")
-        return arrayListJiraAssignee
-    }
-
-    private fun addJiraPriority(): ArrayList<String> {
-        arrayListJiraPriority.add("priority_a")
-        arrayListJiraPriority.add("priority_b")
-        return arrayListJiraPriority
-    }
+//    private fun addJiraProjectNames(): ArrayList<String> {
+//        arrayListJiraProject.add("project_a")
+//        arrayListJiraProject.add("project_b")
+//        return arrayListJiraProject
+//    }
+//
+//    private fun addJiraIssueTypes(): ArrayList<String> {
+//        arrayListJiraIssueType.add("issue_type_a")
+//        arrayListJiraIssueType.add("issue_type_b")
+//        return arrayListJiraIssueType
+//    }
+//
+//    private fun addJiraReporterNames(): ArrayList<String> {
+//        arrayListJiraReporter.add("reporter_a")
+//        arrayListJiraReporter.add("reporter_b")
+//        return arrayListJiraReporter
+//    }
+//
+//    private fun addJiraLinkedIssues(): ArrayList<String> {
+//        arrayListJiraLinkedIssue.add("linked_issues_a")
+//        arrayListJiraLinkedIssue.add("linked_issues_b")
+//        return arrayListJiraLinkedIssue
+//    }
+//
+//    private fun addJiraAssignee(): ArrayList<String> {
+//        arrayListJiraAssignee.add("assignee_a")
+//        arrayListJiraAssignee.add("assignee_b")
+//        return arrayListJiraAssignee
+//    }
+//
+//    private fun addJiraPriority(): ArrayList<String> {
+//        arrayListJiraPriority.add("priority_a")
+//        arrayListJiraPriority.add("priority_b")
+//        return arrayListJiraPriority
+//    }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {
