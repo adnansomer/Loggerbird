@@ -233,6 +233,12 @@ class JiraAuthentication {
         activity: Activity
     ) {
         try {
+            arrayListProjects.clear()
+            arrayListIssueTypes.clear()
+            arrayListAssignee.clear()
+            arrayListIssueLinkedTypes.clear()
+            arrayListPriorities.clear()
+            arrayListReporter.clear()
             jiraTaskGatherProjectKeys(restClient = restClient)
             jiraTaskGatherIssueTypes(restClient = restClient)
             jiraTaskGatherAssignees(restClient = restClient)
@@ -277,9 +283,12 @@ class JiraAuthentication {
     private fun jiraTaskGatherAssignees(restClient: JiraRestClient) {
         val projectClient = restClient.projectClient
         projectClient.allProjects.claim().forEach {
-            val projectRoleClient = restClient.projectRolesRestClient
-            projectRoleClient.getRole(it.self).claim().actors.forEach {
-                arrayListAssignee.add(it.name)
+            val projectRestClient = restClient.projectClient
+            projectRestClient.getProject(it.key).claim().projectRoles.forEach { projectRole ->
+                val projectRestRoleClient = restClient.projectRolesRestClient
+                projectRestRoleClient.getRole(it.self,it.id).claim().actors.forEach { actor ->
+                    arrayListAssignee.add(actor.name)
+                }
             }
         }
     }
@@ -299,13 +308,13 @@ class JiraAuthentication {
             arrayListPriorities.add(it.name)
         }
     }
-//    private fun jiraTaskGatherReporters(restClient: JiraRestClient){
-//        val metaDataClient = restClient.metadataClient
-//        val reporterList =
+    private fun jiraTaskGatherReporters(restClient: JiraRestClient){
+        val metaDataClient = restClient.projectClient
+        val reporterList = metaDataClient
 //        reporterList.claim().forEach {
 //            arrayListIssueLinkedTypes.add(it.name)
 //        }
-//    }
+    }
 
 
 

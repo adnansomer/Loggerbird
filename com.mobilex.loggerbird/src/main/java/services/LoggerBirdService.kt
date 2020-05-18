@@ -36,7 +36,6 @@ import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.atlassian.jira.rest.client.api.domain.IssueType
 import com.google.android.material.circularreveal.CircularRevealLinearLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputLayout
@@ -2197,7 +2196,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         )
                     }
                     progressBarJira = viewJiraAuth.findViewById(R.id.progressbar_jira)
-                    progressBarJira.progress = 50
                     buttonJiraAuthNext = viewJiraAuth.findViewById(R.id.button_jira_auth_next)
                     buttonJiraAuthCancel = viewJiraAuth.findViewById(R.id.button_jira_auth_cancel)
                     editTextJiraAuthMail = viewJiraAuth.findViewById(R.id.editText_jira_init_email)
@@ -2214,7 +2212,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
-    private fun removeJiraAuthayout() {
+    private fun removeJiraAuthLayout() {
         if (windowManagerJiraAuth != null && this::viewJiraAuth.isInitialized) {
             (windowManagerJiraAuth as WindowManager).removeViewImmediate(viewJiraAuth)
             windowManagerJiraAuth = null
@@ -2314,12 +2312,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.M)
     private fun buttonClicksJiraAuth(filePathMedia: File) {
         buttonJiraAuthNext.setSafeOnClickListener {
-            removeJiraAuthayout()
+            removeJiraAuthLayout()
             initializeJiraLayout(filePathMedia = filePathMedia)
         }
 
         buttonJiraAuthCancel.setSafeOnClickListener {
-            removeJiraAuthayout()
+            removeJiraAuthLayout()
         }
     }
 
@@ -2391,35 +2389,44 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListAssignee: ArrayList<String>,
         arrayListPriority: ArrayList<String>
     ) {
-        spinnerProjectAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
-        spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerProject.adapter = spinnerProjectAdapter
+        if(arrayListProjectNames.isNotEmpty()){
+            spinnerProjectAdapter =
+                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
+            spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerProject.adapter = spinnerProjectAdapter
 
-        spinnerIssueTypeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
-        spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerIssueType.adapter = spinnerIssueTypeAdapter
+            spinnerIssueTypeAdapter =
+                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
+            spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerIssueType.adapter = spinnerIssueTypeAdapter
+        }
+
 
 //        spinnerReporterAdapter =
 //            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListReporterNames)
 //        spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 //        spinnerReporter.adapter = spinnerReporterAdapter
 
-        spinnerLinkedIssueAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
-        spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
+        if(arrayListLinkedIssues.isNotEmpty()){
+            spinnerLinkedIssueAdapter =
+                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
+            spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
+        }
 
-        spinnerAssigneeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
-        spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerAssignee.adapter = spinnerAssigneeAdapter
+        if(arrayListAssignee.isNotEmpty()){
+            spinnerAssigneeAdapter =
+                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
+            spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerAssignee.adapter = spinnerAssigneeAdapter
+        }
 
-        spinnerPriorityAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
-        spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerPriority.adapter = spinnerPriorityAdapter
+        if(arrayListPriority.isNotEmpty()){
+            spinnerPriorityAdapter =
+                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
+            spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerPriority.adapter = spinnerPriorityAdapter
+        }
     }
 
 //    private fun addJiraProjectNames(): ArrayList<String> {
