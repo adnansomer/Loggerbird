@@ -41,7 +41,6 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private lateinit var paintView:View
     private val coroutineCallPaint: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
-
     init {
         mPaint.isAntiAlias = true
         mPaint.isDither = true
@@ -171,10 +170,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                 val bitmap = Bitmap.createBitmap(paintView.width,paintView.height, Bitmap.Config.ARGB_8888)
                 val canvas = Canvas(bitmap)
                 val fileDirectory: File = context.filesDir
-                val filePath = File(
-                    fileDirectory,
-                    "loggerbird_screenshot_"+System.currentTimeMillis().toString()+"_"+filename+".png"
-                )
+                val filePath = File(fileDirectory, "loggerbird_screenshot_"+System.currentTimeMillis().toString()+"_"+filename+".png")
                 LoggerBirdService.callShareView(filePathMedia = filePath)
                 arrayListFileNameScreenshot.add(filePath.absolutePath)
                 val os = FileOutputStream(filePath)

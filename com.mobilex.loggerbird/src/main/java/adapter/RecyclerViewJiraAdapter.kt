@@ -3,6 +3,8 @@ package adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -28,7 +30,7 @@ class RecyclerViewJiraAdapter(private val fileList:ArrayList<RecyclerViewJiraMod
     class ViewHolder(view : View) : RecyclerView.ViewHolder(view) {
         fun bindItems(item : RecyclerViewJiraModel){
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
-            val floatingActionButtonCross = itemView.findViewById<FloatingActionButton>(R.id.floating_action_button_cross)
+            val floatingActionButtonCross = itemView.findViewById<ImageButton>(R.id.floating_action_button_cross)
             textViewFileName.text = item.file.name
             floatingActionButtonCross.setOnClickListener {
             }
