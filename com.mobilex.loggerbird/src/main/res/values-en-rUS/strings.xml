@@ -96,4 +96,6 @@
     <string name="textView_jira_priority">Priority</string>
     <string name="button_jira_create">Create</string>
     <string name="button_jira_cancel">Cancel</string>
+    <string name="button_jita_init_next">Next</string>
+    <string name="button_jira_init_cancel">Cancel</string>
 </resources>

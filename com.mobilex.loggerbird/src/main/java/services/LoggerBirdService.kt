@@ -157,12 +157,16 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var layout_jira_summary : TextInputLayout
     private lateinit var editTextSummary: EditText
     private lateinit var editTextDescription: EditText
+    private lateinit var editTextJiraAuthMail : EditText
+    private lateinit var editTextJiraAuthPassword : EditText
     private lateinit var spinnerReporter: Spinner
     private lateinit var spinnerLinkedIssue: Spinner
     private lateinit var spinnerAssignee: Spinner
     private lateinit var spinnerPriority: Spinner
     private lateinit var buttonCreate: Button
     private lateinit var buttonCancel: Button
+    private lateinit var buttonJiraAuthCancel : Button
+    private lateinit var buttonJiraAuthNext :Button
     private lateinit var layoutJira: LinearLayout
     private lateinit var layoutJiraAuth : LinearLayout
     private val arrayListJiraFileName: ArrayList<RecyclerViewJiraModel> = ArrayList()
@@ -2161,19 +2165,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         activity.window.setNavigationBarColor(ContextCompat.getColor(this, R.color.black))
                         activity.window.setStatusBarColor(ContextCompat.getColor(this,R.color.black))
                     }
-//                    progressBarJira = viewJira.findViewById(R.id.progressbar_jira)
-//                    progressBarJira.progress = 100
-//                    spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
-//                    spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
-//                    recyclerViewAttachment = viewJira.findViewById(R.id.recycler_view_jira_attachment)
-//                    editTextSummary = viewJira.findViewById(R.id.editText_jira_summary)
-//                    editTextDescription = viewJira.findViewById(R.id.editText_jira_description)
-//                    spinnerReporter = viewJira.findViewById(R.id.spinner_jira_issue_reporter)
-//                    spinnerLinkedIssue = viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
-//                    spinnerAssignee = viewJira.findViewById(R.id.spinner_jira_issue_assignee)
-//                    spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
-//                    buttonCreate = viewJira.findViewById(R.id.button_jira_create)
-//                    buttonCancel = viewJira.findViewById(R.id.button_jira_cancel)
+                    progressBarJira = viewJiraAuth.findViewById(R.id.progressbar_jira)
+                    progressBarJira.progress = 50
+                    buttonJiraAuthNext = viewJiraAuth.findViewById(R.id.button_jira_auth_next)
+                    buttonJiraAuthCancel = viewJiraAuth.findViewById(R.id.button_jira_auth_cancel)
+                    editTextJiraAuthMail = viewJiraAuth.findViewById(R.id.editText_jira_init_email)
+                    editTextJiraAuthPassword = viewJiraAuth.findViewById(R.id.editText_jira_init_key)
                     layoutJiraAuth = viewJiraAuth.findViewById(R.id.layout_jira_auth)
                     buttonClicksJiraAuth(filePathMedia = filePathMedia)
                 }
@@ -2262,6 +2259,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
+    private fun removeJiraAuthayout(){
+        if (windowManagerJiraAuth != null && this::viewJiraAuth.isInitialized) {
+            (windowManagerJiraAuth as WindowManager).removeViewImmediate(viewJiraAuth)
+            windowManagerJiraAuth = null
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicksJira(filePathMedia: File) {
@@ -2293,36 +2297,19 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun buttonClicksJiraAuth(filePathMedia: File) {
-        layoutJiraAuth.setOnTouchListener(
-            LayoutJiraAuthOnTouchListener(
-                windowManager = (windowManagerJiraAuth as WindowManager),
-                windowManagerView = viewJiraAuth,
-                windowManagerParams = windowManagerParamsJiraAuth
-            )
-        )
-//        buttonCreate.setSafeOnClickListener {
-////            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-////                attachProgressBar()
-////            }
-////            jiraAuthentication.callJiraIssue(
-////                filePathName = filePathMedia,
-////                context = context,
-////                activity = activity
-////            )
-////            removeJiraLayout()
-////            floatingActionButtonView.visibility = View.VISIBLE
-////
-////        }
-////        buttonCancel.setSafeOnClickListener {
-////            removeJiraLayout()
-////            if (controlFloatingActionButtonView()) {
-////                floatingActionButtonView.visibility = View.VISIBLE
-////            }
-////        }
 
+        buttonJiraAuthNext.setSafeOnClickListener {
+            removeJiraAuthayout()
+            initializeJiraLayout(filePathMedia = filePathMedia)
         }
 
+        buttonJiraAuthCancel.setSafeOnClickListener {
+            removeJiraAuthayout()
+
+        }
+    }
 
     private fun checkJiraEmpty() {
         //project,issue-type,summary,reporter,linked issue,assignee,priority must not be empty!

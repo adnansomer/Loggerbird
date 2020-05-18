@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:id="@+id/layout_jira_auth"
+<LinearLayout
+    android:id="@+id/layout_jira_auth"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
+    android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
         android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
             app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
             android:id="@+id/textView_jira_title"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             app:titleTextColor="@color/black"
             app:title="@string/textView_jira_auth_title">
         </androidx.appcompat.widget.Toolbar>
@@ -32,6 +33,76 @@
         </ProgressBar>
 
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:layout_margin="10dp"
+        android:layout_gravity="center">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_jira_init_email"
+            android:textSize="16sp"
+            android:backgroundTint="@color/colorBlack"
+            android:layout_width="match_parent"
+            android:layout_marginRight="10dp"
+            android:textCursorDrawable="@color/colorBlack"
+            android:layout_marginBottom="10dp"
+            android:textStyle="italic"
+            android:hint="@string/textView_jira_init_email"
+            android:layout_height="wrap_content">
+
+        </com.google.android.material.textfield.TextInputEditText>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_jira_init_key"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:backgroundTint="@color/colorBlack"
+            android:textCursorDrawable="@color/colorBlack"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:textStyle="italic"
+            android:hint="@string/textView_jira_init_password"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        android:gravity="bottom">
+
+        <Button
+            android:id="@+id/button_jira_auth_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textAllCaps="true"
+            android:backgroundTint="@color/white"
+            android:elevation="10dp"
+            android:text="@string/button_jira_init_cancel" />
+
+        <Button
+            android:id="@+id/button_jira_auth_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:elevation="10dp"
+            android:textAllCaps="true"
+            android:backgroundTint="@color/white"
+            android:text="@string/button_jita_init_next" />
+
+    </LinearLayout>
+
+
 
 
 
