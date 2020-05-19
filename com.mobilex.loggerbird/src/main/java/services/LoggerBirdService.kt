@@ -2377,7 +2377,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun initializeJiraRecyclerView(filePathMedia: File) {
         recyclerViewAttachment.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        jiraAdapter = RecyclerViewJiraAdapter(addJiraFileNames(filePathMedia = filePathMedia))
+        jiraAdapter = RecyclerViewJiraAdapter(
+            addJiraFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
         recyclerViewAttachment.adapter = jiraAdapter
     }
 
@@ -2389,7 +2394,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListAssignee: ArrayList<String>,
         arrayListPriority: ArrayList<String>
     ) {
-        if(arrayListProjectNames.isNotEmpty()){
+        if (arrayListProjectNames.isNotEmpty()) {
             spinnerProjectAdapter =
                 ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
             spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -2407,21 +2412,21 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //        spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 //        spinnerReporter.adapter = spinnerReporterAdapter
 
-        if(arrayListLinkedIssues.isNotEmpty()){
+        if (arrayListLinkedIssues.isNotEmpty()) {
             spinnerLinkedIssueAdapter =
                 ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
             spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
         }
 
-        if(arrayListAssignee.isNotEmpty()){
+        if (arrayListAssignee.isNotEmpty()) {
             spinnerAssigneeAdapter =
                 ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
             spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerAssignee.adapter = spinnerAssigneeAdapter
         }
 
-        if(arrayListPriority.isNotEmpty()){
+        if (arrayListPriority.isNotEmpty()) {
             spinnerPriorityAdapter =
                 ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
             spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
