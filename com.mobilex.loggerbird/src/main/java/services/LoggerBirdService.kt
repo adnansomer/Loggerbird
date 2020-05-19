@@ -1,9 +1,14 @@
 package services
 
+//import com.slack.api.Slack
+//import com.slack.api.methods.MethodsClient
+//import com.slack.api.methods.request.chat.ChatPostMessageRequest
+//import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import adapter.RecyclerViewJiraAdapter
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Application
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -38,16 +43,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.circularreveal.CircularRevealLinearLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
-//import com.slack.api.Slack
-//import com.slack.api.methods.MethodsClient
-//import com.slack.api.methods.request.chat.ChatPostMessageRequest
-//import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
@@ -164,9 +164,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerAssignee: Spinner
     private lateinit var spinnerPriority: Spinner
     private lateinit var buttonCreate: Button
-    private lateinit var buttonCancel: Button
+    lateinit var buttonCancel: Button
     private lateinit var buttonJiraAuthCancel : Button
     private lateinit var buttonJiraAuthNext :Button
+    private lateinit var switchJiraRemember : Switch
     private lateinit var layoutJira: LinearLayout
     private lateinit var layoutJiraAuth : LinearLayout
     private val arrayListJiraFileName: ArrayList<RecyclerViewJiraModel> = ArrayList()
@@ -2126,16 +2127,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeJiraAuthLayout(filePathMedia: File){
         try {
-            if (windowManagerJiraAuth != null && this::viewJiraAuth.isInitialized) {
-                (windowManagerJiraAuth as WindowManager).removeViewImmediate(viewJiraAuth)
-//                arrayListJiraFileName.clear()
-            }
-            viewJiraAuth = LayoutInflater.from(activity)
-                .inflate(
-                    R.layout.loggerbird_jira_init_popup,
-                    (this.rootView as ViewGroup),
-                    false
-                )
+//            if (windowManagerJiraAuth != null && this::viewJiraAuth.isInitialized) {
+//                (windowManagerJiraAuth as WindowManager).removeViewImmediate(viewJiraAuth)
+//
+//            }
+            viewJiraAuth = LayoutInflater.from(activity).inflate(R.layout.loggerbird_jira_init_popup, (this.rootView as ViewGroup), false)
+
             if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsJiraAuth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
@@ -2162,16 +2159,32 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         windowManagerParamsJiraAuth
                     )
                     if (Build.VERSION.SDK_INT >= 21) {
-                        activity.window.setNavigationBarColor(ContextCompat.getColor(this, R.color.black))
-                        activity.window.setStatusBarColor(ContextCompat.getColor(this,R.color.black))
+                        activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
+                        activity.window.statusBarColor = ContextCompat.getColor(this,R.color.black)
                     }
+
+                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     progressBarJira = viewJiraAuth.findViewById(R.id.progressbar_jira)
                     progressBarJira.progress = 50
+                    switchJiraRemember = viewJiraAuth.findViewById(R.id.switch_jira_remember)
                     buttonJiraAuthNext = viewJiraAuth.findViewById(R.id.button_jira_auth_next)
                     buttonJiraAuthCancel = viewJiraAuth.findViewById(R.id.button_jira_auth_cancel)
                     editTextJiraAuthMail = viewJiraAuth.findViewById(R.id.editText_jira_init_email)
                     editTextJiraAuthPassword = viewJiraAuth.findViewById(R.id.editText_jira_init_key)
                     layoutJiraAuth = viewJiraAuth.findViewById(R.id.layout_jira_auth)
+                    switchJiraRemember.setOnCheckedChangeListener { _, isChecked ->
+                        if(isChecked){
+                            Log.d("swtich","on")
+                            val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            with(sharedPref.edit()) {
+                                putString("jira_username", editTextJiraAuthMail.text.toString())
+                                putString("jira_password", editTextJiraAuthPassword.text.toString())
+                                commit()
+                            }
+                        }
+                    }
+                    editTextJiraAuthMail.setText(sharedPref.getString("jira_username","defaultName"))
+                    editTextJiraAuthPassword.setText(sharedPref.getString("jira_password","defaultPassword"))
                     buttonClicksJiraAuth(filePathMedia = filePathMedia)
                 }
             }
@@ -2223,8 +2236,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         windowManagerParamsJira
                     )
                     if (Build.VERSION.SDK_INT >= 21) {
-                        activity.window.setNavigationBarColor(ContextCompat.getColor(this, R.color.black))
-                        activity.window.setStatusBarColor(ContextCompat.getColor(this,R.color.black))
+                        activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
+                        activity.window.statusBarColor = ContextCompat.getColor(this,R.color.black)
                     }
                     progressBarJira = viewJira.findViewById(R.id.progressbar_jira)
                     progressBarJira.progress = 100
@@ -2280,11 +2293,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 attachProgressBar()
             }
-            jiraAuthentication.callJiraIssue(
-                filePathName = filePathMedia,
-                context = context,
-                activity = activity
-            )
+//            jiraAuthentication.callJiraIssue(
+//                filePathName = filePathMedia,
+//                context = context,
+//                activity = activity
+//
+//            )
             removeJiraLayout()
             floatingActionButtonView.visibility = View.VISIBLE
 
@@ -2301,13 +2315,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun buttonClicksJiraAuth(filePathMedia: File) {
 
         buttonJiraAuthNext.setSafeOnClickListener {
-            removeJiraAuthayout()
             initializeJiraLayout(filePathMedia = filePathMedia)
+            removeJiraAuthayout()
         }
 
         buttonJiraAuthCancel.setSafeOnClickListener {
             removeJiraAuthayout()
-
+            floatingActionButtonView.visibility = View.VISIBLE
         }
     }
 

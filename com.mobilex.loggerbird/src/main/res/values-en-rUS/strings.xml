@@ -85,7 +85,7 @@
     <string name="editText_feedback_title">Give us feedback</string>
     <!-- loggerbird_jira_popup-->
     <string name="textView_jira_auth_title">Step 1/2 - Authorization</string>
-    <string name="textView_jira_title">Step 2/2 - Create Issue</string>
+    <string name="textView_jira_title">Create Issue</string>
     <string name="textView_jira_project">Project</string>
     <string name="textView_jira_issue_type">Issue Type</string>
     <string name="textView_jira_summary">Summary</string>

@@ -9,10 +9,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
-import com.atlassian.jira.rest.client.api.domain.BasicPriority
-import com.atlassian.jira.rest.client.api.domain.Issue
-import com.atlassian.jira.rest.client.api.domain.SearchResult
-import com.atlassian.jira.rest.client.api.domain.User
+import com.atlassian.jira.rest.client.api.domain.*
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
 import com.mobilex.loggerbird.R
@@ -43,6 +40,11 @@ class JiraAuthentication {
     private lateinit var summary: String
     private lateinit var description: String
     private lateinit var arrayListRecyclerViewItems: ArrayList<RecyclerViewJiraModel>
+    private val arrayListProjects: ArrayList<String> = ArrayList()
+    private val arrayListProjectKeys: ArrayList<String> = ArrayList()
+    private val arrayListIssueTypes: ArrayList<String> = ArrayList()
+    private val arrayListAssignee: ArrayList<String> = ArrayList()
+    private val arrayListIssueLinkedTypes: ArrayList<String> = ArrayList()
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callJiraIssue(
         filePathName: File? = null,
@@ -104,7 +106,10 @@ class JiraAuthentication {
                                 restClient = jiraAuthentication(),
                                 activity = activity
                             )
-//                            "get" ->
+                            "get" -> jiraTaskGatherDetails(
+                                restClient = jiraAuthentication(),
+                                activity = activity
+                            )
                         }
                     } else {
                         activity.runOnUiThread {
@@ -124,7 +129,6 @@ class JiraAuthentication {
             }
         })
     }
-
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun jiraExceptionHandler(e: Exception, filePathName: File?) {
         filePathName?.delete()
@@ -137,6 +141,7 @@ class JiraAuthentication {
         )
     }
     private fun jiraAuthentication(): JiraRestClient {
+
         val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
         val jiraServerUri =
             URI("https://appcaesars.atlassian.net")
@@ -211,11 +216,96 @@ class JiraAuthentication {
         Log.d("issue", issueKey.toString())
     }
     private fun jiraTaskGatherDetails(
-        filePathMediaName: File? = null,
         restClient: JiraRestClient,
-        activity: Activity? = null
+        activity: Activity
     ) {
-        val issueClient = restClient.issueClient
+        jiraTaskGatherProjectKeys(restClient = restClient)
+        jiraTaskGatherIssueTypes(restClient = restClient)
+        jiraTaskGatherAssignees(restClient = restClient)
+        jiraTaskGatherLinkedIssues(restClient = restClient)
+        activity.runOnUiThread {
+//            LoggerBirdService.loggerBirdService.initializeJiraSpinner(
+//                arrayListProjectNames = arrayListProjects,
+//                arrayListIssueTypes = arrayListIssueTypes,
+//                arrayListAssignee = arrayListAssignee,
+//                arrayListLinkedIssues = arrayListIssueLinkedTypes
+//            )
+        }
+    }
+
+    private fun jiraTaskGatherProjectKeys(restClient: JiraRestClient) {
+        arrayListProjectKeys.clear()
+        val projectClient = restClient.projectClient
+        val projectList = projectClient.allProjects
+        projectList.claim().forEach {
+            arrayListProjectKeys.add(it.key)
+            if (it.name != null) {
+                arrayListProjects.add(it.name!!)
+            }
+        }
+    }
+    private fun jiraTaskGatherIssueTypes(restClient: JiraRestClient) {
+        val metaDataClient = restClient.metadataClient
+        val issueTypeList = metaDataClient.issueTypes
+        issueTypeList.claim().forEach {
+            arrayListIssueTypes.add(it.name)
+        }
+    }
+
+    private fun jiraTaskGatherAssignees(restClient: JiraRestClient) {
+        val projectClient = restClient.projectClient
+        var projectCounter = 0
+        do {
+            val assigneeList = projectClient.getProject(arrayListProjectKeys[projectCounter])
+            val projectRolesRestClient = restClient.projectRolesRestClient
+            val projectRoleList = projectRolesRestClient.getRoles(assigneeList.claim().self)
+            projectRoleList.claim().forEach {
+                it.actors.forEach {
+                    arrayListAssignee.add(it.name)
+                }
+            }
+//                assigneeList.claim().projectRoles.forEach { it ->
+//                    val projectRoleList = projectRolesRestClient.getRole(it.self)
+//                    projectRoleList.map {projectRole ->
+//                        projectRole.actors.forEach { actor ->
+//                            arrayListAssignee.add(actor.name)
+//                        }
+//                    }
+//                    if(projectRoleList.claim() != null){
+//                        projectRoleList.claim().actors.forEach { actor ->
+//
+//                        }
+//                    }
+//                    projectRoleList.claim().forEach {
+//                        it.actors.forEach { actor ->
+//                            arrayListAssignee.add(actor.name)
+//                        }
+//                    }
+            projectCounter++
+            if (arrayListProjectKeys.size == projectCounter) {
+                break
+            }
+        } while (arrayListProjectKeys.iterator().hasNext())
+    }
+    private fun jiraTaskGatherLinkedIssues(restClient: JiraRestClient) {
+        val metaDataClient = restClient.metadataClient
+        val linkedIssuesList = metaDataClient.issueLinkTypes
+        linkedIssuesList.claim().forEach {
+            arrayListIssueLinkedTypes.add(it.name)
+        }
+    }
+    //    private fun jiraTaskGatherReporters(restClient: JiraRestClient){
+//        val metaDataClient = restClient.metadataClient
+//        val reporterList =
+//        reporterList.claim().forEach {
+//            arrayListIssueLinkedTypes.add(it.name)
+//        }
+//    }
+    internal fun getArrayListProjects(): ArrayList<String> {
+        return arrayListProjects
+    }
+    internal fun getArrayListIssueTypes(): ArrayList<String> {
+        return arrayListIssueTypes
     }
     internal fun gatherJiraSpinnerDetails(
         spinnerProject: Spinner,
@@ -236,7 +326,6 @@ class JiraAuthentication {
         editTextSummary: EditText,
         editTextDescription: EditText
     ) {
-
         summary = editTextSummary.text.toString()
         description = editTextDescription.text.toString()
     }
