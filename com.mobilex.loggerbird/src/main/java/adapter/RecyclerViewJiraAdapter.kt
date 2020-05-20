@@ -21,6 +21,7 @@ import android.widget.Button
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
+import services.LoggerBirdService
 
 class RecyclerViewJiraAdapter(
     private val fileList: ArrayList<RecyclerViewJiraModel>,
@@ -64,6 +65,8 @@ class RecyclerViewJiraAdapter(
         private lateinit var textViewTitle: TextView
         private lateinit var buttonYes: Button
         private lateinit var buttonNo: Button
+
+
         fun bindItems(
             item: RecyclerViewJiraModel,
             adapter: RecyclerViewJiraAdapter,
@@ -133,12 +136,9 @@ class RecyclerViewJiraAdapter(
                             viewRecyclerViewItems,
                             windowManagerParamsRecyclerViewItemPopup
                         )
-                        textViewTitle =
-                            viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_jira_title)
-                        buttonYes =
-                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_jira_yes)
-                        buttonNo =
-                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_jira_no)
+                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_jira_title)
+                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_jira_yes)
+                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_jira_no)
                         buttonClicksJiraPopup(adapter = adapter , fileList = fileList , position = position)
                     }
                 }
@@ -175,7 +175,9 @@ class RecyclerViewJiraAdapter(
             buttonNo.setSafeOnClickListener {
                 removePopupLayout()
             }
+
         }
+
 
         private fun removePopupLayout(){
             if (windowManagerRecyclerViewItemPopup != null && this::viewRecyclerViewItems.isInitialized) {

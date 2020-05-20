@@ -3,9 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/jira_save"
+        android:id="@+id/jira_menu_save"
         android:icon="@drawable/ic_save_black_24dp"
-        android:title="Save"
+        android:title="Save Issue Info"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/jira_menu_clear"
+        android:title="Clear Issue Info"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/jira_menu_delete_attachments"
+        android:title="Delete Attachments"
         app:showAsAction="never" />
 
 </menu>

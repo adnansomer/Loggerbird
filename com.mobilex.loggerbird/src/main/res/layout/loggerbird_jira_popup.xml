@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-
-<ScrollView
+<LinearLayout android:id="@+id/layout_jira"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <LinearLayout
-        android:id="@+id/layout_jira"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#f5f5f5"
-        android:orientation="vertical"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
-
-
+    android:background="@color/colorFab"
+    android:orientation="vertical"
+    style="@style/Dialog"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/colorFab"
             android:orientation="vertical">
 
             <androidx.appcompat.widget.Toolbar
@@ -25,6 +19,7 @@
                 app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
                 app:menu="@menu/loggerbird_jira_menu"
                 android:layout_width="match_parent"
+                android:background="@color/colorFab"
                 android:layout_height="wrap_content"
                 app:titleTextColor="@color/black"
                 app:title="@string/textView_jira_title">
@@ -43,9 +38,13 @@
 
         </LinearLayout>
 
+    <ScrollView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
 
-
-        <LinearLayout
+    <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#f5f5f5">
@@ -54,188 +53,349 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_margin="5dp">
+                android:layout_margin="10dp">
 
-                <LinearLayout
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:orientation="vertical">
+                    app:cardElevation="5dp"
+                    android:layout_marginBottom="7dp">
 
-                    <TextView
-                        android:id="@+id/textView_jira_project"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/black"
-                        android:textSize="17sp"
-                        android:layout_marginBottom="5dp"
-                        android:text="@string/textView_jira_project">
-                    </TextView>
-
-                    <Spinner
-                        android:id="@+id/spinner_jira_project"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-                    </Spinner>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/textView_jira_issue_type"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/black"
-                        android:textSize="17sp"
-                        android:layout_marginBottom="5dp"
-                        android:text="@string/textView_jira_issue_type" />
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
 
-                    <Spinner
-                        android:id="@+id/spinner_jira_issue_type"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
+                        <TextView
+                            android:id="@+id/textView_jira_project"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:textSize="17sp"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_project">
+                        </TextView>
 
-                <LinearLayout
+                        <Spinner
+                            android:id="@+id/spinner_jira_project"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                        </Spinner>
+
+                    </LinearLayout>
+
+
+                </androidx.cardview.widget.CardView>
+
+
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:orientation="vertical">
+                    app:cardElevation="5dp"
+                    android:layout_marginBottom="7dp">
 
-                    <TextView
-                        android:id="@+id/textView_jira_reporter"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/black"
-                        android:textSize="17sp"
-                        android:layout_marginBottom="5dp"
-                        android:text="@string/textView_jira_reporter" />
-                    <Spinner
-                        android:id="@+id/spinner_jira_issue_reporter"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
 
-                </LinearLayout>
+                        <TextView
+                            android:id="@+id/textView_jira_issue_type"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:textSize="17sp"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_issue_type" />
 
-                <LinearLayout
+                        <Spinner
+                            android:id="@+id/spinner_jira_issue_type"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"/>
+                    </LinearLayout>
+
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:orientation="vertical">
+                    app:cardElevation="5dp"
+                    android:layout_marginBottom="7dp">
 
-                    <TextView
-                        android:id="@+id/textView_jira_linked_issues"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/black"
-                        android:textSize="17sp"
-                        android:layout_marginBottom="5dp"
-                        android:text="@string/textView_jira_linked_issue" />
-                    <Spinner
-                        android:id="@+id/spinner_jira_issue_linked_issues"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
 
-                </LinearLayout>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp"
+                            android:textColor="@color/black"
+                            android:layout_marginBottom="10dp"
+                            android:text="@string/textView_jira_summary">
+                        </TextView>
 
-                <LinearLayout
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editText_jira_summary"
+                            android:textSize="16sp"
+                            android:layout_width="match_parent"
+                            android:layout_marginRight="10dp"
+                            android:cursorVisible="true"
+                            android:maxLines="3"
+                            android:background="@null"
+                            android:textCursorDrawable="@color/colorBlack"
+                            android:layout_marginBottom="10dp"
+                            android:hint="@string/editText_jira_summary"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="10dp">
+
+                        </com.google.android.material.textfield.TextInputEditText>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:orientation="vertical">
+                    app:cardElevation="5dp"
+                    android:layout_marginBottom="7dp">
 
-                    <TextView
-                        android:id="@+id/textView_jira_assignee"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="5dp"
-                        android:text="@string/textView_jira_assignee" />
-                    <Spinner
-                        android:id="@+id/spinner_jira_issue_assignee"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
 
-                </LinearLayout>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/textView_jira_description"
+                            android:textSize="16sp"
+                            android:textColor="@color/black"
+                            android:layout_marginBottom="10dp">
+                        </TextView>
 
-                <LinearLayout
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editText_jira_description"
+                            android:hint="@string/editText_jira_description"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp"
+                            android:gravity="top"
+                            android:cursorVisible="true"
+                            android:textCursorDrawable="@color/colorBlack"
+                            android:background="@null"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginBottom="10dp"
+                            android:lines="5"
+                            android:maxLines="5"
+                            android:layout_marginEnd="5dp">
+
+                        </com.google.android.material.textfield.TextInputEditText>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+
+
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:orientation="vertical">
+                    app:cardElevation="5dp"
+                    android:layout_marginBottom="7dp">
 
-                    <TextView
-                        android:id="@+id/textView_jira_priority"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="5dp"
-                        android:text="@string/textView_jira_priority" />
-                    <Spinner
-                        android:id="@+id/spinner_jira_issue_priority"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
 
-                </LinearLayout>
+                        <TextView
+                            android:id="@+id/textView_jira_reporter"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:baselineAligned="false"
+                            android:text="@string/textView_jira_reporter"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editText_jira_summary"
-                    android:textSize="16sp"
-                    android:layout_width="match_parent"
-                    android:layout_marginRight="10dp"
-                    android:textCursorDrawable="@color/colorBlack"
-                    android:layout_marginBottom="10dp"
-                    android:textStyle="italic"
-                    android:hint="@string/textView_jira_summary"
-                    android:layout_height="wrap_content">
+                        <Spinner
+                            android:id="@+id/spinner_jira_issue_reporter"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"/>
 
-                </com.google.android.material.textfield.TextInputEditText>
+                    </LinearLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editText_jira_description"
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    android:textCursorDrawable="@color/colorBlack"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:textStyle="italic"
-                    android:hint="@string/textView_jira_description">
+                    app:cardElevation="5dp"
+                    android:layout_marginBottom="7dp">
 
-                </com.google.android.material.textfield.TextInputEditText>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
 
+                        <TextView
+                            android:id="@+id/textView_jira_linked_issues"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_linked_issue" />
+                        <Spinner
+                            android:id="@+id/spinner_jira_issue_linked_issues"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"/>
 
+                    </LinearLayout>
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_view_jira_attachment"
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-                </androidx.recyclerview.widget.RecyclerView>
+                    android:layout_height="wrap_content"
+                    app:cardElevation="5dp"
+                    android:layout_marginBottom="7dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_assignee"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_assignee" />
+                        <Spinner
+                            android:id="@+id/spinner_jira_issue_assignee"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"/>
+
+                    </LinearLayout>
 
 
+                </androidx.cardview.widget.CardView>
 
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardElevation="5dp"
+                    android:layout_marginBottom="7dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_priority"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_priority" />
+                        <Spinner
+                            android:id="@+id/spinner_jira_issue_priority"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"/>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardElevation="5dp"
+                    android:layout_marginBottom="7dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_attachments"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:text="Attachments"
+                            android:layout_marginBottom="5dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="10dp">
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/ic_attach_file_black_24dp">
+
+                            </ImageView>
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/recycler_view_jira_attachment"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent">
+                            </androidx.recyclerview.widget.RecyclerView>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+
+                </androidx.cardview.widget.CardView>
 
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_margin="10dp"
+                    android:weightSum="2">
 
                     <Button
                         android:id="@+id/button_jira_cancel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@color/black"
+                        android:textColor="@color/secondaryColor"
                         android:textSize="18sp"
+                        app:elevation="5dp"
                         android:textAllCaps="false"
-                        android:backgroundTint="@color/white"
+                        android:layout_gravity="left"
+                        android:background="@color/colorFab"
+                        android:layout_marginRight="5dp"
                         android:text="@string/button_jira_cancel" />
 
                     <Button
@@ -245,21 +405,18 @@
                         android:layout_weight="1"
                         android:textColor="@color/black"
                         android:textSize="18sp"
+                        app:elevation="5dp"
                         android:textAllCaps="false"
-                        android:backgroundTint="@color/white"
+                        android:background="@color/colorFab"
                         android:text="@string/button_jira_create" />
+
                 </LinearLayout>
+
             </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+    </ScrollView>
 
-</ScrollView>
-
-
-
-
-
-
+</LinearLayout>
 
