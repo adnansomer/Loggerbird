@@ -75,5 +75,6 @@ internal class Constants {
         const val singleFileDeleteTag:String = "Single File"
         const val discardFileTag:String = "Discard File"
         const val jiraTag:String = "Jira"
+        const val recyclerViewJiraAdapterTag:String = "RecyclerView Jira Adapter"
     }
 }

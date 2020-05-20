@@ -27,7 +27,7 @@
         </TextView>
 
         <ImageButton
-            android:id="@+id/floating_action_button_cross"
+            android:id="@+id/image_button_cross"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
