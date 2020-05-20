@@ -97,6 +97,10 @@
     <string name="textView_jira_init_password">Key-Token</string>
     <string name="button_jira_create">Create</string>
     <string name="button_jira_cancel">Cancel</string>
-    <string name="button_jita_init_next">Next</string>
+    <string name="button_jira_init_next">Next</string>
     <string name="button_jira_init_cancel">Cancel</string>
+    <!-- recycler_view_item_popup-->
+    <string name="textView_recyclerView_popup_title">Are you sure to remove attachment \n from your jira issue?</string>
+    <string name="button_recyclerView_yes">Yes</string>
+    <string name="button_recyclerView_no">No</string>
 </resources>

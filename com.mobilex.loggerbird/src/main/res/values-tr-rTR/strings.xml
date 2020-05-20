@@ -84,6 +84,7 @@
     <!-- loggerbird_feedback-->
     <string name="editText_feedback_title">Geri bildirim verin</string>
     <!-- loggerbird_jira_popup-->
+    <string name="textView_jira_auth_title">Adım 1/2 - Yetkilendirme</string>
     <string name="textView_jira_title">Konu Oluştur</string>
     <string name="textView_jira_project">Proje</string>
     <string name="textView_jira_issue_type">Konu Tipi</string>
@@ -93,6 +94,14 @@
     <string name="textView_jira_linked_issue">Bağlantılı Konu</string>
     <string name="textView_jira_assignee">Sorumlu</string>
     <string name="textView_jira_priority">Öncelik</string>
+    <string name="textView_jira_init_email">E-Mail</string>
+    <string name="textView_jira_init_password">Key-Token</string>
     <string name="button_jira_create">Oluştur</string>
     <string name="button_jira_cancel">İptal</string>
+    <string name="button_jira_init_next">Sonraki</string>
+    <string name="button_jira_init_cancel">İptal</string>
+    <!-- recycler_view_item_popup-->
+    <string name="textView_recyclerView_popup_title">Jira görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_yes">Evet</string>
+    <string name="button_recyclerView_no">Hayır</string>
 </resources>

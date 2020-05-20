@@ -1,14 +1,9 @@
 package services
 
-//import com.slack.api.Slack
-//import com.slack.api.methods.MethodsClient
-//import com.slack.api.methods.request.chat.ChatPostMessageRequest
-//import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import adapter.RecyclerViewJiraAdapter
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Application
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -48,6 +43,10 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
+//import com.slack.api.Slack
+//import com.slack.api.methods.MethodsClient
+//import com.slack.api.methods.request.chat.ChatPostMessageRequest
+//import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
@@ -81,7 +80,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var windowManagerProgressBar: Any? = null
     private var windowManagerFeedback: Any? = null
     private var windowManagerJira: Any? = null
-    private var windowManagerJiraAuth : Any? = null
+    private var windowManagerJiraAuth: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -150,28 +149,39 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     internal val jiraAuthentication = JiraAuthentication()
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarView: View
-    private lateinit var progressBarJira : ProgressBar
+    private lateinit var progressBarJira: ProgressBar
     private lateinit var spinnerProject: Spinner
     private lateinit var spinnerIssueType: Spinner
     private lateinit var recyclerViewAttachment: RecyclerView
-    private lateinit var layout_jira_summary : TextInputLayout
+    private lateinit var layout_jira_summary: TextInputLayout
     private lateinit var editTextSummary: EditText
     private lateinit var editTextDescription: EditText
-    private lateinit var editTextJiraAuthMail : EditText
-    private lateinit var editTextJiraAuthPassword : EditText
+    private lateinit var editTextJiraAuthMail: EditText
+    private lateinit var editTextJiraAuthPassword: EditText
     private lateinit var spinnerReporter: Spinner
     private lateinit var spinnerLinkedIssue: Spinner
     private lateinit var spinnerAssignee: Spinner
     private lateinit var spinnerPriority: Spinner
     private lateinit var buttonCreate: Button
-    lateinit var buttonCancel: Button
-    private lateinit var buttonJiraAuthCancel : Button
-    private lateinit var buttonJiraAuthNext :Button
-    private lateinit var switchJiraRemember : Switch
+    internal lateinit var buttonCancel: Button
+    private lateinit var buttonJiraAuthCancel: Button
+    private lateinit var buttonJiraAuthNext: Button
     private lateinit var layoutJira: LinearLayout
-    private lateinit var layoutJiraAuth : LinearLayout
+    private lateinit var layoutJiraAuth: LinearLayout
     private val arrayListJiraFileName: ArrayList<RecyclerViewJiraModel> = ArrayList()
+    //    private val arrayListJiraProject: ArrayList<String> = ArrayList()
+//    private val arrayListJiraIssueType: ArrayList<String> = ArrayList()
+//    private val arrayListJiraReporter: ArrayList<String> = ArrayList()
+//    private val arrayListJiraLinkedIssue: ArrayList<String> = ArrayList()
+//    private val arrayListJiraAssignee: ArrayList<String> = ArrayList()
+//    private val arrayListJiraPriority: ArrayList<String> = ArrayList()
     private lateinit var jiraAdapter: RecyclerViewJiraAdapter
+    private lateinit var spinnerProjectAdapter: ArrayAdapter<String>
+    private lateinit var spinnerIssueTypeAdapter: ArrayAdapter<String>
+    private lateinit var spinnerReporterAdapter: ArrayAdapter<String>
+    private lateinit var spinnerLinkedIssueAdapter: ArrayAdapter<String>
+    private lateinit var spinnerAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var spinnerPriorityAdapter: ArrayAdapter<String>
 
     //Static global variables:
     internal companion object {
@@ -446,9 +456,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 this.view = view
                 floatingActionButtonView = view
                 floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-                floating_action_button_screenshot = view.findViewById(R.id.fragment_floating_action_button_screenshot)
-                floating_action_button_video = view.findViewById(R.id.fragment_floating_action_button_video)
-                floating_action_button_audio = view.findViewById(R.id.fragment_floating_action_button_audio)
+                floating_action_button_screenshot =
+                    view.findViewById(R.id.fragment_floating_action_button_screenshot)
+                floating_action_button_video =
+                    view.findViewById(R.id.fragment_floating_action_button_video)
+                floating_action_button_audio =
+                    view.findViewById(R.id.fragment_floating_action_button_audio)
                 reveal_linear_layout_share = view.findViewById(R.id.reveal_linear_layout_share)
                 textView_send_email = view.findViewById(R.id.textView_send_email)
                 textView_discard = view.findViewById(R.id.textView_discard)
@@ -678,7 +691,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             .scaleX(1F)
             .scaleY(1F)
             .withEndAction {
-                floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
+                when {
+                    audioRecording -> {
+                        floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
+                    }
+                    screenshotDrawing -> {
+                        floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
+                    }
+                    else -> {
+                        floating_action_button.setImageResource(R.drawable.ic_share_black_24dp)
+                    }
+                }
                 floating_action_button.animate()
                     .rotationBy(0F)
                     .setDuration(200)
@@ -719,7 +742,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    //initializeJiraLayout(filePathMedia = filePathMedia)
+//                    initializeJiraLayout(filePathMedia = filePathMedia)
                     initializeJiraAuthLayout(filePathMedia = filePathMedia)
                 }
             }
@@ -2125,14 +2148,18 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun initializeJiraAuthLayout(filePathMedia: File){
+    private fun initializeJiraAuthLayout(filePathMedia: File) {
         try {
-//            if (windowManagerJiraAuth != null && this::viewJiraAuth.isInitialized) {
-//                (windowManagerJiraAuth as WindowManager).removeViewImmediate(viewJiraAuth)
-//
-//            }
-            viewJiraAuth = LayoutInflater.from(activity).inflate(R.layout.loggerbird_jira_init_popup, (this.rootView as ViewGroup), false)
-
+            if (windowManagerJiraAuth != null && this::viewJiraAuth.isInitialized) {
+                (windowManagerJiraAuth as WindowManager).removeViewImmediate(viewJiraAuth)
+//                arrayListJiraFileName.clear()
+            }
+            viewJiraAuth = LayoutInflater.from(activity)
+                .inflate(
+                    R.layout.loggerbird_jira_init_popup,
+                    (this.rootView as ViewGroup),
+                    false
+                )
             if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsJiraAuth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
@@ -2159,32 +2186,22 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         windowManagerParamsJiraAuth
                     )
                     if (Build.VERSION.SDK_INT >= 21) {
-                        activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
-                        activity.window.statusBarColor = ContextCompat.getColor(this,R.color.black)
+                        activity.window.navigationBarColor = ContextCompat.getColor(
+                            this,
+                            R.color.black
+                        )
+                        activity.window.statusBarColor = ContextCompat.getColor(
+                            this,
+                            R.color.black
+                        )
                     }
-
-                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     progressBarJira = viewJiraAuth.findViewById(R.id.progressbar_jira)
-                    progressBarJira.progress = 50
-                    switchJiraRemember = viewJiraAuth.findViewById(R.id.switch_jira_remember)
                     buttonJiraAuthNext = viewJiraAuth.findViewById(R.id.button_jira_auth_next)
                     buttonJiraAuthCancel = viewJiraAuth.findViewById(R.id.button_jira_auth_cancel)
                     editTextJiraAuthMail = viewJiraAuth.findViewById(R.id.editText_jira_init_email)
-                    editTextJiraAuthPassword = viewJiraAuth.findViewById(R.id.editText_jira_init_key)
+                    editTextJiraAuthPassword =
+                        viewJiraAuth.findViewById(R.id.editText_jira_init_key)
                     layoutJiraAuth = viewJiraAuth.findViewById(R.id.layout_jira_auth)
-                    switchJiraRemember.setOnCheckedChangeListener { _, isChecked ->
-                        if(isChecked){
-                            Log.d("swtich","on")
-                            val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString("jira_username", editTextJiraAuthMail.text.toString())
-                                putString("jira_password", editTextJiraAuthPassword.text.toString())
-                                commit()
-                            }
-                        }
-                    }
-                    editTextJiraAuthMail.setText(sharedPref.getString("jira_username","defaultName"))
-                    editTextJiraAuthPassword.setText(sharedPref.getString("jira_password","defaultPassword"))
                     buttonClicksJiraAuth(filePathMedia = filePathMedia)
                 }
             }
@@ -2193,9 +2210,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
         }
-
-
     }
+
+    private fun removeJiraAuthLayout() {
+        if (windowManagerJiraAuth != null && this::viewJiraAuth.isInitialized) {
+            (windowManagerJiraAuth as WindowManager).removeViewImmediate(viewJiraAuth)
+            windowManagerJiraAuth = null
+        }
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeJiraLayout(filePathMedia: File) {
@@ -2203,6 +2226,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (windowManagerJira != null && this::viewJira.isInitialized) {
                 (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
                 arrayListJiraFileName.clear()
+//                arrayListJiraProject.clear()
+//                arrayListJiraIssueType.clear()
+//                arrayListJiraReporter.clear()
+//                arrayListJiraLinkedIssue.clear()
+//                arrayListJiraAssignee.clear()
+//                arrayListJiraPriority.clear()
             }
             viewJira = LayoutInflater.from(activity)
                 .inflate(
@@ -2235,26 +2264,28 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         viewJira,
                         windowManagerParamsJira
                     )
-                    if (Build.VERSION.SDK_INT >= 21) {
-                        activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
-                        activity.window.statusBarColor = ContextCompat.getColor(this,R.color.black)
-                    }
-                    progressBarJira = viewJira.findViewById(R.id.progressbar_jira)
-                    progressBarJira.progress = 100
                     spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
                     spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
-                    recyclerViewAttachment = viewJira.findViewById(R.id.recycler_view_jira_attachment)
+                    recyclerViewAttachment =
+                        viewJira.findViewById(R.id.recycler_view_jira_attachment)
                     editTextSummary = viewJira.findViewById(R.id.editText_jira_summary)
                     editTextDescription = viewJira.findViewById(R.id.editText_jira_description)
                     spinnerReporter = viewJira.findViewById(R.id.spinner_jira_issue_reporter)
-                    spinnerLinkedIssue = viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
+                    spinnerLinkedIssue =
+                        viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
                     spinnerAssignee = viewJira.findViewById(R.id.spinner_jira_issue_assignee)
                     spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
                     buttonCreate = viewJira.findViewById(R.id.button_jira_create)
                     buttonCancel = viewJira.findViewById(R.id.button_jira_cancel)
                     layoutJira = viewJira.findViewById(R.id.layout_jira)
-                    buttonClicksJira(filePathMedia = filePathMedia)
+                    jiraAuthentication.callJiraIssue(
+                        context = context,
+                        activity = activity,
+                        jiraTask = "get"
+                    )
+//                    initializeJiraSpinner(jiraAuthentication.getArrayListProjects(),jiraAuthentication.getArrayListIssueTypes())
                     initializeJiraRecyclerView(filePathMedia = filePathMedia)
+                    buttonClicksJira(filePathMedia = filePathMedia)
                 }
             }
         } catch (e: Exception) {
@@ -2269,15 +2300,27 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
             windowManagerJira = null
             arrayListJiraFileName.clear()
+//            arrayListJiraProject.clear()
+//            arrayListJiraIssueType.clear()
+//            arrayListJiraReporter.clear()
+//            arrayListJiraLinkedIssue.clear()
+//            arrayListJiraAssignee.clear()
+//            arrayListJiraPriority.clear()
         }
     }
 
-    private fun removeJiraAuthayout(){
-        if (windowManagerJiraAuth != null && this::viewJiraAuth.isInitialized) {
-            (windowManagerJiraAuth as WindowManager).removeViewImmediate(viewJiraAuth)
-            windowManagerJiraAuth = null
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun buttonClicksJiraAuth(filePathMedia: File) {
+        buttonJiraAuthNext.setSafeOnClickListener {
+            removeJiraAuthLayout()
+            initializeJiraLayout(filePathMedia = filePathMedia)
+        }
+
+        buttonJiraAuthCancel.setSafeOnClickListener {
+            removeJiraAuthLayout()
         }
     }
+
 
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -2293,35 +2336,31 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 attachProgressBar()
             }
-//            jiraAuthentication.callJiraIssue(
-//                filePathName = filePathMedia,
-//                context = context,
-//                activity = activity
-//
-//            )
-            removeJiraLayout()
-            floatingActionButtonView.visibility = View.VISIBLE
-
+            jiraAuthentication.gatherJiraSpinnerDetails(
+                spinnerProject = spinnerProject,
+                spinnerIssueType = spinnerIssueType,
+                spinnerLinkedIssues = spinnerLinkedIssue,
+                spinnerAssignee = spinnerAssignee,
+                spinnerReporter = spinnerReporter,
+                spinnerPriority = spinnerPriority
+            )
+            jiraAuthentication.gatherJiraEditTextDetails(
+                editTextSummary = editTextSummary,
+                editTextDescription = editTextDescription
+            )
+            jiraAuthentication.gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems = arrayListJiraFileName)
+            jiraAuthentication.callJiraIssue(
+                filePathName = filePathMedia,
+                context = context,
+                activity = activity,
+                jiraTask = "create"
+            )
         }
         buttonCancel.setSafeOnClickListener {
             removeJiraLayout()
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
             }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun buttonClicksJiraAuth(filePathMedia: File) {
-
-        buttonJiraAuthNext.setSafeOnClickListener {
-            initializeJiraLayout(filePathMedia = filePathMedia)
-            removeJiraAuthayout()
-        }
-
-        buttonJiraAuthCancel.setSafeOnClickListener {
-            removeJiraAuthayout()
-            floatingActionButtonView.visibility = View.VISIBLE
         }
     }
 
@@ -2336,11 +2375,100 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     private fun initializeJiraRecyclerView(filePathMedia: File) {
-
-        recyclerViewAttachment.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        val jiraAdapter = RecyclerViewJiraAdapter(addJiraFileNames(filePathMedia = filePathMedia))
+        recyclerViewAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        jiraAdapter = RecyclerViewJiraAdapter(
+            addJiraFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
         recyclerViewAttachment.adapter = jiraAdapter
     }
+
+    internal fun initializeJiraSpinner(
+        arrayListProjectNames: ArrayList<String>,
+        arrayListIssueTypes: ArrayList<String>,
+//        arrayListReporterNames: ArrayList<String>,
+        arrayListLinkedIssues: ArrayList<String>,
+        arrayListAssignee: ArrayList<String>,
+        arrayListPriority: ArrayList<String>
+    ) {
+        if (arrayListProjectNames.isNotEmpty()) {
+            spinnerProjectAdapter =
+                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
+            spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerProject.adapter = spinnerProjectAdapter
+
+            spinnerIssueTypeAdapter =
+                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
+            spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerIssueType.adapter = spinnerIssueTypeAdapter
+        }
+
+
+//        spinnerReporterAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListReporterNames)
+//        spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerReporter.adapter = spinnerReporterAdapter
+
+        if (arrayListLinkedIssues.isNotEmpty()) {
+            spinnerLinkedIssueAdapter =
+                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
+            spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
+        }
+
+        if (arrayListAssignee.isNotEmpty()) {
+            spinnerAssigneeAdapter =
+                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
+            spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerAssignee.adapter = spinnerAssigneeAdapter
+        }
+
+        if (arrayListPriority.isNotEmpty()) {
+            spinnerPriorityAdapter =
+                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
+            spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerPriority.adapter = spinnerPriorityAdapter
+        }
+    }
+
+//    private fun addJiraProjectNames(): ArrayList<String> {
+//        arrayListJiraProject.add("project_a")
+//        arrayListJiraProject.add("project_b")
+//        return arrayListJiraProject
+//    }
+//
+//    private fun addJiraIssueTypes(): ArrayList<String> {
+//        arrayListJiraIssueType.add("issue_type_a")
+//        arrayListJiraIssueType.add("issue_type_b")
+//        return arrayListJiraIssueType
+//    }
+//
+//    private fun addJiraReporterNames(): ArrayList<String> {
+//        arrayListJiraReporter.add("reporter_a")
+//        arrayListJiraReporter.add("reporter_b")
+//        return arrayListJiraReporter
+//    }
+//
+//    private fun addJiraLinkedIssues(): ArrayList<String> {
+//        arrayListJiraLinkedIssue.add("linked_issues_a")
+//        arrayListJiraLinkedIssue.add("linked_issues_b")
+//        return arrayListJiraLinkedIssue
+//    }
+//
+//    private fun addJiraAssignee(): ArrayList<String> {
+//        arrayListJiraAssignee.add("assignee_a")
+//        arrayListJiraAssignee.add("assignee_b")
+//        return arrayListJiraAssignee
+//    }
+//
+//    private fun addJiraPriority(): ArrayList<String> {
+//        arrayListJiraPriority.add("priority_a")
+//        arrayListJiraPriority.add("priority_b")
+//        return arrayListJiraPriority
+//    }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {
