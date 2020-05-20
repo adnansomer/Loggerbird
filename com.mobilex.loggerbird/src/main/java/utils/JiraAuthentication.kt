@@ -25,9 +25,7 @@ import loggerbird.LoggerBird
 import models.RecyclerViewJiraModel
 import okhttp3.*
 import services.LoggerBirdService
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
+import java.io.*
 import java.net.URI
 
 
@@ -48,8 +46,8 @@ class JiraAuthentication {
     private val arrayListIssueTypes: ArrayList<String> = ArrayList()
     private val arrayListAssignee: ArrayList<String> = ArrayList()
     private val arrayListIssueLinkedTypes: ArrayList<String> = ArrayList()
-    private val arrayListReporter:ArrayList<String> = ArrayList()
-    private val arrayListPriorities:ArrayList<String> = ArrayList()
+    private val arrayListReporter: ArrayList<String> = ArrayList()
+    private val arrayListPriorities: ArrayList<String> = ArrayList()
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callJiraIssue(
         filePathName: File? = null,
@@ -168,12 +166,13 @@ class JiraAuthentication {
         restClient: JiraRestClient,
         activity: Activity? = null
     ) {
-        val userClient = restClient.userClient
-        val searchClient = restClient.searchClient
-        val searchPromise: Promise<SearchResult> = searchClient.searchJql("project = DEN")
-        val search: SearchResult = searchPromise.claim()
-        Log.d("issue", search.issues.count().toString())
-        val issueClient = restClient.issueClient
+        try {
+            val userClient = restClient.userClient
+            val searchClient = restClient.searchClient
+            val searchPromise: Promise<SearchResult> = searchClient.searchJql("project = LGB")
+            val search: SearchResult = searchPromise.claim()
+            Log.d("issue", search.issues.count().toString())
+            val issueClient = restClient.issueClient
 //        val issuePromise = issueClient.getIssue("DEN-5")
 //        val issue = issuePromise.claim()
 //        Log.d("issue",issue.summary)
@@ -183,49 +182,52 @@ class JiraAuthentication {
 //                    val basicProject = BasicProject(null,"LGB",10004,"LoggerBird")
 //        val userPromise: Promise<User> = userClient.getUser("?accountId=5e3bc6ed3f647d0c99d7fcf2")
 //        val user: User = userPromise.claim()
-        val issueBuilder = IssueInputBuilder("DEN", 10004, "unhandled_berk!")
-        issueBuilder.setDescription("LoggerBird_2")
+            val issueBuilder = IssueInputBuilder("LGB", 10004, "unhandled_berk!")
+            issueBuilder.setDescription("LoggerBird_Scrum")
 //        issueBuilder.setAssigneeName("0")
-//        val basicUser = BasicUser(
-//            null,
-//            user.name,
-//            user.displayName,
-//            user.accountId
-//        )
-//        issueBuilder.setAssignee(basicUser)
-//        issueBuilder.setReporter(basicUser)
+//            val basicUser = BasicUser(
+//                URI("https://appcaesars.atlassian.net/rest/api/2/user?accountId=5eb3efa5ad226b0ba423144a"),
+//                "caesars App",
+//                "caesars App"
+//
+//            )
+//            issueBuilder.setAssignee(basicUser)
+//        issueBuilder.setReporter()
 //                    issueBuilder.addProperty()
 //                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
 //                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
 
-        val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
-        val issueKey = basicIssue.key
-        val issueUri = basicIssue.self
-        val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
-        if (filePathMediaName != null) {
-            val inputStreamMediaFile = FileInputStream(filePathMediaName)
+            val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
+            val issueKey = basicIssue.key
+            val issueUri = basicIssue.self
+            val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
+            if (filePathMediaName != null) {
+                val inputStreamMediaFile = FileInputStream(filePathMediaName)
+                issueClient.addAttachment(
+                    issue.get().attachmentsUri,
+                    inputStreamMediaFile,
+                    filePathMediaName.absolutePath
+                )
+                if (filePathMediaName.exists()) {
+                    filePathMediaName.delete()
+                }
+            }
+            val inputStreamSecessionFile =
+                FileInputStream(LoggerBird.filePathSecessionName)
             issueClient.addAttachment(
                 issue.get().attachmentsUri,
-                inputStreamMediaFile,
-                filePathMediaName.absolutePath
+                inputStreamSecessionFile,
+                LoggerBird.filePathSecessionName.absolutePath
             )
-            if (filePathMediaName.exists()) {
-                filePathMediaName.delete()
+            activity?.runOnUiThread {
+                LoggerBirdService.loggerBirdService.buttonCancel.performClick()
             }
+            LoggerBirdService.loggerBirdService.finishShareLayout("jira")
+            Log.d("issue", issueUri.toString())
+            Log.d("issue", issueKey.toString())
+        } catch (e: Exception) {
+            jiraExceptionHandler(e = e, filePathName = filePathMediaName)
         }
-        val inputStreamSecessionFile =
-            FileInputStream(LoggerBird.filePathSecessionName)
-        issueClient.addAttachment(
-            issue.get().attachmentsUri,
-            inputStreamSecessionFile,
-            LoggerBird.filePathSecessionName.absolutePath
-        )
-        activity?.runOnUiThread {
-            LoggerBirdService.loggerBirdService.buttonCancel.performClick()
-        }
-        LoggerBirdService.loggerBirdService.finishShareLayout("jira")
-        Log.d("issue", issueUri.toString())
-        Log.d("issue", issueKey.toString())
     }
 
     private fun jiraTaskGatherDetails(
@@ -283,13 +285,22 @@ class JiraAuthentication {
     private fun jiraTaskGatherAssignees(restClient: JiraRestClient) {
         val projectClient = restClient.projectClient
         projectClient.allProjects.claim().forEach {
-            val projectRestClient = restClient.projectClient
-            projectRestClient.getProject(it.key).claim().projectRoles.forEach { projectRole ->
-                val projectRestRoleClient = restClient.projectRolesRestClient
-                projectRestRoleClient.getRole(it.self,it.id).claim().actors.forEach { actor ->
-                    arrayListAssignee.add(actor.name)
+            val userClient = restClient.userClient
+            val searchClient = restClient.searchClient
+
+            searchClient.searchJql("project = " + it.key).claim().issues.forEach {
+                if(it.reporter?.displayName != null){
+                    arrayListAssignee.add(it.reporter!!.displayName)
                 }
+
             }
+//            val projectRolesClient = restClient.projectRolesRestClient
+//            val issueClient = restClient.issueClient
+//
+//            val user = userClient.getUser(URI("https://appcaesars.atlassian.net/rest/api/2/user?accountId=5eb3efa5ad226b0ba423144a")).claim()
+//            if(user!= null) {
+//                arrayListAssignee.add(user.displayName)
+//            }
         }
     }
 
@@ -301,21 +312,22 @@ class JiraAuthentication {
             arrayListIssueLinkedTypes.add(it.name)
         }
     }
-    private fun jiraTaskGatherPriorities(restClient: JiraRestClient){
+
+    private fun jiraTaskGatherPriorities(restClient: JiraRestClient) {
         val metaDataClient = restClient.metadataClient
         val priorityList = metaDataClient.priorities
         priorityList.claim().forEach {
             arrayListPriorities.add(it.name)
         }
     }
-    private fun jiraTaskGatherReporters(restClient: JiraRestClient){
+
+    private fun jiraTaskGatherReporters(restClient: JiraRestClient) {
         val metaDataClient = restClient.projectClient
         val reporterList = metaDataClient
 //        reporterList.claim().forEach {
 //            arrayListIssueLinkedTypes.add(it.name)
 //        }
     }
-
 
 
     internal fun getArrayListProjects(): ArrayList<String> {
