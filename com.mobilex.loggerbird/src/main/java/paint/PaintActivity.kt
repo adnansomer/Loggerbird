@@ -72,6 +72,8 @@ class PaintActivity : Activity() {
         }
     }
 
+
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

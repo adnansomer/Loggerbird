@@ -68,7 +68,15 @@
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="10dp"
             android:textStyle="italic"
+            android:password="true"
             android:hint="@string/textView_jira_init_password"/>
+
+        <Switch
+            android:id="@+id/switch_jira_remember"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Remember Me">
+        </Switch>
 
     </LinearLayout>
 
@@ -103,10 +111,6 @@
             android:text="@string/button_jira_init_next" />
 
     </LinearLayout>
-
-
-
-
 
 </LinearLayout>
 
