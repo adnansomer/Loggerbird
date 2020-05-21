@@ -13,6 +13,7 @@ import com.atlassian.jira.rest.client.api.JiraRestClientFactory
 import com.atlassian.jira.rest.client.api.domain.*
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
+import com.google.gson.JsonObject
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
@@ -22,8 +23,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
+import models.AccountIdService
+import models.JiraUserModel
 import models.RecyclerViewJiraModel
 import okhttp3.*
+import retrofit2.Retrofit
 import services.LoggerBirdService
 import java.io.*
 import java.net.URI
@@ -137,14 +141,19 @@ class JiraAuthentication {
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun jiraExceptionHandler(e: Exception, filePathName: File?) {
+    private fun jiraExceptionHandler(
+        e: Exception? = null,
+        filePathName: File? = null,
+        throwable: Throwable? = null
+    ) {
         filePathName?.delete()
         LoggerBirdService.loggerBirdService.finishShareLayout("jira_error")
-        e.printStackTrace()
+        e?.printStackTrace()
         LoggerBird.callEnqueue()
         LoggerBird.callExceptionDetails(
             exception = e,
-            tag = Constants.jiraAuthenticationtag
+            tag = Constants.jiraAuthenticationtag,
+            throwable = throwable
         )
     }
 
@@ -283,26 +292,63 @@ class JiraAuthentication {
     }
 
     private fun jiraTaskGatherAssignees(restClient: JiraRestClient) {
-        val projectClient = restClient.projectClient
-        projectClient.allProjects.claim().forEach {
-            val userClient = restClient.userClient
-            val searchClient = restClient.searchClient
 
-            searchClient.searchJql("project = " + it.key).claim().issues.forEach {
-                if(it.reporter?.displayName != null){
+//        https://appcaesars.atlassian.net/rest/api/2/user/search?query
+//        RetrofitUserJiraClient.getJiraUserClient().create(AccountIdService::class.java)
+//            .getAccountIdList().enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+//                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+//                override fun onFailure(call: retrofit2.Call<List<JiraUserModel>>, t: Throwable) {
+//                    jiraExceptionHandler(throwable = t)
+//                }
+//
+//                override fun onResponse(
+//                    call: retrofit2.Call<List<JiraUserModel>>,
+//                    response: retrofit2.Response<List<JiraUserModel>>
+//                ) {
+//                    var counter = 0
+//                    do{
+//                        Log.d("response_retrofit", response.raw().body?.toString())
+//                        counter++
+//                    }while (response.body()!!.iterator().hasNext())
+//
+//                    val accountIdList = response.body()?.get(0)
+//                    var accountListCounter = 0
+//                    val userClient = restClient.userClient
+//                    if (accountIdList != null) {
+//                        do {
+//                            if (accountIdList.size > accountListCounter) {
+//                                val user =
+//                                    userClient.getUser(URI("https://appcaesars.atlassian.net/rest/api/2/user?accountId=" + accountIdList[accountListCounter]))
+//                                        .claim()
+//                                arrayListAssignee.add(user.displayName)
+//                            } else {
+//                                break
+//                            }
+//                            accountListCounter++
+//                        } while (accountIdList.iterator().hasNext())
+//                    }
+//                }
+//            })
+
+        val searchClient = restClient.searchClient
+        searchClient.searchJql("project = LGB").claim().issues.forEach {
+            if (it.assignee != null) {
+                if (!arrayListAssignee.contains(it.assignee!!.displayName)) {
+                    arrayListAssignee.add(it.assignee!!.displayName)
+                }
+            }
+
+            if (it.reporter != null) {
+                if (!arrayListAssignee.contains(it.reporter!!.displayName)) {
                     arrayListAssignee.add(it.reporter!!.displayName)
                 }
-
             }
+
+        }
+    }
 //            val projectRolesClient = restClient.projectRolesRestClient
 //            val issueClient = restClient.issueClient
 //
-//            val user = userClient.getUser(URI("https://appcaesars.atlassian.net/rest/api/2/user?accountId=5eb3efa5ad226b0ba423144a")).claim()
-//            if(user!= null) {
-//                arrayListAssignee.add(user.displayName)
-//            }
-        }
-    }
 
 
     private fun jiraTaskGatherLinkedIssues(restClient: JiraRestClient) {
