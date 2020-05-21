@@ -93,6 +93,8 @@
     <string name="editText_jira_summary">Sorun hakkinda kisa bir ozet yaziniz.</string>
     <string name="editText_jira_description">Sorunu detayli bir sekilde anlatiniz.</string>
     <string name="textView_jira_reporter">Bildiren</string>
+    <string name="textView_jira_component">Bileşen</string>
+    <string name="textView_jira_fix_versions">Düzeltme versiyonu</string>
     <string name="textView_jira_linked_issue">Bağlantılı Konu</string>
     <string name="textView_jira_assignee">Sorumlu</string>
     <string name="textView_jira_priority">Öncelik</string>
