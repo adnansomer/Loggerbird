@@ -54,6 +54,7 @@
     <string name="files_action_delete_success">Files discarded successfully!</string>
     <string name="share_video_delete">Video file is deleted</string>
     <string name="share_audio_delete">Audio file is deleted</string>
+    <string name="share_media_delete">Media file is deleted</string>
     <string name="share_file_sent">Media file is sent!</string>
     <string name="share_file_sent_error">An error happened while trying to send media file!</string>
     <string name="jira_sent">Jira issue opened!</string>
@@ -70,7 +71,7 @@
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>
     <!-- activity_paint_save_dialog-->
-    <string name="editText_hint_save_dialog_title">#Issue name:</string>
+    <string name="editText_hint_save_dialog_title">File name:</string>
     <string name="textView_save_dialog_title">Save your drawing</string>
     <!-- activity_save_snackbar-->
     <string name="textView_delete_verification">Are you sure you want to delete?</string>
@@ -84,10 +85,12 @@
     <string name="editText_feedback_title">Give us feedback!</string>
     <!-- loggerbird_jira_popup-->
     <string name="textView_jira_auth_title">Step 1/2 - Authorization</string>
-    <string name="textView_jira_title">Step 2/2 - Create Issue</string>
+    <string name="textView_jira_title">Create Issue</string>
     <string name="textView_jira_project">Project</string>
     <string name="textView_jira_issue_type">Issue Type</string>
     <string name="textView_jira_summary">Summary</string>
+    <string name="editText_jira_summary">Write a brief summary about your issue.</string>
+    <string name="editText_jira_description">Describe your issue in details.</string>
     <string name="textView_jira_description">Description</string>
     <string name="textView_jira_reporter">Reporter</string>
     <string name="textView_jira_linked_issue">Linked Issues</string>

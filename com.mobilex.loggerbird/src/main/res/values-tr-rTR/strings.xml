@@ -71,7 +71,7 @@
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça boyutu ayarla</string>
     <!-- activity_paint_save_dialog-->
-    <string name="editText_hint_save_dialog_title">#Konu ismi:</string>
+    <string name="editText_hint_save_dialog_title">Dosya adı</string>
     <string name="textView_save_dialog_title">Çizimini kaydet</string>
     <!-- activity_save_snackbar-->
     <string name="textView_delete_verification">Silmek istediğinizden emin misiniz?</string>
@@ -90,6 +90,8 @@
     <string name="textView_jira_issue_type">Konu Tipi</string>
     <string name="textView_jira_summary">Özet:</string>
     <string name="textView_jira_description">Açıklama:</string>
+    <string name="editText_jira_summary">Sorun hakkinda kisa bir ozet yaziniz.</string>
+    <string name="editText_jira_description">Sorunu detayli bir sekilde anlatiniz.</string>
     <string name="textView_jira_reporter">Bildiren</string>
     <string name="textView_jira_linked_issue">Bağlantılı Konu</string>
     <string name="textView_jira_assignee">Sorumlu</string>
