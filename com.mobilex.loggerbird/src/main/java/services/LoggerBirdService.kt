@@ -165,10 +165,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //  private lateinit var editTextJiraAuthPassword: EditText
     private lateinit var spinnerReporter: Spinner
     private lateinit var spinnerLinkedIssue: Spinner
+    private lateinit var spinnerIssue: Spinner
     private lateinit var spinnerAssignee: Spinner
     private lateinit var spinnerPriority: Spinner
-    private lateinit var spinnerComponent:Spinner
-    private lateinit var spinnerFixVersions:Spinner
+    private lateinit var spinnerComponent: Spinner
+    private lateinit var spinnerFixVersions: Spinner
     private lateinit var buttonCreate: Button
     internal lateinit var buttonCancel: Button
     //  private lateinit var buttonJiraAuthCancel: Button
@@ -188,10 +189,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerIssueTypeAdapter: ArrayAdapter<String>
     private lateinit var spinnerReporterAdapter: ArrayAdapter<String>
     private lateinit var spinnerLinkedIssueAdapter: ArrayAdapter<String>
+    private lateinit var spinnerIssueAdapter: ArrayAdapter<String>
     private lateinit var spinnerAssigneeAdapter: ArrayAdapter<String>
     private lateinit var spinnerPriorityAdapter: ArrayAdapter<String>
-    private lateinit var spinnerFixVersionsAdapter:ArrayAdapter<String>
-    private lateinit var spinnerComponentAdapter:ArrayAdapter<String>
+    private lateinit var spinnerFixVersionsAdapter: ArrayAdapter<String>
+    private lateinit var spinnerComponentAdapter: ArrayAdapter<String>
+
 
     //Static global variables:
     internal companion object {
@@ -2274,6 +2277,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     spinnerReporter = viewJira.findViewById(R.id.spinner_jira_issue_reporter)
                     spinnerLinkedIssue =
                         viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
+                    spinnerIssue = viewJira.findViewById(R.id.spinner_jira_issue_issues)
                     spinnerAssignee = viewJira.findViewById(R.id.spinner_jira_issue_assignee)
                     spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
                     spinnerComponent = viewJira.findViewById(R.id.spinner_jira_issue_component)
@@ -2361,13 +2365,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         )
 
         buttonCreate.setSafeOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                attachProgressBar()
-            }
             jiraAuthentication.gatherJiraSpinnerDetails(
                 spinnerProject = spinnerProject,
                 spinnerIssueType = spinnerIssueType,
                 spinnerLinkedIssues = spinnerLinkedIssue,
+                spinnerIssues = spinnerIssue,
                 spinnerAssignee = spinnerAssignee,
                 spinnerReporter = spinnerReporter,
                 spinnerPriority = spinnerPriority,
@@ -2379,12 +2381,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 editTextDescription = editTextDescription
             )
             jiraAuthentication.gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems = arrayListJiraFileName)
-            jiraAuthentication.callJiraIssue(
-                filePathName = filePathMedia,
-                context = context,
-                activity = activity,
-                jiraTask = "create"
-            )
+            if (jiraAuthentication.checkSummaryEmpty(activity = activity, context = context)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    attachProgressBar()
+                }
+                jiraAuthentication.callJiraIssue(
+                    filePathName = filePathMedia,
+                    context = context,
+                    activity = activity,
+                    jiraTask = "create"
+                )
+            }
         }
 
         toolbarJira.setOnMenuItemClickListener {
@@ -2475,10 +2482,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListIssueTypes: ArrayList<String>,
         arrayListReporterNames: ArrayList<String>,
         arrayListLinkedIssues: ArrayList<String>,
+        arrayListIssues: ArrayList<String>,
         arrayListAssignee: ArrayList<String>,
         arrayListPriority: ArrayList<String>,
-        arrayListComponent:ArrayList<String>,
-        arrayListFixVersions:ArrayList<String>
+        arrayListComponent: ArrayList<String>,
+        arrayListFixVersions: ArrayList<String>
     ) {
         spinnerProjectAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
@@ -2494,19 +2502,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerReporter.adapter = spinnerReporterAdapter
 
-
         spinnerLinkedIssueAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
         spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
 
+        spinnerIssueAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssues)
+        spinnerIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerIssue.adapter = spinnerIssueAdapter
 
         spinnerAssigneeAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
         spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerAssignee.adapter = spinnerAssigneeAdapter
-
-
 
         spinnerPriorityAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)

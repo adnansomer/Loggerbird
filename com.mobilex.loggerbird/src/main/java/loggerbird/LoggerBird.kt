@@ -2819,7 +2819,7 @@ class LoggerBird : LifecycleObserver {
 //                                    activity = LoggerBirdService.loggerBirdService.returnActivity()
 //                                )
                                 if(LoggerBirdService.controlLoggerBirdServiceInit()){
-                                    LoggerBirdService.loggerBirdService.jiraAuthentication.jiraUnhandledExceptionTask()
+                                    LoggerBirdService.loggerBirdService.jiraAuthentication.jiraUnhandledExceptionTask(context = context)
                                 }
                             } else {
                                 EmailUtil.sendUnhandledException(

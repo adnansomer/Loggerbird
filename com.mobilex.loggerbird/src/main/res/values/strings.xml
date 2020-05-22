@@ -60,6 +60,9 @@
     <string name="jira_sent">Jira issue opened!</string>
     <string name="jira_sent_error">An error happened while trying to open jira issue!</string>
     <string name="media_recording_error">Please complete your other media operation!</string>
+    <string name="jira_summary_empty">Summary cannot be empty!</string>
+    <string name="jira_summary_unhandled_exception">unhandled_exception:</string>
+    <string name="jira_description_unhandled_exception">An unhandled exception detected check log file for more details!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -96,6 +99,7 @@
     <string name="textView_jira_component">Component</string>
     <string name="textView_jira_fix_versions">Fix versions</string>
     <string name="textView_jira_linked_issue">Linked Issues</string>
+    <string name="textView_jira_issue">Issue</string>
     <string name="textView_jira_assignee">Assignee</string>
     <string name="textView_jira_priority">Priority</string>
     <string name="textView_jira_init_email">E-Mail</string>
