@@ -241,7 +241,7 @@ class JiraAuthentication {
             arrayListReporter.clear()
             jiraTaskGatherProjectKeys(restClient = restClient)
             jiraTaskGatherIssueTypes(restClient = restClient)
-            jiraTaskGatherAssignees(restClient = restClient)
+//            jiraTaskGatherAssignees(restClient = restClient)
             jiraTaskGatherLinkedIssues(restClient = restClient)
             jiraTaskGatherPriorities(restClient = restClient)
             activity.runOnUiThread {
@@ -315,8 +315,6 @@ class JiraAuthentication {
 //            arrayListIssueLinkedTypes.add(it.name)
 //        }
     }
-
-
 
     internal fun getArrayListProjects(): ArrayList<String> {
         return arrayListProjects

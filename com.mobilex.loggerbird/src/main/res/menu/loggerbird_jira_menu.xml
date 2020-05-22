@@ -6,7 +6,7 @@
         android:id="@+id/jira_menu_save"
         android:icon="@drawable/ic_save_black_24dp"
         android:title="Save Issue Info"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/jira_menu_clear"

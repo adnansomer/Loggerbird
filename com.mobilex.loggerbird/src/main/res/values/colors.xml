@@ -15,4 +15,5 @@
     <color name="cookieBarColor">#102027</color>
     <color name="jiraBlue">#2684ff</color>
     <color name="jiraSilver">#C0C0C0</color>
+    <color name="darkTransparent">#99000000</color>
 </resources>

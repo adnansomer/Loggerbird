@@ -43,6 +43,7 @@ class FloatingActionButtonOnTouchListener(
         try {
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+
                     floatingActionButtonScreenShot.visibility = View.GONE
                     floatingActionButtonVideo.visibility = View.GONE
                     floatingActionButtonAudio.visibility = View.GONE

@@ -137,7 +137,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var cookieBar: CookieBar
     private lateinit var viewFeedback: View
     private lateinit var viewJira: View
-//  private lateinit var viewJiraAuth: View
+    //  private lateinit var viewJiraAuth: View
     private lateinit var wrapper: FrameLayout
     private lateinit var floating_action_button_feedback: FloatingActionButton
     private lateinit var floating_action_button_feed_close: FloatingActionButton
@@ -161,7 +161,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var layout_jira_summary: TextInputLayout
     private lateinit var editTextSummary: EditText
     private lateinit var editTextDescription: EditText
-//  private lateinit var editTextJiraAuthMail: EditText
+    //  private lateinit var editTextJiraAuthMail: EditText
 //  private lateinit var editTextJiraAuthPassword: EditText
     private lateinit var spinnerReporter: Spinner
     private lateinit var spinnerLinkedIssue: Spinner
@@ -169,11 +169,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerPriority: Spinner
     private lateinit var buttonCreate: Button
     internal lateinit var buttonCancel: Button
-//  private lateinit var buttonJiraAuthCancel: Button
+    //  private lateinit var buttonJiraAuthCancel: Button
 //  private lateinit var buttonJiraAuthNext: Button
     private lateinit var layoutJira: LinearLayout
     private lateinit var toolbarJira : Toolbar
-//    private lateinit var layoutJiraAuth: LinearLayout
+    //    private lateinit var layoutJiraAuth: LinearLayout
     private val arrayListJiraFileName: ArrayList<RecyclerViewJiraModel> = ArrayList()
     //    private val arrayListJiraProject: ArrayList<String> = ArrayList()
 //    private val arrayListJiraIssueType: ArrayList<String> = ArrayList()
@@ -708,6 +708,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         textView_counter_audio.visibility = View.GONE
         textView_counter_video.visibility = View.GONE
         reveal_linear_layout_share.visibility = View.VISIBLE
+        floating_action_button.isExpanded = true
         shareViewClicks(filePathMedia = filePathMedia)
     }
 
