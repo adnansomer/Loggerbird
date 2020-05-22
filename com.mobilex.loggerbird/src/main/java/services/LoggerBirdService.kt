@@ -2294,7 +2294,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     jiraAuthentication.callJiraIssue(
                         context = context,
                         activity = activity,
-                        jiraTask = "get"
+                        jiraTask = "get",
+                        createMethod = "normal"
                     )
 
 //                    initializeJiraSpinner(jiraAuthentication.getArrayListProjects(),jiraAuthentication.getArrayListIssueTypes())
@@ -2389,7 +2390,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     filePathName = filePathMedia,
                     context = context,
                     activity = activity,
-                    jiraTask = "create"
+                    jiraTask = "create",
+                    createMethod = "normal"
                 )
             }
         }

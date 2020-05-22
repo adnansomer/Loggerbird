@@ -9,14 +9,12 @@ import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.recyclerview.widget.RecyclerView
 import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
 import com.atlassian.jira.rest.client.api.domain.*
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.api.domain.input.LinkIssuesInput
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
-import com.google.gson.JsonObject
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
@@ -26,16 +24,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
-import models.AccountIdService
-import models.JiraUserModel
 import models.RecyclerViewJiraModel
 import okhttp3.*
-import org.joda.time.DateTime
-import retrofit2.Retrofit
 import services.LoggerBirdService
 import java.io.*
 import java.net.URI
-import java.time.LocalDate
 
 
 class JiraAuthentication {
@@ -48,7 +41,7 @@ class JiraAuthentication {
     private var projectPosition: Int = 0
     private var componentPosition: Int = 0
     private var fixVersionPosition: Int = 0
-    private var linkedIssueTypePosition:Int = 0
+    private var linkedIssueTypePosition: Int = 0
     private lateinit var reporter: String
     private lateinit var linkedIssue: String
     private lateinit var issue: String
@@ -58,7 +51,7 @@ class JiraAuthentication {
     private lateinit var description: String
     private val hashMapComponent: HashMap<String, Iterable<BasicComponent>> = HashMap()
     private val hashMapFixVersions: HashMap<String, Iterable<Version>> = HashMap()
-    private val hashMapLinkedIssues:HashMap<String,String> = HashMap()
+    private val hashMapLinkedIssues: HashMap<String, String> = HashMap()
     private lateinit var arrayListRecyclerViewItems: ArrayList<RecyclerViewJiraModel>
     private val arrayListProjects: ArrayList<String> = ArrayList()
     private val arrayListProjectKeys: ArrayList<String> = ArrayList()
@@ -72,12 +65,14 @@ class JiraAuthentication {
     private val arrayListPrioritiesId: ArrayList<Int> = ArrayList()
     private val arrayListComponents: ArrayList<String> = ArrayList()
     private val arrayListFixVersions: ArrayList<String> = ArrayList()
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callJiraIssue(
         filePathName: File? = null,
         context: Context,
         activity: Activity,
-        jiraTask: String
+        jiraTask: String,
+        createMethod: String
     ) {
         coroutineCallJira.async {
             try {
@@ -86,7 +81,8 @@ class JiraAuthentication {
                         filePathMediaName = filePathName,
                         context = context,
                         activity = activity,
-                        jiraTask = jiraTask
+                        jiraTask = jiraTask,
+                        createMethod = createMethod
                     )
                 } else {
                     activity.runOnUiThread {
@@ -110,7 +106,8 @@ class JiraAuthentication {
         filePathMediaName: File?,
         context: Context,
         activity: Activity,
-        jiraTask: String
+        jiraTask: String,
+        createMethod: String
     ) {
         val client = OkHttpClient()
         val request: Request =
@@ -134,7 +131,8 @@ class JiraAuthentication {
                                 filePathMediaName = filePathMediaName,
                                 restClient = jiraAuthentication(),
                                 activity = activity,
-                                context = context
+                                context = context,
+                                createMethod = createMethod
                             )
                             "get" -> jiraTaskGatherDetails(
                                 restClient = jiraAuthentication(),
@@ -209,14 +207,14 @@ class JiraAuthentication {
     private fun jiraTaskCreateIssue(
         filePathMediaName: File? = null,
         restClient: JiraRestClient,
-        activity: Activity? = null,
-        context: Context
+        activity: Activity,
+        context: Context,
+        createMethod:String
     ) {
         try {
-            if (activity != null) {
-                jiraNormalTask(restClient = restClient, context = context, activity = activity)
-            } else {
-                jiraUnhandledTask(restClient = restClient, context = context)
+            when(createMethod){
+                 "normal" ->  jiraNormalTask(restClient = restClient, context = context, activity = activity)
+                  "unhandled" ->   jiraUnhandledTask(restClient = restClient)
             }
         } catch (e: Exception) {
             jiraExceptionHandler(e = e, filePathName = filePathMediaName)
@@ -250,14 +248,24 @@ class JiraAuthentication {
 //                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
 //                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
 //            issueBuilder.setDueDate(DateTime.parse("2020-06-25"))
-            issueBuilder.setComponents(hashMapComponent[arrayListComponents[componentPosition]])
-            issueBuilder.setFixVersions(hashMapFixVersions[arrayListFixVersions[fixVersionPosition]])
+            if (arrayListComponents[componentPosition].isNotEmpty()) {
+                issueBuilder.setComponents(hashMapComponent[arrayListComponents[componentPosition]])
+            }
+            if (arrayListFixVersions[fixVersionPosition].isNotEmpty()) {
+                issueBuilder.setFixVersions(hashMapFixVersions[arrayListFixVersions[fixVersionPosition]])
+            }
             val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
             val issueKey = basicIssue.key
             val issueUri = basicIssue.self
             val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
-            val linkIssueInput = LinkIssuesInput(issueKey, this.issue, hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]])
-            issueClient.linkIssue(linkIssueInput)
+            if (this.issue.isNotEmpty()) {
+                val linkIssueInput = LinkIssuesInput(
+                    issueKey,
+                    this.issue,
+                    hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
+                )
+                issueClient.linkIssue(linkIssueInput)
+            }
             var fileCounter = 0
             do {
                 if (RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths.size > fileCounter) {
@@ -295,14 +303,14 @@ class JiraAuthentication {
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun jiraUnhandledTask(restClient: JiraRestClient, context: Context) {
+    private fun jiraUnhandledTask(restClient: JiraRestClient) {
         val issueClient = restClient.issueClient
         val issueBuilder = IssueInputBuilder(
             "DEN",
             10004,
-            context.resources.getString(R.string.jira_summary_unhandled_exception)
-        )
-        issueBuilder.setDescription(context.resources.getString(R.string.jira_description_unhandled_exception))
+           "unhandled_exception:"
+            )
+        issueBuilder.setDescription("An unhandled exception occurred in the application check log details for more information!")
         val inputStreamSecessionFile =
             FileInputStream(LoggerBird.filePathSecessionName)
         val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
@@ -333,6 +341,9 @@ class JiraAuthentication {
             arrayListReporter.clear()
             arrayListComponents.clear()
             arrayListFixVersions.clear()
+            hashMapComponent.clear()
+            hashMapFixVersions.clear()
+            hashMapLinkedIssues.clear()
             jiraTaskGatherProjectKeys(restClient = restClient)
             jiraTaskGatherIssueTypes(restClient = restClient)
             jiraTaskGatherAssignees(restClient = restClient)
@@ -461,9 +472,10 @@ class JiraAuthentication {
     private fun jiraTaskGatherIssues(restClient: JiraRestClient) {
         val searchClient = restClient.searchClient
         val projectClient = restClient.projectClient
+        arrayListIssues.add("")
         projectClient.allProjects.claim().forEach {
-            searchClient.searchJql("project=" + it.key).claim().issues.forEach {
-                arrayListIssues.add(it.key)
+            searchClient.searchJql("project=" + it.key).claim().issues.forEach { issue ->
+                arrayListIssues.add(issue.key)
             }
         }
 
@@ -482,6 +494,8 @@ class JiraAuthentication {
 
     private fun jiraTaskGatherFixComp(restClient: JiraRestClient) {
         val projectClient = restClient.projectClient
+        arrayListComponents.add("")
+        arrayListFixVersions.add("")
         projectClient.allProjects.claim().forEach {
             projectClient.getProject(it.key).claim().components.forEach { component ->
                 arrayListComponents.add(component.name)
@@ -562,10 +576,10 @@ class JiraAuthentication {
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal suspend fun jiraUnhandledExceptionTask(context: Context) {
+    internal suspend fun jiraUnhandledExceptionTask(context: Context,activity: Activity) {
         withContext(coroutineCallJira.coroutineContext) {
             try {
-                jiraTaskCreateIssue(restClient = jiraAuthentication(), context = context)
+                jiraTaskCreateIssue(restClient = jiraAuthentication(), context = context,createMethod = "unhandled",activity = activity)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
