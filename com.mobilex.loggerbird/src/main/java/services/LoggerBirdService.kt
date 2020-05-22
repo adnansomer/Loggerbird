@@ -466,12 +466,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 this.view = view
                 floatingActionButtonView = view
                 floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-                floating_action_button_screenshot =
-                    view.findViewById(R.id.fragment_floating_action_button_screenshot)
-                floating_action_button_video =
-                    view.findViewById(R.id.fragment_floating_action_button_video)
-                floating_action_button_audio =
-                    view.findViewById(R.id.fragment_floating_action_button_audio)
+                floating_action_button_screenshot = view.findViewById(R.id.fragment_floating_action_button_screenshot)
+                floating_action_button_video = view.findViewById(R.id.fragment_floating_action_button_video)
+                floating_action_button_audio = view.findViewById(R.id.fragment_floating_action_button_audio)
                 reveal_linear_layout_share = view.findViewById(R.id.reveal_linear_layout_share)
                 textView_send_email = view.findViewById(R.id.textView_send_email)
                 textView_discard = view.findViewById(R.id.textView_discard)
@@ -603,7 +600,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("ClickableViewAccessibility")
     private fun buttonClicks() {
+
         floating_action_button.setOnClickListener {
+
             if (!Settings.canDrawOverlays(context)) {
                 checkDrawOtherAppPermission(activity = (context as Activity))
             } else {
@@ -2505,8 +2504,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
         spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerAssignee.adapter = spinnerAssigneeAdapter
-
-
 
         spinnerPriorityAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)

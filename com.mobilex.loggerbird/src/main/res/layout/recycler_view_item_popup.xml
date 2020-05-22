@@ -37,14 +37,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_gravity="center"
-        android:layout_margin="10dp">
+        android:layout_gravity="center">
 
         <Button
             android:id="@+id/button_recycler_view_jira_yes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textColor="@color/colorBlack"
             android:background="@color/colorFab"
             android:text="@string/button_recyclerView_yes" />
@@ -53,7 +52,7 @@
             android:id="@+id/button_recycler_view_jira_no"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textColor="@color/colorBlack"
             android:background="@color/colorFab"
             android:text="@string/button_recyclerView_no" />

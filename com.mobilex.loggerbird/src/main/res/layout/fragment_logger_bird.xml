@@ -110,7 +110,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_shape"
-        android:elevation="1dp"
+        app:elevation="1dp"
         android:gravity="center"
         android:singleLine="true"
         android:textColor="@color/secondaryColor"
@@ -126,32 +126,37 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_shape"
-        android:elevation="1dp"
         android:gravity="center"
         android:singleLine="true"
         android:textColor="@color/secondaryColor"
         android:textSize="9sp"
         android:textStyle="bold"
         app:borderWidth="0dp"
+        app:elevation="1dp"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="@id/fragment_floating_action_button_audio"
         app:layout_constraintEnd_toEndOf="@id/fragment_floating_action_button_audio"/>
 
+
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fragment_floating_action_button"
-        style="@style/AppTheme.Fab"
+        android:id="@+id/fragment_floating_action_button_video"
         android:layout_margin="1dp"
-        app:rippleColor="@color/secondaryColor"
+        style="@style/AppTheme.FabSpeedDial"
         app:borderWidth="0dp"
+        app:fabSize="auto"
         app:elevation="0dp"
-        app:fabSize="normal"
+        android:scaleType="fitCenter"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/loggerbird" />
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_videocam_black_24dp" />
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_audio"
-        app:rippleColor="#cfd8dc"
         style="@style/AppTheme.FabSpeedDial"
         android:layout_margin="1dp"
         android:layout_width="wrap_content"
@@ -160,14 +165,13 @@
         android:clipToPadding="false"
         android:visibility="gone"
         app:borderWidth="0dp"
+        app:elevation="0dp"
         android:scaleType="fitCenter"
-        app:elevation="1dp"
         app:fabSize="normal"
         app:srcCompat="@drawable/ic_mic_black_24dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button_screenshot"
-        app:rippleColor="#cfd8dc"
         style="@style/AppTheme.FabSpeedDial"
         android:layout_width="wrap_content"
         android:layout_margin="1dp"
@@ -182,23 +186,21 @@
         app:srcCompat="@drawable/ic_photo_camera_black_24dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fragment_floating_action_button_video"
-        style="@style/AppTheme.FabSpeedDial"
-        app:rippleColor="#cfd8dc"
-        android:layout_width="wrap_content"
+        android:id="@+id/fragment_floating_action_button"
         android:layout_margin="1dp"
-        android:layout_height="wrap_content"
-        android:textColor="@color/colorBlack"
+        app:rippleColor="@color/secondaryColor"
+        android:clickable="true"
+        style="@style/AppTheme.Fab"
+        app:borderWidth="0dp"
+        app:elevation="1dp"
+        app:fabSize="auto"
         android:scaleType="fitCenter"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:borderWidth="0dp"
-        app:elevation="1dp"
-        app:fabSize="normal"
-        app:srcCompat="@drawable/ic_videocam_black_24dp" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/loggerbird"
+        android:focusable="true" />
 
 
 </FrameLayout>

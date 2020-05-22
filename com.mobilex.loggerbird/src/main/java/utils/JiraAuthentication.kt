@@ -62,6 +62,7 @@ class JiraAuthentication {
     private val arrayListPriorities: ArrayList<String> = ArrayList()
     private val arrayListPrioritiesId: ArrayList<Int> = ArrayList()
     private val arrayListComponents: ArrayList<String> = ArrayList()
+    private lateinit var arrayListComponentsId : Iterable<BasicComponent>
     private val arrayListFixVersions: ArrayList<String> = ArrayList()
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callJiraIssue(
@@ -214,6 +215,7 @@ class JiraAuthentication {
             )
             issueBuilder.setPriorityId(arrayListPrioritiesId[priorityPosition].toLong())
             issueBuilder.setDescription(description)
+
 //            issueBuilder.setReporterName(reporter)
             issueBuilder.setAssigneeName("5eb3efa5ad226b0ba423144a")
 //        issueBuilder.setAssigneeName("0")
@@ -236,16 +238,16 @@ class JiraAuthentication {
             var fileCounter = 0
             do {
                 if(RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths.size>fileCounter){
-                        val file = RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
-                        val inputStreamMediaFile = FileInputStream(file)
-                        issueClient.addAttachment(
-                            issue.get().attachmentsUri,
-                            inputStreamMediaFile,
-                            file.absolutePath
-                        )
-                        if (file.exists()) {
-                           file.delete()
-                        }
+                    val file = RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
+                    val inputStreamMediaFile = FileInputStream(file)
+                    issueClient.addAttachment(
+                        issue.get().attachmentsUri,
+                        inputStreamMediaFile,
+                        file.absolutePath
+                    )
+                    if (file.exists()) {
+                        file.delete()
+                    }
                 }else{
                     break
                 }
@@ -419,6 +421,19 @@ class JiraAuthentication {
             projectClient.getProject(it.key).claim().components.forEach { component ->
                 arrayListComponents.add(component.name)
             }
+
+//            arrayListComponentsId = projectClient.getProject(it.key).claim().components
+//
+//            for(BasicComponent component : components){
+//
+//            component
+//                }
+
+//            if(!arrayListComponentsId.iterator().hasNext()){
+//                arrayListComponentsId = projectClient.getProject(it.key).claim().components
+//            }
+
+
             projectClient.getProject(it.key).claim().versions.forEach { version ->
                 arrayListFixVersions.add(version.name)
             }
@@ -456,7 +471,7 @@ class JiraAuthentication {
         assignee = spinnerAssignee.selectedItem.toString()
         priority = spinnerPriority.selectedItem.toString()
         priorityPosition = spinnerPriority.selectedItemPosition
-//        component = spinnerComponent.selectedItem.toString()
+ //       component = spinnerComponent.selectedItem.toString()
 //        fixVersions = spinnerFixVersions.selectedItem.toString()
     }
 
