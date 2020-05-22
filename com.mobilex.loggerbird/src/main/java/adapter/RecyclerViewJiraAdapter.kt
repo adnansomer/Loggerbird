@@ -173,11 +173,11 @@ class RecyclerViewJiraAdapter(
 
         private fun buttonClicksJiraPopup(fileList: ArrayList<RecyclerViewJiraModel>, position: Int, adapter: RecyclerViewJiraAdapter) {
             buttonYes.setSafeOnClickListener {
+                if(fileList.size>position){
+                    fileList[position].file.delete()
+                }
                 fileList.removeAt(position)
                 arrayListFilePaths = fileList
-//                if(fileList.size>position){
-//                    fileList[position].file.delete()
-//                }
                 adapter.notifyDataSetChanged()
                 removePopupLayout()
             }
