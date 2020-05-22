@@ -66,6 +66,10 @@ class RecyclerViewJiraAdapter(
         private lateinit var buttonYes: Button
         private lateinit var buttonNo: Button
 
+        companion object{
+             internal lateinit var arrayListFilePaths:ArrayList<RecyclerViewJiraModel>
+        }
+
 
         fun bindItems(
             item: RecyclerViewJiraModel,
@@ -76,6 +80,7 @@ class RecyclerViewJiraAdapter(
             activity: Activity,
             rootView: View
         ) {
+            arrayListFilePaths = fileList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
             textViewFileName.text = item.file.name
@@ -169,6 +174,10 @@ class RecyclerViewJiraAdapter(
         private fun buttonClicksJiraPopup(fileList: ArrayList<RecyclerViewJiraModel>, position: Int, adapter: RecyclerViewJiraAdapter) {
             buttonYes.setSafeOnClickListener {
                 fileList.removeAt(position)
+                arrayListFilePaths = fileList
+//                if(fileList.size>position){
+//                    fileList[position].file.delete()
+//                }
                 adapter.notifyDataSetChanged()
                 removePopupLayout()
             }

@@ -167,12 +167,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerLinkedIssue: Spinner
     private lateinit var spinnerAssignee: Spinner
     private lateinit var spinnerPriority: Spinner
+    private lateinit var spinnerComponent:Spinner
+    private lateinit var spinnerFixVersions:Spinner
     private lateinit var buttonCreate: Button
     internal lateinit var buttonCancel: Button
     //  private lateinit var buttonJiraAuthCancel: Button
 //  private lateinit var buttonJiraAuthNext: Button
     private lateinit var layoutJira: LinearLayout
-    private lateinit var toolbarJira : Toolbar
+    private lateinit var toolbarJira: Toolbar
     //    private lateinit var layoutJiraAuth: LinearLayout
     private val arrayListJiraFileName: ArrayList<RecyclerViewJiraModel> = ArrayList()
     //    private val arrayListJiraProject: ArrayList<String> = ArrayList()
@@ -188,12 +190,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerLinkedIssueAdapter: ArrayAdapter<String>
     private lateinit var spinnerAssigneeAdapter: ArrayAdapter<String>
     private lateinit var spinnerPriorityAdapter: ArrayAdapter<String>
+    private lateinit var spinnerFixVersionsAdapter:ArrayAdapter<String>
+    private lateinit var spinnerComponentAdapter:ArrayAdapter<String>
 
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
         lateinit var floating_action_button: FloatingActionButton
-        internal lateinit var filePathMedia : File
+        internal lateinit var filePathMedia: File
         private lateinit var floating_action_button_screenshot: FloatingActionButton
         private lateinit var floating_action_button_video: FloatingActionButton
         private lateinit var floating_action_button_audio: FloatingActionButton
@@ -462,9 +466,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 this.view = view
                 floatingActionButtonView = view
                 floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-                floating_action_button_screenshot = view.findViewById(R.id.fragment_floating_action_button_screenshot)
-                floating_action_button_video = view.findViewById(R.id.fragment_floating_action_button_video)
-                floating_action_button_audio = view.findViewById(R.id.fragment_floating_action_button_audio)
+                floating_action_button_screenshot =
+                    view.findViewById(R.id.fragment_floating_action_button_screenshot)
+                floating_action_button_video =
+                    view.findViewById(R.id.fragment_floating_action_button_video)
+                floating_action_button_audio =
+                    view.findViewById(R.id.fragment_floating_action_button_audio)
                 reveal_linear_layout_share = view.findViewById(R.id.reveal_linear_layout_share)
                 textView_send_email = view.findViewById(R.id.textView_send_email)
                 textView_discard = view.findViewById(R.id.textView_discard)
@@ -708,7 +715,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         textView_counter_audio.visibility = View.GONE
         textView_counter_video.visibility = View.GONE
         reveal_linear_layout_share.visibility = View.VISIBLE
-        floating_action_button.isExpanded = true
         shareViewClicks(filePathMedia = filePathMedia)
     }
 
@@ -2204,7 +2210,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //                arrayListJiraAssignee.clear()
 //                arrayListJiraPriority.clear()
             }
-            viewJira = LayoutInflater.from(activity).inflate(R.layout.loggerbird_jira_popup, (this.rootView as ViewGroup), false)
+            viewJira = LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_jira_popup, (this.rootView as ViewGroup), false)
             windowManagerParams.windowAnimations = android.R.anim.slide_out_right
             if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsJira = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -2227,7 +2234,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                 windowManagerJira = activity.getSystemService(Context.WINDOW_SERVICE)!!
 
-                val animation = AnimationUtils.loadAnimation(context,R.anim.slide_in_from_top)
+                val animation = AnimationUtils.loadAnimation(context, R.anim.slide_in_from_top)
                 viewJira.startAnimation(animation)
 
                 if (windowManagerJira != null) {
@@ -2237,7 +2244,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     )
 
                     if (Build.VERSION.SDK_INT >= 23) {
-                        activity.window.navigationBarColor = resources.getColor(R.color.black, theme)
+                        activity.window.navigationBarColor =
+                            resources.getColor(R.color.black, theme)
                         activity.window.statusBarColor = resources.getColor(R.color.black, theme)
                     } else {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -2259,23 +2267,26 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                     spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
                     spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
-                    recyclerViewAttachment = viewJira.findViewById(R.id.recycler_view_jira_attachment)
+                    recyclerViewAttachment =
+                        viewJira.findViewById(R.id.recycler_view_jira_attachment)
                     editTextSummary = viewJira.findViewById(R.id.editText_jira_summary)
                     editTextDescription = viewJira.findViewById(R.id.editText_jira_description)
                     spinnerReporter = viewJira.findViewById(R.id.spinner_jira_issue_reporter)
-                    spinnerLinkedIssue = viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
+                    spinnerLinkedIssue =
+                        viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
                     spinnerAssignee = viewJira.findViewById(R.id.spinner_jira_issue_assignee)
                     spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
+                    spinnerComponent = viewJira.findViewById(R.id.spinner_jira_issue_component)
+                    spinnerFixVersions = viewJira.findViewById(R.id.spinner_jira_issue_fix_versions)
                     buttonCreate = viewJira.findViewById(R.id.button_jira_create)
                     buttonCancel = viewJira.findViewById(R.id.button_jira_cancel)
                     toolbarJira = viewJira.findViewById(R.id.textView_jira_title)
                     layoutJira = viewJira.findViewById(R.id.layout_jira)
 
-                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                    val sharedPref =
+                        PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     editTextSummary.setText(sharedPref.getString("jira_summary", null))
                     editTextDescription.setText(sharedPref.getString("jira_description", null))
-
-
                     jiraAuthentication.callJiraIssue(
                         context = context,
                         activity = activity,
@@ -2359,7 +2370,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 spinnerLinkedIssues = spinnerLinkedIssue,
                 spinnerAssignee = spinnerAssignee,
                 spinnerReporter = spinnerReporter,
-                spinnerPriority = spinnerPriority
+                spinnerPriority = spinnerPriority,
+                spinnerComponent = spinnerComponent,
+                spinnerFixVersions = spinnerFixVersions
             )
             jiraAuthentication.gatherJiraEditTextDetails(
                 editTextSummary = editTextSummary,
@@ -2375,25 +2388,35 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
 
         toolbarJira.setOnMenuItemClickListener {
-            when(it.itemId){
+            when (it.itemId) {
                 R.id.jira_menu_save -> {
-                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                    val sharedPref =
+                        PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     with(sharedPref.edit()) {
                         putString("jira_summary", editTextSummary.text.toString())
                         putString("jira_description", editTextDescription.text.toString())
                         commit()
                     }
-                    Toast.makeText(viewJira.context,"Issue preferences are saved!",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        viewJira.context,
+                        "Issue preferences are saved!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
                 R.id.jira_menu_clear -> {
-                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                    val sharedPref =
+                        PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     val editor: SharedPreferences.Editor = sharedPref.edit()
                     editor.remove("jira_summary")
                     editor.remove("jira_description")
                     editor.apply()
                     editTextDescription.text = null
                     editTextSummary.text = null
-                    Toast.makeText(viewJira.context,"Issue preferences are deleted!",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        viewJira.context,
+                        "Issue preferences are deleted!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 R.id.jira_menu_delete_attachments -> {
@@ -2429,7 +2452,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     private fun initializeJiraRecyclerView(filePathMedia: File) {
-        recyclerViewAttachment.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerViewAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         jiraAdapter = RecyclerViewJiraAdapter(
             addJiraFileNames(filePathMedia = filePathMedia),
             context = context,
@@ -2439,7 +2463,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         recyclerViewAttachment.adapter = jiraAdapter
     }
 
-    private fun removeJiraFileNames() : ArrayList<RecyclerViewJiraModel>{
+    private fun removeJiraFileNames(): ArrayList<RecyclerViewJiraModel> {
         arrayListJiraFileName.clear()
         jiraAdapter.notifyDataSetChanged()
         arrayListJiraFileName.add(RecyclerViewJiraModel(file = LoggerBird.filePathSecessionName))
@@ -2449,46 +2473,57 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     internal fun initializeJiraSpinner(
         arrayListProjectNames: ArrayList<String>,
         arrayListIssueTypes: ArrayList<String>,
-//        arrayListReporterNames: ArrayList<String>,
+        arrayListReporterNames: ArrayList<String>,
         arrayListLinkedIssues: ArrayList<String>,
         arrayListAssignee: ArrayList<String>,
-        arrayListPriority: ArrayList<String>
+        arrayListPriority: ArrayList<String>,
+        arrayListComponent:ArrayList<String>,
+        arrayListFixVersions:ArrayList<String>
     ) {
-        if (arrayListProjectNames.isNotEmpty()) {
-            spinnerProjectAdapter =
-                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
-            spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerProject.adapter = spinnerProjectAdapter
-            spinnerIssueTypeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
-            spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerIssueType.adapter = spinnerIssueTypeAdapter
-        }
+        spinnerProjectAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
+        spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerProject.adapter = spinnerProjectAdapter
+        spinnerIssueTypeAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
+        spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerIssueType.adapter = spinnerIssueTypeAdapter
 
-//        spinnerReporterAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListReporterNames)
-//        spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerReporter.adapter = spinnerReporterAdapter
+        spinnerReporterAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListReporterNames)
+        spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerReporter.adapter = spinnerReporterAdapter
 
-        if (arrayListLinkedIssues.isNotEmpty()) {
-            spinnerLinkedIssueAdapter =
-                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
-            spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
-        }
 
-        if (arrayListAssignee.isNotEmpty()) {
-            spinnerAssigneeAdapter =
-                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
-            spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerAssignee.adapter = spinnerAssigneeAdapter
-        }
+        spinnerLinkedIssueAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
+        spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
 
-        if (arrayListPriority.isNotEmpty()) {
-            spinnerPriorityAdapter =
-                ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
-            spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerPriority.adapter = spinnerPriorityAdapter
-        }
+
+        spinnerAssigneeAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
+        spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerAssignee.adapter = spinnerAssigneeAdapter
+
+
+
+        spinnerPriorityAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
+        spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerPriority.adapter = spinnerPriorityAdapter
+
+        spinnerComponentAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListComponent)
+        spinnerComponentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerComponent.adapter = spinnerComponentAdapter
+
+        spinnerFixVersionsAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListFixVersions)
+        spinnerFixVersionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerFixVersions.adapter = spinnerFixVersionsAdapter
+
+
     }
 
 //    private fun addJiraProjectNames(): ArrayList<String> {

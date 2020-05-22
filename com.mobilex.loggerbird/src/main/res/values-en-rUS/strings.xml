@@ -94,6 +94,8 @@
     <string name="editText_jira_summary">Write a brief summary about your issue.</string>
     <string name="editText_jira_description">Describe your issue in details.</string>
     <string name="textView_jira_reporter">Reporter</string>
+    <string name="textView_jira_component">Component</string>
+    <string name="textView_jira_fix_versions">Fix versions</string>
     <string name="textView_jira_linked_issue">Linked Issues</string>
     <string name="textView_jira_assignee">Assignee</string>
     <string name="textView_jira_priority">Priority</string>
