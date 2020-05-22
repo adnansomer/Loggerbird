@@ -506,9 +506,9 @@ class JiraAuthentication {
     private fun jiraTaskGatherIssues(restClient: JiraRestClient) {
         val searchClient = restClient.searchClient
         val projectClient = restClient.projectClient
-        arrayListIssues.add("")
-        arrayListLabel.add("")
-        arrayListEpicLink.add("")
+        arrayListIssues.add("Select one")
+        arrayListLabel.add("Select one")
+        arrayListEpicLink.add("Select one")
         projectClient.allProjects.claim().forEach {
             searchClient.searchJql("project=" + it.key).claim().issues.forEach { issue ->
 //                issue.fields.forEach {

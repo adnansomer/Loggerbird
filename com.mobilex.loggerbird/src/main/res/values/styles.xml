@@ -26,7 +26,7 @@
     </style>
 
     <style name="AppTheme.FabSpeedDial" parent="Theme.MaterialComponents">
-        <item name="android:backgroundTint">#eeeeee</item>
+        <item name="android:backgroundTint">@color/colorMiniFab</item>
         <item name="android:clipToPadding">false</item>
         <item name="android:windowFullscreen">true</item>>
         <item name="rippleColor">@color/colorFab</item>

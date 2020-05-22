@@ -27,8 +27,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.provider.Settings
-import android.transition.AutoTransition
-import android.transition.TransitionManager
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
@@ -38,7 +36,6 @@ import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
-import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -84,7 +81,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var windowManagerProgressBar: Any? = null
     private var windowManagerFeedback: Any? = null
     private var windowManagerJira: Any? = null
-    private var windowManagerJiraAuth: Any? = null
+    //private var windowManagerJiraAuth: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -102,8 +99,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var filePathVideo: File
     private lateinit var filePathAudio: File
     private var isOpen = false
-    private lateinit var fabOpen: Animation
-    private lateinit var fabClose: Animation
+    //private lateinit var fabOpen: Animation
+    //private lateinit var fabClose: Animation
     private var screenDensity: Int = 0
     private var projectManager: MediaProjectionManager? = null
     private var mediaProjection: MediaProjection? = null
@@ -921,16 +918,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 .scaleX(1F)
                                 .scaleY(1F)
                                 .withEndAction {
-                                    when {
-                                        audioRecording -> {
-                                            floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
-                                        }
-                                        videoRecording -> (
-                                                floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp))
-                                        else -> {
-                                            floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
-                                        }
-                                    }
+                                    floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
                                     floating_action_button.animate()
                                         .rotationBy(0F)
                                         .setDuration(200)
@@ -968,11 +956,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (!audioRecording) {
                         if (arrayListFileName.size <= 10) {
                             val fileDirectory: File = context.filesDir
-                            filePathAudio = File(
-                                fileDirectory,
-                                "logger_bird_audio" + System.currentTimeMillis()
-                                    .toString() + "recording.3gpp"
-                            )
+                            filePathAudio = File(fileDirectory, "logger_bird_audio" + System.currentTimeMillis().toString() + "recording.3gpp")
                             addFileNameList(fileName = filePathAudio.absolutePath)
                             mediaRecorderAudio = MediaRecorder()
                             mediaRecorderAudio?.setAudioSource(MediaRecorder.AudioSource.MIC)
@@ -1007,11 +991,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             }
                         } else {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(
-                                    context,
-                                    R.string.session_file_limit,
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Toast.makeText(context, R.string.session_file_limit, Toast.LENGTH_SHORT).show()
                             }
                         }
                     } else {
@@ -1099,11 +1079,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             startScreenRecording()
                         } else {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(
-                                    context,
-                                    R.string.session_file_limit,
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Toast.makeText(context, R.string.session_file_limit, Toast.LENGTH_SHORT).show()
                             }
                         }
                     } else {
@@ -1124,9 +1100,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                         controlTimeControllerVideo = false
                                     }
                                     withContext(Dispatchers.IO) {
-                                        //                                        if(mediaCodecsFile.exists()){
-//
-//                                        }
                                         stopScreenRecord()
                                     }
                                 }
@@ -1577,7 +1550,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                 windowManagerFeedback = activity.getSystemService(Context.WINDOW_SERVICE)!!
                 if (windowManagerFeedback != null) {
-//                    windowManagerParamsFeedback.gravity = Gravity.BOTTOM
                     (windowManagerFeedback as WindowManager).addView(
                         viewFeedback,
                         windowManagerParamsFeedback
@@ -2120,7 +2092,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 }
                 .start()
 
-        }, 3000)
+        }, 2000)
 
         if (this::progressBarView.isInitialized) {
             (windowManagerProgressBar as WindowManager).removeViewImmediate(progressBarView)
@@ -2275,13 +2247,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                     spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
                     spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
-                    recyclerViewAttachment =
-                        viewJira.findViewById(R.id.recycler_view_jira_attachment)
+                    recyclerViewAttachment = viewJira.findViewById(R.id.recycler_view_jira_attachment)
                     editTextSummary = viewJira.findViewById(R.id.editText_jira_summary)
                     editTextDescription = viewJira.findViewById(R.id.editText_jira_description)
                     spinnerReporter = viewJira.findViewById(R.id.spinner_jira_issue_reporter)
-                    spinnerLinkedIssue =
-                        viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
+                    spinnerLinkedIssue = viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
                     spinnerIssue = viewJira.findViewById(R.id.spinner_jira_issue_issues)
                     spinnerAssignee = viewJira.findViewById(R.id.spinner_jira_issue_assignee)
                     spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
@@ -2295,8 +2265,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     toolbarJira = viewJira.findViewById(R.id.textView_jira_title)
                     layoutJira = viewJira.findViewById(R.id.layout_jira)
 
-                    val sharedPref =
-                        PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     editTextSummary.setText(sharedPref.getString("jira_summary", null))
                     editTextDescription.setText(sharedPref.getString("jira_description", null))
                     jiraAuthentication.callJiraIssue(
