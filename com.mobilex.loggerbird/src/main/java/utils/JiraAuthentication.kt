@@ -42,6 +42,7 @@ class JiraAuthentication {
     private var componentPosition: Int = 0
     private var fixVersionPosition: Int = 0
     private var linkedIssueTypePosition: Int = 0
+    private var labelPosition: Int = 0
     private lateinit var reporter: String
     private lateinit var linkedIssue: String
     private lateinit var issue: String
@@ -49,6 +50,9 @@ class JiraAuthentication {
     private lateinit var priority: String
     private var summary: String = ""
     private lateinit var description: String
+    private lateinit var label: String
+    private lateinit var epicLink: String
+    private lateinit var sprint:String
     private val hashMapComponent: HashMap<String, Iterable<BasicComponent>> = HashMap()
     private val hashMapFixVersions: HashMap<String, Iterable<Version>> = HashMap()
     private val hashMapLinkedIssues: HashMap<String, String> = HashMap()
@@ -65,7 +69,11 @@ class JiraAuthentication {
     private val arrayListPrioritiesId: ArrayList<Int> = ArrayList()
     private val arrayListComponents: ArrayList<String> = ArrayList()
     private val arrayListFixVersions: ArrayList<String> = ArrayList()
-
+    private val arrayListLabel: ArrayList<String> = ArrayList()
+    private val arrayListChoosenLabel: ArrayList<String> = ArrayList()
+    private val arrayListEpicLink: ArrayList<String> = ArrayList()
+    private val arrayListFields: ArrayList<String> = ArrayList()
+    private val arrayListSprint:ArrayList<String> = ArrayList()
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callJiraIssue(
         filePathName: File? = null,
@@ -193,6 +201,8 @@ class JiraAuthentication {
 // dueTime:Date -
 // sprint:String -
 // linkedIssue: String +
+// label:String +
+// epiclink:String +
 // issue:String +
 // assignee: String +-
 // priority: String +
@@ -209,12 +219,16 @@ class JiraAuthentication {
         restClient: JiraRestClient,
         activity: Activity,
         context: Context,
-        createMethod:String
+        createMethod: String
     ) {
         try {
-            when(createMethod){
-                 "normal" ->  jiraNormalTask(restClient = restClient, context = context, activity = activity)
-                  "unhandled" ->   jiraUnhandledTask(restClient = restClient)
+            when (createMethod) {
+                "normal" -> jiraNormalTask(
+                    restClient = restClient,
+                    context = context,
+                    activity = activity
+                )
+                "unhandled" -> jiraUnhandledTask(restClient = restClient)
             }
         } catch (e: Exception) {
             jiraExceptionHandler(e = e, filePathName = filePathMediaName)
@@ -233,6 +247,11 @@ class JiraAuthentication {
             )
             issueBuilder.setPriorityId(arrayListPrioritiesId[priorityPosition].toLong())
             issueBuilder.setDescription(description)
+
+            issueBuilder.setFieldValue("labels", arrayListChoosenLabel)
+//            issueBuilder.setFieldValue("assignee",assignee)
+//            issueBuilder.setFieldValue("reporter",reporter)
+
 //            issueBuilder.setReporterName(reporter)
 //            issueBuilder.setAssigneeName("5eb3efa5ad226b0ba423144a")
 //        issueBuilder.setAssigneeName("0")
@@ -262,6 +281,14 @@ class JiraAuthentication {
                 val linkIssueInput = LinkIssuesInput(
                     issueKey,
                     this.issue,
+                    hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
+                )
+                issueClient.linkIssue(linkIssueInput)
+            }
+            if (this.epicLink.isNotEmpty()) {
+                val linkIssueInput = LinkIssuesInput(
+                    issueKey,
+                    this.epicLink,
                     hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
                 )
                 issueClient.linkIssue(linkIssueInput)
@@ -308,8 +335,8 @@ class JiraAuthentication {
         val issueBuilder = IssueInputBuilder(
             "DEN",
             10004,
-           "unhandled_exception:"
-            )
+            "unhandled_exception:"
+        )
         issueBuilder.setDescription("An unhandled exception occurred in the application check log details for more information!")
         val inputStreamSecessionFile =
             FileInputStream(LoggerBird.filePathSecessionName)
@@ -341,9 +368,14 @@ class JiraAuthentication {
             arrayListReporter.clear()
             arrayListComponents.clear()
             arrayListFixVersions.clear()
+            arrayListLabel.clear()
+            arrayListChoosenLabel.clear()
+            arrayListEpicLink.clear()
+            arrayListSprint.clear()
             hashMapComponent.clear()
             hashMapFixVersions.clear()
             hashMapLinkedIssues.clear()
+//            jiraTaskGatherFields(restClient = restClient)
             jiraTaskGatherProjectKeys(restClient = restClient)
             jiraTaskGatherIssueTypes(restClient = restClient)
             jiraTaskGatherAssignees(restClient = restClient)
@@ -362,7 +394,10 @@ class JiraAuthentication {
                     arrayListIssues = arrayListIssues,
                     arrayListPriority = arrayListPriorities,
                     arrayListComponent = arrayListComponents,
-                    arrayListFixVersions = arrayListFixVersions
+                    arrayListFixVersions = arrayListFixVersions,
+                    arrayListLabel = arrayListLabel,
+                    arrayListEpicLink = arrayListEpicLink,
+                    arrayListSprint = arrayListSprint
                 )
             }
         } catch (e: Exception) {
@@ -465,7 +500,6 @@ class JiraAuthentication {
                 arrayListIssueLinkedTypes.add(it.inward)
                 hashMapLinkedIssues[it.inward] = it.name
             }
-
         }
     }
 
@@ -473,9 +507,23 @@ class JiraAuthentication {
         val searchClient = restClient.searchClient
         val projectClient = restClient.projectClient
         arrayListIssues.add("")
+        arrayListLabel.add("")
+        arrayListEpicLink.add("")
         projectClient.allProjects.claim().forEach {
             searchClient.searchJql("project=" + it.key).claim().issues.forEach { issue ->
+//                issue.fields.forEach {
+//                    Log.d("sprint",it.name)
+//                }
+                if(issue.getField("Sprint")?.value != null){
+                    arrayListSprint.add(issue.getField("Sprint")?.value.toString())
+                }
                 arrayListIssues.add(issue.key)
+                if (issue.issueType.name == "Epic") {
+                    arrayListEpicLink.add(issue.key)
+                }
+                issue.labels.forEach { label ->
+                    arrayListLabel.add(label)
+                }
             }
         }
 
@@ -509,6 +557,14 @@ class JiraAuthentication {
         }
     }
 
+    private fun jiraTaskGatherFields(restClient: JiraRestClient) {
+        val metaDataClient = restClient.metadataClient
+        metaDataClient.fields.claim().forEach {
+            arrayListFields.add(it.id)
+        }
+    }
+
+
     private fun jiraTaskGatherReporters(restClient: JiraRestClient) {
         arrayListReporter.addAll(arrayListAssignee)
     }
@@ -530,7 +586,10 @@ class JiraAuthentication {
         spinnerAssignee: Spinner,
         spinnerPriority: Spinner,
         spinnerComponent: Spinner,
-        spinnerFixVersions: Spinner
+        spinnerFixVersions: Spinner,
+        spinnerLabel: Spinner,
+        spinnerEpicLink: Spinner,
+        spinnerSprint:Spinner
     ) {
         project = spinnerProject.selectedItem.toString()
         projectPosition = spinnerProject.selectedItemPosition
@@ -545,6 +604,9 @@ class JiraAuthentication {
         componentPosition = spinnerComponent.selectedItemPosition
         fixVersionPosition = spinnerFixVersions.selectedItemPosition
         linkedIssueTypePosition = spinnerLinkedIssues.selectedItemPosition
+        arrayListChoosenLabel.add(spinnerLabel.selectedItem.toString())
+        epicLink = spinnerEpicLink.selectedItem.toString()
+        sprint = spinnerSprint.selectedItem.toString()
     }
 
     internal fun gatherJiraEditTextDetails(
@@ -576,10 +638,15 @@ class JiraAuthentication {
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal suspend fun jiraUnhandledExceptionTask(context: Context,activity: Activity) {
+    internal suspend fun jiraUnhandledExceptionTask(context: Context, activity: Activity) {
         withContext(coroutineCallJira.coroutineContext) {
             try {
-                jiraTaskCreateIssue(restClient = jiraAuthentication(), context = context,createMethod = "unhandled",activity = activity)
+                jiraTaskCreateIssue(
+                    restClient = jiraAuthentication(),
+                    context = context,
+                    createMethod = "unhandled",
+                    activity = activity
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
             }

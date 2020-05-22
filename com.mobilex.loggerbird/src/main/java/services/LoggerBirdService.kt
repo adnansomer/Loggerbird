@@ -170,6 +170,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerPriority: Spinner
     private lateinit var spinnerComponent: Spinner
     private lateinit var spinnerFixVersions: Spinner
+    private lateinit var spinnerLabel: Spinner
+    private lateinit var spinnerEpicLink: Spinner
+    private lateinit var spinnerSprint:Spinner
     private lateinit var buttonCreate: Button
     internal lateinit var buttonCancel: Button
     //  private lateinit var buttonJiraAuthCancel: Button
@@ -194,6 +197,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerPriorityAdapter: ArrayAdapter<String>
     private lateinit var spinnerFixVersionsAdapter: ArrayAdapter<String>
     private lateinit var spinnerComponentAdapter: ArrayAdapter<String>
+    private lateinit var spinnerLabelAdapter: ArrayAdapter<String>
+    private lateinit var spinnerEpicLinkAdapter: ArrayAdapter<String>
+    private lateinit var spinnerSprintAdapter:ArrayAdapter<String>
 
 
     //Static global variables:
@@ -2282,6 +2288,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
                     spinnerComponent = viewJira.findViewById(R.id.spinner_jira_issue_component)
                     spinnerFixVersions = viewJira.findViewById(R.id.spinner_jira_issue_fix_versions)
+                    spinnerLabel = viewJira.findViewById(R.id.spinner_jira_labels)
+                    spinnerEpicLink = viewJira.findViewById(R.id.spinner_jira_epic_link)
+                    spinnerSprint = viewJira.findViewById(R.id.spinner_jira_sprint)
                     buttonCreate = viewJira.findViewById(R.id.button_jira_create)
                     buttonCancel = viewJira.findViewById(R.id.button_jira_cancel)
                     toolbarJira = viewJira.findViewById(R.id.textView_jira_title)
@@ -2375,7 +2384,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 spinnerReporter = spinnerReporter,
                 spinnerPriority = spinnerPriority,
                 spinnerComponent = spinnerComponent,
-                spinnerFixVersions = spinnerFixVersions
+                spinnerFixVersions = spinnerFixVersions,
+                spinnerLabel = spinnerLabel,
+                spinnerEpicLink = spinnerEpicLink,
+                spinnerSprint = spinnerSprint
             )
             jiraAuthentication.gatherJiraEditTextDetails(
                 editTextSummary = editTextSummary,
@@ -2488,7 +2500,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListAssignee: ArrayList<String>,
         arrayListPriority: ArrayList<String>,
         arrayListComponent: ArrayList<String>,
-        arrayListFixVersions: ArrayList<String>
+        arrayListFixVersions: ArrayList<String>,
+        arrayListLabel:ArrayList<String>,
+        arrayListEpicLink:ArrayList<String>,
+        arrayListSprint:ArrayList<String>
     ) {
         spinnerProjectAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
@@ -2534,6 +2549,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         spinnerFixVersionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerFixVersions.adapter = spinnerFixVersionsAdapter
 
+        spinnerLabelAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLabel)
+        spinnerLabelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerLabel.adapter = spinnerLabelAdapter
+
+        spinnerEpicLinkAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListEpicLink)
+        spinnerEpicLinkAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerEpicLink.adapter = spinnerEpicLinkAdapter
+
+        spinnerSprintAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListSprint)
+        spinnerSprintAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerSprint.adapter = spinnerSprintAdapter
 
     }
 

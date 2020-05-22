@@ -103,6 +103,9 @@
     <string name="textView_jira_issue">Issue</string>
     <string name="textView_jira_assignee">Assignee</string>
     <string name="textView_jira_priority">Priority</string>
+    <string name="textView_jira_label">Labels</string>
+    <string name="textView_jira_epic_link">Epic Link</string>
+    <string name="textView_jira_sprint">Sprint</string>
     <string name="textView_jira_init_email">E-Mail</string>
     <string name="textView_jira_init_password">Key-Token</string>
     <string name="button_jira_create">Create</string>
