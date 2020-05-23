@@ -188,19 +188,14 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button"
         android:layout_margin="1dp"
-        app:rippleColor="@color/secondaryColor"
-        android:clickable="true"
         style="@style/AppTheme.Fab"
         app:borderWidth="0dp"
         app:elevation="1dp"
-        app:fabSize="auto"
+        app:fabSize="normal"
         android:scaleType="fitCenter"
-        android:clipChildren="false"
-        android:clipToPadding="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/loggerbird"
-        android:focusable="true" />
+        app:srcCompat="@drawable/loggerbird" />
 
 
 </FrameLayout>

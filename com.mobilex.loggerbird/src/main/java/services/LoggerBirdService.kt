@@ -13,8 +13,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
@@ -151,7 +153,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     internal val jiraAuthentication = JiraAuthentication()
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarView: View
-    private lateinit var progressBarJira: ProgressBar
     private lateinit var spinnerProject: Spinner
     private lateinit var spinnerIssueType: Spinner
     private lateinit var recyclerViewAttachment: RecyclerView
@@ -174,8 +175,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     internal lateinit var buttonCancel: Button
     //  private lateinit var buttonJiraAuthCancel: Button
 //  private lateinit var buttonJiraAuthNext: Button
-    private lateinit var layoutJira: LinearLayout
+    private lateinit var layoutJira: FrameLayout
     private lateinit var toolbarJira: Toolbar
+    private lateinit var progressBarJira: ProgressBar
+    private lateinit var progressBarLayout: FrameLayout
     //    private lateinit var layoutJiraAuth: LinearLayout
     private val arrayListJiraFileName: ArrayList<RecyclerViewJiraModel> = ArrayList()
     //    private val arrayListJiraProject: ArrayList<String> = ArrayList()
@@ -1144,6 +1147,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 floating_action_button_video.visibility = View.GONE
                 textView_counter_video.visibility = View.VISIBLE
                 textView_video_size.visibility = View.VISIBLE
+                floating_action_button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context,R.color.secondaryColor))
                 floating_action_button.animate()
                     .rotationBy(360F)
                     .setDuration(200)
@@ -2182,7 +2186,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (windowManagerJira != null && this::viewJira.isInitialized) {
                 (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
                 arrayListJiraFileName.clear()
-                windowManagerParams.windowAnimations = R.anim.slide_in_from_top
+//                windowManagerParams.windowAnimations = R.anim.slide_in_from_top
 //                arrayListJiraProject.clear()
 //                arrayListJiraIssueType.clear()
 //                arrayListJiraReporter.clear()
@@ -2245,6 +2249,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         true
                     })
 
+
                     spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
                     spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
                     recyclerViewAttachment = viewJira.findViewById(R.id.recycler_view_jira_attachment)
@@ -2264,10 +2269,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     buttonCancel = viewJira.findViewById(R.id.button_jira_cancel)
                     toolbarJira = viewJira.findViewById(R.id.textView_jira_title)
                     layoutJira = viewJira.findViewById(R.id.layout_jira)
+                    progressBarJira = viewJira.findViewById(R.id.jira_progressbar)
+                    progressBarLayout = viewJira.findViewById(R.id.jira_progressbar_background)
+
 
                     val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     editTextSummary.setText(sharedPref.getString("jira_summary", null))
                     editTextDescription.setText(sharedPref.getString("jira_description", null))
+
                     jiraAuthentication.callJiraIssue(
                         context = context,
                         activity = activity,
@@ -2275,9 +2284,25 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         createMethod = "normal"
                     )
 
-//                    initializeJiraSpinner(jiraAuthentication.getArrayListProjects(),jiraAuthentication.getArrayListIssueTypes())
+                    initializeJiraSpinner(
+                        jiraAuthentication.getArrayListProjects(),
+                        jiraAuthentication.getArrayListIssueTypes(),
+                        jiraAuthentication.getArrayListReporter(),
+                        jiraAuthentication.getArrayListIssueLinkedTypes(),
+                        jiraAuthentication.getArrayListIssues(),
+                        jiraAuthentication.getArrayListAsignee(),
+                        jiraAuthentication.getArrayListPriorities(),
+                        jiraAuthentication.getArrayListComponent(),
+                        jiraAuthentication.getArrayListFixVersions(),
+                        jiraAuthentication.getArrayListLabel(),
+                        jiraAuthentication.getArrayListEpicLink(),
+                        jiraAuthentication.getArrayListSprint()
+                    )
+
                     initializeJiraRecyclerView(filePathMedia = filePathMedia)
                     buttonClicksJira(filePathMedia = filePathMedia)
+                    progressBarLayout.visibility = View.VISIBLE
+                    progressBarJira.visibility = View.VISIBLE
                 }
             }
         } catch (e: Exception) {
@@ -2459,6 +2484,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         return arrayListJiraFileName
     }
 
+
     internal fun initializeJiraSpinner(
         arrayListProjectNames: ArrayList<String>,
         arrayListIssueTypes: ArrayList<String>,
@@ -2473,10 +2499,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListEpicLink:ArrayList<String>,
         arrayListSprint:ArrayList<String>
     ) {
-        spinnerProjectAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
+
+        spinnerProjectAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
         spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerProject.adapter = spinnerProjectAdapter
+
         spinnerIssueTypeAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
         spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -2531,6 +2558,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListSprint)
         spinnerSprintAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSprint.adapter = spinnerSprintAdapter
+
+        progressBarLayout.visibility = View.GONE
+        progressBarJira.visibility = View.GONE
 
     }
 

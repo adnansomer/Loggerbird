@@ -33,7 +33,7 @@
         <item name="borderWidth">0dp</item>
     </style>
 
-    <style name="AppTheme.Fab" parent="Theme.MaterialComponents">
+    <style name="AppTheme.Fab">
         <item name="android:tint">@color/white</item>
         <item name="android:clipToPadding">false</item>
         <item name="android:backgroundTint">@color/black</item>

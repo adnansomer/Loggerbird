@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -53,6 +54,7 @@ class JiraAuthentication {
     private lateinit var label: String
     private lateinit var epicLink: String
     private lateinit var sprint:String
+    private lateinit var progressBar: ProgressBar
     private val hashMapComponent: HashMap<String, Iterable<BasicComponent>> = HashMap()
     private val hashMapFixVersions: HashMap<String, Iterable<Version>> = HashMap()
     private val hashMapLinkedIssues: HashMap<String, String> = HashMap()
@@ -376,6 +378,7 @@ class JiraAuthentication {
             hashMapFixVersions.clear()
             hashMapLinkedIssues.clear()
 //            jiraTaskGatherFields(restClient = restClient)
+
             jiraTaskGatherProjectKeys(restClient = restClient)
             jiraTaskGatherIssueTypes(restClient = restClient)
             jiraTaskGatherAssignees(restClient = restClient)
@@ -406,6 +409,7 @@ class JiraAuthentication {
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
         }
     }
+
 
     private fun jiraTaskGatherProjectKeys(restClient: JiraRestClient) {
         val projectClient = restClient.projectClient
@@ -506,9 +510,9 @@ class JiraAuthentication {
     private fun jiraTaskGatherIssues(restClient: JiraRestClient) {
         val searchClient = restClient.searchClient
         val projectClient = restClient.projectClient
-        arrayListIssues.add("Select one")
-        arrayListLabel.add("Select one")
-        arrayListEpicLink.add("Select one")
+        arrayListIssues.add("")
+        arrayListLabel.add("")
+        arrayListEpicLink.add("")
         projectClient.allProjects.claim().forEach {
             searchClient.searchJql("project=" + it.key).claim().issues.forEach { issue ->
 //                issue.fields.forEach {
@@ -569,6 +573,7 @@ class JiraAuthentication {
         arrayListReporter.addAll(arrayListAssignee)
     }
 
+
     internal fun getArrayListProjects(): ArrayList<String> {
         return arrayListProjects
     }
@@ -576,6 +581,47 @@ class JiraAuthentication {
     internal fun getArrayListIssueTypes(): ArrayList<String> {
         return arrayListIssueTypes
     }
+
+    internal fun getArrayListAsignee(): ArrayList<String>{
+        return arrayListAssignee
+    }
+
+    internal fun getArrayListReporter() : ArrayList<String>{
+        return arrayListReporter
+    }
+
+    internal fun getArrayListIssueLinkedTypes() : ArrayList<String>{
+        return arrayListIssueLinkedTypes
+    }
+
+    internal fun getArrayListIssues() : ArrayList<String>{
+        return arrayListIssues
+    }
+
+    internal fun getArrayListPriorities() : ArrayList<String>{
+        return arrayListPriorities
+    }
+
+    internal fun getArrayListComponent() : ArrayList<String>{
+        return arrayListComponents
+    }
+
+    internal fun getArrayListFixVersions() : ArrayList<String>{
+        return arrayListFixVersions
+    }
+
+    internal fun getArrayListLabel() : ArrayList<String>{
+        return arrayListLabel
+    }
+
+    internal fun getArrayListEpicLink() : ArrayList<String>{
+        return arrayListEpicLink
+    }
+
+    internal fun getArrayListSprint() : ArrayList<String>{
+        return arrayListSprint
+    }
+
 
     internal fun gatherJiraSpinnerDetails(
         spinnerProject: Spinner,
@@ -606,7 +652,7 @@ class JiraAuthentication {
         linkedIssueTypePosition = spinnerLinkedIssues.selectedItemPosition
         arrayListChoosenLabel.add(spinnerLabel.selectedItem.toString())
         epicLink = spinnerEpicLink.selectedItem.toString()
-        sprint = spinnerSprint.selectedItem.toString()
+      //  sprint = spinnerSprint.selectedItem.toString()
     }
 
     internal fun gatherJiraEditTextDetails(
