@@ -1147,7 +1147,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 floating_action_button_video.visibility = View.GONE
                 textView_counter_video.visibility = View.VISIBLE
                 textView_video_size.visibility = View.VISIBLE
-                floating_action_button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context,R.color.secondaryColor))
                 floating_action_button.animate()
                     .rotationBy(360F)
                     .setDuration(200)
@@ -1934,15 +1933,21 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 if (this@LoggerBirdService::filePathVideo.isInitialized) {
                     if (filePathVideo.exists()) {
                         filePathVideo.delete()
+                        finishShareLayout(message = "media")
+                    }else{
+                        finishShareLayout(message = "media_error")
                     }
                 }
 
                 if (this@LoggerBirdService::filePathAudio.isInitialized) {
                     if (filePathAudio.exists()) {
                         filePathAudio.delete()
+                        finishShareLayout(message = "media")
+                    }else{
+                        finishShareLayout(message = "media_error")
                     }
                 }
-                finishShareLayout(message = "media")
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.discardFileTag)
@@ -1957,10 +1962,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             try {
                 if (filePathMedia.exists()) {
                     LoggerBird.callEmailSender(context = context, file = filePathMedia)
-                    LoggerBird.deleteSingleMediaFile(
-                        this@LoggerBirdService,
-                        filePathMedia = filePathMedia
-                    )
+                    LoggerBird.deleteSingleMediaFile(this@LoggerBirdService, filePathMedia = filePathMedia)
+                }else{
+                    finishShareLayout("single_email_error")
                 }
             } catch (e: Exception) {
                 finishShareLayout("single_email_error")
@@ -1975,92 +1979,38 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     internal fun finishShareLayout(message: String) {
         activity.runOnUiThread {
             when (message) {
-                "media" -> Toast.makeText(
-                    context,
-                    R.string.share_media_delete,
-                    Toast.LENGTH_SHORT
-                ).show()
-                "single_email" -> Toast.makeText(
-                    context,
-                    R.string.share_file_sent,
-                    Toast.LENGTH_SHORT
-                ).show()
-                "single_email_error" -> Toast.makeText(
-                    context,
-                    R.string.share_file_sent_error,
-                    Toast.LENGTH_SHORT
-                ).show()
-                "jira" -> Toast.makeText(context, R.string.jira_sent, Toast.LENGTH_SHORT).show()
-                "jira_error" -> Toast.makeText(
-                    context,
-                    R.string.jira_sent_error,
-                    Toast.LENGTH_SHORT
-                ).show()
+                "media" -> {
+                    Toast.makeText(context, R.string.share_media_delete, Toast.LENGTH_SHORT).show()
+                    finishSuccessFab()
+                    detachProgressBar()}
+                "media_error" -> {
+                    Toast.makeText(context, R.string.share_media_delete_error, Toast.LENGTH_SHORT).show()
+                    finishErrorFab()
+                    detachProgressBar()}
+                "single_email" -> {
+                    Toast.makeText(context, R.string.share_file_sent, Toast.LENGTH_SHORT).show()
+                    finishSuccessFab()
+                    detachProgressBar()}
+                "single_email_error" -> {
+                    Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT).show()
+                    finishErrorFab()
+                    detachProgressBar()}
+                "jira" -> {
+                    Toast.makeText(context, R.string.jira_sent, Toast.LENGTH_SHORT).show()
+                    finishSuccessFab() }
+                "jira_error" ->{
+                    Toast.makeText(context, R.string.jira_sent_error, Toast.LENGTH_SHORT).show()
+                    progressBarLayout.visibility = View.GONE
+                    progressBarJira.visibility = View.GONE
+                    finishErrorFab() }
             }
-            detachProgressBar()
-            reveal_linear_layout_share.visibility = View.GONE
-            floating_action_button.animate()
-                .rotationBy(360F)
-                .setDuration(200)
-                .scaleX(1F)
-                .scaleY(1F)
-                .withEndAction {
-                    floating_action_button.setImageResource(R.drawable.loggerbird)
-                    floating_action_button.animate()
-                        .rotationBy(0F)
-                        .setDuration(200)
-                        .scaleX(1F)
-                        .scaleY(1F)
-                        .start()
-                }
-                .start()
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun deleteSingleMediaFile(controlEmailAction: Boolean? = null, filePathMedia: File) {
-        if (filePathMedia.exists()) {
-            filePathMedia.delete()
-        }
-        finishShareLayout("single_email")
-        LoggerBird.callEnqueue()
-    }
+    private fun finishSuccessFab(){
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun attachProgressBar() {
-        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
-        progressBarView =
-            LayoutInflater.from(activity).inflate(R.layout.default_progressbar, rootView, false)
-        windowManagerParamsProgressBar = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-            )
-        } else {
-            WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-            )
-        }
-        windowManagerProgressBar = activity.getSystemService(Context.WINDOW_SERVICE)!!
-        (windowManagerProgressBar as WindowManager).addView(
-            progressBarView,
-            windowManagerParamsProgressBar
-        )
-        progressBar = progressBarView.findViewById(R.id.progressBar)
-        progressBar.visibility = View.VISIBLE
-        progressBar.progress
-
-    }
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun detachProgressBar() {
+        reveal_linear_layout_share.visibility = View.GONE
         Handler().postDelayed({
             floating_action_button.animate()
                 .rotationBy(360F)
@@ -2096,8 +2046,96 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 }
                 .start()
 
-        }, 2000)
+        }, 2500)
 
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun finishErrorFab(){
+
+        reveal_linear_layout_share.visibility = View.GONE
+        Handler().postDelayed({
+            floating_action_button.animate()
+                .rotationBy(360F)
+                .setDuration(200)
+                .scaleX(1F)
+                .scaleY(1F)
+                .withEndAction {
+                    floating_action_button.setImageResource(R.drawable.ic_close_black_24dp)
+                    floating_action_button.animate()
+                        .rotationBy(0F)
+                        .setDuration(200)
+                        .scaleX(1F)
+                        .scaleY(1F)
+                        .start()
+                }
+                .start()
+        }, 0)
+
+        Handler().postDelayed({
+            floating_action_button.animate()
+                .rotationBy(360F)
+                .setDuration(200)
+                .scaleX(1F)
+                .scaleY(1F)
+                .withEndAction {
+                    floating_action_button.setImageResource(R.drawable.loggerbird)
+                    floating_action_button.animate()
+                        .rotationBy(0F)
+                        .setDuration(200)
+                        .scaleX(1F)
+                        .scaleY(1F)
+                        .start()
+                }
+                .start()
+
+        }, 2500)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun deleteSingleMediaFile(controlEmailAction: Boolean? = null, filePathMedia: File) {
+        if (filePathMedia.exists()) {
+            filePathMedia.delete()
+        }
+
+        finishShareLayout("single_email")
+        LoggerBird.callEnqueue()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun attachProgressBar() {
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        progressBarView =
+            LayoutInflater.from(activity).inflate(R.layout.default_progressbar, rootView, false)
+        windowManagerParamsProgressBar = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+            )
+        } else {
+            WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+            )
+        }
+        windowManagerProgressBar = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerProgressBar as WindowManager).addView(
+            progressBarView,
+            windowManagerParamsProgressBar
+        )
+        progressBar = progressBarView.findViewById(R.id.progressBar)
+        progressBar.visibility = View.VISIBLE
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun detachProgressBar() {
         if (this::progressBarView.isInitialized) {
             (windowManagerProgressBar as WindowManager).removeViewImmediate(progressBarView)
         }
@@ -2186,16 +2224,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (windowManagerJira != null && this::viewJira.isInitialized) {
                 (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
                 arrayListJiraFileName.clear()
-//                windowManagerParams.windowAnimations = R.anim.slide_in_from_top
-//                arrayListJiraProject.clear()
-//                arrayListJiraIssueType.clear()
-//                arrayListJiraReporter.clear()
-//                arrayListJiraLinkedIssue.clear()
-//                arrayListJiraAssignee.clear()
-//                arrayListJiraPriority.clear()
             }
-            viewJira = LayoutInflater.from(activity)
-                .inflate(R.layout.loggerbird_jira_popup, (this.rootView as ViewGroup), false)
+            viewJira = LayoutInflater.from(activity).inflate(R.layout.loggerbird_jira_popup, (this.rootView as ViewGroup), false)
             windowManagerParams.windowAnimations = android.R.anim.slide_out_right
             if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsJira = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -2218,9 +2248,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                 windowManagerJira = activity.getSystemService(Context.WINDOW_SERVICE)!!
 
-                val animation = AnimationUtils.loadAnimation(context, R.anim.slide_in_from_top)
-                viewJira.startAnimation(animation)
-
                 if (windowManagerJira != null) {
                     (windowManagerJira as WindowManager).addView(
                         viewJira,
@@ -2228,27 +2255,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     )
 
                     if (Build.VERSION.SDK_INT >= 23) {
-                        activity.window.navigationBarColor =
-                            resources.getColor(R.color.black, theme)
-                        activity.window.statusBarColor = resources.getColor(R.color.black, theme)
-                    } else {
+                        activity.window.navigationBarColor = resources.getColor(R.color.black, theme)
+                        activity.window.statusBarColor = resources.getColor(R.color.black, theme) }
+                    else {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             activity.window.navigationBarColor = resources.getColor(R.color.black)
                             activity.window.statusBarColor = resources.getColor(R.color.black)
                         }
                     }
-
-                    viewJira.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
-                        if (keyCode == KeyEvent.KEYCODE_BACK) {
-                            removeJiraLayout()
-                            if (controlFloatingActionButtonView()) {
-                                floatingActionButtonView.visibility = View.VISIBLE
-                            }
-                            return@OnKeyListener true
-                        }
-                        true
-                    })
-
 
                     spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
                     spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
@@ -2272,7 +2286,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     progressBarJira = viewJira.findViewById(R.id.jira_progressbar)
                     progressBarLayout = viewJira.findViewById(R.id.jira_progressbar_background)
 
-
                     val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     editTextSummary.setText(sharedPref.getString("jira_summary", null))
                     editTextDescription.setText(sharedPref.getString("jira_description", null))
@@ -2283,7 +2296,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         jiraTask = "get",
                         createMethod = "normal"
                     )
-
                     initializeJiraSpinner(
                         jiraAuthentication.getArrayListProjects(),
                         jiraAuthentication.getArrayListIssueTypes(),
@@ -2317,12 +2329,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
             windowManagerJira = null
             arrayListJiraFileName.clear()
-//            arrayListJiraProject.clear()
-//            arrayListJiraIssueType.clear()
-//            arrayListJiraReporter.clear()
-//            arrayListJiraLinkedIssue.clear()
-//            arrayListJiraAssignee.clear()
-//            arrayListJiraPriority.clear()
+
+            removeJiraSpinner(
+                jiraAuthentication.getArrayListProjects(),
+                jiraAuthentication.getArrayListIssueTypes(),
+                jiraAuthentication.getArrayListReporter(),
+                jiraAuthentication.getArrayListIssueLinkedTypes(),
+                jiraAuthentication.getArrayListIssues(),
+                jiraAuthentication.getArrayListAsignee(),
+                jiraAuthentication.getArrayListPriorities(),
+                jiraAuthentication.getArrayListComponent(),
+                jiraAuthentication.getArrayListFixVersions(),
+                jiraAuthentication.getArrayListLabel(),
+                jiraAuthentication.getArrayListEpicLink(),
+                jiraAuthentication.getArrayListSprint())
         }
     }
 
@@ -2389,7 +2409,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             jiraAuthentication.gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems = arrayListJiraFileName)
             if (jiraAuthentication.checkSummaryEmpty(activity = activity, context = context)) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    attachProgressBar()
+                    progressBarJira.visibility = View.VISIBLE
+                    progressBarLayout.visibility = View.VISIBLE
                 }
                 jiraAuthentication.callJiraIssue(
                     filePathName = filePathMedia,
@@ -2432,10 +2453,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-
-                R.id.jira_menu_delete_attachments -> {
-                    removeJiraFileNames()
-                }
             }
             return@setOnMenuItemClickListener true
         }
@@ -2456,6 +2473,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     private fun checkJiraEmpty() {
+
         //project,issue-type,summary,reporter,linked issue,assignee,priority must not be empty!
     }
 
@@ -2484,6 +2502,34 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         return arrayListJiraFileName
     }
 
+    private fun removeJiraSpinner(
+        arrayListProjectNames: ArrayList<String>,
+        arrayListIssueTypes: ArrayList<String>,
+        arrayListReporterNames: ArrayList<String>,
+        arrayListLinkedIssues: ArrayList<String>,
+        arrayListIssues: ArrayList<String>,
+        arrayListAssignee: ArrayList<String>,
+        arrayListPriority: ArrayList<String>,
+        arrayListComponent: ArrayList<String>,
+        arrayListFixVersions: ArrayList<String>,
+        arrayListLabel:ArrayList<String>,
+        arrayListEpicLink:ArrayList<String>,
+        arrayListSprint:ArrayList<String>){
+
+            arrayListProjectNames.clear()
+            arrayListIssueTypes.clear()
+            arrayListReporterNames.clear()
+            arrayListLinkedIssues.clear()
+            arrayListIssues.clear()
+            arrayListAssignee.clear()
+            arrayListPriority.clear()
+            arrayListComponent.clear()
+            arrayListFixVersions.clear()
+            arrayListLabel.clear()
+            arrayListEpicLink.clear()
+            arrayListSprint.clear()
+        }
+
 
     internal fun initializeJiraSpinner(
         arrayListProjectNames: ArrayList<String>,
@@ -2504,63 +2550,53 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerProject.adapter = spinnerProjectAdapter
 
-        spinnerIssueTypeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
+        spinnerIssueTypeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
         spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerIssueType.adapter = spinnerIssueTypeAdapter
 
-        spinnerReporterAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListReporterNames)
+        spinnerReporterAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListReporterNames)
         spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerReporter.adapter = spinnerReporterAdapter
 
-        spinnerLinkedIssueAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
+        spinnerLinkedIssueAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
         spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
 
-        spinnerIssueAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssues)
+        spinnerIssueAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssues)
         spinnerIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerIssue.adapter = spinnerIssueAdapter
 
-        spinnerAssigneeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
+        spinnerAssigneeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
         spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerAssignee.adapter = spinnerAssigneeAdapter
 
-        spinnerPriorityAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
+        spinnerPriorityAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
         spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerPriority.adapter = spinnerPriorityAdapter
 
-        spinnerComponentAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListComponent)
+        spinnerComponentAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListComponent)
         spinnerComponentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerComponent.adapter = spinnerComponentAdapter
 
-        spinnerFixVersionsAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListFixVersions)
+        spinnerFixVersionsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListFixVersions)
         spinnerFixVersionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerFixVersions.adapter = spinnerFixVersionsAdapter
 
-        spinnerLabelAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLabel)
+        spinnerLabelAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLabel)
         spinnerLabelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerLabel.adapter = spinnerLabelAdapter
 
-        spinnerEpicLinkAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListEpicLink)
+        spinnerEpicLinkAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListEpicLink)
         spinnerEpicLinkAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerEpicLink.adapter = spinnerEpicLinkAdapter
 
-        spinnerSprintAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListSprint)
+        spinnerSprintAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListSprint)
         spinnerSprintAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSprint.adapter = spinnerSprintAdapter
 
         progressBarLayout.visibility = View.GONE
         progressBarJira.visibility = View.GONE
+
 
     }
 
@@ -2608,5 +2644,4 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
         }
     }
-
 }

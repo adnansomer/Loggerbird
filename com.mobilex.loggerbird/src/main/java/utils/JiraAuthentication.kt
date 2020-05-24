@@ -152,11 +152,9 @@ class JiraAuthentication {
 
                     } else {
                         activity.runOnUiThread {
-                            Toast.makeText(
-                                context,
-                                R.string.internet_connection_check_failure,
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, R.string.internet_connection_check_failure, Toast.LENGTH_SHORT).show()
+
+
                         }
                         throw LoggerBirdException(
                             Constants.internetErrorMessage
@@ -298,8 +296,7 @@ class JiraAuthentication {
             var fileCounter = 0
             do {
                 if (RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths.size > fileCounter) {
-                    val file =
-                        RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
+                    val file = RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
                     val inputStreamMediaFile = FileInputStream(file)
                     issueClient.addAttachment(
                         issue.get().attachmentsUri,
@@ -307,7 +304,7 @@ class JiraAuthentication {
                         file.absolutePath
                     )
                     if (file.exists()) {
-                        file.delete()
+                        //file.delete()
                     }
                 } else {
                     break
@@ -572,7 +569,6 @@ class JiraAuthentication {
     private fun jiraTaskGatherReporters(restClient: JiraRestClient) {
         arrayListReporter.addAll(arrayListAssignee)
     }
-
 
     internal fun getArrayListProjects(): ArrayList<String> {
         return arrayListProjects

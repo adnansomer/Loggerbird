@@ -13,9 +13,4 @@
         android:title="Clear Issue Info"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/jira_menu_delete_attachments"
-        android:title="Delete Attachments"
-        app:showAsAction="never" />
-
 </menu>
