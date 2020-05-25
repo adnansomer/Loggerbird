@@ -304,7 +304,7 @@ class JiraAuthentication {
                         file.absolutePath
                     )
                     if (file.exists()) {
-                        //file.delete()
+                        file.delete()
                     }
                 } else {
                     break

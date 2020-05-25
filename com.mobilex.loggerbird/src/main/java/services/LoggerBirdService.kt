@@ -33,6 +33,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
+import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
@@ -68,6 +69,7 @@ import utils.EmailUtil
 import utils.JiraAuthentication
 import utils.LinkedBlockingQueueUtil
 import java.io.File
+import java.io.FileNotFoundException
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -622,6 +624,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (floating_action_button_screenshot.visibility == View.VISIBLE) {
                 if (!PaintActivity.controlPaintInPictureState) {
                     if (!audioRecording && !videoRecording) {
+
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
                     } else {
                         Toast.makeText(context, R.string.media_recording_error, Toast.LENGTH_SHORT)
@@ -756,9 +759,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
 
             textView_discard.setOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    attachProgressBar()
-                }
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    attachProgressBar()
+//                }
                 discardMediaFile()
             }
         }
@@ -1931,22 +1934,46 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         coroutineCallDiscardFile.async {
             try {
                 if (this@LoggerBirdService::filePathVideo.isInitialized) {
-                    if (filePathVideo.exists()) {
-                        filePathVideo.delete()
-                        finishShareLayout(message = "media")
-                    }else{
+                    try{
+                        if (filePathVideo.exists()) {
+                            filePathVideo.delete()
+                            finishShareLayout(message = "media")
+                        }else{
+                            finishShareLayout(message = "media_error")
+                        }
+                    }catch (e : FileNotFoundException){
                         finishShareLayout(message = "media_error")
+                        e.printStackTrace()
                     }
                 }
 
-                if (this@LoggerBirdService::filePathAudio.isInitialized) {
-                    if (filePathAudio.exists()) {
-                        filePathAudio.delete()
+                try{
+                    if (this@LoggerBirdService::filePathAudio.isInitialized) {
+                        if (filePathAudio.exists()) {
+                            filePathAudio.delete()
+                            finishShareLayout(message = "media")
+                        }else{
+                            finishShareLayout(message = "media_error")
+                        }
+                    }
+                }catch (e : FileNotFoundException){
+                    finishShareLayout(message = "media_error")
+                    e.printStackTrace()
+                }
+
+
+                try{
+                    if(PaintView.filePathScreenShot.exists()){
+                        PaintView.filePathScreenShot.delete()
                         finishShareLayout(message = "media")
                     }else{
                         finishShareLayout(message = "media_error")
                     }
+                }catch (e : FileNotFoundException){
+                    finishShareLayout(message = "media_error")
+                    e.printStackTrace()
                 }
+
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -1982,27 +2009,33 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 "media" -> {
                     Toast.makeText(context, R.string.share_media_delete, Toast.LENGTH_SHORT).show()
                     finishSuccessFab()
-                    detachProgressBar()}
+                    //detachProgressBar()
+                }
                 "media_error" -> {
                     Toast.makeText(context, R.string.share_media_delete_error, Toast.LENGTH_SHORT).show()
                     finishErrorFab()
-                    detachProgressBar()}
+                    //detachProgressBar()
+                }
                 "single_email" -> {
                     Toast.makeText(context, R.string.share_file_sent, Toast.LENGTH_SHORT).show()
                     finishSuccessFab()
-                    detachProgressBar()}
+                    detachProgressBar()
+                }
                 "single_email_error" -> {
                     Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT).show()
                     finishErrorFab()
-                    detachProgressBar()}
+                    detachProgressBar()
+                }
                 "jira" -> {
                     Toast.makeText(context, R.string.jira_sent, Toast.LENGTH_SHORT).show()
-                    finishSuccessFab() }
+                    finishSuccessFab()
+                }
                 "jira_error" ->{
                     Toast.makeText(context, R.string.jira_sent_error, Toast.LENGTH_SHORT).show()
                     progressBarLayout.visibility = View.GONE
                     progressBarJira.visibility = View.GONE
-                    finishErrorFab() }
+                    finishErrorFab()
+                }
             }
         }
     }
@@ -2105,20 +2138,19 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.M)
     private fun attachProgressBar() {
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
-        progressBarView =
-            LayoutInflater.from(activity).inflate(R.layout.default_progressbar, rootView, false)
+        progressBarView = LayoutInflater.from(activity).inflate(R.layout.default_progressbar, rootView, false)
         windowManagerParamsProgressBar = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
             )
         } else {
             WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
@@ -2129,13 +2161,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             progressBarView,
             windowManagerParamsProgressBar
         )
-        progressBar = progressBarView.findViewById(R.id.progressBar)
-        progressBar.visibility = View.VISIBLE
-
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun detachProgressBar() {
+    private fun  detachProgressBar() {
         if (this::progressBarView.isInitialized) {
             (windowManagerProgressBar as WindowManager).removeViewImmediate(progressBarView)
         }
