@@ -41,5 +41,14 @@
         <item name="rippleColor">@color/secondaryColor</item>
     </style>
 
+    <style name="AppTheme.Fab.Live">
+        <item name="android:tint">@color/white</item>
+        <item name="android:clipToPadding">false</item>
+        <item name="android:backgroundTint">@color/secondaryColor</item>
+        <item name="borderWidth">0dp</item>
+        <item name="rippleColor">@color/secondaryColor</item>
+    </style>
+
+
 
 </resources>

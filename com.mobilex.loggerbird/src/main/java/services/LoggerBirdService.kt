@@ -1,11 +1,10 @@
 package services
 
-//import com.slack.api.Slack
-//import com.slack.api.methods.MethodsClient
-//import com.slack.api.methods.request.chat.ChatPostMessageRequest
-//import com.slack.api.methods.response.chat.ChatPostMessageResponse
+import com.slack.api.Slack
+import com.slack.api.methods.response.api.ApiTestResponse
 import adapter.RecyclerViewJiraAdapter
 import android.Manifest
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Service
@@ -33,9 +32,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
+import android.view.animation.*
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
@@ -215,6 +212,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         private lateinit var reveal_linear_layout_share: CircularRevealLinearLayout
         private lateinit var textView_send_email: TextView
         private lateinit var textView_share_jira: TextView
+        private lateinit var textView_share_slack: TextView
         private lateinit var textView_discard: TextView
         //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
@@ -261,7 +259,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     workQueueLinked.put(runnableList[0])
                 }
             }
-
         }
 
         internal fun resetEnqueue() {
@@ -422,6 +419,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.M)
     internal fun initializeFloatingActionButton(activity: Activity) {
+
         if (windowManager != null && this::view.isInitialized) {
             (windowManager as WindowManager).removeViewImmediate(view)
 
@@ -435,7 +433,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     }
                 }
                 .setSwipeToDismiss(true)
-                .setDuration(3000)
+                .setDuration(2000)
                 .show()
             windowManager = null
             isFabEnable = false
@@ -453,6 +451,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     rootView,
                     false
                 )
+
+            view.scaleX = 0F
+            view.scaleY = 0F
+            view.animate()
+                .scaleX(1F)
+                .scaleY(1F)
+                .setDuration(500)
+                .setInterpolator(BounceInterpolator())
+                .setStartDelay(0)
+                .start()
+
             if (Settings.canDrawOverlays(activity)) {
                 windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
@@ -484,6 +493,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 textView_send_email = view.findViewById(R.id.textView_send_email)
                 textView_discard = view.findViewById(R.id.textView_discard)
                 textView_share_jira = view.findViewById(R.id.textView_share_jira)
+                textView_share_slack = view.findViewById(R.id.textView_share_slack)
                 //textView_dismiss = view.findViewById(R.id.textView_dismiss)
                 textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
                 textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
@@ -758,6 +768,22 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 }
             }
 
+            textView_share_slack.setOnClickListener {
+
+                Thread {
+                    val slack = Slack.getInstance()
+                    val response = slack.methods().apiTest { it.foo("bar") }
+                    Log.d("adnanslack",response.toString())
+
+                    activity.runOnUiThread {
+                        Toast.makeText(this.context,response.toString(),Toast.LENGTH_SHORT).show()
+                    }
+                }.start()
+
+            }
+
+
+
             textView_discard.setOnClickListener {
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                    attachProgressBar()
@@ -979,9 +1005,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 floating_action_button_audio.visibility = View.GONE
                                 textView_counter_audio.visibility = View.VISIBLE
                                 textView_audio_size.visibility = View.VISIBLE
+
                                 floating_action_button.animate()
                                     .rotationBy(360F)
-                                    .setDuration(200)
+                                    .setDuration(300)
                                     .scaleX(1F)
                                     .scaleY(1F)
                                     .withEndAction {
@@ -994,6 +1021,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                             .start()
                                     }
                                     .start()
+
                             }
                         } else {
                             withContext(Dispatchers.Main) {
@@ -1029,6 +1057,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             mediaRecorderAudio?.start()
             state = true
             withContext(Dispatchers.Main) {
+
                 Toast.makeText(context, R.string.audio_recording_start, Toast.LENGTH_SHORT).show()
             }
             audioCounterStart()
@@ -1360,6 +1389,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             Log.d("shake", "shake fired!!")
             if (Settings.canDrawOverlays(this.activity)) {
                 if (!controlFileAction) {
+
                     initializeFloatingActionButton(activity = this.activity)
                 } else {
                     Toast.makeText(
@@ -2255,7 +2285,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 arrayListJiraFileName.clear()
             }
             viewJira = LayoutInflater.from(activity).inflate(R.layout.loggerbird_jira_popup, (this.rootView as ViewGroup), false)
-            windowManagerParams.windowAnimations = android.R.anim.slide_out_right
+
             if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsJira = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
