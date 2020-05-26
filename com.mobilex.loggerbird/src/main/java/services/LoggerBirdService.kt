@@ -2,6 +2,9 @@ package services
 
 import com.slack.api.Slack
 import com.slack.api.methods.response.api.ApiTestResponse
+import com.slack.api.methods.MethodsClient
+import com.slack.api.methods.request.chat.ChatPostMessageRequest
+import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import adapter.RecyclerViewJiraAdapter
 import android.Manifest
 import android.animation.ValueAnimator
@@ -771,9 +774,21 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             textView_share_slack.setOnClickListener {
 
                 Thread {
+//                    val slack = Slack.getInstance()
+//                    val response = slack.methods().apiTest { it.foo("bar") }
+//                    Log.d("adnanslack",response.toString())
+
+
+
                     val slack = Slack.getInstance()
-                    val response = slack.methods().apiTest { it.foo("bar") }
-                    Log.d("adnanslack",response.toString())
+                    val token =
+                            "xoxb-1050703475826-1145080262722-ky9ACRsZfZcacuifbgXiZmEZ"
+
+                    val response = slack.methods(token).chatPostMessage { it
+                        .channel("#ozv-team")
+                        .text("selam")
+                    }
+
 
                     activity.runOnUiThread {
                         Toast.makeText(this.context,response.toString(),Toast.LENGTH_SHORT).show()
@@ -781,8 +796,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 }.start()
 
             }
-
-
 
             textView_discard.setOnClickListener {
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -1590,10 +1603,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         viewFeedback,
                         windowManagerParamsFeedback
                     )
-                    floating_action_button_feedback =
-                        viewFeedback.findViewById(R.id.floating_action_button_feed)
-                    floating_action_button_feed_close =
-                        viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
+                    floating_action_button_feedback = viewFeedback.findViewById(R.id.floating_action_button_feed)
+                    floating_action_button_feed_close = viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
                     editText_feedback = viewFeedback.findViewById(R.id.editText_feed_back)
                     buttonClicksFeedback()
                 }
