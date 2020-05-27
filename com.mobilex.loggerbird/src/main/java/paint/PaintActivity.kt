@@ -248,10 +248,8 @@ class PaintActivity : Activity() {
             layout.setPadding(0, 0, 0, -50)
             layout.layoutParams = parentParams
             val rootView: ViewGroup = window.decorView.findViewById(android.R.id.content)
-            val snackView: View =
-                layoutInflater.inflate(R.layout.activity_paint_save_snackbar, rootView, false)
-            val messageTextView: TextView =
-                snackView.findViewById(R.id.message_text_view) as TextView
+            val snackView: View = layoutInflater.inflate(R.layout.activity_paint_save_snackbar, rootView, false)
+            val messageTextView: TextView = snackView.findViewById(R.id.message_text_view) as TextView
             messageTextView.text = resources.getString(R.string.snackbar_delete_verification)
 
             val textViewYes: TextView = snackView.findViewById(R.id.snackbar_yes)
@@ -385,7 +383,6 @@ class PaintActivity : Activity() {
                 override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                     val currentWidth:String = resources.getText(R.string.snackbar_current_width).toString() + i + "%"
                     seekView.brushWidthSeekText.text = currentWidth
-
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {
@@ -430,7 +427,7 @@ class PaintActivity : Activity() {
                     snackBarFileSaving.dismiss()
                 }.show()
                 Toast.makeText(activity,  resources.getText(R.string.snackbar_successfully_saved), Toast.LENGTH_SHORT).show()
-                fabScreenshotAnimation()
+                //fabScreenshotAnimation()
                 finish()
                 overridePendingTransition(R.anim.no_animation,R.anim.slide_in_bottom)
 
@@ -592,16 +589,7 @@ class PaintActivity : Activity() {
             .scaleX(1F)
             .scaleY(1F)
             .withEndAction {
-                when {
-                    LoggerBirdService.audioRecording -> {
-                        LoggerBirdService.floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
-                    }
-                    LoggerBirdService.videoRecording -> (
-                            LoggerBirdService.floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
-                            )
-                    else -> {
-                        LoggerBirdService.floating_action_button.setImageResource(R.drawable.loggerbird)}
-                }
+                LoggerBirdService.floating_action_button.setImageResource(R.drawable.loggerbird)
                 LoggerBirdService.floating_action_button.animate()
                     .rotationBy(0F)
                     .setDuration(200)

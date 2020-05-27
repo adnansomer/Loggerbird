@@ -57,6 +57,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         const val DEFAULT_BRUSH_COLOR = Color.BLACK
         private const val TOUCH_TOLERANCE = 4.0f
         internal val arrayListFileNameScreenshot:ArrayList<String> = ArrayList()
+        internal lateinit var filePathScreenShot : File
     }
 
     internal fun init(metrics: DisplayMetrics) {
@@ -170,16 +171,16 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                 val bitmap = Bitmap.createBitmap(paintView.width,paintView.height, Bitmap.Config.ARGB_8888)
                 val canvas = Canvas(bitmap)
                 val fileDirectory: File = context.filesDir
-                val filePath = File(fileDirectory, "loggerbird_screenshot_"+System.currentTimeMillis().toString()+"_"+filename+".png")
-                LoggerBirdService.callShareView(filePathMedia = filePath)
-                arrayListFileNameScreenshot.add(filePath.absolutePath)
-                val os = FileOutputStream(filePath)
+                filePathScreenShot = File(fileDirectory, "loggerbird_screenshot_"+System.currentTimeMillis().toString()+"_"+filename+".png")
+                val os = FileOutputStream(filePathScreenShot)
                 paintView.draw(canvas)
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, os)
                 withContext(Dispatchers.IO) {
                     os.flush()
                     os.close()
                 }
+                arrayListFileNameScreenshot.add(filePathScreenShot.absolutePath)
+                LoggerBirdService.callShareView(filePathMedia = filePathScreenShot)
             } catch (e: Exception) {
                 e.printStackTrace()
                 LoggerBird.callEnqueue()

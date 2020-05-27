@@ -56,6 +56,7 @@
     <string name="share_audio_delete">Ses kaydı silindi!</string>
     <string name="share_file_sent">Medya dosyası gonderildi!</string>
     <string name="share_media_delete">Medya dosyası silindi!</string>
+    <string name="share_media_delete_error">Medya dosyasi bulunamadi!</string>
     <string name="share_file_sent_error">Medya dosyası gönderilmeye çalışırken bir hatayla karşılaşıldı!</string>
     <string name="jira_sent">Jira konusu açıldı!</string>
     <string name="jira_sent_error">Jira dosyası açılmaya çalışırken bir hatayla karşılaşıldı!</string>

@@ -2,11 +2,11 @@
 <resources>
     <color name="colorPrimary">#ffffff</color>
     <color name="colorPrimaryDark">#ffffff</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorAccent">#000000</color>
     <color name="colorBlack">#000000</color>
     <color name="colorGray">#808080</color>
     <color name="colorFab">#ffffff</color>
-    <color name="colorMiniFab">#ECEFF1</color>
+    <color name="colorMiniFab">#eeeeee</color>
     <color name="black">#212121</color>
     <color name="white">#fafafa</color>
     <color name="gray">#424242</color>
@@ -15,4 +15,5 @@
     <color name="cookieBarColor">#102027</color>
     <color name="jiraBlue">#2684ff</color>
     <color name="jiraSilver">#C0C0C0</color>
+    <color name="darkTransparent">#99000000</color>
 </resources>

@@ -5,6 +5,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'realm-android'
 apply plugin: 'com.google.gms.google-services'
 
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
@@ -17,6 +18,7 @@ android {
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -40,6 +42,7 @@ android {
         }
 
     }
+
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/LICENSE'
@@ -51,7 +54,6 @@ android {
         exclude 'META-INF/ASL2.0'
         exclude 'META-INF/jersey-module-version'
     }
-
 }
 
 dependencies {
@@ -108,9 +110,13 @@ dependencies {
         exclude group: 'org.hamcrest'
     }
     implementation ('com.google.android.material:material:1.2.0-alpha06')
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("com.slack.api:slack-api-client:1.0.7")
 }
 repositories {
     maven { url "https://jitpack.io" }
     mavenCentral()
     google()
 }
+
