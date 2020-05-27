@@ -26,17 +26,29 @@
     </style>
 
     <style name="AppTheme.FabSpeedDial" parent="Theme.MaterialComponents">
-        <item name="android:backgroundTint">#fafafa</item>
+        <item name="android:backgroundTint">@color/colorMiniFab</item>
         <item name="android:clipToPadding">false</item>
         <item name="android:windowFullscreen">true</item>>
+        <item name="rippleColor">@color/colorFab</item>
         <item name="borderWidth">0dp</item>
     </style>
 
     <style name="AppTheme.Fab">
         <item name="android:tint">@color/white</item>
+        <item name="android:clipToPadding">false</item>
         <item name="android:backgroundTint">@color/black</item>
         <item name="borderWidth">0dp</item>
         <item name="rippleColor">@color/secondaryColor</item>
     </style>
+
+    <style name="AppTheme.Fab.Live">
+        <item name="android:tint">@color/white</item>
+        <item name="android:clipToPadding">false</item>
+        <item name="android:backgroundTint">@color/secondaryColor</item>
+        <item name="borderWidth">0dp</item>
+        <item name="rippleColor">@color/secondaryColor</item>
+    </style>
+
+
 
 </resources>
