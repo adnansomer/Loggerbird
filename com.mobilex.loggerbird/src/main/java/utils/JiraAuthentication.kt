@@ -25,7 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
-import models.RecyclerViewJiraModel
+import models.RecyclerViewModel
 import okhttp3.*
 import services.LoggerBirdService
 import java.io.*
@@ -53,12 +53,12 @@ class JiraAuthentication {
     private lateinit var description: String
     private lateinit var label: String
     private lateinit var epicLink: String
-    private lateinit var sprint:String
+    private lateinit var sprint: String
     private lateinit var progressBar: ProgressBar
     private val hashMapComponent: HashMap<String, Iterable<BasicComponent>> = HashMap()
     private val hashMapFixVersions: HashMap<String, Iterable<Version>> = HashMap()
     private val hashMapLinkedIssues: HashMap<String, String> = HashMap()
-    private lateinit var arrayListRecyclerViewItems: ArrayList<RecyclerViewJiraModel>
+    private lateinit var arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>
     private val arrayListProjects: ArrayList<String> = ArrayList()
     private val arrayListProjectKeys: ArrayList<String> = ArrayList()
     private val arrayListIssueTypes: ArrayList<String> = ArrayList()
@@ -75,7 +75,7 @@ class JiraAuthentication {
     private val arrayListChoosenLabel: ArrayList<String> = ArrayList()
     private val arrayListEpicLink: ArrayList<String> = ArrayList()
     private val arrayListFields: ArrayList<String> = ArrayList()
-    private val arrayListSprint:ArrayList<String> = ArrayList()
+    private val arrayListSprint: ArrayList<String> = ArrayList()
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callJiraIssue(
         filePathName: File? = null,
@@ -152,7 +152,11 @@ class JiraAuthentication {
 
                     } else {
                         activity.runOnUiThread {
-                            Toast.makeText(context, R.string.internet_connection_check_failure, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                R.string.internet_connection_check_failure,
+                                Toast.LENGTH_SHORT
+                            ).show()
 
 
                         }
@@ -296,15 +300,18 @@ class JiraAuthentication {
             var fileCounter = 0
             do {
                 if (RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths.size > fileCounter) {
-                    val file = RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
+                    val file =
+                        RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
                     val inputStreamMediaFile = FileInputStream(file)
                     issueClient.addAttachment(
                         issue.get().attachmentsUri,
                         inputStreamMediaFile,
                         file.absolutePath
                     )
-                    if (file.exists()) {
-                        file.delete()
+                    if (file.name != "logger_bird_details.txt") {
+                        if (file.exists()) {
+                            file.delete()
+                        }
                     }
                 } else {
                     break
@@ -320,7 +327,7 @@ class JiraAuthentication {
 //                LoggerBird.filePathSecessionName.absolutePath
 //            )
             activity.runOnUiThread {
-                LoggerBirdService.loggerBirdService.buttonCancel.performClick()
+                LoggerBirdService.loggerBirdService.buttonJiraCancel.performClick()
             }
             LoggerBirdService.loggerBirdService.finishShareLayout("jira")
             Log.d("issue", issueUri.toString())
@@ -512,10 +519,10 @@ class JiraAuthentication {
         arrayListEpicLink.add("")
         projectClient.allProjects.claim().forEach {
             searchClient.searchJql("project=" + it.key).claim().issues.forEach { issue ->
-//                issue.fields.forEach {
+                //                issue.fields.forEach {
 //                    Log.d("sprint",it.name)
 //                }
-                if(issue.getField("Sprint")?.value != null){
+                if (issue.getField("Sprint")?.value != null) {
                     arrayListSprint.add(issue.getField("Sprint")?.value.toString())
                 }
                 arrayListIssues.add(issue.key)
@@ -578,43 +585,43 @@ class JiraAuthentication {
         return arrayListIssueTypes
     }
 
-    internal fun getArrayListAsignee(): ArrayList<String>{
+    internal fun getArrayListAsignee(): ArrayList<String> {
         return arrayListAssignee
     }
 
-    internal fun getArrayListReporter() : ArrayList<String>{
+    internal fun getArrayListReporter(): ArrayList<String> {
         return arrayListReporter
     }
 
-    internal fun getArrayListIssueLinkedTypes() : ArrayList<String>{
+    internal fun getArrayListIssueLinkedTypes(): ArrayList<String> {
         return arrayListIssueLinkedTypes
     }
 
-    internal fun getArrayListIssues() : ArrayList<String>{
+    internal fun getArrayListIssues(): ArrayList<String> {
         return arrayListIssues
     }
 
-    internal fun getArrayListPriorities() : ArrayList<String>{
+    internal fun getArrayListPriorities(): ArrayList<String> {
         return arrayListPriorities
     }
 
-    internal fun getArrayListComponent() : ArrayList<String>{
+    internal fun getArrayListComponent(): ArrayList<String> {
         return arrayListComponents
     }
 
-    internal fun getArrayListFixVersions() : ArrayList<String>{
+    internal fun getArrayListFixVersions(): ArrayList<String> {
         return arrayListFixVersions
     }
 
-    internal fun getArrayListLabel() : ArrayList<String>{
+    internal fun getArrayListLabel(): ArrayList<String> {
         return arrayListLabel
     }
 
-    internal fun getArrayListEpicLink() : ArrayList<String>{
+    internal fun getArrayListEpicLink(): ArrayList<String> {
         return arrayListEpicLink
     }
 
-    internal fun getArrayListSprint() : ArrayList<String>{
+    internal fun getArrayListSprint(): ArrayList<String> {
         return arrayListSprint
     }
 
@@ -631,7 +638,7 @@ class JiraAuthentication {
         spinnerFixVersions: Spinner,
         spinnerLabel: Spinner,
         spinnerEpicLink: Spinner,
-        spinnerSprint:Spinner
+        spinnerSprint: Spinner
     ) {
         project = spinnerProject.selectedItem.toString()
         projectPosition = spinnerProject.selectedItemPosition
@@ -648,7 +655,7 @@ class JiraAuthentication {
         linkedIssueTypePosition = spinnerLinkedIssues.selectedItemPosition
         arrayListChoosenLabel.add(spinnerLabel.selectedItem.toString())
         epicLink = spinnerEpicLink.selectedItem.toString()
-      //  sprint = spinnerSprint.selectedItem.toString()
+        //  sprint = spinnerSprint.selectedItem.toString()
     }
 
     internal fun gatherJiraEditTextDetails(
@@ -659,7 +666,7 @@ class JiraAuthentication {
         description = editTextDescription.text.toString()
     }
 
-    internal fun gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems: ArrayList<RecyclerViewJiraModel>) {
+    internal fun gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>) {
         this.arrayListRecyclerViewItems = arrayListRecyclerViewItems
     }
 
@@ -677,6 +684,8 @@ class JiraAuthentication {
             false
         }
     }
+
+
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
