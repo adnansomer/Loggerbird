@@ -64,6 +64,9 @@
     <string name="jira_summary_empty">Özet boş olamaz!</string>
     <string name="jira_summary_unhandled_exception">unhandled_exception:</string>
     <string name="jira_description_unhandled_exception">Beklenmeyen bir hata tespit edilmiştir daha çok detay için log dosyasına bakınız!</string>
+    <string name="slack_message_empty">Mesaj boş olamaz!</string>
+    <string name="slack_sent">Slack mesajı gönderildi!</string>
+    <string name="slack_sent_error">Slack mesajı gönderilmeye çalışırken bir hatayla karşılaşıldı!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
@@ -113,7 +116,7 @@
     <string name="button_jira_cancel">İptal</string>
     <string name="button_jira_init_next">Sonraki</string>
     <string name="button_jira_init_cancel">İptal</string>
-    <!-- recycler_view_item_popup-->
+    <!-- recycler_view_jira_item_popup-->
     <string name="textView_recyclerView_popup_title">Jira görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_yes">Evet</string>
     <string name="button_recyclerView_no">Hayır</string>
@@ -126,4 +129,8 @@
     <string name="textView_slack_attachment">Eklentiler</string>
     <string name="button_slack_cancel">İptal</string>
     <string name="button_slack_create">Oluştur</string>
+    <!-- recycler_view_slack_item_popup-->
+    <string name="textView_recyclerView_slack_popup_title">Slack mesajınızdan bu eklentiyi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_slack_yes">Evet</string>
+    <string name="button_recyclerView_slack_no">Hayır</string>
 </resources>

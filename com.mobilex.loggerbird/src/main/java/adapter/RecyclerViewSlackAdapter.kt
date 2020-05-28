@@ -22,18 +22,18 @@ import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
 
-class RecyclerViewJiraAdapter(
+class RecyclerViewSlackAdapter(
     private val fileList: ArrayList<RecyclerViewModel>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View
 ) :
-    RecyclerView.Adapter<RecyclerViewJiraAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerViewSlackAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_jira_item,
+                R.layout.recycler_view_slack_item,
                 parent,
                 false
             )
@@ -72,7 +72,7 @@ class RecyclerViewJiraAdapter(
 
         fun bindItems(
             item: RecyclerViewModel,
-            adapter: RecyclerViewJiraAdapter,
+            adapter: RecyclerViewSlackAdapter,
             position: Int,
             fileList: ArrayList<RecyclerViewModel>,
             context: Context,
@@ -103,12 +103,12 @@ class RecyclerViewJiraAdapter(
             rootView: View,
             fileList: ArrayList<RecyclerViewModel>,
             position: Int,
-            adapter: RecyclerViewJiraAdapter
+            adapter: RecyclerViewSlackAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_jira_item_popup,
+                        R.layout.recycler_view_slack_item_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -140,10 +140,10 @@ class RecyclerViewJiraAdapter(
                             viewRecyclerViewItems,
                             windowManagerParamsRecyclerViewItemPopup
                         )
-                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_jira_title)
-                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_jira_yes)
-                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_jira_no)
-                        buttonClicksJiraPopup(adapter = adapter , fileList = fileList , position = position)
+                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_slack_title)
+                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_slack_yes)
+                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_slack_no)
+                        buttonClicksSlackPopup(adapter = adapter , fileList = fileList , position = position)
                     }
                 }
             } catch (e: Exception) {
@@ -151,7 +151,7 @@ class RecyclerViewJiraAdapter(
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
-                    tag = Constants.recyclerViewJiraAdapterTag
+                    tag = Constants.recyclerViewSlackAdapterTag
                 )
             }
 
@@ -170,7 +170,7 @@ class RecyclerViewJiraAdapter(
 //            alertDialogItemDelete.show()
         }
 
-        private fun buttonClicksJiraPopup(fileList: ArrayList<RecyclerViewModel>, position: Int, adapter: RecyclerViewJiraAdapter) {
+        private fun buttonClicksSlackPopup(fileList: ArrayList<RecyclerViewModel>, position: Int, adapter: RecyclerViewSlackAdapter) {
             buttonYes.setSafeOnClickListener {
                 fileList.removeAt(position)
                 arrayListFilePaths = fileList

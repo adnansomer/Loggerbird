@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.widget.EditText
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.mobilex.loggerbird.R
@@ -23,7 +25,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
+import models.RecyclerViewModel
 import okhttp3.*
+import services.LoggerBirdService
 import java.io.File
 import java.io.IOException
 
@@ -31,13 +35,25 @@ class SlackAuthentication {
     private var coroutineCallSlack: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallOkHttpSlack: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private val internetConnectionUtil = InternetConnectionUtil()
-    internal fun callSlack(activity: Activity, context: Context, filePathMedia: File? = null) {
+    private val arrayListChannels: ArrayList<String> = ArrayList()
+    private val arrayListUsers: ArrayList<String> = ArrayList()
+    private var message: String = ""
+    private lateinit var user: String
+    private lateinit var channel: String
+    private lateinit var arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>
+    internal fun callSlack(
+        activity: Activity,
+        context: Context,
+        filePathMedia: File? = null,
+        slackTask: String
+    ) {
         coroutineCallOkHttpSlack.async {
             if (internetConnectionUtil.checkNetworkConnection(context = context)) {
                 okHttpSlackAuthentication(
                     activity = activity,
                     context = context,
-                    filePathMediaName = filePathMedia
+                    filePathMediaName = filePathMedia,
+                    slackTask = slackTask
                 )
             } else {
                 activity.runOnUiThread {
@@ -65,7 +81,8 @@ class SlackAuthentication {
     private fun okHttpSlackAuthentication(
         context: Context,
         activity: Activity,
-        filePathMediaName: File?
+        filePathMediaName: File?,
+        slackTask: String
     ) {
         val client = OkHttpClient()
         val request: Request =
@@ -91,7 +108,8 @@ class SlackAuthentication {
                                 slackAuthentication(
                                     activity = activity,
                                     context = context,
-                                    filePathMedia = filePathMediaName
+                                    filePathMedia = filePathMediaName,
+                                    slackTask = slackTask
                                 )
                             } catch (e: Exception) {
                                 e.printStackTrace()
@@ -123,22 +141,77 @@ class SlackAuthentication {
         })
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private suspend fun slackAuthentication(
         activity: Activity,
         context: Context,
-        filePathMedia: File?
+        filePathMedia: File?,
+        slackTask: String
     ) {
         val slack = Slack.getInstance()
         val token = "xoxb-1050703475826-1145080262722-ky9ACRsZfZcacuifbgXiZmEZ"
-        slackTask(
-            activity = activity,
-            context = context,
-            slack = slack,
-            token = token,
-            filePathMedia = filePathMedia
-        )
+        when (slackTask) {
+            "get" -> gatherSlackDetails(
+                activity = activity,
+                context = context,
+                slack = slack,
+                token = token,
+                filePathMedia = filePathMedia
+            )
+            "create" -> slackTask(
+                activity = activity,
+                context = context,
+                slack = slack,
+                token = token,
+                filePathMedia = filePathMedia
+            )
+        }
+
     }
 
+    private suspend fun gatherSlackDetails(
+        activity: Activity,
+        context: Context,
+        slack: Slack,
+        token: String,
+        filePathMedia: File?
+    ) {
+        arrayListChannels.clear()
+        arrayListUsers.clear()
+        withContext(Dispatchers.IO) {
+            slackTaskGatherChannels(slack = slack, token = token)
+            slackTaskGatherUsers(slack = slack, token = token)
+            activity.runOnUiThread {
+                LoggerBirdService.loggerBirdService.initializeSlackSpinner(
+                    arrayListChannels = arrayListChannels,
+                    arrayListUsers = arrayListUsers
+                )
+            }
+        }
+    }
+
+    private suspend fun slackTaskGatherChannels(slack: Slack, token: String) {
+        withContext(Dispatchers.IO) {
+            val userListBuilder = UsersListRequest.builder().build()
+            slack.methods(token).usersList(userListBuilder).members.forEach {
+                arrayListUsers.add(it.name)
+//                Log.d("user-name", it.name)
+            }
+        }
+    }
+
+    private suspend fun slackTaskGatherUsers(slack: Slack, token: String) {
+        withContext(Dispatchers.IO) {
+            val conversationListBuilder = ConversationsListRequest.builder().build()
+            slack.methods(token).conversationsList(conversationListBuilder).channels.forEach {
+                arrayListChannels.add(it.name)
+                // Log.d("channel_name", it.name)
+            }
+        }
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private suspend fun slackTask(
         activity: Activity,
         context: Context,
@@ -146,46 +219,70 @@ class SlackAuthentication {
         token: String,
         filePathMedia: File?
     ) {
-        withContext(Dispatchers.IO) {
-            //            val adminUsergroupsListChannelsRequest =
-//                AdminUsergroupsListChannelsRequest.builder().token(token)
-//            val response = slack.methods()
-//                .adminUsergroupsListChannels(adminUsergroupsListChannelsRequest.build())
-//            response.channels.forEach {
-//                Log.d("channel_name", it.name)
-//            }
-
-            val conversationListBuilder = ConversationsListRequest.builder().build()
-            val conversationListResponse =
-                slack.methods(token).conversationsList(conversationListBuilder).channels.forEach {
-                    Log.d("channel_name", it.name)
+        try {
+            withContext(Dispatchers.IO) {
+                slack.methods(token).chatPostMessage {
+                    it
+                        .channel(channel)
+                        .username("LoggerBird")
+                        .text(message)
                 }
 
-
-            val userListBuilder = UsersListRequest.builder().build()
-            val userListResponse = slack.methods(token).usersList(userListBuilder).members.forEach {
-                Log.d("user-name",it.name)
+                if (filePathMedia != null) {
+                    slack.methods(token).filesUpload {
+                        val list = ArrayList<String>()
+                        list.add(channel)
+                        it.file(filePathMedia)
+                        it.filename(filePathMedia.name)
+                        it.channels(list)
+                    }
+                    activity.runOnUiThread {
+                        LoggerBirdService.loggerBirdService.buttonSlackCancel.performClick()
+                    }
+                    LoggerBirdService.loggerBirdService.finishShareLayout("slack")
+                }
             }
-
-//            val response = slack.methods(token).chatPostMessage {
-//                it
-//                    .channel("#ozv-team")
-//                    .username("LoggerBird")
-//                    .text("Deneme")
-//            }
-
-//            if (filePathMedia != null) {
-//                val response2 = slack.methods(token).filesUpload {
-//                    val list = ArrayList<String>()
-//                    list.add("#ozv-team")
-//                    it.file(filePathMedia)
-//                    it.filename(filePathMedia.name)
-//                    it.channels(list)
-//                }
-//                activity.runOnUiThread {
-//                    Toast.makeText(context, response2.toString(), Toast.LENGTH_SHORT).show()
-//                }
-//            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            activity.runOnUiThread {
+                Toast.makeText(context, R.string.slack_sent_error, Toast.LENGTH_SHORT).show()
+            }
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e , tag = Constants.slackTag)
         }
+    }
+
+    internal fun checkMessageEmpty(activity: Activity, context: Context): Boolean {
+        return if (message.isNotEmpty()) {
+            true
+        } else {
+            activity.runOnUiThread {
+                Toast.makeText(
+                    context,
+                    R.string.slack_message_empty,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            false
+        }
+    }
+
+
+    internal fun gatherJiraSpinnerDetails(
+        spinnerChannel: Spinner,
+        spinnerUser: Spinner
+    ) {
+        channel = spinnerChannel.selectedItem.toString()
+        user = spinnerUser.selectedItem.toString()
+    }
+
+    internal fun gatherSlackEditTextDetails(
+        editTextMessage: EditText
+    ) {
+        message = editTextMessage.text.toString()
+    }
+
+    internal fun gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>) {
+        this.arrayListRecyclerViewItems = arrayListRecyclerViewItems
     }
 }

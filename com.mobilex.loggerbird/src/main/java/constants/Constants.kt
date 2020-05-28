@@ -77,5 +77,6 @@ internal class Constants {
         const val jiraTag:String = "Jira"
         const val recyclerViewJiraAdapterTag:String = "RecyclerView Jira Adapter"
         const val slackTag:String = "Slack"
+        const val recyclerViewSlackAdapterTag:String = "RecyclerView Slack Adapter"
     }
 }
