@@ -68,6 +68,7 @@ import paint.PaintView
 import utils.EmailUtil
 import utils.JiraAuthentication
 import utils.LinkedBlockingQueueUtil
+import utils.SlackAuthentication
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.*
@@ -153,6 +154,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private val coroutineCallFilesAction: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlFileAction: Boolean = false
     internal val jiraAuthentication = JiraAuthentication()
+    internal val slackAuthentication = SlackAuthentication()
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarView: View
     private lateinit var spinnerProject: Spinner
@@ -772,29 +774,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
 
             textView_share_slack.setOnClickListener {
-
-                Thread {
-//                    val slack = Slack.getInstance()
-//                    val response = slack.methods().apiTest { it.foo("bar") }
-//                    Log.d("adnanslack",response.toString())
-
-
-
-                    val slack = Slack.getInstance()
-                    val token =
-                            "xoxb-1050703475826-1145080262722-ky9ACRsZfZcacuifbgXiZmEZ"
-
-                    val response = slack.methods(token).chatPostMessage { it
-                        .channel("#ozv-team")
-                        .text("selam")
-                    }
-
-
-                    activity.runOnUiThread {
-                        Toast.makeText(this.context,response.toString(),Toast.LENGTH_SHORT).show()
-                    }
-                }.start()
-
+                slackAuthentication.callSlack(activity = activity , context = context , filePathMedia = filePathMedia)
             }
 
             textView_discard.setOnClickListener {
@@ -2366,20 +2346,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         jiraTask = "get",
                         createMethod = "normal"
                     )
-                    initializeJiraSpinner(
-                        jiraAuthentication.getArrayListProjects(),
-                        jiraAuthentication.getArrayListIssueTypes(),
-                        jiraAuthentication.getArrayListReporter(),
-                        jiraAuthentication.getArrayListIssueLinkedTypes(),
-                        jiraAuthentication.getArrayListIssues(),
-                        jiraAuthentication.getArrayListAsignee(),
-                        jiraAuthentication.getArrayListPriorities(),
-                        jiraAuthentication.getArrayListComponent(),
-                        jiraAuthentication.getArrayListFixVersions(),
-                        jiraAuthentication.getArrayListLabel(),
-                        jiraAuthentication.getArrayListEpicLink(),
-                        jiraAuthentication.getArrayListSprint()
-                    )
+//                    initializeJiraSpinner(
+//                        jiraAuthentication.getArrayListProjects(),
+//                        jiraAuthentication.getArrayListIssueTypes(),
+//                        jiraAuthentication.getArrayListReporter(),
+//                        jiraAuthentication.getArrayListIssueLinkedTypes(),
+//                        jiraAuthentication.getArrayListIssues(),
+//                        jiraAuthentication.getArrayListAsignee(),
+//                        jiraAuthentication.getArrayListPriorities(),
+//                        jiraAuthentication.getArrayListComponent(),
+//                        jiraAuthentication.getArrayListFixVersions(),
+//                        jiraAuthentication.getArrayListLabel(),
+//                        jiraAuthentication.getArrayListEpicLink(),
+//                        jiraAuthentication.getArrayListSprint()
+//                    )
 
                     initializeJiraRecyclerView(filePathMedia = filePathMedia)
                     buttonClicksJira(filePathMedia = filePathMedia)
@@ -2399,20 +2379,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
             windowManagerJira = null
             arrayListJiraFileName.clear()
-
-            removeJiraSpinner(
-                jiraAuthentication.getArrayListProjects(),
-                jiraAuthentication.getArrayListIssueTypes(),
-                jiraAuthentication.getArrayListReporter(),
-                jiraAuthentication.getArrayListIssueLinkedTypes(),
-                jiraAuthentication.getArrayListIssues(),
-                jiraAuthentication.getArrayListAsignee(),
-                jiraAuthentication.getArrayListPriorities(),
-                jiraAuthentication.getArrayListComponent(),
-                jiraAuthentication.getArrayListFixVersions(),
-                jiraAuthentication.getArrayListLabel(),
-                jiraAuthentication.getArrayListEpicLink(),
-                jiraAuthentication.getArrayListSprint())
+//
+//            removeJiraSpinner(
+//                jiraAuthentication.getArrayListProjects(),
+//                jiraAuthentication.getArrayListIssueTypes(),
+//                jiraAuthentication.getArrayListReporter(),
+//                jiraAuthentication.getArrayListIssueLinkedTypes(),
+//                jiraAuthentication.getArrayListIssues(),
+//                jiraAuthentication.getArrayListAsignee(),
+//                jiraAuthentication.getArrayListPriorities(),
+//                jiraAuthentication.getArrayListComponent(),
+//                jiraAuthentication.getArrayListFixVersions(),
+//                jiraAuthentication.getArrayListLabel(),
+//                jiraAuthentication.getArrayListEpicLink(),
+//                jiraAuthentication.getArrayListSprint())
         }
     }
 

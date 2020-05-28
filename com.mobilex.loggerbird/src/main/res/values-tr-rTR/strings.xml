@@ -117,4 +117,13 @@
     <string name="textView_recyclerView_popup_title">Jira görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_yes">Evet</string>
     <string name="button_recyclerView_no">Hayır</string>
+    <!-- loggerbird_slack_popup-->
+    <string name="textView_slack_title">Slack mesajı oluştur</string>
+    <string name="textView_slack_message">Mesaj</string>
+    <string name="editText_slack_message">Mesajınızı buraya yazınız!</string>
+    <string name="textView_slack_channel">Kanallar</string>
+    <string name="textView_slack_user">Kullanıcılar</string>
+    <string name="textView_slack_attachment">Eklentiler</string>
+    <string name="button_slack_cancel">İptal</string>
+    <string name="button_slack_create">Oluştur</string>
 </resources>

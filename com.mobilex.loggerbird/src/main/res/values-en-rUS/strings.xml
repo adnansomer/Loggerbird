@@ -117,4 +117,13 @@
     <string name="textView_recyclerView_popup_title">Are you sure to remove attachment from your issue?</string>
     <string name="button_recyclerView_yes">Yes</string>
     <string name="button_recyclerView_no">No</string>
+    <!-- loggerbird_slack_popup-->
+    <string name="textView_slack_title">Create Slack Message</string>
+    <string name="textView_slack_message">Message</string>
+    <string name="editText_slack_message">Write your message here!</string>
+    <string name="textView_slack_channel">Channels</string>
+    <string name="textView_slack_user">Users</string>
+    <string name="textView_slack_attachment">Attachments</string>
+    <string name="button_slack_cancel">Cancel</string>
+    <string name="button_slack_create">Create</string>
 </resources>
