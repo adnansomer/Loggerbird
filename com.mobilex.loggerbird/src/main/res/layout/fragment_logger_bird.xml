@@ -74,9 +74,6 @@
             android:text="Discard"
             android:drawableLeft="@drawable/ic_delete_sweep_black_24dp" />
 
-
-
-
         <!--   <TextView
                android:id="@+id/textView_dismiss"
                android:layout_width="match_parent"
@@ -204,13 +201,15 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fragment_floating_action_button"
         android:layout_margin="1dp"
-        style="@style/AppTheme.Fab"
+        android:tint="@color/white"
+        android:background="@color/black"
         app:borderWidth="0dp"
+        android:elevation="0dp"
+        app:elevation="0dp"
         app:fabSize="normal"
         android:scaleType="centerCrop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/loggerbird" />
-
 
 </FrameLayout>

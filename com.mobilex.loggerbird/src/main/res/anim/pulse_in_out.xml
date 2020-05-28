@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android">
-    <scale xmlns:android="http://schemas.android.com/apk/res/android"
+    <scale
         android:fromXScale="1"
         android:fromYScale="1"
         android:pivotX="50%"
@@ -9,7 +9,8 @@
         android:toYScale="0.95"
         android:duration="500"
         android:repeatCount="infinite"
-        android:repeatMode="reverse"/>
+        android:repeatMode="reverse">
+    </scale>
 </set>
 
 

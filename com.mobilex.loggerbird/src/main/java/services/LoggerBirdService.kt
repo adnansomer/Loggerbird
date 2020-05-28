@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
@@ -99,8 +100,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var filePathVideo: File
     private lateinit var filePathAudio: File
     private var isOpen = false
-    //private lateinit var fabOpen: Animation
-    //private lateinit var fabClose: Animation
     private var screenDensity: Int = 0
     private var projectManager: MediaProjectionManager? = null
     private var mediaProjection: MediaProjection? = null
@@ -267,6 +266,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         internal var audioRecording = false
         internal var videoRecording = false
         internal var screenshotDrawing = false
+        private lateinit var workingAnimation : Animation
 
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
@@ -367,8 +367,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
             sd = LoggerBirdShakeDetector(this)
             sd.start(sensorManager)
-            logActivityLifeCycleObserver =
-                LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
+            logActivityLifeCycleObserver = LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
             controlActionFiles()
         } catch (e: Exception) {
@@ -714,7 +713,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
             }
         }
-
         floating_action_button.setOnTouchListener(
             FloatingActionButtonOnTouchListener(
                 windowManager = (windowManager as WindowManager),
@@ -735,6 +733,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun shareView(filePathMedia: File) {
+        floating_action_button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.black))
+        floating_action_button.clearAnimation()
         floating_action_button.animate()
             .rotationBy(360F)
             .setDuration(200)
@@ -807,23 +807,23 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
-    private fun attachFloatingActionButtonLayoutListener() {
-        floating_action_button.viewTreeObserver.addOnGlobalLayoutListener(
-            FloatingActionButtonGlobalLayoutListener(
-                floatingActionButton = floating_action_button
-            )
-        )
-        floating_action_button_screenshot.viewTreeObserver.addOnGlobalLayoutListener(
-            FloatingActionButtonScreenshotGlobalLayoutListener(floatingActionButtonScreenshot = floating_action_button_screenshot)
-        )
-        floating_action_button_video.viewTreeObserver.addOnGlobalLayoutListener(
-            FloatingActionButtonVideoGlobalLayoutListener(floatingActionButtonVideo = floating_action_button_video)
-        )
-
-        floating_action_button_audio.viewTreeObserver.addOnGlobalLayoutListener(
-            FloatingActionButtonAudioGlobalLayoutListener(floatingActionButtonAudio = floating_action_button_audio)
-        )
-    }
+//    private fun attachFloatingActionButtonLayoutListener() {
+//        floating_action_button.viewTreeObserver.addOnGlobalLayoutListener(
+//            FloatingActionButtonGlobalLayoutListener(
+//                floatingActionButton = floating_action_button
+//            )
+//        )
+//        floating_action_button_screenshot.viewTreeObserver.addOnGlobalLayoutListener(
+//            FloatingActionButtonScreenshotGlobalLayoutListener(floatingActionButtonScreenshot = floating_action_button_screenshot)
+//        )
+//        floating_action_button_video.viewTreeObserver.addOnGlobalLayoutListener(
+//            FloatingActionButtonVideoGlobalLayoutListener(floatingActionButtonVideo = floating_action_button_video)
+//        )
+//
+//        floating_action_button_audio.viewTreeObserver.addOnGlobalLayoutListener(
+//            FloatingActionButtonAudioGlobalLayoutListener(floatingActionButtonAudio = floating_action_button_audio)
+//        )
+//    }
 
     private fun animationVisibility() {
         if (isOpen) {
@@ -1022,7 +1022,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 floating_action_button_audio.visibility = View.GONE
                                 textView_counter_audio.visibility = View.VISIBLE
                                 textView_audio_size.visibility = View.VISIBLE
-
                                 floating_action_button.animate()
                                     .rotationBy(360F)
                                     .setDuration(300)
@@ -1038,6 +1037,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                             .start()
                                     }
                                     .start()
+                                workingAnimation = AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
+                                floating_action_button.startAnimation(workingAnimation)
+                                floating_action_button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
 
                             }
                         } else {
@@ -1078,7 +1080,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             mediaRecorderAudio?.start()
             state = true
             withContext(Dispatchers.Main) {
-
                 Toast.makeText(context, R.string.audio_recording_start, Toast.LENGTH_SHORT).show()
             }
             audioCounterStart()
@@ -1113,8 +1114,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun takeForegroundService() {
         workQueueLinked.controlRunnable = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            intentForegroundServiceVideo =
-                Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
+            intentForegroundServiceVideo = Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
             startForegroundServiceVideo()
         } else {
             resetEnqueue()
@@ -1220,6 +1220,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     }
                     .start()
 
+                workingAnimation = AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
+                floating_action_button.startAnimation(workingAnimation)
+                floating_action_button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
                 callEnqueue()
             }
             initRecorder()
@@ -1595,7 +1598,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.WRAP_CONTENT,
                         WindowManager.LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
                     )
@@ -1737,6 +1740,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     private fun audioCounterStart() {
+
         coroutineCallAudioCounter.async {
             try {
                 withContext(Dispatchers.Main) {
@@ -1993,8 +1997,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         if (filePathVideo.exists()) {
                             filePathVideo.delete()
                             finishShareLayout(message = "media")
-                        } else {
-                            finishShareLayout(message = "media_error")
                         }
                     } catch (e: FileNotFoundException) {
                         finishShareLayout(message = "media_error")
@@ -2007,8 +2009,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         if (filePathAudio.exists()) {
                             filePathAudio.delete()
                             finishShareLayout(message = "media")
-                        } else {
-                            finishShareLayout(message = "media_error")
                         }
                     }
                 } catch (e: FileNotFoundException) {
@@ -2021,8 +2021,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (PaintView.filePathScreenShot.exists()) {
                         PaintView.filePathScreenShot.delete()
                         finishShareLayout(message = "media")
-                    } else {
-                        finishShareLayout(message = "media_error")
                     }
                 } catch (e: FileNotFoundException) {
                     finishShareLayout(message = "media_error")
@@ -2337,7 +2335,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
                     )
@@ -2372,13 +2370,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                     spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
                     spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
-                    recyclerViewJiraAttachment =
-                        viewJira.findViewById(R.id.recycler_view_jira_attachment)
+                    recyclerViewJiraAttachment = viewJira.findViewById(R.id.recycler_view_jira_attachment)
                     editTextSummary = viewJira.findViewById(R.id.editText_jira_summary)
                     editTextDescription = viewJira.findViewById(R.id.editText_jira_description)
                     spinnerReporter = viewJira.findViewById(R.id.spinner_jira_issue_reporter)
-                    spinnerLinkedIssue =
-                        viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
+                    spinnerLinkedIssue = viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
                     spinnerIssue = viewJira.findViewById(R.id.spinner_jira_issue_issues)
                     spinnerAssignee = viewJira.findViewById(R.id.spinner_jira_issue_assignee)
                     spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
@@ -2394,8 +2390,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     progressBarJira = viewJira.findViewById(R.id.jira_progressbar)
                     progressBarJiraLayout = viewJira.findViewById(R.id.jira_progressbar_background)
 
-                    val sharedPref =
-                        PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     editTextSummary.setText(sharedPref.getString("jira_summary", null))
                     editTextDescription.setText(sharedPref.getString("jira_description", null))
 
@@ -2768,7 +2763,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
                     )
@@ -2840,6 +2835,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicksSlack(filePathMedia: File) {
         buttonSlackCreate.setSafeOnClickListener {
             slackAuthentication.gatherJiraSpinnerDetails(
@@ -2890,13 +2886,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListChannels: ArrayList<String>,
         arrayListUsers: ArrayList<String>
     ) {
-        spinnerChannelsAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListChannels)
+        spinnerChannelsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListChannels)
         spinnerChannelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerChannels.adapter = spinnerChannelsAdapter
 
-        spinnerUsersAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListUsers)
+        spinnerUsersAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListUsers)
         spinnerUsersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerUsers.adapter = spinnerUsersAdapter
 
