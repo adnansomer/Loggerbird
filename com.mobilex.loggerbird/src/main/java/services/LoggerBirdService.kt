@@ -1252,7 +1252,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             .start()
                     }
                     .start()
-                
                 callEnqueue()
             }
             initRecorder()
