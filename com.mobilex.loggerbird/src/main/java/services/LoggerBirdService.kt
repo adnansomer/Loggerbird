@@ -1,13 +1,7 @@
 package services
 
-import com.slack.api.Slack
-import com.slack.api.methods.response.api.ApiTestResponse
-import com.slack.api.methods.MethodsClient
-import com.slack.api.methods.request.chat.ChatPostMessageRequest
-import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import adapter.RecyclerViewJiraAdapter
 import android.Manifest
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Service
@@ -18,7 +12,6 @@ import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.PixelFormat
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
@@ -35,7 +28,9 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
-import android.view.animation.*
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.view.animation.BounceInterpolator
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
@@ -52,6 +47,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
+import com.slack.api.Slack
+import com.slack.api.methods.request.conversations.ConversationsListRequest
 import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
@@ -85,6 +82,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var windowManagerProgressBar: Any? = null
     private var windowManagerFeedback: Any? = null
     private var windowManagerJira: Any? = null
+
     //private var windowManagerJiraAuth: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
@@ -103,6 +101,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var filePathVideo: File
     private lateinit var filePathAudio: File
     private var isOpen = false
+
     //private lateinit var fabOpen: Animation
     //private lateinit var fabClose: Animation
     private var screenDensity: Int = 0
@@ -138,6 +137,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var cookieBar: CookieBar
     private lateinit var viewFeedback: View
     private lateinit var viewJira: View
+
     //  private lateinit var viewJiraAuth: View
     private lateinit var wrapper: FrameLayout
     private lateinit var floating_action_button_feedback: FloatingActionButton
@@ -161,6 +161,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var layout_jira_summary: TextInputLayout
     private lateinit var editTextSummary: EditText
     private lateinit var editTextDescription: EditText
+
     //  private lateinit var editTextJiraAuthMail: EditText
 //  private lateinit var editTextJiraAuthPassword: EditText
     private lateinit var spinnerReporter: Spinner
@@ -172,17 +173,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerFixVersions: Spinner
     private lateinit var spinnerLabel: Spinner
     private lateinit var spinnerEpicLink: Spinner
-    private lateinit var spinnerSprint:Spinner
+    private lateinit var spinnerSprint: Spinner
     private lateinit var buttonCreate: Button
     internal lateinit var buttonCancel: Button
+
     //  private lateinit var buttonJiraAuthCancel: Button
 //  private lateinit var buttonJiraAuthNext: Button
     private lateinit var layoutJira: FrameLayout
     private lateinit var toolbarJira: Toolbar
     private lateinit var progressBarJira: ProgressBar
     private lateinit var progressBarLayout: FrameLayout
+
     //    private lateinit var layoutJiraAuth: LinearLayout
     private val arrayListJiraFileName: ArrayList<RecyclerViewJiraModel> = ArrayList()
+
     //    private val arrayListJiraProject: ArrayList<String> = ArrayList()
 //    private val arrayListJiraIssueType: ArrayList<String> = ArrayList()
 //    private val arrayListJiraReporter: ArrayList<String> = ArrayList()
@@ -201,7 +205,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerComponentAdapter: ArrayAdapter<String>
     private lateinit var spinnerLabelAdapter: ArrayAdapter<String>
     private lateinit var spinnerEpicLinkAdapter: ArrayAdapter<String>
-    private lateinit var spinnerSprintAdapter:ArrayAdapter<String>
+    private lateinit var spinnerSprintAdapter: ArrayAdapter<String>
 
 
     //Static global variables:
@@ -217,6 +221,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         private lateinit var textView_share_jira: TextView
         private lateinit var textView_share_slack: TextView
         private lateinit var textView_discard: TextView
+
         //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
         private lateinit var textView_counter_audio: TextView
@@ -489,9 +494,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 this.view = view
                 floatingActionButtonView = view
                 floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-                floating_action_button_screenshot = view.findViewById(R.id.fragment_floating_action_button_screenshot)
-                floating_action_button_video = view.findViewById(R.id.fragment_floating_action_button_video)
-                floating_action_button_audio = view.findViewById(R.id.fragment_floating_action_button_audio)
+                floating_action_button_screenshot =
+                    view.findViewById(R.id.fragment_floating_action_button_screenshot)
+                floating_action_button_video =
+                    view.findViewById(R.id.fragment_floating_action_button_video)
+                floating_action_button_audio =
+                    view.findViewById(R.id.fragment_floating_action_button_audio)
                 reveal_linear_layout_share = view.findViewById(R.id.reveal_linear_layout_share)
                 textView_send_email = view.findViewById(R.id.textView_send_email)
                 textView_discard = view.findViewById(R.id.textView_discard)
@@ -777,22 +785,47 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //                    val slack = Slack.getInstance()
 //                    val response = slack.methods().apiTest { it.foo("bar") }
 //                    Log.d("adnanslack",response.toString())
-
-
+                    val a = ""
 
                     val slack = Slack.getInstance()
-                    val token =
-                            "xoxb-1050703475826-1145080262722-ky9ACRsZfZcacuifbgXiZmEZ"
+                    val token = "xoxb-1050703475826-1145080262722-ky9ACRsZfZcacuifbgXiZmEZ"
 
                     val response = slack.methods(token).chatPostMessage { it
-                        .channel("#ozv-team")
-                        .text("selam")
+                            .channel("#ozv-team")
+                            .username("LoggerBird")
+                            .text("Deneme")
                     }
 
+//                    val response2 = slack.methods(token).filesUpload {
+//                        val list = ArrayList<String>()
+//                        list.add("#ozv-team")
+//                        it.file(filePathMedia)
+//                        it.filename(filePathMedia.name)
+//                        it.channels(list)
+//                    }
+
+                    val conversationListBuilder = ConversationsListRequest.builder().build()
+                    val conversationListResponse = slack.methods(token).conversationsList(conversationListBuilder).channels.forEach {
+                        Log.d("channel_name",it.name)
+                    }
+
+                    val response3 = slack.methods(token).chatMeMessage {
+                        it.channel("appceasers")
+                        it.text("deneme")
+                    }
+
+
+//                    val response3 = slack.methods(token).channelsList {
+//                        val stringCursor = ArrayList<String>()
+//                        it.cursor(stringCursor)
+//                    }
 
                     activity.runOnUiThread {
-                        Toast.makeText(this.context,response.toString(),Toast.LENGTH_SHORT).show()
+//                        Toast.makeText(context, it.name.toString(), Toast.LENGTH_LONG).show()
+                        Toast.makeText(this.context, response3.toString(), Toast.LENGTH_LONG).show()
+
                     }
+
                 }.start()
 
             }
@@ -1001,7 +1034,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (!audioRecording) {
                         if (arrayListFileName.size <= 10) {
                             val fileDirectory: File = context.filesDir
-                            filePathAudio = File(fileDirectory, "logger_bird_audio" + System.currentTimeMillis().toString() + "recording.3gpp")
+                            filePathAudio = File(
+                                fileDirectory,
+                                "logger_bird_audio" + System.currentTimeMillis()
+                                    .toString() + "recording.3gpp"
+                            )
                             addFileNameList(fileName = filePathAudio.absolutePath)
                             mediaRecorderAudio = MediaRecorder()
                             mediaRecorderAudio?.setAudioSource(MediaRecorder.AudioSource.MIC)
@@ -1038,7 +1075,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             }
                         } else {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(context, R.string.session_file_limit, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    R.string.session_file_limit,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     } else {
@@ -1127,7 +1168,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             startScreenRecording()
                         } else {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(context, R.string.session_file_limit, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    R.string.session_file_limit,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     } else {
@@ -1207,7 +1252,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             .start()
                     }
                     .start()
-
+                
                 callEnqueue()
             }
             initRecorder()
@@ -1603,8 +1648,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         viewFeedback,
                         windowManagerParamsFeedback
                     )
-                    floating_action_button_feedback = viewFeedback.findViewById(R.id.floating_action_button_feed)
-                    floating_action_button_feed_close = viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
+                    floating_action_button_feedback =
+                        viewFeedback.findViewById(R.id.floating_action_button_feed)
+                    floating_action_button_feed_close =
+                        viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
                     editText_feedback = viewFeedback.findViewById(R.id.editText_feed_back)
                     buttonClicksFeedback()
                 }
@@ -1975,42 +2022,42 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         coroutineCallDiscardFile.async {
             try {
                 if (this@LoggerBirdService::filePathVideo.isInitialized) {
-                    try{
+                    try {
                         if (filePathVideo.exists()) {
                             filePathVideo.delete()
                             finishShareLayout(message = "media")
-                        }else{
+                        } else {
                             finishShareLayout(message = "media_error")
                         }
-                    }catch (e : FileNotFoundException){
+                    } catch (e: FileNotFoundException) {
                         finishShareLayout(message = "media_error")
                         e.printStackTrace()
                     }
                 }
 
-                try{
+                try {
                     if (this@LoggerBirdService::filePathAudio.isInitialized) {
                         if (filePathAudio.exists()) {
                             filePathAudio.delete()
                             finishShareLayout(message = "media")
-                        }else{
+                        } else {
                             finishShareLayout(message = "media_error")
                         }
                     }
-                }catch (e : FileNotFoundException){
+                } catch (e: FileNotFoundException) {
                     finishShareLayout(message = "media_error")
                     e.printStackTrace()
                 }
 
 
-                try{
-                    if(PaintView.filePathScreenShot.exists()){
+                try {
+                    if (PaintView.filePathScreenShot.exists()) {
                         PaintView.filePathScreenShot.delete()
                         finishShareLayout(message = "media")
-                    }else{
+                    } else {
                         finishShareLayout(message = "media_error")
                     }
-                }catch (e : FileNotFoundException){
+                } catch (e: FileNotFoundException) {
                     finishShareLayout(message = "media_error")
                     e.printStackTrace()
                 }
@@ -2030,8 +2077,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             try {
                 if (filePathMedia.exists()) {
                     LoggerBird.callEmailSender(context = context, file = filePathMedia)
-                    LoggerBird.deleteSingleMediaFile(this@LoggerBirdService, filePathMedia = filePathMedia)
-                }else{
+                    LoggerBird.deleteSingleMediaFile(
+                        this@LoggerBirdService,
+                        filePathMedia = filePathMedia
+                    )
+                } else {
                     finishShareLayout("single_email_error")
                 }
             } catch (e: Exception) {
@@ -2053,7 +2103,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     //detachProgressBar()
                 }
                 "media_error" -> {
-                    Toast.makeText(context, R.string.share_media_delete_error, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.share_media_delete_error, Toast.LENGTH_SHORT)
+                        .show()
                     finishErrorFab()
                     //detachProgressBar()
                 }
@@ -2063,7 +2114,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     detachProgressBar()
                 }
                 "single_email_error" -> {
-                    Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT)
+                        .show()
                     finishErrorFab()
                     detachProgressBar()
                 }
@@ -2071,7 +2123,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     Toast.makeText(context, R.string.jira_sent, Toast.LENGTH_SHORT).show()
                     finishSuccessFab()
                 }
-                "jira_error" ->{
+                "jira_error" -> {
                     Toast.makeText(context, R.string.jira_sent_error, Toast.LENGTH_SHORT).show()
                     progressBarLayout.visibility = View.GONE
                     progressBarJira.visibility = View.GONE
@@ -2082,7 +2134,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun finishSuccessFab(){
+    private fun finishSuccessFab() {
 
         reveal_linear_layout_share.visibility = View.GONE
         Handler().postDelayed({
@@ -2125,7 +2177,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun finishErrorFab(){
+    private fun finishErrorFab() {
 
         reveal_linear_layout_share.visibility = View.GONE
         Handler().postDelayed({
@@ -2179,7 +2231,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.M)
     private fun attachProgressBar() {
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
-        progressBarView = LayoutInflater.from(activity).inflate(R.layout.default_progressbar, rootView, false)
+        progressBarView =
+            LayoutInflater.from(activity).inflate(R.layout.default_progressbar, rootView, false)
         windowManagerParamsProgressBar = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
@@ -2205,7 +2258,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun  detachProgressBar() {
+    private fun detachProgressBar() {
         if (this::progressBarView.isInitialized) {
             (windowManagerProgressBar as WindowManager).removeViewImmediate(progressBarView)
         }
@@ -2295,7 +2348,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
                 arrayListJiraFileName.clear()
             }
-            viewJira = LayoutInflater.from(activity).inflate(R.layout.loggerbird_jira_popup, (this.rootView as ViewGroup), false)
+            viewJira = LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_jira_popup, (this.rootView as ViewGroup), false)
 
             if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsJira = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -2325,9 +2379,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     )
 
                     if (Build.VERSION.SDK_INT >= 23) {
-                        activity.window.navigationBarColor = resources.getColor(R.color.black, theme)
-                        activity.window.statusBarColor = resources.getColor(R.color.black, theme) }
-                    else {
+                        activity.window.navigationBarColor =
+                            resources.getColor(R.color.black, theme)
+                        activity.window.statusBarColor = resources.getColor(R.color.black, theme)
+                    } else {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             activity.window.navigationBarColor = resources.getColor(R.color.black)
                             activity.window.statusBarColor = resources.getColor(R.color.black)
@@ -2336,11 +2391,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                     spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
                     spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
-                    recyclerViewAttachment = viewJira.findViewById(R.id.recycler_view_jira_attachment)
+                    recyclerViewAttachment =
+                        viewJira.findViewById(R.id.recycler_view_jira_attachment)
                     editTextSummary = viewJira.findViewById(R.id.editText_jira_summary)
                     editTextDescription = viewJira.findViewById(R.id.editText_jira_description)
                     spinnerReporter = viewJira.findViewById(R.id.spinner_jira_issue_reporter)
-                    spinnerLinkedIssue = viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
+                    spinnerLinkedIssue =
+                        viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
                     spinnerIssue = viewJira.findViewById(R.id.spinner_jira_issue_issues)
                     spinnerAssignee = viewJira.findViewById(R.id.spinner_jira_issue_assignee)
                     spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
@@ -2356,7 +2413,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     progressBarJira = viewJira.findViewById(R.id.jira_progressbar)
                     progressBarLayout = viewJira.findViewById(R.id.jira_progressbar_background)
 
-                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                    val sharedPref =
+                        PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     editTextSummary.setText(sharedPref.getString("jira_summary", null))
                     editTextDescription.setText(sharedPref.getString("jira_description", null))
 
@@ -2366,6 +2424,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         jiraTask = "get",
                         createMethod = "normal"
                     )
+
                     initializeJiraSpinner(
                         jiraAuthentication.getArrayListProjects(),
                         jiraAuthentication.getArrayListIssueTypes(),
@@ -2542,11 +2601,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
-    private fun checkJiraEmpty() {
-
-        //project,issue-type,summary,reporter,linked issue,assignee,priority must not be empty!
-    }
-
     private fun addJiraFileNames(filePathMedia: File): ArrayList<RecyclerViewJiraModel> {
         arrayListJiraFileName.add(RecyclerViewJiraModel(file = filePathMedia))
         arrayListJiraFileName.add(RecyclerViewJiraModel(file = LoggerBird.filePathSecessionName))
@@ -2582,23 +2636,24 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListPriority: ArrayList<String>,
         arrayListComponent: ArrayList<String>,
         arrayListFixVersions: ArrayList<String>,
-        arrayListLabel:ArrayList<String>,
-        arrayListEpicLink:ArrayList<String>,
-        arrayListSprint:ArrayList<String>){
+        arrayListLabel: ArrayList<String>,
+        arrayListEpicLink: ArrayList<String>,
+        arrayListSprint: ArrayList<String>
+    ) {
 
-            arrayListProjectNames.clear()
-            arrayListIssueTypes.clear()
-            arrayListReporterNames.clear()
-            arrayListLinkedIssues.clear()
-            arrayListIssues.clear()
-            arrayListAssignee.clear()
-            arrayListPriority.clear()
-            arrayListComponent.clear()
-            arrayListFixVersions.clear()
-            arrayListLabel.clear()
-            arrayListEpicLink.clear()
-            arrayListSprint.clear()
-        }
+        arrayListProjectNames.clear()
+        arrayListIssueTypes.clear()
+        arrayListReporterNames.clear()
+        arrayListLinkedIssues.clear()
+        arrayListIssues.clear()
+        arrayListAssignee.clear()
+        arrayListPriority.clear()
+        arrayListComponent.clear()
+        arrayListFixVersions.clear()
+        arrayListLabel.clear()
+        arrayListEpicLink.clear()
+        arrayListSprint.clear()
+    }
 
 
     internal fun initializeJiraSpinner(
@@ -2611,9 +2666,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListPriority: ArrayList<String>,
         arrayListComponent: ArrayList<String>,
         arrayListFixVersions: ArrayList<String>,
-        arrayListLabel:ArrayList<String>,
-        arrayListEpicLink:ArrayList<String>,
-        arrayListSprint:ArrayList<String>
+        arrayListLabel: ArrayList<String>,
+        arrayListEpicLink: ArrayList<String>,
+        arrayListSprint: ArrayList<String>
     ) {
 
         spinnerProjectAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
@@ -2666,45 +2721,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
         progressBarLayout.visibility = View.GONE
         progressBarJira.visibility = View.GONE
-
-
     }
-
-//    private fun addJiraProjectNames(): ArrayList<String> {
-//        arrayListJiraProject.add("project_a")
-//        arrayListJiraProject.add("project_b")
-//        return arrayListJiraProject
-//    }
-//
-//    private fun addJiraIssueTypes(): ArrayList<String> {
-//        arrayListJiraIssueType.add("issue_type_a")
-//        arrayListJiraIssueType.add("issue_type_b")
-//        return arrayListJiraIssueType
-//    }
-//
-//    private fun addJiraReporterNames(): ArrayList<String> {
-//        arrayListJiraReporter.add("reporter_a")
-//        arrayListJiraReporter.add("reporter_b")
-//        return arrayListJiraReporter
-//    }
-//
-//    private fun addJiraLinkedIssues(): ArrayList<String> {
-//        arrayListJiraLinkedIssue.add("linked_issues_a")
-//        arrayListJiraLinkedIssue.add("linked_issues_b")
-//        return arrayListJiraLinkedIssue
-//    }
-//
-//    private fun addJiraAssignee(): ArrayList<String> {
-//        arrayListJiraAssignee.add("assignee_a")
-//        arrayListJiraAssignee.add("assignee_b")
-//        return arrayListJiraAssignee
-//    }
-//
-//    private fun addJiraPriority(): ArrayList<String> {
-//        arrayListJiraPriority.add("priority_a")
-//        arrayListJiraPriority.add("priority_b")
-//        return arrayListJiraPriority
-//    }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {
@@ -2715,3 +2732,4 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 }
+
