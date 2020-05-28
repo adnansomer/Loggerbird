@@ -64,6 +64,9 @@
     <string name="jira_summary_empty">Summary cannot be empty!</string>
     <string name="jira_summary_unhandled_exception">unhandled_exception:</string>
     <string name="jira_description_unhandled_exception">An unhandled exception detected check log file for more details!</string>
+    <string name="slack_message_empty">Message cannot be empty!</string>
+    <string name="slack_sent">Slack message sent!</string>
+    <string name="slack_sent_error">An error happened while trying to send slack message!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -113,8 +116,21 @@
     <string name="button_jira_cancel">Cancel</string>
     <string name="button_jira_init_next">Next</string>
     <string name="button_jira_init_cancel">Cancel</string>
-    <!-- recycler_view_item_popup-->
+    <!-- recycler_view_jira_item_popup-->
     <string name="textView_recyclerView_popup_title">Are you sure to remove attachment from your issue?</string>
     <string name="button_recyclerView_yes">Yes</string>
     <string name="button_recyclerView_no">No</string>
+    <!-- loggerbird_slack_popup-->
+    <string name="textView_slack_title">Create Slack Message</string>
+    <string name="textView_slack_message">Message</string>
+    <string name="editText_slack_message">Write your message here!</string>
+    <string name="textView_slack_channel">Channels</string>
+    <string name="textView_slack_user">Users</string>
+    <string name="textView_slack_attachment">Attachments</string>
+    <string name="button_slack_cancel">Cancel</string>
+    <string name="button_slack_create">Create</string>
+    <!-- recycler_view_slack_item_popup-->
+    <string name="textView_recyclerView_slack_popup_title">Are you sure to remove attachment from your Slack Message?</string>
+    <string name="button_recyclerView_slack_yes">Yes</string>
+    <string name="button_recyclerView_slack_no">No</string>
 </resources>

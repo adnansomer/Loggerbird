@@ -1,13 +1,8 @@
 package services
 
-import com.slack.api.Slack
-import com.slack.api.methods.response.api.ApiTestResponse
-import com.slack.api.methods.MethodsClient
-import com.slack.api.methods.request.chat.ChatPostMessageRequest
-import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import adapter.RecyclerViewJiraAdapter
+import adapter.RecyclerViewSlackAdapter
 import android.Manifest
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Service
@@ -15,10 +10,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.PixelFormat
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
@@ -60,7 +53,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import listeners.*
 import loggerbird.LoggerBird
-import models.RecyclerViewJiraModel
+import models.RecyclerViewModel
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
@@ -68,6 +61,7 @@ import paint.PaintView
 import utils.EmailUtil
 import utils.JiraAuthentication
 import utils.LinkedBlockingQueueUtil
+import utils.SlackAuthentication
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.*
@@ -85,12 +79,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var windowManagerProgressBar: Any? = null
     private var windowManagerFeedback: Any? = null
     private var windowManagerJira: Any? = null
+    private var windowManagerSlack: Any? = null
     //private var windowManagerJiraAuth: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
     private lateinit var windowManagerParamsJira: WindowManager.LayoutParams
     private lateinit var windowManagerParamsJiraAuth: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsSlack: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -138,6 +134,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var cookieBar: CookieBar
     private lateinit var viewFeedback: View
     private lateinit var viewJira: View
+    private lateinit var viewSlack: View
     //  private lateinit var viewJiraAuth: View
     private lateinit var wrapper: FrameLayout
     private lateinit var floating_action_button_feedback: FloatingActionButton
@@ -152,12 +149,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private val arrayListFileName: ArrayList<String> = ArrayList()
     private val coroutineCallFilesAction: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlFileAction: Boolean = false
-    internal val jiraAuthentication = JiraAuthentication()
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarView: View
+
+    //Jira:
+    internal val jiraAuthentication = JiraAuthentication()
+    private val slackAuthentication = SlackAuthentication()
     private lateinit var spinnerProject: Spinner
     private lateinit var spinnerIssueType: Spinner
-    private lateinit var recyclerViewAttachment: RecyclerView
+    private lateinit var recyclerViewJiraAttachment: RecyclerView
     private lateinit var layout_jira_summary: TextInputLayout
     private lateinit var editTextSummary: EditText
     private lateinit var editTextDescription: EditText
@@ -172,17 +172,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerFixVersions: Spinner
     private lateinit var spinnerLabel: Spinner
     private lateinit var spinnerEpicLink: Spinner
-    private lateinit var spinnerSprint:Spinner
-    private lateinit var buttonCreate: Button
-    internal lateinit var buttonCancel: Button
+    private lateinit var spinnerSprint: Spinner
+    private lateinit var buttonJiraCreate: Button
+    internal lateinit var buttonJiraCancel: Button
     //  private lateinit var buttonJiraAuthCancel: Button
 //  private lateinit var buttonJiraAuthNext: Button
     private lateinit var layoutJira: FrameLayout
     private lateinit var toolbarJira: Toolbar
     private lateinit var progressBarJira: ProgressBar
-    private lateinit var progressBarLayout: FrameLayout
+    private lateinit var progressBarJiraLayout: FrameLayout
     //    private lateinit var layoutJiraAuth: LinearLayout
-    private val arrayListJiraFileName: ArrayList<RecyclerViewJiraModel> = ArrayList()
+    private val arrayListJiraFileName: ArrayList<RecyclerViewModel> = ArrayList()
     //    private val arrayListJiraProject: ArrayList<String> = ArrayList()
 //    private val arrayListJiraIssueType: ArrayList<String> = ArrayList()
 //    private val arrayListJiraReporter: ArrayList<String> = ArrayList()
@@ -201,7 +201,21 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerComponentAdapter: ArrayAdapter<String>
     private lateinit var spinnerLabelAdapter: ArrayAdapter<String>
     private lateinit var spinnerEpicLinkAdapter: ArrayAdapter<String>
-    private lateinit var spinnerSprintAdapter:ArrayAdapter<String>
+    private lateinit var spinnerSprintAdapter: ArrayAdapter<String>
+
+    //Slack:
+    private lateinit var buttonSlackCreate: Button
+    internal lateinit var buttonSlackCancel: Button
+    private lateinit var spinnerChannels: Spinner
+    private lateinit var spinnerUsers: Spinner
+    private lateinit var editTextMessage: EditText
+    private lateinit var spinnerChannelsAdapter: ArrayAdapter<String>
+    private lateinit var spinnerUsersAdapter: ArrayAdapter<String>
+    private lateinit var slackAdapter: RecyclerViewSlackAdapter
+    private lateinit var recyclerViewSlackAttachment: RecyclerView
+    private val arrayListSlackFileName: ArrayList<RecyclerViewModel> = ArrayList()
+    private lateinit var progressBarSlack: ProgressBar
+    private lateinit var progressBarSlackLayout: FrameLayout
 
 
     //Static global variables:
@@ -489,9 +503,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 this.view = view
                 floatingActionButtonView = view
                 floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-                floating_action_button_screenshot = view.findViewById(R.id.fragment_floating_action_button_screenshot)
-                floating_action_button_video = view.findViewById(R.id.fragment_floating_action_button_video)
-                floating_action_button_audio = view.findViewById(R.id.fragment_floating_action_button_audio)
+                floating_action_button_screenshot =
+                    view.findViewById(R.id.fragment_floating_action_button_screenshot)
+                floating_action_button_video =
+                    view.findViewById(R.id.fragment_floating_action_button_video)
+                floating_action_button_audio =
+                    view.findViewById(R.id.fragment_floating_action_button_audio)
                 reveal_linear_layout_share = view.findViewById(R.id.reveal_linear_layout_share)
                 textView_send_email = view.findViewById(R.id.textView_send_email)
                 textView_discard = view.findViewById(R.id.textView_discard)
@@ -772,33 +789,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
 
             textView_share_slack.setOnClickListener {
-
-                Thread {
-//                    val slack = Slack.getInstance()
-//                    val response = slack.methods().apiTest { it.foo("bar") }
-//                    Log.d("adnanslack",response.toString())
-
-
-
-                    val slack = Slack.getInstance()
-                    val token =
-                            "xoxb-1050703475826-1145080262722-ky9ACRsZfZcacuifbgXiZmEZ"
-
-                    val response = slack.methods(token).chatPostMessage { it
-                        .channel("#ozv-team")
-                        .text("selam")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
                     }
 
-
-                    activity.runOnUiThread {
-                        Toast.makeText(this.context,response.toString(),Toast.LENGTH_SHORT).show()
-                    }
-                }.start()
-
+                    initializeSlackLayout(filePathMedia = filePathMedia)
+                }
             }
 
             textView_discard.setOnClickListener {
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                    attachProgressBar()
 //                }
                 discardMediaFile()
@@ -1001,7 +1002,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (!audioRecording) {
                         if (arrayListFileName.size <= 10) {
                             val fileDirectory: File = context.filesDir
-                            filePathAudio = File(fileDirectory, "logger_bird_audio" + System.currentTimeMillis().toString() + "recording.3gpp")
+                            filePathAudio = File(
+                                fileDirectory,
+                                "logger_bird_audio" + System.currentTimeMillis().toString() + "recording.3gpp"
+                            )
                             addFileNameList(fileName = filePathAudio.absolutePath)
                             mediaRecorderAudio = MediaRecorder()
                             mediaRecorderAudio?.setAudioSource(MediaRecorder.AudioSource.MIC)
@@ -1038,7 +1042,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             }
                         } else {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(context, R.string.session_file_limit, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    R.string.session_file_limit,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     } else {
@@ -1127,7 +1135,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             startScreenRecording()
                         } else {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(context, R.string.session_file_limit, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    R.string.session_file_limit,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     } else {
@@ -1603,8 +1615,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         viewFeedback,
                         windowManagerParamsFeedback
                     )
-                    floating_action_button_feedback = viewFeedback.findViewById(R.id.floating_action_button_feed)
-                    floating_action_button_feed_close = viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
+                    floating_action_button_feedback =
+                        viewFeedback.findViewById(R.id.floating_action_button_feed)
+                    floating_action_button_feed_close =
+                        viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
                     editText_feedback = viewFeedback.findViewById(R.id.editText_feed_back)
                     buttonClicksFeedback()
                 }
@@ -1975,42 +1989,42 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         coroutineCallDiscardFile.async {
             try {
                 if (this@LoggerBirdService::filePathVideo.isInitialized) {
-                    try{
+                    try {
                         if (filePathVideo.exists()) {
                             filePathVideo.delete()
                             finishShareLayout(message = "media")
-                        }else{
+                        } else {
                             finishShareLayout(message = "media_error")
                         }
-                    }catch (e : FileNotFoundException){
+                    } catch (e: FileNotFoundException) {
                         finishShareLayout(message = "media_error")
                         e.printStackTrace()
                     }
                 }
 
-                try{
+                try {
                     if (this@LoggerBirdService::filePathAudio.isInitialized) {
                         if (filePathAudio.exists()) {
                             filePathAudio.delete()
                             finishShareLayout(message = "media")
-                        }else{
+                        } else {
                             finishShareLayout(message = "media_error")
                         }
                     }
-                }catch (e : FileNotFoundException){
+                } catch (e: FileNotFoundException) {
                     finishShareLayout(message = "media_error")
                     e.printStackTrace()
                 }
 
 
-                try{
-                    if(PaintView.filePathScreenShot.exists()){
+                try {
+                    if (PaintView.filePathScreenShot.exists()) {
                         PaintView.filePathScreenShot.delete()
                         finishShareLayout(message = "media")
-                    }else{
+                    } else {
                         finishShareLayout(message = "media_error")
                     }
-                }catch (e : FileNotFoundException){
+                } catch (e: FileNotFoundException) {
                     finishShareLayout(message = "media_error")
                     e.printStackTrace()
                 }
@@ -2030,8 +2044,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             try {
                 if (filePathMedia.exists()) {
                     LoggerBird.callEmailSender(context = context, file = filePathMedia)
-                    LoggerBird.deleteSingleMediaFile(this@LoggerBirdService, filePathMedia = filePathMedia)
-                }else{
+                    LoggerBird.deleteSingleMediaFile(
+                        this@LoggerBirdService,
+                        filePathMedia = filePathMedia
+                    )
+                } else {
                     finishShareLayout("single_email_error")
                 }
             } catch (e: Exception) {
@@ -2053,7 +2070,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     //detachProgressBar()
                 }
                 "media_error" -> {
-                    Toast.makeText(context, R.string.share_media_delete_error, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.share_media_delete_error, Toast.LENGTH_SHORT)
+                        .show()
                     finishErrorFab()
                     //detachProgressBar()
                 }
@@ -2063,7 +2081,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     detachProgressBar()
                 }
                 "single_email_error" -> {
-                    Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT)
+                        .show()
                     finishErrorFab()
                     detachProgressBar()
                 }
@@ -2071,18 +2090,33 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     Toast.makeText(context, R.string.jira_sent, Toast.LENGTH_SHORT).show()
                     finishSuccessFab()
                 }
-                "jira_error" ->{
+                "jira_error" -> {
+                    removeJiraLayout()
                     Toast.makeText(context, R.string.jira_sent_error, Toast.LENGTH_SHORT).show()
-                    progressBarLayout.visibility = View.GONE
+                    progressBarJiraLayout.visibility = View.GONE
                     progressBarJira.visibility = View.GONE
                     finishErrorFab()
                 }
+                "slack" -> {
+                    Toast.makeText(context, R.string.slack_sent, Toast.LENGTH_SHORT).show()
+                    finishSuccessFab()
+                }
+                "slack_error" -> {
+                    removeSlackLayout()
+                    Toast.makeText(context, R.string.slack_sent_error, Toast.LENGTH_SHORT).show()
+                    progressBarSlackLayout.visibility = View.GONE
+                    progressBarSlack.visibility = View.GONE
+                    finishErrorFab()
+                }
+            }
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
             }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun finishSuccessFab(){
+    private fun finishSuccessFab() {
 
         reveal_linear_layout_share.visibility = View.GONE
         Handler().postDelayed({
@@ -2125,8 +2159,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun finishErrorFab(){
-
+    private fun finishErrorFab() {
         reveal_linear_layout_share.visibility = View.GONE
         Handler().postDelayed({
             floating_action_button.animate()
@@ -2179,7 +2212,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.M)
     private fun attachProgressBar() {
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
-        progressBarView = LayoutInflater.from(activity).inflate(R.layout.default_progressbar, rootView, false)
+        progressBarView =
+            LayoutInflater.from(activity).inflate(R.layout.default_progressbar, rootView, false)
         windowManagerParamsProgressBar = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
@@ -2205,7 +2239,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun  detachProgressBar() {
+    private fun detachProgressBar() {
         if (this::progressBarView.isInitialized) {
             (windowManagerProgressBar as WindowManager).removeViewImmediate(progressBarView)
         }
@@ -2295,14 +2329,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
                 arrayListJiraFileName.clear()
             }
-            viewJira = LayoutInflater.from(activity).inflate(R.layout.loggerbird_jira_popup, (this.rootView as ViewGroup), false)
+            viewJira = LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_jira_popup, (this.rootView as ViewGroup), false)
 
             if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsJira = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
                     )
@@ -2325,9 +2360,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     )
 
                     if (Build.VERSION.SDK_INT >= 23) {
-                        activity.window.navigationBarColor = resources.getColor(R.color.black, theme)
-                        activity.window.statusBarColor = resources.getColor(R.color.black, theme) }
-                    else {
+                        activity.window.navigationBarColor =
+                            resources.getColor(R.color.black, theme)
+                        activity.window.statusBarColor = resources.getColor(R.color.black, theme)
+                    } else {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             activity.window.navigationBarColor = resources.getColor(R.color.black)
                             activity.window.statusBarColor = resources.getColor(R.color.black)
@@ -2336,11 +2372,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                     spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
                     spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
-                    recyclerViewAttachment = viewJira.findViewById(R.id.recycler_view_jira_attachment)
+                    recyclerViewJiraAttachment =
+                        viewJira.findViewById(R.id.recycler_view_jira_attachment)
                     editTextSummary = viewJira.findViewById(R.id.editText_jira_summary)
                     editTextDescription = viewJira.findViewById(R.id.editText_jira_description)
                     spinnerReporter = viewJira.findViewById(R.id.spinner_jira_issue_reporter)
-                    spinnerLinkedIssue = viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
+                    spinnerLinkedIssue =
+                        viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
                     spinnerIssue = viewJira.findViewById(R.id.spinner_jira_issue_issues)
                     spinnerAssignee = viewJira.findViewById(R.id.spinner_jira_issue_assignee)
                     spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
@@ -2349,14 +2387,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     spinnerLabel = viewJira.findViewById(R.id.spinner_jira_labels)
                     spinnerEpicLink = viewJira.findViewById(R.id.spinner_jira_epic_link)
                     spinnerSprint = viewJira.findViewById(R.id.spinner_jira_sprint)
-                    buttonCreate = viewJira.findViewById(R.id.button_jira_create)
-                    buttonCancel = viewJira.findViewById(R.id.button_jira_cancel)
+                    buttonJiraCreate = viewJira.findViewById(R.id.button_jira_create)
+                    buttonJiraCancel = viewJira.findViewById(R.id.button_jira_cancel)
                     toolbarJira = viewJira.findViewById(R.id.textView_jira_title)
                     layoutJira = viewJira.findViewById(R.id.layout_jira)
                     progressBarJira = viewJira.findViewById(R.id.jira_progressbar)
-                    progressBarLayout = viewJira.findViewById(R.id.jira_progressbar_background)
+                    progressBarJiraLayout = viewJira.findViewById(R.id.jira_progressbar_background)
 
-                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                    val sharedPref =
+                        PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     editTextSummary.setText(sharedPref.getString("jira_summary", null))
                     editTextDescription.setText(sharedPref.getString("jira_description", null))
 
@@ -2366,24 +2405,24 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         jiraTask = "get",
                         createMethod = "normal"
                     )
-                    initializeJiraSpinner(
-                        jiraAuthentication.getArrayListProjects(),
-                        jiraAuthentication.getArrayListIssueTypes(),
-                        jiraAuthentication.getArrayListReporter(),
-                        jiraAuthentication.getArrayListIssueLinkedTypes(),
-                        jiraAuthentication.getArrayListIssues(),
-                        jiraAuthentication.getArrayListAsignee(),
-                        jiraAuthentication.getArrayListPriorities(),
-                        jiraAuthentication.getArrayListComponent(),
-                        jiraAuthentication.getArrayListFixVersions(),
-                        jiraAuthentication.getArrayListLabel(),
-                        jiraAuthentication.getArrayListEpicLink(),
-                        jiraAuthentication.getArrayListSprint()
-                    )
+//                    initializeJiraSpinner(
+//                        jiraAuthentication.getArrayListProjects(),
+//                        jiraAuthentication.getArrayListIssueTypes(),
+//                        jiraAuthentication.getArrayListReporter(),
+//                        jiraAuthentication.getArrayListIssueLinkedTypes(),
+//                        jiraAuthentication.getArrayListIssues(),
+//                        jiraAuthentication.getArrayListAsignee(),
+//                        jiraAuthentication.getArrayListPriorities(),
+//                        jiraAuthentication.getArrayListComponent(),
+//                        jiraAuthentication.getArrayListFixVersions(),
+//                        jiraAuthentication.getArrayListLabel(),
+//                        jiraAuthentication.getArrayListEpicLink(),
+//                        jiraAuthentication.getArrayListSprint()
+//                    )
 
                     initializeJiraRecyclerView(filePathMedia = filePathMedia)
                     buttonClicksJira(filePathMedia = filePathMedia)
-                    progressBarLayout.visibility = View.VISIBLE
+                    progressBarJiraLayout.visibility = View.VISIBLE
                     progressBarJira.visibility = View.VISIBLE
                 }
             }
@@ -2399,20 +2438,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
             windowManagerJira = null
             arrayListJiraFileName.clear()
-
-            removeJiraSpinner(
-                jiraAuthentication.getArrayListProjects(),
-                jiraAuthentication.getArrayListIssueTypes(),
-                jiraAuthentication.getArrayListReporter(),
-                jiraAuthentication.getArrayListIssueLinkedTypes(),
-                jiraAuthentication.getArrayListIssues(),
-                jiraAuthentication.getArrayListAsignee(),
-                jiraAuthentication.getArrayListPriorities(),
-                jiraAuthentication.getArrayListComponent(),
-                jiraAuthentication.getArrayListFixVersions(),
-                jiraAuthentication.getArrayListLabel(),
-                jiraAuthentication.getArrayListEpicLink(),
-                jiraAuthentication.getArrayListSprint())
+//
+//            removeJiraSpinner(
+//                jiraAuthentication.getArrayListProjects(),
+//                jiraAuthentication.getArrayListIssueTypes(),
+//                jiraAuthentication.getArrayListReporter(),
+//                jiraAuthentication.getArrayListIssueLinkedTypes(),
+//                jiraAuthentication.getArrayListIssues(),
+//                jiraAuthentication.getArrayListAsignee(),
+//                jiraAuthentication.getArrayListPriorities(),
+//                jiraAuthentication.getArrayListComponent(),
+//                jiraAuthentication.getArrayListFixVersions(),
+//                jiraAuthentication.getArrayListLabel(),
+//                jiraAuthentication.getArrayListEpicLink(),
+//                jiraAuthentication.getArrayListSprint())
         }
     }
 
@@ -2457,7 +2496,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             )
         )
 
-        buttonCreate.setSafeOnClickListener {
+        buttonJiraCreate.setSafeOnClickListener {
             jiraAuthentication.gatherJiraSpinnerDetails(
                 spinnerProject = spinnerProject,
                 spinnerIssueType = spinnerIssueType,
@@ -2480,7 +2519,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (jiraAuthentication.checkSummaryEmpty(activity = activity, context = context)) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     progressBarJira.visibility = View.VISIBLE
-                    progressBarLayout.visibility = View.VISIBLE
+                    progressBarJiraLayout.visibility = View.VISIBLE
                 }
                 jiraAuthentication.callJiraIssue(
                     filePathName = filePathMedia,
@@ -2534,7 +2573,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
         }
 
-        buttonCancel.setSafeOnClickListener {
+        buttonJiraCancel.setSafeOnClickListener {
             removeJiraLayout()
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
@@ -2542,19 +2581,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
-    private fun checkJiraEmpty() {
-
-        //project,issue-type,summary,reporter,linked issue,assignee,priority must not be empty!
-    }
-
-    private fun addJiraFileNames(filePathMedia: File): ArrayList<RecyclerViewJiraModel> {
-        arrayListJiraFileName.add(RecyclerViewJiraModel(file = filePathMedia))
-        arrayListJiraFileName.add(RecyclerViewJiraModel(file = LoggerBird.filePathSecessionName))
+    private fun addJiraFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        arrayListJiraFileName.add(RecyclerViewModel(file = filePathMedia))
+        arrayListJiraFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         return arrayListJiraFileName
     }
 
     private fun initializeJiraRecyclerView(filePathMedia: File) {
-        recyclerViewAttachment.layoutManager =
+        recyclerViewJiraAttachment.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         jiraAdapter = RecyclerViewJiraAdapter(
             addJiraFileNames(filePathMedia = filePathMedia),
@@ -2562,13 +2596,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             activity = activity,
             rootView = rootView
         )
-        recyclerViewAttachment.adapter = jiraAdapter
+        recyclerViewJiraAttachment.adapter = jiraAdapter
     }
 
-    private fun removeJiraFileNames(): ArrayList<RecyclerViewJiraModel> {
+    private fun removeJiraFileNames(): ArrayList<RecyclerViewModel> {
         arrayListJiraFileName.clear()
         jiraAdapter.notifyDataSetChanged()
-        arrayListJiraFileName.add(RecyclerViewJiraModel(file = LoggerBird.filePathSecessionName))
+        arrayListJiraFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         return arrayListJiraFileName
     }
 
@@ -2582,23 +2616,24 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListPriority: ArrayList<String>,
         arrayListComponent: ArrayList<String>,
         arrayListFixVersions: ArrayList<String>,
-        arrayListLabel:ArrayList<String>,
-        arrayListEpicLink:ArrayList<String>,
-        arrayListSprint:ArrayList<String>){
+        arrayListLabel: ArrayList<String>,
+        arrayListEpicLink: ArrayList<String>,
+        arrayListSprint: ArrayList<String>
+    ) {
 
-            arrayListProjectNames.clear()
-            arrayListIssueTypes.clear()
-            arrayListReporterNames.clear()
-            arrayListLinkedIssues.clear()
-            arrayListIssues.clear()
-            arrayListAssignee.clear()
-            arrayListPriority.clear()
-            arrayListComponent.clear()
-            arrayListFixVersions.clear()
-            arrayListLabel.clear()
-            arrayListEpicLink.clear()
-            arrayListSprint.clear()
-        }
+        arrayListProjectNames.clear()
+        arrayListIssueTypes.clear()
+        arrayListReporterNames.clear()
+        arrayListLinkedIssues.clear()
+        arrayListIssues.clear()
+        arrayListAssignee.clear()
+        arrayListPriority.clear()
+        arrayListComponent.clear()
+        arrayListFixVersions.clear()
+        arrayListLabel.clear()
+        arrayListEpicLink.clear()
+        arrayListSprint.clear()
+    }
 
 
     internal fun initializeJiraSpinner(
@@ -2611,60 +2646,72 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListPriority: ArrayList<String>,
         arrayListComponent: ArrayList<String>,
         arrayListFixVersions: ArrayList<String>,
-        arrayListLabel:ArrayList<String>,
-        arrayListEpicLink:ArrayList<String>,
-        arrayListSprint:ArrayList<String>
+        arrayListLabel: ArrayList<String>,
+        arrayListEpicLink: ArrayList<String>,
+        arrayListSprint: ArrayList<String>
     ) {
 
-        spinnerProjectAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
+        spinnerProjectAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
         spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerProject.adapter = spinnerProjectAdapter
 
-        spinnerIssueTypeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
+        spinnerIssueTypeAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
         spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerIssueType.adapter = spinnerIssueTypeAdapter
 
-        spinnerReporterAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListReporterNames)
+        spinnerReporterAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListReporterNames)
         spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerReporter.adapter = spinnerReporterAdapter
 
-        spinnerLinkedIssueAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
+        spinnerLinkedIssueAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
         spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
 
-        spinnerIssueAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssues)
+        spinnerIssueAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssues)
         spinnerIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerIssue.adapter = spinnerIssueAdapter
 
-        spinnerAssigneeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
+        spinnerAssigneeAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
         spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerAssignee.adapter = spinnerAssigneeAdapter
 
-        spinnerPriorityAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
+        spinnerPriorityAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
         spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerPriority.adapter = spinnerPriorityAdapter
 
-        spinnerComponentAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListComponent)
+        spinnerComponentAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListComponent)
         spinnerComponentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerComponent.adapter = spinnerComponentAdapter
 
-        spinnerFixVersionsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListFixVersions)
+        spinnerFixVersionsAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListFixVersions)
         spinnerFixVersionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerFixVersions.adapter = spinnerFixVersionsAdapter
 
-        spinnerLabelAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLabel)
+        spinnerLabelAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLabel)
         spinnerLabelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerLabel.adapter = spinnerLabelAdapter
 
-        spinnerEpicLinkAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListEpicLink)
+        spinnerEpicLinkAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListEpicLink)
         spinnerEpicLinkAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerEpicLink.adapter = spinnerEpicLinkAdapter
 
-        spinnerSprintAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListSprint)
+        spinnerSprintAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListSprint)
         spinnerSprintAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSprint.adapter = spinnerSprintAdapter
 
-        progressBarLayout.visibility = View.GONE
+        progressBarJiraLayout.visibility = View.GONE
         progressBarJira.visibility = View.GONE
 
 
@@ -2705,6 +2752,157 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //        arrayListJiraPriority.add("priority_b")
 //        return arrayListJiraPriority
 //    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeSlackLayout(filePathMedia: File) {
+        try {
+            if (windowManagerSlack != null && this::viewSlack.isInitialized) {
+                (windowManagerSlack as WindowManager).removeViewImmediate(viewSlack)
+                arrayListSlackFileName.clear()
+            }
+            viewSlack = LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_slack_popup, (this.rootView as ViewGroup), false)
+
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsSlack = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerSlack = activity.getSystemService(Context.WINDOW_SERVICE)!!
+
+                if (windowManagerSlack != null) {
+                    (windowManagerSlack as WindowManager).addView(
+                        viewSlack,
+                        windowManagerParamsSlack
+                    )
+
+                    if (Build.VERSION.SDK_INT >= 23) {
+                        activity.window.navigationBarColor =
+                            resources.getColor(R.color.black, theme)
+                        activity.window.statusBarColor = resources.getColor(R.color.black, theme)
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            activity.window.navigationBarColor = resources.getColor(R.color.black)
+                            activity.window.statusBarColor = resources.getColor(R.color.black)
+                        }
+                    }
+
+                    spinnerChannels = viewSlack.findViewById(R.id.spinner_slack_channel)
+                    spinnerUsers = viewSlack.findViewById(R.id.spinner_slack_user)
+                    recyclerViewSlackAttachment =
+                        viewSlack.findViewById(R.id.recycler_view_slack_attachment)
+                    editTextMessage = viewSlack.findViewById(R.id.editText_slack_message)
+                    buttonSlackCancel = viewSlack.findViewById(R.id.button_slack_cancel)
+                    buttonSlackCreate = viewSlack.findViewById(R.id.button_slack_create)
+//                    toolbarJira = viewJira.findViewById(R.id.textView_jira_title)
+//                    layoutJira = viewJira.findViewById(R.id.layout_jira)
+                    progressBarSlack = viewSlack.findViewById(R.id.slack_progressbar)
+                    progressBarSlackLayout = viewSlack.findViewById(R.id.slack_progressbar_background)
+
+                    slackAuthentication.callSlack(
+                        context = context,
+                        activity = activity,
+                        filePathMedia = filePathMedia,
+                        slackTask = "get"
+                    )
+                    initializeSlackRecyclerView(filePathMedia = filePathMedia)
+                    buttonClicksSlack(filePathMedia)
+                    progressBarSlackLayout.visibility = View.VISIBLE
+                    progressBarSlack.visibility = View.VISIBLE
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
+        }
+    }
+
+    private fun removeSlackLayout() {
+        if (windowManagerSlack != null && this::viewSlack.isInitialized) {
+            (windowManagerSlack as WindowManager).removeViewImmediate(viewSlack)
+            windowManagerSlack = null
+            arrayListSlackFileName.clear()
+        }
+    }
+
+    private fun buttonClicksSlack(filePathMedia: File) {
+        buttonSlackCreate.setSafeOnClickListener {
+            slackAuthentication.gatherJiraSpinnerDetails(
+                spinnerChannel = spinnerChannels,
+                spinnerUser = spinnerUsers
+            )
+            slackAuthentication.gatherSlackEditTextDetails(editTextMessage = editTextMessage)
+            slackAuthentication.gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems = arrayListSlackFileName)
+            if (slackAuthentication.checkMessageEmpty(activity = activity, context = context)) {
+                progressBarSlack.visibility = View.VISIBLE
+                progressBarSlackLayout.visibility = View.VISIBLE
+                slackAuthentication.callSlack(
+                    activity = activity,
+                    context = context,
+                    filePathMedia = filePathMedia,
+                    slackTask = "create"
+                )
+            }
+        }
+        buttonSlackCancel.setSafeOnClickListener {
+            removeSlackLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+    }
+
+
+    private fun initializeSlackRecyclerView(filePathMedia: File) {
+        recyclerViewSlackAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        slackAdapter = RecyclerViewSlackAdapter(
+            addSlackFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewSlackAttachment.adapter = slackAdapter
+    }
+
+    private fun addSlackFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        arrayListSlackFileName.add(RecyclerViewModel(file = filePathMedia))
+        arrayListSlackFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        return arrayListSlackFileName
+    }
+
+    internal fun initializeSlackSpinner(
+        arrayListChannels: ArrayList<String>,
+        arrayListUsers: ArrayList<String>
+    ) {
+        spinnerChannelsAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListChannels)
+        spinnerChannelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerChannels.adapter = spinnerChannelsAdapter
+
+        spinnerUsersAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListUsers)
+        spinnerUsersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerUsers.adapter = spinnerUsersAdapter
+
+        progressBarSlack.visibility = View.GONE
+        progressBarSlackLayout.visibility = View.GONE
+    }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {
