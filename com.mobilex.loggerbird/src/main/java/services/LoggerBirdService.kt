@@ -2091,6 +2091,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     finishSuccessFab()
                 }
                 "jira_error" -> {
+                    removeJiraLayout()
                     Toast.makeText(context, R.string.jira_sent_error, Toast.LENGTH_SHORT).show()
                     progressBarJiraLayout.visibility = View.GONE
                     progressBarJira.visibility = View.GONE
@@ -2101,11 +2102,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     finishSuccessFab()
                 }
                 "slack_error" -> {
+                    removeSlackLayout()
                     Toast.makeText(context, R.string.slack_sent_error, Toast.LENGTH_SHORT).show()
                     progressBarSlackLayout.visibility = View.GONE
                     progressBarSlack.visibility = View.GONE
                     finishErrorFab()
                 }
+            }
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
             }
         }
     }
@@ -2155,7 +2160,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun finishErrorFab() {
-
         reveal_linear_layout_share.visibility = View.GONE
         Handler().postDelayed({
             floating_action_button.animate()

@@ -41,6 +41,7 @@ class SlackAuthentication {
     private lateinit var user: String
     private lateinit var channel: String
     private lateinit var arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callSlack(
         activity: Activity,
         context: Context,
@@ -48,32 +49,29 @@ class SlackAuthentication {
         slackTask: String
     ) {
         coroutineCallOkHttpSlack.async {
-            if (internetConnectionUtil.checkNetworkConnection(context = context)) {
-                okHttpSlackAuthentication(
-                    activity = activity,
-                    context = context,
-                    filePathMediaName = filePathMedia,
-                    slackTask = slackTask
-                )
-            } else {
-                activity.runOnUiThread {
-                    Toast.makeText(
-                        context,
-                        R.string.network_check_failure,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                throw LoggerBirdException(
-                    Constants.networkErrorMessage
-                )
-            }
-
             try {
+                if (internetConnectionUtil.checkNetworkConnection(context = context)) {
+                    okHttpSlackAuthentication(
+                        activity = activity,
+                        context = context,
+                        filePathMediaName = filePathMedia,
+                        slackTask = slackTask
+                    )
+                } else {
+                    activity.runOnUiThread {
+                        Toast.makeText(
+                            context,
+                            R.string.network_check_failure,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    throw LoggerBirdException(
+                        Constants.networkErrorMessage
+                    )
+                }
 
             } catch (e: Exception) {
-                e.printStackTrace()
-                LoggerBird.callEnqueue()
-                LoggerBird.callExceptionDetails(exception = e, tag = Constants.slackTag)
+                jiraExceptionHandler(e = e, filePathName = filePathMedia)
             }
         }
     }
@@ -92,9 +90,7 @@ class SlackAuthentication {
         client.newCall(request).enqueue(object : Callback {
             @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
             override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-                LoggerBird.callEnqueue()
-                LoggerBird.callExceptionDetails(exception = e, tag = Constants.slackTag)
+                jiraExceptionHandler(e = e)
             }
 
             @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -133,9 +129,7 @@ class SlackAuthentication {
                         )
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
-                    LoggerBird.callEnqueue()
-                    LoggerBird.callExceptionDetails(exception = e, tag = Constants.slackTag)
+                    jiraExceptionHandler(e = e)
                 }
             }
         })
@@ -224,7 +218,7 @@ class SlackAuthentication {
                 slack.methods(token).chatPostMessage {
                     it
                         .channel(channel)
-                        .username("LoggerBird")
+                        .username(user)
                         .text(message)
                 }
 
@@ -243,12 +237,7 @@ class SlackAuthentication {
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-            activity.runOnUiThread {
-                Toast.makeText(context, R.string.slack_sent_error, Toast.LENGTH_SHORT).show()
-            }
-            LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e , tag = Constants.slackTag)
+            jiraExceptionHandler(e = e, filePathName = filePathMedia)
         }
     }
 
@@ -284,5 +273,22 @@ class SlackAuthentication {
 
     internal fun gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>) {
         this.arrayListRecyclerViewItems = arrayListRecyclerViewItems
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun jiraExceptionHandler(
+        e: Exception? = null,
+        filePathName: File? = null,
+        throwable: Throwable? = null
+    ) {
+        filePathName?.delete()
+        LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
+        e?.printStackTrace()
+        LoggerBird.callEnqueue()
+        LoggerBird.callExceptionDetails(
+            exception = e,
+            tag = Constants.slackTag,
+            throwable = throwable
+        )
     }
 }
