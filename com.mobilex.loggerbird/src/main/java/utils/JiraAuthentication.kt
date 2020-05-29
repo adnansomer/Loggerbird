@@ -16,6 +16,8 @@ import com.atlassian.jira.rest.client.api.domain.*
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.api.domain.input.LinkIssuesInput
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
@@ -25,8 +27,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
+import models.AccountIdService
+import models.JiraUserModel
 import models.RecyclerViewModel
 import okhttp3.*
+import org.json.JSONObject
 import services.LoggerBirdService
 import java.io.*
 import java.net.URI
@@ -44,6 +49,8 @@ class JiraAuthentication {
     private var fixVersionPosition: Int = 0
     private var linkedIssueTypePosition: Int = 0
     private var labelPosition: Int = 0
+    private var assigneePosition: Int = 0
+    private var reporterPosition: Int = 0
     private lateinit var reporter: String
     private lateinit var linkedIssue: String
     private lateinit var issue: String
@@ -76,6 +83,14 @@ class JiraAuthentication {
     private val arrayListEpicLink: ArrayList<String> = ArrayList()
     private val arrayListFields: ArrayList<String> = ArrayList()
     private val arrayListSprint: ArrayList<String> = ArrayList()
+    private val arrayListAccountId: ArrayList<String> = ArrayList()
+    private val arrayListSelf: ArrayList<String> = ArrayList()
+    private val arrayListName: ArrayList<String> = ArrayList()
+
+    companion object {
+        internal lateinit var createdIssueKey: String
+    }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callJiraIssue(
         filePathName: File? = null,
@@ -251,13 +266,14 @@ class JiraAuthentication {
             )
             issueBuilder.setPriorityId(arrayListPrioritiesId[priorityPosition].toLong())
             issueBuilder.setDescription(description)
-
             issueBuilder.setFieldValue("labels", arrayListChoosenLabel)
-//            issueBuilder.setFieldValue("assignee",assignee)
 //            issueBuilder.setFieldValue("reporter",reporter)
 
-//            issueBuilder.setReporterName(reporter)
-//            issueBuilder.setAssigneeName("5eb3efa5ad226b0ba423144a")
+//            val basicUser = BasicUser(URI(arrayListSelf[assigneePosition]),arrayListName[assigneePosition],assignee,arrayListAccountId[assigneePosition])
+//            issueBuilder.setAssigneeName(basicUser.displayName)
+////            issueBuilder.setReporter(basicUser)
+//            issueBuilder.setFieldValue("assignee",basicUser)
+//            issueBuilder.setReporter(basicUser.)
 //        issueBuilder.setAssigneeName("0")
 //            val basicUser = BasicUser(
 //                URI("https://appcaesars.atlassian.net/rest/api/2/user?accountId=5eb3efa5ad226b0ba423144a"),
@@ -279,8 +295,31 @@ class JiraAuthentication {
             }
             val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
             val issueKey = basicIssue.key
+//            createdIssueKey  = issueKey
             val issueUri = basicIssue.self
             val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
+            val jsonObjectAssignee = JsonObject()
+            jsonObjectAssignee.addProperty("accountId", arrayListAccountId[assigneePosition])
+            RetrofitUserJiraClient.getJiraUserClient(url = "https://appcaesars.atlassian.net/rest/api/2/issue/$issueKey/")
+                .create(AccountIdService::class.java)
+                .setAssignee(jsonObject = jsonObjectAssignee)
+                .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<List<JiraUserModel>>,
+                        t: Throwable
+                    ) {
+                        jiraExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<List<JiraUserModel>>,
+                        response: retrofit2.Response<List<JiraUserModel>>
+                    ) {
+                        Log.d("assignee_put_success", response.code().toString())
+                        Log.d("assignee_put_success", assignee)
+                    }
+                })
             if (this.issue.isNotEmpty()) {
                 val linkIssueInput = LinkIssuesInput(
                     issueKey,
@@ -357,6 +396,7 @@ class JiraAuthentication {
         LoggerBirdService.loggerBirdService.finishShareLayout("jira")
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun jiraTaskGatherDetails(
         restClient: JiraRestClient,
         activity: Activity
@@ -367,6 +407,10 @@ class JiraAuthentication {
             arrayListIssueTypes.clear()
             arrayListIssueTypesId.clear()
             arrayListAssignee.clear()
+            arrayListAccountId.clear()
+            arrayListSelf.clear()
+            arrayListName.clear()
+            arrayListIssueTypesId.clear()
             arrayListIssueLinkedTypes.clear()
             arrayListIssues.clear()
             arrayListPriorities.clear()
@@ -386,7 +430,7 @@ class JiraAuthentication {
             jiraTaskGatherProjectKeys(restClient = restClient)
             jiraTaskGatherIssueTypes(restClient = restClient)
             jiraTaskGatherAssignees(restClient = restClient)
-            jiraTaskGatherReporters(restClient = restClient)
+//            jiraTaskGatherReporters(restClient = restClient)
             jiraTaskGatherLinkedIssues(restClient = restClient)
             jiraTaskGatherIssues(restClient = restClient)
             jiraTaskGatherPriorities(restClient = restClient)
@@ -408,9 +452,7 @@ class JiraAuthentication {
                 )
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-            LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
+            jiraExceptionHandler(e = e)
         }
     }
 
@@ -438,57 +480,51 @@ class JiraAuthentication {
     private fun jiraTaskGatherAssignees(restClient: JiraRestClient) {
 
 //        https://appcaesars.atlassian.net/rest/api/2/user/search?query
-//        RetrofitUserJiraClient.getJiraUserClient().create(AccountIdService::class.java)
-//            .getAccountIdList().enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
-//                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-//                override fun onFailure(call: retrofit2.Call<List<JiraUserModel>>, t: Throwable) {
-//                    jiraExceptionHandler(throwable = t)
-//                }
-//
-//                override fun onResponse(
-//                    call: retrofit2.Call<List<JiraUserModel>>,
-//                    response: retrofit2.Response<List<JiraUserModel>>
-//                ) {
-//                    var counter = 0
-//                    do{
-//                        Log.d("response_retrofit", response.raw().body?.toString())
-//                        counter++
-//                    }while (response.body()!!.iterator().hasNext())
-//
-//                    val accountIdList = response.body()?.get(0)
-//                    var accountListCounter = 0
-//                    val userClient = restClient.userClient
-//                    if (accountIdList != null) {
-//                        do {
-//                            if (accountIdList.size > accountListCounter) {
-//                                val user =
-//                                    userClient.getUser(URI("https://appcaesars.atlassian.net/rest/api/2/user?accountId=" + accountIdList[accountListCounter]))
-//                                        .claim()
-//                                arrayListAssignee.add(user.displayName)
-//                            } else {
-//                                break
-//                            }
-//                            accountListCounter++
-//                        } while (accountIdList.iterator().hasNext())
-//                    }
-//                }
-//            })
 
-        val searchClient = restClient.searchClient
-        searchClient.searchJql("project = LGB").claim().issues.forEach {
-            if (it.assignee != null) {
-                if (!arrayListAssignee.contains(it.assignee!!.displayName)) {
-                    arrayListAssignee.add(it.assignee!!.displayName)
+        RetrofitUserJiraClient.getJiraUserClient(url = "https://appcaesars.atlassian.net/rest/api/2/user/")
+            .create(AccountIdService::class.java)
+            .getAccountIdList().enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                override fun onFailure(call: retrofit2.Call<List<JiraUserModel>>, t: Throwable) {
+                    jiraExceptionHandler(throwable = t)
                 }
-            }
 
-            if (it.reporter != null) {
-                if (!arrayListAssignee.contains(it.reporter!!.displayName)) {
-                    arrayListAssignee.add(it.reporter!!.displayName)
+                override fun onResponse(
+                    call: retrofit2.Call<List<JiraUserModel>>,
+                    response: retrofit2.Response<List<JiraUserModel>>
+                ) {
+                    val displayNameList = response.body()
+                    displayNameList?.forEach {
+                        if (it.displayName != null) {
+                            if (!arrayListAssignee.contains(it.displayName!!)) {
+                                arrayListAssignee.add(it.displayName!!)
+                                arrayListReporter.add(it.displayName!!)
+                                arrayListAccountId.add(it.accountId!!)
+                                arrayListSelf.add(it.self!!)
+                                arrayListName.add(it.emailAddress!!)
+                            }
+                        }
+                    }
                 }
-            }
+            })
 
-        }
+//        val searchClient = restClient.searchClient
+//        searchClient.searchJql("project = LGB").claim().issues.forEach {
+//            if (it.assignee != null) {
+//                if (!arrayListAssignee.contains(it.assignee!!.displayName)) {
+//                    arrayListAssignee.add(it.assignee!!.displayName)
+//                }
+//            }
+//
+//            if (it.reporter != null) {
+//                if (!arrayListAssignee.contains(it.reporter!!.displayName)) {
+//                    arrayListAssignee.add(it.reporter!!.displayName)
+//                }
+//            }
+//
+//        }
+//        val userClient = restClient.userClient
+//        userClient.getUser("").claim()
     }
 //            val projectRolesClient = restClient.projectRolesRestClient
 //            val issueClient = restClient.issueClient
@@ -645,9 +681,11 @@ class JiraAuthentication {
         issueType = spinnerIssueType.selectedItem.toString()
         issueTypePosition = spinnerIssueType.selectedItemPosition
         reporter = spinnerReporter.selectedItem.toString()
+        reporterPosition = spinnerReporter.selectedItemPosition
         linkedIssue = spinnerLinkedIssues.selectedItem.toString()
         issue = spinnerIssues.selectedItem.toString()
         assignee = spinnerAssignee.selectedItem.toString()
+        assigneePosition = spinnerAssignee.selectedItemPosition
         priority = spinnerPriority.selectedItem.toString()
         priorityPosition = spinnerPriority.selectedItemPosition
         componentPosition = spinnerComponent.selectedItemPosition
@@ -684,8 +722,6 @@ class JiraAuthentication {
             false
         }
     }
-
-
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
