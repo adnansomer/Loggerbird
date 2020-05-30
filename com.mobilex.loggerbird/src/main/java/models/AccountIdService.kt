@@ -13,4 +13,6 @@ interface AccountIdService {
 //    @Headers("Content-Type: application/json")
     @PUT("assignee")
     fun setAssignee(@Body jsonObject:JsonObject): Call<List<JiraUserModel>>
+    @PUT("?")
+    fun setReporter(@Body jsonObject:JsonObject): Call<List<JiraUserModel>>
 }

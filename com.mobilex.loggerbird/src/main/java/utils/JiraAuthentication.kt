@@ -5,10 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.Spinner
-import android.widget.Toast
+import android.widget.*
 import androidx.annotation.RequiresApi
 import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
@@ -17,7 +14,6 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.api.domain.input.LinkIssuesInput
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
 import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
@@ -31,7 +27,6 @@ import models.AccountIdService
 import models.JiraUserModel
 import models.RecyclerViewModel
 import okhttp3.*
-import org.json.JSONObject
 import services.LoggerBirdService
 import java.io.*
 import java.net.URI
@@ -85,7 +80,8 @@ class JiraAuthentication {
     private val arrayListSprint: ArrayList<String> = ArrayList()
     private val arrayListAccountId: ArrayList<String> = ArrayList()
     private val arrayListSelf: ArrayList<String> = ArrayList()
-    private val arrayListName: ArrayList<String> = ArrayList()
+    private val arrayListEmailAdresses: ArrayList<String> = ArrayList()
+    private val arrayListAvatarUrls: ArrayList<String> = ArrayList()
 
     companion object {
         internal lateinit var createdIssueKey: String
@@ -320,6 +316,32 @@ class JiraAuthentication {
                         Log.d("assignee_put_success", assignee)
                     }
                 })
+
+            val jsonObjectReporter = JsonObject()
+            jsonObjectReporter.addProperty("self", arrayListSelf[reporterPosition])
+            jsonObjectReporter.addProperty("accountId", arrayListAccountId[reporterPosition])
+            jsonObjectReporter.addProperty("emailAddress", arrayListEmailAdresses[reporterPosition])
+            RetrofitUserJiraClient.getJiraUserClient(url = "https://appcaesars.atlassian.net/rest/api/2/issue/$issueKey/")
+                .create(AccountIdService::class.java)
+                .setReporter(jsonObject = jsonObjectReporter)
+                .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<List<JiraUserModel>>,
+                        t: Throwable
+                    ) {
+                        jiraExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<List<JiraUserModel>>,
+                        response: retrofit2.Response<List<JiraUserModel>>
+                    ) {
+                        Log.d("reporter_put_success", response.code().toString())
+                        Log.d("reporter_put_success", reporter)
+                    }
+                })
+
             if (this.issue.isNotEmpty()) {
                 val linkIssueInput = LinkIssuesInput(
                     issueKey,
@@ -409,7 +431,8 @@ class JiraAuthentication {
             arrayListAssignee.clear()
             arrayListAccountId.clear()
             arrayListSelf.clear()
-            arrayListName.clear()
+            arrayListEmailAdresses.clear()
+            arrayListAvatarUrls.clear()
             arrayListIssueTypesId.clear()
             arrayListIssueLinkedTypes.clear()
             arrayListIssues.clear()
@@ -501,7 +524,7 @@ class JiraAuthentication {
                                 arrayListReporter.add(it.displayName!!)
                                 arrayListAccountId.add(it.accountId!!)
                                 arrayListSelf.add(it.self!!)
-                                arrayListName.add(it.emailAddress!!)
+                                arrayListEmailAdresses.add(it.emailAddress!!)
                             }
                         }
                     }
@@ -550,9 +573,9 @@ class JiraAuthentication {
     private fun jiraTaskGatherIssues(restClient: JiraRestClient) {
         val searchClient = restClient.searchClient
         val projectClient = restClient.projectClient
-        arrayListIssues.add("")
-        arrayListLabel.add("")
-        arrayListEpicLink.add("")
+//        arrayListIssues.add("")
+//        arrayListLabel.add("")
+//        arrayListEpicLink.add("")
         projectClient.allProjects.claim().forEach {
             searchClient.searchJql("project=" + it.key).claim().issues.forEach { issue ->
                 //                issue.fields.forEach {
@@ -586,8 +609,8 @@ class JiraAuthentication {
 
     private fun jiraTaskGatherFixComp(restClient: JiraRestClient) {
         val projectClient = restClient.projectClient
-        arrayListComponents.add("")
-        arrayListFixVersions.add("")
+//        arrayListComponents.add("")
+//        arrayListFixVersions.add("")
         projectClient.allProjects.claim().forEach {
             projectClient.getProject(it.key).claim().components.forEach { component ->
                 arrayListComponents.add(component.name)
@@ -663,36 +686,57 @@ class JiraAuthentication {
 
 
     internal fun gatherJiraSpinnerDetails(
-        spinnerProject: Spinner,
-        spinnerIssueType: Spinner,
-        spinnerReporter: Spinner,
-        spinnerLinkedIssues: Spinner,
-        spinnerIssues: Spinner,
-        spinnerAssignee: Spinner,
-        spinnerPriority: Spinner,
-        spinnerComponent: Spinner,
-        spinnerFixVersions: Spinner,
-        spinnerLabel: Spinner,
-        spinnerEpicLink: Spinner,
-        spinnerSprint: Spinner
+//        spinnerProject: Spinner,
+        autoTextViewProject: AutoCompleteTextView,
+//        spinnerIssueType: Spinner,
+        autoTextViewIssueType: AutoCompleteTextView,
+//        spinnerReporter: Spinner,
+        autoTextViewReporter: AutoCompleteTextView,
+//        spinnerLinkedIssues: Spinner,
+        autoTextViewLinkedIssues: AutoCompleteTextView,
+//        spinnerIssues: Spinner,
+        autoTextViewIssues: AutoCompleteTextView,
+//        spinnerAssignee: Spinner,
+        autoTextViewAssignee: AutoCompleteTextView,
+//        spinnerPriority: Spinner,
+        autoTextViewPriority: AutoCompleteTextView,
+//        spinnerComponent: Spinner,
+        autoTextViewComponent: AutoCompleteTextView,
+//        spinnerFixVersions: Spinner,
+        autoTextViewFixVersions: AutoCompleteTextView,
+//        spinnerLabel: Spinner,
+        autoTextViewLabel: AutoCompleteTextView,
+//        spinnerEpicLink: Spinner,
+        autoTextViewEpicLink: AutoCompleteTextView,
+//        spinnerSprint: Spinner
+        autoTextViewSprint: AutoCompleteTextView
     ) {
-        project = spinnerProject.selectedItem.toString()
-        projectPosition = spinnerProject.selectedItemPosition
-        issueType = spinnerIssueType.selectedItem.toString()
-        issueTypePosition = spinnerIssueType.selectedItemPosition
-        reporter = spinnerReporter.selectedItem.toString()
-        reporterPosition = spinnerReporter.selectedItemPosition
-        linkedIssue = spinnerLinkedIssues.selectedItem.toString()
-        issue = spinnerIssues.selectedItem.toString()
-        assignee = spinnerAssignee.selectedItem.toString()
-        assigneePosition = spinnerAssignee.selectedItemPosition
-        priority = spinnerPriority.selectedItem.toString()
-        priorityPosition = spinnerPriority.selectedItemPosition
-        componentPosition = spinnerComponent.selectedItemPosition
-        fixVersionPosition = spinnerFixVersions.selectedItemPosition
-        linkedIssueTypePosition = spinnerLinkedIssues.selectedItemPosition
-        arrayListChoosenLabel.add(spinnerLabel.selectedItem.toString())
-        epicLink = spinnerEpicLink.selectedItem.toString()
+        project = autoTextViewProject.editableText.toString()
+//        project = spinnerProject.selectedItem.toString()
+//        projectPosition = spinnerProject.selectedItemPosition
+        issueType = autoTextViewIssueType.editableText.toString()
+//        issueType = spinnerIssueType.selectedItem.toString()
+//        issueTypePosition = spinnerIssueType.selectedItemPosition
+        reporter = autoTextViewReporter.editableText.toString()
+//        reporter = spinnerReporter.selectedItem.toString()
+//        reporterPosition = spinnerReporter.selectedItemPosition
+        linkedIssue = autoTextViewLinkedIssues.editableText.toString()
+//        linkedIssue = spinnerLinkedIssues.selectedItem.toString()
+        issue = autoTextViewIssues.editableText.toString()
+//        issue = spinnerIssues.selectedItem.toString()
+        assignee = autoTextViewAssignee.editableText.toString()
+//        assignee = spinnerAssignee.selectedItem.toString()
+//        assigneePosition = spinnerAssignee.selectedItemPosition
+        priority = autoTextViewPriority.editableText.toString()
+//        priority = spinnerPriority.selectedItem.toString()
+//        priorityPosition = spinnerPriority.selectedItemPosition
+//        componentPosition = spinnerComponent.selectedItemPosition
+//        fixVersionPosition = spinnerFixVersions.selectedItemPosition
+//        linkedIssueTypePosition = spinnerLinkedIssues.selectedItemPosition
+        arrayListChoosenLabel.add(autoTextViewLabel.editableText.toString())
+//        arrayListChoosenLabel.add(spinnerLabel.selectedItem.toString())
+        epicLink = autoTextViewEpicLink.editableText.toString()
+//        epicLink = spinnerEpicLink.selectedItem.toString()
         //  sprint = spinnerSprint.selectedItem.toString()
     }
 
@@ -721,6 +765,38 @@ class JiraAuthentication {
             }
             false
         }
+    }
+
+    internal fun setProjectPosition(projectPosition: Int) {
+        this.projectPosition = projectPosition
+    }
+
+    internal fun setIssueTypePosition(issueTypePosition: Int) {
+        this.issueTypePosition = issueTypePosition
+    }
+
+    internal fun setReporterPosition(reporterPosition: Int) {
+        this.reporterPosition = reporterPosition
+    }
+
+    internal fun setAssigneePosition(assigneePosition: Int) {
+        this.assigneePosition = assigneePosition
+    }
+
+    internal fun setPriorityPosition(priorityPosition: Int) {
+        this.priorityPosition = priorityPosition
+    }
+
+    internal fun setComponentPosition(componentPosition: Int) {
+        this.componentPosition = componentPosition
+    }
+
+    internal fun setFixVersionsPosition(fixVersionsPosition: Int) {
+        this.fixVersionPosition = fixVersionsPosition
+    }
+
+    internal fun setLinkedIssueTypePosition(linkedIssueTypePosition: Int) {
+        this.linkedIssueTypePosition = linkedIssueTypePosition
     }
 
 

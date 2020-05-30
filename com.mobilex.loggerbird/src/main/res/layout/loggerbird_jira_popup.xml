@@ -81,13 +81,22 @@
                                 android:layout_marginBottom="5dp"
                                 android:text="@string/textView_jira_project">
                             </TextView>
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_jira_project"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:singleLine="true"
+                                >
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
+                            <!--
                             <Spinner
                                 android:id="@+id/spinner_jira_project"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent">
                             </Spinner>
-
+-->
                         </LinearLayout>
 
 
@@ -114,12 +123,21 @@
                                 android:textSize="17sp"
                                 android:layout_marginBottom="5dp"
                                 android:text="@string/textView_jira_issue_type" />
-
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_jira_issue_type"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:singleLine="true"
+                                >
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                            <!--
                             <Spinner
                                 android:id="@+id/spinner_jira_issue_type"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginBottom="10dp"/>
+                                -->
                         </LinearLayout>
 
 
@@ -231,12 +249,20 @@
                                 android:text="@string/textView_jira_component"
                                 android:textColor="@color/black"
                                 android:textSize="16sp" />
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_jira_component"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:singleLine="true"
+                                >
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
-                            <Spinner
+                           <!-- <Spinner
                                 android:id="@+id/spinner_jira_issue_component"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>
+                                android:layout_marginBottom="10dp"/>-->
 
                         </LinearLayout>
 
@@ -264,12 +290,20 @@
                                 android:text="@string/textView_jira_reporter"
                                 android:textColor="@color/black"
                                 android:textSize="16sp" />
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_jira_reporter"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:singleLine="true"
+                                >
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
-                            <Spinner
+                            <!--<Spinner
                                 android:id="@+id/spinner_jira_issue_reporter"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>
+                                android:layout_marginBottom="10dp"/-->
 
                         </LinearLayout>
 
@@ -295,11 +329,19 @@
                                 android:textSize="16sp"
                                 android:layout_marginBottom="5dp"
                                 android:text="@string/textView_jira_linked_issue" />
-                            <Spinner
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_jira_linked_issues"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:singleLine="true"
+                                >
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                         <!--   <Spinner
                                 android:id="@+id/spinner_jira_issue_linked_issues"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>
+                                android:layout_marginBottom="10dp"/>-->
 
                         </LinearLayout>
 
@@ -325,11 +367,20 @@
                                 android:textSize="16sp"
                                 android:layout_marginBottom="5dp"
                                 android:text="@string/textView_jira_issue" />
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_jira_issues"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:singleLine="true"
+                                >
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                            <!--
                             <Spinner
                                 android:id="@+id/spinner_jira_issue_issues"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>
+                                android:layout_marginBottom="10dp"/>-->
 
                         </LinearLayout>
 
@@ -355,11 +406,19 @@
                                 android:textSize="16sp"
                                 android:layout_marginBottom="5dp"
                                 android:text="@string/textView_jira_assignee" />
-                            <Spinner
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_jira_assignee"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:singleLine="true"
+                                >
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                          <!--  <Spinner
                                 android:id="@+id/spinner_jira_issue_assignee"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>
+                                android:layout_marginBottom="10dp"/>-->
 
                         </LinearLayout>
 
@@ -387,12 +446,19 @@
                                 android:text="@string/textView_jira_fix_versions"
                                 android:textColor="@color/black"
                                 android:textSize="16sp" />
-
-                            <Spinner
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_jira_fix_versions"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:singleLine="true"
+                                >
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                           <!-- <Spinner
                                 android:id="@+id/spinner_jira_issue_fix_versions"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>
+                                android:layout_marginBottom="10dp"/>-->
 
                         </LinearLayout>
 
@@ -418,11 +484,19 @@
                                 android:textSize="16sp"
                                 android:layout_marginBottom="5dp"
                                 android:text="@string/textView_jira_priority" />
-                            <Spinner
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_jira_priority"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:singleLine="true"
+                                >
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                        <!--    <Spinner
                                 android:id="@+id/spinner_jira_issue_priority"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>
+                                android:layout_marginBottom="10dp"/>-->
 
                         </LinearLayout>
 
@@ -448,11 +522,19 @@
                                 android:textSize="16sp"
                                 android:layout_marginBottom="5dp"
                                 android:text="@string/textView_jira_label" />
-                            <Spinner
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_jira_labels"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:singleLine="true"
+                                >
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                            <!--<Spinner
                                 android:id="@+id/spinner_jira_labels"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>
+                                android:layout_marginBottom="10dp"/>-->
 
                         </LinearLayout>
 
@@ -477,11 +559,20 @@
                                 android:textSize="16sp"
                                 android:layout_marginBottom="5dp"
                                 android:text="@string/textView_jira_epic_link" />
-                            <Spinner
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_jira_epic_link"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:singleLine="true"
+                                >
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+
+                           <!-- <Spinner
                                 android:id="@+id/spinner_jira_epic_link"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>
+                                android:layout_marginBottom="10dp"/>-->
 
                         </LinearLayout>
 
@@ -506,11 +597,19 @@
                                 android:textSize="16sp"
                                 android:layout_marginBottom="5dp"
                                 android:text="@string/textView_jira_sprint" />
-                            <Spinner
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_jira_sprint"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:singleLine="true"
+                                >
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                          <!--  <Spinner
                                 android:id="@+id/spinner_jira_sprint"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>
+                                android:layout_marginBottom="10dp"/>-->
 
                         </LinearLayout>
 
@@ -533,13 +632,14 @@
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/black"
                                 android:textSize="16sp"
-                                android:text="Attachments"
+                                android:text="@string/textView_jira_attachment"
                                 android:layout_marginBottom="5dp" />
 
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
+                                android:gravity="center"
                                 android:layout_marginBottom="10dp">
 
                                 <ImageView
@@ -579,9 +679,10 @@
                             android:textSize="18sp"
                             app:elevation="5dp"
                             android:textAllCaps="false"
-                            android:layout_gravity="left"
+                            android:layout_gravity="start"
                             android:background="@color/colorFab"
                             android:layout_marginRight="5dp"
+                            android:layout_marginLeft="5dp"
                             android:text="@string/button_jira_cancel" />
 
                         <Button
