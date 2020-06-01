@@ -1,5 +1,6 @@
 package utils
 
+import loggerbird.LoggerBird
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -10,8 +11,8 @@ class RetrofitUserJiraClient {
             val client = OkHttpClient.Builder()
                 .addInterceptor(
                     BasicAuthInterceptor(
-                        "appcaesars@gmail.com",
-                        "uPPXsUw0FabxeOa5CkDm0BAE"
+                        LoggerBird.jiraUserName,
+                        LoggerBird.jiraApiToken
                     )
                 )
                 .build()

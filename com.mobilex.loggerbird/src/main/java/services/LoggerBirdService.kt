@@ -58,10 +58,9 @@ import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
 import paint.PaintView
+import utils.*
 import utils.EmailUtil
-import utils.JiraAuthentication
 import utils.LinkedBlockingQueueUtil
-import utils.SlackAuthentication
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.*
@@ -240,6 +239,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private val arrayListSlackFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var progressBarSlack: ProgressBar
     private lateinit var progressBarSlackLayout: FrameLayout
+    private val defaultToast :DefaultToast = DefaultToast()
 
 
     //Static global variables:
@@ -2119,6 +2119,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     Toast.makeText(context, R.string.jira_sent_error, Toast.LENGTH_SHORT).show()
                     progressBarJiraLayout.visibility = View.GONE
                     progressBarJira.visibility = View.GONE
+//                    detachProgressBar()
                     finishErrorFab()
                 }
                 "slack" -> {
@@ -2260,6 +2261,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             progressBarView,
             windowManagerParamsProgressBar
         )
+        progressBarView.isClickable = false
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -2461,6 +2463,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                     initializeJiraRecyclerView(filePathMedia = filePathMedia)
                     buttonClicksJira(filePathMedia = filePathMedia)
+//                    attachProgressBar()
                     progressBarJiraLayout.visibility = View.VISIBLE
                     progressBarJira.visibility = View.VISIBLE
                 }
@@ -2571,6 +2574,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     progressBarJira.visibility = View.VISIBLE
                     progressBarJiraLayout.visibility = View.VISIBLE
+//                    attachProgressBar()
                 }
                 jiraAuthentication.callJiraIssue(
                     filePathName = filePathMedia,
@@ -2924,9 +2928,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //        spinnerSprint.adapter = spinnerSprintAdapter
             progressBarJiraLayout.visibility = View.GONE
             progressBarJira.visibility = View.GONE
+//            detachProgressBar()
         } catch (e: Exception) {
             progressBarJiraLayout.visibility = View.GONE
             progressBarJira.visibility = View.GONE
+//            detachProgressBar()
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)

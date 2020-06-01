@@ -707,11 +707,13 @@
 
     </LinearLayout>
 
-    <FrameLayout
+   <FrameLayout
         android:id="@+id/jira_progressbar_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
         android:background="@color/darkTransparent">
 
         <ProgressBar
