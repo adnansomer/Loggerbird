@@ -15,6 +15,8 @@ interface AccountIdService {
     fun setAssignee(@Body jsonObject:JsonObject): Call<List<JiraUserModel>>
     @PUT("?")
     fun setReporter(@Body jsonObject:JsonObject): Call<List<JiraUserModel>>
+    @PUT("?")
+    fun setSprint(@Body jsonObject:JsonObject): Call<List<JiraUserModel>>
     @GET("sprint")
     fun getSprintList(): Call<JsonObject>
     @GET("board")

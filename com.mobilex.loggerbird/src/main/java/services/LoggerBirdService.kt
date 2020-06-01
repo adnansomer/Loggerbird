@@ -2922,6 +2922,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 autoTextViewSprint.showDropDown()
                 false
             }
+            autoTextViewSprint.setOnItemClickListener { parent, view, position, id ->
+                jiraAuthentication.setSprintPosition(sprintPosition = position)
+            }
 //        spinnerSprintAdapter =
 //            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListSprint)
 //        spinnerSprintAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)

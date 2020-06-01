@@ -44,6 +44,7 @@ class JiraAuthentication {
     private var labelPosition: Int = 0
     private var assigneePosition: Int = 0
     private var reporterPosition: Int = 0
+    private var sprintPosition:Int = 0
     private lateinit var reporter: String
     private lateinit var linkedIssue: String
     private lateinit var issue: String
@@ -58,6 +59,7 @@ class JiraAuthentication {
     private val hashMapComponent: HashMap<String, Iterable<BasicComponent>> = HashMap()
     private val hashMapFixVersions: HashMap<String, Iterable<Version>> = HashMap()
     private val hashMapLinkedIssues: HashMap<String, String> = HashMap()
+    private val hashMapSprint:HashMap<String,String> = HashMap()
     private lateinit var arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>
     private val arrayListProjects: ArrayList<String> = ArrayList()
     private val arrayListProjectKeys: ArrayList<String> = ArrayList()
@@ -75,13 +77,11 @@ class JiraAuthentication {
     private val arrayListChoosenLabel: ArrayList<String> = ArrayList()
     private val arrayListEpicLink: ArrayList<String> = ArrayList()
     private val arrayListFields: ArrayList<String> = ArrayList()
-    private val arrayListSprint: ArrayList<String> = ArrayList()
+    private val arrayListSprintName: ArrayList<String> = ArrayList()
     private val arrayListAccountId: ArrayList<String> = ArrayList()
     private val arrayListSelf: ArrayList<String> = ArrayList()
     private val arrayListEmailAdresses: ArrayList<String> = ArrayList()
     private val arrayListAvatarUrls: ArrayList<String> = ArrayList()
-    private val arrayListSprintId: ArrayList<String> = ArrayList()
-    private val arrayListSprintName: ArrayList<String> = ArrayList()
     private val arrayListBoardId: ArrayList<String> = ArrayList()
     private val jiraDomainName = LoggerBird.jiraDomainName
     private val jiraUserName = LoggerBird.jiraUserName
@@ -350,6 +350,31 @@ class JiraAuthentication {
                     }
                 })
 
+
+            val jsonObjectSprint = JsonObject()
+            val jsonObjectFieldSprint = JsonObject()
+            jsonObjectSprint.addProperty("customfield_10020", hashMapSprint[arrayListSprintName[sprintPosition]])
+            jsonObjectField.add("fields", jsonObjectFieldSprint)
+            RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+                .create(AccountIdService::class.java)
+                .setSprint(jsonObject = jsonObjectSprint)
+                .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<List<JiraUserModel>>,
+                        t: Throwable
+                    ) {
+                        jiraExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<List<JiraUserModel>>,
+                        response: retrofit2.Response<List<JiraUserModel>>
+                    ) {
+                        Log.d("sprint_put_success", response.code().toString())
+                    }
+                })
+
             if (this.issue.isNotEmpty()) {
                 val linkIssueInput = LinkIssuesInput(
                     issueKey,
@@ -452,8 +477,6 @@ class JiraAuthentication {
             arrayListLabel.clear()
             arrayListChoosenLabel.clear()
             arrayListEpicLink.clear()
-            arrayListSprint.clear()
-            arrayListSprintId.clear()
             arrayListSprintName.clear()
             arrayListBoardId.clear()
             hashMapComponent.clear()
@@ -677,8 +700,8 @@ class JiraAuthentication {
                                     Log.d("sprint_details", response.code().toString())
                                     val displaySprintList = response.body()
                                     displaySprintList?.getAsJsonArray("values")?.forEach { sprint ->
-                                        arrayListSprint.add(sprint.asJsonObject["id"].asString)
                                         arrayListSprintName.add(sprint.asJsonObject["name"].asString)
+                                        hashMapSprint[sprint.asJsonObject["name"].asString] = sprint.asJsonObject["id"].asString
                                     }
 
                                 }
@@ -744,9 +767,7 @@ class JiraAuthentication {
         return arrayListEpicLink
     }
 
-    internal fun getArrayListSprint(): ArrayList<String> {
-        return arrayListSprint
-    }
+
 
 
     internal fun gatherJiraSpinnerDetails(
@@ -868,6 +889,10 @@ class JiraAuthentication {
 
     internal fun setLinkedIssueTypePosition(linkedIssueTypePosition: Int) {
         this.linkedIssueTypePosition = linkedIssueTypePosition
+    }
+
+    internal fun setSprintPosition(sprintPosition:Int){
+        this.sprintPosition = sprintPosition
     }
 
 
