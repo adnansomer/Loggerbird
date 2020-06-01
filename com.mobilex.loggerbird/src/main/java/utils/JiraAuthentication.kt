@@ -685,9 +685,6 @@ class JiraAuthentication {
         }
     }
 
-
-
-
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal suspend fun jiraUnhandledExceptionTask(context: Context, activity: Activity) {
         withContext(coroutineCallJira.coroutineContext) {

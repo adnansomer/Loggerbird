@@ -37,16 +37,22 @@ class SlackAuthentication {
     private val internetConnectionUtil = InternetConnectionUtil()
     private val arrayListChannels: ArrayList<String> = ArrayList()
     private val arrayListUsers: ArrayList<String> = ArrayList()
+    private val arrayListUsersName: ArrayList<String> = ArrayList()
     private var message: String = ""
-    private lateinit var user: String
-    private lateinit var channel: String
+    private var messageUser: String = ""
+    private var spinnerPosition : Int = 0
+    internal lateinit var user: String
+    internal lateinit var channel: String
     private lateinit var arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>
+    private val hashMapUser: HashMap<String, String> = HashMap()
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callSlack(
         activity: Activity,
         context: Context,
         filePathMedia: File? = null,
-        slackTask: String
+        slackTask: String,
+        messagePath: String? = null
     ) {
         coroutineCallOkHttpSlack.async {
             try {
@@ -55,7 +61,8 @@ class SlackAuthentication {
                         activity = activity,
                         context = context,
                         filePathMediaName = filePathMedia,
-                        slackTask = slackTask
+                        slackTask = slackTask,
+                        messagePath = messagePath
                     )
                 } else {
                     activity.runOnUiThread {
@@ -80,7 +87,9 @@ class SlackAuthentication {
         context: Context,
         activity: Activity,
         filePathMediaName: File?,
-        slackTask: String
+        slackTask: String,
+        messagePath: String? = null
+
     ) {
         val client = OkHttpClient()
         val request: Request =
@@ -105,7 +114,8 @@ class SlackAuthentication {
                                     activity = activity,
                                     context = context,
                                     filePathMedia = filePathMediaName,
-                                    slackTask = slackTask
+                                    slackTask = slackTask,
+                                    messagePath = messagePath
                                 )
                             } catch (e: Exception) {
                                 e.printStackTrace()
@@ -140,10 +150,13 @@ class SlackAuthentication {
         activity: Activity,
         context: Context,
         filePathMedia: File?,
-        slackTask: String
+        slackTask: String,
+        messagePath: String? = null
     ) {
         val slack = Slack.getInstance()
-        val token = "xoxb-1050703475826-1145080262722-ky9ACRsZfZcacuifbgXiZmEZ"
+    //    val token = "xoxb-1050703475826-1145080262722-ky9ACRsZfZcacuifbgXiZmEZ"
+        val token = "xoxb-1176309019584-1152486968594-k4brnZhlrUXAAy80Be0GmaVv"
+
         when (slackTask) {
             "get" -> gatherSlackDetails(
                 activity = activity,
@@ -157,10 +170,11 @@ class SlackAuthentication {
                 context = context,
                 slack = slack,
                 token = token,
-                filePathMedia = filePathMedia
+                filePathMedia = filePathMedia,
+                messagePath = messagePath
+
             )
         }
-
     }
 
     private suspend fun gatherSlackDetails(
@@ -172,29 +186,34 @@ class SlackAuthentication {
     ) {
         arrayListChannels.clear()
         arrayListUsers.clear()
+        hashMapUser.clear()
+        arrayListUsersName.clear()
         withContext(Dispatchers.IO) {
             slackTaskGatherChannels(slack = slack, token = token)
             slackTaskGatherUsers(slack = slack, token = token)
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeSlackSpinner(
                     arrayListChannels = arrayListChannels,
-                    arrayListUsers = arrayListUsers
+                    arrayListUsers = arrayListUsersName
                 )
             }
         }
     }
 
-    private suspend fun slackTaskGatherChannels(slack: Slack, token: String) {
+    private suspend fun slackTaskGatherUsers(slack: Slack, token: String) {
         withContext(Dispatchers.IO) {
             val userListBuilder = UsersListRequest.builder().build()
             slack.methods(token).usersList(userListBuilder).members.forEach {
-                arrayListUsers.add(it.name)
-//                Log.d("user-name", it.name)
+                arrayListUsers.add(it.id)
+                arrayListUsersName.add(it.name)
+                hashMapUser.put(it.name,it.id)
+//              Log.d("user-name", it.name)
             }
+
         }
     }
 
-    private suspend fun slackTaskGatherUsers(slack: Slack, token: String) {
+    private suspend fun slackTaskGatherChannels(slack: Slack, token: String) {
         withContext(Dispatchers.IO) {
             val conversationListBuilder = ConversationsListRequest.builder().build()
             slack.methods(token).conversationsList(conversationListBuilder).channels.forEach {
@@ -211,21 +230,23 @@ class SlackAuthentication {
         context: Context,
         slack: Slack,
         token: String,
-        filePathMedia: File?
+        filePathMedia: File?,
+        messagePath: String?
     ) {
         try {
             withContext(Dispatchers.IO) {
-                slack.methods(token).chatPostMessage {
-                    it
-                        .channel(channel)
-                        .username(user)
-                        .text(message)
+                if(messagePath != null){
+                    slack.methods(token).chatPostMessage {
+                        it.channel(hashMapUser.get(arrayListUsersName[spinnerPosition]).toString())
+                        it.text(messageUser)
+                        it.asUser(true)
+                    }
                 }
 
-                if (filePathMedia != null) {
+                if (filePathMedia != null && messagePath != null) {
                     slack.methods(token).filesUpload {
                         val list = ArrayList<String>()
-                        list.add(channel)
+                        list.add(hashMapUser.get(arrayListUsersName[spinnerPosition]).toString())
                         it.file(filePathMedia)
                         it.filename(filePathMedia.name)
                         it.channels(list)
@@ -256,12 +277,33 @@ class SlackAuthentication {
         }
     }
 
+    internal fun checkMessageEmptyUser(activity: Activity, context: Context): Boolean{
+        return if (messageUser.isNotEmpty()) {
+            true
+        } else {
+            activity.runOnUiThread {
+                Toast.makeText(
+                    context,
+                    R.string.slack_message_empty,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            false
+        }
+    }
 
-    internal fun gatherJiraSpinnerDetails(
-        spinnerChannel: Spinner,
-        spinnerUser: Spinner
+    internal fun gatherSlackChannelSpinnerDetails(
+        spinnerChannel: Spinner
+        //spinnerUser: Spinner
     ) {
         channel = spinnerChannel.selectedItem.toString()
+        //user = spinnerUser.selectedItem.toString()
+    }
+
+    internal fun gatherSlackUserSpinnerDetails(
+        spinnerUser : Spinner
+    ){
+        spinnerPosition = spinnerUser.selectedItemPosition
         user = spinnerUser.selectedItem.toString()
     }
 
@@ -271,7 +313,13 @@ class SlackAuthentication {
         message = editTextMessage.text.toString()
     }
 
-    internal fun gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>) {
+    internal fun gatherSlackUserEditTextDetails(
+        editTextMessage: EditText
+    ){
+        messageUser = editTextMessage.text.toString()
+    }
+
+    internal fun gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>) {
         this.arrayListRecyclerViewItems = arrayListRecyclerViewItems
     }
 

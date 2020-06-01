@@ -117,6 +117,7 @@
     <string name="button_jira_init_next">Sonraki</string>
     <string name="button_jira_init_cancel">İptal</string>
     <!-- recycler_view_jira_item_popup-->
+    <string name="textView_recyclerView_popup_header">Dosyayi Sil</string>
     <string name="textView_recyclerView_popup_title">Jira görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_yes">Evet</string>
     <string name="button_recyclerView_no">Hayır</string>

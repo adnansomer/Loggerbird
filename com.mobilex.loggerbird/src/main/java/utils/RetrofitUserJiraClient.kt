@@ -7,7 +7,8 @@ class RetrofitUserJiraClient {
         fun getJiraUserClient(): Retrofit {
             return Retrofit.Builder()
                 .baseUrl("https://appcaesars.atlassian.net/rest/api/2/user/")
-                .addConverterFactory(GsonConverterFactory.create()).build()
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
         }
     }
 }
