@@ -805,44 +805,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-
-//                    Thread{
-//                        val slack = Slack.getInstance()
-//                        //val token = "xoxb-1050703475826-1145080262722-ky9ACRsZfZcacuifbgXiZmEZ"
-//                        val token = "xoxb-1176309019584-1152486968594-k4brnZhlrUXAAy80Be0GmaVv"
-//                        val response = slack.methods(token).chatPostMessage{
-//                            it.text("berk naber1")
-//                            it.channel("U014F2X12PP")
-//                            it.asUser(true)
-//                        }
-
-//                        val usersIdentityRequestBuilder = UsersIdentityRequest.UsersIdentityRequestBuilder()
-//                        val response3 = slack.methods(token).usersIdentity{
-//                            it.build(usersIdentityRequestBuilder)
-//
-//                        }
-//
-//                        val usersIdentityRequest = UsergroupsListRequest.builder().build()
-//                        val response3 = slack.methods(token).usersIdentity(usersIdentityRequest) {
-//
-//                        }
-//
-//                        activity.runOnUiThread {
-//                            Toast.makeText(applicationContext,response3.toString(),Toast.LENGTH_LONG).show()
-//                        }
-//
-//                    }.start()
-
-
-
                     initializeSlackLayout(filePathMedia = filePathMedia)
                 }
            }
 
             textView_discard.setOnClickListener {
-                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    attachProgressBar()
-//                }
                 discardMediaFile()
             }
         }
@@ -2238,7 +2205,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
             )
@@ -2246,7 +2213,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
             )
@@ -2256,6 +2223,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             progressBarView,
             windowManagerParamsProgressBar
         )
+        progressBarView.isClickable = false
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -2785,6 +2753,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             resources.getColor(R.color.black, theme)
                         activity.window.statusBarColor = resources.getColor(R.color.black, theme)
                     } else {
+
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             activity.window.navigationBarColor = resources.getColor(R.color.black)
                             activity.window.statusBarColor = resources.getColor(R.color.black)
@@ -2818,6 +2787,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     buttonClicksSlack(filePathMedia)
                     progressBarSlackLayout.visibility = View.VISIBLE
                     progressBarSlack.visibility = View.VISIBLE
+
                 }
             }
         } catch (e: Exception) {
@@ -2851,7 +2821,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     context = context,
                     filePathMedia = filePathMedia,
                     slackTask = "create",
-                    messagePath = slackAuthentication.channel
+                    messagePath = slackAuthentication.channel,
+                    slackType = "channel"
                 )
             }
         }
@@ -2870,10 +2841,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     context = context,
                     filePathMedia = filePathMedia,
                     slackTask = "create",
-                    messagePath = slackAuthentication.user
+                    messagePath = slackAuthentication.user,
+                    slackType = "user"
                 )
             }
-
         }
 
         buttonSlackCancel.setSafeOnClickListener {

@@ -1,5 +1,6 @@
 package utils
 
+import adapter.RecyclerViewSlackAdapter
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -30,6 +31,7 @@ import okhttp3.*
 import services.LoggerBirdService
 import java.io.File
 import java.io.IOException
+import java.net.SocketTimeoutException
 
 class SlackAuthentication {
     private var coroutineCallSlack: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -52,7 +54,9 @@ class SlackAuthentication {
         context: Context,
         filePathMedia: File? = null,
         slackTask: String,
-        messagePath: String? = null
+        messagePath: String? = null,
+        slackType : String? = null
+
     ) {
         coroutineCallOkHttpSlack.async {
             try {
@@ -62,7 +66,8 @@ class SlackAuthentication {
                         context = context,
                         filePathMediaName = filePathMedia,
                         slackTask = slackTask,
-                        messagePath = messagePath
+                        messagePath = messagePath,
+                        slackType = slackType
                     )
                 } else {
                     activity.runOnUiThread {
@@ -78,7 +83,7 @@ class SlackAuthentication {
                 }
 
             } catch (e: Exception) {
-                jiraExceptionHandler(e = e, filePathName = filePathMedia)
+                slackExceptionHandler(e = e, filePathName = filePathMedia)
             }
         }
     }
@@ -88,7 +93,8 @@ class SlackAuthentication {
         activity: Activity,
         filePathMediaName: File?,
         slackTask: String,
-        messagePath: String? = null
+        messagePath: String? = null,
+        slackType : String? = null
 
     ) {
         val client = OkHttpClient()
@@ -99,7 +105,7 @@ class SlackAuthentication {
         client.newCall(request).enqueue(object : Callback {
             @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
             override fun onFailure(call: Call, e: IOException) {
-                jiraExceptionHandler(e = e)
+                slackExceptionHandler(e = e)
             }
 
             @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -115,7 +121,8 @@ class SlackAuthentication {
                                     context = context,
                                     filePathMedia = filePathMediaName,
                                     slackTask = slackTask,
-                                    messagePath = messagePath
+                                    messagePath = messagePath,
+                                    slackType = slackType
                                 )
                             } catch (e: Exception) {
                                 e.printStackTrace()
@@ -139,7 +146,7 @@ class SlackAuthentication {
                         )
                     }
                 } catch (e: Exception) {
-                    jiraExceptionHandler(e = e)
+                    slackExceptionHandler(e = e)
                 }
             }
         })
@@ -151,10 +158,10 @@ class SlackAuthentication {
         context: Context,
         filePathMedia: File?,
         slackTask: String,
-        messagePath: String? = null
+        messagePath: String? = null,
+        slackType : String? = null
     ) {
         val slack = Slack.getInstance()
-    //    val token = "xoxb-1050703475826-1145080262722-ky9ACRsZfZcacuifbgXiZmEZ"
         val token = "xoxb-1176309019584-1152486968594-k4brnZhlrUXAAy80Be0GmaVv"
 
         when (slackTask) {
@@ -171,7 +178,8 @@ class SlackAuthentication {
                 slack = slack,
                 token = token,
                 filePathMedia = filePathMedia,
-                messagePath = messagePath
+                messagePath = messagePath,
+                slackType = slackType
 
             )
         }
@@ -182,7 +190,8 @@ class SlackAuthentication {
         context: Context,
         slack: Slack,
         token: String,
-        filePathMedia: File?
+        filePathMedia: File?,
+        slackType : String? = null
     ) {
         arrayListChannels.clear()
         arrayListUsers.clear()
@@ -207,9 +216,7 @@ class SlackAuthentication {
                 arrayListUsers.add(it.id)
                 arrayListUsersName.add(it.name)
                 hashMapUser.put(it.name,it.id)
-//              Log.d("user-name", it.name)
             }
-
         }
     }
 
@@ -218,7 +225,6 @@ class SlackAuthentication {
             val conversationListBuilder = ConversationsListRequest.builder().build()
             slack.methods(token).conversationsList(conversationListBuilder).channels.forEach {
                 arrayListChannels.add(it.name)
-                // Log.d("channel_name", it.name)
             }
         }
     }
@@ -231,36 +237,104 @@ class SlackAuthentication {
         slack: Slack,
         token: String,
         filePathMedia: File?,
-        messagePath: String?
+        messagePath: String?,
+        slackType: String?
     ) {
-        try {
-            withContext(Dispatchers.IO) {
-                if(messagePath != null){
-                    slack.methods(token).chatPostMessage {
-                        it.channel(hashMapUser.get(arrayListUsersName[spinnerPosition]).toString())
-                        it.text(messageUser)
-                        it.asUser(true)
+
+        when(slackType) {
+
+            "user" ->
+                try {
+                    withContext(Dispatchers.IO) {
+                        if(messagePath != null){
+                            slack.methods(token).chatPostMessage {
+                                it.channel(hashMapUser.get(arrayListUsersName[spinnerPosition]).toString())
+                                it.text(messageUser)
+                                it.asUser(true)
+                            }
+                        }
+
+                        if (filePathMedia != null && messagePath != null) {
+                            var fileCounter = 0
+                            do{
+                                val list = ArrayList<String>()
+                                list.add(hashMapUser.get(arrayListUsersName[spinnerPosition]).toString())
+                                if(RecyclerViewSlackAdapter.ViewHolder.arrayListFilePaths.size > fileCounter){
+                                    val file = RecyclerViewSlackAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
+                                    slack.methods(token).filesUpload {
+                                        it.file(file)
+                                        it.filename(file.name)
+                                        it.channels(list)
+                                    }
+                                    if (file.name != "logger_bird_details.txt") {
+                                        if (file.exists()) {
+                                            file.delete()
+                                        }
+                                    }
+                                }else {
+                                        break
+                                    }
+                                    fileCounter++
+
+                            }while (RecyclerViewSlackAdapter.ViewHolder.arrayListFilePaths.iterator().hasNext())
+
+                            activity.runOnUiThread {
+                                LoggerBirdService.loggerBirdService.buttonSlackCancel.performClick()
+                            }
+                            LoggerBirdService.loggerBirdService.finishShareLayout("slack")
+                        }
                     }
+                } catch (e: Exception) {
+                    slackExceptionHandler(e = e, filePathName = filePathMedia)
                 }
 
-                if (filePathMedia != null && messagePath != null) {
-                    slack.methods(token).filesUpload {
-                        val list = ArrayList<String>()
-                        list.add(hashMapUser.get(arrayListUsersName[spinnerPosition]).toString())
-                        it.file(filePathMedia)
-                        it.filename(filePathMedia.name)
-                        it.channels(list)
+            "channel" ->
+                try {
+                    withContext(Dispatchers.IO) {
+                        if(messagePath != null){
+                            slack.methods(token).chatPostMessage {
+                                it.channel(channel)
+                                it.text(message)
+                                it.asUser(true)
+                            }
+                        }
+
+                        if (filePathMedia != null && messagePath != null) {
+                            var fileCounter = 0
+                            do{
+                                val list = ArrayList<String>()
+                                list.add(channel)
+                                if(RecyclerViewSlackAdapter.ViewHolder.arrayListFilePaths.size > fileCounter){
+                                    val file = RecyclerViewSlackAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
+                                    slack.methods(token).filesUpload {
+                                        it.file(file)
+                                        it.filename(file.name)
+                                        it.channels(list)
+                                    }
+                                    if (file.name != "logger_bird_details.txt") {
+                                        if (file.exists()) {
+                                            file.delete()
+                                        }
+                                    }
+                                }else {
+                                    break
+                                }
+                                fileCounter++
+                            }while (RecyclerViewSlackAdapter.ViewHolder.arrayListFilePaths.iterator().hasNext())
+
+                            activity.runOnUiThread {
+                                LoggerBirdService.loggerBirdService.buttonSlackCancel.performClick()
+                            }
+                            LoggerBirdService.loggerBirdService.finishShareLayout("slack")
+                        }
                     }
-                    activity.runOnUiThread {
-                        LoggerBirdService.loggerBirdService.buttonSlackCancel.performClick()
-                    }
-                    LoggerBirdService.loggerBirdService.finishShareLayout("slack")
+                } catch (e: Exception) {
+                    slackExceptionHandler(e = e, filePathName = filePathMedia, socketTimeOut = java.net.SocketTimeoutException())
                 }
+
             }
-        } catch (e: Exception) {
-            jiraExceptionHandler(e = e, filePathName = filePathMedia)
         }
-    }
+
 
     internal fun checkMessageEmpty(activity: Activity, context: Context): Boolean {
         return if (message.isNotEmpty()) {
@@ -294,10 +368,8 @@ class SlackAuthentication {
 
     internal fun gatherSlackChannelSpinnerDetails(
         spinnerChannel: Spinner
-        //spinnerUser: Spinner
     ) {
         channel = spinnerChannel.selectedItem.toString()
-        //user = spinnerUser.selectedItem.toString()
     }
 
     internal fun gatherSlackUserSpinnerDetails(
@@ -324,14 +396,16 @@ class SlackAuthentication {
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun jiraExceptionHandler(
+    private fun slackExceptionHandler(
         e: Exception? = null,
         filePathName: File? = null,
-        throwable: Throwable? = null
+        throwable: Throwable? = null,
+        socketTimeOut: SocketTimeoutException? = null
     ) {
         filePathName?.delete()
         LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
         e?.printStackTrace()
+        socketTimeOut?.message
         LoggerBird.callEnqueue()
         LoggerBird.callExceptionDetails(
             exception = e,
