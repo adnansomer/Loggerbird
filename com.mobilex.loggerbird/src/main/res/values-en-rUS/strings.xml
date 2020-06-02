@@ -112,6 +112,7 @@
     <string name="textView_jira_sprint">Sprint</string>
     <string name="textView_jira_init_email">E-Mail</string>
     <string name="textView_jira_init_password">Key-Token</string>
+    <string name="textView_jira_attachment">Attachments</string>
     <string name="button_jira_create">Create</string>
     <string name="button_jira_cancel">Cancel</string>
     <string name="button_jira_init_next">Next</string>
