@@ -353,25 +353,28 @@ class JiraAuthentication {
 
             val jsonObjectSprint = JsonObject()
             val jsonObjectFieldSprint = JsonObject()
-            jsonObjectSprint.addProperty("customfield_10020", hashMapSprint[arrayListSprintName[sprintPosition]])
-            jsonObjectField.add("fields", jsonObjectFieldSprint)
+            jsonObjectSprint.addProperty("customfield_10020",hashMapSprint[arrayListSprintName[sprintPosition]]?.toInt())
+            jsonObjectFieldSprint.add("fields", jsonObjectSprint)
             RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
                 .create(AccountIdService::class.java)
-                .setSprint(jsonObject = jsonObjectSprint)
-                .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+                .setSprint(jsonObject = jsonObjectFieldSprint)
+                .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
-                        call: retrofit2.Call<List<JiraUserModel>>,
+                        call: retrofit2.Call<List<JiraSprintModel>>,
                         t: Throwable
                     ) {
                         jiraExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
-                        call: retrofit2.Call<List<JiraUserModel>>,
-                        response: retrofit2.Response<List<JiraUserModel>>
+                        call: retrofit2.Call<List<JiraSprintModel>>,
+                        response: retrofit2.Response<List<JiraSprintModel>>
                     ) {
                         Log.d("sprint_put_success", response.code().toString())
+                        response.body()?.forEach {
+                            Log.d("sprint_put_success_list", it.customfield_10020.toString())
+                        }
                     }
                 })
 
@@ -700,8 +703,10 @@ class JiraAuthentication {
                                     Log.d("sprint_details", response.code().toString())
                                     val displaySprintList = response.body()
                                     displaySprintList?.getAsJsonArray("values")?.forEach { sprint ->
-                                        arrayListSprintName.add(sprint.asJsonObject["name"].asString)
-                                        hashMapSprint[sprint.asJsonObject["name"].asString] = sprint.asJsonObject["id"].asString
+                                        if(sprint.asJsonObject["state"].asString == "active" ){
+                                            arrayListSprintName.add(sprint.asJsonObject["name"].asString)
+                                            hashMapSprint[sprint.asJsonObject["name"].asString] = sprint.asJsonObject["id"].asString
+                                        }
                                     }
 
                                 }
