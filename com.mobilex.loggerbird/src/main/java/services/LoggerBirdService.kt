@@ -58,10 +58,9 @@ import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
 import paint.PaintView
+import utils.*
 import utils.EmailUtil
-import utils.JiraAuthentication
 import utils.LinkedBlockingQueueUtil
-import utils.SlackAuthentication
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.*
@@ -155,24 +154,36 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     //Jira:
     internal val jiraAuthentication = JiraAuthentication()
     private val slackAuthentication = SlackAuthentication()
-    private lateinit var spinnerProject: Spinner
-    private lateinit var spinnerIssueType: Spinner
+    //    private lateinit var spinnerProject: Spinner
+    private lateinit var autoTextViewProject: AutoCompleteTextView
+    //    private lateinit var spinnerIssueType: Spinner
+    private lateinit var autoTextViewIssueType: AutoCompleteTextView
     private lateinit var recyclerViewJiraAttachment: RecyclerView
     private lateinit var layout_jira_summary: TextInputLayout
     private lateinit var editTextSummary: EditText
     private lateinit var editTextDescription: EditText
     //  private lateinit var editTextJiraAuthMail: EditText
 //  private lateinit var editTextJiraAuthPassword: EditText
-    private lateinit var spinnerReporter: Spinner
-    private lateinit var spinnerLinkedIssue: Spinner
-    private lateinit var spinnerIssue: Spinner
-    private lateinit var spinnerAssignee: Spinner
-    private lateinit var spinnerPriority: Spinner
-    private lateinit var spinnerComponent: Spinner
-    private lateinit var spinnerFixVersions: Spinner
-    private lateinit var spinnerLabel: Spinner
-    private lateinit var spinnerEpicLink: Spinner
-    private lateinit var spinnerSprint: Spinner
+//    private lateinit var spinnerReporter: Spinner
+    private lateinit var autoTextViewReporter: AutoCompleteTextView
+    //    private lateinit var spinnerLinkedIssue: Spinner
+    private lateinit var autoTextViewLinkedIssue: AutoCompleteTextView
+    //    private lateinit var spinnerIssue: Spinner
+    private lateinit var autoTextViewIssue: AutoCompleteTextView
+    //    private lateinit var spinnerAssignee: Spinner
+    private lateinit var autoTextViewAssignee: AutoCompleteTextView
+    //    private lateinit var spinnerPriority: Spinner
+    private lateinit var autoTextViewPriority: AutoCompleteTextView
+    //    private lateinit var spinnerComponent: Spinner
+    private lateinit var autoTextViewComponent: AutoCompleteTextView
+    //    private lateinit var spinnerFixVersions: Spinner
+    private lateinit var autoTextViewFixVersions: AutoCompleteTextView
+    //    private lateinit var spinnerLabel: Spinner
+    private lateinit var autoTextViewLabel: AutoCompleteTextView
+    //    private lateinit var spinnerEpicLink: Spinner
+    private lateinit var autoTextViewEpicLink: AutoCompleteTextView
+    //    private lateinit var spinnerSprint: Spinner
+    private lateinit var autoTextViewSprint: AutoCompleteTextView
     private lateinit var buttonJiraCreate: Button
     internal lateinit var buttonJiraCancel: Button
     //  private lateinit var buttonJiraAuthCancel: Button
@@ -190,18 +201,30 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //    private val arrayListJiraAssignee: ArrayList<String> = ArrayList()
 //    private val arrayListJiraPriority: ArrayList<String> = ArrayList()
     private lateinit var jiraAdapter: RecyclerViewJiraAdapter
-    private lateinit var spinnerProjectAdapter: ArrayAdapter<String>
-    private lateinit var spinnerIssueTypeAdapter: ArrayAdapter<String>
-    private lateinit var spinnerReporterAdapter: ArrayAdapter<String>
-    private lateinit var spinnerLinkedIssueAdapter: ArrayAdapter<String>
-    private lateinit var spinnerIssueAdapter: ArrayAdapter<String>
-    private lateinit var spinnerAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var spinnerPriorityAdapter: ArrayAdapter<String>
-    private lateinit var spinnerFixVersionsAdapter: ArrayAdapter<String>
-    private lateinit var spinnerComponentAdapter: ArrayAdapter<String>
-    private lateinit var spinnerLabelAdapter: ArrayAdapter<String>
-    private lateinit var spinnerEpicLinkAdapter: ArrayAdapter<String>
-    private lateinit var spinnerSprintAdapter: ArrayAdapter<String>
+    //    private lateinit var spinnerProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewProjectAdapter: ArrayAdapter<String>
+    //    private lateinit var spinnerIssueTypeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewIssueTypeAdapter: ArrayAdapter<String>
+    //    private lateinit var spinnerReporterAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewReporterAdapter: ArrayAdapter<String>
+    //    private lateinit var spinnerLinkedIssueAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewLinkedIssueAdapter: ArrayAdapter<String>
+    //    private lateinit var spinnerIssueAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewIssueAdapter: ArrayAdapter<String>
+    //    private lateinit var spinnerAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAssigneeAdapter: ArrayAdapter<String>
+    //    private lateinit var spinnerPriorityAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPriorityAdapter: ArrayAdapter<String>
+    //    private lateinit var spinnerFixVersionsAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewFixVersionsAdapter: ArrayAdapter<String>
+    //    private lateinit var spinnerComponentAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewComponentAdapter: ArrayAdapter<String>
+    //    private lateinit var spinnerLabelAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewLabelAdapter: ArrayAdapter<String>
+    //    private lateinit var spinnerEpicLinkAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewEpicLinkAdapter: ArrayAdapter<String>
+    //    private lateinit var spinnerSprintAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewSprintAdapter: ArrayAdapter<String>
 
     //Slack:
     private lateinit var buttonSlackCreate: Button
@@ -216,6 +239,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private val arrayListSlackFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var progressBarSlack: ProgressBar
     private lateinit var progressBarSlackLayout: FrameLayout
+    private val defaultToast :DefaultToast = DefaultToast()
 
 
     //Static global variables:
@@ -2095,6 +2119,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     Toast.makeText(context, R.string.jira_sent_error, Toast.LENGTH_SHORT).show()
                     progressBarJiraLayout.visibility = View.GONE
                     progressBarJira.visibility = View.GONE
+//                    detachProgressBar()
                     finishErrorFab()
                 }
                 "slack" -> {
@@ -2236,6 +2261,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             progressBarView,
             windowManagerParamsProgressBar
         )
+        progressBarView.isClickable = false
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -2370,23 +2396,38 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         }
                     }
 
-                    spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
-                    spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
+//                    spinnerProject = viewJira.findViewById(R.id.spinner_jira_project)
+                    autoTextViewProject = viewJira.findViewById(R.id.auto_textView_jira_project)
+//                    spinnerIssueType = viewJira.findViewById(R.id.spinner_jira_issue_type)
+                    autoTextViewIssueType =
+                        viewJira.findViewById(R.id.auto_textView_jira_issue_type)
                     recyclerViewJiraAttachment =
                         viewJira.findViewById(R.id.recycler_view_jira_attachment)
                     editTextSummary = viewJira.findViewById(R.id.editText_jira_summary)
                     editTextDescription = viewJira.findViewById(R.id.editText_jira_description)
-                    spinnerReporter = viewJira.findViewById(R.id.spinner_jira_issue_reporter)
-                    spinnerLinkedIssue =
-                        viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
-                    spinnerIssue = viewJira.findViewById(R.id.spinner_jira_issue_issues)
-                    spinnerAssignee = viewJira.findViewById(R.id.spinner_jira_issue_assignee)
-                    spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
-                    spinnerComponent = viewJira.findViewById(R.id.spinner_jira_issue_component)
-                    spinnerFixVersions = viewJira.findViewById(R.id.spinner_jira_issue_fix_versions)
-                    spinnerLabel = viewJira.findViewById(R.id.spinner_jira_labels)
-                    spinnerEpicLink = viewJira.findViewById(R.id.spinner_jira_epic_link)
-                    spinnerSprint = viewJira.findViewById(R.id.spinner_jira_sprint)
+//                    spinnerReporter = viewJira.findViewById(R.id.spinner_jira_issue_reporter)
+                    autoTextViewReporter = viewJira.findViewById(R.id.auto_textView_jira_reporter)
+//                    spinnerLinkedIssue =
+//                        viewJira.findViewById(R.id.spinner_jira_issue_linked_issues)
+                    autoTextViewLinkedIssue =
+                        viewJira.findViewById(R.id.auto_textView_jira_linked_issues)
+//                    spinnerIssue = viewJira.findViewById(R.id.spinner_jira_issue_issues)
+                    autoTextViewIssue = viewJira.findViewById(R.id.auto_textView_jira_issues)
+//                    spinnerAssignee = viewJira.findViewById(R.id.spinner_jira_issue_assignee)
+                    autoTextViewAssignee = viewJira.findViewById(R.id.auto_textView_jira_assignee)
+//                    spinnerPriority = viewJira.findViewById(R.id.spinner_jira_issue_priority)
+                    autoTextViewPriority = viewJira.findViewById(R.id.auto_textView_jira_priority)
+//                    spinnerComponent = viewJira.findViewById(R.id.spinner_jira_issue_component)
+                    autoTextViewComponent = viewJira.findViewById(R.id.auto_textView_jira_component)
+//                    spinnerFixVersions = viewJira.findViewById(R.id.spinner_jira_issue_fix_versions)
+                    autoTextViewFixVersions =
+                        viewJira.findViewById(R.id.auto_textView_jira_fix_versions)
+//                    spinnerLabel = viewJira.findViewById(R.id.spinner_jira_labels)
+                    autoTextViewLabel = viewJira.findViewById(R.id.auto_textView_jira_labels)
+//                    spinnerEpicLink = viewJira.findViewById(R.id.spinner_jira_epic_link)
+                    autoTextViewEpicLink = viewJira.findViewById(R.id.auto_textView_jira_epic_link)
+//                    spinnerSprint = viewJira.findViewById(R.id.spinner_jira_sprint)
+                    autoTextViewSprint = viewJira.findViewById(R.id.auto_textView_jira_sprint)
                     buttonJiraCreate = viewJira.findViewById(R.id.button_jira_create)
                     buttonJiraCancel = viewJira.findViewById(R.id.button_jira_cancel)
                     toolbarJira = viewJira.findViewById(R.id.textView_jira_title)
@@ -2422,6 +2463,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
                     initializeJiraRecyclerView(filePathMedia = filePathMedia)
                     buttonClicksJira(filePathMedia = filePathMedia)
+//                    attachProgressBar()
                     progressBarJiraLayout.visibility = View.VISIBLE
                     progressBarJira.visibility = View.VISIBLE
                 }
@@ -2498,18 +2540,30 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
         buttonJiraCreate.setSafeOnClickListener {
             jiraAuthentication.gatherJiraSpinnerDetails(
-                spinnerProject = spinnerProject,
-                spinnerIssueType = spinnerIssueType,
-                spinnerLinkedIssues = spinnerLinkedIssue,
-                spinnerIssues = spinnerIssue,
-                spinnerAssignee = spinnerAssignee,
-                spinnerReporter = spinnerReporter,
-                spinnerPriority = spinnerPriority,
-                spinnerComponent = spinnerComponent,
-                spinnerFixVersions = spinnerFixVersions,
-                spinnerLabel = spinnerLabel,
-                spinnerEpicLink = spinnerEpicLink,
-                spinnerSprint = spinnerSprint
+                autoTextViewProject = autoTextViewProject,
+//                spinnerProject = spinnerProject,
+                autoTextViewIssueType = autoTextViewIssueType,
+//                spinnerIssueType = spinnerIssueType,
+                autoTextViewLinkedIssues = autoTextViewLinkedIssue,
+//                spinnerLinkedIssues = spinnerLinkedIssue,
+                autoTextViewIssues = autoTextViewIssue,
+//                spinnerIssues = spinnerIssue,
+                autoTextViewAssignee = autoTextViewAssignee,
+//                spinnerAssignee = spinnerAssignee,
+                autoTextViewReporter = autoTextViewReporter,
+//                spinnerReporter = spinnerReporter,
+                autoTextViewPriority = autoTextViewPriority,
+//                spinnerPriority = spinnerPriority,
+                autoTextViewComponent = autoTextViewComponent,
+//                spinnerComponent = spinnerComponent,
+                autoTextViewFixVersions = autoTextViewFixVersions,
+//                spinnerFixVersions = spinnerFixVersions,
+                autoTextViewLabel = autoTextViewLabel,
+//                spinnerLabel = spinnerLabel,
+                autoTextViewEpicLink = autoTextViewEpicLink,
+//                spinnerEpicLink = spinnerEpicLink,
+                autoTextViewSprint = autoTextViewSprint
+//                spinnerSprint = spinnerSprint
             )
             jiraAuthentication.gatherJiraEditTextDetails(
                 editTextSummary = editTextSummary,
@@ -2520,6 +2574,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     progressBarJira.visibility = View.VISIBLE
                     progressBarJiraLayout.visibility = View.VISIBLE
+//                    attachProgressBar()
                 }
                 jiraAuthentication.callJiraIssue(
                     filePathName = filePathMedia,
@@ -2636,6 +2691,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
     internal fun initializeJiraSpinner(
         arrayListProjectNames: ArrayList<String>,
         arrayListIssueTypes: ArrayList<String>,
@@ -2651,70 +2708,238 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListSprint: ArrayList<String>
     ) {
 
-        spinnerProjectAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
-        spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerProject.adapter = spinnerProjectAdapter
+        try {
+            autoTextViewProjectAdapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                arrayListProjectNames
+            )
+            autoTextViewProject.setAdapter(autoTextViewProjectAdapter)
+            if (arrayListProjectNames.isNotEmpty()) {
+                autoTextViewProject.setText(arrayListProjectNames[0], false)
+            }
+            autoTextViewProject.setOnTouchListener { v, event ->
+                autoTextViewProject.showDropDown()
+                false
+            }
+            autoTextViewProject.setOnItemClickListener { parent, view, position, id ->
+                jiraAuthentication.setProjectPosition(projectPosition = position)
+            }
+//        spinnerProjectAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
+//        spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerProject.adapter = spinnerProjectAdapter
+            autoTextViewIssueTypeAdapter =
+                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListIssueTypes)
+            autoTextViewIssueType.setAdapter(autoTextViewIssueTypeAdapter)
+            if (arrayListIssueTypes.isNotEmpty()) {
+                autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
+            }
+            autoTextViewIssueType.setOnTouchListener { v, event ->
+                autoTextViewIssueType.showDropDown()
+                false
+            }
+            autoTextViewIssueType.setOnItemClickListener { parent, view, position, id ->
+                jiraAuthentication.setIssueTypePosition(issueTypePosition = position)
+            }
+//        spinnerIssueTypeAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
+//        spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerIssueType.adapter = spinnerIssueTypeAdapter
+            autoTextViewReporterAdapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                arrayListReporterNames
+            )
+            autoTextViewReporter.setAdapter(autoTextViewReporterAdapter)
+            if (arrayListReporterNames.isNotEmpty()) {
+                autoTextViewReporter.setText(arrayListReporterNames[0], false)
+            }
+            autoTextViewReporter.setOnTouchListener { v, event ->
+                autoTextViewReporter.showDropDown()
+                false
+            }
+            autoTextViewReporter.setOnItemClickListener { parent, view, position, id ->
+                jiraAuthentication.setReporterPosition(reporterPosition = position)
+            }
 
-        spinnerIssueTypeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
-        spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerIssueType.adapter = spinnerIssueTypeAdapter
+//        spinnerReporterAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListReporterNames)
+//        spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerReporter.adapter = spinnerReporterAdapter
 
-        spinnerReporterAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListReporterNames)
-        spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerReporter.adapter = spinnerReporterAdapter
+            autoTextViewLinkedIssueAdapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                arrayListLinkedIssues
+            )
+            autoTextViewLinkedIssue.setAdapter(autoTextViewLinkedIssueAdapter)
+            if (arrayListLinkedIssues.isNotEmpty()) {
+                autoTextViewLinkedIssue.setText(arrayListLinkedIssues[0], false)
+            }
+            autoTextViewLinkedIssue.setOnTouchListener { v, event ->
+                autoTextViewLinkedIssue.showDropDown()
+                false
+            }
+            autoTextViewLinkedIssue.setOnItemClickListener { parent, view, position, id ->
+                jiraAuthentication.setLinkedIssueTypePosition(linkedIssueTypePosition = position)
+            }
+//        spinnerLinkedIssueAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
+//        spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
 
-        spinnerLinkedIssueAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
-        spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
+            autoTextViewIssueAdapter =
+                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListIssues)
+            autoTextViewIssue.setAdapter(autoTextViewIssueAdapter)
+//            if (arrayListIssues.isNotEmpty()) {
+//                autoTextViewIssue.setText(arrayListIssues[0], false)
+//            }
+            autoTextViewIssue.setOnTouchListener { v, event ->
+                autoTextViewIssue.showDropDown()
+                false
+            }
 
-        spinnerIssueAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssues)
-        spinnerIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerIssue.adapter = spinnerIssueAdapter
+//        spinnerIssueAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssues)
+//        spinnerIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerIssue.adapter = spinnerIssueAdapter
 
-        spinnerAssigneeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
-        spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerAssignee.adapter = spinnerAssigneeAdapter
+            autoTextViewAssigneeAdapter =
+                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListAssignee)
+            autoTextViewAssignee.setAdapter(autoTextViewAssigneeAdapter)
+//            if (arrayListAssignee.isNotEmpty()) {
+//                autoTextViewAssignee.setText(arrayListAssignee[0], false)
+//            }
+            autoTextViewAssignee.setOnTouchListener { v, event ->
+                autoTextViewAssignee.showDropDown()
+                false
+            }
+            autoTextViewAssignee.setOnItemClickListener { parent, view, position, id ->
+                jiraAuthentication.setAssigneePosition(assigneePosition = position)
+            }
 
-        spinnerPriorityAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
-        spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerPriority.adapter = spinnerPriorityAdapter
+//        spinnerAssigneeAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
+//        spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerAssignee.adapter = spinnerAssigneeAdapter
 
-        spinnerComponentAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListComponent)
-        spinnerComponentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerComponent.adapter = spinnerComponentAdapter
+            autoTextViewPriorityAdapter =
+                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListPriority)
+            autoTextViewPriority.setAdapter(autoTextViewPriorityAdapter)
+            if (arrayListPriority.isNotEmpty()) {
+                autoTextViewPriority.setText(arrayListPriority[0], false)
+            }
+            autoTextViewPriority.setOnTouchListener { v, event ->
+                autoTextViewPriority.showDropDown()
+                false
+            }
+            autoTextViewPriority.setOnItemClickListener { parent, view, position, id ->
+                jiraAuthentication.setPriorityPosition(priorityPosition = position)
+            }
+//        spinnerPriorityAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
+//        spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerPriority.adapter = spinnerPriorityAdapter
 
-        spinnerFixVersionsAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListFixVersions)
-        spinnerFixVersionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerFixVersions.adapter = spinnerFixVersionsAdapter
+            autoTextViewComponentAdapter =
+                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListComponent)
+            autoTextViewComponent.setAdapter(autoTextViewComponentAdapter)
+//            if (arrayListComponent.isNotEmpty()) {
+//                autoTextViewComponent.setText(arrayListComponent[0], false)
+//            }
+            autoTextViewComponent.setOnTouchListener { v, event ->
+                autoTextViewComponent.showDropDown()
+                false
+            }
+            autoTextViewComponent.setOnItemClickListener { parent, view, position, id ->
+                jiraAuthentication.setComponentPosition(componentPosition = position)
+            }
+//        spinnerComponentAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListComponent)
+//        spinnerComponentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerComponent.adapter = spinnerComponentAdapter
 
-        spinnerLabelAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLabel)
-        spinnerLabelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerLabel.adapter = spinnerLabelAdapter
+            autoTextViewFixVersionsAdapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                arrayListFixVersions
+            )
+            autoTextViewFixVersions.setAdapter(autoTextViewFixVersionsAdapter)
+//            if (arrayListFixVersions.isNotEmpty()) {
+//                autoTextViewFixVersions.setText(arrayListFixVersions[0], false)
+//            }
+            autoTextViewFixVersions.setOnTouchListener { v, event ->
+                autoTextViewFixVersions.showDropDown()
+                false
+            }
+            autoTextViewFixVersions.setOnItemClickListener { parent, view, position, id ->
+                jiraAuthentication.setFixVersionsPosition(fixVersionsPosition = position)
+            }
+//        spinnerFixVersionsAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListFixVersions)
+//        spinnerFixVersionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerFixVersions.adapter = spinnerFixVersionsAdapter
 
-        spinnerEpicLinkAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListEpicLink)
-        spinnerEpicLinkAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerEpicLink.adapter = spinnerEpicLinkAdapter
 
-        spinnerSprintAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListSprint)
-        spinnerSprintAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerSprint.adapter = spinnerSprintAdapter
+            autoTextViewLabelAdapter =
+                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListLabel)
+            autoTextViewLabel.setAdapter(autoTextViewLabelAdapter)
+//            if (arrayListLabel.isNotEmpty()) {
+//                autoTextViewLabel.setText(arrayListLabel[0], false)
+//            }
+            autoTextViewLabel.setOnTouchListener { v, event ->
+                autoTextViewLabel.showDropDown()
+                false
+            }
+//        spinnerLabelAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLabel)
+//        spinnerLabelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerLabel.adapter = spinnerLabelAdapter
 
-        progressBarJiraLayout.visibility = View.GONE
-        progressBarJira.visibility = View.GONE
+            autoTextViewEpicLinkAdapter =
+                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListEpicLink)
+            autoTextViewEpicLink.setAdapter(autoTextViewEpicLinkAdapter)
+//            if (arrayListEpicLink.isNotEmpty()) {
+//                autoTextViewEpicLink.setText(arrayListEpicLink[0], false)
+//            }
+            autoTextViewEpicLink.setOnTouchListener { v, event ->
+                autoTextViewEpicLink.showDropDown()
+                false
+            }
+//        spinnerEpicLinkAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListEpicLink)
+//        spinnerEpicLinkAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerEpicLink.adapter = spinnerEpicLinkAdapter
 
-
+            autoTextViewSprintAdapter =
+                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListSprint)
+            autoTextViewSprint.setAdapter(autoTextViewSprintAdapter)
+//            if (arrayListSprint.isNotEmpty()) {
+//                autoTextViewSprint.setText(arrayListSprint[0], false)
+//            }
+            autoTextViewSprint.setOnTouchListener { v, event ->
+                autoTextViewSprint.showDropDown()
+                false
+            }
+            autoTextViewSprint.setOnItemClickListener { parent, view, position, id ->
+                jiraAuthentication.setSprintPosition(sprintPosition = position)
+            }
+//        spinnerSprintAdapter =
+//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListSprint)
+//        spinnerSprintAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spinnerSprint.adapter = spinnerSprintAdapter
+            progressBarJiraLayout.visibility = View.GONE
+            progressBarJira.visibility = View.GONE
+//            detachProgressBar()
+        } catch (e: Exception) {
+            progressBarJiraLayout.visibility = View.GONE
+            progressBarJira.visibility = View.GONE
+//            detachProgressBar()
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
+        }
     }
 
 //    private fun addJiraProjectNames(): ArrayList<String> {
@@ -2811,7 +3036,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //                    toolbarJira = viewJira.findViewById(R.id.textView_jira_title)
 //                    layoutJira = viewJira.findViewById(R.id.layout_jira)
                     progressBarSlack = viewSlack.findViewById(R.id.slack_progressbar)
-                    progressBarSlackLayout = viewSlack.findViewById(R.id.slack_progressbar_background)
+                    progressBarSlackLayout =
+                        viewSlack.findViewById(R.id.slack_progressbar_background)
 
                     slackAuthentication.callSlack(
                         context = context,
@@ -2840,6 +3066,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicksSlack(filePathMedia: File) {
         buttonSlackCreate.setSafeOnClickListener {
             slackAuthentication.gatherJiraSpinnerDetails(

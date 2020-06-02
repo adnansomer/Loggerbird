@@ -5,10 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.Spinner
-import android.widget.Toast
+import android.widget.*
 import androidx.annotation.RequiresApi
 import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
@@ -16,6 +13,7 @@ import com.atlassian.jira.rest.client.api.domain.*
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.api.domain.input.LinkIssuesInput
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
+import com.google.gson.JsonObject
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
@@ -25,7 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
-import models.RecyclerViewModel
+import models.*
 import okhttp3.*
 import services.LoggerBirdService
 import java.io.*
@@ -44,6 +42,9 @@ class JiraAuthentication {
     private var fixVersionPosition: Int = 0
     private var linkedIssueTypePosition: Int = 0
     private var labelPosition: Int = 0
+    private var assigneePosition: Int = 0
+    private var reporterPosition: Int = 0
+    private var sprintPosition:Int = 0
     private lateinit var reporter: String
     private lateinit var linkedIssue: String
     private lateinit var issue: String
@@ -58,6 +59,7 @@ class JiraAuthentication {
     private val hashMapComponent: HashMap<String, Iterable<BasicComponent>> = HashMap()
     private val hashMapFixVersions: HashMap<String, Iterable<Version>> = HashMap()
     private val hashMapLinkedIssues: HashMap<String, String> = HashMap()
+    private val hashMapSprint:HashMap<String,String> = HashMap()
     private lateinit var arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>
     private val arrayListProjects: ArrayList<String> = ArrayList()
     private val arrayListProjectKeys: ArrayList<String> = ArrayList()
@@ -75,7 +77,21 @@ class JiraAuthentication {
     private val arrayListChoosenLabel: ArrayList<String> = ArrayList()
     private val arrayListEpicLink: ArrayList<String> = ArrayList()
     private val arrayListFields: ArrayList<String> = ArrayList()
-    private val arrayListSprint: ArrayList<String> = ArrayList()
+    private val arrayListSprintName: ArrayList<String> = ArrayList()
+    private val arrayListAccountId: ArrayList<String> = ArrayList()
+    private val arrayListSelf: ArrayList<String> = ArrayList()
+    private val arrayListEmailAdresses: ArrayList<String> = ArrayList()
+    private val arrayListAvatarUrls: ArrayList<String> = ArrayList()
+    private val arrayListBoardId: ArrayList<String> = ArrayList()
+    private val jiraDomainName = LoggerBird.jiraDomainName
+    private val jiraUserName = LoggerBird.jiraUserName
+    private val jiraApiToken = LoggerBird.jiraApiToken
+    private val defaultToast: DefaultToast = DefaultToast()
+
+    companion object {
+        internal lateinit var createdIssueKey: String
+    }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callJiraIssue(
         filePathName: File? = null,
@@ -122,7 +138,7 @@ class JiraAuthentication {
         val client = OkHttpClient()
         val request: Request =
             Request.Builder()
-                .url("https://appcaesars.atlassian.net")
+                .url(jiraDomainName)
                 .build()
         client.newCall(request).enqueue(object : Callback {
             @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -191,11 +207,11 @@ class JiraAuthentication {
     private fun jiraAuthentication(): JiraRestClient {
         val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
         val jiraServerUri =
-            URI("https://appcaesars.atlassian.net")
+            URI(jiraDomainName)
         return factory.createWithBasicHttpAuthentication(
             jiraServerUri,
-            "appcaesars@gmail.com",
-            "uPPXsUw0FabxeOa5CkDm0BAE"
+            jiraUserName,
+            jiraApiToken
         )
     }
 
@@ -251,13 +267,13 @@ class JiraAuthentication {
             )
             issueBuilder.setPriorityId(arrayListPrioritiesId[priorityPosition].toLong())
             issueBuilder.setDescription(description)
-
             issueBuilder.setFieldValue("labels", arrayListChoosenLabel)
-//            issueBuilder.setFieldValue("assignee",assignee)
 //            issueBuilder.setFieldValue("reporter",reporter)
-
-//            issueBuilder.setReporterName(reporter)
-//            issueBuilder.setAssigneeName("5eb3efa5ad226b0ba423144a")
+//            val basicUser = BasicUser(URI(arrayListSelf[assigneePosition]),arrayListName[assigneePosition],assignee,arrayListAccountId[assigneePosition])
+//            issueBuilder.setAssigneeName(basicUser.displayName)
+////            issueBuilder.setReporter(basicUser)
+//            issueBuilder.setFieldValue("assignee",basicUser)
+//            issueBuilder.setReporter(basicUser.)
 //        issueBuilder.setAssigneeName("0")
 //            val basicUser = BasicUser(
 //                URI("https://appcaesars.atlassian.net/rest/api/2/user?accountId=5eb3efa5ad226b0ba423144a"),
@@ -279,8 +295,89 @@ class JiraAuthentication {
             }
             val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
             val issueKey = basicIssue.key
+//            createdIssueKey  = issueKey
             val issueUri = basicIssue.self
             val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
+            val jsonObjectAssignee = JsonObject()
+            jsonObjectAssignee.addProperty("accountId", arrayListAccountId[assigneePosition])
+            RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+                .create(AccountIdService::class.java)
+                .setAssignee(jsonObject = jsonObjectAssignee)
+                .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<List<JiraUserModel>>,
+                        t: Throwable
+                    ) {
+                        jiraExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<List<JiraUserModel>>,
+                        response: retrofit2.Response<List<JiraUserModel>>
+                    ) {
+                        Log.d("assignee_put_success", response.code().toString())
+                        Log.d("assignee_put_success", assignee)
+                    }
+                })
+
+            val jsonObjectReporter = JsonObject()
+            val jsonObjectField = JsonObject()
+            val jsonObjectReporterField = JsonObject()
+            jsonObjectReporter.addProperty("self", arrayListSelf[reporterPosition])
+            jsonObjectReporter.addProperty("accountId", arrayListAccountId[reporterPosition])
+            jsonObjectReporter.addProperty("emailAddress", arrayListEmailAdresses[reporterPosition])
+            jsonObjectReporterField.add("reporter", jsonObjectReporter)
+            jsonObjectField.add("fields", jsonObjectReporterField)
+            RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+                .create(AccountIdService::class.java)
+                .setReporter(jsonObject = jsonObjectField)
+                .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<List<JiraUserModel>>,
+                        t: Throwable
+                    ) {
+                        jiraExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<List<JiraUserModel>>,
+                        response: retrofit2.Response<List<JiraUserModel>>
+                    ) {
+                        Log.d("reporter_put_success", response.code().toString())
+                        Log.d("reporter_put_success", reporter)
+                    }
+                })
+
+
+            val jsonObjectSprint = JsonObject()
+            val jsonObjectFieldSprint = JsonObject()
+            jsonObjectSprint.addProperty("customfield_10020",hashMapSprint[arrayListSprintName[sprintPosition]]?.toInt())
+            jsonObjectFieldSprint.add("fields", jsonObjectSprint)
+            RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+                .create(AccountIdService::class.java)
+                .setSprint(jsonObject = jsonObjectFieldSprint)
+                .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<List<JiraSprintModel>>,
+                        t: Throwable
+                    ) {
+                        jiraExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<List<JiraSprintModel>>,
+                        response: retrofit2.Response<List<JiraSprintModel>>
+                    ) {
+                        Log.d("sprint_put_success", response.code().toString())
+                        response.body()?.forEach {
+                            Log.d("sprint_put_success_list", it.customfield_10020.toString())
+                        }
+                    }
+                })
+
             if (this.issue.isNotEmpty()) {
                 val linkIssueInput = LinkIssuesInput(
                     issueKey,
@@ -357,6 +454,7 @@ class JiraAuthentication {
         LoggerBirdService.loggerBirdService.finishShareLayout("jira")
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun jiraTaskGatherDetails(
         restClient: JiraRestClient,
         activity: Activity
@@ -367,6 +465,11 @@ class JiraAuthentication {
             arrayListIssueTypes.clear()
             arrayListIssueTypesId.clear()
             arrayListAssignee.clear()
+            arrayListAccountId.clear()
+            arrayListSelf.clear()
+            arrayListEmailAdresses.clear()
+            arrayListAvatarUrls.clear()
+            arrayListIssueTypesId.clear()
             arrayListIssueLinkedTypes.clear()
             arrayListIssues.clear()
             arrayListPriorities.clear()
@@ -377,7 +480,8 @@ class JiraAuthentication {
             arrayListLabel.clear()
             arrayListChoosenLabel.clear()
             arrayListEpicLink.clear()
-            arrayListSprint.clear()
+            arrayListSprintName.clear()
+            arrayListBoardId.clear()
             hashMapComponent.clear()
             hashMapFixVersions.clear()
             hashMapLinkedIssues.clear()
@@ -391,6 +495,7 @@ class JiraAuthentication {
             jiraTaskGatherIssues(restClient = restClient)
             jiraTaskGatherPriorities(restClient = restClient)
             jiraTaskGatherFixComp(restClient = restClient)
+            jiraTaskGatherSprint(restClient = restClient)
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeJiraSpinner(
                     arrayListProjectNames = arrayListProjects,
@@ -404,13 +509,11 @@ class JiraAuthentication {
                     arrayListFixVersions = arrayListFixVersions,
                     arrayListLabel = arrayListLabel,
                     arrayListEpicLink = arrayListEpicLink,
-                    arrayListSprint = arrayListSprint
+                    arrayListSprint = arrayListSprintName
                 )
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-            LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
+            jiraExceptionHandler(e = e)
         }
     }
 
@@ -438,57 +541,51 @@ class JiraAuthentication {
     private fun jiraTaskGatherAssignees(restClient: JiraRestClient) {
 
 //        https://appcaesars.atlassian.net/rest/api/2/user/search?query
-//        RetrofitUserJiraClient.getJiraUserClient().create(AccountIdService::class.java)
-//            .getAccountIdList().enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
-//                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-//                override fun onFailure(call: retrofit2.Call<List<JiraUserModel>>, t: Throwable) {
-//                    jiraExceptionHandler(throwable = t)
-//                }
-//
-//                override fun onResponse(
-//                    call: retrofit2.Call<List<JiraUserModel>>,
-//                    response: retrofit2.Response<List<JiraUserModel>>
-//                ) {
-//                    var counter = 0
-//                    do{
-//                        Log.d("response_retrofit", response.raw().body?.toString())
-//                        counter++
-//                    }while (response.body()!!.iterator().hasNext())
-//
-//                    val accountIdList = response.body()?.get(0)
-//                    var accountListCounter = 0
-//                    val userClient = restClient.userClient
-//                    if (accountIdList != null) {
-//                        do {
-//                            if (accountIdList.size > accountListCounter) {
-//                                val user =
-//                                    userClient.getUser(URI("https://appcaesars.atlassian.net/rest/api/2/user?accountId=" + accountIdList[accountListCounter]))
-//                                        .claim()
-//                                arrayListAssignee.add(user.displayName)
-//                            } else {
-//                                break
-//                            }
-//                            accountListCounter++
-//                        } while (accountIdList.iterator().hasNext())
-//                    }
-//                }
-//            })
 
-        val searchClient = restClient.searchClient
-        searchClient.searchJql("project = LGB").claim().issues.forEach {
-            if (it.assignee != null) {
-                if (!arrayListAssignee.contains(it.assignee!!.displayName)) {
-                    arrayListAssignee.add(it.assignee!!.displayName)
+        RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/user/")
+            .create(AccountIdService::class.java)
+            .getAccountIdList().enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                override fun onFailure(call: retrofit2.Call<List<JiraUserModel>>, t: Throwable) {
+                    jiraExceptionHandler(throwable = t)
                 }
-            }
 
-            if (it.reporter != null) {
-                if (!arrayListAssignee.contains(it.reporter!!.displayName)) {
-                    arrayListAssignee.add(it.reporter!!.displayName)
+                override fun onResponse(
+                    call: retrofit2.Call<List<JiraUserModel>>,
+                    response: retrofit2.Response<List<JiraUserModel>>
+                ) {
+                    val displayNameList = response.body()
+                    displayNameList?.forEach {
+                        if (it.displayName != null) {
+                            if (!arrayListAssignee.contains(it.displayName!!)) {
+                                arrayListAssignee.add(it.displayName!!)
+                                arrayListReporter.add(it.displayName!!)
+                                arrayListAccountId.add(it.accountId!!)
+                                arrayListSelf.add(it.self!!)
+                                arrayListEmailAdresses.add(it.emailAddress!!)
+                            }
+                        }
+                    }
                 }
-            }
+            })
 
-        }
+//        val searchClient = restClient.searchClient
+//        searchClient.searchJql("project = LGB").claim().issues.forEach {
+//            if (it.assignee != null) {
+//                if (!arrayListAssignee.contains(it.assignee!!.displayName)) {
+//                    arrayListAssignee.add(it.assignee!!.displayName)
+//                }
+//            }
+//
+//            if (it.reporter != null) {
+//                if (!arrayListAssignee.contains(it.reporter!!.displayName)) {
+//                    arrayListAssignee.add(it.reporter!!.displayName)
+//                }
+//            }
+//
+//        }
+//        val userClient = restClient.userClient
+//        userClient.getUser("").claim()
     }
 //            val projectRolesClient = restClient.projectRolesRestClient
 //            val issueClient = restClient.issueClient
@@ -514,17 +611,18 @@ class JiraAuthentication {
     private fun jiraTaskGatherIssues(restClient: JiraRestClient) {
         val searchClient = restClient.searchClient
         val projectClient = restClient.projectClient
-        arrayListIssues.add("")
-        arrayListLabel.add("")
-        arrayListEpicLink.add("")
+//        arrayListIssues.add("")
+//        arrayListLabel.add("")
+//        arrayListEpicLink.add("")
         projectClient.allProjects.claim().forEach {
             searchClient.searchJql("project=" + it.key).claim().issues.forEach { issue ->
                 //                issue.fields.forEach {
 //                    Log.d("sprint",it.name)
 //                }
-                if (issue.getField("Sprint")?.value != null) {
-                    arrayListSprint.add(issue.getField("Sprint")?.value.toString())
-                }
+
+//                if (issue.getField("Sprint")?.value != null) {
+//                    arrayListSprint.add(issue.getField("Sprint")?.value.toString())
+//                }
                 arrayListIssues.add(issue.key)
                 if (issue.issueType.name == "Epic") {
                     arrayListEpicLink.add(issue.key)
@@ -550,8 +648,8 @@ class JiraAuthentication {
 
     private fun jiraTaskGatherFixComp(restClient: JiraRestClient) {
         val projectClient = restClient.projectClient
-        arrayListComponents.add("")
-        arrayListFixVersions.add("")
+//        arrayListComponents.add("")
+//        arrayListFixVersions.add("")
         projectClient.allProjects.claim().forEach {
             projectClient.getProject(it.key).claim().components.forEach { component ->
                 arrayListComponents.add(component.name)
@@ -563,6 +661,59 @@ class JiraAuthentication {
                 hashMapFixVersions[version.name] = projectClient.getProject(it.key).claim().versions
             }
         }
+    }
+
+    private fun jiraTaskGatherSprint(restClient: JiraRestClient) {
+        RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/agile/1.0/")
+            .create(AccountIdService::class.java)
+            .getBoardList().enqueue(object : retrofit2.Callback<JsonObject> {
+                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                override fun onFailure(call: retrofit2.Call<JsonObject>, t: Throwable) {
+                    jiraExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonObject>,
+                    response: retrofit2.Response<JsonObject>
+                ) {
+                    Log.d("sprint_details", response.code().toString())
+                    val boardList = response.body()
+                    boardList?.getAsJsonArray("values")?.forEach {
+                        if (it.asJsonObject["type"].asString == "scrum") {
+                            arrayListBoardId.add(it.asJsonObject["id"].asString)
+                        }
+                    }
+                    arrayListBoardId.forEach {
+                        RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/agile/1.0/board/$it/")
+                            .create(AccountIdService::class.java)
+                            .getSprintList()
+                            .enqueue(object : retrofit2.Callback<JsonObject> {
+                                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                                override fun onFailure(
+                                    call: retrofit2.Call<JsonObject>,
+                                    t: Throwable
+                                ) {
+                                    jiraExceptionHandler(throwable = t)
+                                }
+
+                                override fun onResponse(
+                                    call: retrofit2.Call<JsonObject>,
+                                    response: retrofit2.Response<JsonObject>
+                                ) {
+                                    Log.d("sprint_details", response.code().toString())
+                                    val displaySprintList = response.body()
+                                    displaySprintList?.getAsJsonArray("values")?.forEach { sprint ->
+                                        if(sprint.asJsonObject["state"].asString == "active" ){
+                                            arrayListSprintName.add(sprint.asJsonObject["name"].asString)
+                                            hashMapSprint[sprint.asJsonObject["name"].asString] = sprint.asJsonObject["id"].asString
+                                        }
+                                    }
+
+                                }
+                            })
+                    }
+                }
+            })
     }
 
     private fun jiraTaskGatherFields(restClient: JiraRestClient) {
@@ -621,40 +772,61 @@ class JiraAuthentication {
         return arrayListEpicLink
     }
 
-    internal fun getArrayListSprint(): ArrayList<String> {
-        return arrayListSprint
-    }
+
 
 
     internal fun gatherJiraSpinnerDetails(
-        spinnerProject: Spinner,
-        spinnerIssueType: Spinner,
-        spinnerReporter: Spinner,
-        spinnerLinkedIssues: Spinner,
-        spinnerIssues: Spinner,
-        spinnerAssignee: Spinner,
-        spinnerPriority: Spinner,
-        spinnerComponent: Spinner,
-        spinnerFixVersions: Spinner,
-        spinnerLabel: Spinner,
-        spinnerEpicLink: Spinner,
-        spinnerSprint: Spinner
+//        spinnerProject: Spinner,
+        autoTextViewProject: AutoCompleteTextView,
+//        spinnerIssueType: Spinner,
+        autoTextViewIssueType: AutoCompleteTextView,
+//        spinnerReporter: Spinner,
+        autoTextViewReporter: AutoCompleteTextView,
+//        spinnerLinkedIssues: Spinner,
+        autoTextViewLinkedIssues: AutoCompleteTextView,
+//        spinnerIssues: Spinner,
+        autoTextViewIssues: AutoCompleteTextView,
+//        spinnerAssignee: Spinner,
+        autoTextViewAssignee: AutoCompleteTextView,
+//        spinnerPriority: Spinner,
+        autoTextViewPriority: AutoCompleteTextView,
+//        spinnerComponent: Spinner,
+        autoTextViewComponent: AutoCompleteTextView,
+//        spinnerFixVersions: Spinner,
+        autoTextViewFixVersions: AutoCompleteTextView,
+//        spinnerLabel: Spinner,
+        autoTextViewLabel: AutoCompleteTextView,
+//        spinnerEpicLink: Spinner,
+        autoTextViewEpicLink: AutoCompleteTextView,
+//        spinnerSprint: Spinner
+        autoTextViewSprint: AutoCompleteTextView
     ) {
-        project = spinnerProject.selectedItem.toString()
-        projectPosition = spinnerProject.selectedItemPosition
-        issueType = spinnerIssueType.selectedItem.toString()
-        issueTypePosition = spinnerIssueType.selectedItemPosition
-        reporter = spinnerReporter.selectedItem.toString()
-        linkedIssue = spinnerLinkedIssues.selectedItem.toString()
-        issue = spinnerIssues.selectedItem.toString()
-        assignee = spinnerAssignee.selectedItem.toString()
-        priority = spinnerPriority.selectedItem.toString()
-        priorityPosition = spinnerPriority.selectedItemPosition
-        componentPosition = spinnerComponent.selectedItemPosition
-        fixVersionPosition = spinnerFixVersions.selectedItemPosition
-        linkedIssueTypePosition = spinnerLinkedIssues.selectedItemPosition
-        arrayListChoosenLabel.add(spinnerLabel.selectedItem.toString())
-        epicLink = spinnerEpicLink.selectedItem.toString()
+        project = autoTextViewProject.editableText.toString()
+//        project = spinnerProject.selectedItem.toString()
+//        projectPosition = spinnerProject.selectedItemPosition
+        issueType = autoTextViewIssueType.editableText.toString()
+//        issueType = spinnerIssueType.selectedItem.toString()
+//        issueTypePosition = spinnerIssueType.selectedItemPosition
+        reporter = autoTextViewReporter.editableText.toString()
+//        reporter = spinnerReporter.selectedItem.toString()
+//        reporterPosition = spinnerReporter.selectedItemPosition
+        linkedIssue = autoTextViewLinkedIssues.editableText.toString()
+//        linkedIssue = spinnerLinkedIssues.selectedItem.toString()
+        issue = autoTextViewIssues.editableText.toString()
+//        issue = spinnerIssues.selectedItem.toString()
+        assignee = autoTextViewAssignee.editableText.toString()
+//        assignee = spinnerAssignee.selectedItem.toString()
+//        assigneePosition = spinnerAssignee.selectedItemPosition
+        priority = autoTextViewPriority.editableText.toString()
+//        priority = spinnerPriority.selectedItem.toString()
+//        priorityPosition = spinnerPriority.selectedItemPosition
+//        componentPosition = spinnerComponent.selectedItemPosition
+//        fixVersionPosition = spinnerFixVersions.selectedItemPosition
+//        linkedIssueTypePosition = spinnerLinkedIssues.selectedItemPosition
+        arrayListChoosenLabel.add(autoTextViewLabel.editableText.toString())
+//        arrayListChoosenLabel.add(spinnerLabel.selectedItem.toString())
+        epicLink = autoTextViewEpicLink.editableText.toString()
+//        epicLink = spinnerEpicLink.selectedItem.toString()
         //  sprint = spinnerSprint.selectedItem.toString()
     }
 
@@ -670,26 +842,70 @@ class JiraAuthentication {
         this.arrayListRecyclerViewItems = arrayListRecyclerViewItems
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun checkSummaryEmpty(activity: Activity, context: Context): Boolean {
         return if (summary.isNotEmpty()) {
             true
         } else {
             activity.runOnUiThread {
-                Toast.makeText(
-                    context,
-                    R.string.jira_summary_empty,
-                    Toast.LENGTH_SHORT
-                ).show()
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = context.resources.getString(R.string.jira_summary_empty)
+                )
             }
+//            activity.runOnUiThread {
+//                Toast.makeText(
+//                    context,
+//                    R.string.jira_summary_empty,
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//            }
             false
         }
     }
 
+    internal fun setProjectPosition(projectPosition: Int) {
+        this.projectPosition = projectPosition
+    }
 
+    internal fun setIssueTypePosition(issueTypePosition: Int) {
+        this.issueTypePosition = issueTypePosition
+    }
+
+    internal fun setReporterPosition(reporterPosition: Int) {
+        this.reporterPosition = reporterPosition
+    }
+
+    internal fun setAssigneePosition(assigneePosition: Int) {
+        this.assigneePosition = assigneePosition
+    }
+
+    internal fun setPriorityPosition(priorityPosition: Int) {
+        this.priorityPosition = priorityPosition
+    }
+
+    internal fun setComponentPosition(componentPosition: Int) {
+        this.componentPosition = componentPosition
+    }
+
+    internal fun setFixVersionsPosition(fixVersionsPosition: Int) {
+        this.fixVersionPosition = fixVersionsPosition
+    }
+
+    internal fun setLinkedIssueTypePosition(linkedIssueTypePosition: Int) {
+        this.linkedIssueTypePosition = linkedIssueTypePosition
+    }
+
+    internal fun setSprintPosition(sprintPosition:Int){
+        this.sprintPosition = sprintPosition
+    }
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal suspend fun jiraUnhandledExceptionTask(context: Context, activity: Activity) {
+    internal suspend fun jiraUnhandledExceptionTask(
+        context: Context,
+        activity: Activity
+    ) {
         withContext(coroutineCallJira.coroutineContext) {
             try {
                 jiraTaskCreateIssue(
