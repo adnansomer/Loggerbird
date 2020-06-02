@@ -44,8 +44,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.behavior.SwipeDismissBehavior
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.circularreveal.CircularRevealLinearLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -782,7 +784,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
 
             textView_share_jira.setOnClickListener {
-                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                    attachProgressBar()
 //                }
 //                jiraAuthentication.callJiraIssue(
@@ -790,15 +792,41 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //                    context = context,
 //                    activity = activity
 //                )
+
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-
                     initializeJiraLayout(filePathMedia = filePathMedia)
+//                Thread{
+//
+//                    val slack = Slack.getInstance()
+//                    val client = slack.
+//                    val token = "xoxb-1176309019584-1152486968594-k4brnZhlrUXAAy80Be0GmaVv"
+//                    val res = slack.methods().oauthToken {
+//                        it.clientId("1176309019584.1151103028997")
+//                        it.clientSecret("6147f0bd55a0c777893d07c91f3b16ef")
+//                        it.redirectUri()
+//                    }
+
+
+//                    val response = slack.methods().oauthAccess {
+//                        it.clientId("1176309019584.1151103028997")
+//                        it.clientSecret("6147f0bd55a0c777893d07c91f3b16ef")
+//                        it.redirectUri("https://slack.com/oauth/v2/authorize?client_id=1176309019584.1151103028997&scope=app_mentions:read,calls:read,calls:write,channels:history,channels:join,channels:manage,channels:read,chat:write,chat:write.customize,chat:write.public,files:read,files:write,groups:write,im:history,im:read,im:write,incoming-webhook,reactions:read,usergroups:read,usergroups:write,users.profile:read,users:read,users:read.email,users:write,remote_files:write,remote_files:share,groups:read,team:read&user_scope=users:read,chat:write")
+//                    }
+
+
+//                    Log.d("adnan",response.toString())
+//                    Log.d("adnan",res.toString())
+
+//                }.start()
+
 //                  initializeJiraAuthLayout(filePathMedia = filePathMedia)
                 }
             }
+
 
             textView_share_slack.setOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -1030,7 +1058,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 workingAnimation = AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
                                 floating_action_button.startAnimation(workingAnimation)
                                 floating_action_button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
-
                             }
                         } else {
                             withContext(Dispatchers.Main) {
@@ -2726,7 +2753,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
                     )
@@ -2734,7 +2761,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
                     )
@@ -2885,6 +2912,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
+
     private fun initializeSlackRecyclerView(filePathMedia: File) {
         recyclerViewSlackAttachment.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -2898,6 +2926,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         recyclerViewSlackAttachmentUser.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
         recyclerViewSlackAttachment.adapter = slackAdapter
         recyclerViewSlackAttachmentUser.adapter = slackAdapter
+
     }
 
     private fun addSlackFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {

@@ -163,6 +163,7 @@ class SlackAuthentication {
     ) {
         val slack = Slack.getInstance()
         val token = "xoxb-1176309019584-1152486968594-k4brnZhlrUXAAy80Be0GmaVv"
+        //val token = "xoxp-1176309019584-1152680995235-1165667140657-94283bc32ae0a866189d28284f999a06"
 
         when (slackTask) {
             "get" -> gatherSlackDetails(
@@ -180,7 +181,6 @@ class SlackAuthentication {
                 filePathMedia = filePathMedia,
                 messagePath = messagePath,
                 slackType = slackType
-
             )
         }
     }
