@@ -799,6 +799,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         floatingActionButtonView.visibility = View.GONE
                     }
                     initializeJiraLayout(filePathMedia = filePathMedia)
+
 //                Thread{
 //
 //                    val slack = Slack.getInstance()
@@ -809,18 +810,18 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //                        it.clientSecret("6147f0bd55a0c777893d07c91f3b16ef")
 //                        it.redirectUri()
 //                    }
-
-
+//
+//
 //                    val response = slack.methods().oauthAccess {
 //                        it.clientId("1176309019584.1151103028997")
 //                        it.clientSecret("6147f0bd55a0c777893d07c91f3b16ef")
 //                        it.redirectUri("https://slack.com/oauth/v2/authorize?client_id=1176309019584.1151103028997&scope=app_mentions:read,calls:read,calls:write,channels:history,channels:join,channels:manage,channels:read,chat:write,chat:write.customize,chat:write.public,files:read,files:write,groups:write,im:history,im:read,im:write,incoming-webhook,reactions:read,usergroups:read,usergroups:write,users.profile:read,users:read,users:read.email,users:write,remote_files:write,remote_files:share,groups:read,team:read&user_scope=users:read,chat:write")
 //                    }
-
-
-//                    Log.d("adnan",response.toString())
-//                    Log.d("adnan",res.toString())
-
+//
+//
+////                    Log.d("adnan",response.toString())
+////                    Log.d("adnan",res.toString())
+//
 //                }.start()
 
 //                  initializeJiraAuthLayout(filePathMedia = filePathMedia)
