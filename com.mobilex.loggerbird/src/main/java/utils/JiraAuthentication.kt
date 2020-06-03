@@ -5,10 +5,12 @@ import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
 import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
+import com.atlassian.jira.rest.client.api.ProjectRestClient
 import com.atlassian.jira.rest.client.api.domain.*
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.api.domain.input.LinkIssuesInput
@@ -52,11 +54,14 @@ class JiraAuthentication {
     private lateinit var label: String
     private lateinit var epicLink: String
     private lateinit var sprint: String
+    private lateinit var component: String
+    private lateinit var fixVersion: String
     private lateinit var progressBar: ProgressBar
     private val hashMapComponent: HashMap<String, Iterable<BasicComponent>> = HashMap()
     private val hashMapFixVersions: HashMap<String, Iterable<Version>> = HashMap()
     private val hashMapLinkedIssues: HashMap<String, String> = HashMap()
     private val hashMapSprint: HashMap<String, String> = HashMap()
+    private val hashMapBoard: HashMap<String, String> = HashMap()
     private lateinit var arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>
     private val arrayListProjects: ArrayList<String> = ArrayList()
     private val arrayListProjectKeys: ArrayList<String> = ArrayList()
@@ -266,8 +271,12 @@ class JiraAuthentication {
                 summary
             )
             issueBuilder.setPriorityId(arrayListPrioritiesId[priorityPosition].toLong())
-            issueBuilder.setDescription(description)
-            issueBuilder.setFieldValue("labels", arrayListChoosenLabel)
+            if (this.description.isNotEmpty()) {
+                issueBuilder.setDescription(description)
+            }
+            if (this.arrayListChoosenLabel.isNotEmpty()) {
+                issueBuilder.setFieldValue("labels", arrayListChoosenLabel)
+            }
 //            issueBuilder.setFieldValue("reporter",reporter)
 //            val basicUser = BasicUser(URI(arrayListSelf[assigneePosition]),arrayListName[assigneePosition],assignee,arrayListAccountId[assigneePosition])
 //            issueBuilder.setAssigneeName(basicUser.displayName)
@@ -287,10 +296,10 @@ class JiraAuthentication {
 //                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
 //                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
 //            issueBuilder.setDueDate(DateTime.parse("2020-06-25"))
-            if (arrayListComponents[componentPosition].isNotEmpty()) {
+            if (arrayListComponents[componentPosition].isNotEmpty() && component.isNotEmpty()) {
                 issueBuilder.setComponents(hashMapComponent[arrayListComponents[componentPosition]])
             }
-            if (arrayListFixVersions[fixVersionPosition].isNotEmpty()) {
+            if (arrayListFixVersions[fixVersionPosition].isNotEmpty() && fixVersion.isNotEmpty()) {
                 issueBuilder.setFixVersions(hashMapFixVersions[arrayListFixVersions[fixVersionPosition]])
             }
             val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
@@ -298,89 +307,102 @@ class JiraAuthentication {
 //            createdIssueKey  = issueKey
             val issueUri = basicIssue.self
             val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
-            val jsonObjectAssignee = JsonObject()
-            jsonObjectAssignee.addProperty("accountId", arrayListAccountId[assigneePosition])
-            RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
-                .create(AccountIdService::class.java)
-                .setAssignee(jsonObject = jsonObjectAssignee)
-                .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
-                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                    override fun onFailure(
-                        call: retrofit2.Call<List<JiraUserModel>>,
-                        t: Throwable
-                    ) {
-                        jiraExceptionHandler(throwable = t)
-                    }
-
-                    override fun onResponse(
-                        call: retrofit2.Call<List<JiraUserModel>>,
-                        response: retrofit2.Response<List<JiraUserModel>>
-                    ) {
-                        Log.d("assignee_put_success", response.code().toString())
-                        Log.d("assignee_put_success", assignee)
-                    }
-                })
-
-            val jsonObjectReporter = JsonObject()
-            val jsonObjectField = JsonObject()
-            val jsonObjectReporterField = JsonObject()
-            jsonObjectReporter.addProperty("self", arrayListSelf[reporterPosition])
-            jsonObjectReporter.addProperty("accountId", arrayListAccountId[reporterPosition])
-            jsonObjectReporter.addProperty("emailAddress", arrayListEmailAdresses[reporterPosition])
-            jsonObjectReporterField.add("reporter", jsonObjectReporter)
-            jsonObjectField.add("fields", jsonObjectReporterField)
-            RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
-                .create(AccountIdService::class.java)
-                .setReporter(jsonObject = jsonObjectField)
-                .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
-                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                    override fun onFailure(
-                        call: retrofit2.Call<List<JiraUserModel>>,
-                        t: Throwable
-                    ) {
-                        jiraExceptionHandler(throwable = t)
-                    }
-
-                    override fun onResponse(
-                        call: retrofit2.Call<List<JiraUserModel>>,
-                        response: retrofit2.Response<List<JiraUserModel>>
-                    ) {
-                        Log.d("reporter_put_success", response.code().toString())
-                        Log.d("reporter_put_success", reporter)
-                    }
-                })
-
-            if (this::sprintField.isInitialized) {
-                val jsonObjectSprint = JsonObject()
-                val jsonObjectFieldSprint = JsonObject()
-                jsonObjectSprint.addProperty(
-                    sprintField,
-                    hashMapSprint[arrayListSprintName[sprintPosition]]?.toInt()
-                )
-                jsonObjectFieldSprint.add("fields", jsonObjectSprint)
+            if (this.assignee.isNotEmpty()) {
+                val jsonObjectAssignee = JsonObject()
+                jsonObjectAssignee.addProperty("accountId", arrayListAccountId[assigneePosition])
                 RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
                     .create(AccountIdService::class.java)
-                    .setSprint(jsonObject = jsonObjectFieldSprint)
-                    .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
+                    .setAssignee(jsonObject = jsonObjectAssignee)
+                    .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
                         @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                         override fun onFailure(
-                            call: retrofit2.Call<List<JiraSprintModel>>,
+                            call: retrofit2.Call<List<JiraUserModel>>,
                             t: Throwable
                         ) {
                             jiraExceptionHandler(throwable = t)
                         }
 
                         override fun onResponse(
-                            call: retrofit2.Call<List<JiraSprintModel>>,
-                            response: retrofit2.Response<List<JiraSprintModel>>
+                            call: retrofit2.Call<List<JiraUserModel>>,
+                            response: retrofit2.Response<List<JiraUserModel>>
                         ) {
-                            Log.d("sprint_put_success", response.code().toString())
-                            response.body()?.forEach {
-                                Log.d("sprint_put_success_list", it.customfield_10020.toString())
-                            }
+                            Log.d("assignee_put_success", response.code().toString())
+                            Log.d("assignee_put_success", assignee)
                         }
                     })
             }
+
+            if (this.reporter.isNotEmpty()) {
+                val jsonObjectReporter = JsonObject()
+                val jsonObjectField = JsonObject()
+                val jsonObjectReporterField = JsonObject()
+                jsonObjectReporter.addProperty("self", arrayListSelf[reporterPosition])
+                jsonObjectReporter.addProperty("accountId", arrayListAccountId[reporterPosition])
+                jsonObjectReporter.addProperty(
+                    "emailAddress",
+                    arrayListEmailAdresses[reporterPosition]
+                )
+                jsonObjectReporterField.add("reporter", jsonObjectReporter)
+                jsonObjectField.add("fields", jsonObjectReporterField)
+                RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+                    .create(AccountIdService::class.java)
+                    .setReporter(jsonObject = jsonObjectField)
+                    .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+                        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                        override fun onFailure(
+                            call: retrofit2.Call<List<JiraUserModel>>,
+                            t: Throwable
+                        ) {
+                            jiraExceptionHandler(throwable = t)
+                        }
+
+                        override fun onResponse(
+                            call: retrofit2.Call<List<JiraUserModel>>,
+                            response: retrofit2.Response<List<JiraUserModel>>
+                        ) {
+                            Log.d("reporter_put_success", response.code().toString())
+                            Log.d("reporter_put_success", reporter)
+                        }
+                    })
+            }
+
+            if (this.sprint.isNotEmpty()) {
+                if (this::sprintField.isInitialized) {
+                    val jsonObjectSprint = JsonObject()
+                    val jsonObjectFieldSprint = JsonObject()
+                    jsonObjectSprint.addProperty(
+                        sprintField,
+                        hashMapSprint[arrayListSprintName[sprintPosition]]?.toInt()
+                    )
+                    jsonObjectFieldSprint.add("fields", jsonObjectSprint)
+                    RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+                        .create(AccountIdService::class.java)
+                        .setSprint(jsonObject = jsonObjectFieldSprint)
+                        .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
+                            @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                            override fun onFailure(
+                                call: retrofit2.Call<List<JiraSprintModel>>,
+                                t: Throwable
+                            ) {
+                                jiraExceptionHandler(throwable = t)
+                            }
+
+                            override fun onResponse(
+                                call: retrofit2.Call<List<JiraSprintModel>>,
+                                response: retrofit2.Response<List<JiraSprintModel>>
+                            ) {
+                                Log.d("sprint_put_success", response.code().toString())
+                                response.body()?.forEach {
+                                    Log.d(
+                                        "sprint_put_success_list",
+                                        it.customfield_10020.toString()
+                                    )
+                                }
+                            }
+                        })
+                }
+            }
+
             if (this.issue.isNotEmpty()) {
                 val linkIssueInput = LinkIssuesInput(
                     issueKey,
@@ -463,6 +485,7 @@ class JiraAuthentication {
         activity: Activity
     ) {
         try {
+            queueCounter = 0
             this.activity = activity
             val coroutineCallGatherDetails = CoroutineScope(Dispatchers.IO)
             coroutineCallGatherDetails.launch {
@@ -491,15 +514,18 @@ class JiraAuthentication {
                 hashMapComponent.clear()
                 hashMapFixVersions.clear()
                 hashMapLinkedIssues.clear()
-                jiraTaskGatherFields(restClient = restClient)
+                hashMapSprint.clear()
+                hashMapBoard.clear()
+                jiraTaskGatherSprintFields(restClient = restClient)
                 jiraTaskGatherProjectKeys(restClient = restClient)
                 jiraTaskGatherIssueTypes(restClient = restClient)
                 jiraTaskGatherAssignees(restClient = restClient)
                 jiraTaskGatherLinkedIssues(restClient = restClient)
                 jiraTaskGatherIssues(restClient = restClient)
                 jiraTaskGatherPriorities(restClient = restClient)
-                jiraTaskGatherFixComp(restClient = restClient)
                 jiraTaskGatherSprint(restClient = restClient)
+                jiraTaskGatherBoards()
+                Log.d("que_counter", queueCounter.toString())
             }
 
         } catch (e: Exception) {
@@ -507,28 +533,35 @@ class JiraAuthentication {
         }
     }
 
-    private fun updateFields(){
-        activity.runOnUiThread {
-            LoggerBirdService.loggerBirdService.initializeJiraSpinner(
-                arrayListProjectNames = arrayListProjects,
-                arrayListIssueTypes = arrayListIssueTypes,
-                arrayListAssignee = arrayListAssignee,
-                arrayListReporterNames = arrayListReporter,
-                arrayListLinkedIssues = arrayListIssueLinkedTypes,
-                arrayListIssues = arrayListIssues,
-                arrayListPriority = arrayListPriorities,
-                arrayListComponent = arrayListComponents,
-                arrayListFixVersions = arrayListFixVersions,
-                arrayListLabel = arrayListLabel,
-                arrayListEpicLink = arrayListEpicLink,
-                arrayListSprint = arrayListSprintName
-            )
+    private fun updateFields() {
+        queueCounter--
+        Log.d("que_counter", queueCounter.toString())
+        if (queueCounter == 0) {
+            activity.runOnUiThread {
+                LoggerBirdService.loggerBirdService.initializeJiraSpinner(
+                    arrayListProjectNames = arrayListProjects,
+                    arrayListProjectKeys = arrayListProjectKeys,
+                    arrayListIssueTypes = arrayListIssueTypes,
+                    arrayListAssignee = arrayListAssignee,
+                    arrayListReporterNames = arrayListReporter,
+                    arrayListLinkedIssues = arrayListIssueLinkedTypes,
+                    arrayListIssues = arrayListIssues,
+                    arrayListPriority = arrayListPriorities,
+                    arrayListComponent = arrayListComponents,
+                    arrayListFixVersions = arrayListFixVersions,
+                    arrayListLabel = arrayListLabel,
+                    arrayListEpicLink = arrayListEpicLink,
+                    arrayListSprint = arrayListSprintName,
+                    hashMapBoardList = hashMapBoard
+                )
+            }
         }
+
     }
 
     private fun jiraTaskGatherProjectKeys(restClient: JiraRestClient) {
-        val coroutineCallProjectKeys = CoroutineScope(Dispatchers.IO)
         queueCounter++
+        val coroutineCallProjectKeys = CoroutineScope(Dispatchers.IO)
         coroutineCallProjectKeys.async {
             val projectClient = restClient.projectClient
             val projectList = projectClient.allProjects
@@ -538,16 +571,17 @@ class JiraAuthentication {
                 }
                 arrayListProjectKeys.add(it.key)
             }
-            queueCounter--
-            if(queueCounter==0){
-                updateFields()
-            }
+            jiraTaskGatherFixComp(
+                projectClient = projectClient,
+                projectKey = arrayListProjectKeys[projectPosition]
+            )
+            updateFields()
         }
     }
 
     private fun jiraTaskGatherIssueTypes(restClient: JiraRestClient) {
-        val coroutineCallIssueTypes = CoroutineScope(Dispatchers.IO)
         queueCounter++
+        val coroutineCallIssueTypes = CoroutineScope(Dispatchers.IO)
         coroutineCallIssueTypes.async {
             val metaDataClient = restClient.metadataClient
             val issueTypeList = metaDataClient.issueTypes
@@ -555,19 +589,16 @@ class JiraAuthentication {
                 arrayListIssueTypes.add(it.name)
                 arrayListIssueTypesId.add(it.id.toInt())
             }
-            queueCounter--
-            if(queueCounter==0){
-                updateFields()
-            }
+            updateFields()
         }
     }
 
     private fun jiraTaskGatherAssignees(restClient: JiraRestClient) {
 
 //        https://appcaesars.atlassian.net/rest/api/2/user/search?query
-        val coroutineScopeGatherAssignee = CoroutineScope(Dispatchers.IO)
         queueCounter++
-        coroutineScopeGatherAssignee.async {
+        val coroutineCallGatherAssignee = CoroutineScope(Dispatchers.IO)
+        coroutineCallGatherAssignee.async {
             RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/user/")
                 .create(AccountIdService::class.java)
                 .getAccountIdList().enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
@@ -576,10 +607,6 @@ class JiraAuthentication {
                         call: retrofit2.Call<List<JiraUserModel>>,
                         t: Throwable
                     ) {
-                        queueCounter--
-                        if(queueCounter==0){
-                            updateFields()
-                        }
                         jiraExceptionHandler(throwable = t)
                     }
 
@@ -599,11 +626,8 @@ class JiraAuthentication {
                                 }
                             }
                         }
-                        jiraTaskGatherReporters(restClient = restClient)
-                        queueCounter--
-                        if(queueCounter==0){
-                            updateFields()
-                        }
+//                        jiraTaskGatherReporters(restClient = restClient)
+                        updateFields()
                     }
                 })
         }
@@ -633,8 +657,8 @@ class JiraAuthentication {
 
 
     private fun jiraTaskGatherLinkedIssues(restClient: JiraRestClient) {
-        val coroutineCallLinkedIssues = CoroutineScope(Dispatchers.IO)
         queueCounter++
+        val coroutineCallLinkedIssues = CoroutineScope(Dispatchers.IO)
         coroutineCallLinkedIssues.async {
             val metaDataClient = restClient.metadataClient
             val linkedIssuesList = metaDataClient.issueLinkTypes
@@ -649,16 +673,13 @@ class JiraAuthentication {
                     hashMapLinkedIssues[it.inward] = it.name
                 }
             }
-            queueCounter--
-            if(queueCounter==0){
-                updateFields()
-            }
+            updateFields()
         }
     }
 
     private fun jiraTaskGatherIssues(restClient: JiraRestClient) {
-        val coroutineCallGatherIssues = CoroutineScope(Dispatchers.IO)
         queueCounter++
+        val coroutineCallGatherIssues = CoroutineScope(Dispatchers.IO)
         coroutineCallGatherIssues.async {
             val searchClient = restClient.searchClient
             val projectClient = restClient.projectClient
@@ -683,18 +704,15 @@ class JiraAuthentication {
                     }
                 }
             }
-            queueCounter--
-            if(queueCounter==0){
-                updateFields()
-            }
+            updateFields()
         }
 
     }
 
     private fun jiraTaskGatherPriorities(restClient: JiraRestClient) {
+        queueCounter++
         val coroutineCallPriorities = CoroutineScope(Dispatchers.IO)
         coroutineCallPriorities.async {
-            queueCounter++
             val metaDataClient = restClient.metadataClient
             val priorityList = metaDataClient.priorities
             priorityList.claim().forEach {
@@ -703,42 +721,26 @@ class JiraAuthentication {
                     arrayListPrioritiesId.add(it.id!!.toInt())
                 }
             }
-            queueCounter--
-            if(queueCounter==0){
-                updateFields()
-            }
+            updateFields()
         }
     }
 
-    private fun jiraTaskGatherFixComp(restClient: JiraRestClient) {
-        val coroutineCallFixComp = CoroutineScope(Dispatchers.IO)
-        queueCounter++
-        coroutineCallFixComp.async {
-            val projectClient = restClient.projectClient
-//        arrayListComponents.add("")
-//        arrayListFixVersions.add("")
-            projectClient.allProjects.claim().forEach {
-                projectClient.getProject(it.key).claim().components.forEach { component ->
-                    arrayListComponents.add(component.name)
-                    hashMapComponent[component.name] =
-                        projectClient.getProject(it.key).claim().components
-                }
-                projectClient.getProject(it.key).claim().versions.forEach { version ->
-                    arrayListFixVersions.add(version.name)
-                    hashMapFixVersions[version.name] =
-                        projectClient.getProject(it.key).claim().versions
-                }
-            }
-            queueCounter--
-            if(queueCounter==0){
-                updateFields()
-            }
+    private fun jiraTaskGatherFixComp(projectClient: ProjectRestClient, projectKey: String) {
+        projectClient.getProject(projectKey).claim().components.forEach { component ->
+            arrayListComponents.add(component.name)
+            hashMapComponent[component.name] =
+                projectClient.getProject(projectKey).claim().components
+        }
+        projectClient.getProject(projectKey).claim().versions.forEach { version ->
+            arrayListFixVersions.add(version.name)
+            hashMapFixVersions[version.name] =
+                projectClient.getProject(projectKey).claim().versions
         }
     }
 
     private fun jiraTaskGatherSprint(restClient: JiraRestClient) {
-        val coroutineCallSprint = CoroutineScope(Dispatchers.IO)
         queueCounter++
+        val coroutineCallSprint = CoroutineScope(Dispatchers.IO)
         coroutineCallSprint.async {
             RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/agile/1.0/")
                 .create(AccountIdService::class.java)
@@ -769,10 +771,6 @@ class JiraAuthentication {
                                         call: retrofit2.Call<JsonObject>,
                                         t: Throwable
                                     ) {
-                                        queueCounter--
-                                        if(queueCounter==0){
-                                            updateFields()
-                                        }
                                         jiraExceptionHandler(throwable = t)
                                     }
 
@@ -790,21 +788,51 @@ class JiraAuthentication {
                                                         sprint.asJsonObject["id"].asString
                                                 }
                                             }
-                                        queueCounter--
-                                        if(queueCounter==0){
-                                            updateFields()
-                                        }
+
                                     }
                                 })
                         }
+                        updateFields()
                     }
                 })
         }
     }
 
-    private fun jiraTaskGatherFields(restClient: JiraRestClient) {
-        val coroutineCallGatherFields = CoroutineScope(Dispatchers.IO)
+    private fun jiraTaskGatherBoards() {
         queueCounter++
+        val coroutineCallGatherBoards = CoroutineScope(Dispatchers.IO)
+        coroutineCallGatherBoards.async {
+            RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/agile/1.0/")
+                .create(AccountIdService::class.java)
+                .getBoardList()
+                .enqueue(object : retrofit2.Callback<JsonObject> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<JsonObject>,
+                        t: Throwable
+                    ) {
+                        jiraExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
+                    ) {
+                        Log.d("board_details", response.code().toString())
+                        val boardList = response.body()
+                        boardList?.getAsJsonArray("values")?.forEach {
+                            hashMapBoard[it.asJsonObject["location"].asJsonObject["projectKey"].asString] =
+                                it.asJsonObject["type"].asString
+                        }
+                        updateFields()
+                    }
+                })
+        }
+    }
+
+    private fun jiraTaskGatherSprintFields(restClient: JiraRestClient) {
+        queueCounter++
+        val coroutineCallGatherFields = CoroutineScope(Dispatchers.IO)
         coroutineCallGatherFields.async {
             val metaDataClient = restClient.metadataClient
             metaDataClient.fields.claim().forEach {
@@ -814,10 +842,7 @@ class JiraAuthentication {
             }
 //           arrayListFields.add(it.id)
 //            arrayListFields.add(it.name)
-            queueCounter--
-            if(queueCounter==0){
-                updateFields()
-            }
+            updateFields()
         }
     }
 
@@ -924,6 +949,9 @@ class JiraAuthentication {
         epicLink = autoTextViewEpicLink.editableText.toString()
 //        epicLink = spinnerEpicLink.selectedItem.toString()
         //  sprint = spinnerSprint.selectedItem.toString()
+        component = autoTextViewComponent.editableText.toString()
+        fixVersion = autoTextViewFixVersions.editableText.toString()
+        sprint = autoTextViewSprint.editableText.toString()
     }
 
     internal fun gatherJiraEditTextDetails(

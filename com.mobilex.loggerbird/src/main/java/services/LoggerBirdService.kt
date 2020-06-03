@@ -29,9 +29,11 @@ import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
 import android.view.animation.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
+import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -66,6 +68,7 @@ import java.io.FileNotFoundException
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
@@ -192,6 +195,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var toolbarJira: Toolbar
     private lateinit var progressBarJira: ProgressBar
     private lateinit var progressBarJiraLayout: FrameLayout
+    private lateinit var cardViewSprint:CardView
     //    private lateinit var layoutJiraAuth: LinearLayout
     private val arrayListJiraFileName: ArrayList<RecyclerViewModel> = ArrayList()
     //    private val arrayListJiraProject: ArrayList<String> = ArrayList()
@@ -225,6 +229,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var autoTextViewEpicLinkAdapter: ArrayAdapter<String>
     //    private lateinit var spinnerSprintAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewSprintAdapter: ArrayAdapter<String>
+    private var projectPosition = 0
 
     //Slack:
     private lateinit var buttonSlackCreate: Button
@@ -2434,6 +2439,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     layoutJira = viewJira.findViewById(R.id.layout_jira)
                     progressBarJira = viewJira.findViewById(R.id.jira_progressbar)
                     progressBarJiraLayout = viewJira.findViewById(R.id.jira_progressbar_background)
+                    cardViewSprint = viewJira.findViewById(R.id.cardView_sprint)
 
                     val sharedPref =
                         PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
@@ -2576,6 +2582,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     progressBarJiraLayout.visibility = View.VISIBLE
 //                    attachProgressBar()
                 }
+                hideKeyboard(activity = activity)
                 jiraAuthentication.callJiraIssue(
                     filePathName = filePathMedia,
                     context = context,
@@ -2695,6 +2702,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @SuppressLint("ClickableViewAccessibility")
     internal fun initializeJiraSpinner(
         arrayListProjectNames: ArrayList<String>,
+        arrayListProjectKeys:ArrayList<String>,
         arrayListIssueTypes: ArrayList<String>,
         arrayListReporterNames: ArrayList<String>,
         arrayListLinkedIssues: ArrayList<String>,
@@ -2705,7 +2713,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListFixVersions: ArrayList<String>,
         arrayListLabel: ArrayList<String>,
         arrayListEpicLink: ArrayList<String>,
-        arrayListSprint: ArrayList<String>
+        arrayListSprint: ArrayList<String>,
+        hashMapBoardList:HashMap<String,String>
     ) {
 
         try {
@@ -2715,7 +2724,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 arrayListProjectNames
             )
             autoTextViewProject.setAdapter(autoTextViewProjectAdapter)
-            if (arrayListProjectNames.isNotEmpty()) {
+            if (arrayListProjectNames.isNotEmpty() && autoTextViewProject.text.isEmpty()) {
                 autoTextViewProject.setText(arrayListProjectNames[0], false)
             }
             autoTextViewProject.setOnTouchListener { v, event ->
@@ -2723,7 +2732,21 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 false
             }
             autoTextViewProject.setOnItemClickListener { parent, view, position, id ->
+                projectPosition = position
                 jiraAuthentication.setProjectPosition(projectPosition = position)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    progressBarJira.visibility = View.VISIBLE
+                    progressBarJiraLayout.visibility = View.VISIBLE
+//                    attachProgressBar()
+                }
+                hideKeyboard(activity = activity)
+                jiraAuthentication.callJiraIssue(
+                    context = context,
+                    activity = activity,
+                    jiraTask = "get",
+                    createMethod = "normal"
+                )
+
             }
 //        spinnerProjectAdapter =
 //            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
@@ -2752,9 +2775,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 arrayListReporterNames
             )
             autoTextViewReporter.setAdapter(autoTextViewReporterAdapter)
-            if (arrayListReporterNames.isNotEmpty()) {
-                autoTextViewReporter.setText(arrayListReporterNames[0], false)
-            }
+//            if (arrayListReporterNames.isNotEmpty()) {
+//                autoTextViewReporter.setText(arrayListReporterNames[0], false)
+//            }
             autoTextViewReporter.setOnTouchListener { v, event ->
                 autoTextViewReporter.showDropDown()
                 false
@@ -2912,19 +2935,26 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //        spinnerEpicLinkAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 //        spinnerEpicLink.adapter = spinnerEpicLinkAdapter
 
-            autoTextViewSprintAdapter =
-                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListSprint)
-            autoTextViewSprint.setAdapter(autoTextViewSprintAdapter)
+            if(hashMapBoardList[arrayListProjectKeys[projectPosition]] == "scrum"){
+                cardViewSprint.visibility = View.VISIBLE
+                autoTextViewSprintAdapter =
+                    ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListSprint)
+                autoTextViewSprint.setAdapter(autoTextViewSprintAdapter)
 //            if (arrayListSprint.isNotEmpty()) {
 //                autoTextViewSprint.setText(arrayListSprint[0], false)
 //            }
-            autoTextViewSprint.setOnTouchListener { v, event ->
-                autoTextViewSprint.showDropDown()
-                false
+                autoTextViewSprint.setOnTouchListener { v, event ->
+                    autoTextViewSprint.showDropDown()
+                    false
+                }
+                autoTextViewSprint.setOnItemClickListener { parent, view, position, id ->
+                    jiraAuthentication.setSprintPosition(sprintPosition = position)
+                }
+            }else{
+                cardViewSprint.visibility = View.GONE
             }
-            autoTextViewSprint.setOnItemClickListener { parent, view, position, id ->
-                jiraAuthentication.setSprintPosition(sprintPosition = position)
-            }
+
+
 //        spinnerSprintAdapter =
 //            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListSprint)
 //        spinnerSprintAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -2941,6 +2971,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
         }
     }
+
 
 //    private fun addJiraProjectNames(): ArrayList<String> {
 //        arrayListJiraProject.add("project_a")
@@ -3129,6 +3160,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
         progressBarSlack.visibility = View.GONE
         progressBarSlackLayout.visibility = View.GONE
+    }
+    private fun hideKeyboard(activity: Activity){
+        val inputMethodManager = (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+        inputMethodManager.toggleSoftInput(0,0)
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
