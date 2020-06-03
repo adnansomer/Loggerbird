@@ -4,10 +4,10 @@
     <color name="colorPrimaryDark">#ffffff</color>
     <color name="colorAccent">#000000</color>
     <color name="colorBlack">#000000</color>
-    <color name="colorGray">#808080</color>
+    <color name="colorGray">#9e9e9e</color>
     <color name="colorFab">#ffffff</color>
     <color name="colorMiniFab">#eeeeee</color>
-    <color name="black">#212121</color>
+    <color name="black">#000000</color>
     <color name="white">#fafafa</color>
     <color name="gray">#424242</color>
     <color name="secondaryColor">#a00037</color>
@@ -16,4 +16,5 @@
     <color name="jiraBlue">#2684ff</color>
     <color name="jiraSilver">#C0C0C0</color>
     <color name="darkTransparent">#99000000</color>
+    <color name="mediaRecordColor">#c62828</color>
 </resources>

@@ -6,25 +6,27 @@
     android:layout_height="wrap_content"
     android:gravity="center"
     android:orientation="horizontal"
-    android:layout_margin="5dp">
+    android:layout_marginRight="5dp"
+    android:layout_marginEnd="7dp">
 
         <TextView
             android:id="@+id/textView_file_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="PLACEHOLDER.TXT"
+            android:textStyle="italic"
             android:background="@color/white"
             android:textColor="@color/black"
-            android:textSize="12sp">
+            android:textSize="14sp"
+            android:layout_marginRight="3dp">
         </TextView>
 
         <ImageButton
             android:id="@+id/image_button_cross"
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginLeft="10dp"
             android:layout_gravity="center"
+            android:tint="@color/secondaryColor"
             app:srcCompat="@drawable/ic_close_black_24dp"
             android:background="@color/white">
         </ImageButton>
