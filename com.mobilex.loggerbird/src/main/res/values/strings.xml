@@ -117,9 +117,10 @@
     <string name="button_jira_init_next">Next</string>
     <string name="button_jira_init_cancel">Cancel</string>
     <!-- recycler_view_jira_item_popup-->
-    <string name="textView_recyclerView_popup_title">Are you sure to remove attachment from your issue?</string>
-    <string name="button_recyclerView_yes">Yes</string>
-    <string name="button_recyclerView_no">No</string>
+    <string name="textView_recyclerView_popup_header">Delete Attachment</string>
+    <string name="textView_recyclerView_popup_title">Are you sure to remove attachment from your Jira issue?</string>
+    <string name="button_recyclerView_yes">Delete Attachment</string>
+    <string name="button_recyclerView_no">Keep File</string>
     <!-- loggerbird_slack_popup-->
     <string name="textView_slack_title">Create Slack Message</string>
     <string name="textView_slack_message">Message</string>
@@ -131,6 +132,6 @@
     <string name="button_slack_create">Create</string>
     <!-- recycler_view_slack_item_popup-->
     <string name="textView_recyclerView_slack_popup_title">Are you sure to remove attachment from your Slack Message?</string>
-    <string name="button_recyclerView_slack_yes">Yes</string>
-    <string name="button_recyclerView_slack_no">No</string>
+    <string name="button_recyclerView_slack_yes">Delete Attachment</string>
+    <string name="button_recyclerView_slack_no">Keep File</string>
 </resources>
