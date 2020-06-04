@@ -162,7 +162,7 @@ class SlackAuthentication {
         slackType : String? = null
     ) {
         val slack = Slack.getInstance()
-        val token = "xoxb-1176309019584-1152486968594-k4brnZhlrUXAAy80Be0GmaVv"
+        val token = "xoxb-523949707746-1185252116928-e77ayP6N5Mv0VfJbYhQ4JyaB"
         //val token = "xoxp-1176309019584-1152680995235-1165667140657-94283bc32ae0a866189d28284f999a06"
 
         when (slackTask) {

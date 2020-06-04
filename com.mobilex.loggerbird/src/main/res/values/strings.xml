@@ -62,8 +62,13 @@
     <string name="jira_sent_error">An error happened while trying to open jira issue!</string>
     <string name="media_recording_error">Please complete your other media operation!</string>
     <string name="jira_summary_empty">Summary cannot be empty!</string>
+    <string name="jira_reporter_empty">Reporter doesn\'t exist!</string>
+    <string name="jira_fix_version_empty">Fix version doesn\'t exist!</string>
+    <string name="jira_epic_link_empty">Epic link doesn\'t exist!</string>
     <string name="jira_summary_unhandled_exception">unhandled_exception:</string>
     <string name="jira_description_unhandled_exception">An unhandled exception detected check log file for more details!</string>
+    <string name="jira_issue_preferences_save">Issue preferences are saved!</string>
+    <string name="jira_issue_preferences_delete">Issue preferences are deleted!</string>
     <string name="slack_message_empty">Message cannot be empty!</string>
     <string name="slack_sent">Slack message sent!</string>
     <string name="slack_sent_error">An error happened while trying to send slack message!</string>
@@ -109,6 +114,8 @@
     <string name="textView_jira_label">Labels</string>
     <string name="textView_jira_epic_link">Epic Link</string>
     <string name="textView_jira_sprint">Sprint</string>
+    <string name="textView_jira_start_date">Start date</string>
+    <string name="textView_jira_remove_date">Remove date</string>
     <string name="textView_jira_init_email">E-Mail</string>
     <string name="textView_jira_init_password">Key-Token</string>
     <string name="textView_jira_attachment">Attachments</string>
@@ -134,4 +141,7 @@
     <string name="textView_recyclerView_slack_popup_title">Are you sure to remove attachment from your Slack Message?</string>
     <string name="button_recyclerView_slack_yes">Delete Attachment</string>
     <string name="button_recyclerView_slack_no">Keep File</string>
+    <!-- jira_calendar_view-->
+    <string name="button_CalendarView_ok">OK</string>
+    <string name="button_CalendarView_cancel">CANCEL</string>
 </resources>

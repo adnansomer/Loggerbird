@@ -84,6 +84,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var windowManagerFeedback: Any? = null
     private var windowManagerJira: Any? = null
     private var windowManagerSlack: Any? = null
+    private var windowManagerJiraDatePicker: Any? = null
     //private var windowManagerJiraAuth: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
@@ -91,6 +92,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var windowManagerParamsJira: WindowManager.LayoutParams
     private lateinit var windowManagerParamsJiraAuth: WindowManager.LayoutParams
     private lateinit var windowManagerParamsSlack: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsJiraDatePicker: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -155,6 +157,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var controlFileAction: Boolean = false
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarView: View
+    private val defaultToast: DefaultToast = DefaultToast()
 
     //Jira:
     internal val jiraAuthentication = JiraAuthentication()
@@ -195,10 +198,21 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //  private lateinit var buttonJiraAuthNext: Button
     private lateinit var layoutJira: FrameLayout
     private lateinit var toolbarJira: Toolbar
-    private lateinit var toolbarSlack : Toolbar
+    private lateinit var toolbarSlack: Toolbar
     private lateinit var progressBarJira: ProgressBar
     private lateinit var progressBarJiraLayout: FrameLayout
-    private lateinit var cardViewSprint:CardView
+    private lateinit var cardViewSprint: CardView
+    private lateinit var cardViewStartDate: CardView
+    private lateinit var imageViewStartDate: ImageView
+    //    private lateinit var textViewRemoveDate: TextView
+    private lateinit var imageButtonRemoveDate: ImageButton
+    private lateinit var calendarViewStartDate: CalendarView
+    private lateinit var calendarViewJiraView: View
+    private lateinit var calendarViewJiraLayout: FrameLayout
+    private var calendarViewJiraDate: Long? = null
+    private lateinit var buttonCalendarViewJiraCancel: Button
+    private lateinit var buttonCalendarViewJiraOk: Button
+    private lateinit var scrollViewJira: ScrollView
     //    private lateinit var layoutJiraAuth: LinearLayout
     private val arrayListJiraFileName: ArrayList<RecyclerViewModel> = ArrayList()
     //    private val arrayListJiraProject: ArrayList<String> = ArrayList()
@@ -234,6 +248,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var autoTextViewSprintAdapter: ArrayAdapter<String>
     private var projectPosition = 0
 
+
     //Slack:
     private lateinit var buttonSlackCreate: Button
     internal lateinit var buttonSlackCancel: Button
@@ -242,7 +257,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerChannels: Spinner
     private lateinit var spinnerUsers: Spinner
     private lateinit var editTextMessage: EditText
-    private lateinit var editTextMessageUser : EditText
+    private lateinit var editTextMessageUser: EditText
     private lateinit var spinnerChannelsAdapter: ArrayAdapter<String>
     private lateinit var spinnerUsersAdapter: ArrayAdapter<String>
     private lateinit var slackAdapter: RecyclerViewSlackAdapter
@@ -251,9 +266,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private val arrayListSlackFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var progressBarSlack: ProgressBar
     private lateinit var progressBarSlackLayout: FrameLayout
-    private lateinit var slackChannelLayout : ScrollView
-    private lateinit var slackUserLayout : ScrollView
-    private lateinit var slackBottomNavigationView : BottomNavigationView
+    private lateinit var slackChannelLayout: ScrollView
+    private lateinit var slackUserLayout: ScrollView
+    private lateinit var slackBottomNavigationView: BottomNavigationView
 
 
     //Static global variables:
@@ -305,7 +320,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         internal var audioRecording = false
         internal var videoRecording = false
         internal var screenshotDrawing = false
-        private lateinit var workingAnimation : Animation
+        private lateinit var workingAnimation: Animation
 
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
@@ -774,7 +789,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun shareView(filePathMedia: File) {
-        floating_action_button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.black))
+        floating_action_button.backgroundTintList =
+            ColorStateList.valueOf(resources.getColor(R.color.black))
         floating_action_button.clearAnimation()
         floating_action_button.animate()
             .rotationBy(360F)
@@ -1079,9 +1095,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                             .start()
                                     }
                                     .start()
-                                workingAnimation = AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
+                                workingAnimation =
+                                    AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
                                 floating_action_button.startAnimation(workingAnimation)
-                                floating_action_button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
+                                floating_action_button.backgroundTintList =
+                                    ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
 
 
                             }
@@ -1266,7 +1284,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     .start()
                 workingAnimation = AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
                 floating_action_button.startAnimation(workingAnimation)
-                floating_action_button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
+                floating_action_button.backgroundTintList =
+                    ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
 
 
                 callEnqueue()
@@ -2373,6 +2392,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //    }
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeJiraLayout(filePathMedia: File) {
         try {
@@ -2460,12 +2480,19 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     progressBarJira = viewJira.findViewById(R.id.jira_progressbar)
                     progressBarJiraLayout = viewJira.findViewById(R.id.jira_progressbar_background)
                     cardViewSprint = viewJira.findViewById(R.id.cardView_sprint)
+                    cardViewStartDate = viewJira.findViewById(R.id.cardView_start_date)
+                    imageViewStartDate = viewJira.findViewById(R.id.imageView_start_date)
+//                    textViewRemoveDate = viewJira.findViewById(R.id.textView_jira_remove_date)
+                    imageButtonRemoveDate =
+                        viewJira.findViewById(R.id.image_button_jira_remove_date)
+                    scrollViewJira = viewJira.findViewById(R.id.scrollView_jira)
 
-                    val sharedPref =
-                        PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                    editTextSummary.setText(sharedPref.getString("jira_summary", null))
-                    editTextDescription.setText(sharedPref.getString("jira_description", null))
-
+                    scrollViewJira.setOnTouchListener { v, event ->
+                        if (event.action == MotionEvent.ACTION_DOWN) {
+                            hideKeyboard(activity = activity)
+                        }
+                        return@setOnTouchListener false
+                    }
                     jiraAuthentication.callJiraIssue(
                         context = context,
                         activity = activity,
@@ -2506,6 +2533,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
             windowManagerJira = null
             arrayListJiraFileName.clear()
+            projectPosition = 0
 //
 //            removeJiraSpinner(
 //                jiraAuthentication.getArrayListProjects(),
@@ -2553,8 +2581,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //
 //    }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicksJira(filePathMedia: File) {
         layoutJira.setOnTouchListener(
             LayoutJiraOnTouchListener(
@@ -2596,13 +2624,26 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 editTextDescription = editTextDescription
             )
             jiraAuthentication.gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems = arrayListJiraFileName)
-            if (jiraAuthentication.checkSummaryEmpty(activity = activity, context = context)) {
+            if (jiraAuthentication.checkSummaryEmpty(
+                    activity = activity,
+                    context = context
+                ) && jiraAuthentication.checkReporterEmpty(
+                    activity = activity,
+                    context = context
+                ) && jiraAuthentication.checkFixVersionsEmpty(
+                    activity = activity,
+                    context = context
+                ) && jiraAuthentication.checkEpicLinkEmpty(
+                    activity = activity,
+                    context = context
+                )
+            ) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     progressBarJira.visibility = View.VISIBLE
                     progressBarJiraLayout.visibility = View.VISIBLE
 //                    attachProgressBar()
                 }
-                hideKeyboard(activity = activity)
+//                hideKeyboard(activity = activity)
                 jiraAuthentication.callJiraIssue(
                     filePathName = filePathMedia,
                     context = context,
@@ -2619,30 +2660,69 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     val sharedPref =
                         PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     with(sharedPref.edit()) {
+                        putString("jira_project", autoTextViewProject.editableText.toString())
+                        putInt("jira_project_position", projectPosition)
+                        putString("jira_issue_type", autoTextViewIssueType.editableText.toString())
                         putString("jira_summary", editTextSummary.text.toString())
                         putString("jira_description", editTextDescription.text.toString())
+                        putString("jira_component", autoTextViewComponent.editableText.toString())
+                        putString("jira_reporter", autoTextViewReporter.editableText.toString())
+                        putString(
+                            "jira_linked_issue",
+                            autoTextViewLinkedIssue.editableText.toString()
+                        )
+                        putString("jira_issue", autoTextViewIssue.editableText.toString())
+                        putString("jira_assignee", autoTextViewAssignee.editableText.toString())
+                        putString("jira_priority", autoTextViewPriority.editableText.toString())
+                        putString(
+                            "jira_fix_versions",
+                            autoTextViewFixVersions.editableText.toString()
+                        )
+                        putString("jira_labels", autoTextViewLabel.editableText.toString())
+                        putString("jira_epic_link", autoTextViewEpicLink.editableText.toString())
+                        putString("jira_sprint", autoTextViewSprint.editableText.toString())
                         commit()
                     }
-                    Toast.makeText(
-                        viewJira.context,
-                        "Issue preferences are saved!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    defaultToast.attachToast(
+                        activity = activity,
+                        toastMessage = context.resources.getString(R.string.jira_issue_preferences_save)
+                    )
                 }
                 R.id.jira_menu_clear -> {
                     val sharedPref =
                         PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     val editor: SharedPreferences.Editor = sharedPref.edit()
+                    editor.remove("jira_project")
+                    editor.remove("jira_project_position")
+                    editor.remove("jira_issue_type")
                     editor.remove("jira_summary")
                     editor.remove("jira_description")
+                    editor.remove("jira_component")
+                    editor.remove("jira_reporter")
+                    editor.remove("jira_linked_issue")
+                    editor.remove("jira_issue")
+                    editor.remove("jira_assignee")
+                    editor.remove("jira_priority")
+                    editor.remove("jira_fix_versions")
+                    editor.remove("jira_labels")
+                    editor.remove("jira_epic_link")
+                    editor.remove("jira_sprint")
                     editor.apply()
+                    projectPosition = 0
                     editTextDescription.text = null
                     editTextSummary.text = null
-                    Toast.makeText(
-                        viewJira.context,
-                        "Issue preferences are deleted!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    autoTextViewComponent.setText("", false)
+                    autoTextViewReporter.setText("", false)
+                    autoTextViewIssue.setText("", false)
+                    autoTextViewAssignee.setText("", false)
+                    autoTextViewFixVersions.setText("", false)
+                    autoTextViewLabel.setText("", false)
+                    autoTextViewEpicLink.setText("", false)
+                    autoTextViewSprint.setText("", false)
+                    defaultToast.attachToast(
+                        activity = activity,
+                        toastMessage = context.resources.getString(R.string.jira_issue_preferences_delete)
+                    )
                 }
             }
             return@setOnMenuItemClickListener true
@@ -2660,6 +2740,18 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
             }
+        }
+        imageViewStartDate.setSafeOnClickListener {
+            attachJiraDatePicker()
+        }
+
+//        textViewRemoveDate.setOnClickListener {
+//            jiraAuthentication.setStartDate(startDate = null)
+//            textViewRemoveDate.visibility = View.GONE
+//        }
+        imageButtonRemoveDate.setOnClickListener {
+            jiraAuthentication.setStartDate(startDate = null)
+            imageButtonRemoveDate.visibility = View.GONE
         }
     }
 
@@ -2722,7 +2814,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @SuppressLint("ClickableViewAccessibility")
     internal fun initializeJiraSpinner(
         arrayListProjectNames: ArrayList<String>,
-        arrayListProjectKeys:ArrayList<String>,
+        arrayListProjectKeys: ArrayList<String>,
         arrayListIssueTypes: ArrayList<String>,
         arrayListReporterNames: ArrayList<String>,
         arrayListLinkedIssues: ArrayList<String>,
@@ -2734,10 +2826,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListLabel: ArrayList<String>,
         arrayListEpicLink: ArrayList<String>,
         arrayListSprint: ArrayList<String>,
-        hashMapBoardList:HashMap<String,String>
+        hashMapBoardList: HashMap<String, String>
     ) {
 
         try {
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+            editTextSummary.setText(sharedPref.getString("jira_summary", null))
+            editTextDescription.setText(sharedPref.getString("jira_description", null))
             autoTextViewProjectAdapter = ArrayAdapter(
                 this,
                 android.R.layout.simple_dropdown_item_1line,
@@ -2745,7 +2841,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             )
             autoTextViewProject.setAdapter(autoTextViewProjectAdapter)
             if (arrayListProjectNames.isNotEmpty() && autoTextViewProject.text.isEmpty()) {
-                autoTextViewProject.setText(arrayListProjectNames[0], false)
+                if (sharedPref.getString("jira_project", null) != null) {
+                    autoTextViewProject.setText(sharedPref.getString("jira_project", null), false)
+                } else {
+                    autoTextViewProject.setText(arrayListProjectNames[0], false)
+                }
             }
             autoTextViewProject.setOnTouchListener { v, event ->
                 autoTextViewProject.showDropDown()
@@ -2766,7 +2866,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     jiraTask = "get",
                     createMethod = "normal"
                 )
-
+            }
+            autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+                if (!hasFocus) {
+                    if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+                        if (sharedPref.getString("jira_project", null) != null) {
+                            autoTextViewProject.setText(
+                                sharedPref.getString("jira_project", null),
+                                false
+                            )
+                        } else {
+                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+                        }
+                    }
+                }
             }
 //        spinnerProjectAdapter =
 //            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
@@ -2776,7 +2889,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListIssueTypes)
             autoTextViewIssueType.setAdapter(autoTextViewIssueTypeAdapter)
             if (arrayListIssueTypes.isNotEmpty()) {
-                autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
+                if (sharedPref.getString("jira_issue_type", null) != null) {
+                    autoTextViewIssueType.setText(
+                        sharedPref.getString("jira_issue_type", null),
+                        false
+                    )
+                } else {
+                    autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
+                }
             }
             autoTextViewIssueType.setOnTouchListener { v, event ->
                 autoTextViewIssueType.showDropDown()
@@ -2784,6 +2904,23 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
             autoTextViewIssueType.setOnItemClickListener { parent, view, position, id ->
                 jiraAuthentication.setIssueTypePosition(issueTypePosition = position)
+                hideKeyboard(activity = activity)
+            }
+            autoTextViewIssueType.setOnFocusChangeListener { v, hasFocus ->
+                if (!hasFocus) {
+                    if (!arrayListIssueTypes.contains(autoTextViewIssueType.editableText.toString())) {
+                        if (sharedPref.getString("jira_issue_type", null) != null) {
+                            autoTextViewIssueType.setText(
+                                sharedPref.getString(
+                                    "jira_issue_type",
+                                    null
+                                ), false
+                            )
+                        } else {
+                            autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
+                        }
+                    }
+                }
             }
 //        spinnerIssueTypeAdapter =
 //            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
@@ -2795,15 +2932,19 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 arrayListReporterNames
             )
             autoTextViewReporter.setAdapter(autoTextViewReporterAdapter)
-//            if (arrayListReporterNames.isNotEmpty()) {
+            if (arrayListReporterNames.isNotEmpty()) {
+                if (sharedPref.getString("jira_reporter", null) != null) {
+                    autoTextViewReporter.setText(sharedPref.getString("jira_reporter", null), false)
+                }
 //                autoTextViewReporter.setText(arrayListReporterNames[0], false)
-//            }
+            }
             autoTextViewReporter.setOnTouchListener { v, event ->
                 autoTextViewReporter.showDropDown()
                 false
             }
             autoTextViewReporter.setOnItemClickListener { parent, view, position, id ->
                 jiraAuthentication.setReporterPosition(reporterPosition = position)
+                hideKeyboard(activity = activity)
             }
 
 //        spinnerReporterAdapter =
@@ -2818,7 +2959,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             )
             autoTextViewLinkedIssue.setAdapter(autoTextViewLinkedIssueAdapter)
             if (arrayListLinkedIssues.isNotEmpty()) {
-                autoTextViewLinkedIssue.setText(arrayListLinkedIssues[0], false)
+                if (sharedPref.getString("jira_linked_issue", null) != null) {
+                    autoTextViewLinkedIssue.setText(
+                        sharedPref.getString("jira_linked_issue", null),
+                        false
+                    )
+                } else {
+                    autoTextViewLinkedIssue.setText(arrayListLinkedIssues[0], false)
+                }
             }
             autoTextViewLinkedIssue.setOnTouchListener { v, event ->
                 autoTextViewLinkedIssue.showDropDown()
@@ -2826,6 +2974,23 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
             autoTextViewLinkedIssue.setOnItemClickListener { parent, view, position, id ->
                 jiraAuthentication.setLinkedIssueTypePosition(linkedIssueTypePosition = position)
+                hideKeyboard(activity = activity)
+            }
+            autoTextViewLinkedIssue.setOnFocusChangeListener { v, hasFocus ->
+                if (!hasFocus) {
+                    if (!arrayListLinkedIssues.contains(autoTextViewLinkedIssue.editableText.toString())) {
+                        if (sharedPref.getString("jira_linked_issue", null) != null) {
+                            autoTextViewLinkedIssue.setText(
+                                sharedPref.getString(
+                                    "jira_linked_issue",
+                                    null
+                                ), false
+                            )
+                        } else {
+                            autoTextViewLinkedIssue.setText(arrayListLinkedIssues[0], false)
+                        }
+                    }
+                }
             }
 //        spinnerLinkedIssueAdapter =
 //            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
@@ -2835,9 +3000,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             autoTextViewIssueAdapter =
                 ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListIssues)
             autoTextViewIssue.setAdapter(autoTextViewIssueAdapter)
-//            if (arrayListIssues.isNotEmpty()) {
+            if (arrayListIssues.isNotEmpty()) {
+                if (sharedPref.getString("jira_issue", null) != null) {
+                    autoTextViewIssue.setText(sharedPref.getString("jira_issue", null), false)
+                }
 //                autoTextViewIssue.setText(arrayListIssues[0], false)
-//            }
+            }
             autoTextViewIssue.setOnTouchListener { v, event ->
                 autoTextViewIssue.showDropDown()
                 false
@@ -2851,15 +3019,19 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             autoTextViewAssigneeAdapter =
                 ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListAssignee)
             autoTextViewAssignee.setAdapter(autoTextViewAssigneeAdapter)
-//            if (arrayListAssignee.isNotEmpty()) {
+            if (arrayListAssignee.isNotEmpty()) {
+                if (sharedPref.getString("jira_assignee", null) != null) {
+                    autoTextViewAssignee.setText(sharedPref.getString("jira_assignee", null), false)
+                }
 //                autoTextViewAssignee.setText(arrayListAssignee[0], false)
-//            }
+            }
             autoTextViewAssignee.setOnTouchListener { v, event ->
                 autoTextViewAssignee.showDropDown()
                 false
             }
             autoTextViewAssignee.setOnItemClickListener { parent, view, position, id ->
                 jiraAuthentication.setAssigneePosition(assigneePosition = position)
+                hideKeyboard(activity = activity)
             }
 
 //        spinnerAssigneeAdapter =
@@ -2871,7 +3043,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListPriority)
             autoTextViewPriority.setAdapter(autoTextViewPriorityAdapter)
             if (arrayListPriority.isNotEmpty()) {
-                autoTextViewPriority.setText(arrayListPriority[0], false)
+                if (sharedPref.getString("jira_priority", null) != null) {
+                    autoTextViewPriority.setText(sharedPref.getString("jira_priority", null), false)
+                } else {
+                    autoTextViewPriority.setText(arrayListPriority[0], false)
+                }
             }
             autoTextViewPriority.setOnTouchListener { v, event ->
                 autoTextViewPriority.showDropDown()
@@ -2879,6 +3055,23 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
             autoTextViewPriority.setOnItemClickListener { parent, view, position, id ->
                 jiraAuthentication.setPriorityPosition(priorityPosition = position)
+                hideKeyboard(activity = activity)
+            }
+            autoTextViewPriority.setOnFocusChangeListener { v, hasFocus ->
+                if (!hasFocus) {
+                    if (!arrayListPriority.contains(autoTextViewPriority.editableText.toString())) {
+                        if (sharedPref.getString("jira_priority", null) != null) {
+                            autoTextViewPriority.setText(
+                                sharedPref.getString(
+                                    "jira_priority",
+                                    null
+                                ), false
+                            )
+                        } else {
+                            autoTextViewPriority.setText(arrayListPriority[0], false)
+                        }
+                    }
+                }
             }
 //        spinnerPriorityAdapter =
 //            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
@@ -2888,9 +3081,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             autoTextViewComponentAdapter =
                 ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListComponent)
             autoTextViewComponent.setAdapter(autoTextViewComponentAdapter)
-//            if (arrayListComponent.isNotEmpty()) {
+            if (arrayListComponent.isNotEmpty()) {
+                if (sharedPref.getString("jira_component", null) != null) {
+                    autoTextViewComponent.setText(
+                        sharedPref.getString("jira_component", null),
+                        false
+                    )
+                }
 //                autoTextViewComponent.setText(arrayListComponent[0], false)
-//            }
+            }
             autoTextViewComponent.setOnTouchListener { v, event ->
                 autoTextViewComponent.showDropDown()
                 false
@@ -2909,15 +3108,22 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 arrayListFixVersions
             )
             autoTextViewFixVersions.setAdapter(autoTextViewFixVersionsAdapter)
-//            if (arrayListFixVersions.isNotEmpty()) {
+            if (arrayListFixVersions.isNotEmpty()) {
+                if (sharedPref.getString("jira_fix_versions", null) != null) {
+                    autoTextViewFixVersions.setText(
+                        sharedPref.getString("jira_fix_versions", null),
+                        false
+                    )
+                }
 //                autoTextViewFixVersions.setText(arrayListFixVersions[0], false)
-//            }
+            }
             autoTextViewFixVersions.setOnTouchListener { v, event ->
                 autoTextViewFixVersions.showDropDown()
                 false
             }
             autoTextViewFixVersions.setOnItemClickListener { parent, view, position, id ->
                 jiraAuthentication.setFixVersionsPosition(fixVersionsPosition = position)
+                hideKeyboard(activity = activity)
             }
 //        spinnerFixVersionsAdapter =
 //            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListFixVersions)
@@ -2928,12 +3134,18 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             autoTextViewLabelAdapter =
                 ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListLabel)
             autoTextViewLabel.setAdapter(autoTextViewLabelAdapter)
-//            if (arrayListLabel.isNotEmpty()) {
+            if (arrayListLabel.isNotEmpty()) {
+                if (sharedPref.getString("jira_labels", null) != null) {
+                    autoTextViewLabel.setText(sharedPref.getString("jira_labels", null), false)
+                }
 //                autoTextViewLabel.setText(arrayListLabel[0], false)
-//            }
+            }
             autoTextViewLabel.setOnTouchListener { v, event ->
                 autoTextViewLabel.showDropDown()
                 false
+            }
+            autoTextViewLabel.setOnItemClickListener { parent, view, position, id ->
+                hideKeyboard(activity = activity)
             }
 //        spinnerLabelAdapter =
 //            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLabel)
@@ -2943,35 +3155,50 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             autoTextViewEpicLinkAdapter =
                 ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListEpicLink)
             autoTextViewEpicLink.setAdapter(autoTextViewEpicLinkAdapter)
-//            if (arrayListEpicLink.isNotEmpty()) {
+            if (arrayListEpicLink.isNotEmpty()) {
+                if (sharedPref.getString("jira_epic_link", null) != null) {
+                    autoTextViewEpicLink.setText(
+                        sharedPref.getString("jira_epic_link", null),
+                        false
+                    )
+                }
 //                autoTextViewEpicLink.setText(arrayListEpicLink[0], false)
-//            }
+            }
             autoTextViewEpicLink.setOnTouchListener { v, event ->
                 autoTextViewEpicLink.showDropDown()
                 false
+            }
+            autoTextViewEpicLink.setOnItemClickListener { parent, view, position, id ->
+                hideKeyboard(activity = activity)
             }
 //        spinnerEpicLinkAdapter =
 //            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListEpicLink)
 //        spinnerEpicLinkAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 //        spinnerEpicLink.adapter = spinnerEpicLinkAdapter
 
-            if(hashMapBoardList[arrayListProjectKeys[projectPosition]] == "scrum"){
+            if (hashMapBoardList[arrayListProjectKeys[projectPosition]] == "scrum") {
                 cardViewSprint.visibility = View.VISIBLE
+                cardViewStartDate.visibility = View.VISIBLE
                 autoTextViewSprintAdapter =
                     ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListSprint)
                 autoTextViewSprint.setAdapter(autoTextViewSprintAdapter)
-//            if (arrayListSprint.isNotEmpty()) {
+                if (arrayListSprint.isNotEmpty()) {
+                    if (sharedPref.getString("jira_sprint", null) != null) {
+                        autoTextViewSprint.setText(sharedPref.getString("jira_sprint", null), false)
+                    }
 //                autoTextViewSprint.setText(arrayListSprint[0], false)
-//            }
+                }
                 autoTextViewSprint.setOnTouchListener { v, event ->
                     autoTextViewSprint.showDropDown()
                     false
                 }
                 autoTextViewSprint.setOnItemClickListener { parent, view, position, id ->
                     jiraAuthentication.setSprintPosition(sprintPosition = position)
+                    hideKeyboard(activity = activity)
                 }
-            }else{
+            } else {
                 cardViewSprint.visibility = View.GONE
+                cardViewStartDate.visibility = View.GONE
             }
 
 
@@ -3036,7 +3263,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 (windowManagerSlack as WindowManager).removeViewImmediate(viewSlack)
                 arrayListSlackFileName.clear()
             }
-            viewSlack = LayoutInflater.from(activity).inflate(R.layout.loggerbird_slack_popup, (this.rootView as ViewGroup), false)
+            viewSlack = LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_slack_popup, (this.rootView as ViewGroup), false)
 
             if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsSlack = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -3051,7 +3279,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
                     )
@@ -3081,8 +3309,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     spinnerUsers = viewSlack.findViewById(R.id.spinner_slack_user)
                     slackChannelLayout = viewSlack.findViewById(R.id.slack_send_channel_layout)
                     slackUserLayout = viewSlack.findViewById(R.id.slack_send_user_layout)
-                    recyclerViewSlackAttachment = viewSlack.findViewById(R.id.recycler_view_slack_attachment)
-                    recyclerViewSlackAttachmentUser = viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
+                    recyclerViewSlackAttachment =
+                        viewSlack.findViewById(R.id.recycler_view_slack_attachment)
+                    recyclerViewSlackAttachmentUser =
+                        viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
                     editTextMessage = viewSlack.findViewById(R.id.editText_slack_message)
                     editTextMessageUser = viewSlack.findViewById(R.id.editText_slack_message_user)
                     buttonSlackCancel = viewSlack.findViewById(R.id.button_slack_cancel)
@@ -3092,7 +3322,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     progressBarSlack = viewSlack.findViewById(R.id.slack_progressbar)
                     toolbarSlack = viewSlack.findViewById(R.id.toolbar_slack)
                     slackBottomNavigationView = viewSlack.findViewById(R.id.slack_bottom_nav_view)
-                    progressBarSlackLayout = viewSlack.findViewById(R.id.slack_progressbar_background)
+                    progressBarSlackLayout =
+                        viewSlack.findViewById(R.id.slack_progressbar_background)
 
                     slackAuthentication.callSlack(
                         context = context,
@@ -3187,7 +3418,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
 
         slackBottomNavigationView.setOnNavigationItemSelectedListener {
-            when(it.itemId){
+            when (it.itemId) {
 
                 R.id.slack_menu_channel -> {
                     slackChannelLayout.visibility = View.VISIBLE
@@ -3225,20 +3456,95 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListChannels: ArrayList<String>,
         arrayListUsers: ArrayList<String>
     ) {
-        spinnerChannelsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListChannels)
+        spinnerChannelsAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListChannels)
         spinnerChannelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerChannels.adapter = spinnerChannelsAdapter
 
-        spinnerUsersAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListUsers)
+        spinnerUsersAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListUsers)
         spinnerUsersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerUsers.adapter = spinnerUsersAdapter
 
         progressBarSlack.visibility = View.GONE
         progressBarSlackLayout.visibility = View.GONE
     }
-    private fun hideKeyboard(activity: Activity){
-        val inputMethodManager = (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-        inputMethodManager.toggleSoftInput(0,0)
+
+    private fun hideKeyboard(activity: Activity) {
+        val inputMethodManager =
+            (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+        inputMethodManager.hideSoftInputFromWindow(viewJira.windowToken, 0)
+    }
+
+    private fun initializeStartDatePicker() {
+        val calendar = Calendar.getInstance()
+        val mYear = calendar.get(Calendar.YEAR)
+        val mMonth = calendar.get(Calendar.MONTH)
+        val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        var startDate = "$mYear-$mMonth-$mDayOfMonth"
+        calendarViewJiraLayout = calendarViewJiraView.findViewById(R.id.jira_calendar_view_layout)
+        calendarViewStartDate = calendarViewJiraView.findViewById(R.id.calendarView_start_date)
+        buttonCalendarViewJiraCancel =
+            calendarViewJiraView.findViewById(R.id.button_jira_calendar_cancel)
+        buttonCalendarViewJiraOk = calendarViewJiraView.findViewById(R.id.button_jira_calendar_ok)
+
+        calendarViewStartDate.minDate = System.currentTimeMillis()
+        if (calendarViewJiraDate != null) {
+            calendarViewStartDate.setDate(calendarViewJiraDate!!, true, true)
+        }
+        calendarViewJiraLayout.setOnClickListener {
+            detachJiraDatePicker()
+        }
+        buttonCalendarViewJiraCancel.setOnClickListener {
+            detachJiraDatePicker()
+        }
+
+        buttonCalendarViewJiraOk.setOnClickListener {
+            jiraAuthentication.setStartDate(startDate = startDate)
+            detachJiraDatePicker()
+//            textViewRemoveDate.visibility = View.VISIBLE
+            imageButtonRemoveDate.visibility = View.VISIBLE
+        }
+        calendarViewStartDate.setOnDateChangeListener { viewStartDate, year, month, dayOfMonth ->
+            calendarViewJiraDate = viewStartDate.date
+            startDate = "$year-$month-$dayOfMonth"
+        }
+
+    }
+
+    private fun attachJiraDatePicker() {
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        calendarViewJiraView =
+            LayoutInflater.from(activity).inflate(R.layout.jira_calendar_view, rootView, false)
+        windowManagerParamsJiraDatePicker = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+            )
+        } else {
+            WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+            )
+        }
+        windowManagerJiraDatePicker = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerJiraDatePicker as WindowManager).addView(
+            calendarViewJiraView,
+            windowManagerParamsJiraDatePicker
+        )
+        initializeStartDatePicker()
+    }
+
+    private fun detachJiraDatePicker() {
+        if (this::calendarViewJiraView.isInitialized) {
+            (windowManagerJiraDatePicker as WindowManager).removeViewImmediate(calendarViewJiraView)
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
