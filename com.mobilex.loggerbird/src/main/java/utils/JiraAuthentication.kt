@@ -3,10 +3,13 @@ package utils
 import adapter.RecyclerViewJiraAdapter
 import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Build
+import android.os.Looper
 import android.util.Log
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.preference.PreferenceManager
 import com.atlassian.jira.rest.client.api.JiraRestClient
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory
 import com.atlassian.jira.rest.client.api.ProjectRestClient
@@ -26,6 +29,10 @@ import okhttp3.*
 import services.LoggerBirdService
 import java.io.*
 import java.net.URI
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.system.exitProcess
 
 
 class JiraAuthentication {
@@ -254,7 +261,13 @@ class JiraAuthentication {
                     context = context,
                     activity = activity
                 )
-                "unhandled" -> jiraUnhandledTask(restClient = restClient)
+                "unhandled" -> if(filePathMediaName != null){
+                    if(filePathMediaName.exists()){
+                        jiraUnhandledTask(restClient = restClient , context = context , filePathName = filePathMediaName)
+                    }else{
+                        defaultToast.attachToast(activity = activity , toastMessage = context.resources.getString(R.string.unhandled_file_doesnt_exist))
+                    }
+                }
             }
         } catch (e: Exception) {
             jiraExceptionHandler(e = e, filePathName = filePathMediaName)
@@ -524,7 +537,7 @@ class JiraAuthentication {
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun jiraUnhandledTask(restClient: JiraRestClient) {
+    private fun jiraUnhandledTask(restClient: JiraRestClient,context: Context , filePathName: File) {
         val issueClient = restClient.issueClient
         val issueBuilder = IssueInputBuilder(
             "DEN",
@@ -533,16 +546,26 @@ class JiraAuthentication {
         )
         issueBuilder.setDescription("An unhandled exception occurred in the application check log details for more information!")
         val inputStreamSecessionFile =
-            FileInputStream(LoggerBird.filePathSecessionName)
+            FileInputStream(filePathName)
         val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
         val issueKey = basicIssue.key
         val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
         issueClient.addAttachment(
             issue.get().attachmentsUri,
             inputStreamSecessionFile,
-            LoggerBird.filePathSecessionName.absolutePath
+            filePathName.absolutePath
         )
-        LoggerBirdService.loggerBirdService.finishShareLayout("jira")
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(LoggerBirdService.loggerBirdService.returnActivity().applicationContext)
+        val editor: SharedPreferences.Editor = sharedPref.edit()
+        editor.remove("unhandled_file_path")
+        editor.apply()
+        LoggerBirdService.loggerBirdService.returnActivity().runOnUiThread {
+            LoggerBirdService.loggerBirdService.detachProgressBar()
+            defaultToast.attachToast(activity =  LoggerBirdService.loggerBirdService.returnActivity() , toastMessage = context.resources.getString(R.string.jira_sent))
+        }
+//        defaultToast.attachToast(activity = LoggerBirdService.loggerBirdService.returnActivity() , toastMessage = "Unhandled Exception occurred , automatically opening jira issue!")
+//        LoggerBirdService.loggerBirdService.finishShareLayout("jira")
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -1176,21 +1199,24 @@ class JiraAuthentication {
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal suspend fun jiraUnhandledExceptionTask(
+    internal fun jiraUnhandledExceptionTask(
         context: Context,
-        activity: Activity
+        activity: Activity,
+        filePath: File
     ) {
-        withContext(coroutineCallJira.coroutineContext) {
+//        withContext(coroutineCallJira.coroutineContext) {
             try {
                 jiraTaskCreateIssue(
                     restClient = jiraAuthentication(),
                     context = context,
                     createMethod = "unhandled",
-                    activity = activity
+                    activity = activity,
+                    filePathMediaName = filePath
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
+                LoggerBirdService.loggerBirdService.detachProgressBar()
             }
-        }
+//        }
     }
 }

@@ -79,5 +79,6 @@ internal class Constants {
         const val slackTag:String = "Slack"
         const val recyclerViewSlackAdapterTag:String = "RecyclerView Slack Adapter"
         const val loggerBirdToastTag:String = "LoggerBird Toast"
+        const val unhandledExceptionPopupTag:String = "Unhandled Exception Popup"
     }
 }
