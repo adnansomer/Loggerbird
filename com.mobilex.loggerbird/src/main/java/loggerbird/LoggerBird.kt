@@ -58,6 +58,7 @@ import utils.EmailUtil
 import utils.InternetConnectionUtil
 import utils.LinkedBlockingQueueUtil
 import java.io.File
+import java.lang.NullPointerException
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
@@ -199,6 +200,7 @@ class LoggerBird : LifecycleObserver {
                     workQueueLinked = LinkedBlockingQueueUtil()
                     val logcatObserver = UnhandledExceptionObserver()
                     Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
+//                    throw  NullPointerException("Parameter Type cannot be null");
                     coroutineCallMemoryService.async {
                         intentServiceMemory = Intent(context, LoggerBirdMemoryService::class.java)
                         context.startService(intentServiceMemory)
@@ -207,6 +209,7 @@ class LoggerBird : LifecycleObserver {
 
                 } catch (e: Exception) {
                     e.printStackTrace()
+//                    throw  NullPointerException("Parameter Type cannot be null");
                 }
             }
 

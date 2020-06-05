@@ -1479,8 +1479,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.M)
     override fun hearShake() {
         try {
-            val file:File ?  = null
-            file!!.createNewFile()
+//            val file:File ?  = null
+//            file!!.createNewFile()
             Log.d("shake", "shake fired!!")
             if (Settings.canDrawOverlays(this.activity)) {
                 if (checkUnhandledFilePath()) {
