@@ -1,5 +1,6 @@
 package observers
 
+
 import constants.Constants
 import loggerbird.LoggerBird
 
@@ -11,12 +12,26 @@ internal class UnhandledExceptionObserver() : Thread.UncaughtExceptionHandler {
      * @var LoggerBird.uncaughtExceptionHandlerController is used for determining that there is an unhandled exception for callExceptionDetails method.
      */
     override fun uncaughtException(t: Thread, e: Throwable) {
-        try {
+            if(e.cause != null){
+                loggerBirdClass(className = e.cause!!.stackTrace[0].className,e = e)
+            }else{
+                loggerBirdClass(className = e.stackTrace[0].className,e = e)
+            }
+    }
+    private fun loggerBirdClass(className:String,e:Throwable):Boolean{
+        return try {
+            if(Class.forName(className).`package`?.name!= "loggerbird"){
+                LoggerBird.uncaughtExceptionHandlerController = true
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(throwable = e, tag = Constants.unHandledExceptionTag)
+            }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
             LoggerBird.uncaughtExceptionHandlerController = true
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(throwable = e, tag = Constants.unHandledExceptionTag)
-        } catch (e: Exception) {
-            e.printStackTrace()
+            false
         }
     }
 }
