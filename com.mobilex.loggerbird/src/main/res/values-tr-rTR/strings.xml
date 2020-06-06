@@ -74,7 +74,9 @@
     <string name="slack_sent_error">Slack mesajı gönderilmeye çalışırken bir hatayla karşılaşıldı!</string>
     <string name="unhandled_title">En son açılan oturumda bir hata ile karşılaşıldı , bu hatayı jira ile paylaşmak istermisiniz?</string>
     <string name="unhandled_discard">Dosyayı sil!</string>
-    <string name="unhandled_share_with_jira">Dosyayı jira ile paylaş!</string>
+    <string name="unhandled_share_with_jira">Dosyayı jira ile paylaş:</string>
+    <string name="unhandled_customize_jira">*Jira konusunu özelleştir ve gönder!</string>
+    <string name="unhandled_send">*Gönder!</string>
     <string name="unhandled_file_doesnt_exist">Dosya konumu bulunamadı!</string>
     <string name="unhandled_file_discard_success">Dosya başarılı bir şekilde silindi!</string>
     <!-- EmailUtil -->

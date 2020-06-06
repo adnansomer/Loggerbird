@@ -16,40 +16,64 @@
     <TextView
         android:id="@+id/textView_unhandled_title"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:gravity="start"
         android:layout_gravity="center"
         android:text="@string/unhandled_title"
         android:textColor="@android:color/white"
         android:textSize="15sp" />
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:weightSum="2">
+        android:orientation="horizontal"
+        android:layout_marginTop="15dp">
 
         <TextView
             android:id="@+id/textView_unhandled_discard"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="start"
+            android:layout_weight="1"
+            android:layout_gravity="bottom"
             android:text="@string/unhandled_discard"
             android:textColor="@android:color/white"
             android:textSize="15sp" />
 
-        <TextView
-            android:id="@+id/textView_unhandled_share_jira"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="end"
-            android:text="@string/unhandled_share_with_jira"
-            android:textColor="@android:color/white"
-            android:textSize="13sp"
-            android:textStyle="italic" />
+            android:orientation="vertical"
+            >
+
+            <TextView
+                android:id="@+id/textView_unhandled_jira_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="@string/unhandled_share_with_jira"
+                android:textColor="@android:color/white"
+                android:textSize="15sp" />
+            <TextView
+                android:id="@+id/textView_unhandled_jira_customize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="@string/unhandled_customize_jira"
+                android:textColor="@android:color/white"
+                android:textSize="15sp" />
+            <TextView
+                android:id="@+id/textView_unhandled_share_jira"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/unhandled_send"
+                android:layout_gravity="start"
+                android:textColor="@android:color/white"
+                android:textSize="15sp"
+                android:textStyle="italic" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -261,11 +261,18 @@ class JiraAuthentication {
                     context = context,
                     activity = activity
                 )
-                "unhandled" -> if(filePathMediaName != null){
-                    if(filePathMediaName.exists()){
-                        jiraUnhandledTask(restClient = restClient , context = context , filePathName = filePathMediaName)
-                    }else{
-                        defaultToast.attachToast(activity = activity , toastMessage = context.resources.getString(R.string.unhandled_file_doesnt_exist))
+                "unhandled" -> if (filePathMediaName != null) {
+                    if (filePathMediaName.exists()) {
+                        jiraUnhandledTask(
+                            restClient = restClient,
+                            context = context,
+                            filePathName = filePathMediaName
+                        )
+                    } else {
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.unhandled_file_doesnt_exist)
+                        )
                     }
                 }
             }
@@ -530,21 +537,29 @@ class JiraAuthentication {
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.buttonJiraCancel.performClick()
             }
-            LoggerBirdService.loggerBirdService.finishShareLayout("jira")
+            if(!LoggerBirdService.loggerBirdService.checkUnhandledFilePath()){
+                LoggerBirdService.loggerBirdService.finishShareLayout("jira")
+            }else{
+                LoggerBirdService.loggerBirdService.unhandledExceptionCustomizeIssueSent()
+            }
             Log.d("issue", issueUri.toString())
             Log.d("issue", issueKey.toString())
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun jiraUnhandledTask(restClient: JiraRestClient,context: Context , filePathName: File) {
+    private fun jiraUnhandledTask(
+        restClient: JiraRestClient,
+        context: Context,
+        filePathName: File
+    ) {
         val issueClient = restClient.issueClient
         val issueBuilder = IssueInputBuilder(
             "DEN",
             10004,
-            "unhandled_exception:"
+            context.resources.getString(R.string.jira_summary_unhandled_exception)
         )
-        issueBuilder.setDescription("An unhandled exception occurred in the application check log details for more information!")
+        issueBuilder.setDescription(context.resources.getString(R.string.jira_description_unhandled_exception))
         val inputStreamSecessionFile =
             FileInputStream(filePathName)
         val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
@@ -562,7 +577,10 @@ class JiraAuthentication {
         editor.apply()
         LoggerBirdService.loggerBirdService.returnActivity().runOnUiThread {
             LoggerBirdService.loggerBirdService.detachProgressBar()
-            defaultToast.attachToast(activity =  LoggerBirdService.loggerBirdService.returnActivity() , toastMessage = context.resources.getString(R.string.jira_sent))
+            defaultToast.attachToast(
+                activity = LoggerBirdService.loggerBirdService.returnActivity(),
+                toastMessage = context.resources.getString(R.string.jira_sent)
+            )
         }
 //        defaultToast.attachToast(activity = LoggerBirdService.loggerBirdService.returnActivity() , toastMessage = "Unhandled Exception occurred , automatically opening jira issue!")
 //        LoggerBirdService.loggerBirdService.finishShareLayout("jira")
@@ -618,7 +636,10 @@ class JiraAuthentication {
             }
 
         } catch (e: Exception) {
-            jiraExceptionHandler(e = e)
+            updateFields()
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
         }
     }
 
@@ -930,10 +951,11 @@ class JiraAuthentication {
                     "Start date" -> startDateField = it.id
                 }
             }
-//           arrayListFields.add(it.id)
-//            arrayListFields.add(it.name)
+            //           arrayListFields.add(it.id)
+            //            arrayListFields.add(it.name)
             updateFields()
         }
+
     }
 
 
@@ -1205,18 +1227,18 @@ class JiraAuthentication {
         filePath: File
     ) {
 //        withContext(coroutineCallJira.coroutineContext) {
-            try {
-                jiraTaskCreateIssue(
-                    restClient = jiraAuthentication(),
-                    context = context,
-                    createMethod = "unhandled",
-                    activity = activity,
-                    filePathMediaName = filePath
-                )
-            } catch (e: Exception) {
-                e.printStackTrace()
-                LoggerBirdService.loggerBirdService.detachProgressBar()
-            }
+        try {
+            jiraTaskCreateIssue(
+                restClient = jiraAuthentication(),
+                context = context,
+                createMethod = "unhandled",
+                activity = activity,
+                filePathMediaName = filePath
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBirdService.loggerBirdService.detachProgressBar()
+        }
 //        }
     }
 }
