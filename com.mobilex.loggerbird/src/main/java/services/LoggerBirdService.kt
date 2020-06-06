@@ -47,6 +47,9 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
+import com.slack.api.Slack
+import com.slack.api.methods.request.conversations.ConversationsListRequest
+import com.slack.api.methods.request.oauth.OAuthAccessRequest
 import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
@@ -244,8 +247,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var recyclerViewSlackAttachment: RecyclerView
     private lateinit var recyclerViewSlackAttachmentUser: RecyclerView
     private val arrayListSlackFileName: ArrayList<RecyclerViewModel> = ArrayList()
-    private lateinit var progressBarSlack: ProgressBar
-    private lateinit var progressBarSlackLayout: FrameLayout
+    lateinit var progressBarSlack: ProgressBar
+    lateinit var progressBarSlackLayout: FrameLayout
     private lateinit var slackChannelLayout : ScrollView
     private lateinit var slackUserLayout : ScrollView
     private lateinit var slackBottomNavigationView : BottomNavigationView
@@ -831,13 +834,38 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     }
 
                     initializeSlackLayout(filePathMedia = filePathMedia)
+//                Thread{
+//
+//                    val slack = Slack.getInstance()
+//                    val token = "xoxb-1176309019584-1152486968594-k4brnZhlrUXAAy80Be0GmaVv"
+//                    val token2 = "xoxb-523949707746-1185252116928-e77ayP6N5Mv0VfJbYhQ4JyaB"
+
+//                    val response3 = slack.methods(token2).chatPostMessage {
+//                        it.channel("#loggerbirdslack")
+//                        it.text("deneme adnan")
+//
+//                    }
+                    //val code = slack.httpClient.config.auditEndpointUrlPrefix
+//                    //val token = "12345"
+//                    val response3 = slack.methods().oauthV2Access {
+//
+//                        it.code("523949707746.1160234750373.8cbc9ea4305574a8b54d88ce97b032b6782634defc4e938c24f68a01d7d923e2")
+//                        it.clientId("1176309019584.1151103028997")
+//                        it.clientSecret("6147f0bd55a0c777893d07c91f3b16ef")
+//                        it.redirectUri("https://app.slack.com/client")
+//                    }
+//////
+//                    Log.d("adnan", response3.toString())
+////
+////
+////                }.start()
+//
+//                }.start()
                 }
             }
 
             textView_discard.setOnClickListener {
-                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    attachProgressBar()
-//                }
+
                 discardMediaFile()
             }
         }
@@ -2037,8 +2065,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         if (filePathVideo.exists()) {
                             filePathVideo.delete()
                             finishShareLayout(message = "media")
-                        } else {
-                            finishShareLayout(message = "media_error")
                         }
                     } catch (e: FileNotFoundException) {
                         finishShareLayout(message = "media_error")
@@ -2051,8 +2077,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         if (filePathAudio.exists()) {
                             filePathAudio.delete()
                             finishShareLayout(message = "media")
-                        } else {
-                            finishShareLayout(message = "media_error")
                         }
                     }
                 } catch (e: FileNotFoundException) {
@@ -2065,8 +2089,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (PaintView.filePathScreenShot.exists()) {
                         PaintView.filePathScreenShot.delete()
                         finishShareLayout(message = "media")
-                    } else {
-                        finishShareLayout(message = "media_error")
                     }
                 } catch (e: FileNotFoundException) {
                     finishShareLayout(message = "media_error")
@@ -3012,7 +3034,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
                     )
@@ -3020,7 +3042,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
                     )
@@ -3069,6 +3091,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         filePathMedia = filePathMedia,
                         slackTask = "get"
                     )
+
+                    if(slackAuthentication.exceptionBoolean){
+                        progressBarSlackLayout.visibility = View.GONE
+                        progressBarSlack.visibility = View.GONE
+                        slackAuthentication.callSlack(
+                            context = context,
+                            activity = activity,
+                            filePathMedia = Companion.filePathMedia,
+                            slackTask = "get"
+                        )
+                    }
                     initializeSlackRecyclerView(filePathMedia = filePathMedia)
                     buttonClicksSlack(filePathMedia)
                     progressBarSlackLayout.visibility = View.VISIBLE
@@ -3081,6 +3114,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
         }
+    }
+
+    internal fun refreshSlackLoad(){
+        progressBarSlackLayout.visibility = View.GONE
+        progressBarSlack.visibility = View.GONE
+        slackAuthentication.callSlack(
+            context = context,
+            activity = activity,
+            filePathMedia = Companion.filePathMedia,
+            slackTask = "get"
+        )
     }
 
 
@@ -3132,6 +3176,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     slackType = "user"
                 )
             }
+
+            if(slackAuthentication.exceptionBoolean){
+                progressBarSlack.visibility = View.GONE
+                progressBarSlackLayout.visibility = View.GONE
+            }
         }
 
         buttonSlackCancel.setSafeOnClickListener {
@@ -3157,7 +3206,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
         slackBottomNavigationView.setOnNavigationItemSelectedListener {
             when(it.itemId){
-
                 R.id.slack_menu_channel -> {
                     slackChannelLayout.visibility = View.VISIBLE
                     slackUserLayout.visibility = View.GONE
@@ -3170,6 +3218,22 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
             return@setOnNavigationItemSelectedListener true
         }
+
+        toolbarSlack.setOnMenuItemClickListener {
+            when(it.itemId){
+                R.id.slack_menu_refresh -> {
+                    slackAuthentication.callSlack(
+                        context = context,
+                        activity = activity,
+                        filePathMedia = filePathMedia,
+                        slackTask = "get"
+                    )
+                    progressBarSlackLayout.visibility = View.VISIBLE
+                    progressBarSlack.visibility = View.VISIBLE
+                }
+            }
+            return@setOnMenuItemClickListener true
+        }
     }
 
     private fun initializeSlackRecyclerView(filePathMedia: File) {
@@ -3181,7 +3245,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             activity = activity,
             rootView = rootView
         )
+
+        recyclerViewSlackAttachmentUser.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
         recyclerViewSlackAttachment.adapter = slackAdapter
+        recyclerViewSlackAttachmentUser.adapter = slackAdapter
     }
 
     private fun addSlackFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
@@ -3190,10 +3257,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         return arrayListSlackFileName
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun initializeSlackSpinner(
         arrayListChannels: ArrayList<String>,
         arrayListUsers: ArrayList<String>
     ) {
+
         spinnerChannelsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListChannels)
         spinnerChannelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerChannels.adapter = spinnerChannelsAdapter
@@ -3204,6 +3273,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
         progressBarSlack.visibility = View.GONE
         progressBarSlackLayout.visibility = View.GONE
+
+//        if(spinnerChannelsAdapter.isEmpty){
+//            slackAuthentication.callSlack(
+//                context = context,
+//                activity = activity,
+//                filePathMedia = filePathMedia,
+//                slackTask = "get"
+//            )
+//            progressBarSlackLayout.visibility = View.VISIBLE
+//            progressBarSlack.visibility = View.VISIBLE
+//        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

@@ -5,10 +5,12 @@ import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.view.View
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.preference.PreferenceManager
 import com.mobilex.loggerbird.R
 import com.slack.api.RequestConfigurator
 import com.slack.api.Slack
@@ -47,6 +49,25 @@ class SlackAuthentication {
     internal lateinit var channel: String
     private lateinit var arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>
     private val hashMapUser: HashMap<String, String> = HashMap()
+    private var convertedToken : String = ""
+    private val returnCode = LoggerBird.slackApiToken
+    private val slack = Slack.getInstance()
+    private val defaultToast: DefaultToast = DefaultToast()
+    var exceptionBoolean : Boolean = false
+    private var queueCounter : Int = 0
+    private lateinit var activity : Activity
+    private lateinit var context: Context
+    private var filePathMedia: File? = null
+    private lateinit var slackTask: String
+    private var messagePath: String? = null
+    private var slackType: String? = null
+    private var controlcallSlack : Boolean = false
+
+    companion object{
+        private const val CLIENT_ID = "1176309019584.1151103028997"
+        private const val CLIENT_SECRET = "6147f0bd55a0c777893d07c91f3b16ef"
+        private const val REDIRECT_URL = "https://app.slack.com/client"
+    }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callSlack(
@@ -58,6 +79,14 @@ class SlackAuthentication {
         slackType : String? = null
 
     ) {
+
+        this.activity = activity
+        this.context = context
+        this.filePathMedia = filePathMedia
+        this.slackTask = slackTask
+        this.messagePath = messagePath
+        this.slackType = slackType
+
         coroutineCallOkHttpSlack.async {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
@@ -100,7 +129,7 @@ class SlackAuthentication {
         val client = OkHttpClient()
         val request: Request =
             Request.Builder()
-                .url("https://app.slack.com/client/T011GLPDZQA/C011GLPEP4J")
+                .url("https://app.slack.com/client")
                 .build()
         client.newCall(request).enqueue(object : Callback {
             @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -161,27 +190,52 @@ class SlackAuthentication {
         messagePath: String? = null,
         slackType : String? = null
     ) {
-        val slack = Slack.getInstance()
-        val token = "xoxb-1176309019584-1152486968594-k4brnZhlrUXAAy80Be0GmaVv"
-        //val token = "xoxp-1176309019584-1152680995235-1165667140657-94283bc32ae0a866189d28284f999a06"
+
+        this.activity = activity
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        val token = sharedPref.getString("slackAccessToken", "")
+        //val token = "xoxb-523949707746-1185252116928-e77ayP6N5Mv0VfJbYhQ4JyaB" //mobilex
+        //val token = "xoxb-1176309019584-1152486968594-k4brnZhlrUXAAy80Be0GmaVv" //loggerbird
+
+        if(token == "") {
+
+            withContext(Dispatchers.IO) {
+                val convertToken = slack.methods().oauthV2Access {
+                    it.code(returnCode)
+                    it.clientId(CLIENT_ID)
+                    it.clientSecret(CLIENT_SECRET)
+                    it.redirectUri(REDIRECT_URL)
+                }
+                val convertedToken = convertToken.accessToken
+                val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                with(sharedPref.edit()) {
+                    putString("slackAccessToken", convertedToken)
+                    commit()
+                }
+            }
+        }
 
         when (slackTask) {
-            "get" -> gatherSlackDetails(
-                activity = activity,
-                context = context,
-                slack = slack,
-                token = token,
-                filePathMedia = filePathMedia
-            )
-            "create" -> slackTask(
-                activity = activity,
-                context = context,
-                slack = slack,
-                token = token,
-                filePathMedia = filePathMedia,
-                messagePath = messagePath,
-                slackType = slackType
-            )
+            "get" -> token?.let {
+                gatherSlackDetails(
+                    activity = activity,
+                    context = context,
+                    slack = slack,
+                    token = it,
+                    filePathMedia = filePathMedia
+                )
+            }
+            "create" -> token?.let {
+                slackTask(
+                    activity = activity,
+                    context = context,
+                    slack = slack,
+                    token = it,
+                    filePathMedia = filePathMedia,
+                    messagePath = messagePath,
+                    slackType = slackType
+                )
+            }
         }
     }
 
@@ -193,6 +247,7 @@ class SlackAuthentication {
         filePathMedia: File?,
         slackType : String? = null
     ) {
+        queueCounter = 0
         arrayListChannels.clear()
         arrayListUsers.clear()
         hashMapUser.clear()
@@ -200,6 +255,19 @@ class SlackAuthentication {
         withContext(Dispatchers.IO) {
             slackTaskGatherChannels(slack = slack, token = token)
             slackTaskGatherUsers(slack = slack, token = token)
+//            activity.runOnUiThread {
+//                LoggerBirdService.loggerBirdService.initializeSlackSpinner(
+//                    arrayListChannels = arrayListChannels,
+//                    arrayListUsers = arrayListUsersName
+//                )
+//            }
+        }
+    }
+
+    private fun updateFields(){
+        queueCounter--
+        Log.d("adnan",queueCounter.toString())
+        if(queueCounter == 0){
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeSlackSpinner(
                     arrayListChannels = arrayListChannels,
@@ -210,25 +278,60 @@ class SlackAuthentication {
     }
 
     private suspend fun slackTaskGatherUsers(slack: Slack, token: String) {
+        queueCounter++
         withContext(Dispatchers.IO) {
-            val userListBuilder = UsersListRequest.builder().build()
-            slack.methods(token).usersList(userListBuilder).members.forEach {
-                arrayListUsers.add(it.id)
-                arrayListUsersName.add(it.name)
-                hashMapUser.put(it.name,it.id)
+            try{
+                val userListBuilder = UsersListRequest.builder().build()
+                val userResponse = slack.methods(token).usersList(userListBuilder).members.forEach {
+                    arrayListUsers.add(it.id)
+                    arrayListUsersName.add(it.name)
+                    hashMapUser[it.name] = it.id
+                }
+                updateFields()
+            }catch(e: IllegalStateException) {
+
+                    if(!controlcallSlack){
+                        controlcallSlack = true
+                        callSlack(activity,
+                            context,
+                            filePathMedia,
+                            slackTask,
+                            messagePath,
+                            slackType )
+                    }
+                    Log.d("adnan","illegal")
+                    e.printStackTrace()
+                }
             }
         }
-    }
 
     private suspend fun slackTaskGatherChannels(slack: Slack, token: String) {
-        withContext(Dispatchers.IO) {
-            val conversationListBuilder = ConversationsListRequest.builder().build()
-            slack.methods(token).conversationsList(conversationListBuilder).channels.forEach {
-                arrayListChannels.add(it.name)
+            queueCounter++
+            withContext(Dispatchers.IO) {
+                try {
+                    val conversationListBuilder = ConversationsListRequest.builder().build()
+                    val channelResponse = slack.methods(token).conversationsList(conversationListBuilder).channels.forEach {
+                        arrayListChannels.add(it.name)
+                    }
+                    updateFields()
+                }catch(e: IllegalStateException) {
+
+                    if(!controlcallSlack){
+                        controlcallSlack = true
+                        callSlack(activity,
+                            context,
+                            filePathMedia,
+                            slackTask,
+                            messagePath,
+                            slackType )
+                    }
+
+                    Log.d("adnan","illegal")
+                    e.printStackTrace()
+                    exceptionBoolean = true
+                }
             }
         }
-    }
-
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private suspend fun slackTask(
@@ -331,7 +434,6 @@ class SlackAuthentication {
                 } catch (e: Exception) {
                     slackExceptionHandler(e = e, filePathName = filePathMedia, socketTimeOut = java.net.SocketTimeoutException())
                 }
-
             }
         }
 
