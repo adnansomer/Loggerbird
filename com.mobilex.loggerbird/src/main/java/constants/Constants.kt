@@ -24,8 +24,7 @@ internal class Constants {
         const val emailTag = "email"
         const val unHandledExceptionTag = "Unhandled Exception"
         const val logInitErrorMessage = "Call logInit method before calling any other method!"
-        const val logInitAttachedErrorMessage =
-            "logInit method is already attached to your application!"
+        const val logInitAttachedErrorMessage = "logInit method is already attached to your application!"
         const val internetErrorMessage = "Invalid internet connection response code!"
         const val networkErrorMessage = "Invalid network response"
         const val SMTP_HOST_NAME: String = "smtp.gmail.com";
@@ -33,8 +32,7 @@ internal class Constants {
         const val saveSessionOldFileTag: String = "Save Session Old File"
         const val workQueueUtilTag: String = "Work Queue Util"
         const val recyclerViewAdapterDataObserverTag: String = "RecyclerView Adapter Data Observer"
-        const val recyclerViewChildAttachStateChangeListenerTag: String =
-            "RecyclerView Child Attach State Change Listener"
+        const val recyclerViewChildAttachStateChangeListenerTag: String = "RecyclerView Child Attach State Change Listener"
         const val recyclerViewItemTouchListener: String = "RecyclerView Item Touch Listener"
         const val recyclerViewScrollListener: String = "RecyclerView Scroll Listener"
         const val serviceTag: String = "Service"

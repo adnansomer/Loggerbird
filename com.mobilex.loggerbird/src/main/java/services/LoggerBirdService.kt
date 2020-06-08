@@ -29,7 +29,9 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
-import android.view.animation.*
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.view.animation.BounceInterpolator
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
@@ -47,9 +49,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
-import com.slack.api.Slack
-import com.slack.api.methods.request.conversations.ConversationsListRequest
-import com.slack.api.methods.request.oauth.OAuthAccessRequest
 import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
@@ -63,9 +62,10 @@ import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
 import paint.PaintView
-import utils.*
 import utils.EmailUtil
+import utils.JiraAuthentication
 import utils.LinkedBlockingQueueUtil
+import utils.SlackAuthentication
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.*
@@ -3023,110 +3023,100 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeSlackLayout(filePathMedia: File) {
         try {
-            if (windowManagerSlack != null && this::viewSlack.isInitialized) {
-                (windowManagerSlack as WindowManager).removeViewImmediate(viewSlack)
-                arrayListSlackFileName.clear()
-            }
-            viewSlack = LayoutInflater.from(activity).inflate(R.layout.loggerbird_slack_popup, (this.rootView as ViewGroup), false)
-
-            if (Settings.canDrawOverlays(activity)) {
-                windowManagerParamsSlack = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
+                try{
+                    if (windowManagerSlack != null && this::viewSlack.isInitialized) {
+                        (windowManagerSlack as WindowManager).removeViewImmediate(viewSlack)
+                        arrayListSlackFileName.clear()
+                    }
+                    viewSlack = LayoutInflater.from(activity).inflate(R.layout.loggerbird_slack_popup, (this.rootView as ViewGroup), false)
+                    }catch (e : WindowManager.BadTokenException) {
+                        e.printStackTrace()
                 }
 
-                windowManagerSlack = activity.getSystemService(Context.WINDOW_SERVICE)!!
-
-                if (windowManagerSlack != null) {
-                    (windowManagerSlack as WindowManager).addView(
-                        viewSlack,
-                        windowManagerParamsSlack
-                    )
-
-                    if (Build.VERSION.SDK_INT >= 23) {
-                        activity.window.navigationBarColor =
-                            resources.getColor(R.color.black, theme)
-                        activity.window.statusBarColor = resources.getColor(R.color.black, theme)
+                if (Settings.canDrawOverlays(activity)) {
+                    windowManagerParamsSlack = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        WindowManager.LayoutParams(
+                            WindowManager.LayoutParams.MATCH_PARENT,
+                            WindowManager.LayoutParams.MATCH_PARENT,
+                            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                            PixelFormat.TRANSLUCENT
+                        )
                     } else {
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            activity.window.navigationBarColor = resources.getColor(R.color.black)
-                            activity.window.statusBarColor = resources.getColor(R.color.black)
-                        }
+                        WindowManager.LayoutParams(
+                            WindowManager.LayoutParams.MATCH_PARENT,
+                            WindowManager.LayoutParams.MATCH_PARENT,
+                            WindowManager.LayoutParams.TYPE_APPLICATION,
+                            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                            PixelFormat.TRANSLUCENT
+                        )
                     }
 
-                    spinnerChannels = viewSlack.findViewById(R.id.spinner_slack_channel)
-                    spinnerUsers = viewSlack.findViewById(R.id.spinner_slack_user)
-                    slackChannelLayout = viewSlack.findViewById(R.id.slack_send_channel_layout)
-                    slackUserLayout = viewSlack.findViewById(R.id.slack_send_user_layout)
-                    recyclerViewSlackAttachment = viewSlack.findViewById(R.id.recycler_view_slack_attachment)
-                    recyclerViewSlackAttachmentUser = viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
-                    editTextMessage = viewSlack.findViewById(R.id.editText_slack_message)
-                    editTextMessageUser = viewSlack.findViewById(R.id.editText_slack_message_user)
-                    buttonSlackCancel = viewSlack.findViewById(R.id.button_slack_cancel)
-                    buttonSlackCreate = viewSlack.findViewById(R.id.button_slack_create)
-                    buttonSlackCancelUser = viewSlack.findViewById(R.id.button_slack_cancel_user)
-                    buttonSlackCreateUser = viewSlack.findViewById(R.id.button_slack_create_user)
-                    progressBarSlack = viewSlack.findViewById(R.id.slack_progressbar)
-                    toolbarSlack = viewSlack.findViewById(R.id.toolbar_slack)
-                    slackBottomNavigationView = viewSlack.findViewById(R.id.slack_bottom_nav_view)
-                    progressBarSlackLayout = viewSlack.findViewById(R.id.slack_progressbar_background)
+                    windowManagerSlack = activity.getSystemService(Context.WINDOW_SERVICE)!!
 
-                    slackAuthentication.callSlack(
-                        context = context,
-                        activity = activity,
-                        filePathMedia = filePathMedia,
-                        slackTask = "get"
-                    )
+                    if (windowManagerSlack != null) {
+                        (windowManagerSlack as WindowManager).addView(
+                            viewSlack,
+                            windowManagerParamsSlack
+                        )
 
-                    if(slackAuthentication.exceptionBoolean){
-                        progressBarSlackLayout.visibility = View.GONE
-                        progressBarSlack.visibility = View.GONE
+                        if (Build.VERSION.SDK_INT >= 23) {
+                            activity.window.navigationBarColor = resources.getColor(R.color.black)
+                            activity.window.statusBarColor = resources.getColor(R.color.black)
+                        } else {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                activity.window.navigationBarColor = resources.getColor(R.color.black)
+                                activity.window.statusBarColor = resources.getColor(R.color.black)
+                            }
+                        }
+
+                        spinnerChannels = viewSlack.findViewById(R.id.spinner_slack_channel)
+                        spinnerUsers = viewSlack.findViewById(R.id.spinner_slack_user)
+                        slackChannelLayout = viewSlack.findViewById(R.id.slack_send_channel_layout)
+                        slackUserLayout = viewSlack.findViewById(R.id.slack_send_user_layout)
+                        recyclerViewSlackAttachment = viewSlack.findViewById(R.id.recycler_view_slack_attachment)
+                        recyclerViewSlackAttachmentUser = viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
+                        editTextMessage = viewSlack.findViewById(R.id.editText_slack_message)
+                        editTextMessageUser = viewSlack.findViewById(R.id.editText_slack_message_user)
+                        buttonSlackCancel = viewSlack.findViewById(R.id.button_slack_cancel)
+                        buttonSlackCreate = viewSlack.findViewById(R.id.button_slack_create)
+                        buttonSlackCancelUser = viewSlack.findViewById(R.id.button_slack_cancel_user)
+                        buttonSlackCreateUser = viewSlack.findViewById(R.id.button_slack_create_user)
+                        progressBarSlack = viewSlack.findViewById(R.id.slack_progressbar)
+                        toolbarSlack = viewSlack.findViewById(R.id.toolbar_slack)
+                        slackBottomNavigationView = viewSlack.findViewById(R.id.slack_bottom_nav_view)
+                        progressBarSlackLayout = viewSlack.findViewById(R.id.slack_progressbar_background)
+
                         slackAuthentication.callSlack(
                             context = context,
                             activity = activity,
-                            filePathMedia = Companion.filePathMedia,
+                            filePathMedia = filePathMedia,
                             slackTask = "get"
                         )
-                    }
-                    initializeSlackRecyclerView(filePathMedia = filePathMedia)
-                    buttonClicksSlack(filePathMedia)
-                    progressBarSlackLayout.visibility = View.VISIBLE
-                    progressBarSlack.visibility = View.VISIBLE
 
+                        if(slackAuthentication.exceptionBoolean){
+                            progressBarSlackLayout.visibility = View.GONE
+                            progressBarSlack.visibility = View.GONE
+                            slackAuthentication.callSlack(
+                                context = context,
+                                activity = activity,
+                                filePathMedia = Companion.filePathMedia,
+                                slackTask = "get"
+                            )
+                        }
+                        initializeSlackRecyclerView(filePathMedia = filePathMedia)
+                        buttonClicksSlack(filePathMedia)
+                        progressBarSlackLayout.visibility = View.VISIBLE
+                        progressBarSlack.visibility = View.VISIBLE
+                    }
                 }
-            }
+
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
         }
     }
-
-    internal fun refreshSlackLoad(){
-        progressBarSlackLayout.visibility = View.GONE
-        progressBarSlack.visibility = View.GONE
-        slackAuthentication.callSlack(
-            context = context,
-            activity = activity,
-            filePathMedia = Companion.filePathMedia,
-            slackTask = "get"
-        )
-    }
-
 
     private fun removeSlackLayout() {
         if (windowManagerSlack != null && this::viewSlack.isInitialized) {
@@ -3274,16 +3264,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         progressBarSlack.visibility = View.GONE
         progressBarSlackLayout.visibility = View.GONE
 
-//        if(spinnerChannelsAdapter.isEmpty){
-//            slackAuthentication.callSlack(
-//                context = context,
-//                activity = activity,
-//                filePathMedia = filePathMedia,
-//                slackTask = "get"
-//            )
-//            progressBarSlackLayout.visibility = View.VISIBLE
-//            progressBarSlack.visibility = View.VISIBLE
-//        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
