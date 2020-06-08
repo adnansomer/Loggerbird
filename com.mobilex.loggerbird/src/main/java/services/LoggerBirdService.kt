@@ -3235,8 +3235,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
             if (checkUnhandledFilePath()) {
                 editTextSummary.setText(activity.resources.getString(R.string.jira_summary_unhandled_exception))
-                editTextDescription.setText(sharedPref.getString("unhandled_exception_message",null))
-                editTextDescription.isFocusable = false
+                if(checkBoxUnhandledChecked()){
+                    editTextDescription.setText(sharedPref.getString("unhandled_exception_message",null))
+                    editTextDescription.isFocusable = false
+                }
             }
 
 //        spinnerSprintAdapter =
@@ -3725,6 +3727,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         return false
     }
 
+    private fun checkBoxUnhandledChecked():Boolean{
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        if(sharedPref.getBoolean("duplication_enabled",false)){
+            return true
+        }
+        return false
+    }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun unhandledExceptionCustomizeIssueSent() {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
@@ -3783,48 +3794,48 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
 
-    private fun checkDuplicateExceptionMessage(
-        context: Context,
-        unhandledExceptionMessage: String
-    ): Boolean {
-        val sharedPref =
-            PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
-        if (sharedPref.getString("unhandled_exception_message", null) != null) {
-            val gson = Gson()
-            val json = sharedPref.getString("unhandled_exception_message", null)
-            if (json?.isNotEmpty()!!) {
-                val arrayListExceptionMessage: ArrayList<String> =
-                    gson.fromJson(json, object : TypeToken<ArrayList<String>>() {}.type)
-                return arrayListExceptionMessage.contains(unhandledExceptionMessage)
-            }
-        }
-        return false
-    }
-
-    private fun checkContainedExceptionMessage(context: Context): Boolean {
-        val sharedPref =
-            PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
-        if (sharedPref.getString("unhandled_exception_message", null) != null) {
-            val gson = Gson()
-            val json = sharedPref.getString("unhandled_exception_message", null)
-            if (json?.isNotEmpty()!!) {
-                val arrayListExceptionMessage: ArrayList<String> =
-                    gson.fromJson(json, object : TypeToken<ArrayList<String>>() {}.type)
-                arrayListUnhandledExceptionMessage.addAll(arrayListExceptionMessage)
-                return arrayListExceptionMessage.size > 20
-            }
-        }
-        return false
-    }
-
-    private fun checkUnhandledExceptionDuplicated(activity: Activity): Boolean {
-        val sharedPref =
-            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-        if (sharedPref.getBoolean("unhandled_exception_message_duplication", false)) {
-            return true
-        }
-        return false
-    }
+//    private fun checkDuplicateExceptionMessage(
+//        context: Context,
+//        unhandledExceptionMessage: String
+//    ): Boolean {
+//        val sharedPref =
+//            PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+//        if (sharedPref.getString("unhandled_exception_message", null) != null) {
+//            val gson = Gson()
+//            val json = sharedPref.getString("unhandled_exception_message", null)
+//            if (json?.isNotEmpty()!!) {
+//                val arrayListExceptionMessage: ArrayList<String> =
+//                    gson.fromJson(json, object : TypeToken<ArrayList<String>>() {}.type)
+//                return arrayListExceptionMessage.contains(unhandledExceptionMessage)
+//            }
+//        }
+//        return false
+//    }
+//
+//    private fun checkContainedExceptionMessage(context: Context): Boolean {
+//        val sharedPref =
+//            PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+//        if (sharedPref.getString("unhandled_exception_message", null) != null) {
+//            val gson = Gson()
+//            val json = sharedPref.getString("unhandled_exception_message", null)
+//            if (json?.isNotEmpty()!!) {
+//                val arrayListExceptionMessage: ArrayList<String> =
+//                    gson.fromJson(json, object : TypeToken<ArrayList<String>>() {}.type)
+//                arrayListUnhandledExceptionMessage.addAll(arrayListExceptionMessage)
+//                return arrayListExceptionMessage.size > 20
+//            }
+//        }
+//        return false
+//    }
+//
+//    private fun checkUnhandledExceptionDuplicated(activity: Activity): Boolean {
+//        val sharedPref =
+//            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+//        if (sharedPref.getBoolean("unhandled_exception_message_duplication", false)) {
+//            return true
+//        }
+//        return false
+//    }
 
     internal fun attachUnhandledDuplicationLayout(
         unhandledExceptionIssueMethod: String,
