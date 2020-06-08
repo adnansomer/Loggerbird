@@ -230,12 +230,14 @@ class JiraAuthentication {
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun jiraExceptionHandler(
+   internal fun jiraExceptionHandler(
         e: Exception? = null,
         filePathName: File? = null,
         throwable: Throwable? = null
     ) {
-        filePathName?.delete()
+        if(filePathName?.name != "logger_bird_details_old_session.txt"){
+            filePathName?.delete()
+        }
         LoggerBirdService.loggerBirdService.finishShareLayout("jira_error")
         e?.printStackTrace()
         LoggerBird.callEnqueue()
@@ -299,6 +301,7 @@ class JiraAuthentication {
                         )
                     } else {
                         activity.runOnUiThread {
+                            LoggerBirdService.loggerBirdService.detachProgressBar()
                             defaultToast.attachToast(
                                 activity = activity,
                                 toastMessage = context.resources.getString(R.string.unhandled_file_doesnt_exist)

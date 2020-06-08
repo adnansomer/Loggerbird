@@ -2185,7 +2185,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         progressBarJira.visibility = View.GONE
                     }
 
-//                    detachProgressBar()
+                    detachProgressBar()
                     finishErrorFab()
                 }
                 "slack" -> {
@@ -2334,8 +2334,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun detachProgressBar() {
-        if (this::progressBarView.isInitialized) {
+        if (this::progressBarView.isInitialized && windowManagerProgressBar != null) {
             (windowManagerProgressBar as WindowManager).removeViewImmediate(progressBarView)
+            windowManagerProgressBar = null
         }
     }
 
@@ -3235,8 +3236,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
             if (checkUnhandledFilePath()) {
                 editTextSummary.setText(activity.resources.getString(R.string.jira_summary_unhandled_exception))
-                if(checkBoxUnhandledChecked()){
-                    editTextDescription.setText(sharedPref.getString("unhandled_exception_message",null))
+                if (checkBoxUnhandledChecked()) {
+                    editTextDescription.setText(
+                        sharedPref.getString(
+                            "unhandled_exception_message",
+                            null
+                        )
+                    )
                     editTextDescription.isFocusable = false
                 }
             }
@@ -3686,6 +3692,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //                createMethod = "duplicate_file"
 //            )
         } catch (e: Exception) {
+            detachProgressBar()
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(
@@ -3722,15 +3729,26 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         val sharedPref =
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         if (sharedPref.getString("unhandled_file_path", null) != null) {
-            return true
+            val filepath = File(sharedPref.getString("unhandled_file_path", null)!!)
+            if (filepath.exists()) {
+                return true
+            } else {
+                activity.runOnUiThread {
+                    defaultToast.attachToast(
+                        activity = activity,
+                        toastMessage = activity.resources.getString(R.string.unhandled_file_doesnt_exist)
+                    )
+                }
+            }
+            return false
         }
         return false
     }
 
-    private fun checkBoxUnhandledChecked():Boolean{
+    private fun checkBoxUnhandledChecked(): Boolean {
         val sharedPref =
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-        if(sharedPref.getBoolean("duplication_enabled",false)){
+        if (sharedPref.getBoolean("duplication_enabled", false)) {
             return true
         }
         return false

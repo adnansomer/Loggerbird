@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class RetrofitUserJiraClient {
     companion object {
-        fun getJiraUserClient(url:String): Retrofit {
+       internal fun getJiraUserClient(url:String): Retrofit {
             val client = OkHttpClient.Builder()
                 .addInterceptor(
                     BasicAuthInterceptor(
