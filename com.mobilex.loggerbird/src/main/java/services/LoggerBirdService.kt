@@ -1479,17 +1479,22 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.M)
     override fun hearShake() {
         try {
+//            val file:File ?  = null
+//            file!!.createNewFile()
             Log.d("shake", "shake fired!!")
             if (Settings.canDrawOverlays(this.activity)) {
-                if (!controlFileAction) {
-
-                    initializeFloatingActionButton(activity = this.activity)
+                if (checkUnhandledFilePath()) {
+                    gatherUnhandledExceptionDetails()
                 } else {
-                    Toast.makeText(
-                        context,
-                        R.string.files_action_limit,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    if (!controlFileAction) {
+                        initializeFloatingActionButton(activity = this.activity)
+                    } else {
+                        Toast.makeText(
+                            context,
+                            R.string.files_action_limit,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             } else {
                 if (!isFabEnable) {
@@ -1524,6 +1529,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.shakerTag)
+            val file: File? = null
+            file!!.createNewFile()
         }
     }
 
@@ -1891,7 +1898,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         if (sessionTimeEnd != null && sessionTimeStart != null) {
             val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
             val sharedPref =
-                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
+                PreferenceManager.getDefaultSharedPreferences(logActivityLifeCycleObserver.activityInstance().applicationContext)
+                    ?: return
             with(sharedPref.edit()) {
                 putLong("session_time", sharedPref.getLong("session_time", 0) + sessionDuration)
                 commit()
@@ -2186,7 +2194,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun finishSuccessFab() {
-
         reveal_linear_layout_share.visibility = View.GONE
         Handler().postDelayed({
             floating_action_button.animate()
@@ -2279,7 +2286,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun attachProgressBar() {
+    internal fun attachProgressBar() {
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         progressBarView =
             LayoutInflater.from(activity).inflate(R.layout.default_progressbar, rootView, false)
@@ -2309,7 +2316,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun detachProgressBar() {
+    internal fun detachProgressBar() {
         if (this::progressBarView.isInitialized) {
             (windowManagerProgressBar as WindowManager).removeViewImmediate(progressBarView)
         }
@@ -2400,6 +2407,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
                 arrayListJiraFileName.clear()
             }
+            this.rootView = activity.window.decorView.findViewById(android.R.id.content)
             viewJira = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_jira_popup, (this.rootView as ViewGroup), false)
 
@@ -2757,7 +2765,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     private fun addJiraFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         arrayListJiraFileName.add(RecyclerViewModel(file = filePathMedia))
-        arrayListJiraFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        if (!checkUnhandledFilePath()) {
+            arrayListJiraFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
         return arrayListJiraFileName
     }
 
@@ -2888,14 +2898,19 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             autoTextViewIssueTypeAdapter =
                 ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListIssueTypes)
             autoTextViewIssueType.setAdapter(autoTextViewIssueTypeAdapter)
-            if (arrayListIssueTypes.isNotEmpty()) {
-                if (sharedPref.getString("jira_issue_type", null) != null) {
-                    autoTextViewIssueType.setText(
-                        sharedPref.getString("jira_issue_type", null),
-                        false
-                    )
-                } else {
-                    autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
+            if (checkUnhandledFilePath()) {
+                autoTextViewIssueType.setText(arrayListIssueTypes[2], false)
+                jiraAuthentication.setIssueTypePosition(issueTypePosition = 2)
+            } else {
+                if (arrayListIssueTypes.isNotEmpty()) {
+                    if (sharedPref.getString("jira_issue_type", null) != null) {
+                        autoTextViewIssueType.setText(
+                            sharedPref.getString("jira_issue_type", null),
+                            false
+                        )
+                    } else {
+                        autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
+                    }
                 }
             }
             autoTextViewIssueType.setOnTouchListener { v, event ->
@@ -3201,6 +3216,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 cardViewStartDate.visibility = View.GONE
             }
 
+            if (checkUnhandledFilePath()) {
+                editTextSummary.setText(activity.resources.getString(R.string.jira_summary_unhandled_exception))
+                editTextDescription.setText(activity.resources.getString(R.string.jira_description_unhandled_exception))
+            }
 
 //        spinnerSprintAdapter =
 //            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListSprint)
@@ -3544,6 +3563,90 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun detachJiraDatePicker() {
         if (this::calendarViewJiraView.isInitialized) {
             (windowManagerJiraDatePicker as WindowManager).removeViewImmediate(calendarViewJiraView)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun gatherUnhandledExceptionDetails() {
+        try {
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+            val filePath = File(sharedPref.getString("unhandled_file_path", null)!!)
+            CookieBar.build(activity)
+                .setCustomView(R.layout.loggerbird_unhandled_popup)
+                .setCustomViewInitializer {
+                    val textViewDiscard = it.findViewById<TextView>(R.id.textView_unhandled_discard)
+                    val textViewShareWithJira =
+                        it.findViewById<TextView>(R.id.textView_unhandled_share_jira)
+                    val textViewCustomizeJira =
+                        it.findViewById<TextView>(R.id.textView_unhandled_jira_customize)
+                    textViewDiscard.setSafeOnClickListener {
+                        if (filePath.exists()) {
+                            filePath.delete()
+                        }
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("unhandled_file_path")
+                        editor.apply()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.unhandled_file_discard_success)
+                        )
+                        CookieBar.dismiss(activity)
+                    }
+                    textViewShareWithJira.setSafeOnClickListener {
+                        attachProgressBar()
+                        val coroutineCallUnhandledTask = CoroutineScope(Dispatchers.IO)
+                        coroutineCallUnhandledTask.async {
+                            jiraAuthentication.jiraUnhandledExceptionTask(
+                                context = context,
+                                activity = activity,
+                                filePath = filePath
+                            )
+                        }
+                        CookieBar.dismiss(activity)
+                    }
+                    textViewCustomizeJira.setSafeOnClickListener {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            if (controlFloatingActionButtonView()) {
+                                floatingActionButtonView.visibility = View.GONE
+                            }
+                            initializeJiraLayout(filePathMedia = filePath)
+                        }
+                    }
+                }.setSwipeToDismiss(false)
+                .setEnableAutoDismiss(false)
+                .show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.unhandledExceptionPopupTag
+            )
+        }
+    }
+
+    internal fun checkUnhandledFilePath(): Boolean {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        if (sharedPref.getString("unhandled_file_path", null) != null) {
+            return true
+        }
+        return false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun unhandledExceptionCustomizeIssueSent() {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        val editor: SharedPreferences.Editor = sharedPref.edit()
+        editor.remove("unhandled_file_path")
+        editor.apply()
+        CookieBar.dismiss(activity)
+        activity.runOnUiThread {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.jira_sent)
+            )
         }
     }
 
