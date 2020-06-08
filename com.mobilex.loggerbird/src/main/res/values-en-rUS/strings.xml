@@ -79,6 +79,7 @@
     <string name="unhandled_send">*Send!</string>
     <string name="unhandled_file_doesnt_exist">File path doesn\'t exist!</string>
     <string name="unhandled_file_discard_success">File discarded successfully!</string>
+    <string name="unhandled_file_duplication_found">We have detected duplication error messages , do you still want to create issue?</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -152,4 +153,12 @@
     <!-- jira_calendar_view-->
     <string name="button_CalendarView_ok">OK</string>
     <string name="button_CalendarView_cancel">CANCEL</string>
+    <!-- unhandled_duplication_popup-->
+    <string name="textView_duplication_popup_title">Warning:Duplication!</string>
+    <string name="textView_duplication_popup_content">We have detected duplication error messages , do you still want to create issue?</string>
+    <string name="button_duplication_popup_proceed">Proceed!</string>
+    <string name="button_duplication_popup_cancel">Cancel!</string>
+    <string name="textView_duplication_check">Duplication:</string>
+    <string name="duplication_check_enabled">Duplication check enabled!</string>
+    <string name="duplication_check_disabled">Duplication check disabled!</string>
 </resources>

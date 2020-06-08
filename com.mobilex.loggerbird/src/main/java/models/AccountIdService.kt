@@ -23,4 +23,6 @@ interface AccountIdService {
     fun getSprintList(): Call<JsonObject>
     @GET("board")
     fun getBoardList(): Call<JsonObject>
+    @GET("search?")
+    fun getAttachmentList(@Query("project")  projectKey:String,@Query("fields") attachmentTitle:String): Call<JsonObject>
 }

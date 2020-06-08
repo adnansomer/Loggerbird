@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import android.os.FileUtils
 import android.os.Looper
 import android.util.Log
 import android.widget.*
@@ -17,6 +18,7 @@ import com.atlassian.jira.rest.client.api.domain.*
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.api.domain.input.LinkIssuesInput
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.mobilex.loggerbird.R
 import constants.Constants
@@ -177,6 +179,33 @@ class JiraAuthentication {
                                 restClient = jiraAuthentication(),
                                 activity = activity
                             )
+                            "unhandled_duplication" ->
+                            if(duplicateErrorMessageCheck(
+                                    restClient = jiraAuthentication(),
+                                    activity = activity
+                                )){
+                                activity.runOnUiThread {
+                                    LoggerBirdService.loggerBirdService.detachProgressBar()
+                                    when(createMethod){
+                                        "default" ->  LoggerBirdService.loggerBirdService.attachUnhandledDuplicationLayout(
+                                            unhandledExceptionIssueMethod = "default",
+                                            filePath = filePathMediaName!!
+                                        )
+                                        "customize" ->   LoggerBirdService.loggerBirdService.attachUnhandledDuplicationLayout(
+                                            unhandledExceptionIssueMethod = "customize",
+                                            filePath = filePathMediaName!!
+                                        )
+                                    }
+                                }
+                            }else{
+                                activity.runOnUiThread {
+                                    LoggerBirdService.loggerBirdService.detachProgressBar()
+                                    when(createMethod){
+                                        "default" -> LoggerBirdService.loggerBirdService.createDefaultUnhandledJiraIssue(filePath = filePathMediaName!!)
+                                        "customize" ->  LoggerBirdService.loggerBirdService.createCustomizedUnhandledJiraIssue(filePath = filePathMediaName!!)
+                                    }
+                                }
+                            }
                         }
 
                     } else {
@@ -269,10 +298,12 @@ class JiraAuthentication {
                             filePathName = filePathMediaName
                         )
                     } else {
-                        defaultToast.attachToast(
-                            activity = activity,
-                            toastMessage = context.resources.getString(R.string.unhandled_file_doesnt_exist)
-                        )
+                        activity.runOnUiThread {
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.unhandled_file_doesnt_exist)
+                            )
+                        }
                     }
                 }
             }
@@ -329,17 +360,23 @@ class JiraAuthentication {
 //                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
 //                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
 //            issueBuilder.setDueDate(DateTime.parse("2020-06-25"))
-            if (arrayListComponents[componentPosition].isNotEmpty() && this.component != null) {
-                if (this.component!!.isNotEmpty()) {
-                    issueBuilder.setComponents(hashMapComponent[arrayListComponents[componentPosition]])
-                }
+            if (arrayListComponents.size > componentPosition) {
+                if (arrayListComponents[componentPosition].isNotEmpty() && this.component != null) {
+                    if (this.component!!.isNotEmpty()) {
+                        issueBuilder.setComponents(hashMapComponent[arrayListComponents[componentPosition]])
+                    }
 
-            }
-            if (arrayListFixVersions[fixVersionPosition].isNotEmpty() && this.fixVersion != null) {
-                if (this.fixVersion!!.isNotEmpty()) {
-                    issueBuilder.setFixVersions(hashMapFixVersions[arrayListFixVersions[fixVersionPosition]])
                 }
             }
+
+            if (arrayListFixVersions.size > fixVersionPosition) {
+                if (arrayListFixVersions[fixVersionPosition].isNotEmpty() && this.fixVersion != null) {
+                    if (this.fixVersion!!.isNotEmpty()) {
+                        issueBuilder.setFixVersions(hashMapFixVersions[arrayListFixVersions[fixVersionPosition]])
+                    }
+                }
+            }
+
             val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
             val issueKey = basicIssue.key
 //            createdIssueKey  = issueKey
@@ -537,9 +574,9 @@ class JiraAuthentication {
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.buttonJiraCancel.performClick()
             }
-            if(!LoggerBirdService.loggerBirdService.checkUnhandledFilePath()){
+            if (!LoggerBirdService.loggerBirdService.checkUnhandledFilePath()) {
                 LoggerBirdService.loggerBirdService.finishShareLayout("jira")
-            }else{
+            } else {
                 LoggerBirdService.loggerBirdService.unhandledExceptionCustomizeIssueSent()
             }
             Log.d("issue", issueUri.toString())
@@ -553,13 +590,15 @@ class JiraAuthentication {
         context: Context,
         filePathName: File
     ) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(LoggerBirdService.loggerBirdService.returnActivity().applicationContext)
         val issueClient = restClient.issueClient
         val issueBuilder = IssueInputBuilder(
             "DEN",
             10004,
             context.resources.getString(R.string.jira_summary_unhandled_exception)
         )
-        issueBuilder.setDescription(context.resources.getString(R.string.jira_description_unhandled_exception))
+        issueBuilder.setDescription(sharedPref.getString("unhandled_exception_message", null))
         val inputStreamSecessionFile =
             FileInputStream(filePathName)
         val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
@@ -570,8 +609,6 @@ class JiraAuthentication {
             inputStreamSecessionFile,
             filePathName.absolutePath
         )
-        val sharedPref =
-            PreferenceManager.getDefaultSharedPreferences(LoggerBirdService.loggerBirdService.returnActivity().applicationContext)
         val editor: SharedPreferences.Editor = sharedPref.edit()
         editor.remove("unhandled_file_path")
         editor.apply()
@@ -1240,5 +1277,99 @@ class JiraAuthentication {
             LoggerBirdService.loggerBirdService.detachProgressBar()
         }
 //        }
+    }
+
+    //    internal fun duplicateIssueCheck(restClient: JiraRestClient): Boolean {
+//        val sharedPref =
+//            PreferenceManager.getDefaultSharedPreferences(LoggerBird.context.applicationContext)
+//        if (sharedPref.getString("unhandled_file_path", null) != null) {
+//            val fileUnhandled = File(sharedPref.getString("unhandled_file_path", null)!!)
+//            var fileIssue: File
+//                try {
+//                    val arrayListFile:ArrayList<File> = ArrayList()
+//                    val projectClient = restClient.projectClient
+//                    val searchClient = restClient.searchClient
+//                    projectClient.allProjects.claim().forEach {
+//                        //                        val jsonObjectAssignee = JsonObject()
+////                        jsonObjectAssignee.addProperty(
+////                            "accountId",
+////                            arrayListAccountId[assigneePosition]
+////                        )
+//                        RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
+//                            .create(AccountIdService::class.java)
+//                            .getAttachmentList(projectKey = it.key , attachmentTitle = "attachment")
+//                            .enqueue(object : retrofit2.Callback<JsonObject> {
+//                                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+//                                override fun onFailure(
+//                                    call: retrofit2.Call<JsonObject>,
+//                                    t: Throwable
+//                                ) {
+////                                    resetJiraValues()
+//                                    jiraExceptionHandler(throwable = t)
+//                                }
+//
+//                                override fun onResponse(
+//                                    call: retrofit2.Call<JsonObject>,
+//                                    response: retrofit2.Response<JsonObject>
+//                                ) {
+////                                    resetJiraValues()
+//                                    Log.d("attachment_get_success", response.code().toString())
+//                                    response.body()?.getAsJsonArray("issues")?.forEach { issue ->
+//                                        val jsonObjectIssues:JsonObject = issue.asJsonObject
+//                                            val jsonObjectFields:JsonObject = jsonObjectIssues.asJsonObject["fields"].asJsonObject
+//                                            jsonObjectFields.getAsJsonArray("attachment").forEach { self ->
+//                                                fileIssue = File(URI(self.asJsonObject["content"].asString))
+//                                                if (fileIssue.readBytes().contentEquals(
+//                                                        fileUnhandled.readBytes()
+//                                                    )) {
+//                                                    Log.d("found_duplicate", "duplication!")
+//                                                    return
+//                                                }
+//                                        }
+//                                    }
+//                                }
+//                            })
+////                        searchClient.searchJql("project=" + it.key+"&fields=attachment").claim()
+////                            .issues.forEach { issue ->
+////                            issue.attachments.find { file ->
+////                                fileIssue = File(file.contentUri)
+////                                Log.d("file",file.filename)
+////                                if (fileIssue == fileUnhandled) {
+////                                    Log.d("found_duplicate", "duplication!")
+////                                    return@async true
+////                                }
+////                                return@forEach
+////                            }
+//
+//                    }
+//                } catch (e: Exception) {
+//                    e.printStackTrace()
+//                    LoggerBird.callEnqueue()
+//                    LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
+//                }
+//        }
+//        return false
+//    }
+    internal fun duplicateErrorMessageCheck(
+        restClient: JiraRestClient,
+        activity: Activity
+    ): Boolean {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        var controlDuplication = false
+        if (sharedPref.getString("unhandled_exception_message", null) != null) {
+            val exceptionMessage = sharedPref.getString("unhandled_exception_message", null)
+                val searchClient = restClient.searchClient
+                val projectClient = restClient.projectClient
+                projectClient.allProjects.claim().forEach {
+                    searchClient.searchJql("project=" + it.key).claim().issues.forEach { issue ->
+                        if (issue.description == exceptionMessage) {
+                            Log.d("found_duplication", "true!!!!")
+                            controlDuplication = true
+                            return controlDuplication
+                        }
+                    }
+                }
+        }
+        return controlDuplication
     }
 }
