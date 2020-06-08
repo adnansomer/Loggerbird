@@ -3612,7 +3612,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (sharedPref.getBoolean("duplication_enabled", false)) {
                         checkBoxDuplication.isChecked = true
                     }
-                    checkBoxDuplication.setSafeOnClickListener {
+                    checkBoxDuplication.setOnClickListener {
                         if (checkBoxDuplication.isChecked) {
                             with(sharedPref.edit()) {
                                 putBoolean("duplication_enabled", true)
