@@ -131,8 +131,7 @@ class SlackAuthentication {
 
     ) {
         val client = OkHttpClient()
-        val request: Request =
-            Request.Builder()
+        val request: Request = Request.Builder()
                 .url("https://app.slack.com/client")
                 .build()
         client.newCall(request).enqueue(object : Callback {
@@ -512,7 +511,6 @@ class SlackAuthentication {
         throwable: Throwable? = null,
         socketTimeOut: SocketTimeoutException? = null
     ) {
-        filePathName?.delete()
         LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
         e?.printStackTrace()
         socketTimeOut?.message
