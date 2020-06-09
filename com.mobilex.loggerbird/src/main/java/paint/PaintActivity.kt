@@ -7,6 +7,7 @@ import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -531,6 +532,9 @@ class PaintActivity : Activity() {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onBackPressed() {
         super.onBackPressed()
+        LoggerBirdService.floating_action_button.clearAnimation()
+        LoggerBirdService.floating_action_button.backgroundTintList =
+            ColorStateList.valueOf(resources.getColor(R.color.black))
         Toast.makeText(activity, R.string.drawing_cancelled_message, Toast.LENGTH_SHORT).show()
         overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
         finish()
@@ -551,7 +555,7 @@ class PaintActivity : Activity() {
     ) {
 
         if (isInPictureInPictureMode) {
-
+            LoggerBirdService.floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
             pipModeChange = true
             paint_floating_action_button.visibility = View.GONE
             paint_floating_action_button_save.visibility = View.GONE
@@ -583,6 +587,9 @@ class PaintActivity : Activity() {
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun fabScreenshotAnimation(){
+        LoggerBirdService.floating_action_button.clearAnimation()
+        LoggerBirdService.floating_action_button.backgroundTintList =
+            ColorStateList.valueOf(resources.getColor(R.color.black))
         LoggerBirdService.floating_action_button.animate()
             .rotationBy(360F)
             .setDuration(200)
@@ -620,5 +627,6 @@ class PaintActivity : Activity() {
         super.onDestroy()
         LoggerBirdService.screenshotDrawing = false
         controlPaintInPictureState = false
+//        fabScreenshotAnimation()
     }
 }

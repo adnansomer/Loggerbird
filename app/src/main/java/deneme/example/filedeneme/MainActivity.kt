@@ -202,8 +202,9 @@ class MainActivity : AppCompatActivity() {
 //
 //        }
         button_add.setOnClickListener() {
-            val filePathTest: File? = null
-            filePathTest!!.createNewFile()
+            val coroutineScope = CoroutineScope(Dispatchers.IO)
+                throw  NullPointerException("Parameter Type cannot be null");
+
 
             //recyclerViewList.removeAt(0)
             //recyclerViewList.add(RecyclerModel("hello how are you"))
@@ -212,8 +213,8 @@ class MainActivity : AppCompatActivity() {
 //                view = recycler_view,
 //                resources = recycler_view.resources
 //            )
-            LoggerBird.callComponentDetails(view = button_add,resources = button_add.resources)
-            LoggerBird.callEmailSender(context = this)
+//            LoggerBird.callComponentDetails(view = button_add,resources = button_add.resources)
+//            LoggerBird.callEmailSender(context = this)
 //            for (x in 1..5) {
 //                LoggerBird.callComponentDetails(view = button_add, resources = button_add.resources)
 //                LoggerBird.callLifeCycleDetails()
@@ -268,7 +269,8 @@ class MainActivity : AppCompatActivity() {
 //            }
         }
         button_read_logs.setOnClickListener(View.OnClickListener {
-            getCurrentData()
+            throw  NullPointerException("asdf");
+//            getCurrentData()
 //            beginSearch("dog", this)
             // LogDeneme.saveComponentDetails(view=button_read_logs,resources = button_read_logs.resources)
             //            LogDeneme.saveComponentDetails(null,button_read_logs,button_read_logs.resources,this)

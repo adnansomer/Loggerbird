@@ -6,10 +6,12 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.content.res.Resources
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,6 +24,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleObserver
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.billingclient.api.*
 import com.google.gson.GsonBuilder
@@ -50,10 +53,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import services.LoggerBirdMemoryService
 import services.LoggerBirdService
+import utils.DefaultToast
 import utils.EmailUtil
 import utils.InternetConnectionUtil
 import utils.LinkedBlockingQueueUtil
 import java.io.File
+import java.lang.NullPointerException
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
@@ -66,7 +71,7 @@ class LoggerBird : LifecycleObserver {
     companion object {
         //Static global variables.
         private var controlLogInit: Boolean = false
-        private lateinit var context: Context
+        internal lateinit var context: Context
         private var filePathName: String? = null
         private lateinit var fileDirectory: File
         private lateinit var filePath: File
@@ -137,10 +142,10 @@ class LoggerBird : LifecycleObserver {
         internal var stringBuilderActivityLifeCycleObserver: StringBuilder = StringBuilder()
         internal var classList: ArrayList<String> = ArrayList()
         internal lateinit var filePathSecessionName: File
-        internal lateinit var jiraDomainName:String
-        internal lateinit var jiraUserName:String
+        internal lateinit var jiraDomainName: String
+        internal lateinit var jiraUserName: String
         internal lateinit var jiraApiToken: String
-        internal lateinit var slackApiToken: String
+        private val defaultToast = DefaultToast()
 //        private val loggerBirdService: LoggerBirdService = LoggerBirdService()
 
 
@@ -166,10 +171,9 @@ class LoggerBird : LifecycleObserver {
 
         fun logInit(
             context: Context,
-            jiraDomainName:String,
-            jiraUserName:String,
-            jiraApiToken:String,
-            slackApiToken:String,
+            jiraDomainName: String,
+            jiraUserName: String,
+            jiraApiToken: String,
             filePathName: String? = null
         ): Boolean {
             this.context = context
@@ -179,7 +183,6 @@ class LoggerBird : LifecycleObserver {
                     Companion.jiraDomainName = jiraDomainName
                     Companion.jiraUserName = jiraUserName
                     Companion.jiraApiToken = jiraApiToken
-                    Companion.slackApiToken = slackApiToken
                     logAttachLifeCycleObservers(context = context)
                     fileDirectory = context.filesDir
                     if (filePathName != null) {
@@ -197,6 +200,7 @@ class LoggerBird : LifecycleObserver {
                     workQueueLinked = LinkedBlockingQueueUtil()
                     val logcatObserver = UnhandledExceptionObserver()
                     Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
+//                    throw  NullPointerException("Parameter Type cannot be null");
                     coroutineCallMemoryService.async {
                         intentServiceMemory = Intent(context, LoggerBirdMemoryService::class.java)
                         context.startService(intentServiceMemory)
@@ -205,6 +209,7 @@ class LoggerBird : LifecycleObserver {
 
                 } catch (e: Exception) {
                     e.printStackTrace()
+//                    throw  NullPointerException("Parameter Type cannot be null");
                 }
             }
 
@@ -1768,6 +1773,7 @@ class LoggerBird : LifecycleObserver {
          * Exceptions:
          * @throws exception if logInit method return value is false.
          */
+        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
         private fun takeExceptionDetails(
             exception: Exception? = null,
             tag: String? = null,
@@ -1775,7 +1781,46 @@ class LoggerBird : LifecycleObserver {
         ) {
             workQueueLinked.controlRunnable = true
             try {
-                coroutineCallException.async {
+                if (!uncaughtExceptionHandlerController) {
+                    coroutineCallException.async {
+                        stringBuilderException = StringBuilder()
+                        val date = Calendar.getInstance().time
+                        val formatter =
+                            SimpleDateFormat.getDateTimeInstance()
+                        formattedTime = formatter.format(date)
+                        if (exception != null) {
+                            if (Log.getStackTraceString(exception).isNotEmpty()) {
+                                stringBuilderException.append(
+                                    "\n" + "Method Tag:" + tag +
+                                            "\n" + formattedTime + ":" + Constants.exceptionTag + "\n" + "Exception:" + Log.getStackTraceString(
+                                        exception
+                                    )
+                                )
+                            } else {
+                                stringBuilderException.append(
+                                    "\n" + "Method Tag:" + tag +
+                                            "\n" + formattedTime + ":" + Constants.exceptionTag + "\n" + "Exception:" + exception.message
+                                )
+                            }
+                        } else if (throwable != null) {
+                            if (Log.getStackTraceString(throwable).isNotEmpty()) {
+                                stringBuilderException.append(
+                                    "\n" + "Method Tag:" + tag +
+                                            "\n" + formattedTime + ":" + Constants.unHandledExceptionTag + "\n" + "Throwable:" + Log.getStackTraceString(
+                                        throwable
+                                    )
+                                )
+                            } else {
+                                stringBuilderException.append(
+                                    "\n" + "Method Tag:" + tag +
+                                            "\n" + formattedTime + ":" + Constants.unHandledExceptionTag + "\n" + "Throwable:" + throwable.message
+                                )
+                            }
+
+                        }
+                        saveExceptionDetails()
+                    }
+                } else {
                     stringBuilderException = StringBuilder()
                     val date = Calendar.getInstance().time
                     val formatter =
@@ -1795,6 +1840,10 @@ class LoggerBird : LifecycleObserver {
                                         "\n" + formattedTime + ":" + Constants.exceptionTag + "\n" + "Exception:" + exception.message
                             )
                         }
+                        LoggerBirdService.loggerBirdService.addUnhandledExceptionMessage(
+                            context = context,
+                            unhandledExceptionMessage = exception.stackTrace[0].className
+                        )
                     } else if (throwable != null) {
                         if (Log.getStackTraceString(throwable).isNotEmpty()) {
                             stringBuilderException.append(
@@ -1808,11 +1857,16 @@ class LoggerBird : LifecycleObserver {
                                 "\n" + "Method Tag:" + tag +
                                         "\n" + formattedTime + ":" + Constants.unHandledExceptionTag + "\n" + "Throwable:" + throwable.message
                             )
-                        }
 
+                        }
+                        LoggerBirdService.loggerBirdService.addUnhandledExceptionMessage(
+                            context = context,
+                            unhandledExceptionMessage = throwable.stackTrace[0].className
+                        )
                     }
                     saveExceptionDetails()
                 }
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -2772,7 +2826,7 @@ class LoggerBird : LifecycleObserver {
          * Exception:
          * @throws exception if error occurs and prints error into logcat.
          */
-        private suspend fun saveExceptionDetails() {
+        private fun saveExceptionDetails() {
             if (stringBuilderException.isNotEmpty()) {
                 try {
                     fileDirectory = context.filesDir
@@ -2788,9 +2842,7 @@ class LoggerBird : LifecycleObserver {
                         )
                     }
                     if (!filePath.exists()) {
-                        withContext(Dispatchers.IO) {
-                            filePath.createNewFile()
-                        }
+                        filePath.createNewFile()
                         takeDeviceInformationDetails()
                         filePath.appendText(
                             stringBuilderBuild.toString()
@@ -2823,24 +2875,25 @@ class LoggerBird : LifecycleObserver {
                         )
                     }
                     if (uncaughtExceptionHandlerController) {
-                        uncaughtExceptionHandlerController = false
-                        withContext(Dispatchers.IO) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//                               LoggerBirdService.loggerBirdService.jiraAuthentication.callJiraIssue(
-//                                   context = context,
-//                                    activity = LoggerBirdService.loggerBirdService.returnActivity()
+                        //                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+////                               LoggerBirdService.loggerBirdService.jiraAuthentication.callJiraIssue(
+////                                   context = context,
+////                                    activity = LoggerBirdService.loggerBirdService.returnActivity()
+////                                )
+//                                if(LoggerBirdService.controlLoggerBirdServiceInit()){
+//                                    Looper.prepare()
+//                                    Toast.makeText(context,"Unhandled Exception occurred , automatically opening jira issue!",Toast.LENGTH_LONG).show()
+////                                    defaultToast.attachToast(activity =LoggerBirdService.loggerBirdService.returnActivity() , toastMessage = "Unhandled Exception occurred , automatically opening jira issue!")
+//                                    LoggerBirdService.loggerBirdService.jiraAuthentication.jiraUnhandledExceptionTask(context = context, activity = LoggerBirdService.loggerBirdService.returnActivity())
+//                                    Looper.loop()
+//                                }
+//                            } else {
+//                                EmailUtil.sendUnhandledException(
+//                                    file = filePath,
+//                                    context = context
 //                                )
-                                if(LoggerBirdService.controlLoggerBirdServiceInit()){
-                                    LoggerBirdService.loggerBirdService.jiraAuthentication.jiraUnhandledExceptionTask(context = context, activity = LoggerBirdService.loggerBirdService.returnActivity())
-                                }
-                            } else {
-                                EmailUtil.sendUnhandledException(
-                                    file = filePath,
-                                    context = context
-                                )
-                            }
-                            saveSessionIntoOldSessionFile()
-                        }
+//                            }
+                        saveSessionIntoOldSessionFile()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -2886,6 +2939,22 @@ class LoggerBird : LifecycleObserver {
                 oldSessionFile.appendText(LoggerBirdMemoryService.stringBuilderMemoryUsage.toString())
                 filePath.delete()
                 filePath = oldSessionFile
+                if (uncaughtExceptionHandlerController) {
+                    val sharedPref =
+                        PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+                            ?: return
+                    with(sharedPref.edit()) {
+                        putString("unhandled_file_path", filePath.absolutePath)
+                        commit()
+                    }
+                } else {
+                    val sharedPref =
+                        PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+                    val editor: SharedPreferences.Editor = sharedPref.edit()
+                    editor.remove("unhandled_file_path")
+                    editor.commit()
+                }
+
                 android.os.Process.killProcess(android.os.Process.myPid());
                 exitProcess(0);
             } catch (e: Exception) {

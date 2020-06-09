@@ -13,6 +13,9 @@ import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.mobilex.loggerbird.R
 import constants.Constants
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
 import java.util.*
 
@@ -86,15 +89,15 @@ class DefaultToast {
         }
     }
 
-    private fun detachToast() {
+    private  fun detachToast() {
         if (this.textViewToast != null && this.toastView != null) {
-            (windowManagerToast as WindowManager).removeViewImmediate(toastView)
-            toastView = null
-            textViewToast = null
+                    (windowManagerToast as WindowManager).removeViewImmediate(toastView)
+                    toastView = null
+                    textViewToast = null
         }
     }
 
-    private fun toastTimer(activity: Activity) {
+    private fun  toastTimer(activity: Activity) {
         val timerToast = Timer()
         val timerTaskToast = object : TimerTask() {
             override fun run() {

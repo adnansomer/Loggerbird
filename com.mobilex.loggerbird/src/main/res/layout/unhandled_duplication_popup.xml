@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@color/darkTransparent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/pop_up_shape"
+        android:gravity="center"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_marginTop="20dp"
+            android:text="@string/textView_duplication_popup_title"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+        <ImageView
+            android:id="@+id/imageView_unhandled_duplication_warning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:srcCompat="@drawable/ic_warning_black_24dp" />
+
+
+        <TextView
+            android:id="@+id/textView_unhandled_duplication_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginTop="10dp"
+            android:text="@string/textView_duplication_popup_content"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/button_unhandled_duplication_proceed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/pop_up_button_shape"
+            android:text="@string/button_duplication_popup_proceed"
+            android:textAllCaps="false"
+            android:textColor="@color/colorFab"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/button_unhandled_duplication_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@color/colorFab"
+            android:text="@string/button_duplication_popup_cancel"
+            android:textAllCaps="false"
+            android:textColor="@color/colorBlack"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+
+</LinearLayout>
