@@ -81,10 +81,12 @@
     <string name="unhandled_file_doesnt_exist">File path doesn\'t exist!</string>
     <string name="unhandled_file_discard_success">File discarded successfully!</string>
     <string name="unhandled_file_duplication_found">We have detected duplication error messages , do you still want to create issue?</string>
+    <string name="email_invalid_format">Invalid e-mail format!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
     <string name="email_send_failure">E-mail could not send because of a failure!</string>
+    <string name="email_send_success">E-mail sent successfully!</string>
     <string name="feed_back_email_success">Thank you for your feedback!</string>
     <string name="unhandled_exception_success">Unhandled exception detected,check your e-mail for details!</string>
     <string name="log_details_success">Log details have been sent to your e-mail!</string>
@@ -161,4 +163,14 @@
     <string name="textView_duplication_check">Duplication:</string>
     <string name="duplication_check_enabled">Duplication check enabled!</string>
     <string name="duplication_check_disabled">Duplication check disabled!</string>
+    <!-- loggerbird_email_popup-->
+    <string name="textView_email_title">Create Email</string>
+    <string name="textView_email_issue">New Issue</string>
+    <string name="editText_email_to">To:</string>
+    <string name="editText_email_subject">Subject:</string>
+    <string name="editText_email_content">Write your message here:</string>
+    <string name="textView_email_attachments">Attachments</string>
+    <string name="button_email_create">Create</string>
+    <string name="button_email_cancel">Cancel</string>
+    <string name="textView_recyclerView_email_popup_title">Are you sure to remove attachment from your Email?</string>
 </resources>

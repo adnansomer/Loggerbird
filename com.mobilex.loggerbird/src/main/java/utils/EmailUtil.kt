@@ -1,5 +1,6 @@
 package utils
 
+import adapter.RecyclerViewEmailAdapter
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -7,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
 import authentication.SMTPAuthenticator
@@ -21,6 +23,7 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOption
 import com.mobilex.loggerbird.R
 import exception.LoggerBirdException
 import kotlinx.coroutines.*
+import services.LoggerBirdService
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -51,6 +54,7 @@ internal class EmailUtil {
         private lateinit var mailSession: javax.mail.Session
         private lateinit var transport: Transport
         private lateinit var dataSource: FileDataSource
+        private val defaultToast = DefaultToast()
 
         /**
          * This Method Takes Log File And Send As Email.
@@ -64,10 +68,14 @@ internal class EmailUtil {
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws LoggerBirdException if internet or network check gives exceptions.
          */
+        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
         internal suspend fun sendEmail(
             file: File? = null,
             context: Context,
-            progressBar: ProgressBar
+            progressBar: ProgressBar,
+            to: String,
+            subject: String? = null,
+            message: String? = null
         ) {
             try {
                 val internetConnectionUtil = InternetConnectionUtil()
@@ -81,9 +89,11 @@ internal class EmailUtil {
                             systemTime()
                         )
                         sendSingleEmail(
-                            subject = "log_details",
                             file = file,
                             context = context,
+                            to = to,
+                            subject = subject,
+                            message = message,
                             progressBar = progressBar
                         )
                         Log.d(
@@ -147,7 +157,8 @@ internal class EmailUtil {
          */
         internal suspend fun sendUnhandledException(
             file: File,
-            context: Context
+            context: Context,
+            to: String
         ) {
             try {
                 val internetConnectionUtil = InternetConnectionUtil()
@@ -163,7 +174,8 @@ internal class EmailUtil {
                         sendSingleEmail(
                             subject = "unhandled_log_details",
                             file = file,
-                            context = context
+                            context = context,
+                            to = to
                         )
                         Log.d(
                             "email_time",
@@ -210,7 +222,7 @@ internal class EmailUtil {
         }
 
 
-        internal suspend fun sendFeedbackEmail(context: Context, message: String) {
+        internal suspend fun sendFeedbackEmail(context: Context, message: String,to: String) {
             try {
                 val internetConnectionUtil = InternetConnectionUtil()
                 if (internetConnectionUtil.checkNetworkConnection(
@@ -225,7 +237,8 @@ internal class EmailUtil {
                         sendSingleEmail(
                             message = message,
                             subject = "feed_back_details",
-                            context = context
+                            context = context,
+                            to = to
                         )
                         Log.d(
                             "email_time",
@@ -293,7 +306,7 @@ internal class EmailUtil {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private suspend fun initializeEmail(context: Context, subject: String? = null) {
+        private suspend fun initializeEmail(context: Context, to: String, subject: String? = null , message: String? = null) {
             try {
                 properties = Properties()
                 properties["mail.transport.protocol"] = "smtp"
@@ -316,9 +329,9 @@ internal class EmailUtil {
                 )
                 multiPart = MimeMultipart()
                 mimeMessage.setFrom(InternetAddress("adnansomer@gmail.com"))
-                mimeMessage.addRecipients(Message.RecipientType.TO, "adnansomer@gmail.com")
+                mimeMessage.addRecipients(Message.RecipientType.TO, to)
                 mimeMessage.subject = subject
-                mimeBodyPart = MimeBodyPart()
+                mimeMessage.setText(message)
                 transport.connect()
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
@@ -348,34 +361,55 @@ internal class EmailUtil {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
+        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
         private suspend fun sendSingleEmail(
             context: Context,
-            subject: String,
+            to: String,
+            subject: String? = null,
             message: String? = null,
             file: File? = null,
             progressBar: ProgressBar? = null
         ) {
             try {
-                if(progressBar!=null){
-                    withContext(Dispatchers.Main){
+                if (progressBar != null) {
+                    withContext(Dispatchers.Main) {
                         progressBar.visibility = View.VISIBLE
                     }
                 }
-                initializeEmail(subject = subject, context = context)
-                if (file != null) {
-                    dataSource = FileDataSource(file.path)
-                    mimeBodyPart.dataHandler = DataHandler(
-                        dataSource
-                    )
-                    mimeBodyPart.fileName = file.name
-                    multiPart.addBodyPart(
-                        mimeBodyPart
-                    )
+                initializeEmail(context = context, to = to, subject = subject , message = message)
+//                if (file != null) {
+//                    dataSource = FileDataSource(file.path)
+//                    mimeBodyPart.dataHandler = DataHandler(
+//                        dataSource
+//                    )
+//                    mimeBodyPart.fileName = file.name
+//                    multiPart.addBodyPart(
+//                        mimeBodyPart
+//                    )
+//                    mimeMessage.setContent(
+//                        multiPart
+//                    )
+//                } else {
+//                    mimeMessage.setContent(message, "text/plain")
+//                }
+//                if (message != null) {
+//                    mimeMessage.addHeader(message, "text/html")
+//                }
+                if (RecyclerViewEmailAdapter.ViewHolder.arrayListFilePaths.isNotEmpty()) {
+                    RecyclerViewEmailAdapter.ViewHolder.arrayListFilePaths.forEach {
+                        mimeBodyPart = MimeBodyPart()
+                        dataSource = FileDataSource(it.file.path)
+                        mimeBodyPart.dataHandler = DataHandler(
+                            dataSource
+                        )
+                        mimeBodyPart.fileName = it.file.name
+                        multiPart.addBodyPart(
+                            mimeBodyPart
+                        )
+                    }
                     mimeMessage.setContent(
                         multiPart
                     )
-                } else {
-                    mimeMessage.setContent(message, "text/plain")
                 }
                 if (transport.isConnected) {
                     transport.sendMessage(
@@ -388,8 +422,14 @@ internal class EmailUtil {
                             context.resources.getString(R.string.feed_back_email_success)
                         "unhandled_log_details" -> toastMessage =
                             context.resources.getString(R.string.unhandled_exception_success)
-                        "log_details" -> toastMessage =
-                            context.resources.getString(R.string.log_details_success)
+                        else -> withContext(Dispatchers.Main) {
+                            LoggerBirdService.loggerBirdService.detachProgressBar()
+                            LoggerBirdService.loggerBirdService.removeEmailLayout()
+                            defaultToast.attachToast(
+                                activity = LoggerBirdService.loggerBirdService.returnActivity(),
+                                toastMessage = context.resources.getString(R.string.email_send_success)
+                            )
+                        }
                     }
                     if (toastMessage != null) {
                         if (message != null) {
@@ -419,8 +459,8 @@ internal class EmailUtil {
                         ).show()
                     }
                 }
-                if(progressBar!=null){
-                    withContext(Dispatchers.Main){
+                if (progressBar != null) {
+                    withContext(Dispatchers.Main) {
                         progressBar.visibility = View.GONE
                     }
                 }
@@ -521,7 +561,7 @@ internal class EmailUtil {
                             ).show()
                         }
                     }
-                }else if (it.status == SmartReplySuggestionResult.STATUS_NO_REPLY){
+                } else if (it.status == SmartReplySuggestionResult.STATUS_NO_REPLY) {
                     (context as Activity).runOnUiThread {
                         Toast.makeText(
                             context,

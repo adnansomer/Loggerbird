@@ -168,6 +168,7 @@ class JiraAuthentication {
                 Log.d("response_code", response.code.toString())
                 try {
                     if (response.code in 200..299) {
+                        checkQueueTime(activity = activity)
                         when (jiraTask) {
                             "create" -> jiraTaskCreateIssue(
                                 filePathMediaName = filePathMediaName,
@@ -244,7 +245,9 @@ class JiraAuthentication {
 //        if(filePathName?.name != "logger_bird_details_old_session.txt"){
 //            filePathName?.delete()
 //        }
-        timerTaskQueue.cancel()
+        if(this::timerTaskQueue.isInitialized){
+            timerTaskQueue.cancel()
+        }
         LoggerBirdService.loggerBirdService.finishShareLayout("jira_error")
         e?.printStackTrace()
         LoggerBird.callEnqueue()
@@ -592,6 +595,7 @@ class JiraAuthentication {
                 } else {
                     LoggerBirdService.loggerBirdService.unhandledExceptionCustomizeIssueSent()
                 }
+                timerTaskQueue.cancel()
                 Log.d("issue", issueUri.toString())
                 Log.d("issue", issueKey.toString())
             }
@@ -628,6 +632,7 @@ class JiraAuthentication {
         val editor: SharedPreferences.Editor = sharedPref.edit()
         editor.remove("unhandled_file_path")
         editor.apply()
+        timerTaskQueue.cancel()
         LoggerBirdService.loggerBirdService.returnActivity().runOnUiThread {
             LoggerBirdService.loggerBirdService.detachProgressBar()
             defaultToast.attachToast(
@@ -645,7 +650,6 @@ class JiraAuthentication {
         activity: Activity
     ) {
         try {
-            checkQueueTime(activity = activity)
             queueCounter = 0
             this.activity = activity
             val coroutineCallGatherDetails = CoroutineScope(Dispatchers.IO)

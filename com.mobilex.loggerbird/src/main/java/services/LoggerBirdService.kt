@@ -1,5 +1,6 @@
 package services
 
+import adapter.RecyclerViewEmailAdapter
 import adapter.RecyclerViewJiraAdapter
 import adapter.RecyclerViewSlackAdapter
 import android.Manifest
@@ -66,7 +67,6 @@ import utils.*
 import utils.EmailUtil
 import utils.LinkedBlockingQueueUtil
 import java.io.File
-import java.io.FileNotFoundException
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -86,6 +86,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var windowManagerSlack: Any? = null
     private var windowManagerJiraDatePicker: Any? = null
     private var windowManagerUnhandledDuplication: Any? = null
+    private var windowManagerEmail: Any? = null
     //private var windowManagerJiraAuth: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
@@ -95,6 +96,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var windowManagerParamsSlack: WindowManager.LayoutParams
     private lateinit var windowManagerParamsJiraDatePicker: WindowManager.LayoutParams
     private lateinit var windowManagerParamsUnhandledDuplication: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsEmail: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -144,6 +146,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var viewJira: View
     private lateinit var viewSlack: View
     private lateinit var viewUnhandledDuplication: View
+    private lateinit var viewEmail: View
     //  private lateinit var viewJiraAuth: View
     private lateinit var wrapper: FrameLayout
     private lateinit var floating_action_button_feedback: FloatingActionButton
@@ -272,6 +275,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var slackChannelLayout: ScrollView
     private lateinit var slackUserLayout: ScrollView
     private lateinit var slackBottomNavigationView: BottomNavigationView
+
+    //Email:
+    private lateinit var buttonEmailCreate: Button
+    private lateinit var buttonEmailCancel: Button
+    private lateinit var editTextTo: EditText
+    private lateinit var editTextContent: EditText
+    private lateinit var editTextSubject: EditText
+    private lateinit var toolbarEmail:Toolbar
+    private lateinit var recyclerViewEmailAttachment: RecyclerView
+    private lateinit var emailAdapter: RecyclerViewEmailAdapter
+    private val arrayListEmailFileName: ArrayList<RecyclerViewModel> = ArrayList()
 
 
     //Static global variables:
@@ -875,10 +889,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun shareViewClicks(filePathMedia: File) {
         if (reveal_linear_layout_share.isVisible) {
             textView_send_email.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    attachProgressBar()
-                }
-                sendSingleMediaFile(filePathMedia = filePathMedia)
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    attachProgressBar()
+//                }
+//                sendSingleMediaFile(filePathMedia = filePathMedia)
+                initializeEmailLayout(filePathMedia = filePathMedia)
             }
 
             textView_share_jira.setSafeOnClickListener {
@@ -894,7 +909,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-
                     initializeJiraLayout(filePathMedia = filePathMedia)
 //                    initializeJiraAuthLayout(filePathMedia = filePathMedia)
                 }
@@ -1788,7 +1802,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         )
         floating_action_button_feedback.setOnTouchListener(layoutFeedbackOnTouchListener)
         floating_action_button_feedback.setSafeOnClickListener {
-            sendFeedback()
+            sendFeedback("appcaesars@gmail.com")
         }
         floating_action_button_feed_close.setSafeOnClickListener {
             removeFeedBackLayout()
@@ -1796,13 +1810,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     }
 
-    private fun sendFeedback() {
+    private fun sendFeedback(to: String) {
         if (editText_feedback.text.trim().isNotEmpty()) {
             removeFeedBackLayout()
             coroutineCallFeedback.async {
                 EmailUtil.sendFeedbackEmail(
                     context = context,
-                    message = editText_feedback.text.toString()
+                    message = editText_feedback.text.toString(),
+                    to = to
                 )
 //                withContext(Dispatchers.Main){
 //                    Toast.makeText(
@@ -2105,7 +2120,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     do {
                         fileName = File(arrayListOldFiles[fileCounter])
                         if (fileName.exists()) {
-                            LoggerBird.callEmailSender(context = context, file = fileName)
+                            LoggerBird.callEmailSender(context = context, file = fileName,to = "appcaesars@gmail.com")
                         }
                         fileCounter++
                         if (fileCounter == arrayListOldFiles.size) {
@@ -2143,11 +2158,22 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun sendSingleMediaFile(filePathMedia: File) {
+    private fun sendSingleMediaFile(
+        filePathMedia: File,
+        to: String,
+        message: String? = null,
+        subject: String? = null
+    ) {
         coroutineCallSendSingleFile.async {
             try {
                 if (filePathMedia.exists()) {
-                    LoggerBird.callEmailSender(context = context, file = filePathMedia)
+                    LoggerBird.callEmailSender(
+                        context = context,
+                        file = filePathMedia,
+                        to = to,
+                        message = message,
+                        subject = subject
+                    )
                     LoggerBird.deleteSingleMediaFile(
                         this@LoggerBirdService,
                         filePathMedia = filePathMedia
@@ -2176,7 +2202,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 "media_error" -> {
                     Toast.makeText(context, R.string.share_media_delete_error, Toast.LENGTH_SHORT)
                         .show()
-//                    finishErrorFab()
+                    finishErrorFab()
                     //detachProgressBar()
                 }
                 "single_email" -> {
@@ -2207,7 +2233,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 }
                 "jira_error_time_out" -> {
                     removeJiraLayout()
-                    Toast.makeText(context, R.string.jira_sent_error_time_out, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.jira_sent_error_time_out, Toast.LENGTH_SHORT)
+                        .show()
                     if (this::progressBarJiraLayout.isInitialized && this::progressBarJira.isInitialized) {
                         progressBarJiraLayout.visibility = View.GONE
                         progressBarJira.visibility = View.GONE
@@ -3982,6 +4009,122 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
         return false
     }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeEmailLayout(filePathMedia: File) {
+        arrayListEmailFileName.clear()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewEmail =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_email_popup, rootView, false)
+        windowManagerParamsEmail =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerEmail = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerEmail as WindowManager).addView(
+            viewEmail,
+            windowManagerParamsEmail
+        )
+        buttonEmailCreate =
+            viewEmail.findViewById(R.id.button_email_create)
+        buttonEmailCancel =
+            viewEmail.findViewById(R.id.button_email_cancel)
+        editTextTo = viewEmail.findViewById(R.id.editText_email_to)
+        editTextSubject = viewEmail.findViewById(R.id.editText_email_subject)
+        editTextContent = viewEmail.findViewById(R.id.editText_email_message)
+        toolbarEmail = viewEmail.findViewById(R.id.toolbar_email)
+        recyclerViewEmailAttachment = viewEmail.findViewById(R.id.recycler_view_email_attachment)
+        initializeEmailRecyclerView(filePathMedia = filePathMedia)
+        initializeEmailButtons(filePathMedia = filePathMedia)
+//        detachProgressBar()
+    }
+
+    internal fun removeEmailLayout() {
+        if (this::viewEmail.isInitialized) {
+            (windowManagerEmail as WindowManager).removeViewImmediate(
+                viewEmail
+            )
+            arrayListEmailFileName.clear()
+        }
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeEmailButtons(filePathMedia: File) {
+        buttonEmailCreate.setSafeOnClickListener {
+            if (checkEmailFormat(editTextTo.text.toString())) {
+                attachProgressBar()
+                sendSingleMediaFile(
+                    filePathMedia = filePathMedia,
+                    to = editTextTo.text.toString(),
+                    subject = editTextSubject.text.toString(),
+                    message = editTextContent.text.toString()
+                )
+            }
+        }
+        buttonEmailCancel.setSafeOnClickListener {
+            removeEmailLayout()
+        }
+        toolbarEmail.setNavigationOnClickListener {
+            removeEmailLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeEmailRecyclerView(filePathMedia: File) {
+        recyclerViewEmailAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        emailAdapter = RecyclerViewEmailAdapter(
+            addEmailFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewEmailAttachment.adapter = emailAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addEmailFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListEmailFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListEmailFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListEmailFileName
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun checkEmailFormat(to: String): Boolean {
+        return if (android.util.Patterns.EMAIL_ADDRESS.matcher(to).matches()) {
+            true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.email_invalid_format)
+            )
+            false
+        }
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {

@@ -62,6 +62,7 @@ import java.lang.NullPointerException
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.security.auth.Subject
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 
@@ -791,6 +792,9 @@ class LoggerBird : LifecycleObserver {
         fun callEmailSender(
             file: File? = null,
             context: Context,
+            to: String,
+            message: String? = null,
+            subject: String? = null,
             progressBar: ProgressBar? = null,
             rootView: ViewGroup? = null
         ) {
@@ -802,14 +806,20 @@ class LoggerBird : LifecycleObserver {
                                 file = file,
                                 context = context,
                                 progressBar = progressBar,
-                                rootView = rootView
+                                rootView = rootView,
+                                to = to,
+                                message = message,
+                                subject = subject
                             )
                         } else {
                             sendDetailsAsEmail(
                                 file = this.filePath,
                                 context = context,
                                 progressBar = progressBar,
-                                rootView = rootView
+                                rootView = rootView,
+                                to = to,
+                                message = message,
+                                subject = subject
                             )
                         }
                     })
@@ -820,14 +830,20 @@ class LoggerBird : LifecycleObserver {
                             file = file,
                             context = context,
                             progressBar = progressBar,
-                            rootView = rootView
+                            rootView = rootView,
+                            to = to,
+                            message = message,
+                            subject = subject
                         )
                     } else {
                         sendDetailsAsEmail(
                             file = this.filePath,
                             context = context,
                             progressBar = progressBar,
-                            rootView = rootView
+                            rootView = rootView,
+                            to = to,
+                            message = message,
+                            subject = subject
                         )
                     }
                 })
@@ -1894,6 +1910,9 @@ class LoggerBird : LifecycleObserver {
         private fun sendDetailsAsEmail(
             file: File,
             context: Context,
+            to: String,
+            subject: String? = null,
+            message: String? = null,
             progressBar: ProgressBar? = null,
             rootView: ViewGroup? = null
         ) {
@@ -1929,13 +1948,19 @@ class LoggerBird : LifecycleObserver {
                             EmailUtil.sendEmail(
                                 file = file,
                                 context = context,
-                                progressBar = progressBar
+                                progressBar = progressBar,
+                                to = to,
+                                message = message,
+                                subject = subject
                             )
                         } else {
                             EmailUtil.sendEmail(
                                 file = file,
                                 context = context,
-                                progressBar = defaultProgressBar
+                                progressBar = defaultProgressBar,
+                                to = to,
+                                message = message,
+                                subject = subject
                             )
                         }
                     }
