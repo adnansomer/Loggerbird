@@ -3708,6 +3708,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun checkUnhandledFilePath(): Boolean {
         val sharedPref =
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
@@ -3883,6 +3884,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeUnhandledDuplicationButtons(
         unhandledExceptionIssueMethod: String,
         filePath: File
