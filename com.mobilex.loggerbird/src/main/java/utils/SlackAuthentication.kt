@@ -23,10 +23,7 @@ import com.slack.api.model.Conversation
 import com.slack.api.model.Usergroup
 import constants.Constants
 import exception.LoggerBirdException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import models.RecyclerViewModel
 import okhttp3.*
@@ -34,6 +31,9 @@ import services.LoggerBirdService
 import java.io.File
 import java.io.IOException
 import java.net.SocketTimeoutException
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class SlackAuthentication {
     private var coroutineCallSlack: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -250,12 +250,17 @@ class SlackAuthentication {
         filePathMedia: File?,
         slackType : String? = null
     ) {
+//        checkQueueTime(activity = activity)
         queueCounter = 0
-        arrayListChannels.clear()
-        arrayListUsers.clear()
-        hashMapUser.clear()
-        hashMapChannel.clear()
-        arrayListUsersName.clear()
+        this.activity = activity
+        val coroutineCallGatherDetails = CoroutineScope(Dispatchers.IO)
+        coroutineCallGatherDetails.launch {
+            arrayListChannels.clear()
+            arrayListUsers.clear()
+            hashMapUser.clear()
+            hashMapChannel.clear()
+            arrayListUsersName.clear()
+        }
         withContext(Dispatchers.IO) {
             slackTaskGatherChannels(slack = slack, token = token)
             slackTaskGatherUsers(slack = slack, token = token)
@@ -503,6 +508,18 @@ class SlackAuthentication {
     internal fun gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>) {
         this.arrayListRecyclerViewItems = arrayListRecyclerViewItems
     }
+
+//    private fun checkQueueTime(activity: Activity) {
+//        val timerQueue = Timer()
+//        timerTaskQueue = object : TimerTask() {
+//            override fun run() {
+//                activity.runOnUiThread {
+//                    LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
+//                }
+//            }
+//        }
+//        timerQueue.schedule(timerTaskQueue, 20000)
+//    }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun slackExceptionHandler(
