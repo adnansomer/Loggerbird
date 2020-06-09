@@ -65,6 +65,7 @@ class SlackAuthentication {
     private var messagePath: String? = null
     private var slackType: String? = null
     private var controlcallSlack : Boolean = false
+//  private lateinit var timerTaskQueue: TimerTask
 
     /** Loggerbird slack app client information */
     companion object{
@@ -250,26 +251,33 @@ class SlackAuthentication {
         filePathMedia: File?,
         slackType : String? = null
     ) {
-//        checkQueueTime(activity = activity)
-        queueCounter = 0
-        this.activity = activity
+//      checkQueueTime(activity = activity)
         val coroutineCallGatherDetails = CoroutineScope(Dispatchers.IO)
-        coroutineCallGatherDetails.launch {
-            arrayListChannels.clear()
-            arrayListUsers.clear()
-            hashMapUser.clear()
-            hashMapChannel.clear()
-            arrayListUsersName.clear()
-        }
-        withContext(Dispatchers.IO) {
-            slackTaskGatherChannels(slack = slack, token = token)
-            slackTaskGatherUsers(slack = slack, token = token)
+        coroutineCallGatherDetails.launch(Dispatchers.IO){
+            try{
+                queueCounter = 0
+                val coroutineCallGatherDetails = CoroutineScope(Dispatchers.IO)
+                coroutineCallGatherDetails.launch {
+                    arrayListChannels.clear()
+                    arrayListUsers.clear()
+                    hashMapUser.clear()
+                    hashMapChannel.clear()
+                    arrayListUsersName.clear()
+                }
+                withContext(Dispatchers.IO) {
+                    slackTaskGatherChannels(slack = slack, token = token)
+                    slackTaskGatherUsers(slack = slack, token = token)
+                }
+            }catch(e: java.net.SocketTimeoutException){
+                slackExceptionHandler(e = e, filePathName = filePathMedia, socketTimeOut = java.net.SocketTimeoutException())
+            }
         }
     }
 
     private fun updateFields(){
         queueCounter--
         if(queueCounter == 0){
+//            timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeSlackSpinner(
                     arrayListChannels = arrayListChannels,
@@ -528,6 +536,7 @@ class SlackAuthentication {
         throwable: Throwable? = null,
         socketTimeOut: SocketTimeoutException? = null
     ) {
+//        timerTaskQueue.cancel()
         LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
         e?.printStackTrace()
         socketTimeOut?.message
