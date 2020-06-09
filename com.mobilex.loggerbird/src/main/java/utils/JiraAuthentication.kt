@@ -102,6 +102,7 @@ class JiraAuthentication {
     private var startDateField: String? = null
     private var startDate: String? = null
     private var queueCreateTask = 0
+    private lateinit var timerTaskQueue: TimerTask
 
     companion object {
         internal lateinit var createdIssueKey: String
@@ -243,6 +244,7 @@ class JiraAuthentication {
 //        if(filePathName?.name != "logger_bird_details_old_session.txt"){
 //            filePathName?.delete()
 //        }
+        timerTaskQueue.cancel()
         LoggerBirdService.loggerBirdService.finishShareLayout("jira_error")
         e?.printStackTrace()
         LoggerBird.callEnqueue()
@@ -556,12 +558,14 @@ class JiraAuthentication {
                     if (RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths.size > fileCounter) {
                         val file =
                             RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
-                        val inputStreamMediaFile = FileInputStream(file)
-                        issueClient.addAttachment(
-                            issue.get().attachmentsUri,
-                            inputStreamMediaFile,
-                            file.absolutePath
-                        )
+                        if (file.exists()) {
+                            val inputStreamMediaFile = FileInputStream(file)
+                            issueClient.addAttachment(
+                                issue.get().attachmentsUri,
+                                inputStreamMediaFile,
+                                file.absolutePath
+                            )
+                        }
                         if (file.name != "logger_bird_details.txt") {
                             if (file.exists()) {
                                 file.delete()
@@ -641,6 +645,7 @@ class JiraAuthentication {
         activity: Activity
     ) {
         try {
+            checkQueueTime(activity = activity)
             queueCounter = 0
             this.activity = activity
             val coroutineCallGatherDetails = CoroutineScope(Dispatchers.IO)
@@ -697,6 +702,7 @@ class JiraAuthentication {
         queueCounter--
         Log.d("que_counter", queueCounter.toString())
         if (queueCounter == 0) {
+            timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeJiraSpinner(
                     arrayListProjectNames = arrayListProjects,
@@ -1386,5 +1392,17 @@ class JiraAuthentication {
             }
         }
         return controlDuplication
+    }
+
+    private fun checkQueueTime(activity: Activity) {
+        val timerQueue = Timer()
+        timerTaskQueue = object : TimerTask() {
+            override fun run() {
+                activity.runOnUiThread {
+                    LoggerBirdService.loggerBirdService.finishShareLayout("jira_error_time_out")
+                }
+            }
+        }
+        timerQueue.schedule(timerTaskQueue, 20000)
     }
 }

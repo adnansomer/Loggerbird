@@ -60,6 +60,7 @@
     <string name="share_file_sent_error">Medya dosyası gönderilmeye çalışırken bir hatayla karşılaşıldı!</string>
     <string name="jira_sent">Jira konusu açıldı!</string>
     <string name="jira_sent_error">Jira dosyası açılmaya çalışırken bir hatayla karşılaşıldı!</string>
+    <string name="jira_sent_error_time_out">Jira dosyası açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
     <string name="media_recording_error">Lütfen önce diğer medya operasyonunuzu tamamlayın!</string>
     <string name="jira_summary_empty">Özet boş olamaz!</string>
     <string name="jira_reporter_empty">Bildiren bulunamadı!</string>

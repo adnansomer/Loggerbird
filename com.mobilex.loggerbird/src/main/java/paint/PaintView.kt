@@ -178,6 +178,7 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                 val canvas = Canvas(bitmap)
                 val fileDirectory: File = context.filesDir
                 filePathScreenShot = File(fileDirectory, "loggerbird_screenshot_"+System.currentTimeMillis().toString()+"_"+filename+".png")
+                LoggerBirdService.arrayListFile.add(filePathScreenShot)
                 val os = FileOutputStream(filePathScreenShot)
                 paintView.draw(canvas)
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, os)
