@@ -2076,49 +2076,32 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         coroutineCallDiscardFile.async {
             try {
                 if (this@LoggerBirdService::filePathVideo.isInitialized) {
-                    try {
-                        if (filePathVideo.exists()) {
-                            filePathVideo.delete()
-                            finishShareLayout(message = "media")
-                        } else {
-                            finishShareLayout(message = "media_error")
-                        }
-                    } catch (e: FileNotFoundException) {
+                    if (filePathVideo.exists()) {
+                        filePathVideo.delete()
+                        finishShareLayout(message = "media")
+                    } else {
                         finishShareLayout(message = "media_error")
-                        e.printStackTrace()
                     }
                 }
-
-                try {
-                    if (this@LoggerBirdService::filePathAudio.isInitialized) {
-                        if (filePathAudio.exists()) {
-                            filePathAudio.delete()
-                            finishShareLayout(message = "media")
-                        } else {
-                            finishShareLayout(message = "media_error")
-                        }
+                if (this@LoggerBirdService::filePathAudio.isInitialized) {
+                    if (filePathAudio.exists()) {
+                        filePathAudio.delete()
+                        finishShareLayout(message = "media")
+                    } else {
+                        finishShareLayout(message = "media_error")
                     }
-                } catch (e: FileNotFoundException) {
-                    finishShareLayout(message = "media_error")
-                    e.printStackTrace()
                 }
-
-
-                try {
+                if (this@LoggerBirdService::filePathAudio.isInitialized) {
                     if (PaintView.filePathScreenShot.exists()) {
                         PaintView.filePathScreenShot.delete()
                         finishShareLayout(message = "media")
                     } else {
                         finishShareLayout(message = "media_error")
                     }
-                } catch (e: FileNotFoundException) {
-                    finishShareLayout(message = "media_error")
-                    e.printStackTrace()
                 }
-
-
             } catch (e: Exception) {
                 e.printStackTrace()
+                finishShareLayout(message = "media_error")
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.discardFileTag)
                 LoggerBird.callEnqueue()
             }
@@ -2159,7 +2142,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 "media_error" -> {
                     Toast.makeText(context, R.string.share_media_delete_error, Toast.LENGTH_SHORT)
                         .show()
-                    finishErrorFab()
+//                    finishErrorFab()
                     //detachProgressBar()
                 }
                 "single_email" -> {
@@ -2170,7 +2153,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 "single_email_error" -> {
                     Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT)
                         .show()
-                    finishErrorFab()
+//                    finishErrorFab()
                     detachProgressBar()
                 }
                 "jira" -> {
@@ -2186,7 +2169,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     }
 
                     detachProgressBar()
-                    finishErrorFab()
+//                    finishErrorFab()
                 }
                 "slack" -> {
                     Toast.makeText(context, R.string.slack_sent, Toast.LENGTH_SHORT).show()
@@ -2197,7 +2180,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     Toast.makeText(context, R.string.slack_sent_error, Toast.LENGTH_SHORT).show()
                     progressBarSlackLayout.visibility = View.GONE
                     progressBarSlack.visibility = View.GONE
-                    finishErrorFab()
+//                    finishErrorFab()
                 }
             }
             if (controlFloatingActionButtonView()) {
