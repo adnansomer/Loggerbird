@@ -28,18 +28,49 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:baselineAligned="false"
         android:layout_marginTop="15dp">
 
-        <TextView
-            android:id="@+id/textView_unhandled_discard"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="start"
+            android:orientation="vertical"
             android:layout_weight="1"
-            android:layout_gravity="bottom"
-            android:text="@string/unhandled_discard"
-            android:textColor="@android:color/white"
-            android:textSize="15sp" />
+            >
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                >
+                <TextView
+                    android:id="@+id/textView_unhandled_check"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:text="@string/textView_duplication_check"
+                    android:textColor="@android:color/white"
+                    android:textSize="15sp" />
+
+                <CheckBox
+                    android:id="@+id/checkBox_unhandled_jira"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:buttonTint="@color/white"
+                    android:background="@null" />
+            </LinearLayout>
+            <TextView
+                android:id="@+id/textView_unhandled_discard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:layout_gravity="bottom"
+                android:text="@string/unhandled_discard"
+                android:textColor="@android:color/white"
+                android:textSize="15sp" />
+        </LinearLayout>
+
 
         <LinearLayout
             android:layout_width="wrap_content"

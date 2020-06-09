@@ -269,7 +269,8 @@ class MainActivity : AppCompatActivity() {
 //            }
         }
         button_read_logs.setOnClickListener(View.OnClickListener {
-            getCurrentData()
+            throw  NullPointerException("asdf");
+//            getCurrentData()
 //            beginSearch("dog", this)
             // LogDeneme.saveComponentDetails(view=button_read_logs,resources = button_read_logs.resources)
             //            LogDeneme.saveComponentDetails(null,button_read_logs,button_read_logs.resources,this)

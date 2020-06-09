@@ -71,7 +71,7 @@ class LoggerBird : LifecycleObserver {
     companion object {
         //Static global variables.
         private var controlLogInit: Boolean = false
-         internal lateinit var context: Context
+        internal lateinit var context: Context
         private var filePathName: String? = null
         private lateinit var fileDirectory: File
         private lateinit var filePath: File
@@ -1840,6 +1840,10 @@ class LoggerBird : LifecycleObserver {
                                         "\n" + formattedTime + ":" + Constants.exceptionTag + "\n" + "Exception:" + exception.message
                             )
                         }
+                        LoggerBirdService.loggerBirdService.addUnhandledExceptionMessage(
+                            context = context,
+                            unhandledExceptionMessage = exception.stackTrace[0].className
+                        )
                     } else if (throwable != null) {
                         if (Log.getStackTraceString(throwable).isNotEmpty()) {
                             stringBuilderException.append(
@@ -1853,8 +1857,12 @@ class LoggerBird : LifecycleObserver {
                                 "\n" + "Method Tag:" + tag +
                                         "\n" + formattedTime + ":" + Constants.unHandledExceptionTag + "\n" + "Throwable:" + throwable.message
                             )
-                        }
 
+                        }
+                        LoggerBirdService.loggerBirdService.addUnhandledExceptionMessage(
+                            context = context,
+                            unhandledExceptionMessage = throwable.stackTrace[0].className
+                        )
                     }
                     saveExceptionDetails()
                 }
@@ -2818,7 +2826,7 @@ class LoggerBird : LifecycleObserver {
          * Exception:
          * @throws exception if error occurs and prints error into logcat.
          */
-        private  fun saveExceptionDetails() {
+        private fun saveExceptionDetails() {
             if (stringBuilderException.isNotEmpty()) {
                 try {
                     fileDirectory = context.filesDir
@@ -2834,7 +2842,7 @@ class LoggerBird : LifecycleObserver {
                         )
                     }
                     if (!filePath.exists()) {
-                            filePath.createNewFile()
+                        filePath.createNewFile()
                         takeDeviceInformationDetails()
                         filePath.appendText(
                             stringBuilderBuild.toString()
@@ -2867,7 +2875,7 @@ class LoggerBird : LifecycleObserver {
                         )
                     }
                     if (uncaughtExceptionHandlerController) {
-                            //                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        //                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 ////                               LoggerBirdService.loggerBirdService.jiraAuthentication.callJiraIssue(
 ////                                   context = context,
 ////                                    activity = LoggerBirdService.loggerBirdService.returnActivity()
@@ -2885,7 +2893,7 @@ class LoggerBird : LifecycleObserver {
 //                                    context = context
 //                                )
 //                            }
-                            saveSessionIntoOldSessionFile()
+                        saveSessionIntoOldSessionFile()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -2931,14 +2939,17 @@ class LoggerBird : LifecycleObserver {
                 oldSessionFile.appendText(LoggerBirdMemoryService.stringBuilderMemoryUsage.toString())
                 filePath.delete()
                 filePath = oldSessionFile
-                if(uncaughtExceptionHandlerController){
-                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(context.applicationContext) ?: return
+                if (uncaughtExceptionHandlerController) {
+                    val sharedPref =
+                        PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+                            ?: return
                     with(sharedPref.edit()) {
                         putString("unhandled_file_path", filePath.absolutePath)
                         commit()
                     }
-                }else{
-                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+                } else {
+                    val sharedPref =
+                        PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
                     val editor: SharedPreferences.Editor = sharedPref.edit()
                     editor.remove("unhandled_file_path")
                     editor.commit()

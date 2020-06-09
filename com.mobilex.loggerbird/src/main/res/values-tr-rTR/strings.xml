@@ -60,6 +60,7 @@
     <string name="share_file_sent_error">Medya dosyası gönderilmeye çalışırken bir hatayla karşılaşıldı!</string>
     <string name="jira_sent">Jira konusu açıldı!</string>
     <string name="jira_sent_error">Jira dosyası açılmaya çalışırken bir hatayla karşılaşıldı!</string>
+    <string name="jira_sent_error_time_out">Jira dosyası açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
     <string name="media_recording_error">Lütfen önce diğer medya operasyonunuzu tamamlayın!</string>
     <string name="jira_summary_empty">Özet boş olamaz!</string>
     <string name="jira_reporter_empty">Bildiren bulunamadı!</string>
@@ -79,6 +80,7 @@
     <string name="unhandled_send">*Gönder!</string>
     <string name="unhandled_file_doesnt_exist">Dosya konumu bulunamadı!</string>
     <string name="unhandled_file_discard_success">Dosya başarılı bir şekilde silindi!</string>
+    <string name="unhandled_file_duplication_found">En son açılan görevin hata mesajı ile aynı hata mesajı karşılaşıldı.Bu dosyayı yine de göndermek istermisiniz?</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
@@ -152,4 +154,12 @@
     <!-- jira_calendar_view-->
     <string name="button_CalendarView_ok">TAMAM</string>
     <string name="button_CalendarView_cancel">İPTAL</string>
+    <!-- unhandled_duplication_popup-->
+    <string name="textView_duplication_popup_title">Dikkat:Tekrarlanma!</string>
+    <string name="textView_duplication_popup_content">En son açılan görevin hata mesajı ile aynı hata mesajı karşılaşıldı.Bu dosyayı yine de göndermek istermisiniz?</string>
+    <string name="button_duplication_popup_proceed">Devam!</string>
+    <string name="button_duplication_popup_cancel">İptal!</string>
+    <string name="textView_duplication_check">Tekrarlama:</string>
+    <string name="duplication_check_enabled">Tekrarlanma kontrolü açıldı!</string>
+    <string name="duplication_check_disabled">Tekrarlanma kontrolü kapatıldı!</string>
 </resources>
