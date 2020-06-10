@@ -255,7 +255,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     //    private lateinit var spinnerSprintAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewSprintAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewEpicNameAdapter: ArrayAdapter<String>
-    private var projectPosition = 0
+    private var projectPosition:Int = 0
+    private var controlProjectPosition:Boolean = false
 
 
     //Slack:
@@ -3041,7 +3042,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListProjectKeys: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-
+        if(!controlProjectPosition){
+            projectPosition = sharedPref.getInt("jira_project_position",0)
+        }
+        controlProjectPosition = false
         if (hashMapBoardList[arrayListProjectKeys[projectPosition]] == "scrum") {
             cardViewSprint.visibility = View.VISIBLE
             cardViewStartDate.visibility = View.VISIBLE
@@ -3455,6 +3459,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
         autoTextViewProject.setOnItemClickListener { parent, view, position, id ->
             projectPosition = position
+            controlProjectPosition = true
             jiraAuthentication.setProjectPosition(projectPosition = position)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 progressBarJira.visibility = View.VISIBLE
