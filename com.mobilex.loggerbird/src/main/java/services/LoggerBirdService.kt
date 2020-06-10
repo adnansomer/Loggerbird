@@ -2177,15 +2177,16 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 if (filePathMedia.exists()) {
                     LoggerBird.callEmailSender(
                         context = context,
+                        activity = activity,
                         file = filePathMedia,
                         to = to,
                         message = message,
                         subject = subject
                     )
-                    LoggerBird.deleteSingleMediaFile(
-                        this@LoggerBirdService,
-                        filePathMedia = filePathMedia
-                    )
+//                    LoggerBird.deleteSingleMediaFile(
+//                        this@LoggerBirdService,
+//                        filePathMedia = filePathMedia
+//                    )
                 } else {
                     finishShareLayout("single_email_error")
                 }
@@ -2222,6 +2223,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT)
                         .show()
 //                    finishErrorFab()
+                    removeEmailLayout()
                     detachProgressBar()
                 }
                 "jira" -> {

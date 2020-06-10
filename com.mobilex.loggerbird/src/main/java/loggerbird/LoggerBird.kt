@@ -795,6 +795,7 @@ class LoggerBird : LifecycleObserver {
         fun callEmailSender(
             file: File? = null,
             context: Context,
+            activity: Activity? = null,
             to: String,
             message: String? = null,
             subject: String? = null,
@@ -808,6 +809,7 @@ class LoggerBird : LifecycleObserver {
                             sendDetailsAsEmail(
                                 file = file,
                                 context = context,
+                                activity = activity,
                                 progressBar = progressBar,
                                 rootView = rootView,
                                 to = to,
@@ -818,6 +820,7 @@ class LoggerBird : LifecycleObserver {
                             sendDetailsAsEmail(
                                 file = this.filePath,
                                 context = context,
+                                activity = activity,
                                 progressBar = progressBar,
                                 rootView = rootView,
                                 to = to,
@@ -832,6 +835,7 @@ class LoggerBird : LifecycleObserver {
                         sendDetailsAsEmail(
                             file = file,
                             context = context,
+                            activity = activity,
                             progressBar = progressBar,
                             rootView = rootView,
                             to = to,
@@ -842,6 +846,7 @@ class LoggerBird : LifecycleObserver {
                         sendDetailsAsEmail(
                             file = this.filePath,
                             context = context,
+                            activity = activity,
                             progressBar = progressBar,
                             rootView = rootView,
                             to = to,
@@ -1913,6 +1918,7 @@ class LoggerBird : LifecycleObserver {
         private fun sendDetailsAsEmail(
             file: File,
             context: Context,
+            activity: Activity? = null,
             to: String,
             subject: String? = null,
             message: String? = null,
@@ -1951,6 +1957,7 @@ class LoggerBird : LifecycleObserver {
                             EmailUtil.sendEmail(
                                 file = file,
                                 context = context,
+                                activity = activity,
                                 progressBar = progressBar,
                                 to = to,
                                 message = message,
@@ -1960,6 +1967,7 @@ class LoggerBird : LifecycleObserver {
                             EmailUtil.sendEmail(
                                 file = file,
                                 context = context,
+                                activity = activity,
                                 progressBar = defaultProgressBar,
                                 to = to,
                                 message = message,

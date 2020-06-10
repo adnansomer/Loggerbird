@@ -92,7 +92,7 @@
     <string name="feed_back_email_success">Geri bildiriminiz için teşekkür ederiz!</string>
     <string name="unhandled_exception_success">Beklenmeyen bir hata gözlemlendi,detayları için e-mailinizi kontrol ediniz!</string>
     <string name="log_details_success">Log detayları e-mailinize gönderilmiştir!</string>
-
+    <string name="email_connection_time_out">E-mail internet zaman aşımından dolayı gönderilmedi!</string>
     <!-- Layout:-->
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça boyutu ayarla</string>
