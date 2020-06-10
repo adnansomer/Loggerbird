@@ -2262,6 +2262,18 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     progressBarSlack.visibility = View.GONE
 //                    finishErrorFab()
                 }
+                "slack_error_time_out" -> {
+                    removeJiraLayout()
+                    Toast.makeText(context, R.string.slack_sent_error_time_out, Toast.LENGTH_SHORT)
+                        .show()
+                    if (this::progressBarSlackLayout.isInitialized && this::progressBarSlack.isInitialized) {
+                        progressBarSlackLayout.visibility = View.GONE
+                        progressBarSlack.visibility = View.GONE
+                    }
+                    detachProgressBar()
+//                    finishErrorFab()
+                }
+
             }
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
@@ -2964,7 +2976,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 arrayListProjectNames = arrayListProjectNames,
                 sharedPref = sharedPref
             )
-            initializeIssueType(arrayListIssueTypes = arrayListIssueTypes,arrayListEpicName = arrayListEpicName, sharedPref = sharedPref)
+            initializeIssueType(
+                arrayListIssueTypes = arrayListIssueTypes,
+                arrayListEpicName = arrayListEpicName,
+                sharedPref = sharedPref
+            )
             initializeReporter(
                 arrayListReporterNames = arrayListReporterNames,
                 sharedPref = sharedPref
@@ -2983,8 +2999,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             )
             initializeLabels(arrayListLabel = arrayListLabel, sharedPref = sharedPref)
             initializeEpicLink(arrayListEpicLink = arrayListEpicLink, sharedPref = sharedPref)
-            initializeSprint(arrayListSprint = arrayListSprint,hashMapBoardList = hashMapBoardList , arrayListProjectKeys = arrayListProjectKeys, sharedPref = sharedPref)
-            initializeEpicName(arrayListEpicName = arrayListEpicName , sharedPref = sharedPref)
+            initializeSprint(
+                arrayListSprint = arrayListSprint,
+                hashMapBoardList = hashMapBoardList,
+                arrayListProjectKeys = arrayListProjectKeys,
+                sharedPref = sharedPref
+            )
+            initializeEpicName(arrayListEpicName = arrayListEpicName, sharedPref = sharedPref)
 
             if (checkUnhandledFilePath()) {
                 editTextSummary.setText(activity.resources.getString(R.string.jira_summary_unhandled_exception))
@@ -3011,6 +3032,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeSprint(
@@ -3052,6 +3074,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             cardViewStartDate.visibility = View.GONE
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeEpicLink(
@@ -3082,6 +3105,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             hideKeyboard(activity = activity)
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeLabels(arrayListLabel: ArrayList<String>, sharedPref: SharedPreferences) {
@@ -3102,6 +3126,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             hideKeyboard(activity = activity)
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeFixVersions(
@@ -3132,6 +3157,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             hideKeyboard(activity = activity)
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeComponent(
@@ -3162,6 +3188,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             jiraAuthentication.setComponentPosition(componentPosition = position)
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     private fun initializePriority(
@@ -3210,6 +3237,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeAssignee(
@@ -3241,6 +3269,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             hideKeyboard(activity = activity)
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeIssues(
@@ -3378,7 +3407,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewIssueType.setOnItemClickListener { parent, view, position, id ->
             jiraAuthentication.setIssueTypePosition(issueTypePosition = position)
             hideKeyboard(activity = activity)
-            initializeEpicName(arrayListEpicName = arrayListEpicName , sharedPref = sharedPref)
+            initializeEpicName(arrayListEpicName = arrayListEpicName, sharedPref = sharedPref)
         }
         autoTextViewIssueType.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
@@ -3732,18 +3761,40 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
             return@setOnNavigationItemSelectedListener true
         }
+        toolbarSlack.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.slack_menu_refresh -> {
+                    slackAuthentication.callSlack(
+                        context = context,
+                        activity = activity,
+                        filePathMedia = filePathMedia,
+                        slackTask = "get"
+                    )
+                    progressBarSlackLayout.visibility = View.VISIBLE
+                    progressBarSlack.visibility = View.VISIBLE
+                }
+            }
+            return@setOnMenuItemClickListener true
+        }
+
     }
 
     private fun initializeSlackRecyclerView(filePathMedia: File) {
-        recyclerViewSlackAttachment.layoutManager =
+        recyclerViewSlackAttachmentUser.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        slackAdapter = RecyclerViewSlackAdapter(
-            addSlackFileNames(filePathMedia = filePathMedia),
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+
+        if (filePathMedia.exists()) {
+            slackAdapter = RecyclerViewSlackAdapter(
+                addSlackFileNames(filePathMedia = filePathMedia),
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        }
+
         recyclerViewSlackAttachment.adapter = slackAdapter
+        recyclerViewSlackAttachmentUser.adapter = slackAdapter
+
     }
 
     private fun addSlackFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
