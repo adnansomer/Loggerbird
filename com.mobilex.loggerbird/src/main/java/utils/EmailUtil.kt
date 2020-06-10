@@ -167,6 +167,7 @@ internal class EmailUtil {
                 LoggerBirdService.loggerBirdService.returnActivity().runOnUiThread {
                     LoggerBirdService.loggerBirdService.removeEmailLayout()
                     LoggerBirdService.loggerBirdService.detachProgressBar()
+                    LoggerBirdService.resetEnqueueMail()
                 }
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
@@ -440,12 +441,7 @@ internal class EmailUtil {
                             context.resources.getString(R.string.unhandled_exception_success)
                         else -> withContext(Dispatchers.Main) {
                             defaultConnectionQueueUtil.cancelTimer()
-                            LoggerBirdService.loggerBirdService.detachProgressBar()
-                            LoggerBirdService.loggerBirdService.removeEmailLayout()
-                            defaultToast.attachToast(
-                                activity = LoggerBirdService.loggerBirdService.returnActivity(),
-                                toastMessage = context.resources.getString(R.string.email_send_success)
-                            )
+                            LoggerBirdService.callEnqueueEmail()
                         }
                     }
                     if (toastMessage != null) {
@@ -500,6 +496,7 @@ internal class EmailUtil {
                     }
                 }
                 e.printStackTrace()
+                LoggerBirdService.resetEnqueueMail()
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
             }
@@ -510,6 +507,7 @@ internal class EmailUtil {
                 defaultToast.attachToast(activity = activity , toastMessage = activity.resources.getString(R.string.email_connection_time_out) )
                 LoggerBirdService.loggerBirdService.removeEmailLayout()
                 LoggerBirdService.loggerBirdService.detachProgressBar()
+                LoggerBirdService.resetEnqueueMail()
             }
         }
     }

@@ -84,6 +84,7 @@
     <string name="unhandled_file_discard_success">File discarded successfully!</string>
     <string name="unhandled_file_duplication_found">We have detected duplication error messages , do you still want to create issue?</string>
     <string name="email_invalid_format">Invalid e-mail format!</string>
+    <string name="email_to_duplication">This user already added to list!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -174,7 +175,12 @@
     <string name="editText_email_subject">Subject:</string>
     <string name="editText_email_content">Write your message here:</string>
     <string name="textView_email_attachments">Attachments</string>
+    <string name="textView_email_to_list">To list</string>
     <string name="button_email_create">Create</string>
     <string name="button_email_cancel">Cancel</string>
     <string name="textView_recyclerView_email_popup_title">Are you sure to remove attachment from your Email?</string>
+    <string name="textView_recyclerView_email_to_popup_title">Are you sure to remove this user from your Email?</string>
+    <string name="button_email_to_remove">Remove user</string>
+    <string name="button_email_to_keep">Keep user</string>
+    <string name="textView_recyclerView_to_popup_header">Delete User</string>
 </resources>

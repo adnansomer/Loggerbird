@@ -77,16 +77,78 @@
                             android:textColor="@color/black"
                             android:textSize="16sp" />
 
-                        <EditText
-                            android:id="@+id/editText_email_to"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:ems="10"
-                            android:hint="@string/editText_email_to"
-                            android:inputType="textEmailAddress"
-                            android:singleLine="true"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            >
+                            <EditText
+                                android:id="@+id/editText_email_to"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:ems="10"
+                                android:hint="@string/editText_email_to"
+                                android:layout_weight="1"
+                                android:inputType="textEmailAddress"
+                                android:singleLine="true"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/imageView_email_add"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                app:srcCompat="@drawable/ic_add_black_24dp" />
+                        </LinearLayout>
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cardView_to_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="7dp"
+                            android:visibility="gone"
+                            app:cardElevation="5dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="5dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/textView_email_to_list"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="5dp"
+                                    android:text="@string/textView_email_to_list"
+                                    android:textColor="@color/black"
+                                    android:textSize="16sp" />
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="10dp"
+                                    android:orientation="horizontal">
+
+                                    <ImageView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        app:srcCompat="@drawable/ic_account_circle_black_24dp">
+
+                                    </ImageView>
+
+                                    <androidx.recyclerview.widget.RecyclerView
+                                        android:id="@+id/recycler_view_email_to_list"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent">
+                                    </androidx.recyclerview.widget.RecyclerView>
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+
+                        </androidx.cardview.widget.CardView>
 
                         <EditText
                             android:id="@+id/editText_email_subject"
