@@ -52,6 +52,7 @@ class JiraAuthentication {
     private var assigneePosition: Int = 0
     private var reporterPosition: Int = 0
     private var sprintPosition: Int = 0
+    private var epicNamePosition:Int = 0
     private var reporter: String? = null
     private var linkedIssue: String? = null
     private var issue: String? = null
@@ -62,6 +63,7 @@ class JiraAuthentication {
     private var label: String? = null
     private var epicLink: String? = null
     private var sprint: String? = null
+    private var epicName:String = ""
     private var component: String? = null
     private var fixVersion: String? = null
     private val hashMapComponent: HashMap<String, Iterable<BasicComponent>> = HashMap()
@@ -87,6 +89,7 @@ class JiraAuthentication {
     private val arrayListEpicLink: ArrayList<String> = ArrayList()
     //    private val arrayListFields: ArrayList<String> = ArrayList()
     private val arrayListSprintName: ArrayList<String> = ArrayList()
+    private val arrayListEpicName:ArrayList<String> = ArrayList()
     private val arrayListAccountId: ArrayList<String> = ArrayList()
     private val arrayListSelf: ArrayList<String> = ArrayList()
     private val arrayListEmailAdresses: ArrayList<String> = ArrayList()
@@ -101,6 +104,7 @@ class JiraAuthentication {
     private lateinit var activity: Activity
     private var startDateField: String? = null
     private var startDate: String? = null
+    private var epicNameField:String? = null
     private var queueCreateTask = 0
     private lateinit var timerTaskQueue: TimerTask
 
@@ -355,25 +359,11 @@ class JiraAuthentication {
                 if (this.arrayListChoosenLabel.isNotEmpty()) {
                     issueBuilder.setFieldValue("labels", arrayListChoosenLabel)
                 }
-                //            issueBuilder.setFieldValue("reporter",reporter)
-                //            val basicUser = BasicUser(URI(arrayListSelf[assigneePosition]),arrayListName[assigneePosition],assignee,arrayListAccountId[assigneePosition])
-                //            issueBuilder.setAssigneeName(basicUser.displayName)
-                ////            issueBuilder.setReporter(basicUser)
-                //            issueBuilder.setFieldValue("assignee",basicUser)
-                //            issueBuilder.setReporter(basicUser.)
-                //        issueBuilder.setAssigneeName("0")
-                //            val basicUser = BasicUser(
-                //                URI("https://appcaesars.atlassian.net/rest/api/2/user?accountId=5eb3efa5ad226b0ba423144a"),
-                //                "caesars App",
-                //                "caesars App"
-                //
-                //            )
-                //            issueBuilder.setAssignee(basicUser)
-                //        issueBuilder.setReporter()
-                //                    issueBuilder.addProperty()
-                //                    val issueInput = IssueInputBuilder(basicProject,issueType,"LoggerBird_Assignment").build()
-                //                    val issueCreated = issueClient.createIssue(issueBuilder.build()).claim().key
-                //            issueBuilder.setDueDate(DateTime.parse("2020-06-25"))
+                if(this.issueType == "Epic"){
+                    if(this.epicName.isNotEmpty() && epicNameField != null){
+                        issueBuilder.setFieldValue(epicNameField,epicName)
+                    }
+                }
                 if (arrayListComponents.size > componentPosition) {
                     if (arrayListComponents[componentPosition].isNotEmpty() && this.component != null) {
                         if (this.component!!.isNotEmpty()) {
@@ -675,6 +665,7 @@ class JiraAuthentication {
                 arrayListChoosenLabel.clear()
                 arrayListEpicLink.clear()
                 arrayListSprintName.clear()
+                arrayListEpicName.clear()
                 arrayListBoardId.clear()
                 hashMapComponent.clear()
                 hashMapFixVersions.clear()
@@ -722,6 +713,7 @@ class JiraAuthentication {
                     arrayListLabel = arrayListLabel,
                     arrayListEpicLink = arrayListEpicLink,
                     arrayListSprint = arrayListSprintName,
+                    arrayListEpicName = arrayListEpicName,
                     hashMapBoardList = hashMapBoard
                 )
             }
@@ -868,6 +860,7 @@ class JiraAuthentication {
                     arrayListIssues.add(issue.key)
                     if (issue.issueType.name == "Epic") {
                         arrayListEpicLink.add(issue.key)
+                        arrayListEpicName.add((issue.getField(epicNameField)?.value.toString()))
                     }
                     issue.labels.forEach { label ->
                         arrayListLabel.add(label)
@@ -1009,6 +1002,7 @@ class JiraAuthentication {
                 when (it.name) {
                     "Sprint" -> sprintField = it.id
                     "Start date" -> startDateField = it.id
+                    "Epic Name" -> epicNameField = it.id
                 }
             }
             //           arrayListFields.add(it.id)
@@ -1017,6 +1011,13 @@ class JiraAuthentication {
         }
 
     }
+//    private fun jiraTaskGatherEpicNames(restClient: JiraRestClient){
+//        queueCounter
+//        val coroutineCallGatherEpicNames = CoroutineScope(Dispatchers.IO)
+//        coroutineCallGatherEpicNames.async {
+//            updateFields()
+//        }
+//    }
 
 
     private fun jiraTaskGatherReporters(restClient: JiraRestClient) {
@@ -1092,7 +1093,8 @@ class JiraAuthentication {
 //        spinnerEpicLink: Spinner,
         autoTextViewEpicLink: AutoCompleteTextView,
 //        spinnerSprint: Spinner
-        autoTextViewSprint: AutoCompleteTextView
+        autoTextViewSprint: AutoCompleteTextView,
+        autoTextViewEpicName:AutoCompleteTextView
     ) {
         project = autoTextViewProject.editableText.toString()
 //        project = spinnerProject.selectedItem.toString()
@@ -1124,6 +1126,7 @@ class JiraAuthentication {
         component = autoTextViewComponent.editableText.toString()
         fixVersion = autoTextViewFixVersions.editableText.toString()
         sprint = autoTextViewSprint.editableText.toString()
+        epicName = autoTextViewEpicName.editableText.toString()
     }
 
     internal fun gatherJiraEditTextDetails(
@@ -1205,6 +1208,20 @@ class JiraAuthentication {
             false
         }
     }
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun checkEpicName(activity: Activity, context: Context): Boolean {
+        return if (epicName.isNotEmpty()) {
+            true
+        } else {
+            activity.runOnUiThread {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = context.resources.getString(R.string.jira_epic_name_empty)
+                )
+            }
+            false
+        }
+    }
 
 
     internal fun setProjectPosition(projectPosition: Int) {
@@ -1247,9 +1264,14 @@ class JiraAuthentication {
         this.startDate = startDate
     }
 
+    internal fun setEpicNamePosition(epicNamePosition:Int){
+        this.epicNamePosition = epicNamePosition
+    }
+
     private fun resetJiraValues() {
         queueCreateTask--
         if (queueCreateTask == 0) {
+            summary = ""
             project = null
             issueType = null
             reporter = null
@@ -1261,11 +1283,13 @@ class JiraAuthentication {
             label = null
             epicLink = null
             sprint = null
+            epicName = ""
             component = null
             fixVersion = null
             sprintField = null
             startDateField = null
             startDate = null
+            epicNameField = null
             issueTypePosition = 0
             priorityPosition = 0
             projectPosition = 0
@@ -1276,6 +1300,7 @@ class JiraAuthentication {
             assigneePosition = 0
             reporterPosition = 0
             sprintPosition = 0
+            epicNamePosition = 0
         }
 
     }
