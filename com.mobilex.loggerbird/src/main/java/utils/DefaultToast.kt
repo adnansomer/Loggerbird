@@ -25,6 +25,7 @@ class DefaultToast {
     private var toastView: View? = null
     private var textViewToast: TextView? = null
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+
     internal fun attachToast(activity: Activity, toastMessage: String) {
         try {
             detachToast()

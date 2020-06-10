@@ -74,6 +74,7 @@
     <string name="slack_message_empty">Mesaj boş olamaz!</string>
     <string name="slack_sent">Slack mesajı gönderildi!</string>
     <string name="slack_sent_error">Slack mesajı gönderilmeye çalışırken bir hatayla karşılaşıldı!</string>
+    <string name="slack_sent_error_time_out">Slack mesajı gönderilmeye çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
     <string name="unhandled_title">En son açılan oturumda bir hata ile karşılaşıldı , bu hatayı jira ile paylaşmak istermisiniz?</string>
     <string name="unhandled_discard">Dosyayı sil!</string>
     <string name="unhandled_share_with_jira">Dosyayı jira ile paylaş:</string>

@@ -3,12 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_slack"
     android:layout_width="match_parent"
+    android:background="@color/darkTransparent"
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:layout_margin="20dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/colorFab"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/pop_up_shape"
         android:orientation="vertical">
 
         <LinearLayout
@@ -23,6 +26,7 @@
                 android:layout_height="wrap_content"
                 android:background="@color/colorFab"
                 app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
+                app:menu="@menu/loggerbird_slack_toolbar_menu"
                 app:title="@string/textView_slack_title"
                 app:titleTextColor="@color/black">
             </androidx.appcompat.widget.Toolbar>
@@ -146,8 +150,8 @@
                             android:cursorVisible="true"
                             android:gravity="top"
                             android:hint="@string/editText_slack_message"
-                            android:lines="10"
-                            android:maxLines="10"
+                            android:lines="6"
+                            android:maxLines="6"
                             android:textCursorDrawable="@color/colorBlack"
                             android:textSize="16sp">
                         </com.google.android.material.textfield.TextInputEditText>
@@ -316,8 +320,8 @@
                             android:cursorVisible="true"
                             android:gravity="top"
                             android:hint="@string/editText_slack_message"
-                            android:lines="10"
-                            android:maxLines="10"
+                            android:lines="6"
+                            android:maxLines="6"
                             android:textCursorDrawable="@color/colorBlack"
                             android:textSize="16sp">
                         </com.google.android.material.textfield.TextInputEditText>

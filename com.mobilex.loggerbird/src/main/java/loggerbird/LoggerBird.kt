@@ -147,6 +147,7 @@ class LoggerBird : LifecycleObserver {
         internal lateinit var jiraUserName: String
         internal lateinit var jiraApiToken: String
         private val defaultToast = DefaultToast()
+        internal lateinit var slackApiToken: String
 //        private val loggerBirdService: LoggerBirdService = LoggerBirdService()
 
 
@@ -175,6 +176,7 @@ class LoggerBird : LifecycleObserver {
             jiraDomainName: String,
             jiraUserName: String,
             jiraApiToken: String,
+            slackApiToken:String,
             filePathName: String? = null
         ): Boolean {
             this.context = context
@@ -184,6 +186,7 @@ class LoggerBird : LifecycleObserver {
                     Companion.jiraDomainName = jiraDomainName
                     Companion.jiraUserName = jiraUserName
                     Companion.jiraApiToken = jiraApiToken
+                    Companion.slackApiToken = slackApiToken
                     logAttachLifeCycleObservers(context = context)
                     fileDirectory = context.filesDir
                     if (filePathName != null) {
