@@ -68,8 +68,7 @@ class RecyclerViewSlackAdapter(
         companion object{
              internal lateinit var arrayListFilePaths:ArrayList<RecyclerViewModel>
         }
-
-
+        
         fun bindItems(
             item: RecyclerViewModel,
             adapter: RecyclerViewSlackAdapter,
@@ -94,7 +93,6 @@ class RecyclerViewSlackAdapter(
                     )
                 }
             }
-
         }
 
         @RequiresApi(Build.VERSION_CODES.M)
@@ -182,7 +180,6 @@ class RecyclerViewSlackAdapter(
             }
 
         }
-
 
         private fun removePopupLayout(){
             if (windowManagerRecyclerViewItemPopup != null && this::viewRecyclerViewItems.isInitialized) {
