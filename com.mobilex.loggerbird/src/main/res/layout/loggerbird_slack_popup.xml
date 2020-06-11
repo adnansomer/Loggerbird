@@ -90,37 +90,6 @@
 
                 </androidx.cardview.widget.CardView>
 
-              <!-- <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView_slack_user"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/textView_slack_user"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-                        <Spinner
-                            android:id="@+id/spinner_slack_user"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp" />
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView> -->
-
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -193,10 +162,22 @@
                             </ImageView>
 
                             <androidx.recyclerview.widget.RecyclerView
+                                android:visibility="visible"
                                 android:id="@+id/recycler_view_slack_attachment"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent">
+                                android:layout_gravity="center"
+                                android:layout_height="wrap_content">
                             </androidx.recyclerview.widget.RecyclerView>
+
+                            <TextView
+                                android:id="@+id/textView_slack_no_attachment"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:textSize="16sp"
+                                android:visibility="gone"
+                                android:text="@string/textView_slack_no_attachment">
+                            </TextView>
 
                         </LinearLayout>
 
@@ -277,7 +258,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="5dp"
                             android:baselineAligned="false"
-                            android:text="Users"
+                            android:text="@string/textView_slack_user"
                             android:textColor="@color/black"
                             android:textSize="16sp" />
 
@@ -365,8 +346,20 @@
                             <androidx.recyclerview.widget.RecyclerView
                                 android:id="@+id/recycler_view_slack_attachment_user"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent">
+                                android:visibility="visible"
+                                android:layout_gravity="center"
+                                android:layout_height="wrap_content">
                             </androidx.recyclerview.widget.RecyclerView>
+
+                            <TextView
+                                android:id="@+id/textView_slack_user_no_attachment"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:textSize="16sp"
+                                android:visibility="gone"
+                                android:text="@string/textView_slack_no_attachment">
+                            </TextView>
 
                         </LinearLayout>
 
@@ -429,7 +422,7 @@
                 </View>
             </FrameLayout>
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
+            <com.google.android.material.bottomnavigation.BottomNavigationView
                 android:id="@+id/slack_bottom_nav_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -466,9 +459,3 @@
     </FrameLayout>
 
 </FrameLayout>
-
-
-
-
-
-

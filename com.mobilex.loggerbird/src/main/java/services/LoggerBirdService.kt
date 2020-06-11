@@ -37,6 +37,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isEmpty
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -264,8 +265,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerChannelsAdapter: ArrayAdapter<String>
     private lateinit var spinnerUsersAdapter: ArrayAdapter<String>
     private lateinit var slackAdapter: RecyclerViewSlackAdapter
-    private lateinit var recyclerViewSlackAttachment: RecyclerView
-    private lateinit var recyclerViewSlackAttachmentUser: RecyclerView
     private val arrayListSlackFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var progressBarSlack: ProgressBar
     private lateinit var progressBarSlackLayout: FrameLayout
@@ -325,6 +324,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         internal var screenshotDrawing = false
         private lateinit var workingAnimation: Animation
         internal val arrayListFile: ArrayList<File> = ArrayList()
+        internal lateinit var recyclerViewSlackAttachment: RecyclerView
+        internal lateinit var recyclerViewSlackAttachmentUser: RecyclerView
+        internal lateinit var recyclerViewSlackNoAttachment : TextView
+        internal lateinit var recyclerViewSlackUserNoAttachment : TextView
 
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
@@ -3395,10 +3398,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     spinnerUsers = viewSlack.findViewById(R.id.spinner_slack_user)
                     slackChannelLayout = viewSlack.findViewById(R.id.slack_send_channel_layout)
                     slackUserLayout = viewSlack.findViewById(R.id.slack_send_user_layout)
-                    recyclerViewSlackAttachment =
-                        viewSlack.findViewById(R.id.recycler_view_slack_attachment)
-                    recyclerViewSlackAttachmentUser =
-                        viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
+                    recyclerViewSlackAttachment = viewSlack.findViewById(R.id.recycler_view_slack_attachment)
+                    recyclerViewSlackAttachmentUser = viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
                     editTextMessage = viewSlack.findViewById(R.id.editText_slack_message)
                     editTextMessageUser = viewSlack.findViewById(R.id.editText_slack_message_user)
                     buttonSlackCancel = viewSlack.findViewById(R.id.button_slack_cancel)
@@ -3408,8 +3409,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     progressBarSlack = viewSlack.findViewById(R.id.slack_progressbar)
                     toolbarSlack = viewSlack.findViewById(R.id.toolbar_slack)
                     slackBottomNavigationView = viewSlack.findViewById(R.id.slack_bottom_nav_view)
-                    progressBarSlackLayout =
-                        viewSlack.findViewById(R.id.slack_progressbar_background)
+                    progressBarSlackLayout = viewSlack.findViewById(R.id.slack_progressbar_background)
+                    recyclerViewSlackNoAttachment = viewSlack.findViewById(R.id.textView_slack_no_attachment)
+                    recyclerViewSlackUserNoAttachment = viewSlack.findViewById(R.id.textView_slack_user_no_attachment)
 
                     slackAuthentication.callSlack(
                         context = context,
@@ -3538,11 +3540,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     private fun initializeSlackRecyclerView(filePathMedia: File) {
-        recyclerViewSlackAttachment.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        recyclerViewSlackAttachmentUser.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerViewSlackAttachment.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerViewSlackAttachmentUser.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
         if(filePathMedia.exists()){
             slackAdapter = RecyclerViewSlackAdapter(
@@ -3555,6 +3555,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
         recyclerViewSlackAttachment.adapter = slackAdapter
         recyclerViewSlackAttachmentUser.adapter = slackAdapter
+
     }
 
     private fun addSlackFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {

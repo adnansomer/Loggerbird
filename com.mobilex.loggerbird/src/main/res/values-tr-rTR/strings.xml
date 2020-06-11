@@ -148,6 +148,7 @@
     <string name="textView_slack_attachment">Eklentiler</string>
     <string name="button_slack_cancel">İptal</string>
     <string name="button_slack_create">Oluştur</string>
+    <string name="textView_slack_no_attachment">Hiçbir ek bulunmamaktadir.</string>
     <!-- recycler_view_slack_item_popup-->
     <string name="textView_recyclerView_slack_popup_title">Slack mesajınızdan bu eklentiyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_slack_yes">Evet</string>

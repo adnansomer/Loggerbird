@@ -148,6 +148,7 @@
     <string name="textView_slack_attachment">Attachments</string>
     <string name="button_slack_cancel">Cancel</string>
     <string name="button_slack_create">Create</string>
+    <string name="textView_slack_no_attachment">There is no attachment.</string>
     <!-- recycler_view_slack_item_popup-->
     <string name="textView_recyclerView_slack_popup_title">Are you sure to remove attachment from your Slack Message?</string>
     <string name="button_recyclerView_slack_yes">Delete Attachment</string>
