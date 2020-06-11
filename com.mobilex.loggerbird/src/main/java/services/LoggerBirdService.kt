@@ -3282,15 +3282,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewPriority.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListPriority.contains(autoTextViewPriority.editableText.toString())) {
-                    if (sharedPref.getString("jira_priority", null) != null) {
-                        autoTextViewPriority.setText(
-                            sharedPref.getString(
-                                "jira_priority",
-                                null
-                            ), false
-                        )
-                    } else {
-                        autoTextViewPriority.setText(arrayListPriority[0], false)
+                    if(arrayListPriority.isNotEmpty()){
+                        if (sharedPref.getString("jira_priority", null) != null) {
+                            autoTextViewPriority.setText(
+                                sharedPref.getString(
+                                    "jira_priority",
+                                    null
+                                ), false
+                            )
+                        } else {
+                            autoTextViewPriority.setText(arrayListPriority[0], false)
+                        }
                     }
                 }
             }
@@ -3383,15 +3385,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewLinkedIssue.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListLinkedIssues.contains(autoTextViewLinkedIssue.editableText.toString())) {
-                    if (sharedPref.getString("jira_linked_issue", null) != null) {
-                        autoTextViewLinkedIssue.setText(
-                            sharedPref.getString(
-                                "jira_linked_issue",
-                                null
-                            ), false
-                        )
-                    } else {
-                        autoTextViewLinkedIssue.setText(arrayListLinkedIssues[0], false)
+                    if(arrayListLinkedIssues.isNotEmpty()){
+                        if (sharedPref.getString("jira_linked_issue", null) != null) {
+                            autoTextViewLinkedIssue.setText(
+                                sharedPref.getString(
+                                    "jira_linked_issue",
+                                    null
+                                ), false
+                            )
+                        } else {
+                            autoTextViewLinkedIssue.setText(arrayListLinkedIssues[0], false)
+                        }
                     }
                 }
             }
@@ -3471,15 +3475,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewIssueType.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListIssueTypes.contains(autoTextViewIssueType.editableText.toString())) {
-                    if (sharedPref.getString("jira_issue_type", null) != null) {
-                        autoTextViewIssueType.setText(
-                            sharedPref.getString(
-                                "jira_issue_type",
-                                null
-                            ), false
-                        )
-                    } else {
-                        autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
+                    if(arrayListIssueTypes.isNotEmpty()){
+                        if (sharedPref.getString("jira_issue_type", null) != null) {
+                            autoTextViewIssueType.setText(
+                                sharedPref.getString(
+                                    "jira_issue_type",
+                                    null
+                                ), false
+                            )
+                        } else {
+                            autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
+                        }
                     }
                 }
             }
@@ -3532,13 +3538,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
-                    if (sharedPref.getString("jira_project", null) != null) {
-                        autoTextViewProject.setText(
-                            sharedPref.getString("jira_project", null),
-                            false
-                        )
-                    } else {
-                        autoTextViewProject.setText(arrayListProjectNames[0], false)
+                    if(arrayListProjectNames.isNotEmpty()){
+                        if (sharedPref.getString("jira_project", null) != null) {
+                            autoTextViewProject.setText(
+                                sharedPref.getString("jira_project", null),
+                                false
+                            )
+                        } else {
+                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+                        }
                     }
                 }
             }
@@ -3580,15 +3588,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             autoTextViewEpicName.setOnFocusChangeListener { v, hasFocus ->
                 if (!hasFocus && autoTextViewEpicName.text.toString().isEmpty()) {
                     if (!arrayListEpicName.contains(autoTextViewEpicName.editableText.toString())) {
-                        if (sharedPref.getString("jira_epic_name", null) != null) {
-                            autoTextViewEpicName.setText(
-                                sharedPref.getString(
-                                    "jira_epic_name",
-                                    null
-                                ), false
-                            )
-                        } else {
-                            autoTextViewEpicName.setText(arrayListEpicName[0], false)
+                        if(arrayListEpicName.isNotEmpty()){
+                            if (sharedPref.getString("jira_epic_name", null) != null) {
+                                autoTextViewEpicName.setText(
+                                    sharedPref.getString(
+                                        "jira_epic_name",
+                                        null
+                                    ), false
+                                )
+                            } else {
+                                autoTextViewEpicName.setText(arrayListEpicName[0], false)
+                            }
                         }
                     }
                 }
