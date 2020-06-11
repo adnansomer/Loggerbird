@@ -66,6 +66,7 @@
     <string name="jira_reporter_empty">Bildiren bulunamadı!</string>
     <string name="jira_fix_version_empty">Düzeltme versiyonu bulunamadı!</string>
     <string name="jira_epic_link_empty">Epik konu bulunamadı!</string>
+    <string name="jira_epic_name_empty">Epik isim boş olamaz!</string>
     <string name="jira_summary_unhandled_exception">unhandled_exception:</string>
     <string name="jira_description_unhandled_exception">Beklenmeyen bir hata tespit edilmiştir daha çok detay için log dosyasına bakınız!</string>
     <string name="jira_issue_preferences_save">Konu tercihleri kaydedildi!</string>
@@ -82,14 +83,17 @@
     <string name="unhandled_file_doesnt_exist">Dosya konumu bulunamadı!</string>
     <string name="unhandled_file_discard_success">Dosya başarılı bir şekilde silindi!</string>
     <string name="unhandled_file_duplication_found">En son açılan görevin hata mesajı ile aynı hata mesajı karşılaşıldı.Bu dosyayı yine de göndermek istermisiniz?</string>
+    <string name="email_invalid_format">Yanlış e-mail formatı!</string>
+    <string name="email_to_duplication">Bu kullanıcı zaten listeye eklendi!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
     <string name="email_send_failure">E-mail bir hatadan dolayı gönderilemedi!</string>
+    <string name="email_send_success">E-mail başarılı bir şekilde gönderildi!</string>
     <string name="feed_back_email_success">Geri bildiriminiz için teşekkür ederiz!</string>
     <string name="unhandled_exception_success">Beklenmeyen bir hata gözlemlendi,detayları için e-mailinizi kontrol ediniz!</string>
     <string name="log_details_success">Log detayları e-mailinize gönderilmiştir!</string>
-
+    <string name="email_connection_time_out">E-mail internet zaman aşımından dolayı gönderilmedi!</string>
     <!-- Layout:-->
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça boyutu ayarla</string>
@@ -125,6 +129,7 @@
     <string name="textView_jira_label">Etiketler</string>
     <string name="textView_jira_epic_link">Epik konu</string>
     <string name="textView_jira_sprint">Sprint</string>
+    <string name="textView_jira_epic_name">Epik İsim</string>
     <string name="textView_jira_start_date">Başlangıç tarihi</string>
     <string name="textView_jira_remove_date">Tarihi kaldır</string>
     <string name="textView_jira_init_email">E-Mail</string>
@@ -163,4 +168,19 @@
     <string name="textView_duplication_check">Tekrarlama:</string>
     <string name="duplication_check_enabled">Tekrarlanma kontrolü açıldı!</string>
     <string name="duplication_check_disabled">Tekrarlanma kontrolü kapatıldı!</string>
+    <!-- loggerbird_email_popup-->
+    <string name="textView_email_title">Email oluştur</string>
+    <string name="textView_email_issue">Yeni İleti</string>
+    <string name="editText_email_to">Alıcılar:</string>
+    <string name="editText_email_subject">Konu:</string>
+    <string name="editText_email_content">Mesajınızı buraya yazınız:</string>
+    <string name="textView_email_attachments">Eklentiler</string>
+    <string name="textView_email_to_list">Alıcılar Listesi</string>
+    <string name="button_email_create">Oluştur</string>
+    <string name="button_email_cancel">İptal</string>
+    <string name="textView_recyclerView_email_popup_title">E-mailiniz\'den bu eklentiyi kaldırmaktan eminmisiniz?</string>
+    <string name="textView_recyclerView_email_to_popup_title">E-mailiniz\'den bu kullanıcıyı kaldırmaktan eminmisiniz?</string>
+    <string name="button_email_to_remove">Kullanıcıyı kaldır</string>
+    <string name="button_email_to_keep">Kullanıcıyı sakla</string>
+    <string name="textView_recyclerView_to_popup_header">Kullanıcıyı Sil</string>
 </resources>

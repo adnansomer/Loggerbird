@@ -66,6 +66,7 @@
     <string name="jira_reporter_empty">Reporter doesn\'t exist!</string>
     <string name="jira_fix_version_empty">Fix version doesn\'t exist!</string>
     <string name="jira_epic_link_empty">Epic link doesn\'t exist!</string>
+    <string name="jira_epic_name_empty">Epic name cannot be empty!</string>
     <string name="jira_summary_unhandled_exception">unhandled_exception:</string>
     <string name="jira_description_unhandled_exception">An unhandled exception detected check log file for more details!</string>
     <string name="jira_issue_preferences_save">Issue preferences are saved!</string>
@@ -82,13 +83,17 @@
     <string name="unhandled_file_doesnt_exist">File path doesn\'t exist!</string>
     <string name="unhandled_file_discard_success">File discarded successfully!</string>
     <string name="unhandled_file_duplication_found">We have detected duplication error messages , do you still want to create issue?</string>
+    <string name="email_invalid_format">Invalid e-mail format!</string>
+    <string name="email_to_duplication">This user already added to list!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
     <string name="email_send_failure">E-mail could not send because of a failure!</string>
+    <string name="email_send_success">E-mail sent successfully!</string>
     <string name="feed_back_email_success">Thank you for your feedback!</string>
     <string name="unhandled_exception_success">Unhandled exception detected,check your e-mail for details!</string>
     <string name="log_details_success">Log details have been sent to your e-mail!</string>
+    <string name="email_connection_time_out">Email could not send because of a internet connection timeout!</string>
     <!-- Layout:-->
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>
@@ -124,6 +129,7 @@
     <string name="textView_jira_label">Labels</string>
     <string name="textView_jira_epic_link">Epic Link</string>
     <string name="textView_jira_sprint">Sprint</string>
+    <string name="textView_jira_epic_name">Epic Name</string>
     <string name="textView_jira_start_date">Start date</string>
     <string name="textView_jira_remove_date">Remove date</string>
     <string name="textView_jira_init_email">E-Mail</string>
@@ -162,4 +168,19 @@
     <string name="textView_duplication_check">Duplication:</string>
     <string name="duplication_check_enabled">Duplication check enabled!</string>
     <string name="duplication_check_disabled">Duplication check disabled!</string>
+    <!-- loggerbird_email_popup-->
+    <string name="textView_email_title">Create Email</string>
+    <string name="textView_email_issue">New Issue</string>
+    <string name="editText_email_to">To:</string>
+    <string name="editText_email_subject">Subject:</string>
+    <string name="editText_email_content">Write your message here:</string>
+    <string name="textView_email_attachments">Attachments</string>
+    <string name="textView_email_to_list">To list</string>
+    <string name="button_email_create">Create</string>
+    <string name="button_email_cancel">Cancel</string>
+    <string name="textView_recyclerView_email_popup_title">Are you sure to remove attachment from your Email?</string>
+    <string name="textView_recyclerView_email_to_popup_title">Are you sure to remove this user from your Email?</string>
+    <string name="button_email_to_remove">Remove user</string>
+    <string name="button_email_to_keep">Keep user</string>
+    <string name="textView_recyclerView_to_popup_header">Delete User</string>
 </resources>

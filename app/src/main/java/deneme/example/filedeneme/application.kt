@@ -11,7 +11,7 @@ class application : Application() {
             jiraDomainName = "https://appcaesars.atlassian.net",
             jiraUserName = "appcaesars@gmail.com",
             jiraApiToken = "uPPXsUw0FabxeOa5CkDm0BAE",
-            slackApiToken = "1176309019584.1163966126886.4bf56b96e2c8179c8e493b726f9389a360eedf88f388e38de4a6b5f9f6b3e357"
+            slackApiToken = "523949707746.1169086416502.683b3fca438d557cf9b3ac16930db18b100a5daba822ae45663954326093b358"
         )
     }
 }
