@@ -412,6 +412,7 @@ internal class EmailUtil {
                 mimeBodyPart = MimeBodyPart()
                 mimeBodyPart.setContent(message,"text/plain")
                 multiPart.addBodyPart(mimeBodyPart)
+                if(RecyclerViewEmailAdapter.ViewHolder.controlArrayListFilePaths()){
                 if (RecyclerViewEmailAdapter.ViewHolder.arrayListFilePaths.isNotEmpty()) {
                     RecyclerViewEmailAdapter.ViewHolder.arrayListFilePaths.forEach {
                         mimeBodyPart = MimeBodyPart()
@@ -424,6 +425,7 @@ internal class EmailUtil {
                             mimeBodyPart
                         )
                     }
+                }
                     mimeMessage.setContent(
                         multiPart
                     )
@@ -462,7 +464,7 @@ internal class EmailUtil {
 //                                ).show()
 //                            }
 //                        }
-                    }
+
                 } else {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
@@ -478,6 +480,7 @@ internal class EmailUtil {
                     }
                 }
                 transport.close()
+                }
             } catch (e: Exception) {
                 if(activity != null){
                     activity.runOnUiThread {
