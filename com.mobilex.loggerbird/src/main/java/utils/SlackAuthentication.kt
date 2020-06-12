@@ -530,6 +530,7 @@ class SlackAuthentication {
 
     private fun checkConnectionTimeOut(activity: Activity){
         Timer().schedule(object : TimerTask() {
+            @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
             override fun run() {
                 activity.runOnUiThread {
                     LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
