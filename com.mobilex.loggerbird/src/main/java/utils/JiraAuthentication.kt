@@ -107,6 +107,7 @@ class JiraAuthentication {
     private var epicLinkField: String? = null
     private var queueCreateTask = 0
     private lateinit var timerTaskQueue: TimerTask
+    private  var controlDuplication = false
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callJiraIssue(
@@ -306,6 +307,7 @@ class JiraAuthentication {
                     if (filePathMediaName.exists()) {
                         jiraUnhandledTask(
 //                            restClient = restClient,
+                            activity = activity,
                             context = context,
                             filePathName = filePathMediaName
                         )
@@ -484,8 +486,10 @@ class JiraAuthentication {
                                                 val file = it.file
                                                 if (file.exists()) {
                                                     createAttachments(
+                                                        activity = activity,
                                                         issueKey = issueKey,
-                                                        file = file
+                                                        file = file,
+                                                        task = "normal"
                                                     )
                                                 }
                                             }
@@ -615,11 +619,99 @@ class JiraAuthentication {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun jiraUnhandledTask(
 //        restClient: JiraRestClient,
+        activity: Activity,
         context: Context,
         filePathName: File
     ) {
-        val sharedPref =
-            PreferenceManager.getDefaultSharedPreferences(LoggerBirdService.loggerBirdService.returnActivity().applicationContext)
+        checkQueueTime(activity = activity)
+        val coroutineCallCreateUnhandledIssue = CoroutineScope(Dispatchers.IO)
+        coroutineCallCreateUnhandledIssue.async {
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(LoggerBirdService.loggerBirdService.returnActivity().applicationContext)
+            val jsonObjectIssue = JsonObject()
+            val jsonObjectContent = JsonObject()
+            val jsonObjectProjectId = JsonObject()
+            val jsonObjectIssueType = JsonObject()
+            val jsonObjectPriorityId = JsonObject()
+            jsonObjectPriorityId.addProperty(
+                "id",
+                0
+            )
+            jsonObjectIssueType.addProperty(
+                "id",
+                10004
+            )
+            jsonObjectProjectId.addProperty(
+                "key",
+                "UN"
+            )
+//            jsonObjectContent.add("priority", jsonObjectPriorityId)
+            jsonObjectContent.add("project", jsonObjectProjectId)
+            jsonObjectContent.add("issuetype", jsonObjectIssueType)
+            jsonObjectContent.addProperty("summary",context.resources.getString(R.string.jira_summary_unhandled_exception))
+            jsonObjectContent.addProperty("description", sharedPref.getString("unhandled_exception_message", null))
+            jsonObjectIssue.add("fields", jsonObjectContent)
+            RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
+                .create(AccountIdService::class.java)
+                .createIssue(jsonObjectIssue)
+                .enqueue(object : retrofit2.Callback<JsonObject> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<JsonObject>,
+                        t: Throwable
+                    ) {
+                        jiraExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
+                    ) {
+                        val coroutineCallCreateIssue = CoroutineScope(Dispatchers.IO)
+                        coroutineCallCreateIssue.async {
+                            try {
+                                Log.d(
+                                    "create_issue_details",
+                                    response.code().toString()
+                                )
+                                if (response.errorBody()?.string() != null) {
+                                    Log.d(
+                                        "create_issue_details",
+                                        response.errorBody()?.string()
+                                    )
+                                }
+                                val createdIssue = response.body()
+                                val issueKey = createdIssue!!["key"].asString
+                                    if (filePathName.exists()) {
+                                        createAttachments(
+                                            issueKey = issueKey,
+                                            file = filePathName,
+                                            activity = activity,
+                                            task = "unhandled"
+                                        )
+                                    }
+                                val editor: SharedPreferences.Editor = sharedPref.edit()
+                                editor.remove("unhandled_file_path")
+                                editor.apply()
+                                timerTaskQueue.cancel()
+                                LoggerBirdService.loggerBirdService.returnActivity().runOnUiThread {
+                                    LoggerBirdService.loggerBirdService.detachProgressBar()
+                                    defaultToast.attachToast(
+                                        activity = LoggerBirdService.loggerBirdService.returnActivity(),
+                                        toastMessage = context.resources.getString(R.string.jira_sent)
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                jiraExceptionHandler(e = e)
+                            }
+                        }
+                        //updateFields()
+                    }
+                })
+        }
+
+
+
 //        val issueClient = restClient.issueClient
 //        val issueBuilder = IssueInputBuilder(
 //            "DEN",
@@ -637,17 +729,6 @@ class JiraAuthentication {
 //            inputStreamSecessionFile,
 //            filePathName.absolutePath
 //        )
-        val editor: SharedPreferences.Editor = sharedPref.edit()
-        editor.remove("unhandled_file_path")
-        editor.apply()
-        timerTaskQueue.cancel()
-        LoggerBirdService.loggerBirdService.returnActivity().runOnUiThread {
-            LoggerBirdService.loggerBirdService.detachProgressBar()
-            defaultToast.attachToast(
-                activity = LoggerBirdService.loggerBirdService.returnActivity(),
-                toastMessage = context.resources.getString(R.string.jira_sent)
-            )
-        }
 //        defaultToast.attachToast(activity = LoggerBirdService.loggerBirdService.returnActivity() , toastMessage = "Unhandled Exception occurred , automatically opening jira issue!")
 //        LoggerBirdService.loggerBirdService.finishShareLayout("jira")
     }
@@ -695,7 +776,7 @@ class JiraAuthentication {
                 jiraTaskGatherIssueTypes()
                 jiraTaskGatherAssignees()
                 jiraTaskGatherLinkedIssues()
-                jiraTaskGatherIssues()
+                jiraTaskGatherIssues(task = "normal")
                 jiraTaskGatherLabels()
                 jiraTaskGatherPriorities()
                 jiraTaskGatherSprint()
@@ -960,8 +1041,11 @@ class JiraAuthentication {
         }
     }
 
-    private fun jiraTaskGatherIssues() {
-        queueCounter++
+    private fun jiraTaskGatherIssues(task:String,exceptionMessage:String? = null) {
+        if(task != "duplication"){
+            queueCounter++
+        }
+
         val coroutineCallGatherIssues = CoroutineScope(Dispatchers.IO)
         coroutineCallGatherIssues.async {
             RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
@@ -984,9 +1068,17 @@ class JiraAuthentication {
                             Log.d("issue_details", response.code().toString())
                             val issueList = response.body()
                             issueList?.getAsJsonArray("issues")?.forEach {
-                                arrayListIssues.add(it.asJsonObject["key"].asString)
+                                if(task != "duplication" && exceptionMessage == null){
+                                    arrayListIssues.add(it.asJsonObject["key"].asString)
+                                }else{
+                                    if(exceptionMessage!! == it.asJsonObject["fields"].asJsonObject["description"].asString){
+                                        controlDuplication = true
+                                    }
+                                }
                             }
-                            updateFields()
+                            if(task != "duplication"){
+                                updateFields()
+                            }
                         }
                     }
                 })
@@ -1613,11 +1705,13 @@ class JiraAuthentication {
         this.epicNamePosition = epicNamePosition
     }
 
-    private fun resetJiraValues() {
+    private fun resetJiraValues(activity: Activity) {
         queueCreateTask--
         if (queueCreateTask == 0) {
             activity.runOnUiThread {
-                LoggerBirdService.loggerBirdService.buttonJiraCancel.performClick()
+                if(LoggerBirdService.loggerBirdService.controlButtonJiraCancel()){
+                    LoggerBirdService.loggerBirdService.buttonJiraCancel.performClick()
+                }
             }
             if (!LoggerBirdService.loggerBirdService.checkUnhandledFilePath()) {
                 LoggerBirdService.loggerBirdService.finishShareLayout("jira")
@@ -1760,9 +1854,10 @@ class JiraAuthentication {
         activity: Activity
     ): Boolean {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-        var controlDuplication = false
         if (sharedPref.getString("unhandled_exception_message", null) != null) {
             val exceptionMessage = sharedPref.getString("unhandled_exception_message", null)
+            jiraTaskGatherIssues(task = "duplication",exceptionMessage = exceptionMessage)
+            Thread.sleep(10000)
 //            val searchClient = restClient.searchClient
 //            val projectClient = restClient.projectClient
 //            projectClient.allProjects.claim().forEach {
@@ -1808,7 +1903,7 @@ class JiraAuthentication {
                             call: retrofit2.Call<List<JiraUserModel>>,
                             t: Throwable
                         ) {
-                            resetJiraValues()
+                            resetJiraValues(activity = activity)
                             jiraExceptionHandler(throwable = t)
                         }
 
@@ -1816,7 +1911,7 @@ class JiraAuthentication {
                             call: retrofit2.Call<List<JiraUserModel>>,
                             response: retrofit2.Response<List<JiraUserModel>>
                         ) {
-                            resetJiraValues()
+                            resetJiraValues(activity = activity)
                             Log.d("assignee_put_success", response.code().toString())
                         }
                     })
@@ -1851,7 +1946,7 @@ class JiraAuthentication {
                             call: retrofit2.Call<List<JiraUserModel>>,
                             t: Throwable
                         ) {
-                            resetJiraValues()
+                            resetJiraValues(activity = activity)
                             jiraExceptionHandler(throwable = t)
                         }
 
@@ -1859,7 +1954,7 @@ class JiraAuthentication {
                             call: retrofit2.Call<List<JiraUserModel>>,
                             response: retrofit2.Response<List<JiraUserModel>>
                         ) {
-                            resetJiraValues()
+                            resetJiraValues(activity = activity)
                             Log.d("reporter_put_success", response.code().toString())
                         }
                     })
@@ -1887,7 +1982,7 @@ class JiraAuthentication {
                             call: retrofit2.Call<List<JiraSprintModel>>,
                             t: Throwable
                         ) {
-                            resetJiraValues()
+                            resetJiraValues(activity = activity)
                             jiraExceptionHandler(throwable = t)
                         }
 
@@ -1895,7 +1990,7 @@ class JiraAuthentication {
                             call: retrofit2.Call<List<JiraSprintModel>>,
                             response: retrofit2.Response<List<JiraSprintModel>>
                         ) {
-                            resetJiraValues()
+                            resetJiraValues(activity = activity)
                             Log.d("sprint_put_success", response.code().toString())
                         }
                     })
@@ -1922,7 +2017,7 @@ class JiraAuthentication {
                         call: retrofit2.Call<List<JiraSprintModel>>,
                         t: Throwable
                     ) {
-                        resetJiraValues()
+                        resetJiraValues(activity = activity)
                         jiraExceptionHandler(throwable = t)
                     }
 
@@ -1930,15 +2025,18 @@ class JiraAuthentication {
                         call: retrofit2.Call<List<JiraSprintModel>>,
                         response: retrofit2.Response<List<JiraSprintModel>>
                     ) {
-                        resetJiraValues()
+                        resetJiraValues(activity = activity)
                         Log.d("start_put_success", response.code().toString())
                     }
                 })
         }
     }
 
-    private fun createAttachments(issueKey: String, file:File) {
-        queueCreateTask++
+    private fun createAttachments(issueKey: String, file:File,activity: Activity,task:String) {
+        if(task != "unhandled"){
+            queueCreateTask++
+        }
+
         val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
         val body = MultipartBody.Part.createFormData("file",file.name,requestFile)
         RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
@@ -1950,7 +2048,9 @@ class JiraAuthentication {
                     call: retrofit2.Call<List<JiraSprintModel>>,
                     t: Throwable
                 ) {
-                    resetJiraValues()
+                    if(task != "unhandled"){
+                        resetJiraValues(activity = activity)
+                    }
                     jiraExceptionHandler(throwable = t)
                 }
 
@@ -1958,7 +2058,9 @@ class JiraAuthentication {
                     call: retrofit2.Call<List<JiraSprintModel>>,
                     response: retrofit2.Response<List<JiraSprintModel>>
                 ) {
-                    resetJiraValues()
+                    if(task != "unhandled"){
+                        resetJiraValues(activity = activity)
+                    }
                     if (file.name != "logger_bird_details.txt") {
                         if (file.exists()) {
                             file.delete()

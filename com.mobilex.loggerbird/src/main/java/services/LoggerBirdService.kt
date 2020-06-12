@@ -74,7 +74,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener {
+internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
@@ -203,6 +203,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var autoTextViewEpicName: AutoCompleteTextView
     private lateinit var buttonJiraCreate: Button
     internal lateinit var buttonJiraCancel: Button
+    internal fun controlButtonJiraCancel():Boolean{
+        if(this::buttonJiraCancel.isInitialized){
+            return true
+        }
+        return false
+    }
     //  private lateinit var buttonJiraAuthCancel: Button
 //  private lateinit var buttonJiraAuthNext: Button
     private lateinit var layoutJira: FrameLayout
@@ -535,13 +541,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.serviceTag)
         }
-    }
-
-    /**
-     * This Method Called When Service Created.
-     */
-    override fun onCreate() {
-        super.onCreate()
     }
 
     /**
@@ -1641,7 +1640,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             .setSwipeToDismiss(true)
                             .setCookieListener { isActivateDialogShown = false }
                             .setEnableAutoDismiss(false)
-                            .setCustomViewInitializer(CookieBar.CustomViewInitializer() {
+                            .setCustomViewInitializer(CookieBar.CustomViewInitializer {
                                 val txtActivate =
                                     it.findViewById<TextView>(R.id.btn_action_activate)
                                 val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
