@@ -2230,14 +2230,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 }
 
                 "slack_error_time_out" -> {
-                    removeJiraLayout()
+                    removeSlackLayout()
                     Toast.makeText(context, R.string.slack_sent_error_time_out, Toast.LENGTH_SHORT).show()
-                    if (this::progressBarSlackLayout.isInitialized && this::progressBarSlack.isInitialized) {
-                        progressBarSlackLayout.visibility = View.GONE
-                        progressBarSlack.visibility = View.GONE
-                    }
-                    detachProgressBar()
-//                    finishErrorFab()
+                    progressBarSlackLayout.visibility = View.GONE
+                    progressBarSlack.visibility = View.GONE
+
                 }
             }
             if (controlFloatingActionButtonView()) {

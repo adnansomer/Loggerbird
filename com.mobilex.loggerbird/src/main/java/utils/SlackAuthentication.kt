@@ -65,7 +65,6 @@ class SlackAuthentication {
     private var messagePath: String? = null
     private var slackType: String? = null
     private var controlcallSlack : Boolean = false
-    private lateinit var timerTaskQueue: TimerTask
 
     /** Loggerbird slack app client information **/
     companion object{
@@ -211,7 +210,7 @@ class SlackAuthentication {
                         it.clientSecret(CLIENT_SECRET)
                         it.redirectUri(REDIRECT_URL)
                     }
-                    val convertedToken = convertToken.accessToken
+                    convertedToken = convertToken.accessToken
                     val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     with(sharedPref.edit()) {
                         putString("slackAccessToken", convertedToken)
@@ -319,8 +318,8 @@ class SlackAuthentication {
                         messagePath,
                         slackType )
                 }
-                LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
-                Log.d(Constants.slackTag,"No Authorizated Token")
+
+                checkTimeOut(activity = activity)
                 e.printStackTrace()
             }
         }
@@ -348,8 +347,7 @@ class SlackAuthentication {
                         messagePath,
                         slackType )
                 }
-                LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
-                Log.d(Constants.slackTag,"No Authorizated Token")
+
                 e.printStackTrace()
                 exceptionBoolean = true
             }
@@ -528,15 +526,12 @@ class SlackAuthentication {
         this.arrayListRecyclerViewItems = arrayListRecyclerViewItems
     }
 
-    private fun checkConnectionTimeOut(activity: Activity){
+    private fun checkTimeOut(activity: Activity){
         Timer().schedule(object : TimerTask() {
-            @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
             override fun run() {
-                activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
-                }
+                LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
             }
-        }, 20000)
+        }, 15000)
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
