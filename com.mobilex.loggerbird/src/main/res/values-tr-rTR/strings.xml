@@ -65,6 +65,7 @@
     <string name="jira_summary_empty">Özet boş olamaz!</string>
     <string name="jira_reporter_empty">Bildiren bulunamadı!</string>
     <string name="jira_fix_version_empty">Düzeltme versiyonu bulunamadı!</string>
+    <string name="jira_component_version_empty">Komponent bulunamadı!</string>
     <string name="jira_epic_link_empty">Epik konu bulunamadı!</string>
     <string name="jira_epic_name_empty">Epik isim boş olamaz!</string>
     <string name="jira_summary_unhandled_exception">unhandled_exception:</string>

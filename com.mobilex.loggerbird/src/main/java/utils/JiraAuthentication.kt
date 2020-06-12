@@ -15,6 +15,8 @@ import com.atlassian.jira.rest.client.api.domain.*
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 import com.atlassian.jira.rest.client.api.domain.input.LinkIssuesInput
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.mobilex.loggerbird.R
 import constants.Constants
@@ -61,8 +63,8 @@ class JiraAuthentication {
     private var epicName: String = ""
     private var component: String? = null
     private var fixVersion: String? = null
-    private val hashMapComponent: HashMap<String, Any> = HashMap()
-    private val hashMapFixVersions: HashMap<String, Any> = HashMap()
+    private val hashMapComponent: HashMap<String, String> = HashMap()
+    private val hashMapFixVersions: HashMap<String, String> = HashMap()
     private val hashMapLinkedIssues: HashMap<String, String> = HashMap()
     private val hashMapSprint: HashMap<String, String> = HashMap()
     private val hashMapBoard: HashMap<String, String> = HashMap()
@@ -100,12 +102,9 @@ class JiraAuthentication {
     private var startDateField: String? = null
     private var startDate: String? = null
     private var epicNameField: String? = null
+    private var epicLinkField:String? = null
     private var queueCreateTask = 0
     private lateinit var timerTaskQueue: TimerTask
-
-    companion object {
-        internal lateinit var createdIssueKey: String
-    }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callJiraIssue(
@@ -339,26 +338,179 @@ class JiraAuthentication {
                     context = context
                 ) && checkEpicLinkEmpty(activity = activity, context = context)
             ) {
-                val issueClient = restClient.issueClient
-                val issueBuilder = IssueInputBuilder(
-                    arrayListProjectKeys[projectPosition],
-                    arrayListIssueTypesId[issueTypePosition].toLong(),
-                    summary
-                )
-                issueBuilder.setPriorityId(arrayListPrioritiesId[priorityPosition].toLong())
-                if (this.description != null) {
-                    if (this.description!!.isNotEmpty()) {
-                        issueBuilder.setDescription(description)
+                val coroutineCallJiraCreateIssue = CoroutineScope(Dispatchers.IO)
+                coroutineCallJiraCreateIssue.async {
+                    try {
+                        val jsonObjectIssue = JsonObject()
+                        val jsonObjectContent = JsonObject()
+                        val jsonObjectProjectId = JsonObject()
+                        val jsonObjectIssueType = JsonObject()
+                        val jsonObjectPriorityId = JsonObject()
+                        val gson = GsonBuilder().create()
+                        jsonObjectPriorityId.addProperty(
+                            "id",
+                            arrayListPrioritiesId[priorityPosition].toString()
+                        )
+                        jsonObjectIssueType.addProperty(
+                            "id",
+                            arrayListIssueTypesId[issueTypePosition].toString()
+                        )
+                        jsonObjectProjectId.addProperty(
+                            "key",
+                            arrayListProjectKeys[projectPosition]
+                        )
+                        jsonObjectContent.add("priority", jsonObjectPriorityId)
+                        jsonObjectContent.add("project", jsonObjectProjectId)
+                        jsonObjectContent.add("issuetype", jsonObjectIssueType)
+                        jsonObjectContent.addProperty("summary", summary)
+                        if (description != null) {
+                            if (description!!.isNotEmpty()) {
+                                jsonObjectContent.addProperty("description", description)
+                            }
+                        }
+                        if (arrayListChoosenLabel.isNotEmpty()) {
+                            val jsonArrayLabels = gson.toJsonTree(arrayListChoosenLabel).asJsonArray
+                            jsonObjectContent.add("labels", jsonArrayLabels)
+                        }
+                        if (issueType == "Epic") {
+                            if (epicName.isNotEmpty() && epicNameField != null) {
+                                jsonObjectContent.addProperty(epicNameField, epicName)
+                            }
+                        }
+                        if (arrayListComponents.size > componentPosition) {
+                            if (arrayListComponents[componentPosition].isNotEmpty() && component != null) {
+                                if (component!!.isNotEmpty()) {
+                                    val jsonArrayComponent = JsonArray()
+                                    val jsonObjectComponentId = JsonObject()
+                                    jsonObjectComponentId.addProperty(
+                                        "id",
+                                        hashMapComponent[arrayListComponents[componentPosition]]
+                                    )
+                                    jsonArrayComponent.add(jsonObjectComponentId)
+                                    jsonObjectContent.add("components", jsonArrayComponent)
+                                }
+
+                            }
+                        }
+
+                        if (arrayListFixVersions.size > fixVersionPosition) {
+                            if (arrayListFixVersions[fixVersionPosition].isNotEmpty() && fixVersion != null) {
+                                if (fixVersion!!.isNotEmpty()) {
+                                    val jsonArrayFixVersions = JsonArray()
+                                    val jsonObjectFixVersionsId = JsonObject()
+                                    jsonObjectFixVersionsId.addProperty(
+                                        "id",
+                                        hashMapFixVersions[arrayListFixVersions[fixVersionPosition]]
+                                    )
+                                    jsonArrayFixVersions.add(jsonObjectFixVersionsId)
+                                    jsonObjectContent.add("fixVersions", jsonArrayFixVersions)
+                                }
+                            }
+                        }
+                        if (epicLink != null) {
+                            if (epicLink!!.isNotEmpty()) {
+                                jsonObjectContent.addProperty(epicLinkField, epicLink)
+                            }
+                        }
+
+                        jsonObjectIssue.add("fields", jsonObjectContent)
+
+                        if (issue != null) {
+                            if (issue!!.isNotEmpty()) {
+                                val jsonArrayIssue = JsonArray()
+                                val jsonObjectIssueAdd = JsonObject()
+                                val jsonObjectIssueLink = JsonObject()
+                                val jsonObjectIssueLinkType = JsonObject()
+                                val jsonObjectOutwardIssueKey = JsonObject()
+                                val jsonObjectUpdate = JsonObject()
+                                jsonObjectIssueLinkType.addProperty(
+                                    "name",
+                                    hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
+                                )
+                                jsonObjectOutwardIssueKey.addProperty("key", issue)
+                                jsonObjectIssueLink.add("type", jsonObjectIssueLinkType)
+                                jsonObjectIssueLink.add("outwardIssue", jsonObjectOutwardIssueKey)
+                                jsonObjectIssueAdd.add("add", jsonObjectIssueLink)
+                                jsonArrayIssue.add(jsonObjectIssueAdd)
+                                jsonObjectUpdate.add("issuelinks", jsonArrayIssue)
+                                jsonObjectIssue.add("update", jsonObjectUpdate)
+//                                val linkIssueInput = LinkIssuesInput(
+//                            issueKey,
+//                            this.issue,
+//                            hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
+//                        )
+//                        issueClient.linkIssue(linkIssueInput)
+                            }
+                        }
+                        RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
+                            .create(AccountIdService::class.java)
+                            .createIssue(jsonObjectIssue)
+                            .enqueue(object : retrofit2.Callback<JsonObject> {
+                                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                                override fun onFailure(
+                                    call: retrofit2.Call<JsonObject>,
+                                    t: Throwable
+                                ) {
+                                    jiraExceptionHandler(throwable = t)
+                                }
+
+                                override fun onResponse(
+                                    call: retrofit2.Call<JsonObject>,
+                                    response: retrofit2.Response<JsonObject>
+                                ) {
+                                    val coroutineCallCreateIssue = CoroutineScope(Dispatchers.IO)
+                                    coroutineCallCreateIssue.async {
+                                        try {
+                                            Log.d(
+                                                "create_issue_details",
+                                                response.code().toString()
+                                            )
+                                            if (response.errorBody()?.string() != null) {
+                                                Log.d(
+                                                    "create_issue_details",
+                                                    response.errorBody()?.string()
+                                                )
+                                            }
+
+                                            val createdIssue = response.body()
+                                            val issueKey = createdIssue!!["key"].asString
+                                            createAssignee(issueKey = issueKey)
+                                            createReporter(issueKey = issueKey)
+                                            createSprint(issueKey = issueKey)
+                                            createDate(issueKey = issueKey)
+                                        } catch (e: Exception) {
+                                            jiraExceptionHandler(e = e)
+                                        }
+                                    }
+                                    //updateFields()
+                                }
+                            })
+                    } catch (e: Exception) {
+                        jiraExceptionHandler(e = e)
                     }
                 }
-                if (this.arrayListChoosenLabel.isNotEmpty()) {
-                    issueBuilder.setFieldValue("labels", arrayListChoosenLabel)
-                }
-                if (this.issueType == "Epic") {
-                    if (this.epicName.isNotEmpty() && epicNameField != null) {
-                        issueBuilder.setFieldValue(epicNameField, epicName)
-                    }
-                }
+
+
+//                val issueClient = restClient.issueClient
+//                val issueBuilder = IssueInputBuilder(
+//                    arrayListProjectKeys[projectPosition],
+//                    arrayListIssueTypesId[issueTypePosition].toLong(),
+//                    summary
+//                )
+//                issueBuilder.setPriorityId(arrayListPrioritiesId[priorityPosition].toLong())
+//                if (this.description != null) {
+//                    if (this.description!!.isNotEmpty()) {
+//                        issueBuilder.setDescription(description)
+//                    }
+//                }
+//                if (this.arrayListChoosenLabel.isNotEmpty()) {
+//                    issueBuilder.setFieldValue("labels", arrayListChoosenLabel)
+//                }
+//                if (this.issueType == "Epic") {
+//                    if (this.epicName.isNotEmpty() && epicNameField != null) {
+//                        issueBuilder.setFieldValue(epicNameField, epicName)
+//                    }
+//                }
 //                if (arrayListComponents.size > componentPosition) {
 //                    if (arrayListComponents[componentPosition].isNotEmpty() && this.component != null) {
 //                        if (this.component!!.isNotEmpty()) {
@@ -376,195 +528,55 @@ class JiraAuthentication {
 //                    }
 //                }
 
-                val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
-                val issueKey = basicIssue.key
-                //            createdIssueKey  = issueKey
-                val issueUri = basicIssue.self
-                val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
-                if (this.assignee != null) {
-                    if (this.assignee!!.isNotEmpty()) {
-                        queueCreateTask++
-                        val jsonObjectAssignee = JsonObject()
-                        jsonObjectAssignee.addProperty(
-                            "accountId",
-                            arrayListAccountId[assigneePosition]
-                        )
-                        RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
-                            .create(AccountIdService::class.java)
-                            .setAssignee(jsonObject = jsonObjectAssignee)
-                            .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
-                                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                                override fun onFailure(
-                                    call: retrofit2.Call<List<JiraUserModel>>,
-                                    t: Throwable
-                                ) {
-                                    resetJiraValues()
-                                    jiraExceptionHandler(throwable = t)
-                                }
+//                val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
+//                val issueKey = basicIssue.key
+//                val issueUri = basicIssue.self
+//                val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
 
-                                override fun onResponse(
-                                    call: retrofit2.Call<List<JiraUserModel>>,
-                                    response: retrofit2.Response<List<JiraUserModel>>
-                                ) {
-                                    resetJiraValues()
-                                    Log.d("assignee_put_success", response.code().toString())
-                                }
-                            })
-                    }
-                }
-
-                if (this.reporter != null) {
-                    if (this.reporter!!.isNotEmpty()) {
-                        queueCreateTask++
-                        val jsonObjectReporter = JsonObject()
-                        val jsonObjectField = JsonObject()
-                        val jsonObjectReporterField = JsonObject()
-                        jsonObjectReporter.addProperty("self", arrayListSelf[reporterPosition])
-                        jsonObjectReporter.addProperty(
-                            "accountId",
-                            arrayListAccountId[reporterPosition]
-                        )
-                        jsonObjectReporter.addProperty(
-                            "emailAddress",
-                            arrayListEmailAdresses[reporterPosition]
-                        )
-                        jsonObjectReporterField.add("reporter", jsonObjectReporter)
-                        jsonObjectField.add("fields", jsonObjectReporterField)
-                        RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
-                            .create(AccountIdService::class.java)
-                            .setReporter(jsonObject = jsonObjectField)
-                            .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
-                                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                                override fun onFailure(
-                                    call: retrofit2.Call<List<JiraUserModel>>,
-                                    t: Throwable
-                                ) {
-                                    resetJiraValues()
-                                    jiraExceptionHandler(throwable = t)
-                                }
-
-                                override fun onResponse(
-                                    call: retrofit2.Call<List<JiraUserModel>>,
-                                    response: retrofit2.Response<List<JiraUserModel>>
-                                ) {
-                                    resetJiraValues()
-                                    Log.d("reporter_put_success", response.code().toString())
-                                }
-                            })
-                    }
-
-                }
-
-                if (this.sprint != null && this.sprintField != null) {
-                    if (this.sprint!!.isNotEmpty()) {
-                        queueCreateTask++
-                        val jsonObjectSprint = JsonObject()
-                        val jsonObjectFieldSprint = JsonObject()
-                        jsonObjectSprint.addProperty(
-                            sprintField,
-                            hashMapSprint[arrayListSprintName[sprintPosition]]?.toInt()
-                        )
-                        jsonObjectFieldSprint.add("fields", jsonObjectSprint)
-                        RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
-                            .create(AccountIdService::class.java)
-                            .setSprint(jsonObject = jsonObjectFieldSprint)
-                            .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
-                                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                                override fun onFailure(
-                                    call: retrofit2.Call<List<JiraSprintModel>>,
-                                    t: Throwable
-                                ) {
-                                    resetJiraValues()
-                                    jiraExceptionHandler(throwable = t)
-                                }
-
-                                override fun onResponse(
-                                    call: retrofit2.Call<List<JiraSprintModel>>,
-                                    response: retrofit2.Response<List<JiraSprintModel>>
-                                ) {
-                                    resetJiraValues()
-                                    Log.d("sprint_put_success", response.code().toString())
-                                }
-                            })
-                    }
-                }
-
-                if (this.startDate != null && this.startDateField != null) {
-                    queueCreateTask++
-                    val jsonObjectStartDate = JsonObject()
-                    val jsonObjectFieldStartDate = JsonObject()
-                    jsonObjectStartDate.addProperty(
-                        startDateField,
-                        startDate
-                    )
-                    jsonObjectFieldStartDate.add("fields", jsonObjectStartDate)
-                    RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
-                        .create(AccountIdService::class.java)
-                        .setStartDate(jsonObject = jsonObjectFieldStartDate)
-                        .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
-                            @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                            override fun onFailure(
-                                call: retrofit2.Call<List<JiraSprintModel>>,
-                                t: Throwable
-                            ) {
-                                resetJiraValues()
-                                jiraExceptionHandler(throwable = t)
-                            }
-
-                            override fun onResponse(
-                                call: retrofit2.Call<List<JiraSprintModel>>,
-                                response: retrofit2.Response<List<JiraSprintModel>>
-                            ) {
-                                resetJiraValues()
-                                Log.d("start_put_success", response.code().toString())
-                            }
-                        })
-                }
-
-                if (this.issue != null) {
-                    if (this.issue!!.isNotEmpty()) {
-                        val linkIssueInput = LinkIssuesInput(
-                            issueKey,
-                            this.issue,
-                            hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
-                        )
-                        issueClient.linkIssue(linkIssueInput)
-                    }
-                }
-                if (this.epicLink != null) {
-                    if (this.epicLink!!.isNotEmpty()) {
-                        val linkIssueInput = LinkIssuesInput(
-                            issueKey,
-                            this.epicLink,
-                            hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
-                        )
-                        issueClient.linkIssue(linkIssueInput)
-                    }
-                }
-                var fileCounter = 0
-                do {
-                    if (RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths.size > fileCounter) {
-                        val file =
-                            RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
-                        if (file.exists()) {
-                            val inputStreamMediaFile = FileInputStream(file)
-                            issueClient.addAttachment(
-                                issue.get().attachmentsUri,
-                                inputStreamMediaFile,
-                                file.absolutePath
-                            )
-                        }
-                        if (file.name != "logger_bird_details.txt") {
-                            if (file.exists()) {
-                                file.delete()
-                            }
-                        }
-                    } else {
-                        break
-                    }
-                    fileCounter++
-
-                } while (RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths.iterator().hasNext())
+//                if (this.issue != null) {
+//                    if (this.issue!!.isNotEmpty()) {
+//                        val linkIssueInput = LinkIssuesInput(
+//                            issueKey,
+//                            this.issue,
+//                            hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
+//                        )
+//                        issueClient.linkIssue(linkIssueInput)
+//                    }
+//                }
+//                if (this.epicLink != null) {
+//                    if (this.epicLink!!.isNotEmpty()) {
+//                        val linkIssueInput = LinkIssuesInput(
+//                            issueKey,
+//                            this.epicLink,
+//                            hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
+//                        )
+//                        issueClient.linkIssue(linkIssueInput)
+//                    }
+//                }
+//                var fileCounter = 0
+//                do {
+//                    if (RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths.size > fileCounter) {
+//                        val file =
+//                            RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
+//                        if (file.exists()) {
+//                            val inputStreamMediaFile = FileInputStream(file)
+//                            issueClient.addAttachment(
+//                                issue.get().attachmentsUri,
+//                                inputStreamMediaFile,
+//                                file.absolutePath
+//                            )
+//                        }
+//                        if (file.name != "logger_bird_details.txt") {
+//                            if (file.exists()) {
+//                                file.delete()
+//                            }
+//                        }
+//                    } else {
+//                        break
+//                    }
+//                    fileCounter++
+//
+//                } while (RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths.iterator().hasNext())
                 //            val inputStreamSecessionFile =
                 //                FileInputStream(LoggerBird.filePathSecessionName)
                 //            issueClient.addAttachment(
@@ -572,17 +584,17 @@ class JiraAuthentication {
                 //                inputStreamSecessionFile,
                 //                LoggerBird.filePathSecessionName.absolutePath
                 //            )
-                activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.buttonJiraCancel.performClick()
-                }
-                if (!LoggerBirdService.loggerBirdService.checkUnhandledFilePath()) {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("jira")
-                } else {
-                    LoggerBirdService.loggerBirdService.unhandledExceptionCustomizeIssueSent()
-                }
-                timerTaskQueue.cancel()
-                Log.d("issue", issueUri.toString())
-                Log.d("issue", issueKey.toString())
+//                activity.runOnUiThread {
+//                    LoggerBirdService.loggerBirdService.buttonJiraCancel.performClick()
+//                }
+//                if (!LoggerBirdService.loggerBirdService.checkUnhandledFilePath()) {
+//                    LoggerBirdService.loggerBirdService.finishShareLayout("jira")
+//                } else {
+//                    LoggerBirdService.loggerBirdService.unhandledExceptionCustomizeIssueSent()
+//                }
+//                timerTaskQueue.cancel()
+//                Log.d("issue", issueUri.toString())
+//                Log.d("issue", issueKey.toString())
             }
         } catch (e: Exception) {
             jiraExceptionHandler(e = e)
@@ -1046,8 +1058,12 @@ class JiraAuthentication {
                             Log.d("epic_details", response.code().toString())
                             val epicList = response.body()
                             epicList?.getAsJsonArray("issues")?.forEach {
-                                arrayListEpicLink.add(it.asJsonObject["key"].asString)
-                                arrayListEpicName.add(it.asJsonObject["fields"].asJsonObject[epicNameField].asString)
+                                if (!arrayListEpicLink.contains(it.asJsonObject["key"].asString)) {
+                                    arrayListEpicLink.add(it.asJsonObject["key"].asString)
+                                }
+                                if (!arrayListEpicName.contains(it.asJsonObject["fields"].asJsonObject[epicNameField].asString)) {
+                                    arrayListEpicName.add(it.asJsonObject["fields"].asJsonObject[epicNameField].asString)
+                                }
 //                                arrayListEpicLink.add(it.asJsonObject[epicNameField].asString)
                             }
                             updateFields()
@@ -1130,13 +1146,15 @@ class JiraAuthentication {
                             fixCompList?.getAsJsonArray("components")?.forEach {
                                 if (!arrayListComponents.contains(it.asJsonObject["name"].asString)) {
                                     arrayListComponents.add(it.asJsonObject["name"].asString)
-                                    hashMapComponent[it.asJsonObject["name"].asString] = it
+                                    hashMapComponent[it.asJsonObject["name"].asString] =
+                                        it.asJsonObject["id"].asString
                                 }
                             }
                             fixCompList?.getAsJsonArray("versions")?.forEach {
                                 if (!arrayListFixVersions.contains(it.asJsonObject["name"].asString)) {
                                     arrayListFixVersions.add(it.asJsonObject["name"].asString)
-                                    hashMapFixVersions[it.asJsonObject["name"].asString] = it
+                                    hashMapFixVersions[it.asJsonObject["name"].asString] =
+                                        it.asJsonObject["id"].asString
                                 }
                             }
                             updateFields()
@@ -1284,6 +1302,7 @@ class JiraAuthentication {
                                     "Sprint" -> sprintField = it.id
                                     "Start date" -> startDateField = it.id
                                     "Epic Name" -> epicNameField = it.id
+                                    "Epic Link" -> epicLinkField = it.id
                                 }
                             }
                             updateFields()
@@ -1414,7 +1433,9 @@ class JiraAuthentication {
 //        componentPosition = spinnerComponent.selectedItemPosition
 //        fixVersionPosition = spinnerFixVersions.selectedItemPosition
 //        linkedIssueTypePosition = spinnerLinkedIssues.selectedItemPosition
-        arrayListChoosenLabel.add(autoTextViewLabel.editableText.toString())
+        if (autoTextViewLabel.editableText.toString().isNotEmpty()) {
+            arrayListChoosenLabel.add(autoTextViewLabel.editableText.toString())
+        }
 //        arrayListChoosenLabel.add(spinnerLabel.selectedItem.toString())
         epicLink = autoTextViewEpicLink.editableText.toString()
 //        epicLink = spinnerEpicLink.selectedItem.toString()
@@ -1489,6 +1510,23 @@ class JiraAuthentication {
             false
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun checkComponentEmpty(activity: Activity, context: Context): Boolean {
+        return if (arrayListComponents.contains(component) || component!!.isEmpty()) {
+            true
+        } else {
+            activity.runOnUiThread {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = context.resources.getString(R.string.jira_component_version_empty)
+                )
+            }
+            false
+        }
+    }
+
+
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun checkEpicLinkEmpty(activity: Activity, context: Context): Boolean {
@@ -1568,6 +1606,15 @@ class JiraAuthentication {
     private fun resetJiraValues() {
         queueCreateTask--
         if (queueCreateTask == 0) {
+            activity.runOnUiThread {
+                LoggerBirdService.loggerBirdService.buttonJiraCancel.performClick()
+            }
+            if (!LoggerBirdService.loggerBirdService.checkUnhandledFilePath()) {
+                LoggerBirdService.loggerBirdService.finishShareLayout("jira")
+            } else {
+                LoggerBirdService.loggerBirdService.unhandledExceptionCustomizeIssueSent()
+            }
+            timerTaskQueue.cancel()
             summary = ""
             project = null
             issueType = null
@@ -1587,6 +1634,7 @@ class JiraAuthentication {
             startDateField = null
             startDate = null
             epicNameField = null
+            epicLinkField = null
             issueTypePosition = 0
             priorityPosition = 0
             projectPosition = 0
@@ -1730,5 +1778,152 @@ class JiraAuthentication {
             }
         }
         timerQueue.schedule(timerTaskQueue, 180000)
+    }
+
+    private fun createAssignee(issueKey: String) {
+        if (this.assignee != null) {
+            if (this.assignee!!.isNotEmpty()) {
+                queueCreateTask++
+                val jsonObjectAssignee = JsonObject()
+                jsonObjectAssignee.addProperty(
+                    "accountId",
+                    arrayListAccountId[assigneePosition]
+                )
+                RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+                    .create(AccountIdService::class.java)
+                    .setAssignee(jsonObject = jsonObjectAssignee)
+                    .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+                        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                        override fun onFailure(
+                            call: retrofit2.Call<List<JiraUserModel>>,
+                            t: Throwable
+                        ) {
+                            resetJiraValues()
+                            jiraExceptionHandler(throwable = t)
+                        }
+
+                        override fun onResponse(
+                            call: retrofit2.Call<List<JiraUserModel>>,
+                            response: retrofit2.Response<List<JiraUserModel>>
+                        ) {
+                            resetJiraValues()
+                            Log.d("assignee_put_success", response.code().toString())
+                        }
+                    })
+            }
+        }
+    }
+
+    private fun createReporter(issueKey: String) {
+        if (this.reporter != null) {
+            if (this.reporter!!.isNotEmpty()) {
+                queueCreateTask++
+                val jsonObjectReporter = JsonObject()
+                val jsonObjectField = JsonObject()
+                val jsonObjectReporterField = JsonObject()
+                jsonObjectReporter.addProperty("self", arrayListSelf[reporterPosition])
+                jsonObjectReporter.addProperty(
+                    "accountId",
+                    arrayListAccountId[reporterPosition]
+                )
+                jsonObjectReporter.addProperty(
+                    "emailAddress",
+                    arrayListEmailAdresses[reporterPosition]
+                )
+                jsonObjectReporterField.add("reporter", jsonObjectReporter)
+                jsonObjectField.add("fields", jsonObjectReporterField)
+                RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+                    .create(AccountIdService::class.java)
+                    .setReporter(jsonObject = jsonObjectField)
+                    .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+                        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                        override fun onFailure(
+                            call: retrofit2.Call<List<JiraUserModel>>,
+                            t: Throwable
+                        ) {
+                            resetJiraValues()
+                            jiraExceptionHandler(throwable = t)
+                        }
+
+                        override fun onResponse(
+                            call: retrofit2.Call<List<JiraUserModel>>,
+                            response: retrofit2.Response<List<JiraUserModel>>
+                        ) {
+                            resetJiraValues()
+                            Log.d("reporter_put_success", response.code().toString())
+                        }
+                    })
+            }
+        }
+    }
+
+    private fun createSprint(issueKey: String) {
+        if (this.sprint != null && this.sprintField != null) {
+            if (this.sprint!!.isNotEmpty()) {
+                queueCreateTask++
+                val jsonObjectSprint = JsonObject()
+                val jsonObjectFieldSprint = JsonObject()
+                jsonObjectSprint.addProperty(
+                    sprintField,
+                    hashMapSprint[arrayListSprintName[sprintPosition]]?.toInt()
+                )
+                jsonObjectFieldSprint.add("fields", jsonObjectSprint)
+                RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+                    .create(AccountIdService::class.java)
+                    .setSprint(jsonObject = jsonObjectFieldSprint)
+                    .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
+                        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                        override fun onFailure(
+                            call: retrofit2.Call<List<JiraSprintModel>>,
+                            t: Throwable
+                        ) {
+                            resetJiraValues()
+                            jiraExceptionHandler(throwable = t)
+                        }
+
+                        override fun onResponse(
+                            call: retrofit2.Call<List<JiraSprintModel>>,
+                            response: retrofit2.Response<List<JiraSprintModel>>
+                        ) {
+                            resetJiraValues()
+                            Log.d("sprint_put_success", response.code().toString())
+                        }
+                    })
+            }
+        }
+    }
+
+    private fun createDate(issueKey: String) {
+        if (this.startDate != null && this.startDateField != null) {
+            queueCreateTask++
+            val jsonObjectStartDate = JsonObject()
+            val jsonObjectFieldStartDate = JsonObject()
+            jsonObjectStartDate.addProperty(
+                startDateField,
+                startDate
+            )
+            jsonObjectFieldStartDate.add("fields", jsonObjectStartDate)
+            RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+                .create(AccountIdService::class.java)
+                .setStartDate(jsonObject = jsonObjectFieldStartDate)
+                .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<List<JiraSprintModel>>,
+                        t: Throwable
+                    ) {
+                        resetJiraValues()
+                        jiraExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<List<JiraSprintModel>>,
+                        response: retrofit2.Response<List<JiraSprintModel>>
+                    ) {
+                        resetJiraValues()
+                        Log.d("start_put_success", response.code().toString())
+                    }
+                })
+        }
     }
 }

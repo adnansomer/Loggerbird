@@ -6,6 +6,7 @@ import retrofit2.http.*
 
 interface AccountIdService {
     @POST("issue")
+    fun createIssue(@Body jsonObject:JsonObject):Call<JsonObject>
     @GET("search?query")
     fun getAccountIdList(): Call<List<JiraUserModel>>
 //    @Headers("Content-Type: application/json")

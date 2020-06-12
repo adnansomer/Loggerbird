@@ -362,13 +362,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 }
             }
         }
+
         internal fun callEnqueueEmail() {
             workQueueLinkedEmail.controlRunnable = false
             if (runnableListEmail.size > 0) {
                 runnableListEmail.removeAt(0)
                 if (runnableListEmail.size > 0) {
                     workQueueLinkedEmail.put(runnableListEmail[0])
-                }else{
+                } else {
                     loggerBirdService.detachProgressBar()
                     loggerBirdService.removeEmailLayout()
                     loggerBirdService.defaultToast.attachToast(
@@ -376,7 +377,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         toastMessage = loggerBirdService.context.resources.getString(R.string.email_send_success)
                     )
                 }
-            }else{
+            } else {
                 loggerBirdService.detachProgressBar()
                 loggerBirdService.removeEmailLayout()
                 loggerBirdService.defaultToast.attachToast(
@@ -385,7 +386,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 )
             }
         }
-        internal fun resetEnqueueMail(){
+
+        internal fun resetEnqueueMail() {
             runnableListEmail.clear()
             workQueueLinkedEmail.controlRunnable = false
         }
@@ -1592,16 +1594,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             throw LoggerBirdException(Constants.logInitErrorMessage)
         }
     }
-    private fun callEmail(filePathMedia: File ,to: String) {
+
+    private fun callEmail(filePathMedia: File, to: String) {
         if (LoggerBird.isLogInitAttached()) {
-                if (runnableListEmail.isEmpty()) {
-                    workQueueLinkedEmail.put {
-                        createEmailTask(filePathMedia  = filePathMedia,to = to)
-                    }
+            if (runnableListEmail.isEmpty()) {
+                workQueueLinkedEmail.put {
+                    createEmailTask(filePathMedia = filePathMedia, to = to)
                 }
-                runnableListEmail.add(Runnable {
-                    createEmailTask(filePathMedia  = filePathMedia,to = to)
-                })
+            }
+            runnableListEmail.add(Runnable {
+                createEmailTask(filePathMedia = filePathMedia, to = to)
+            })
         } else {
             throw LoggerBirdException(Constants.logInitErrorMessage)
         }
@@ -2922,6 +2925,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             ) && jiraAuthentication.checkEpicLinkEmpty(
                 activity = activity,
                 context = context
+            ) && jiraAuthentication.checkComponentEmpty(
+                activity = activity,
+                context = context
             )
         ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -3282,7 +3288,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewPriority.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListPriority.contains(autoTextViewPriority.editableText.toString())) {
-                    if(arrayListPriority.isNotEmpty()){
+                    if (arrayListPriority.isNotEmpty()) {
                         if (sharedPref.getString("jira_priority", null) != null) {
                             autoTextViewPriority.setText(
                                 sharedPref.getString(
@@ -3385,7 +3391,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewLinkedIssue.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListLinkedIssues.contains(autoTextViewLinkedIssue.editableText.toString())) {
-                    if(arrayListLinkedIssues.isNotEmpty()){
+                    if (arrayListLinkedIssues.isNotEmpty()) {
                         if (sharedPref.getString("jira_linked_issue", null) != null) {
                             autoTextViewLinkedIssue.setText(
                                 sharedPref.getString(
@@ -3475,7 +3481,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewIssueType.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListIssueTypes.contains(autoTextViewIssueType.editableText.toString())) {
-                    if(arrayListIssueTypes.isNotEmpty()){
+                    if (arrayListIssueTypes.isNotEmpty()) {
                         if (sharedPref.getString("jira_issue_type", null) != null) {
                             autoTextViewIssueType.setText(
                                 sharedPref.getString(
@@ -3538,7 +3544,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
-                    if(arrayListProjectNames.isNotEmpty()){
+                    if (arrayListProjectNames.isNotEmpty()) {
                         if (sharedPref.getString("jira_project", null) != null) {
                             autoTextViewProject.setText(
                                 sharedPref.getString("jira_project", null),
@@ -3588,7 +3594,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             autoTextViewEpicName.setOnFocusChangeListener { v, hasFocus ->
                 if (!hasFocus && autoTextViewEpicName.text.toString().isEmpty()) {
                     if (!arrayListEpicName.contains(autoTextViewEpicName.editableText.toString())) {
-                        if(arrayListEpicName.isNotEmpty()){
+                        if (arrayListEpicName.isNotEmpty()) {
                             if (sharedPref.getString("jira_epic_name", null) != null) {
                                 autoTextViewEpicName.setText(
                                     sharedPref.getString(
@@ -4399,13 +4405,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun initializeEmailButtons(filePathMedia: File) {
         try {
             buttonEmailCreate.setSafeOnClickListener {
-                if(arraylistEmailToUsername.isNotEmpty()){
+                if (arraylistEmailToUsername.isNotEmpty()) {
                     arraylistEmailToUsername.forEach {
-                        callEmail(filePathMedia = filePathMedia,to = it.email)
+                        callEmail(filePathMedia = filePathMedia, to = it.email)
                     }
-                }else{
+                } else {
                     if (checkEmailFormat(editTextTo.text.toString())) {
-                        callEmail(filePathMedia = filePathMedia,to = editTextTo.text.toString())
+                        callEmail(filePathMedia = filePathMedia, to = editTextTo.text.toString())
                     }
                 }
 
@@ -4429,20 +4435,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             e.printStackTrace()
             callEnqueueEmail()
             LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception =  e ,tag = Constants.emailTag)
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
 
         }
     }
 
-    private fun createEmailTask(filePathMedia: File,to:String){
+    private fun createEmailTask(filePathMedia: File, to: String) {
         try {
-                attachProgressBar()
-                sendSingleMediaFile(
-                    filePathMedia = filePathMedia,
-                    to = to,
-                    subject = editTextSubject.text.toString(),
-                    message = editTextContent.text.toString()
-                )
+            attachProgressBar()
+            sendSingleMediaFile(
+                filePathMedia = filePathMedia,
+                to = to,
+                subject = editTextSubject.text.toString(),
+                message = editTextContent.text.toString()
+            )
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -4450,7 +4456,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             detachProgressBar()
             removeEmailLayout()
             LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e ,tag = Constants.emailTag)
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
         }
     }
 

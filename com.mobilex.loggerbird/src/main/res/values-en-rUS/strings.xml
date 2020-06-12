@@ -65,6 +65,7 @@
     <string name="jira_summary_empty">Summary cannot be empty!</string>
     <string name="jira_reporter_empty">Reporter doesn\'t exist!</string>
     <string name="jira_fix_version_empty">Fix version doesn\'t exist!</string>
+    <string name="jira_component_version_empty">Component doesn\'t exist!</string>
     <string name="jira_epic_link_empty">Epic link doesn\'t exist!</string>
     <string name="jira_epic_name_empty">Epic name cannot be empty!</string>
     <string name="jira_summary_unhandled_exception">unhandled_exception:</string>
