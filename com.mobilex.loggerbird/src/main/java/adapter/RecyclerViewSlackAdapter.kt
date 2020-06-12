@@ -133,7 +133,6 @@ class RecyclerViewSlackAdapter(
                     windowManagerRecyclerViewItemPopup =
                         activity.getSystemService(Context.WINDOW_SERVICE)!!
                     if (windowManagerRecyclerViewItemPopup != null) {
-//                    windowManagerParamsFeedback.gravity = Gravity.BOTTOM
                         (windowManagerRecyclerViewItemPopup as WindowManager).addView(
                             viewRecyclerViewItems,
                             windowManagerParamsRecyclerViewItemPopup

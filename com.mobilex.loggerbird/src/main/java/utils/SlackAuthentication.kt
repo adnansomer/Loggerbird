@@ -73,6 +73,7 @@ class SlackAuthentication {
         private const val CLIENT_SECRET = "6147f0bd55a0c777893d07c91f3b16ef"
         private const val REDIRECT_URL = "https://app.slack.com/client"
         private const val APP_ID = "A014F310UVB"
+        private const val INVITATION_URL = "https://slack.com/oauth/v2/authorize?client_id=1176309019584.1151103028997&scope=app_mentions:read,channels:join,channels:read,chat:write,files:write,groups:read,groups:write,im:write,incoming-webhook,mpim:read,mpim:write,usergroups:write,users:read,users:write,usergroups:read,users.profile:read,chat:write.public,team:read"
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -199,13 +200,10 @@ class SlackAuthentication {
             this.activity = activity
             val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             val token = sharedPref.getString("slackAccessToken", "")
-            //val token = "xoxp-1176309019584-1152680995235-1175896048050-9323d8af5383b398669da1c72479fc84"
-            // https://slack.com/oauth/v2/authorize?client_id=1176309019584.1151103028997&scope=app_mentions:read,channels:join,channels:read,chat:write,files:write,groups:read,groups:write,im:write,incoming-webhook,mpim:read,mpim:write,usergroups:write,users:read,users:write,usergroups:read,users.profile:read,chat:write.public,team:read
             //val token = "xoxb-523949707746-1185252116928-e77ayP6N5Mv0VfJbYhQ4JyaB" //mobilex
             //val token = "xoxb-1176309019584-1152486968594-k4brnZhlrUXAAy80Be0GmaVv" //loggerbird
 
             if(token == "") {
-
                 withContext(Dispatchers.IO) {
                     val convertToken = slack.methods().oauthV2Access {
                         it.code(returnCode)
@@ -278,8 +276,9 @@ class SlackAuthentication {
                     slackTaskGatherChannels(slack = slack, token = token)
                     slackTaskGatherUsers(slack = slack, token = token)
                 }
-            }catch(e: java.net.SocketTimeoutException){
+            }catch(e: SocketTimeoutException){
                 LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
+                Log.d(Constants.slackTag,"No Authorizated Token")
                 slackExceptionHandler(e = e, filePathName = filePathMedia, socketTimeOut = java.net.SocketTimeoutException())
 
             }
@@ -321,7 +320,7 @@ class SlackAuthentication {
                         slackType )
                 }
                 LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
-                Log.d("adnan","illegal")
+                Log.d(Constants.slackTag,"No Authorizated Token")
                 e.printStackTrace()
             }
         }
@@ -350,7 +349,7 @@ class SlackAuthentication {
                         slackType )
                 }
                 LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
-                Log.d("adnan","illegal")
+                Log.d(Constants.slackTag,"No Authorizated Token")
                 e.printStackTrace()
                 exceptionBoolean = true
             }
@@ -527,16 +526,6 @@ class SlackAuthentication {
 
     internal fun gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>) {
         this.arrayListRecyclerViewItems = arrayListRecyclerViewItems
-    }
-
-    private fun checkQueueTime(activity: Activity) {
-        val timerQueue = Timer()
-        timerTaskQueue = object : TimerTask() {
-            override fun run() {
-
-            }
-        }
-        timerQueue.schedule(timerTaskQueue, 20000)
     }
 
     private fun checkConnectionTimeOut(activity: Activity){

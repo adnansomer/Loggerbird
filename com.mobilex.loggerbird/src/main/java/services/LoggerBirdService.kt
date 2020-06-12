@@ -2740,9 +2740,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         putString("jira_issue", autoTextViewIssue.editableText.toString())
                         putString("jira_assignee", autoTextViewAssignee.editableText.toString())
                         putString("jira_priority", autoTextViewPriority.editableText.toString())
-                        putString(
-                            "jira_fix_versions",
-                            autoTextViewFixVersions.editableText.toString()
+                        putString("jira_fix_versions", autoTextViewFixVersions.editableText.toString()
                         )
                         putString("jira_labels", autoTextViewLabel.editableText.toString())
                         putString("jira_epic_link", autoTextViewEpicLink.editableText.toString())

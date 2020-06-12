@@ -1403,6 +1403,6 @@ class JiraAuthentication {
                 }
             }
         }
-        timerQueue.schedule(timerTaskQueue, 20000)
+        timerQueue.schedule(timerTaskQueue, 300000)
     }
 }
