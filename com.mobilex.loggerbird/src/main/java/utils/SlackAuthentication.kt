@@ -56,7 +56,6 @@ class SlackAuthentication {
     private val returnCode = LoggerBird.slackApiToken
     private val slack = Slack.getInstance()
     private val defaultToast: DefaultToast = DefaultToast()
-    var exceptionBoolean : Boolean = false
     private var queueCounter : Int = 0
     private lateinit var activity : Activity
     private lateinit var context: Context
@@ -210,7 +209,7 @@ class SlackAuthentication {
                         it.clientSecret(CLIENT_SECRET)
                         it.redirectUri(REDIRECT_URL)
                     }
-                    convertedToken = convertToken.accessToken
+                    val convertedToken = convertToken.accessToken
                     val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     with(sharedPref.edit()) {
                         putString("slackAccessToken", convertedToken)
@@ -245,9 +244,8 @@ class SlackAuthentication {
         }catch (e: Exception){
             slackExceptionHandler(e = e)
             LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(
-                exception = e
-            )
+            Log.d(Constants.slackTag,"No Authorizated Token")
+            slackExceptionHandler(e = e, filePathName = filePathMedia, socketTimeOut = SocketTimeoutException())
         }
     }
 
@@ -259,6 +257,7 @@ class SlackAuthentication {
         filePathMedia: File?,
         slackType : String? = null
     ) {
+
         val coroutineCallGatherDetails = CoroutineScope(Dispatchers.IO)
         coroutineCallGatherDetails.launch(Dispatchers.IO){
             try{
@@ -278,7 +277,7 @@ class SlackAuthentication {
             }catch(e: SocketTimeoutException){
                 LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
                 Log.d(Constants.slackTag,"No Authorizated Token")
-                slackExceptionHandler(e = e, filePathName = filePathMedia, socketTimeOut = java.net.SocketTimeoutException())
+                slackExceptionHandler(e = e, filePathName = filePathMedia, socketTimeOut = SocketTimeoutException())
 
             }
         }
@@ -320,6 +319,7 @@ class SlackAuthentication {
                 }
 
                 checkTimeOut(activity = activity)
+                Log.d(Constants.slackTag,"Not Authorizated Token")
                 e.printStackTrace()
             }
         }
@@ -347,9 +347,8 @@ class SlackAuthentication {
                         messagePath,
                         slackType )
                 }
-
+                Log.d(Constants.slackTag,"Not Authorizated Token")
                 e.printStackTrace()
-                exceptionBoolean = true
             }
         }
     }

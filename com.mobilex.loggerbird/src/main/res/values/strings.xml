@@ -1,6 +1,6 @@
 <resources>
     <!-- Application -->
-    <string name="app_name">denemekotlinlibrary</string>
+    <string name="app_name">LoggerBird</string>
     <!-- Library -->
     <string name="library_name">LoggerBird</string>
     <!-- Classes:-->
@@ -104,7 +104,11 @@
     <string name="textView_action_activate">Activate</string>
     <string name="checkBox_feedback_title">Give us feedback!</string>
     <!-- loggerbird_feedback-->
-    <string name="editText_feedback_title">Give us feedback!</string>
+    <string name="editText_feedback_title">Give Us Feedback</string>
+    <string name="editText_feedback_text">Write your feedback here!</string>
+    <string name="editText_feedback_subtitle">Feedback Message</string>
+    <string name="button_feedback_cancel">Cancel</string>
+    <string name="button_feedback_create">Send</string>
     <!-- loggerbird_jira_popup-->
     <string name="textView_jira_auth_title">Step 1/2 - Authorization</string>
     <string name="textView_jira_title">Create Issue</string>
