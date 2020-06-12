@@ -9,7 +9,8 @@ class BasicAuthInterceptor(username:String,password:String):Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         var request = chain.request()
-        request = request.newBuilder().header("Authorization", credentials).header("Content-Type", "application/json").build()
+        request = request.newBuilder().header("Authorization", credentials).header("Content-Type", "application/json")
+            .header("x-Atlassian-Token","no-check").build()
         return chain.proceed(request)
     }
 }

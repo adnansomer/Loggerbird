@@ -9,23 +9,25 @@ import android.util.Log
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
-import com.atlassian.jira.rest.client.api.JiraRestClient
-import com.atlassian.jira.rest.client.api.JiraRestClientFactory
-import com.atlassian.jira.rest.client.api.domain.*
-import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
-import com.atlassian.jira.rest.client.api.domain.input.LinkIssuesInput
-import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
+//import com.atlassian.jira.rest.client.api.JiraRestClient
+//import com.atlassian.jira.rest.client.api.JiraRestClientFactory
+//import com.atlassian.jira.rest.client.api.domain.*
+//import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
+//import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
-import io.atlassian.util.concurrent.Promise
+//import io.atlassian.util.concurrent.Promise
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import models.*
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
 import services.LoggerBirdService
 import java.io.*
 import java.net.URI
@@ -102,7 +104,7 @@ class JiraAuthentication {
     private var startDateField: String? = null
     private var startDate: String? = null
     private var epicNameField: String? = null
-    private var epicLinkField:String? = null
+    private var epicLinkField: String? = null
     private var queueCreateTask = 0
     private lateinit var timerTaskQueue: TimerTask
 
@@ -170,18 +172,18 @@ class JiraAuthentication {
                         when (jiraTask) {
                             "create" -> jiraTaskCreateIssue(
                                 filePathMediaName = filePathMediaName,
-                                restClient = jiraAuthentication(),
+//                                restClient = jiraAuthentication(),
                                 activity = activity,
                                 context = context,
                                 createMethod = createMethod
                             )
                             "get" -> jiraTaskGatherDetails(
-                                restClient = jiraAuthentication(),
+//                                restClient = jiraAuthentication(),
                                 activity = activity
                             )
                             "unhandled_duplication" ->
                                 if (duplicateErrorMessageCheck(
-                                        restClient = jiraAuthentication(),
+//                                        restClient = jiraAuthentication(),
                                         activity = activity
                                     )
                                 ) {
@@ -256,16 +258,16 @@ class JiraAuthentication {
         )
     }
 
-    private fun jiraAuthentication(): JiraRestClient {
-        val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
-        val jiraServerUri =
-            URI(jiraDomainName)
-        return factory.createWithBasicHttpAuthentication(
-            jiraServerUri,
-            jiraUserName,
-            jiraApiToken
-        )
-    }
+//    private fun jiraAuthentication(): JiraRestClient {
+//        val factory: JiraRestClientFactory = AsynchronousJiraRestClientFactory()
+//        val jiraServerUri =
+//            URI(jiraDomainName)
+//        return factory.createWithBasicHttpAuthentication(
+//            jiraServerUri,
+//            jiraUserName,
+//            jiraApiToken
+//        )
+//    }
 
 // project: String +
 // issueType: String +
@@ -288,7 +290,7 @@ class JiraAuthentication {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun jiraTaskCreateIssue(
         filePathMediaName: File? = null,
-        restClient: JiraRestClient,
+//        restClient: JiraRestClient,
         activity: Activity,
         context: Context,
         createMethod: String
@@ -296,14 +298,14 @@ class JiraAuthentication {
         try {
             when (createMethod) {
                 "normal" -> jiraNormalTask(
-                    restClient = restClient,
+//                    restClient = restClient,
                     context = context,
                     activity = activity
                 )
                 "unhandled" -> if (filePathMediaName != null) {
                     if (filePathMediaName.exists()) {
                         jiraUnhandledTask(
-                            restClient = restClient,
+//                            restClient = restClient,
                             context = context,
                             filePathName = filePathMediaName
                         )
@@ -325,7 +327,7 @@ class JiraAuthentication {
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun jiraNormalTask(restClient: JiraRestClient, activity: Activity, context: Context) {
+    private fun jiraNormalTask(activity: Activity, context: Context) {
         try {
             if (checkSummaryEmpty(
                     activity = activity,
@@ -478,6 +480,15 @@ class JiraAuthentication {
                                             createReporter(issueKey = issueKey)
                                             createSprint(issueKey = issueKey)
                                             createDate(issueKey = issueKey)
+                                            RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths.forEach {
+                                                val file = it.file
+                                                if (file.exists()) {
+                                                    createAttachments(
+                                                        issueKey = issueKey,
+                                                        file = file
+                                                    )
+                                                }
+                                            }
                                         } catch (e: Exception) {
                                             jiraExceptionHandler(e = e)
                                         }
@@ -603,29 +614,29 @@ class JiraAuthentication {
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun jiraUnhandledTask(
-        restClient: JiraRestClient,
+//        restClient: JiraRestClient,
         context: Context,
         filePathName: File
     ) {
         val sharedPref =
             PreferenceManager.getDefaultSharedPreferences(LoggerBirdService.loggerBirdService.returnActivity().applicationContext)
-        val issueClient = restClient.issueClient
-        val issueBuilder = IssueInputBuilder(
-            "DEN",
-            10004,
-            context.resources.getString(R.string.jira_summary_unhandled_exception)
-        )
-        issueBuilder.setDescription(sharedPref.getString("unhandled_exception_message", null))
-        val inputStreamSecessionFile =
-            FileInputStream(filePathName)
-        val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
-        val issueKey = basicIssue.key
-        val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
-        issueClient.addAttachment(
-            issue.get().attachmentsUri,
-            inputStreamSecessionFile,
-            filePathName.absolutePath
-        )
+//        val issueClient = restClient.issueClient
+//        val issueBuilder = IssueInputBuilder(
+//            "DEN",
+//            10004,
+//            context.resources.getString(R.string.jira_summary_unhandled_exception)
+//        )
+//        issueBuilder.setDescription(sharedPref.getString("unhandled_exception_message", null))
+//        val inputStreamSecessionFile =
+//            FileInputStream(filePathName)
+//        val basicIssue = issueClient.createIssue(issueBuilder.build()).claim()
+//        val issueKey = basicIssue.key
+//        val issue: Promise<Issue> = restClient.issueClient.getIssue(issueKey)
+//        issueClient.addAttachment(
+//            issue.get().attachmentsUri,
+//            inputStreamSecessionFile,
+//            filePathName.absolutePath
+//        )
         val editor: SharedPreferences.Editor = sharedPref.edit()
         editor.remove("unhandled_file_path")
         editor.apply()
@@ -643,7 +654,7 @@ class JiraAuthentication {
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun jiraTaskGatherDetails(
-        restClient: JiraRestClient,
+//        restClient: JiraRestClient,
         activity: Activity
     ) {
         try {
@@ -1335,9 +1346,9 @@ class JiraAuthentication {
 //    }
 
 
-    private fun jiraTaskGatherReporters(restClient: JiraRestClient) {
-        arrayListReporter.addAll(arrayListAssignee)
-    }
+//    private fun jiraTaskGatherReporters(restClient: JiraRestClient) {
+//        arrayListReporter.addAll(arrayListAssignee)
+//    }
 
     internal fun getArrayListProjects(): ArrayList<String> {
         return arrayListProjects
@@ -1527,7 +1538,6 @@ class JiraAuthentication {
     }
 
 
-
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun checkEpicLinkEmpty(activity: Activity, context: Context): Boolean {
         return if (arrayListEpicLink.contains(epicLink) || epicLink!!.isEmpty()) {
@@ -1659,7 +1669,7 @@ class JiraAuthentication {
 //        withContext(coroutineCallJira.coroutineContext) {
         try {
             jiraTaskCreateIssue(
-                restClient = jiraAuthentication(),
+//                restClient = jiraAuthentication(),
                 context = context,
                 createMethod = "unhandled",
                 activity = activity,
@@ -1746,24 +1756,24 @@ class JiraAuthentication {
 //        return false
 //    }
     internal fun duplicateErrorMessageCheck(
-        restClient: JiraRestClient,
+//        restClient: JiraRestClient,
         activity: Activity
     ): Boolean {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         var controlDuplication = false
         if (sharedPref.getString("unhandled_exception_message", null) != null) {
             val exceptionMessage = sharedPref.getString("unhandled_exception_message", null)
-            val searchClient = restClient.searchClient
-            val projectClient = restClient.projectClient
-            projectClient.allProjects.claim().forEach {
-                searchClient.searchJql("project=" + it.key).claim().issues.forEach { issue ->
-                    if (issue.description == exceptionMessage) {
-                        Log.d("found_duplication", "true!!!!")
-                        controlDuplication = true
-                        return controlDuplication
-                    }
-                }
-            }
+//            val searchClient = restClient.searchClient
+//            val projectClient = restClient.projectClient
+//            projectClient.allProjects.claim().forEach {
+//                searchClient.searchJql("project=" + it.key).claim().issues.forEach { issue ->
+//                    if (issue.description == exceptionMessage) {
+//                        Log.d("found_duplication", "true!!!!")
+//                        controlDuplication = true
+//                        return controlDuplication
+//                    }
+//                }
+//            }
         }
         return controlDuplication
     }
@@ -1925,5 +1935,37 @@ class JiraAuthentication {
                     }
                 })
         }
+    }
+
+    private fun createAttachments(issueKey: String, file:File) {
+        queueCreateTask++
+        val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+        val body = MultipartBody.Part.createFormData("file",file.name,requestFile)
+        RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+            .create(AccountIdService::class.java)
+            .setAttachments(file= body)
+            .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
+                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                override fun onFailure(
+                    call: retrofit2.Call<List<JiraSprintModel>>,
+                    t: Throwable
+                ) {
+                    resetJiraValues()
+                    jiraExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<List<JiraSprintModel>>,
+                    response: retrofit2.Response<List<JiraSprintModel>>
+                ) {
+                    resetJiraValues()
+                    if (file.name != "logger_bird_details.txt") {
+                        if (file.exists()) {
+                            file.delete()
+                        }
+                    }
+                    Log.d("attachment_put_success", response.code().toString())
+                }
+            })
     }
 }

@@ -1,8 +1,10 @@
 package models
 
 import com.google.gson.JsonObject
+import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.*
+import java.io.InputStream
 
 interface AccountIdService {
     @POST("issue")
@@ -18,6 +20,9 @@ interface AccountIdService {
     fun setSprint(@Body jsonObject:JsonObject): Call<List<JiraSprintModel>>
     @PUT("?")
     fun setStartDate(@Body jsonObject:JsonObject): Call<List<JiraSprintModel>>
+    @Multipart
+    @POST("attachments")
+    fun setAttachments(@Part file:MultipartBody.Part): Call<List<JiraSprintModel>>
     @GET("sprint")
     fun getSprintList(): Call<JsonObject>
     @GET("board")
