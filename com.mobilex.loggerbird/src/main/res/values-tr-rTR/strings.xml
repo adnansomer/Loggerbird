@@ -86,6 +86,10 @@
     <string name="unhandled_file_duplication_found">En son açılan görevin hata mesajı ile aynı hata mesajı karşılaşıldı.Bu dosyayı yine de göndermek istermisiniz?</string>
     <string name="email_invalid_format">Yanlış e-mail formatı!</string>
     <string name="email_to_duplication">Bu kullanıcı zaten listeye eklendi!</string>
+    <string name="future_task_enabled">Gelecek zaman görevi açıldı!</string>
+    <string name="future_task_disabled">Gelecek zaman görevi kapatıldı!</string>
+    <string name="future_task_empty">Tarih ve saati boş olamaz!</string>
+    <string name="future_task_gathered">Gelecek zaman detayları alındı!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
@@ -96,6 +100,12 @@
     <string name="log_details_success">Log detayları e-mailinize gönderilmiştir!</string>
     <string name="email_connection_time_out">E-mail internet zaman aşımından dolayı gönderilmedi!</string>
     <!-- Layout:-->
+    <!-- fragment_logger_bird-->
+    <string name="textView_loggerbird_email_title">E-mail ile gönder</string>
+    <string name="textView_loggerbird_jira_title">Jira ile paylaş</string>
+    <string name="textView_loggerbird_slack_title">Slack ile paylaş</string>
+    <string name="textView_loggerbird_discard_title">Dosyayı sil</string>
+    <string name="textView_loggerbird_future_title">Gelecek zaman görevi olarak ata</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça boyutu ayarla</string>
     <!-- activity_paint_save_dialog-->
@@ -184,4 +194,11 @@
     <string name="button_email_to_remove">Kullanıcıyı kaldır</string>
     <string name="button_email_to_keep">Kullanıcıyı sakla</string>
     <string name="textView_recyclerView_to_popup_header">Kullanıcıyı Sil</string>
+    <!-- loggerbird_future_task_popup-->
+    <string name="textView_future_task_title">Gelecek Zaman Görevi</string>
+    <string name="textView_future_task_content">Bu görevi gelecek zaman görevi olarak atamaktan eminmisiniz?</string>
+    <string name="button_future_task_proceed">Devam et</string>
+    <string name="button_future_task_cancel">İptal</string>
+    <string name="textView_future_task_date">Başlangıç tarihi</string>
+    <string name="textView_future_task_time">Başlangıç zamanı</string>
 </resources>

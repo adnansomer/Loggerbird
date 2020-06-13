@@ -86,6 +86,10 @@
     <string name="unhandled_file_duplication_found">We have detected duplication error messages , do you still want to create issue?</string>
     <string name="email_invalid_format">Invalid e-mail format!</string>
     <string name="email_to_duplication">This user already added to list!</string>
+    <string name="future_task_enabled">Future-task enabled!</string>
+    <string name="future_task_disabled">Future-task disabled!</string>
+    <string name="future_task_empty">Date or time cannot be empty!</string>
+    <string name="future_task_gathered">Future-task details have been gathered!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -96,6 +100,12 @@
     <string name="log_details_success">Log details have been sent to your e-mail!</string>
     <string name="email_connection_time_out">Email could not send because of a internet connection timeout!</string>
     <!-- Layout:-->
+    <!-- fragment_logger_bird-->
+    <string name="textView_loggerbird_email_title">Send to E-Mail</string>
+    <string name="textView_loggerbird_jira_title">Share with Jira</string>
+    <string name="textView_loggerbird_slack_title">Send to Slack</string>
+    <string name="textView_loggerbird_discard_title">Discard</string>
+    <string name="textView_loggerbird_future_title">Set as future task</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>
     <!-- activity_paint_save_dialog-->
@@ -184,4 +194,11 @@
     <string name="button_email_to_remove">Remove user</string>
     <string name="button_email_to_keep">Keep user</string>
     <string name="textView_recyclerView_to_popup_header">Delete User</string>
+    <!-- loggerbird_future_task_popup-->
+    <string name="textView_future_task_title">Future Task</string>
+    <string name="textView_future_task_content">Are you sure to set this task as a future task?</string>
+    <string name="button_future_task_proceed">Proceed</string>
+    <string name="button_future_task_cancel">Cancel</string>
+    <string name="textView_future_task_date">Start date</string>
+    <string name="textView_future_task_time">Start time</string>
 </resources>

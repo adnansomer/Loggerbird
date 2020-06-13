@@ -3,6 +3,7 @@ package utils
 import adapter.RecyclerViewEmailAdapter
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.util.Log
 import android.view.View
@@ -23,6 +24,7 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOption
 import com.mobilex.loggerbird.R
 import exception.LoggerBirdException
 import kotlinx.coroutines.*
+import services.LoggerBirdFutureTaskService
 import services.LoggerBirdService
 import java.io.File
 import java.lang.Runnable
@@ -410,7 +412,9 @@ internal class EmailUtil {
                 }
                 initializeEmail(context = context, to = to, subject = subject)
                 mimeBodyPart = MimeBodyPart()
-                mimeBodyPart.setContent(message,"text/plain")
+                if(message != null){
+                    mimeBodyPart.setContent(message,"text/plain")
+                }
                 multiPart.addBodyPart(mimeBodyPart)
                 if(RecyclerViewEmailAdapter.ViewHolder.controlArrayListFilePaths()){
                 if (RecyclerViewEmailAdapter.ViewHolder.arrayListFilePaths.isNotEmpty()) {
@@ -480,6 +484,7 @@ internal class EmailUtil {
                     }
                 }
                 transport.close()
+                    context.stopService(Intent(context , LoggerBirdFutureTaskService::class.java))
                 }
             } catch (e: Exception) {
                 if(activity != null){
