@@ -337,10 +337,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var timePickerFutureTask: TimePicker
     private lateinit var buttonFutureTaskTimeCreate: Button
     private lateinit var buttonFutureTaskTimeCancel: Button
-    private lateinit var emailTo:String
-    private lateinit var emailMessage:String
-    private lateinit var emailFile:File
-    private lateinit var emailSubject:String
+    private lateinit var emailTo: String
+    private lateinit var emailMessage: String
+    private lateinit var emailFile: File
+    private lateinit var emailSubject: String
+    private lateinit var emailArrayListFilePath: ArrayList<File>
 
     //Static global variables:
     internal companion object {
@@ -4484,24 +4485,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
                     if (arraylistEmailToUsername.isNotEmpty()) {
                         arraylistEmailToUsername.forEach {
-                            setEmailFile(file = filePathMedia)
-                            setEmailTo(to = it.email)
-                            setEmailMessage(message = editTextContent.text.toString())
-                            setEmailSubject(subject = editTextSubject.text.toString())
-                            val intentServiceFuture =
-                                Intent(context, LoggerBirdFutureTaskService::class.java)
-                            context.startService(intentServiceFuture)
-
+                            createFutureTaskEmail(filePathMedia = filePathMedia)
                         }
+//                            emailArrayListFilePath.clear()
+//                            setEmailArrayListFilePath(arrayListFilePath = arrayListFile)
+//                            setEmailFile(file = filePathMedia)
+//                            setEmailTo(to = it.email)
+//                            setEmailMessage(message = editTextContent.text.toString())
+//                            setEmailSubject(subject = editTextSubject.text.toString())
                     } else {
                         if (checkEmailFormat(editTextTo.text.toString())) {
-                            setEmailFile(file = filePathMedia)
-                            setEmailTo(to = editTextTo.text.toString())
-                            setEmailMessage(message = editTextContent.text.toString())
-                            setEmailSubject(subject = editTextSubject.text.toString())
-                            val intentServiceFuture =
-                                Intent(context, LoggerBirdFutureTaskService::class.java)
-                            context.startService(intentServiceFuture)
+                            createFutureTaskEmail(filePathMedia = filePathMedia)
                         }
                     }
 
@@ -4549,6 +4543,21 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
 
         }
+    }
+
+    private fun createFutureTaskEmail(filePathMedia: File) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        with(sharedPref.edit()) {
+            putString("future_task_email_to", editTextTo.text.toString())
+            putString("future_task_email_subject", editTextSubject.text.toString())
+            putString("future_task_email_message", editTextContent.text.toString())
+            putString("future_task_email_file", filePathMedia.absolutePath)
+            commit()
+        }
+        val intentServiceFuture =
+            Intent(context, LoggerBirdFutureTaskService::class.java)
+        context.startForegroundService(intentServiceFuture)
     }
 
     private fun createEmailTask(filePathMedia: File, to: String) {
@@ -4891,6 +4900,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
         }
     }
+
     private fun setEmailTo(to: String) {
         this.emailTo = to
     }
@@ -4907,19 +4917,29 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         this.emailFile = file
     }
 
-    internal fun getEmailTo():String{
+    private fun setEmailArrayListFilePath(arrayListFilePath: ArrayList<File>) {
+        this.emailArrayListFilePath = arrayListFilePath
+    }
+
+    internal fun getEmailTo(): String {
         return emailTo
     }
-    internal fun getEmailMessage():String{
+
+    internal fun getEmailMessage(): String {
         return emailMessage
     }
-    internal fun getEmailSubject():String{
+
+    internal fun getEmailSubject(): String {
         return emailSubject
     }
-    internal fun getEmailFile():File{
+
+    internal fun getEmailFile(): File {
         return emailFile
     }
 
+    internal fun getArrayListFilePath(): ArrayList<File> {
+        return emailArrayListFilePath
+    }
 
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

@@ -20,8 +20,8 @@ import loggerbird.LoggerBird
 import observers.LogActivityLifeCycleObserver
 
 class LoggerBirdForegroundServiceVideo : Service() {
-    companion object {
-        val NOTIFICATION_CHANNEL_ID = "LoggerBirdForegroundService"
+    internal companion object {
+        private val NOTIFICATION_CHANNEL_ID = "LoggerBirdForegroundService"
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -40,7 +40,7 @@ class LoggerBirdForegroundServiceVideo : Service() {
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.foregroundServiceVideo)
         }
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
 

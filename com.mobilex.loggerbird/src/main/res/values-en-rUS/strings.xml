@@ -99,6 +99,8 @@
     <string name="unhandled_exception_success">Unhandled exception detected,check your e-mail for details!</string>
     <string name="log_details_success">Log details have been sent to your e-mail!</string>
     <string name="email_connection_time_out">Email could not send because of a internet connection timeout!</string>
+    <!-- LoggerBirdFutureTaskService -->
+    <string name="future_task_notification_title">LoggerBird future task is running.</string>
     <!-- Layout:-->
     <!-- fragment_logger_bird-->
     <string name="textView_loggerbird_email_title">Send to E-Mail</string>

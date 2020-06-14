@@ -38,8 +38,8 @@
                  android:enabled="true"
                  android:exported="false" />
         <service android:name="services.LoggerBirdFutureTaskService"
-            android:enabled="true"
-            android:exported="true"
+            android:foregroundServiceType="dataSync"
+            android:exported = "true"
             />
 
     </application>

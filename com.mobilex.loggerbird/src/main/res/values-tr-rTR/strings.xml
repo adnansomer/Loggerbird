@@ -99,6 +99,8 @@
     <string name="unhandled_exception_success">Beklenmeyen bir hata gözlemlendi,detayları için e-mailinizi kontrol ediniz!</string>
     <string name="log_details_success">Log detayları e-mailinize gönderilmiştir!</string>
     <string name="email_connection_time_out">E-mail internet zaman aşımından dolayı gönderilmedi!</string>
+    <!-- LoggerBirdFutureTaskService -->
+    <string name="future_task_notification_title">LoggerBird gelecek zaman görevi çalışıyor.</string>
     <!-- Layout:-->
     <!-- fragment_logger_bird-->
     <string name="textView_loggerbird_email_title">E-mail ile gönder</string>
