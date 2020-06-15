@@ -67,6 +67,7 @@ class SlackAuthentication {
 
     /** Loggerbird slack app client information **/
     companion object{
+        
         private const val CLIENT_ID = "1176309019584.1151103028997"
         private const val CLIENT_SECRET = "6147f0bd55a0c777893d07c91f3b16ef"
         private const val REDIRECT_URL = "https://app.slack.com/client"
