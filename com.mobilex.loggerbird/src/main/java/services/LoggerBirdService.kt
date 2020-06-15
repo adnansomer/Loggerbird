@@ -156,9 +156,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewFutureDate: View
     private lateinit var viewFutureTime: View
     private lateinit var wrapper: FrameLayout
-    private lateinit var floating_action_button_feedback: FloatingActionButton
-    private lateinit var floating_action_button_feed_close: FloatingActionButton
-    private lateinit var editText_feedback: EditText
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
     private var sessionTimeEnd: Long? = null
@@ -185,8 +182,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var editTextSummary: EditText
     private lateinit var editTextDescription: EditText
     //  private lateinit var editTextJiraAuthMail: EditText
-//  private lateinit var editTextJiraAuthPassword: EditText
-//    private lateinit var spinnerReporter: Spinner
+    //  private lateinit var editTextJiraAuthPassword: EditText
+    //    private lateinit var spinnerReporter: Spinner
     private lateinit var autoTextViewReporter: AutoCompleteTextView
     //    private lateinit var spinnerLinkedIssue: Spinner
     private lateinit var autoTextViewLinkedIssue: AutoCompleteTextView
@@ -217,7 +214,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     //  private lateinit var buttonJiraAuthCancel: Button
-//  private lateinit var buttonJiraAuthNext: Button
+    //  private lateinit var buttonJiraAuthNext: Button
     private lateinit var layoutJira: FrameLayout
     private lateinit var toolbarJira: Toolbar
     private lateinit var toolbarSlack: Toolbar
@@ -274,6 +271,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var controlProjectPosition: Boolean = false
 
 
+    //Feedback:
+    private lateinit var floating_action_button_feedback: Button
+    private lateinit var floating_action_button_feed_close: Button
+    private lateinit var editText_feedback: EditText
+    private lateinit var toolbarFeedback: Toolbar
+    private lateinit var progressBarFeedback: ProgressBar
+    private lateinit var progressBarFeedbackLayout: FrameLayout
+
     //Slack:
     private lateinit var buttonSlackCreate: Button
     internal lateinit var buttonSlackCancel: Button
@@ -310,7 +315,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var emailToListAdapter: RecyclerViewEmaiToListAdapter
     private val arrayListEmailFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private val arraylistEmailToUsername: ArrayList<RecyclerViewModelTo> = ArrayList()
-
 
     //Future-Task:
     private lateinit var checkBoxFutureTask: CheckBox
@@ -710,6 +714,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             floating_action_button.startAnimation(workingAnimation)
                             floating_action_button.backgroundTintList =
                                 ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
+                            floating_action_button.imageTintList =
+                                ColorStateList.valueOf(resources.getColor(R.color.white))
                             if (audioRecording) {
                                 floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
                             }
@@ -944,6 +950,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun shareView(filePathMedia: File) {
         floating_action_button.backgroundTintList =
             ColorStateList.valueOf(resources.getColor(R.color.black))
+        floating_action_button.imageTintList =
+            ColorStateList.valueOf(resources.getColor(R.color.white))
         floating_action_button.clearAnimation()
         floating_action_button.animate()
             .rotationBy(360F)
@@ -1005,7 +1013,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-
                     initializeSlackLayout(filePathMedia = filePathMedia)
                 }
             }
@@ -1200,26 +1207,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                 context as Activity,
                                 paintActivity.javaClass
                             )
-//                            floating_action_button.animate()
-//                                .rotationBy(360F)
-//                                .setDuration(200)
-//                                .scaleX(1F)
-//                                .scaleY(1F)
-//                                .withEndAction {
-//                                    floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
-//                                    floating_action_button.animate()
-//                                        .rotationBy(0F)
-//                                        .setDuration(200)
-//                                        .scaleX(1F)
-//                                        .scaleY(1F)
-//                                        .start()
-//                                }
-//                                .start()
                             workingAnimation =
                                 AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
                             floating_action_button.startAnimation(workingAnimation)
                             floating_action_button.backgroundTintList =
                                 ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
+                            floating_action_button.imageTintList =
+                                ColorStateList.valueOf(resources.getColor(R.color.white))
                             context.startActivity(screenshotIntent)
                             context.overridePendingTransition(
                                 R.anim.slide_in_right,
@@ -1292,8 +1286,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                 floating_action_button.startAnimation(workingAnimation)
                                 floating_action_button.backgroundTintList =
                                     ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
-
-
+                                floating_action_button.imageTintList =
+                                    ColorStateList.valueOf(resources.getColor(R.color.white))
                             }
                         } else {
                             withContext(Dispatchers.Main) {
@@ -1478,8 +1472,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 floating_action_button.startAnimation(workingAnimation)
                 floating_action_button.backgroundTintList =
                     ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
-
-
+                floating_action_button.imageTintList =
+                    ColorStateList.valueOf(resources.getColor(R.color.white))
                 callEnqueue()
             }
             initRecorder()
@@ -1619,9 +1613,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun callVideoRecording(requestCode: Int, resultCode: Int, data: Intent?) {
         try {
             if (LoggerBird.isLogInitAttached()) {
-                //            if(this::intentForegroundServiceVideo.isInitialized){
-                //                stopForegroundServiceVideo()
-                //            }
                 workQueueLinked.controlRunnable = false
                 runnableList.clear()
                 workQueueLinked.clear()
@@ -1876,16 +1867,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsFeedback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
                     )
                 } else {
                     WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
@@ -1903,6 +1894,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     floating_action_button_feed_close =
                         viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
                     editText_feedback = viewFeedback.findViewById(R.id.editText_feed_back)
+                    toolbarFeedback = viewFeedback.findViewById(R.id.toolbar_feedback)
+                    progressBarFeedback = viewFeedback.findViewById(R.id.feedback_progressbar)
+                    progressBarFeedbackLayout = viewFeedback.findViewById(R.id.feedback_progressbar_background)
                     buttonClicksFeedback()
                 }
             }
@@ -1932,8 +1926,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             layoutFeedbackOnTouchListener
         )
         floating_action_button_feedback.setOnTouchListener(layoutFeedbackOnTouchListener)
+
         floating_action_button_feedback.setSafeOnClickListener {
-            sendFeedback("appcaesars@gmail.com")
+            sendFeedback("adnansomer@gmail.com")
         }
         floating_action_button_feed_close.setSafeOnClickListener {
             removeFeedBackLayout()
@@ -1950,13 +1945,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     message = editText_feedback.text.toString(),
                     to = to
                 )
-//                withContext(Dispatchers.Main){
-//                    Toast.makeText(
-//                        context,
-//                        R.string.feed_back_email_success,
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                }
+                withContext(Dispatchers.Main){
+                    Toast.makeText(
+                        context,
+                        R.string.feed_back_email_success,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         } else {
             Toast.makeText(
@@ -2310,10 +2305,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         message = message,
                         subject = subject
                     )
-//                    LoggerBird.deleteSingleMediaFile(
-//                        this@LoggerBirdService,
-//                        filePathMedia = filePathMedia
-//                    )
                 } else {
                     finishShareLayout("single_email_error")
                     resetEnqueueMail()
@@ -2368,7 +2359,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     }
 
                     detachProgressBar()
-//                    finishErrorFab()
                 }
                 "jira_error_time_out" -> {
                     removeJiraLayout()
@@ -2380,19 +2370,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     }
 
                     detachProgressBar()
-//                    finishErrorFab()
                 }
 
                 "slack" -> {
                     Toast.makeText(context, R.string.slack_sent, Toast.LENGTH_SHORT).show()
                     finishSuccessFab()
                 }
+
                 "slack_error" -> {
                     removeSlackLayout()
                     Toast.makeText(context, R.string.slack_sent_error, Toast.LENGTH_SHORT).show()
                     progressBarSlackLayout.visibility = View.GONE
                     progressBarSlack.visibility = View.GONE
                 }
+
                 "slack_error_time_out" -> {
                     removeSlackLayout()
                     Toast.makeText(context, R.string.slack_sent_error_time_out, Toast.LENGTH_SHORT).show()
