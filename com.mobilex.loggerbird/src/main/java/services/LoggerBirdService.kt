@@ -1,5 +1,7 @@
 package services
 
+import adapter.RecyclerViewEmaiToListAdapter
+import adapter.RecyclerViewEmailAdapter
 import adapter.RecyclerViewJiraAdapter
 import adapter.RecyclerViewSlackAdapter
 import android.Manifest
@@ -29,9 +31,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.view.animation.BounceInterpolator
+import android.view.animation.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -60,20 +60,21 @@ import kotlinx.coroutines.withContext
 import listeners.*
 import loggerbird.LoggerBird
 import models.RecyclerViewModel
+import models.RecyclerViewModelTo
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
-import org.gitlab4j.api.GitLabApi
-import org.gitlab4j.api.Pager
-import org.gitlab4j.api.models.Issue
 import paint.PaintActivity
 import paint.PaintView
 import utils.*
+import utils.EmailUtil
+import utils.LinkedBlockingQueueUtil
 import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
-internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener {
+internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
@@ -87,7 +88,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var windowManagerSlack: Any? = null
     private var windowManagerJiraDatePicker: Any? = null
     private var windowManagerUnhandledDuplication: Any? = null
-
+    private var windowManagerEmail: Any? = null
+    private var windowManagerFutureTask: Any? = null
+    private var windowManagerFutureDate: Any? = null
+    private var windowManagerFutureTime: Any? = null
     //private var windowManagerJiraAuth: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
@@ -97,6 +101,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var windowManagerParamsSlack: WindowManager.LayoutParams
     private lateinit var windowManagerParamsJiraDatePicker: WindowManager.LayoutParams
     private lateinit var windowManagerParamsUnhandledDuplication: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsEmail: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsFutureTask: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsFutureDate: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsFutureTime: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -109,7 +117,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var filePathVideo: File
     private lateinit var filePathAudio: File
     private var isOpen = false
-
     //private lateinit var fabOpen: Animation
     //private lateinit var fabClose: Animation
     private var screenDensity: Int = 0
@@ -147,18 +154,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var viewJira: View
     private lateinit var viewSlack: View
     private lateinit var viewUnhandledDuplication: View
-
+    private lateinit var viewEmail: View
+    private lateinit var viewFutureTask: View
+    private lateinit var viewFutureDate: View
+    private lateinit var viewFutureTime: View
     //  private lateinit var viewJiraAuth: View
     private lateinit var wrapper: FrameLayout
-
-    //Feedback
-    private lateinit var floating_action_button_feedback: Button
-    private lateinit var floating_action_button_feed_close: Button
+    private lateinit var floating_action_button_feedback: FloatingActionButton
+    private lateinit var floating_action_button_feed_close: FloatingActionButton
     private lateinit var editText_feedback: EditText
-    private lateinit var toolbarFeedback: Toolbar
-    private lateinit var progressBarFeedback: ProgressBar
-    private lateinit var progressBarFeedbackLayout: FrameLayout
-
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
     private var sessionTimeEnd: Long? = null
@@ -172,54 +176,48 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var progressBarView: View
     private val defaultToast: DefaultToast = DefaultToast()
     private val arrayListUnhandledExceptionMessage: ArrayList<String> = ArrayList()
-
     //Jira:
     internal val jiraAuthentication = JiraAuthentication()
     private val slackAuthentication = SlackAuthentication()
-
     //    private lateinit var spinnerProject: Spinner
     private lateinit var autoTextViewProject: AutoCompleteTextView
-
     //    private lateinit var spinnerIssueType: Spinner
     private lateinit var autoTextViewIssueType: AutoCompleteTextView
     private lateinit var recyclerViewJiraAttachment: RecyclerView
     private lateinit var layout_jira_summary: TextInputLayout
     private lateinit var editTextSummary: EditText
     private lateinit var editTextDescription: EditText
-
     //  private lateinit var editTextJiraAuthMail: EditText
 //  private lateinit var editTextJiraAuthPassword: EditText
 //    private lateinit var spinnerReporter: Spinner
     private lateinit var autoTextViewReporter: AutoCompleteTextView
-
     //    private lateinit var spinnerLinkedIssue: Spinner
     private lateinit var autoTextViewLinkedIssue: AutoCompleteTextView
-
     //    private lateinit var spinnerIssue: Spinner
     private lateinit var autoTextViewIssue: AutoCompleteTextView
-
     //    private lateinit var spinnerAssignee: Spinner
     private lateinit var autoTextViewAssignee: AutoCompleteTextView
-
     //    private lateinit var spinnerPriority: Spinner
     private lateinit var autoTextViewPriority: AutoCompleteTextView
-
     //    private lateinit var spinnerComponent: Spinner
     private lateinit var autoTextViewComponent: AutoCompleteTextView
-
     //    private lateinit var spinnerFixVersions: Spinner
     private lateinit var autoTextViewFixVersions: AutoCompleteTextView
-
     //    private lateinit var spinnerLabel: Spinner
     private lateinit var autoTextViewLabel: AutoCompleteTextView
-
     //    private lateinit var spinnerEpicLink: Spinner
     private lateinit var autoTextViewEpicLink: AutoCompleteTextView
-
     //    private lateinit var spinnerSprint: Spinner
     private lateinit var autoTextViewSprint: AutoCompleteTextView
+    private lateinit var autoTextViewEpicName: AutoCompleteTextView
     private lateinit var buttonJiraCreate: Button
     internal lateinit var buttonJiraCancel: Button
+    internal fun controlButtonJiraCancel(): Boolean {
+        if (this::buttonJiraCancel.isInitialized) {
+            return true
+        }
+        return false
+    }
 
     //  private lateinit var buttonJiraAuthCancel: Button
 //  private lateinit var buttonJiraAuthNext: Button
@@ -230,8 +228,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var progressBarJiraLayout: FrameLayout
     private lateinit var cardViewSprint: CardView
     private lateinit var cardViewStartDate: CardView
+    private lateinit var cardViewEpicName: CardView
     private lateinit var imageViewStartDate: ImageView
-
     //    private lateinit var textViewRemoveDate: TextView
     private lateinit var imageButtonRemoveDate: ImageButton
     private lateinit var calendarViewStartDate: CalendarView
@@ -241,10 +239,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var buttonCalendarViewJiraCancel: Button
     private lateinit var buttonCalendarViewJiraOk: Button
     private lateinit var scrollViewJira: ScrollView
-
     //    private lateinit var layoutJiraAuth: LinearLayout
     private val arrayListJiraFileName: ArrayList<RecyclerViewModel> = ArrayList()
-
     //    private val arrayListJiraProject: ArrayList<String> = ArrayList()
 //    private val arrayListJiraIssueType: ArrayList<String> = ArrayList()
 //    private val arrayListJiraReporter: ArrayList<String> = ArrayList()
@@ -252,43 +248,33 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //    private val arrayListJiraAssignee: ArrayList<String> = ArrayList()
 //    private val arrayListJiraPriority: ArrayList<String> = ArrayList()
     private lateinit var jiraAdapter: RecyclerViewJiraAdapter
-
     //    private lateinit var spinnerProjectAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewProjectAdapter: ArrayAdapter<String>
-
     //    private lateinit var spinnerIssueTypeAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewIssueTypeAdapter: ArrayAdapter<String>
-
     //    private lateinit var spinnerReporterAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewReporterAdapter: ArrayAdapter<String>
-
     //    private lateinit var spinnerLinkedIssueAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewLinkedIssueAdapter: ArrayAdapter<String>
-
     //    private lateinit var spinnerIssueAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewIssueAdapter: ArrayAdapter<String>
-
     //    private lateinit var spinnerAssigneeAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewAssigneeAdapter: ArrayAdapter<String>
-
     //    private lateinit var spinnerPriorityAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewPriorityAdapter: ArrayAdapter<String>
-
     //    private lateinit var spinnerFixVersionsAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewFixVersionsAdapter: ArrayAdapter<String>
-
     //    private lateinit var spinnerComponentAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewComponentAdapter: ArrayAdapter<String>
-
     //    private lateinit var spinnerLabelAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewLabelAdapter: ArrayAdapter<String>
-
     //    private lateinit var spinnerEpicLinkAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewEpicLinkAdapter: ArrayAdapter<String>
-
     //    private lateinit var spinnerSprintAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewSprintAdapter: ArrayAdapter<String>
-    private var projectPosition = 0
+    private lateinit var autoTextViewEpicNameAdapter: ArrayAdapter<String>
+    private var projectPosition: Int = 0
+    private var controlProjectPosition: Boolean = false
 
 
     //Slack:
@@ -303,6 +289,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var spinnerChannelsAdapter: ArrayAdapter<String>
     private lateinit var spinnerUsersAdapter: ArrayAdapter<String>
     private lateinit var slackAdapter: RecyclerViewSlackAdapter
+    private lateinit var recyclerViewSlackAttachment: RecyclerView
+    private lateinit var recyclerViewSlackAttachmentUser: RecyclerView
     private val arrayListSlackFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var progressBarSlack: ProgressBar
     private lateinit var progressBarSlackLayout: FrameLayout
@@ -310,6 +298,50 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var slackUserLayout: ScrollView
     private lateinit var slackBottomNavigationView: BottomNavigationView
 
+    //Email:
+    private lateinit var buttonEmailCreate: Button
+    private lateinit var buttonEmailCancel: Button
+    private lateinit var imageViewEmailAdd: ImageView
+    private lateinit var cardViewToList: CardView
+    private lateinit var editTextTo: EditText
+    private lateinit var editTextContent: EditText
+    private lateinit var editTextSubject: EditText
+    private lateinit var toolbarEmail: Toolbar
+    private lateinit var recyclerViewEmailAttachment: RecyclerView
+    private lateinit var recyclerViewEmailToList: RecyclerView
+    private lateinit var emailAdapter: RecyclerViewEmailAdapter
+    private lateinit var emailToListAdapter: RecyclerViewEmaiToListAdapter
+    private val arrayListEmailFileName: ArrayList<RecyclerViewModel> = ArrayList()
+    private val arraylistEmailToUsername: ArrayList<RecyclerViewModelTo> = ArrayList()
+
+
+    //Future-Task:
+    private lateinit var checkBoxFutureTask: CheckBox
+    private lateinit var imageViewFutureCalendar: ImageView
+    private lateinit var imageButtonFutureTaskRemoveDate: ImageButton
+    private lateinit var imageViewFutureTime: ImageView
+    private lateinit var imageButtonFutureTaskRemoveTime: ImageButton
+    private lateinit var buttonFutureTaskProceed: Button
+    private lateinit var buttonFutureTaskCancel: Button
+    private val calendarFuture = Calendar.getInstance()
+
+    //Future-Task-Date:
+    private var futureStartDate: Long? = null
+    private lateinit var frameLayoutDate: FrameLayout
+    private lateinit var calendarViewFutureTask: CalendarView
+    private lateinit var buttonFutureTaskDateCreate: Button
+    private lateinit var buttonFutureTaskDateCancel: Button
+    //Future-Task-Time:
+    private var futureStartTime: Long? = null
+    private lateinit var frameLayoutTime: FrameLayout
+    private lateinit var timePickerFutureTask: TimePicker
+    private lateinit var buttonFutureTaskTimeCreate: Button
+    private lateinit var buttonFutureTaskTimeCancel: Button
+    private lateinit var emailTo: String
+    private lateinit var emailMessage: String
+    private lateinit var emailFile: File
+    private lateinit var emailSubject: String
+    private lateinit var emailArrayListFilePath: ArrayList<File>
 
     //Static global variables:
     internal companion object {
@@ -324,7 +356,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         private lateinit var textView_share_jira: TextView
         private lateinit var textView_share_slack: TextView
         private lateinit var textView_discard: TextView
-
         //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
         private lateinit var textView_counter_audio: TextView
@@ -348,7 +379,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         private val ORIENTATIONS = SparseIntArray()
         internal var controlPermissionRequest: Boolean = false
         private var runnableList: ArrayList<Runnable> = ArrayList()
+        private var runnableListEmail: ArrayList<Runnable> = ArrayList()
         private var workQueueLinked: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
+        private var workQueueLinkedEmail: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
         internal var controlVideoPermission: Boolean = false
         internal var controlAudioPermission: Boolean = false
         internal var controlDrawableSettingsPermission: Boolean = false
@@ -363,10 +396,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         internal var screenshotDrawing = false
         private lateinit var workingAnimation: Animation
         internal val arrayListFile: ArrayList<File> = ArrayList()
-        internal lateinit var recyclerViewSlackAttachment: RecyclerView
-        internal lateinit var recyclerViewSlackAttachmentUser: RecyclerView
-        internal lateinit var recyclerViewSlackNoAttachment: TextView
-        internal lateinit var recyclerViewSlackUserNoAttachment: TextView
+        internal var controlFutureTask: Boolean = false
 
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
@@ -376,6 +406,35 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     workQueueLinked.put(runnableList[0])
                 }
             }
+        }
+
+        internal fun callEnqueueEmail() {
+            workQueueLinkedEmail.controlRunnable = false
+            if (runnableListEmail.size > 0) {
+                runnableListEmail.removeAt(0)
+                if (runnableListEmail.size > 0) {
+                    workQueueLinkedEmail.put(runnableListEmail[0])
+                } else {
+                    loggerBirdService.detachProgressBar()
+                    loggerBirdService.removeEmailLayout()
+                    loggerBirdService.defaultToast.attachToast(
+                        activity = loggerBirdService.returnActivity(),
+                        toastMessage = loggerBirdService.context.resources.getString(R.string.email_send_success)
+                    )
+                }
+            } else {
+                loggerBirdService.detachProgressBar()
+                loggerBirdService.removeEmailLayout()
+                loggerBirdService.defaultToast.attachToast(
+                    activity = loggerBirdService.returnActivity(),
+                    toastMessage = loggerBirdService.context.resources.getString(R.string.email_send_success)
+                )
+            }
+        }
+
+        internal fun resetEnqueueMail() {
+            runnableListEmail.clear()
+            workQueueLinkedEmail.controlRunnable = false
         }
 
         internal fun resetEnqueue() {
@@ -507,9 +566,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         try {
-            arrayListFile.forEach {
-                if (it.exists()) {
-                    it.delete()
+            if (!controlFutureTask) {
+                arrayListFile.forEach {
+                    if (it.exists()) {
+                        it.delete()
+                    }
                 }
             }
             dailySessionTimeRecorder()
@@ -521,13 +582,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.serviceTag)
         }
-    }
-
-    /**
-     * This Method Called When Service Created.
-     */
-    override fun onCreate() {
-        super.onCreate()
     }
 
     /**
@@ -646,15 +700,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
                     textView_audio_size = view.findViewById(R.id.fragment_textView_size_audio)
+                    checkBoxFutureTask = view.findViewById(R.id.checkBox_future_task)
 
                     if (audioRecording || videoRecording || screenshotDrawing) {
-                        workingAnimation = AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
+                        workingAnimation =
+                            AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
                         if (controlWorkingAnimation()) {
                             floating_action_button.startAnimation(workingAnimation)
                             floating_action_button.backgroundTintList =
                                 ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
-                            floating_action_button.imageTintList =
-                                ColorStateList.valueOf(resources.getColor(R.color.white))
                             if (audioRecording) {
                                 floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
                             }
@@ -889,8 +943,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     internal fun shareView(filePathMedia: File) {
         floating_action_button.backgroundTintList =
             ColorStateList.valueOf(resources.getColor(R.color.black))
-        floating_action_button.imageTintList =
-            ColorStateList.valueOf(resources.getColor(R.color.white))
         floating_action_button.clearAnimation()
         floating_action_button.animate()
             .rotationBy(360F)
@@ -919,11 +971,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun shareViewClicks(filePathMedia: File) {
         if (reveal_linear_layout_share.isVisible) {
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             textView_send_email.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    attachProgressBar()
-                }
-                sendSingleMediaFile(filePathMedia = filePathMedia)
+                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    attachProgressBar()
+//                }
+//                sendSingleMediaFile(filePathMedia = filePathMedia)
+                initializeEmailLayout(filePathMedia = filePathMedia)
             }
 
             textView_share_jira.setSafeOnClickListener {
@@ -939,7 +994,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-
                     initializeJiraLayout(filePathMedia = filePathMedia)
 //                    initializeJiraAuthLayout(filePathMedia = filePathMedia)
                 }
@@ -960,6 +1014,39 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //                    attachProgressBar()
 //                }
                 discardMediaFile()
+            }
+
+            if (sharedPref.getBoolean("future_task_check", false)) {
+                checkBoxFutureTask.isChecked = true
+            }
+            checkBoxFutureTask.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked) {
+                    with(sharedPref.edit()) {
+                        putBoolean("future_task_check", true)
+                        commit()
+                    }
+                } else {
+                    stopService(Intent(context, LoggerBirdFutureTaskService::class.java))
+                }
+            }
+            checkBoxFutureTask.setOnClickListener {
+                if (checkBoxFutureTask.isChecked) {
+                    defaultToast.attachToast(
+                        activity = activity,
+                        toastMessage = activity.resources.getString(R.string.future_task_enabled)
+                    )
+                    initializeFutureTaskLayout(filePathMedia = filePathMedia)
+                } else {
+                    with(sharedPref.edit()) {
+                        remove("future_task_time")
+                        remove("future_file_path")
+                        commit()
+                    }
+                    defaultToast.attachToast(
+                        activity = activity,
+                        toastMessage = activity.resources.getString(R.string.future_task_disabled)
+                    )
+                }
             }
         }
     }
@@ -1135,8 +1222,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             floating_action_button.startAnimation(workingAnimation)
                             floating_action_button.backgroundTintList =
                                 ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
-                            floating_action_button.imageTintList =
-                                ColorStateList.valueOf(resources.getColor(R.color.white))
                             context.startActivity(screenshotIntent)
                             context.overridePendingTransition(
                                 R.anim.slide_in_right,
@@ -1169,8 +1254,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             val fileDirectory: File = context.filesDir
                             filePathAudio = File(
                                 fileDirectory,
-                                "logger_bird_audio" + System.currentTimeMillis()
-                                    .toString() + "recording.3gpp"
+                                "logger_bird_audio" + System.currentTimeMillis().toString() + "recording.3gpp"
                             )
                             addFileNameList(fileName = filePathAudio.absolutePath)
                             arrayListFile.add(filePathAudio)
@@ -1210,8 +1294,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                                 floating_action_button.startAnimation(workingAnimation)
                                 floating_action_button.backgroundTintList =
                                     ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
-                                floating_action_button.imageTintList =
-                                    ColorStateList.valueOf(resources.getColor(R.color.white))
+
+
                             }
                         } else {
                             withContext(Dispatchers.Main) {
@@ -1396,8 +1480,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 floating_action_button.startAnimation(workingAnimation)
                 floating_action_button.backgroundTintList =
                     ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
-                floating_action_button.imageTintList =
-                    ColorStateList.valueOf(resources.getColor(R.color.white))
 
 
                 callEnqueue()
@@ -1589,6 +1671,21 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
     }
 
+    private fun callEmail(filePathMedia: File, to: String) {
+        if (LoggerBird.isLogInitAttached()) {
+            if (runnableListEmail.isEmpty()) {
+                workQueueLinkedEmail.put {
+                    createEmailTask(filePathMedia = filePathMedia, to = to)
+                }
+            }
+            runnableListEmail.add(Runnable {
+                createEmailTask(filePathMedia = filePathMedia, to = to)
+            })
+        } else {
+            throw LoggerBirdException(Constants.logInitErrorMessage)
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.M)
     override fun hearShake() {
         try {
@@ -1620,7 +1717,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             .setSwipeToDismiss(true)
                             .setCookieListener { isActivateDialogShown = false }
                             .setEnableAutoDismiss(false)
-                            .setCustomViewInitializer(CookieBar.CustomViewInitializer() {
+                            .setCustomViewInitializer(CookieBar.CustomViewInitializer {
                                 val txtActivate =
                                     it.findViewById<TextView>(R.id.btn_action_activate)
                                 val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
@@ -1781,16 +1878,16 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsFeedback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
                         WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
                     )
                 } else {
                     WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
                         WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                         PixelFormat.TRANSLUCENT
@@ -1808,9 +1905,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     floating_action_button_feed_close =
                         viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
                     editText_feedback = viewFeedback.findViewById(R.id.editText_feed_back)
-                    toolbarFeedback = viewFeedback.findViewById(R.id.toolbar_feedback)
-                    progressBarFeedback = viewFeedback.findViewById(R.id.feedback_progressbar)
-                    progressBarFeedbackLayout = viewFeedback.findViewById(R.id.feedback_progressbar_background)
                     buttonClicksFeedback()
                 }
             }
@@ -1841,39 +1935,36 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         )
         floating_action_button_feedback.setOnTouchListener(layoutFeedbackOnTouchListener)
         floating_action_button_feedback.setSafeOnClickListener {
-
-            sendFeedback()
+            sendFeedback("appcaesars@gmail.com")
         }
         floating_action_button_feed_close.setSafeOnClickListener {
-            removeFeedBackLayout()
-        }
-        toolbarFeedback.setNavigationOnClickListener {
             removeFeedBackLayout()
         }
 
     }
 
-    private fun sendFeedback() {
+    private fun sendFeedback(to: String) {
         if (editText_feedback.text.trim().isNotEmpty()) {
             removeFeedBackLayout()
             coroutineCallFeedback.async {
-                activity.runOnUiThread {
-                    progressBarFeedback.visibility = View.VISIBLE
-                    progressBarFeedbackLayout.visibility = View.VISIBLE
-                }
                 EmailUtil.sendFeedbackEmail(
                     context = context,
-                    message = editText_feedback.text.toString()
+                    message = editText_feedback.text.toString(),
+                    to = to
                 )
-                activity.runOnUiThread {
-                    progressBarFeedback.visibility = View.GONE
-                    progressBarFeedbackLayout.visibility = View.GONE
-                }
-
+//                withContext(Dispatchers.Main){
+//                    Toast.makeText(
+//                        context,
+//                        R.string.feed_back_email_success,
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
             }
         } else {
             Toast.makeText(
-                context, R.string.feed_back_email_empty_text, Toast.LENGTH_SHORT
+                context,
+                R.string.feed_back_email_empty_text,
+                Toast.LENGTH_SHORT
             ).show()
         }
     }
@@ -2162,7 +2253,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     do {
                         fileName = File(arrayListOldFiles[fileCounter])
                         if (fileName.exists()) {
-                            LoggerBird.callEmailSender(context = context, file = fileName)
+                            LoggerBird.callEmailSender(
+                                context = context,
+                                file = fileName,
+                                to = "appcaesars@gmail.com"
+                            )
                         }
                         fileCounter++
                         if (fileCounter == arrayListOldFiles.size) {
@@ -2200,21 +2295,35 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun sendSingleMediaFile(filePathMedia: File) {
+    private fun sendSingleMediaFile(
+        filePathMedia: File,
+        to: String,
+        message: String? = null,
+        subject: String? = null
+    ) {
         coroutineCallSendSingleFile.async {
             try {
                 if (filePathMedia.exists()) {
-                    LoggerBird.callEmailSender(context = context, file = filePathMedia)
-                    LoggerBird.deleteSingleMediaFile(
-                        this@LoggerBirdService,
-                        filePathMedia = filePathMedia
+                    LoggerBird.callEmailSender(
+                        context = context,
+                        activity = activity,
+                        file = filePathMedia,
+                        to = to,
+                        message = message,
+                        subject = subject
                     )
+//                    LoggerBird.deleteSingleMediaFile(
+//                        this@LoggerBirdService,
+//                        filePathMedia = filePathMedia
+//                    )
                 } else {
                     finishShareLayout("single_email_error")
+                    resetEnqueueMail()
                 }
             } catch (e: Exception) {
                 finishShareLayout("single_email_error")
                 e.printStackTrace()
+                resetEnqueueMail()
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.singleFileDeleteTag)
             }
@@ -2228,11 +2337,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 "media" -> {
                     Toast.makeText(context, R.string.share_media_delete, Toast.LENGTH_SHORT).show()
                     finishSuccessFab()
+                    //detachProgressBar()
                 }
                 "media_error" -> {
                     Toast.makeText(context, R.string.share_media_delete_error, Toast.LENGTH_SHORT)
                         .show()
                     finishErrorFab()
+                    //detachProgressBar()
                 }
                 "single_email" -> {
                     Toast.makeText(context, R.string.share_file_sent, Toast.LENGTH_SHORT).show()
@@ -2243,6 +2354,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT)
                         .show()
 //                    finishErrorFab()
+                    removeEmailLayout()
                     detachProgressBar()
                 }
                 "jira" -> {
@@ -2268,6 +2380,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         progressBarJiraLayout.visibility = View.GONE
                         progressBarJira.visibility = View.GONE
                     }
+
                     detachProgressBar()
 //                    finishErrorFab()
                 }
@@ -2283,15 +2396,18 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     progressBarSlack.visibility = View.GONE
 //                    finishErrorFab()
                 }
-
                 "slack_error_time_out" -> {
-                    removeSlackLayout()
+                    removeJiraLayout()
                     Toast.makeText(context, R.string.slack_sent_error_time_out, Toast.LENGTH_SHORT)
                         .show()
-                    progressBarSlackLayout.visibility = View.GONE
-                    progressBarSlack.visibility = View.GONE
-
+                    if (this::progressBarSlackLayout.isInitialized && this::progressBarSlack.isInitialized) {
+                        progressBarSlackLayout.visibility = View.GONE
+                        progressBarSlack.visibility = View.GONE
+                    }
+                    detachProgressBar()
+//                    finishErrorFab()
                 }
+
             }
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
@@ -2397,6 +2513,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.M)
     internal fun attachProgressBar() {
+        detachProgressBar()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         progressBarView =
             LayoutInflater.from(activity).inflate(R.layout.default_progressbar, rootView, false)
@@ -2592,6 +2709,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     autoTextViewEpicLink = viewJira.findViewById(R.id.auto_textView_jira_epic_link)
 //                    spinnerSprint = viewJira.findViewById(R.id.spinner_jira_sprint)
                     autoTextViewSprint = viewJira.findViewById(R.id.auto_textView_jira_sprint)
+                    autoTextViewEpicName = viewJira.findViewById(R.id.auto_textView_jira_epic_name)
                     buttonJiraCreate = viewJira.findViewById(R.id.button_jira_create)
                     buttonJiraCancel = viewJira.findViewById(R.id.button_jira_cancel)
                     toolbarJira = viewJira.findViewById(R.id.textView_jira_title)
@@ -2600,6 +2718,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     progressBarJiraLayout = viewJira.findViewById(R.id.jira_progressbar_background)
                     cardViewSprint = viewJira.findViewById(R.id.cardView_sprint)
                     cardViewStartDate = viewJira.findViewById(R.id.cardView_start_date)
+                    cardViewEpicName = viewJira.findViewById(R.id.cardView_epic_name)
                     imageViewStartDate = viewJira.findViewById(R.id.imageView_start_date)
 //                    textViewRemoveDate = viewJira.findViewById(R.id.textView_jira_remove_date)
                     imageButtonRemoveDate =
@@ -2735,7 +2854,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //                spinnerLabel = spinnerLabel,
                 autoTextViewEpicLink = autoTextViewEpicLink,
 //                spinnerEpicLink = spinnerEpicLink,
-                autoTextViewSprint = autoTextViewSprint
+                autoTextViewSprint = autoTextViewSprint,
+                autoTextViewEpicName = autoTextViewEpicName
 //                spinnerSprint = spinnerSprint
             )
             jiraAuthentication.gatherJiraEditTextDetails(
@@ -2743,33 +2863,12 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 editTextDescription = editTextDescription
             )
             jiraAuthentication.gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems = arrayListJiraFileName)
-            if (jiraAuthentication.checkSummaryEmpty(
-                    activity = activity,
-                    context = context
-                ) && jiraAuthentication.checkReporterEmpty(
-                    activity = activity,
-                    context = context
-                ) && jiraAuthentication.checkFixVersionsEmpty(
-                    activity = activity,
-                    context = context
-                ) && jiraAuthentication.checkEpicLinkEmpty(
-                    activity = activity,
-                    context = context
-                )
-            ) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    progressBarJira.visibility = View.VISIBLE
-                    progressBarJiraLayout.visibility = View.VISIBLE
-//                    attachProgressBar()
+            if (autoTextViewIssueType.editableText.toString() != "Epic") {
+                callJiraTask(filePathMedia = filePathMedia)
+            } else {
+                if (jiraAuthentication.checkEpicName(activity = activity, context = context)) {
+                    callJiraTask(filePathMedia = filePathMedia)
                 }
-//                hideKeyboard(activity = activity)
-                jiraAuthentication.callJiraIssue(
-                    filePathName = filePathMedia,
-                    context = context,
-                    activity = activity,
-                    jiraTask = "create",
-                    createMethod = "normal"
-                )
             }
         }
 
@@ -2781,10 +2880,16 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     with(sharedPref.edit()) {
                         putString("jira_project", autoTextViewProject.editableText.toString())
                         putInt("jira_project_position", projectPosition)
-                        putString("jira_issue_type", autoTextViewIssueType.editableText.toString())
+                        putString(
+                            "jira_issue_type",
+                            autoTextViewIssueType.editableText.toString()
+                        )
                         putString("jira_summary", editTextSummary.text.toString())
                         putString("jira_description", editTextDescription.text.toString())
-                        putString("jira_component", autoTextViewComponent.editableText.toString())
+                        putString(
+                            "jira_component",
+                            autoTextViewComponent.editableText.toString()
+                        )
                         putString("jira_reporter", autoTextViewReporter.editableText.toString())
                         putString(
                             "jira_linked_issue",
@@ -2794,11 +2899,19 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         putString("jira_assignee", autoTextViewAssignee.editableText.toString())
                         putString("jira_priority", autoTextViewPriority.editableText.toString())
                         putString(
-                            "jira_fix_versions", autoTextViewFixVersions.editableText.toString()
+                            "jira_fix_versions",
+                            autoTextViewFixVersions.editableText.toString()
                         )
                         putString("jira_labels", autoTextViewLabel.editableText.toString())
-                        putString("jira_epic_link", autoTextViewEpicLink.editableText.toString())
+                        putString(
+                            "jira_epic_link",
+                            autoTextViewEpicLink.editableText.toString()
+                        )
                         putString("jira_sprint", autoTextViewSprint.editableText.toString())
+                        putString(
+                            "jira_epic_name",
+                            autoTextViewEpicName.editableText.toString()
+                        )
                         commit()
                     }
                     defaultToast.attachToast(
@@ -2837,6 +2950,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     autoTextViewLabel.setText("", false)
                     autoTextViewEpicLink.setText("", false)
                     autoTextViewSprint.setText("", false)
+                    autoTextViewEpicName.setText("", false)
                     defaultToast.attachToast(
                         activity = activity,
                         toastMessage = context.resources.getString(R.string.jira_issue_preferences_delete)
@@ -2870,6 +2984,41 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         imageButtonRemoveDate.setOnClickListener {
             jiraAuthentication.setStartDate(startDate = null)
             imageButtonRemoveDate.visibility = View.GONE
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun callJiraTask(filePathMedia: File) {
+        if (jiraAuthentication.checkSummaryEmpty(
+                activity = activity,
+                context = context
+            ) && jiraAuthentication.checkReporterEmpty(
+                activity = activity,
+                context = context
+            ) && jiraAuthentication.checkFixVersionsEmpty(
+                activity = activity,
+                context = context
+            ) && jiraAuthentication.checkEpicLinkEmpty(
+                activity = activity,
+                context = context
+            ) && jiraAuthentication.checkComponentEmpty(
+                activity = activity,
+                context = context
+            )
+        ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                progressBarJira.visibility = View.VISIBLE
+                progressBarJiraLayout.visibility = View.VISIBLE
+//                    attachProgressBar()
+            }
+//                hideKeyboard(activity = activity)
+            jiraAuthentication.callJiraIssue(
+                filePathName = filePathMedia,
+                context = context,
+                activity = activity,
+                jiraTask = "create",
+                createMethod = "normal"
+            )
         }
     }
 
@@ -2916,7 +3065,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListFixVersions: ArrayList<String>,
         arrayListLabel: ArrayList<String>,
         arrayListEpicLink: ArrayList<String>,
-        arrayListSprint: ArrayList<String>
+        arrayListSprint: ArrayList<String>,
+        arrayListEpicName: ArrayList<String>
     ) {
 
         arrayListProjectNames.clear()
@@ -2931,6 +3081,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListLabel.clear()
         arrayListEpicLink.clear()
         arrayListSprint.clear()
+        arrayListEpicName.clear()
     }
 
 
@@ -2950,6 +3101,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         arrayListLabel: ArrayList<String>,
         arrayListEpicLink: ArrayList<String>,
         arrayListSprint: ArrayList<String>,
+        arrayListEpicName: ArrayList<String>,
         hashMapBoardList: HashMap<String, String>
     ) {
 
@@ -2958,377 +3110,40 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             editTextSummary.setText(sharedPref.getString("jira_summary", null))
             editTextDescription.setText(sharedPref.getString("jira_description", null))
-            autoTextViewProjectAdapter = ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListProjectNames
+            initializeProjectName(
+                arrayListProjectNames = arrayListProjectNames,
+                sharedPref = sharedPref
             )
-            autoTextViewProject.setAdapter(autoTextViewProjectAdapter)
-            if (arrayListProjectNames.isNotEmpty() && autoTextViewProject.text.isEmpty()) {
-                if (sharedPref.getString("jira_project", null) != null) {
-                    autoTextViewProject.setText(sharedPref.getString("jira_project", null), false)
-                } else {
-                    autoTextViewProject.setText(arrayListProjectNames[0], false)
-                }
-            }
-            autoTextViewProject.setOnTouchListener { v, event ->
-                autoTextViewProject.showDropDown()
-                false
-            }
-            autoTextViewProject.setOnItemClickListener { parent, view, position, id ->
-                projectPosition = position
-                jiraAuthentication.setProjectPosition(projectPosition = position)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    progressBarJira.visibility = View.VISIBLE
-                    progressBarJiraLayout.visibility = View.VISIBLE
-//                    attachProgressBar()
-                }
-                hideKeyboard(activity = activity)
-                jiraAuthentication.callJiraIssue(
-                    context = context,
-                    activity = activity,
-                    jiraTask = "get",
-                    createMethod = "normal"
-                )
-            }
-            autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
-                if (!hasFocus) {
-                    if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
-                        if (sharedPref.getString("jira_project", null) != null) {
-                            autoTextViewProject.setText(
-                                sharedPref.getString("jira_project", null),
-                                false
-                            )
-                        } else {
-                            autoTextViewProject.setText(arrayListProjectNames[0], false)
-                        }
-                    }
-                }
-            }
-//        spinnerProjectAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjectNames)
-//        spinnerProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerProject.adapter = spinnerProjectAdapter
-            autoTextViewIssueTypeAdapter =
-                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListIssueTypes)
-            autoTextViewIssueType.setAdapter(autoTextViewIssueTypeAdapter)
-            if (checkUnhandledFilePath()) {
-                autoTextViewIssueType.setText(arrayListIssueTypes[2], false)
-                jiraAuthentication.setIssueTypePosition(issueTypePosition = 2)
-            } else {
-                if (arrayListIssueTypes.isNotEmpty()) {
-                    if (sharedPref.getString("jira_issue_type", null) != null) {
-                        autoTextViewIssueType.setText(
-                            sharedPref.getString("jira_issue_type", null),
-                            false
-                        )
-                    } else {
-                        autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
-                    }
-                }
-            }
-            autoTextViewIssueType.setOnTouchListener { v, event ->
-                autoTextViewIssueType.showDropDown()
-                false
-            }
-            autoTextViewIssueType.setOnItemClickListener { parent, view, position, id ->
-                jiraAuthentication.setIssueTypePosition(issueTypePosition = position)
-                hideKeyboard(activity = activity)
-            }
-            autoTextViewIssueType.setOnFocusChangeListener { v, hasFocus ->
-                if (!hasFocus) {
-                    if (!arrayListIssueTypes.contains(autoTextViewIssueType.editableText.toString())) {
-                        if (sharedPref.getString("jira_issue_type", null) != null) {
-                            autoTextViewIssueType.setText(
-                                sharedPref.getString(
-                                    "jira_issue_type",
-                                    null
-                                ), false
-                            )
-                        } else {
-                            autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
-                        }
-                    }
-                }
-            }
-//        spinnerIssueTypeAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssueTypes)
-//        spinnerIssueTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerIssueType.adapter = spinnerIssueTypeAdapter
-            autoTextViewReporterAdapter = ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListReporterNames
+            initializeIssueType(
+                arrayListIssueTypes = arrayListIssueTypes,
+                arrayListEpicName = arrayListEpicName,
+                sharedPref = sharedPref
             )
-            autoTextViewReporter.setAdapter(autoTextViewReporterAdapter)
-            if (arrayListReporterNames.isNotEmpty()) {
-                if (sharedPref.getString("jira_reporter", null) != null) {
-                    autoTextViewReporter.setText(sharedPref.getString("jira_reporter", null), false)
-                }
-//                autoTextViewReporter.setText(arrayListReporterNames[0], false)
-            }
-            autoTextViewReporter.setOnTouchListener { v, event ->
-                autoTextViewReporter.showDropDown()
-                false
-            }
-            autoTextViewReporter.setOnItemClickListener { parent, view, position, id ->
-                jiraAuthentication.setReporterPosition(reporterPosition = position)
-                hideKeyboard(activity = activity)
-            }
-
-//        spinnerReporterAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListReporterNames)
-//        spinnerReporterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerReporter.adapter = spinnerReporterAdapter
-
-            autoTextViewLinkedIssueAdapter = ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListLinkedIssues
+            initializeReporter(
+                arrayListReporterNames = arrayListReporterNames,
+                sharedPref = sharedPref
             )
-            autoTextViewLinkedIssue.setAdapter(autoTextViewLinkedIssueAdapter)
-            if (arrayListLinkedIssues.isNotEmpty()) {
-                if (sharedPref.getString("jira_linked_issue", null) != null) {
-                    autoTextViewLinkedIssue.setText(
-                        sharedPref.getString("jira_linked_issue", null),
-                        false
-                    )
-                } else {
-                    autoTextViewLinkedIssue.setText(arrayListLinkedIssues[0], false)
-                }
-            }
-            autoTextViewLinkedIssue.setOnTouchListener { v, event ->
-                autoTextViewLinkedIssue.showDropDown()
-                false
-            }
-            autoTextViewLinkedIssue.setOnItemClickListener { parent, view, position, id ->
-                jiraAuthentication.setLinkedIssueTypePosition(linkedIssueTypePosition = position)
-                hideKeyboard(activity = activity)
-            }
-            autoTextViewLinkedIssue.setOnFocusChangeListener { v, hasFocus ->
-                if (!hasFocus) {
-                    if (!arrayListLinkedIssues.contains(autoTextViewLinkedIssue.editableText.toString())) {
-                        if (sharedPref.getString("jira_linked_issue", null) != null) {
-                            autoTextViewLinkedIssue.setText(
-                                sharedPref.getString(
-                                    "jira_linked_issue",
-                                    null
-                                ), false
-                            )
-                        } else {
-                            autoTextViewLinkedIssue.setText(arrayListLinkedIssues[0], false)
-                        }
-                    }
-                }
-            }
-//        spinnerLinkedIssueAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLinkedIssues)
-//        spinnerLinkedIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerLinkedIssue.adapter = spinnerLinkedIssueAdapter
-
-            autoTextViewIssueAdapter =
-                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListIssues)
-            autoTextViewIssue.setAdapter(autoTextViewIssueAdapter)
-            if (arrayListIssues.isNotEmpty()) {
-                if (sharedPref.getString("jira_issue", null) != null) {
-                    autoTextViewIssue.setText(sharedPref.getString("jira_issue", null), false)
-                }
-//                autoTextViewIssue.setText(arrayListIssues[0], false)
-            }
-            autoTextViewIssue.setOnTouchListener { v, event ->
-                autoTextViewIssue.showDropDown()
-                false
-            }
-
-//        spinnerIssueAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListIssues)
-//        spinnerIssueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerIssue.adapter = spinnerIssueAdapter
-
-            autoTextViewAssigneeAdapter =
-                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListAssignee)
-            autoTextViewAssignee.setAdapter(autoTextViewAssigneeAdapter)
-            if (arrayListAssignee.isNotEmpty()) {
-                if (sharedPref.getString("jira_assignee", null) != null) {
-                    autoTextViewAssignee.setText(sharedPref.getString("jira_assignee", null), false)
-                }
-//                autoTextViewAssignee.setText(arrayListAssignee[0], false)
-            }
-            autoTextViewAssignee.setOnTouchListener { v, event ->
-                autoTextViewAssignee.showDropDown()
-                false
-            }
-            autoTextViewAssignee.setOnItemClickListener { parent, view, position, id ->
-                jiraAuthentication.setAssigneePosition(assigneePosition = position)
-                hideKeyboard(activity = activity)
-            }
-
-//        spinnerAssigneeAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListAssignee)
-//        spinnerAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerAssignee.adapter = spinnerAssigneeAdapter
-
-            autoTextViewPriorityAdapter =
-                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListPriority)
-            autoTextViewPriority.setAdapter(autoTextViewPriorityAdapter)
-            if (arrayListPriority.isNotEmpty()) {
-                if (sharedPref.getString("jira_priority", null) != null) {
-                    autoTextViewPriority.setText(sharedPref.getString("jira_priority", null), false)
-                } else {
-                    autoTextViewPriority.setText(arrayListPriority[0], false)
-                }
-            }
-            autoTextViewPriority.setOnTouchListener { v, event ->
-                autoTextViewPriority.showDropDown()
-                false
-            }
-            autoTextViewPriority.setOnItemClickListener { parent, view, position, id ->
-                jiraAuthentication.setPriorityPosition(priorityPosition = position)
-                hideKeyboard(activity = activity)
-            }
-            autoTextViewPriority.setOnFocusChangeListener { v, hasFocus ->
-                if (!hasFocus) {
-                    if (!arrayListPriority.contains(autoTextViewPriority.editableText.toString())) {
-                        if (sharedPref.getString("jira_priority", null) != null) {
-                            autoTextViewPriority.setText(
-                                sharedPref.getString(
-                                    "jira_priority",
-                                    null
-                                ), false
-                            )
-                        } else {
-                            autoTextViewPriority.setText(arrayListPriority[0], false)
-                        }
-                    }
-                }
-            }
-//        spinnerPriorityAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListPriority)
-//        spinnerPriorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerPriority.adapter = spinnerPriorityAdapter
-
-            autoTextViewComponentAdapter =
-                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListComponent)
-            autoTextViewComponent.setAdapter(autoTextViewComponentAdapter)
-            if (arrayListComponent.isNotEmpty()) {
-                if (sharedPref.getString("jira_component", null) != null) {
-                    autoTextViewComponent.setText(
-                        sharedPref.getString("jira_component", null),
-                        false
-                    )
-                }
-//                autoTextViewComponent.setText(arrayListComponent[0], false)
-            }
-            autoTextViewComponent.setOnTouchListener { v, event ->
-                autoTextViewComponent.showDropDown()
-                false
-            }
-            autoTextViewComponent.setOnItemClickListener { parent, view, position, id ->
-                jiraAuthentication.setComponentPosition(componentPosition = position)
-            }
-//        spinnerComponentAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListComponent)
-//        spinnerComponentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerComponent.adapter = spinnerComponentAdapter
-
-            autoTextViewFixVersionsAdapter = ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListFixVersions
+            initializeLinkedIssues(
+                arrayListLinkedIssues = arrayListLinkedIssues,
+                sharedPref = sharedPref
             )
-            autoTextViewFixVersions.setAdapter(autoTextViewFixVersionsAdapter)
-            if (arrayListFixVersions.isNotEmpty()) {
-                if (sharedPref.getString("jira_fix_versions", null) != null) {
-                    autoTextViewFixVersions.setText(
-                        sharedPref.getString("jira_fix_versions", null),
-                        false
-                    )
-                }
-//                autoTextViewFixVersions.setText(arrayListFixVersions[0], false)
-            }
-            autoTextViewFixVersions.setOnTouchListener { v, event ->
-                autoTextViewFixVersions.showDropDown()
-                false
-            }
-            autoTextViewFixVersions.setOnItemClickListener { parent, view, position, id ->
-                jiraAuthentication.setFixVersionsPosition(fixVersionsPosition = position)
-                hideKeyboard(activity = activity)
-            }
-//        spinnerFixVersionsAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListFixVersions)
-//        spinnerFixVersionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerFixVersions.adapter = spinnerFixVersionsAdapter
-
-
-            autoTextViewLabelAdapter =
-                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListLabel)
-            autoTextViewLabel.setAdapter(autoTextViewLabelAdapter)
-            if (arrayListLabel.isNotEmpty()) {
-                if (sharedPref.getString("jira_labels", null) != null) {
-                    autoTextViewLabel.setText(sharedPref.getString("jira_labels", null), false)
-                }
-//                autoTextViewLabel.setText(arrayListLabel[0], false)
-            }
-            autoTextViewLabel.setOnTouchListener { v, event ->
-                autoTextViewLabel.showDropDown()
-                false
-            }
-            autoTextViewLabel.setOnItemClickListener { parent, view, position, id ->
-                hideKeyboard(activity = activity)
-            }
-//        spinnerLabelAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListLabel)
-//        spinnerLabelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerLabel.adapter = spinnerLabelAdapter
-
-            autoTextViewEpicLinkAdapter =
-                ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListEpicLink)
-            autoTextViewEpicLink.setAdapter(autoTextViewEpicLinkAdapter)
-            if (arrayListEpicLink.isNotEmpty()) {
-                if (sharedPref.getString("jira_epic_link", null) != null) {
-                    autoTextViewEpicLink.setText(
-                        sharedPref.getString("jira_epic_link", null),
-                        false
-                    )
-                }
-//                autoTextViewEpicLink.setText(arrayListEpicLink[0], false)
-            }
-            autoTextViewEpicLink.setOnTouchListener { v, event ->
-                autoTextViewEpicLink.showDropDown()
-                false
-            }
-            autoTextViewEpicLink.setOnItemClickListener { parent, view, position, id ->
-                hideKeyboard(activity = activity)
-            }
-//        spinnerEpicLinkAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListEpicLink)
-//        spinnerEpicLinkAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerEpicLink.adapter = spinnerEpicLinkAdapter
-
-            if (hashMapBoardList[arrayListProjectKeys[projectPosition]] == "scrum") {
-                cardViewSprint.visibility = View.VISIBLE
-                cardViewStartDate.visibility = View.VISIBLE
-                autoTextViewSprintAdapter =
-                    ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListSprint)
-                autoTextViewSprint.setAdapter(autoTextViewSprintAdapter)
-                if (arrayListSprint.isNotEmpty()) {
-                    if (sharedPref.getString("jira_sprint", null) != null) {
-                        autoTextViewSprint.setText(sharedPref.getString("jira_sprint", null), false)
-                    }
-//                autoTextViewSprint.setText(arrayListSprint[0], false)
-                }
-                autoTextViewSprint.setOnTouchListener { v, event ->
-                    autoTextViewSprint.showDropDown()
-                    false
-                }
-                autoTextViewSprint.setOnItemClickListener { parent, view, position, id ->
-                    jiraAuthentication.setSprintPosition(sprintPosition = position)
-                    hideKeyboard(activity = activity)
-                }
-            } else {
-                cardViewSprint.visibility = View.GONE
-                cardViewStartDate.visibility = View.GONE
-            }
+            initializeIssues(arrayListIssues = arrayListIssues, sharedPref = sharedPref)
+            initializeAssignee(arrayListAssignee = arrayListAssignee, sharedPref = sharedPref)
+            initializePriority(arrayListPriority = arrayListPriority, sharedPref = sharedPref)
+            initializeComponent(arrayListComponent = arrayListComponent, sharedPref = sharedPref)
+            initializeFixVersions(
+                arrayListFixVersions = arrayListFixVersions,
+                sharedPref = sharedPref
+            )
+            initializeLabels(arrayListLabel = arrayListLabel, sharedPref = sharedPref)
+            initializeEpicLink(arrayListEpicLink = arrayListEpicLink, sharedPref = sharedPref)
+            initializeSprint(
+                arrayListSprint = arrayListSprint,
+                hashMapBoardList = hashMapBoardList,
+                arrayListProjectKeys = arrayListProjectKeys,
+                sharedPref = sharedPref
+            )
+            initializeEpicName(arrayListEpicName = arrayListEpicName, sharedPref = sharedPref)
 
             if (checkUnhandledFilePath()) {
                 editTextSummary.setText(activity.resources.getString(R.string.jira_summary_unhandled_exception))
@@ -3343,10 +3158,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 }
             }
 
-//        spinnerSprintAdapter =
-//            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListSprint)
-//        spinnerSprintAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerSprint.adapter = spinnerSprintAdapter
             progressBarJiraLayout.visibility = View.GONE
             progressBarJira.visibility = View.GONE
 //            detachProgressBar()
@@ -3357,6 +3168,525 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializeSprint(
+        arrayListSprint: ArrayList<String>,
+        hashMapBoardList: HashMap<String, String>,
+        arrayListProjectKeys: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        if (!controlProjectPosition) {
+            projectPosition = sharedPref.getInt("jira_project_position", 0)
+        }
+        controlProjectPosition = false
+        if (hashMapBoardList[arrayListProjectKeys[projectPosition]] == "scrum") {
+            cardViewSprint.visibility = View.VISIBLE
+            cardViewStartDate.visibility = View.VISIBLE
+            autoTextViewSprintAdapter =
+                ArrayAdapter(
+                    this,
+                    android.R.layout.simple_dropdown_item_1line,
+                    arrayListSprint
+                )
+            autoTextViewSprint.setAdapter(autoTextViewSprintAdapter)
+            if (arrayListSprint.isNotEmpty()) {
+                if (sharedPref.getString("jira_sprint", null) != null) {
+                    autoTextViewSprint.setText(
+                        sharedPref.getString("jira_sprint", null),
+                        false
+                    )
+                }
+//                autoTextViewSprint.setText(arrayListSprint[0], false)
+            }
+            autoTextViewSprint.setOnTouchListener { v, event ->
+                autoTextViewSprint.showDropDown()
+                false
+            }
+            autoTextViewSprint.setOnItemClickListener { parent, view, position, id ->
+                jiraAuthentication.setSprintPosition(sprintPosition = position)
+                hideKeyboard(activity = activity)
+            }
+        } else {
+            cardViewSprint.visibility = View.GONE
+            cardViewStartDate.visibility = View.GONE
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializeEpicLink(
+        arrayListEpicLink: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewEpicLinkAdapter =
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                arrayListEpicLink
+            )
+        autoTextViewEpicLink.setAdapter(autoTextViewEpicLinkAdapter)
+        if (arrayListEpicLink.isNotEmpty()) {
+            if (sharedPref.getString("jira_epic_link", null) != null) {
+                autoTextViewEpicLink.setText(
+                    sharedPref.getString("jira_epic_link", null),
+                    false
+                )
+            }
+//                autoTextViewEpicLink.setText(arrayListEpicLink[0], false)
+        }
+        autoTextViewEpicLink.setOnTouchListener { v, event ->
+            autoTextViewEpicLink.showDropDown()
+            false
+        }
+        autoTextViewEpicLink.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializeLabels(arrayListLabel: ArrayList<String>, sharedPref: SharedPreferences) {
+        autoTextViewLabelAdapter =
+            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListLabel)
+        autoTextViewLabel.setAdapter(autoTextViewLabelAdapter)
+        if (arrayListLabel.isNotEmpty()) {
+            if (sharedPref.getString("jira_labels", null) != null) {
+                autoTextViewLabel.setText(sharedPref.getString("jira_labels", null), false)
+            }
+//                autoTextViewLabel.setText(arrayListLabel[0], false)
+        }
+        autoTextViewLabel.setOnTouchListener { v, event ->
+            autoTextViewLabel.showDropDown()
+            false
+        }
+        autoTextViewLabel.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializeFixVersions(
+        arrayListFixVersions: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewFixVersionsAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListFixVersions
+        )
+        autoTextViewFixVersions.setAdapter(autoTextViewFixVersionsAdapter)
+        if (arrayListFixVersions.isNotEmpty()) {
+            if (sharedPref.getString("jira_fix_versions", null) != null) {
+                autoTextViewFixVersions.setText(
+                    sharedPref.getString("jira_fix_versions", null),
+                    false
+                )
+            }
+//                autoTextViewFixVersions.setText(arrayListFixVersions[0], false)
+        }
+        autoTextViewFixVersions.setOnTouchListener { v, event ->
+            autoTextViewFixVersions.showDropDown()
+            false
+        }
+        autoTextViewFixVersions.setOnItemClickListener { parent, view, position, id ->
+            jiraAuthentication.setFixVersionsPosition(fixVersionsPosition = position)
+            hideKeyboard(activity = activity)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializeComponent(
+        arrayListComponent: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewComponentAdapter =
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                arrayListComponent
+            )
+        autoTextViewComponent.setAdapter(autoTextViewComponentAdapter)
+        if (arrayListComponent.isNotEmpty()) {
+            if (sharedPref.getString("jira_component", null) != null) {
+                autoTextViewComponent.setText(
+                    sharedPref.getString("jira_component", null),
+                    false
+                )
+            }
+//                autoTextViewComponent.setText(arrayListComponent[0], false)
+        }
+        autoTextViewComponent.setOnTouchListener { v, event ->
+            autoTextViewComponent.showDropDown()
+            false
+        }
+        autoTextViewComponent.setOnItemClickListener { parent, view, position, id ->
+            jiraAuthentication.setComponentPosition(componentPosition = position)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializePriority(
+        arrayListPriority: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPriorityAdapter =
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                arrayListPriority
+            )
+        autoTextViewPriority.setAdapter(autoTextViewPriorityAdapter)
+        if (arrayListPriority.isNotEmpty()) {
+            if (sharedPref.getString("jira_priority", null) != null) {
+                autoTextViewPriority.setText(
+                    sharedPref.getString("jira_priority", null),
+                    false
+                )
+            } else {
+                autoTextViewPriority.setText(arrayListPriority[0], false)
+            }
+        }
+        autoTextViewPriority.setOnTouchListener { v, event ->
+            autoTextViewPriority.showDropDown()
+            false
+        }
+        autoTextViewPriority.setOnItemClickListener { parent, view, position, id ->
+            jiraAuthentication.setPriorityPosition(priorityPosition = position)
+            hideKeyboard(activity = activity)
+        }
+        autoTextViewPriority.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListPriority.contains(autoTextViewPriority.editableText.toString())) {
+                    if (arrayListPriority.isNotEmpty()) {
+                        if (sharedPref.getString("jira_priority", null) != null) {
+                            autoTextViewPriority.setText(
+                                sharedPref.getString(
+                                    "jira_priority",
+                                    null
+                                ), false
+                            )
+                        } else {
+                            autoTextViewPriority.setText(arrayListPriority[0], false)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializeAssignee(
+        arrayListAssignee: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewAssigneeAdapter =
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                arrayListAssignee
+            )
+        autoTextViewAssignee.setAdapter(autoTextViewAssigneeAdapter)
+        if (arrayListAssignee.isNotEmpty()) {
+            if (sharedPref.getString("jira_assignee", null) != null) {
+                autoTextViewAssignee.setText(
+                    sharedPref.getString("jira_assignee", null),
+                    false
+                )
+            }
+//                autoTextViewAssignee.setText(arrayListAssignee[0], false)
+        }
+        autoTextViewAssignee.setOnTouchListener { v, event ->
+            autoTextViewAssignee.showDropDown()
+            false
+        }
+        autoTextViewAssignee.setOnItemClickListener { parent, view, position, id ->
+            jiraAuthentication.setAssigneePosition(assigneePosition = position)
+            hideKeyboard(activity = activity)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializeIssues(
+        arrayListIssues: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewIssueAdapter =
+            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListIssues)
+        autoTextViewIssue.setAdapter(autoTextViewIssueAdapter)
+        if (arrayListIssues.isNotEmpty()) {
+            if (sharedPref.getString("jira_issue", null) != null) {
+                autoTextViewIssue.setText(sharedPref.getString("jira_issue", null), false)
+            }
+//                autoTextViewIssue.setText(arrayListIssues[0], false)
+        }
+        autoTextViewIssue.setOnTouchListener { v, event ->
+            autoTextViewIssue.showDropDown()
+            false
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeLinkedIssues(
+        arrayListLinkedIssues: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewLinkedIssueAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListLinkedIssues
+        )
+        autoTextViewLinkedIssue.setAdapter(autoTextViewLinkedIssueAdapter)
+        if (arrayListLinkedIssues.isNotEmpty()) {
+            if (sharedPref.getString("jira_linked_issue", null) != null) {
+                autoTextViewLinkedIssue.setText(
+                    sharedPref.getString("jira_linked_issue", null),
+                    false
+                )
+            } else {
+                autoTextViewLinkedIssue.setText(arrayListLinkedIssues[0], false)
+            }
+        }
+        autoTextViewLinkedIssue.setOnTouchListener { v, event ->
+            autoTextViewLinkedIssue.showDropDown()
+            false
+        }
+        autoTextViewLinkedIssue.setOnItemClickListener { parent, view, position, id ->
+            jiraAuthentication.setLinkedIssueTypePosition(linkedIssueTypePosition = position)
+            hideKeyboard(activity = activity)
+        }
+        autoTextViewLinkedIssue.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListLinkedIssues.contains(autoTextViewLinkedIssue.editableText.toString())) {
+                    if (arrayListLinkedIssues.isNotEmpty()) {
+                        if (sharedPref.getString("jira_linked_issue", null) != null) {
+                            autoTextViewLinkedIssue.setText(
+                                sharedPref.getString(
+                                    "jira_linked_issue",
+                                    null
+                                ), false
+                            )
+                        } else {
+                            autoTextViewLinkedIssue.setText(arrayListLinkedIssues[0], false)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeReporter(
+        arrayListReporterNames: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewReporterAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListReporterNames
+        )
+        autoTextViewReporter.setAdapter(autoTextViewReporterAdapter)
+        if (arrayListReporterNames.isNotEmpty()) {
+            if (sharedPref.getString("jira_reporter", null) != null) {
+                autoTextViewReporter.setText(
+                    sharedPref.getString("jira_reporter", null),
+                    false
+                )
+            }
+//                autoTextViewReporter.setText(arrayListReporterNames[0], false)
+        }
+        autoTextViewReporter.setOnTouchListener { v, event ->
+            autoTextViewReporter.showDropDown()
+            false
+        }
+        autoTextViewReporter.setOnItemClickListener { parent, view, position, id ->
+            jiraAuthentication.setReporterPosition(reporterPosition = position)
+            hideKeyboard(activity = activity)
+        }
+    }
+
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeIssueType(
+        arrayListIssueTypes: ArrayList<String>,
+        arrayListEpicName: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewIssueTypeAdapter =
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                arrayListIssueTypes
+            )
+        autoTextViewIssueType.setAdapter(autoTextViewIssueTypeAdapter)
+        if (checkUnhandledFilePath()) {
+            autoTextViewIssueType.setText(arrayListIssueTypes[2], false)
+            jiraAuthentication.setIssueTypePosition(issueTypePosition = 2)
+        } else {
+            if (arrayListIssueTypes.isNotEmpty()) {
+                if (sharedPref.getString("jira_issue_type", null) != null) {
+                    autoTextViewIssueType.setText(
+                        sharedPref.getString("jira_issue_type", null),
+                        false
+                    )
+                } else {
+                    autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
+                }
+            }
+        }
+        autoTextViewIssueType.setOnTouchListener { v, event ->
+            autoTextViewIssueType.showDropDown()
+            false
+        }
+        autoTextViewIssueType.setOnItemClickListener { parent, view, position, id ->
+            jiraAuthentication.setIssueTypePosition(issueTypePosition = position)
+            hideKeyboard(activity = activity)
+            initializeEpicName(arrayListEpicName = arrayListEpicName, sharedPref = sharedPref)
+        }
+        autoTextViewIssueType.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListIssueTypes.contains(autoTextViewIssueType.editableText.toString())) {
+                    if (arrayListIssueTypes.isNotEmpty()) {
+                        if (sharedPref.getString("jira_issue_type", null) != null) {
+                            autoTextViewIssueType.setText(
+                                sharedPref.getString(
+                                    "jira_issue_type",
+                                    null
+                                ), false
+                            )
+                        } else {
+                            autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeProjectName(
+        arrayListProjectNames: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListProjectNames
+        )
+        autoTextViewProject.setAdapter(autoTextViewProjectAdapter)
+        if (arrayListProjectNames.isNotEmpty() && autoTextViewProject.text.isEmpty()) {
+            if (sharedPref.getString("jira_project", null) != null) {
+                autoTextViewProject.setText(
+                    sharedPref.getString("jira_project", null),
+                    false
+                )
+            } else {
+                autoTextViewProject.setText(arrayListProjectNames[0], false)
+            }
+        }
+        autoTextViewProject.setOnTouchListener { v, event ->
+            autoTextViewProject.showDropDown()
+            false
+        }
+        autoTextViewProject.setOnItemClickListener { parent, view, position, id ->
+            projectPosition = position
+            controlProjectPosition = true
+            jiraAuthentication.setProjectPosition(projectPosition = position)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                progressBarJira.visibility = View.VISIBLE
+                progressBarJiraLayout.visibility = View.VISIBLE
+//                    attachProgressBar()
+            }
+            hideKeyboard(activity = activity)
+            jiraAuthentication.callJiraIssue(
+                context = context,
+                activity = activity,
+                jiraTask = "get",
+                createMethod = "normal"
+            )
+        }
+        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+                    if (arrayListProjectNames.isNotEmpty()) {
+                        if (sharedPref.getString("jira_project", null) != null) {
+                            autoTextViewProject.setText(
+                                sharedPref.getString("jira_project", null),
+                                false
+                            )
+                        } else {
+                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializeEpicName(
+        arrayListEpicName: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        if (autoTextViewIssueType.editableText.toString() == "Epic") {
+            cardViewEpicName.visibility = View.VISIBLE
+            autoTextViewEpicNameAdapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                arrayListEpicName
+            )
+            autoTextViewEpicName.setAdapter(autoTextViewEpicNameAdapter)
+            if (arrayListEpicName.isNotEmpty()) {
+                if (sharedPref.getString("jira_epic_name", null) != null) {
+                    autoTextViewEpicName.setText(
+                        sharedPref.getString("jira_epic_name", null),
+                        false
+                    )
+                } else {
+                    autoTextViewEpicName.setText(arrayListEpicName[0], false)
+                }
+            }
+            autoTextViewEpicName.setOnTouchListener { v, event ->
+                autoTextViewEpicName.showDropDown()
+                false
+            }
+            autoTextViewEpicName.setOnItemClickListener { parentEpic, viewEpic, positionEpic, idEpic ->
+                jiraAuthentication.setEpicNamePosition(epicNamePosition = positionEpic)
+                hideKeyboard(activity = activity)
+            }
+            autoTextViewEpicName.setOnFocusChangeListener { v, hasFocus ->
+                if (!hasFocus && autoTextViewEpicName.text.toString().isEmpty()) {
+                    if (!arrayListEpicName.contains(autoTextViewEpicName.editableText.toString())) {
+                        if (arrayListEpicName.isNotEmpty()) {
+                            if (sharedPref.getString("jira_epic_name", null) != null) {
+                                autoTextViewEpicName.setText(
+                                    sharedPref.getString(
+                                        "jira_epic_name",
+                                        null
+                                    ), false
+                                )
+                            } else {
+                                autoTextViewEpicName.setText(arrayListEpicName[0], false)
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            cardViewEpicName.visibility = View.GONE
         }
     }
 
@@ -3437,11 +3767,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     if (Build.VERSION.SDK_INT >= 23) {
                         activity.window.navigationBarColor =
                             resources.getColor(R.color.black, theme)
-                        activity.window.statusBarColor = resources.getColor(R.color.black, theme)
+                        activity.window.statusBarColor =
+                            resources.getColor(R.color.black, theme)
                     } else {
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            activity.window.navigationBarColor = resources.getColor(R.color.black)
+                            activity.window.navigationBarColor =
+                                resources.getColor(R.color.black)
                             activity.window.statusBarColor = resources.getColor(R.color.black)
                         }
                     }
@@ -3455,20 +3787,20 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     recyclerViewSlackAttachmentUser =
                         viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
                     editTextMessage = viewSlack.findViewById(R.id.editText_slack_message)
-                    editTextMessageUser = viewSlack.findViewById(R.id.editText_slack_message_user)
+                    editTextMessageUser =
+                        viewSlack.findViewById(R.id.editText_slack_message_user)
                     buttonSlackCancel = viewSlack.findViewById(R.id.button_slack_cancel)
                     buttonSlackCreate = viewSlack.findViewById(R.id.button_slack_create)
-                    buttonSlackCancelUser = viewSlack.findViewById(R.id.button_slack_cancel_user)
-                    buttonSlackCreateUser = viewSlack.findViewById(R.id.button_slack_create_user)
+                    buttonSlackCancelUser =
+                        viewSlack.findViewById(R.id.button_slack_cancel_user)
+                    buttonSlackCreateUser =
+                        viewSlack.findViewById(R.id.button_slack_create_user)
                     progressBarSlack = viewSlack.findViewById(R.id.slack_progressbar)
                     toolbarSlack = viewSlack.findViewById(R.id.toolbar_slack)
-                    slackBottomNavigationView = viewSlack.findViewById(R.id.slack_bottom_nav_view)
+                    slackBottomNavigationView =
+                        viewSlack.findViewById(R.id.slack_bottom_nav_view)
                     progressBarSlackLayout =
                         viewSlack.findViewById(R.id.slack_progressbar_background)
-                    recyclerViewSlackNoAttachment =
-                        viewSlack.findViewById(R.id.textView_slack_no_attachment)
-                    recyclerViewSlackUserNoAttachment =
-                        viewSlack.findViewById(R.id.textView_slack_user_no_attachment)
 
                     slackAuthentication.callSlack(
                         context = context,
@@ -3527,7 +3859,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             )
             slackAuthentication.gatherSlackUserEditTextDetails(editTextMessage = editTextMessageUser)
             slackAuthentication.gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems = arrayListSlackFileName)
-            if (slackAuthentication.checkMessageEmptyUser(activity = activity, context = context)) {
+            if (slackAuthentication.checkMessageEmptyUser(
+                    activity = activity,
+                    context = context
+                )
+            ) {
                 progressBarSlack.visibility = View.VISIBLE
                 progressBarSlackLayout.visibility = View.VISIBLE
                 slackAuthentication.callSlack(
@@ -3577,7 +3913,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             }
             return@setOnNavigationItemSelectedListener true
         }
-
         toolbarSlack.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.slack_menu_refresh -> {
@@ -3597,9 +3932,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     }
 
     private fun initializeSlackRecyclerView(filePathMedia: File) {
-
-        recyclerViewSlackAttachment.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         recyclerViewSlackAttachmentUser.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
@@ -3623,12 +3955,10 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         return arrayListSlackFileName
     }
 
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun initializeSlackSpinner(
         arrayListChannels: ArrayList<String>,
         arrayListUsers: ArrayList<String>
     ) {
-
         spinnerChannelsAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListChannels)
         spinnerChannelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -3641,9 +3971,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
         progressBarSlack.visibility = View.GONE
         progressBarSlackLayout.visibility = View.GONE
-
     }
-
 
     private fun hideKeyboard(activity: Activity) {
         val inputMethodManager =
@@ -3657,11 +3985,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         val mMonth = calendar.get(Calendar.MONTH)
         val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         var startDate = "$mYear-$mMonth-$mDayOfMonth"
-        calendarViewJiraLayout = calendarViewJiraView.findViewById(R.id.jira_calendar_view_layout)
+        calendarViewJiraLayout =
+            calendarViewJiraView.findViewById(R.id.jira_calendar_view_layout)
         calendarViewStartDate = calendarViewJiraView.findViewById(R.id.calendarView_start_date)
         buttonCalendarViewJiraCancel =
             calendarViewJiraView.findViewById(R.id.button_jira_calendar_cancel)
-        buttonCalendarViewJiraOk = calendarViewJiraView.findViewById(R.id.button_jira_calendar_ok)
+        buttonCalendarViewJiraOk =
+            calendarViewJiraView.findViewById(R.id.button_jira_calendar_ok)
 
         calendarViewStartDate.minDate = System.currentTimeMillis()
         if (calendarViewJiraDate != null) {
@@ -3689,9 +4019,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     private fun attachJiraDatePicker() {
         try {
-            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+            val rootView: ViewGroup =
+                activity.window.decorView.findViewById(android.R.id.content)
             calendarViewJiraView =
-                LayoutInflater.from(activity).inflate(R.layout.jira_calendar_view, rootView, false)
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.jira_calendar_view, rootView, false)
             windowManagerParamsJiraDatePicker =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
@@ -3725,7 +4057,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     private fun detachJiraDatePicker() {
         if (this::calendarViewJiraView.isInitialized) {
-            (windowManagerJiraDatePicker as WindowManager).removeViewImmediate(calendarViewJiraView)
+            (windowManagerJiraDatePicker as WindowManager).removeViewImmediate(
+                calendarViewJiraView
+            )
         }
     }
 
@@ -3738,7 +4072,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             CookieBar.build(activity)
                 .setCustomView(R.layout.loggerbird_unhandled_popup)
                 .setCustomViewInitializer {
-                    val textViewDiscard = it.findViewById<TextView>(R.id.textView_unhandled_discard)
+                    val textViewDiscard =
+                        it.findViewById<TextView>(R.id.textView_unhandled_discard)
                     val textViewShareWithJira =
                         it.findViewById<TextView>(R.id.textView_unhandled_share_jira)
                     val textViewCustomizeJira =
@@ -3887,7 +4222,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun unhandledExceptionCustomizeIssueSent() {
-        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         val editor: SharedPreferences.Editor = sharedPref.edit()
         editor.remove("unhandled_file_path")
         editor.apply()
@@ -3986,7 +4322,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //        return false
 //    }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     internal fun attachUnhandledDuplicationLayout(
         unhandledExceptionIssueMethod: String,
         filePath: File
@@ -4080,6 +4415,532 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         }
         return false
     }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeEmailLayout(filePathMedia: File) {
+        arrayListEmailFileName.clear()
+        arraylistEmailToUsername.clear()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewEmail =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_email_popup, rootView, false)
+        windowManagerParamsEmail =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerEmail = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerEmail as WindowManager).addView(
+            viewEmail,
+            windowManagerParamsEmail
+        )
+        buttonEmailCreate =
+            viewEmail.findViewById(R.id.button_email_create)
+        buttonEmailCancel =
+            viewEmail.findViewById(R.id.button_email_cancel)
+        imageViewEmailAdd = viewEmail.findViewById(R.id.imageView_email_add)
+        editTextTo = viewEmail.findViewById(R.id.editText_email_to)
+        editTextSubject = viewEmail.findViewById(R.id.editText_email_subject)
+        editTextContent = viewEmail.findViewById(R.id.editText_email_message)
+        toolbarEmail = viewEmail.findViewById(R.id.toolbar_email)
+        recyclerViewEmailAttachment =
+            viewEmail.findViewById(R.id.recycler_view_email_attachment)
+        recyclerViewEmailToList = viewEmail.findViewById(R.id.recycler_view_email_to_list)
+        cardViewToList = viewEmail.findViewById(R.id.cardView_to_list)
+        initializeEmailRecyclerView(filePathMedia = filePathMedia)
+        initializeEmailToRecyclerView()
+        initializeEmailButtons(filePathMedia = filePathMedia)
+//        detachProgressBar()
+    }
+
+    internal fun removeEmailLayout() {
+        if (this::viewEmail.isInitialized && windowManagerEmail != null) {
+            (windowManagerEmail as WindowManager).removeViewImmediate(
+                viewEmail
+            )
+            windowManagerEmail = null
+            arrayListEmailFileName.clear()
+        }
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeEmailButtons(filePathMedia: File) {
+        try {
+            buttonEmailCreate.setSafeOnClickListener {
+                if (checkBoxFutureTask.isChecked) {
+
+                    if (arraylistEmailToUsername.isNotEmpty()) {
+                        arraylistEmailToUsername.forEach {
+                            createFutureTaskEmail(filePathMedia = filePathMedia)
+                        }
+//                            emailArrayListFilePath.clear()
+//                            setEmailArrayListFilePath(arrayListFilePath = arrayListFile)
+//                            setEmailFile(file = filePathMedia)
+//                            setEmailTo(to = it.email)
+//                            setEmailMessage(message = editTextContent.text.toString())
+//                            setEmailSubject(subject = editTextSubject.text.toString())
+                    } else {
+                        if (checkEmailFormat(editTextTo.text.toString())) {
+                            createFutureTaskEmail(filePathMedia = filePathMedia)
+                        }
+                    }
+
+
+                    removeEmailLayout()
+                    defaultToast.attachToast(
+                        activity = activity,
+                        toastMessage = activity.resources.getString(R.string.future_task_enabled)
+                    )
+                    finishShareLayout(message = "single_email")
+                } else {
+                    if (arraylistEmailToUsername.isNotEmpty()) {
+                        arraylistEmailToUsername.forEach {
+                            callEmail(filePathMedia = filePathMedia, to = it.email)
+                        }
+                    } else {
+                        if (checkEmailFormat(editTextTo.text.toString())) {
+                            callEmail(
+                                filePathMedia = filePathMedia,
+                                to = editTextTo.text.toString()
+                            )
+                        }
+                    }
+                }
+            }
+            buttonEmailCancel.setSafeOnClickListener {
+                removeEmailLayout()
+            }
+            imageViewEmailAdd.setSafeOnClickListener {
+                if (checkEmailFormat(editTextTo.text.toString())) {
+                    cardViewToList.visibility = View.VISIBLE
+                    addEmailToUser(email = editTextTo.text.toString())
+                }
+            }
+            toolbarEmail.setNavigationOnClickListener {
+                removeEmailLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            callEnqueueEmail()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
+
+        }
+    }
+
+    private fun createFutureTaskEmail(filePathMedia: File) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        with(sharedPref.edit()) {
+            putString("future_task_email_to", editTextTo.text.toString())
+            putString("future_task_email_subject", editTextSubject.text.toString())
+            putString("future_task_email_message", editTextContent.text.toString())
+            putString("future_task_email_file", filePathMedia.absolutePath)
+            commit()
+        }
+        val intentServiceFuture =
+            Intent(context, LoggerBirdFutureTaskService::class.java)
+        context.startForegroundService(intentServiceFuture)
+    }
+
+    private fun createEmailTask(filePathMedia: File, to: String) {
+        try {
+            attachProgressBar()
+            sendSingleMediaFile(
+                filePathMedia = filePathMedia,
+                to = to,
+                subject = editTextSubject.text.toString(),
+                message = editTextContent.text.toString()
+            )
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            resetEnqueueMail()
+            detachProgressBar()
+            removeEmailLayout()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeEmailRecyclerView(filePathMedia: File) {
+        recyclerViewEmailAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        emailAdapter = RecyclerViewEmailAdapter(
+            addEmailFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewEmailAttachment.adapter = emailAdapter
+    }
+
+    private fun initializeEmailToRecyclerView() {
+        recyclerViewEmailToList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        emailToListAdapter = RecyclerViewEmaiToListAdapter(
+            arraylistEmailToUsername,
+            cardView = cardViewToList,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewEmailToList.adapter = emailToListAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addEmailToUser(email: String) {
+        if (!arraylistEmailToUsername.contains(RecyclerViewModelTo(email = email))) {
+            arraylistEmailToUsername.add(RecyclerViewModelTo(email = email))
+            emailToListAdapter.notifyDataSetChanged()
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.email_to_duplication)
+            )
+        }
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addEmailFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListEmailFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListEmailFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListEmailFileName
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun checkEmailFormat(to: String): Boolean {
+        return if (android.util.Patterns.EMAIL_ADDRESS.matcher(to).matches()) {
+            true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.email_invalid_format)
+            )
+            false
+        }
+    }
+
+    private fun checkBoxFutureTaskIsChecked(filePathMedia: File): Boolean {
+        if (checkBoxFutureTask.isChecked) {
+            initializeFutureTaskLayout(filePathMedia = filePathMedia)
+            return true
+        }
+        return false
+    }
+
+    private fun initializeFutureTaskLayout(filePathMedia: File) {
+        removeFutureLayout()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewFutureTask =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_future_task_popup, rootView, false)
+        windowManagerParamsFutureTask =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerFutureTask = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerFutureTask as WindowManager).addView(
+            viewFutureTask,
+            windowManagerParamsFutureTask
+        )
+        imageViewFutureCalendar = viewFutureTask.findViewById(R.id.imageView_future_task_date)
+        imageButtonFutureTaskRemoveDate =
+            viewFutureTask.findViewById(R.id.image_button_future_date_remove)
+        imageViewFutureTime = viewFutureTask.findViewById(R.id.imageView_future_task_time)
+        imageButtonFutureTaskRemoveTime =
+            viewFutureTask.findViewById(R.id.image_button_future_time_remove)
+        buttonFutureTaskProceed = viewFutureTask.findViewById(R.id.button_future_task_proceed)
+        buttonFutureTaskCancel = viewFutureTask.findViewById(R.id.button_future_task_cancel)
+
+        buttonClicksFuture(filePathMedia = filePathMedia)
+    }
+
+    private fun removeFutureLayout() {
+        if (this::viewFutureTask.isInitialized && windowManagerFutureTask != null) {
+            (windowManagerFutureTask as WindowManager).removeViewImmediate(
+                viewFutureTask
+            )
+            windowManagerFutureTask = null
+        }
+    }
+
+    private fun buttonClicksFuture(filePathMedia: File) {
+        imageViewFutureCalendar.setSafeOnClickListener {
+            initializeFutureDateLayout()
+        }
+        imageButtonFutureTaskRemoveDate.setSafeOnClickListener {
+            futureStartDate = null
+            imageButtonFutureTaskRemoveDate.visibility = View.GONE
+        }
+        imageViewFutureTime.setSafeOnClickListener {
+            initializeFutureTimeLayout()
+        }
+        imageButtonFutureTaskRemoveTime.setSafeOnClickListener {
+            futureStartTime = null
+            imageButtonFutureTaskRemoveTime.visibility = View.GONE
+        }
+        buttonFutureTaskProceed.setSafeOnClickListener {
+            checkDateAndTimeEmpty(filePathMedia = filePathMedia)
+        }
+        buttonFutureTaskCancel.setSafeOnClickListener {
+            checkBoxFutureTask.isChecked = false
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+            with(sharedPref.edit()) {
+                remove("future_task_time")
+                remove("future_file_path")
+                commit()
+            }
+            futureStartDate = null
+            futureStartTime = null
+            removeFutureLayout()
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.future_task_disabled)
+            )
+        }
+    }
+
+    private fun initializeFutureDateLayout() {
+        removeFutureDateLayout()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewFutureDate =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.future_calendar_view, rootView, false)
+        windowManagerParamsFutureDate =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerFutureDate = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerFutureDate as WindowManager).addView(
+            viewFutureDate,
+            windowManagerParamsFutureDate
+        )
+        frameLayoutDate = viewFutureDate.findViewById(R.id.future_calendar_view_layout)
+        calendarViewFutureTask = viewFutureDate.findViewById(R.id.calendarView_start_date)
+        buttonFutureTaskDateCreate = viewFutureDate.findViewById(R.id.button_future_calendar_ok)
+        buttonFutureTaskDateCancel = viewFutureDate.findViewById(R.id.button_future_calendar_cancel)
+
+        buttonClicksFutureDate()
+
+    }
+
+    private fun removeFutureDateLayout() {
+        if (this::viewFutureDate.isInitialized && windowManagerFutureDate != null) {
+            (windowManagerFutureDate as WindowManager).removeViewImmediate(
+                viewFutureDate
+            )
+            windowManagerFutureDate = null
+        }
+    }
+
+    private fun buttonClicksFutureDate() {
+        val calendar = Calendar.getInstance()
+        val mYear = calendar.get(Calendar.YEAR)
+        val mMonth = calendar.get(Calendar.MONTH)
+        val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        calendarFuture.set(mYear, mMonth, mDayOfMonth)
+        calendarViewFutureTask.minDate = System.currentTimeMillis()
+        frameLayoutDate.setOnClickListener {
+            removeFutureDateLayout()
+        }
+        calendarViewFutureTask.setOnDateChangeListener { view, year, month, dayOfMonth ->
+            calendarFuture.set(year, month, dayOfMonth)
+//            startDate = "$year-$month-$dayOfMonth"
+        }
+        buttonFutureTaskDateCreate.setSafeOnClickListener {
+            futureStartDate = calendarViewFutureTask.date
+            Log.d("time", futureStartDate.toString())
+            Log.d("time", System.currentTimeMillis().toString())
+            imageButtonFutureTaskRemoveDate.visibility = View.VISIBLE
+            removeFutureDateLayout()
+        }
+        buttonFutureTaskDateCancel.setSafeOnClickListener {
+            removeFutureDateLayout()
+        }
+    }
+
+    private fun initializeFutureTimeLayout() {
+        removeFutureTimeLayout()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewFutureTime =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.future_time_picker, rootView, false)
+        windowManagerParamsFutureTime =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerFutureTime = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerFutureTime as WindowManager).addView(
+            viewFutureTime,
+            windowManagerParamsFutureTime
+        )
+        frameLayoutTime = viewFutureTime.findViewById(R.id.future_time_view_layout)
+        timePickerFutureTask = viewFutureTime.findViewById(R.id.timePicker_start_time)
+        buttonFutureTaskTimeCreate = viewFutureTime.findViewById(R.id.button_future_time_ok)
+        buttonFutureTaskTimeCancel = viewFutureTime.findViewById(R.id.button_future_time_cancel)
+
+        buttonClicksFutureTime()
+
+    }
+
+    private fun removeFutureTimeLayout() {
+        if (this::viewFutureTime.isInitialized && windowManagerFutureTime != null) {
+            (windowManagerFutureTime as WindowManager).removeViewImmediate(
+                viewFutureTime
+            )
+            windowManagerFutureTime = null
+        }
+    }
+
+    private fun buttonClicksFutureTime() {
+        frameLayoutTime.setOnClickListener {
+            removeFutureTimeLayout()
+        }
+//        timePickerFutureTask.setOnTimeChangedListener { view, hourOfDay, minute ->
+//
+//        }
+        buttonFutureTaskTimeCreate.setSafeOnClickListener {
+            calendarFuture.set(Calendar.HOUR_OF_DAY, timePickerFutureTask.hour)
+            calendarFuture.set(Calendar.MINUTE, timePickerFutureTask.minute)
+            futureStartTime =
+                timePickerFutureTask.hour.toLong() + timePickerFutureTask.minute.toLong()
+            imageButtonFutureTaskRemoveTime.visibility = View.VISIBLE
+            removeFutureTimeLayout()
+        }
+        buttonFutureTaskTimeCancel.setSafeOnClickListener {
+            removeFutureTimeLayout()
+        }
+    }
+
+    private fun checkDateAndTimeEmpty(filePathMedia: File) {
+        if (futureStartDate != null && futureStartTime != null) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.future_task_gathered)
+            )
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+            with(sharedPref.edit()) {
+                putLong("future_task_time", calendarFuture.timeInMillis)
+                putString("future_file_path", filePathMedia.absolutePath)
+                commit()
+            }
+            removeFutureLayout()
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.future_task_empty)
+            )
+        }
+    }
+
+    private fun setEmailTo(to: String) {
+        this.emailTo = to
+    }
+
+    private fun setEmailMessage(message: String) {
+        this.emailMessage = message
+    }
+
+    private fun setEmailSubject(subject: String) {
+        this.emailSubject = subject
+    }
+
+    private fun setEmailFile(file: File) {
+        this.emailFile = file
+    }
+
+    private fun setEmailArrayListFilePath(arrayListFilePath: ArrayList<File>) {
+        this.emailArrayListFilePath = arrayListFilePath
+    }
+
+    internal fun getEmailTo(): String {
+        return emailTo
+    }
+
+    internal fun getEmailMessage(): String {
+        return emailMessage
+    }
+
+    internal fun getEmailSubject(): String {
+        return emailSubject
+    }
+
+    internal fun getEmailFile(): File {
+        return emailFile
+    }
+
+    internal fun getArrayListFilePath(): ArrayList<File> {
+        return emailArrayListFilePath
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {

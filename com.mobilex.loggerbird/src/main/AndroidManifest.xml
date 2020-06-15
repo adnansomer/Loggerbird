@@ -37,6 +37,10 @@
                  android:stopWithTask="true"
                  android:enabled="true"
                  android:exported="false" />
+        <service android:name="services.LoggerBirdFutureTaskService"
+            android:foregroundServiceType="dataSync"
+            android:exported = "true"
+            />
 
     </application>
 
