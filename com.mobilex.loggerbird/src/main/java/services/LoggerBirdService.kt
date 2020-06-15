@@ -92,7 +92,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerFutureTask: Any? = null
     private var windowManagerFutureDate: Any? = null
     private var windowManagerFutureTime: Any? = null
-    //private var windowManagerJiraAuth: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -117,8 +116,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var filePathVideo: File
     private lateinit var filePathAudio: File
     private var isOpen = false
-    //private lateinit var fabOpen: Animation
-    //private lateinit var fabClose: Animation
     private var screenDensity: Int = 0
     private var projectManager: MediaProjectionManager? = null
     private var mediaProjection: MediaProjection? = null
@@ -158,7 +155,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewFutureTask: View
     private lateinit var viewFutureDate: View
     private lateinit var viewFutureTime: View
-    //  private lateinit var viewJiraAuth: View
     private lateinit var wrapper: FrameLayout
     private lateinit var floating_action_button_feedback: FloatingActionButton
     private lateinit var floating_action_button_feed_close: FloatingActionButton
@@ -1010,9 +1006,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_discard.setSafeOnClickListener {
-                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    attachProgressBar()
-//                }
                 discardMediaFile()
             }
 
