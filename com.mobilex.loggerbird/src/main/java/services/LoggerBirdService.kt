@@ -172,6 +172,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var progressBarView: View
     private val defaultToast: DefaultToast = DefaultToast()
     private val arrayListUnhandledExceptionMessage: ArrayList<String> = ArrayList()
+
     //Jira:
     internal val jiraAuthentication = JiraAuthentication()
     private val slackAuthentication = SlackAuthentication()
@@ -393,6 +394,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var workingAnimation: Animation
         internal val arrayListFile: ArrayList<File> = ArrayList()
         internal var controlFutureTask: Boolean = false
+        internal lateinit var recyclerViewSlackAttachment: RecyclerView
+        internal lateinit var recyclerViewSlackAttachmentUser: RecyclerView
+        internal lateinit var recyclerViewSlackNoAttachment: TextView
+        internal lateinit var recyclerViewSlackUserNoAttachment: TextView
+
 
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
@@ -691,7 +697,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_discard = view.findViewById(R.id.textView_discard)
                     textView_share_jira = view.findViewById(R.id.textView_share_jira)
                     textView_share_slack = view.findViewById(R.id.textView_share_slack)
-                    //textView_dismiss = view.findViewById(R.id.textView_dismiss)
                     textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
                     textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
@@ -2387,18 +2392,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     Toast.makeText(context, R.string.slack_sent_error, Toast.LENGTH_SHORT).show()
                     progressBarSlackLayout.visibility = View.GONE
                     progressBarSlack.visibility = View.GONE
-//                    finishErrorFab()
                 }
                 "slack_error_time_out" -> {
-                    removeJiraLayout()
-                    Toast.makeText(context, R.string.slack_sent_error_time_out, Toast.LENGTH_SHORT)
-                        .show()
-                    if (this::progressBarSlackLayout.isInitialized && this::progressBarSlack.isInitialized) {
-                        progressBarSlackLayout.visibility = View.GONE
-                        progressBarSlack.visibility = View.GONE
-                    }
-                    detachProgressBar()
-//                    finishErrorFab()
+                    removeSlackLayout()
+                    Toast.makeText(context, R.string.slack_sent_error_time_out, Toast.LENGTH_SHORT).show()
+                    progressBarSlackLayout.visibility = View.GONE
+                    progressBarSlack.visibility = View.GONE
                 }
 
             }
@@ -3925,6 +3924,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     private fun initializeSlackRecyclerView(filePathMedia: File) {
+
+        recyclerViewSlackAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         recyclerViewSlackAttachmentUser.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
@@ -3942,16 +3944,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     }
 
+
     private fun addSlackFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         arrayListSlackFileName.add(RecyclerViewModel(file = filePathMedia))
         arrayListSlackFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         return arrayListSlackFileName
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun initializeSlackSpinner(
         arrayListChannels: ArrayList<String>,
         arrayListUsers: ArrayList<String>
     ) {
+
         spinnerChannelsAdapter =
             ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListChannels)
         spinnerChannelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -3964,7 +3969,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
         progressBarSlack.visibility = View.GONE
         progressBarSlackLayout.visibility = View.GONE
+
     }
+
 
     private fun hideKeyboard(activity: Activity) {
         val inputMethodManager =
@@ -4469,7 +4476,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeEmailButtons(filePathMedia: File) {
         try {
@@ -4933,7 +4939,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun getArrayListFilePath(): ArrayList<File> {
         return emailArrayListFilePath
     }
-
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {
