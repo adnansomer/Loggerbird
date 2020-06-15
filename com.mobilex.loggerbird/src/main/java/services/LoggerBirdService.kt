@@ -704,7 +704,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_audio_size = view.findViewById(R.id.fragment_textView_size_audio)
                     checkBoxFutureTask = view.findViewById(R.id.checkBox_future_task)
 
-
                     floating_action_button.imageTintList =
                         ColorStateList.valueOf(resources.getColor(R.color.white))
                     floating_action_button.backgroundTintList =

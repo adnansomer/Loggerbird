@@ -212,7 +212,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
-                            android:text="@string/textView_slack_message"
+                            android:text="@string/textView_email_message"
                             android:textColor="@color/black"
                             android:textSize="16sp">
                         </TextView>
