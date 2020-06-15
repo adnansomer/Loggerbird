@@ -52,10 +52,6 @@ android {
         exclude 'META-INF/jersey-module-version'
     }
 
-    configurations {
-        all*.exclude module: 'support-v4' // This removes all other versions of `support-v4` if gets duplicated from all the artifacts.
-    }
-
 }
 
 dependencies {
