@@ -123,6 +123,11 @@
     <string name="checkBox_feedback_title">Geri bildirim verin</string>
     <!-- loggerbird_feedback-->
     <string name="editText_feedback_title">Geri bildirim verin</string>
+    <string name="editText_feedback_text">Geri bildiriminizi buraya yazin!</string>
+    <string name="editText_feedback_subtitle">Geri bildirim Mesaji</string>
+    <string name="button_feedback_cancel">Iptal</string>
+    <string name="button_feedback_create">Gonder</string>
+
     <!-- loggerbird_jira_popup-->
     <string name="textView_jira_auth_title">Adım 1/2 - Yetkilendirme</string>
     <string name="textView_jira_title">Konu Oluştur</string>
@@ -166,6 +171,7 @@
     <string name="textView_slack_attachment">Eklentiler</string>
     <string name="button_slack_cancel">İptal</string>
     <string name="button_slack_create">Oluştur</string>
+    <string name="textView_slack_no_attachment">Hiçbir ek bulunmamaktadir.</string>
     <!-- recycler_view_slack_item_popup-->
     <string name="textView_recyclerView_slack_popup_title">Slack mesajınızdan bu eklentiyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_slack_yes">Evet</string>

@@ -1,69 +1,156 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/feedback_layout"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center">
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floating_action_button_feed_dismiss"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|start"
-        app:fabSize="mini"
-        android:background="@null"
-        app:backgroundTint="@android:color/transparent"
-        android:elevation="0dp"
-        app:elevation="0dp"
-        app:layout_anchor="@id/feedback_layout"
-        app:layout_anchorGravity="center_vertical|center_horizontal"
-        app:srcCompat="@drawable/ic_close_black_24dp" />
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@color/darkTransparent">
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_gravity="center"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/feed_layout"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="25dp"
-        android:layout_marginBottom="30dp"
-        android:layout_marginRight="30dp"
-        android:background="@drawable/edit_text_layout">
+        android:layout_gravity="center"
+        android:layout_margin="20dp"
+        android:background="@drawable/pop_up_shape"
+        android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/editText_feed_back"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="start"
+            android:layout_height="wrap_content"
+            android:background="@color/colorFab"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar_feedback"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorFab"
+                app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
+                app:title="@string/editText_feedback_title"
+                app:titleTextColor="@color/black">
+            </androidx.appcompat.widget.Toolbar>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@drawable/toolbar_shadow">
+                </View>
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:hint="@string/editText_feedback_title"
-            android:inputType="textMultiLine"
-            android:background="@null"
-            android:lines="8"
-            android:maxLength="90"
-            android:maxLines="8"
-            android:singleLine="true"
-            android:textSize="15sp"
-            android:textStyle="italic" />
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                app:cardElevation="5dp">
+
+                <LinearLayout
+                    android:id="@+id/feed_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="@string/editText_feedback_subtitle"
+                        android:textColor="@color/black"
+                        android:textSize="16sp">
+                    </TextView>
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editText_feed_back"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@null"
+                        android:cursorVisible="true"
+                        android:gravity="top"
+                        android:hint="@string/editText_feedback_text"
+                        android:lines="6"
+                        android:maxLines="6"
+                        android:textCursorDrawable="@color/colorBlack"
+                        android:textSize="16sp">
+                    </com.google.android.material.textfield.TextInputEditText>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="vertical"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/floating_action_button_feed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:background="@drawable/pop_up_button_shape"
+                android:text="@string/button_feedback_create"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                app:elevation="5dp" />
+
+            <Button
+                android:id="@+id/floating_action_button_feed_dismiss"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:background="@drawable/pop_up_cancel_button_shape"
+                android:text="@string/button_feedback_cancel"
+                android:textAllCaps="true"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floating_action_button_feed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        app:borderWidth="0dp"
-        app:fabSize="mini"
-        android:layout_marginRight="5dp"
-        app:srcCompat="@drawable/ic_send_black_24dp"
-        android:background="@null"
-        app:backgroundTint="@android:color/transparent"
-        android:elevation="0dp"
-        app:elevation="0dp"
-        app:layout_anchor="@id/feedback_layout"
-        app:layout_anchorGravity="center_vertical|center_horizontal"
-        android:layout_marginEnd="5dp" />
+    <FrameLayout
+        android:id="@+id/feedback_progressbar_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@color/darkTransparent"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/feedback_progressbar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:indeterminateDrawable="@drawable/progress_bar_loading"
+            android:indeterminateDuration="1000"
+            android:visibility="gone">
+        </ProgressBar>
+
+    </FrameLayout>
 
 </FrameLayout>
