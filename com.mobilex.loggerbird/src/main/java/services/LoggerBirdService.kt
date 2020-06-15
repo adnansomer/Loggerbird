@@ -4488,8 +4488,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             createFutureTaskEmail(filePathMedia = filePathMedia)
                         }
                     }
-
-
                     removeEmailLayout()
                     defaultToast.attachToast(
                         activity = activity,
@@ -4518,6 +4516,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 if (checkEmailFormat(editTextTo.text.toString())) {
                     cardViewToList.visibility = View.VISIBLE
                     addEmailToUser(email = editTextTo.text.toString())
+                    editTextTo.text = null
                 }
             }
             toolbarEmail.setNavigationOnClickListener {
@@ -4550,6 +4549,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         context.startForegroundService(intentServiceFuture)
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun createEmailTask(filePathMedia: File, to: String) {
         try {
             attachProgressBar()

@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import eightbitlab.com.blurview.RenderScriptBlur
 import kotlinx.android.synthetic.main.activity_main3.*
 
 
@@ -31,12 +30,6 @@ class Main3Activity : AppCompatActivity() {
         //Can be used in case your layout has a lot of transparent space and your content
         //gets kinda lost after after blur is applied.
         val windowBackground: Drawable = window.decorView.background
-
-        blurView.setupWith(decorView.findViewById(android.R.id.content))
-            .setFrameClearDrawable(windowBackground)
-            .setBlurAlgorithm(RenderScriptBlur(this))
-            .setBlurRadius(radius)
-            .setHasFixedTransformationMatrix(false)
 
         getList()
 

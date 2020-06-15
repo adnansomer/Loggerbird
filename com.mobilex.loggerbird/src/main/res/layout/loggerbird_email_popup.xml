@@ -3,12 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_slack"
     android:layout_width="match_parent"
+    android:background="@color/darkTransparent"
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:layout_margin="20dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/colorFab"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/pop_up_shape"
         android:orientation="vertical">
 
         <LinearLayout
@@ -81,8 +84,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:gravity="center"
-                            >
+                            android:gravity="center">
                             <EditText
                                 android:id="@+id/editText_email_to"
                                 android:layout_width="0dp"
@@ -201,24 +203,39 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="7dp"
                     app:cardElevation="5dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editText_email_message"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="5dp"
-                        android:layout_marginRight="5dp"
-                        android:layout_marginBottom="10dp"
-                        android:background="@null"
-                        android:cursorVisible="true"
-                        android:gravity="top"
-                        android:hint="@string/editText_email_content"
-                        android:lines="10"
-                        android:maxLines="10"
-                        android:textCursorDrawable="@color/colorBlack"
-                        android:textSize="16sp">
-                    </com.google.android.material.textfield.TextInputEditText>
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:text="@string/textView_slack_message"
+                            android:textColor="@color/black"
+                            android:textSize="16sp">
+                        </TextView>
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editText_email_message"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="5dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginBottom="10dp"
+                            android:background="@null"
+                            android:cursorVisible="true"
+                            android:gravity="top"
+                            android:hint="@string/editText_email_content"
+                            android:lines="8"
+                            android:maxLines="8"
+                            android:textCursorDrawable="@color/colorBlack"
+                            android:textSize="16sp">
+                        </com.google.android.material.textfield.TextInputEditText>
+                    </LinearLayout>
                 </androidx.cardview.widget.CardView>
+
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
@@ -257,7 +274,8 @@
                             <androidx.recyclerview.widget.RecyclerView
                                 android:id="@+id/recycler_view_email_attachment"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent">
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center">
                             </androidx.recyclerview.widget.RecyclerView>
 
                         </LinearLayout>
