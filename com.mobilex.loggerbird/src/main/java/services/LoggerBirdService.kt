@@ -2102,7 +2102,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (sessionTimeEnd != null && sessionTimeStart != null) {
             val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
             val sharedPref =
-                PreferenceManager.getDefaultSharedPreferences(logActivityLifeCycleObserver.activityInstance().applicationContext)
+                PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
                     ?: return
             with(sharedPref.edit()) {
                 putLong("session_time", sharedPref.getLong("session_time", 0) + sessionDuration)
@@ -4472,30 +4472,29 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         try {
             buttonEmailCreate.setSafeOnClickListener {
                 if (checkBoxFutureTask.isChecked) {
-
-                    if (arraylistEmailToUsername.isNotEmpty()) {
-                        arraylistEmailToUsername.forEach {
-                            createFutureTaskEmail(filePathMedia = filePathMedia)
-                        }
-//                            emailArrayListFilePath.clear()
-//                            setEmailArrayListFilePath(arrayListFilePath = arrayListFile)
-//                            setEmailFile(file = filePathMedia)
-//                            setEmailTo(to = it.email)
-//                            setEmailMessage(message = editTextContent.text.toString())
-//                            setEmailSubject(subject = editTextSubject.text.toString())
-                    } else {
-                        if (checkEmailFormat(editTextTo.text.toString())) {
-                            createFutureTaskEmail(filePathMedia = filePathMedia)
+                    attachProgressBar()
+                    val coroutineCallFutureTask = CoroutineScope(Dispatchers.IO)
+                    coroutineCallFutureTask.async {
+//                        if (arraylistEmailToUsername.isNotEmpty()) {
+//                            arraylistEmailToUsername.forEach {
+//                                createFutureTaskEmail()
+//                            }
+//                        } else {
+//                            if (checkEmailFormat(editTextTo.text.toString())) {
+//                                createFutureTaskEmail()
+//                            }
+//                        }
+                        createFutureTaskEmail()
+                        activity.runOnUiThread {
+                            removeEmailLayout()
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = activity.resources.getString(R.string.future_task_enabled)
+                            )
+                            finishShareLayout(message = "single_email")
                         }
                     }
 
-
-                    removeEmailLayout()
-                    defaultToast.attachToast(
-                        activity = activity,
-                        toastMessage = activity.resources.getString(R.string.future_task_enabled)
-                    )
-                    finishShareLayout(message = "single_email")
                 } else {
                     if (arraylistEmailToUsername.isNotEmpty()) {
                         arraylistEmailToUsername.forEach {
@@ -4535,19 +4534,25 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-    private fun createFutureTaskEmail(filePathMedia: File) {
+    private fun createFutureTaskEmail() {
         val sharedPref =
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         with(sharedPref.edit()) {
-            putString("future_task_email_to", editTextTo.text.toString())
+            if(arraylistEmailToUsername.isNotEmpty()){
+                addFutureUserList()
+            }else{
+                putString("future_task_email_to", editTextTo.text.toString())
+            }
             putString("future_task_email_subject", editTextSubject.text.toString())
             putString("future_task_email_message", editTextContent.text.toString())
-            putString("future_task_email_file", filePathMedia.absolutePath)
+//            putString("future_task_email_file", filePathMedia.absolutePath)
             commit()
         }
+        addFutureFileList()
         val intentServiceFuture =
             Intent(context, LoggerBirdFutureTaskService::class.java)
         context.startForegroundService(intentServiceFuture)
+        controlFutureTask = true
     }
 
     private fun createEmailTask(filePathMedia: File, to: String) {
@@ -4891,44 +4896,49 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-    private fun setEmailTo(to: String) {
-        this.emailTo = to
-    }
+    private fun addFutureFileList() {
+        val arrayListFileNames: ArrayList<String> = ArrayList()
+        RecyclerViewEmailAdapter.ViewHolder.arrayListFilePaths.forEach {
+            if (it.file.name == "logger_bird_details.txt") {
+                val futureLoggerBirdFile = File(context.filesDir,"logger_bird_details_future.txt")
+                if(!futureLoggerBirdFile.exists()){
+                    futureLoggerBirdFile.createNewFile()
+                }else{
+                    futureLoggerBirdFile.delete()
+                    futureLoggerBirdFile.createNewFile()
+                }
+                val scanner = Scanner(it.file)
+                do {
+                    futureLoggerBirdFile.appendText(scanner.nextLine() + "\n")
+                } while (scanner.hasNextLine())
+                arrayListFileNames.add(futureLoggerBirdFile.absolutePath)
+            }else{
+                arrayListFileNames.add(it.file.absolutePath)
+            }
 
-    private fun setEmailMessage(message: String) {
-        this.emailMessage = message
+        }
+        val gson = Gson()
+        val json = gson.toJson(arrayListFileNames)
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
+        with(sharedPref.edit()) {
+            putString("file_future_list", json)
+            commit()
+        }
     }
-
-    private fun setEmailSubject(subject: String) {
-        this.emailSubject = subject
-    }
-
-    private fun setEmailFile(file: File) {
-        this.emailFile = file
-    }
-
-    private fun setEmailArrayListFilePath(arrayListFilePath: ArrayList<File>) {
-        this.emailArrayListFilePath = arrayListFilePath
-    }
-
-    internal fun getEmailTo(): String {
-        return emailTo
-    }
-
-    internal fun getEmailMessage(): String {
-        return emailMessage
-    }
-
-    internal fun getEmailSubject(): String {
-        return emailSubject
-    }
-
-    internal fun getEmailFile(): File {
-        return emailFile
-    }
-
-    internal fun getArrayListFilePath(): ArrayList<File> {
-        return emailArrayListFilePath
+    private fun addFutureUserList() {
+        val arrayListUsers:ArrayList<String> = ArrayList()
+        arraylistEmailToUsername.forEach {
+            arrayListUsers.add(it.email)
+        }
+        val gson = Gson()
+        val json = gson.toJson(arrayListUsers)
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
+        with(sharedPref.edit()) {
+            putString("user_future_list", json)
+            commit()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
