@@ -663,7 +663,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     .setStartDelay(0)
                     .start()
 
-
                 if (Settings.canDrawOverlays(activity)) {
                     windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         WindowManager.LayoutParams(
@@ -704,6 +703,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
                     textView_audio_size = view.findViewById(R.id.fragment_textView_size_audio)
                     checkBoxFutureTask = view.findViewById(R.id.checkBox_future_task)
+
+
+                    floating_action_button.imageTintList =
+                        ColorStateList.valueOf(resources.getColor(R.color.white))
+                    floating_action_button.backgroundTintList =
+                        ColorStateList.valueOf(resources.getColor(R.color.black))
 
                     if (audioRecording || videoRecording || screenshotDrawing) {
                         workingAnimation =
