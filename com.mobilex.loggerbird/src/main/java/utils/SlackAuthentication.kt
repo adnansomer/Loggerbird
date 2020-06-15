@@ -317,7 +317,7 @@ class SlackAuthentication {
                         messagePath,
                         slackType )
                 }
-                
+
                 Log.d(Constants.slackTag,"Not Authorizated Token")
                 e.printStackTrace()
             }
