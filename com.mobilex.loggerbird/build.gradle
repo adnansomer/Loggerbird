@@ -4,7 +4,8 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'realm-android'
 apply plugin: 'com.google.gms.google-services'
-
+apply plugin: 'com.github.dcendents.android-maven'
+group='com.github.Berkavc'
 
 android {
     compileSdkVersion 29
@@ -89,7 +90,7 @@ dependencies {
     implementation('com.google.android.material:material:1.1.0')
     implementation("androidx.work:work-runtime-ktx:2.3.4")
             {
-                exclude group: 'com.google.guava'
+//                exclude group: 'com.google.guava'
             }
     implementation "androidx.preference:preference-ktx:1.1.1"
     implementation "androidx.activity:activity-ktx:1.2.0-alpha04"
@@ -100,11 +101,11 @@ dependencies {
     implementation('com.google.firebase:firebase-ml-natural-language-smart-reply-model:20.0.7')
     implementation('com.google.firebase:firebase-ml-natural-language:22.0.0')
     implementation('com.google.firebase:firebase-ml-natural-language-translate-model:20.0.8')
-    implementation('com.atlassian.jira:jira-rest-java-client-core:5.2.1')
-            {
-                exclude group: 'javax.activation'
-            }
-    implementation 'io.atlassian.fugue:fugue:4.7.2'
+//    implementation('com.atlassian.jira:jira-rest-java-client-core:5.2.1')
+//            {
+//                exclude group: 'javax.activation'
+//            }
+//    implementation 'io.atlassian.fugue:fugue:4.7.2'
     implementation 'org.slf4j:slf4j-simple:2.0.0-alpha1'
     implementation ('com.googlecode.json-simple:json-simple:1.1.1'){
         exclude group: 'org.hamcrest'

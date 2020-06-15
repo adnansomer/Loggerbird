@@ -67,6 +67,12 @@ class RecyclerViewEmailAdapter(
 
         companion object{
              internal lateinit var arrayListFilePaths:ArrayList<RecyclerViewModel>
+            internal fun controlArrayListFilePaths():Boolean{
+                if(this::arrayListFilePaths.isInitialized){
+                    return true
+                }
+                return false
+            }
         }
 
 

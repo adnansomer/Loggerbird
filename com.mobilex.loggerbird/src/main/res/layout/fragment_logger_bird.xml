@@ -22,6 +22,33 @@
         android:elevation="8dp"
         app:layout_behavior="com.google.android.material.transformation.FabTransformationSheetBehavior">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            >
+            <CheckBox
+                android:id="@+id/checkBox_future_task"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawablePadding="16dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:buttonTint="@color/black"
+                android:background="@null" />
+            <TextView
+                android:id="@+id/textView_future_task_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/textView_loggerbird_future_title"
+                android:textColor="@android:color/black"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                android:gravity="center_vertical"
+                android:textSize="12sp"
+                android:padding="8dp" />
+        </LinearLayout>
         <TextView
             android:id="@+id/textView_send_email"
             android:layout_width="match_parent"
@@ -29,11 +56,12 @@
             android:drawablePadding="16dp"
             android:textColor="@color/black"
             android:drawableLeft="@drawable/ic_mail_black_24dp"
+            android:drawableStart="@drawable/ic_mail_black_24dp"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
             android:gravity="center_vertical"
             android:textSize="12sp"
             android:padding="8dp"
-            android:text="Send to E-Mail" />
+            android:text="@string/textView_loggerbird_email_title" />
 
         <TextView
             android:id="@+id/textView_share_jira"
@@ -42,11 +70,12 @@
             android:drawablePadding="16dp"
             android:textColor="@color/black"
             android:drawableLeft="@drawable/ic_jira_color_24dp"
+            android:drawableStart="@drawable/ic_jira_color_24dp"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
             android:gravity="center_vertical"
             android:textSize="12sp"
             android:padding="8dp"
-            android:text="Share with Jira" />
+            android:text="@string/textView_loggerbird_jira_title" />
 
         <TextView
             android:id="@+id/textView_share_slack"
@@ -58,7 +87,8 @@
             android:gravity="center_vertical"
             android:textSize="12sp"
             android:padding="8dp"
-            android:text="Send to Slack"
+            android:text="@string/textView_loggerbird_slack_title"
+            android:drawableStart="@drawable/ic_slack_logo_24dp"
             android:drawableLeft="@drawable/ic_slack_logo_24dp" />
 
         <TextView
@@ -71,7 +101,8 @@
             android:gravity="center_vertical"
             android:textSize="12sp"
             android:padding="8dp"
-            android:text="Discard"
+            android:text="@string/textView_loggerbird_discard_title"
+            android:drawableStart="@drawable/ic_delete_sweep_black_24dp"
             android:drawableLeft="@drawable/ic_delete_sweep_black_24dp" />
 
         <!--   <TextView

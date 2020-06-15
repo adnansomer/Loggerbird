@@ -74,7 +74,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener {
+internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
@@ -89,6 +89,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private var windowManagerJiraDatePicker: Any? = null
     private var windowManagerUnhandledDuplication: Any? = null
     private var windowManagerEmail: Any? = null
+    private var windowManagerFutureTask: Any? = null
+    private var windowManagerFutureDate: Any? = null
+    private var windowManagerFutureTime: Any? = null
     //private var windowManagerJiraAuth: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
@@ -99,6 +102,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var windowManagerParamsJiraDatePicker: WindowManager.LayoutParams
     private lateinit var windowManagerParamsUnhandledDuplication: WindowManager.LayoutParams
     private lateinit var windowManagerParamsEmail: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsFutureTask: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsFutureDate: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsFutureTime: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -149,6 +155,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var viewSlack: View
     private lateinit var viewUnhandledDuplication: View
     private lateinit var viewEmail: View
+    private lateinit var viewFutureTask: View
+    private lateinit var viewFutureDate: View
+    private lateinit var viewFutureTime: View
     //  private lateinit var viewJiraAuth: View
     private lateinit var wrapper: FrameLayout
     private lateinit var floating_action_button_feedback: FloatingActionButton
@@ -203,6 +212,13 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private lateinit var autoTextViewEpicName: AutoCompleteTextView
     private lateinit var buttonJiraCreate: Button
     internal lateinit var buttonJiraCancel: Button
+    internal fun controlButtonJiraCancel(): Boolean {
+        if (this::buttonJiraCancel.isInitialized) {
+            return true
+        }
+        return false
+    }
+
     //  private lateinit var buttonJiraAuthCancel: Button
 //  private lateinit var buttonJiraAuthNext: Button
     private lateinit var layoutJira: FrameLayout
@@ -299,6 +315,34 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private val arraylistEmailToUsername: ArrayList<RecyclerViewModelTo> = ArrayList()
 
 
+    //Future-Task:
+    private lateinit var checkBoxFutureTask: CheckBox
+    private lateinit var imageViewFutureCalendar: ImageView
+    private lateinit var imageButtonFutureTaskRemoveDate: ImageButton
+    private lateinit var imageViewFutureTime: ImageView
+    private lateinit var imageButtonFutureTaskRemoveTime: ImageButton
+    private lateinit var buttonFutureTaskProceed: Button
+    private lateinit var buttonFutureTaskCancel: Button
+    private val calendarFuture = Calendar.getInstance()
+
+    //Future-Task-Date:
+    private var futureStartDate: Long? = null
+    private lateinit var frameLayoutDate: FrameLayout
+    private lateinit var calendarViewFutureTask: CalendarView
+    private lateinit var buttonFutureTaskDateCreate: Button
+    private lateinit var buttonFutureTaskDateCancel: Button
+    //Future-Task-Time:
+    private var futureStartTime: Long? = null
+    private lateinit var frameLayoutTime: FrameLayout
+    private lateinit var timePickerFutureTask: TimePicker
+    private lateinit var buttonFutureTaskTimeCreate: Button
+    private lateinit var buttonFutureTaskTimeCancel: Button
+    private lateinit var emailTo: String
+    private lateinit var emailMessage: String
+    private lateinit var emailFile: File
+    private lateinit var emailSubject: String
+    private lateinit var emailArrayListFilePath: ArrayList<File>
+
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
@@ -352,6 +396,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         internal var screenshotDrawing = false
         private lateinit var workingAnimation: Animation
         internal val arrayListFile: ArrayList<File> = ArrayList()
+        internal var controlFutureTask: Boolean = false
 
         internal fun callEnqueue() {
             workQueueLinked.controlRunnable = false
@@ -362,13 +407,14 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 }
             }
         }
+
         internal fun callEnqueueEmail() {
             workQueueLinkedEmail.controlRunnable = false
             if (runnableListEmail.size > 0) {
                 runnableListEmail.removeAt(0)
                 if (runnableListEmail.size > 0) {
                     workQueueLinkedEmail.put(runnableListEmail[0])
-                }else{
+                } else {
                     loggerBirdService.detachProgressBar()
                     loggerBirdService.removeEmailLayout()
                     loggerBirdService.defaultToast.attachToast(
@@ -376,7 +422,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                         toastMessage = loggerBirdService.context.resources.getString(R.string.email_send_success)
                     )
                 }
-            }else{
+            } else {
                 loggerBirdService.detachProgressBar()
                 loggerBirdService.removeEmailLayout()
                 loggerBirdService.defaultToast.attachToast(
@@ -385,7 +431,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                 )
             }
         }
-        internal fun resetEnqueueMail(){
+
+        internal fun resetEnqueueMail() {
             runnableListEmail.clear()
             workQueueLinkedEmail.controlRunnable = false
         }
@@ -519,9 +566,11 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         try {
-            arrayListFile.forEach {
-                if (it.exists()) {
-                    it.delete()
+            if (!controlFutureTask) {
+                arrayListFile.forEach {
+                    if (it.exists()) {
+                        it.delete()
+                    }
                 }
             }
             dailySessionTimeRecorder()
@@ -533,13 +582,6 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.serviceTag)
         }
-    }
-
-    /**
-     * This Method Called When Service Created.
-     */
-    override fun onCreate() {
-        super.onCreate()
     }
 
     /**
@@ -658,6 +700,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                     textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
                     textView_audio_size = view.findViewById(R.id.fragment_textView_size_audio)
+                    checkBoxFutureTask = view.findViewById(R.id.checkBox_future_task)
 
                     if (audioRecording || videoRecording || screenshotDrawing) {
                         workingAnimation =
@@ -928,6 +971,8 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun shareViewClicks(filePathMedia: File) {
         if (reveal_linear_layout_share.isVisible) {
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             textView_send_email.setSafeOnClickListener {
                 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                    attachProgressBar()
@@ -969,6 +1014,39 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
 //                    attachProgressBar()
 //                }
                 discardMediaFile()
+            }
+
+            if (sharedPref.getBoolean("future_task_check", false)) {
+                checkBoxFutureTask.isChecked = true
+            }
+            checkBoxFutureTask.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked) {
+                    with(sharedPref.edit()) {
+                        putBoolean("future_task_check", true)
+                        commit()
+                    }
+                } else {
+                    stopService(Intent(context, LoggerBirdFutureTaskService::class.java))
+                }
+            }
+            checkBoxFutureTask.setOnClickListener {
+                if (checkBoxFutureTask.isChecked) {
+                    defaultToast.attachToast(
+                        activity = activity,
+                        toastMessage = activity.resources.getString(R.string.future_task_enabled)
+                    )
+                    initializeFutureTaskLayout(filePathMedia = filePathMedia)
+                } else {
+                    with(sharedPref.edit()) {
+                        remove("future_task_time")
+                        remove("future_file_path")
+                        commit()
+                    }
+                    defaultToast.attachToast(
+                        activity = activity,
+                        toastMessage = activity.resources.getString(R.string.future_task_disabled)
+                    )
+                }
             }
         }
     }
@@ -1592,16 +1670,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             throw LoggerBirdException(Constants.logInitErrorMessage)
         }
     }
-    private fun callEmail(filePathMedia: File ,to: String) {
+
+    private fun callEmail(filePathMedia: File, to: String) {
         if (LoggerBird.isLogInitAttached()) {
-                if (runnableListEmail.isEmpty()) {
-                    workQueueLinkedEmail.put {
-                        createEmailTask(filePathMedia  = filePathMedia,to = to)
-                    }
+            if (runnableListEmail.isEmpty()) {
+                workQueueLinkedEmail.put {
+                    createEmailTask(filePathMedia = filePathMedia, to = to)
                 }
-                runnableListEmail.add(Runnable {
-                    createEmailTask(filePathMedia  = filePathMedia,to = to)
-                })
+            }
+            runnableListEmail.add(Runnable {
+                createEmailTask(filePathMedia = filePathMedia, to = to)
+            })
         } else {
             throw LoggerBirdException(Constants.logInitErrorMessage)
         }
@@ -1638,7 +1717,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
                             .setSwipeToDismiss(true)
                             .setCookieListener { isActivateDialogShown = false }
                             .setEnableAutoDismiss(false)
-                            .setCustomViewInitializer(CookieBar.CustomViewInitializer() {
+                            .setCustomViewInitializer(CookieBar.CustomViewInitializer {
                                 val txtActivate =
                                     it.findViewById<TextView>(R.id.btn_action_activate)
                                 val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
@@ -2922,6 +3001,9 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             ) && jiraAuthentication.checkEpicLinkEmpty(
                 activity = activity,
                 context = context
+            ) && jiraAuthentication.checkComponentEmpty(
+                activity = activity,
+                context = context
             )
         ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -3282,15 +3364,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewPriority.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListPriority.contains(autoTextViewPriority.editableText.toString())) {
-                    if (sharedPref.getString("jira_priority", null) != null) {
-                        autoTextViewPriority.setText(
-                            sharedPref.getString(
-                                "jira_priority",
-                                null
-                            ), false
-                        )
-                    } else {
-                        autoTextViewPriority.setText(arrayListPriority[0], false)
+                    if (arrayListPriority.isNotEmpty()) {
+                        if (sharedPref.getString("jira_priority", null) != null) {
+                            autoTextViewPriority.setText(
+                                sharedPref.getString(
+                                    "jira_priority",
+                                    null
+                                ), false
+                            )
+                        } else {
+                            autoTextViewPriority.setText(arrayListPriority[0], false)
+                        }
                     }
                 }
             }
@@ -3383,15 +3467,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewLinkedIssue.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListLinkedIssues.contains(autoTextViewLinkedIssue.editableText.toString())) {
-                    if (sharedPref.getString("jira_linked_issue", null) != null) {
-                        autoTextViewLinkedIssue.setText(
-                            sharedPref.getString(
-                                "jira_linked_issue",
-                                null
-                            ), false
-                        )
-                    } else {
-                        autoTextViewLinkedIssue.setText(arrayListLinkedIssues[0], false)
+                    if (arrayListLinkedIssues.isNotEmpty()) {
+                        if (sharedPref.getString("jira_linked_issue", null) != null) {
+                            autoTextViewLinkedIssue.setText(
+                                sharedPref.getString(
+                                    "jira_linked_issue",
+                                    null
+                                ), false
+                            )
+                        } else {
+                            autoTextViewLinkedIssue.setText(arrayListLinkedIssues[0], false)
+                        }
                     }
                 }
             }
@@ -3471,15 +3557,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewIssueType.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListIssueTypes.contains(autoTextViewIssueType.editableText.toString())) {
-                    if (sharedPref.getString("jira_issue_type", null) != null) {
-                        autoTextViewIssueType.setText(
-                            sharedPref.getString(
-                                "jira_issue_type",
-                                null
-                            ), false
-                        )
-                    } else {
-                        autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
+                    if (arrayListIssueTypes.isNotEmpty()) {
+                        if (sharedPref.getString("jira_issue_type", null) != null) {
+                            autoTextViewIssueType.setText(
+                                sharedPref.getString(
+                                    "jira_issue_type",
+                                    null
+                                ), false
+                            )
+                        } else {
+                            autoTextViewIssueType.setText(arrayListIssueTypes[0], false)
+                        }
                     }
                 }
             }
@@ -3532,13 +3620,15 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
         autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
-                    if (sharedPref.getString("jira_project", null) != null) {
-                        autoTextViewProject.setText(
-                            sharedPref.getString("jira_project", null),
-                            false
-                        )
-                    } else {
-                        autoTextViewProject.setText(arrayListProjectNames[0], false)
+                    if (arrayListProjectNames.isNotEmpty()) {
+                        if (sharedPref.getString("jira_project", null) != null) {
+                            autoTextViewProject.setText(
+                                sharedPref.getString("jira_project", null),
+                                false
+                            )
+                        } else {
+                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+                        }
                     }
                 }
             }
@@ -3580,15 +3670,17 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             autoTextViewEpicName.setOnFocusChangeListener { v, hasFocus ->
                 if (!hasFocus && autoTextViewEpicName.text.toString().isEmpty()) {
                     if (!arrayListEpicName.contains(autoTextViewEpicName.editableText.toString())) {
-                        if (sharedPref.getString("jira_epic_name", null) != null) {
-                            autoTextViewEpicName.setText(
-                                sharedPref.getString(
-                                    "jira_epic_name",
-                                    null
-                                ), false
-                            )
-                        } else {
-                            autoTextViewEpicName.setText(arrayListEpicName[0], false)
+                        if (arrayListEpicName.isNotEmpty()) {
+                            if (sharedPref.getString("jira_epic_name", null) != null) {
+                                autoTextViewEpicName.setText(
+                                    sharedPref.getString(
+                                        "jira_epic_name",
+                                        null
+                                    ), false
+                                )
+                            } else {
+                                autoTextViewEpicName.setText(arrayListEpicName[0], false)
+                            }
                         }
                     }
                 }
@@ -4389,16 +4481,45 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
     private fun initializeEmailButtons(filePathMedia: File) {
         try {
             buttonEmailCreate.setSafeOnClickListener {
-                if(arraylistEmailToUsername.isNotEmpty()){
-                    arraylistEmailToUsername.forEach {
-                        callEmail(filePathMedia = filePathMedia,to = it.email)
+                if (checkBoxFutureTask.isChecked) {
+
+                    if (arraylistEmailToUsername.isNotEmpty()) {
+                        arraylistEmailToUsername.forEach {
+                            createFutureTaskEmail(filePathMedia = filePathMedia)
+                        }
+//                            emailArrayListFilePath.clear()
+//                            setEmailArrayListFilePath(arrayListFilePath = arrayListFile)
+//                            setEmailFile(file = filePathMedia)
+//                            setEmailTo(to = it.email)
+//                            setEmailMessage(message = editTextContent.text.toString())
+//                            setEmailSubject(subject = editTextSubject.text.toString())
+                    } else {
+                        if (checkEmailFormat(editTextTo.text.toString())) {
+                            createFutureTaskEmail(filePathMedia = filePathMedia)
+                        }
                     }
-                }else{
-                    if (checkEmailFormat(editTextTo.text.toString())) {
-                        callEmail(filePathMedia = filePathMedia,to = editTextTo.text.toString())
+
+
+                    removeEmailLayout()
+                    defaultToast.attachToast(
+                        activity = activity,
+                        toastMessage = activity.resources.getString(R.string.future_task_enabled)
+                    )
+                    finishShareLayout(message = "single_email")
+                } else {
+                    if (arraylistEmailToUsername.isNotEmpty()) {
+                        arraylistEmailToUsername.forEach {
+                            callEmail(filePathMedia = filePathMedia, to = it.email)
+                        }
+                    } else {
+                        if (checkEmailFormat(editTextTo.text.toString())) {
+                            callEmail(
+                                filePathMedia = filePathMedia,
+                                to = editTextTo.text.toString()
+                            )
+                        }
                     }
                 }
-
             }
             buttonEmailCancel.setSafeOnClickListener {
                 removeEmailLayout()
@@ -4419,20 +4540,35 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             e.printStackTrace()
             callEnqueueEmail()
             LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception =  e ,tag = Constants.emailTag)
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
 
         }
     }
 
-    private fun createEmailTask(filePathMedia: File,to:String){
+    private fun createFutureTaskEmail(filePathMedia: File) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        with(sharedPref.edit()) {
+            putString("future_task_email_to", editTextTo.text.toString())
+            putString("future_task_email_subject", editTextSubject.text.toString())
+            putString("future_task_email_message", editTextContent.text.toString())
+            putString("future_task_email_file", filePathMedia.absolutePath)
+            commit()
+        }
+        val intentServiceFuture =
+            Intent(context, LoggerBirdFutureTaskService::class.java)
+        context.startForegroundService(intentServiceFuture)
+    }
+
+    private fun createEmailTask(filePathMedia: File, to: String) {
         try {
-                attachProgressBar()
-                sendSingleMediaFile(
-                    filePathMedia = filePathMedia,
-                    to = to,
-                    subject = editTextSubject.text.toString(),
-                    message = editTextContent.text.toString()
-                )
+            attachProgressBar()
+            sendSingleMediaFile(
+                filePathMedia = filePathMedia,
+                to = to,
+                subject = editTextSubject.text.toString(),
+                message = editTextContent.text.toString()
+            )
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -4440,7 +4576,7 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             detachProgressBar()
             removeEmailLayout()
             LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e ,tag = Constants.emailTag)
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
         }
     }
 
@@ -4506,6 +4642,303 @@ internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener
             )
             false
         }
+    }
+
+    private fun checkBoxFutureTaskIsChecked(filePathMedia: File): Boolean {
+        if (checkBoxFutureTask.isChecked) {
+            initializeFutureTaskLayout(filePathMedia = filePathMedia)
+            return true
+        }
+        return false
+    }
+
+    private fun initializeFutureTaskLayout(filePathMedia: File) {
+        removeFutureLayout()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewFutureTask =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_future_task_popup, rootView, false)
+        windowManagerParamsFutureTask =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerFutureTask = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerFutureTask as WindowManager).addView(
+            viewFutureTask,
+            windowManagerParamsFutureTask
+        )
+        imageViewFutureCalendar = viewFutureTask.findViewById(R.id.imageView_future_task_date)
+        imageButtonFutureTaskRemoveDate =
+            viewFutureTask.findViewById(R.id.image_button_future_date_remove)
+        imageViewFutureTime = viewFutureTask.findViewById(R.id.imageView_future_task_time)
+        imageButtonFutureTaskRemoveTime =
+            viewFutureTask.findViewById(R.id.image_button_future_time_remove)
+        buttonFutureTaskProceed = viewFutureTask.findViewById(R.id.button_future_task_proceed)
+        buttonFutureTaskCancel = viewFutureTask.findViewById(R.id.button_future_task_cancel)
+
+        buttonClicksFuture(filePathMedia = filePathMedia)
+    }
+
+    private fun removeFutureLayout() {
+        if (this::viewFutureTask.isInitialized && windowManagerFutureTask != null) {
+            (windowManagerFutureTask as WindowManager).removeViewImmediate(
+                viewFutureTask
+            )
+            windowManagerFutureTask = null
+        }
+    }
+
+    private fun buttonClicksFuture(filePathMedia: File) {
+        imageViewFutureCalendar.setSafeOnClickListener {
+            initializeFutureDateLayout()
+        }
+        imageButtonFutureTaskRemoveDate.setSafeOnClickListener {
+            futureStartDate = null
+            imageButtonFutureTaskRemoveDate.visibility = View.GONE
+        }
+        imageViewFutureTime.setSafeOnClickListener {
+            initializeFutureTimeLayout()
+        }
+        imageButtonFutureTaskRemoveTime.setSafeOnClickListener {
+            futureStartTime = null
+            imageButtonFutureTaskRemoveTime.visibility = View.GONE
+        }
+        buttonFutureTaskProceed.setSafeOnClickListener {
+            checkDateAndTimeEmpty(filePathMedia = filePathMedia)
+        }
+        buttonFutureTaskCancel.setSafeOnClickListener {
+            checkBoxFutureTask.isChecked = false
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+            with(sharedPref.edit()) {
+                remove("future_task_time")
+                remove("future_file_path")
+                commit()
+            }
+            futureStartDate = null
+            futureStartTime = null
+            removeFutureLayout()
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.future_task_disabled)
+            )
+        }
+    }
+
+    private fun initializeFutureDateLayout() {
+        removeFutureDateLayout()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewFutureDate =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.future_calendar_view, rootView, false)
+        windowManagerParamsFutureDate =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerFutureDate = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerFutureDate as WindowManager).addView(
+            viewFutureDate,
+            windowManagerParamsFutureDate
+        )
+        frameLayoutDate = viewFutureDate.findViewById(R.id.future_calendar_view_layout)
+        calendarViewFutureTask = viewFutureDate.findViewById(R.id.calendarView_start_date)
+        buttonFutureTaskDateCreate = viewFutureDate.findViewById(R.id.button_future_calendar_ok)
+        buttonFutureTaskDateCancel = viewFutureDate.findViewById(R.id.button_future_calendar_cancel)
+
+        buttonClicksFutureDate()
+
+    }
+
+    private fun removeFutureDateLayout() {
+        if (this::viewFutureDate.isInitialized && windowManagerFutureDate != null) {
+            (windowManagerFutureDate as WindowManager).removeViewImmediate(
+                viewFutureDate
+            )
+            windowManagerFutureDate = null
+        }
+    }
+
+    private fun buttonClicksFutureDate() {
+        val calendar = Calendar.getInstance()
+        val mYear = calendar.get(Calendar.YEAR)
+        val mMonth = calendar.get(Calendar.MONTH)
+        val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        calendarFuture.set(mYear, mMonth, mDayOfMonth)
+        calendarViewFutureTask.minDate = System.currentTimeMillis()
+        frameLayoutDate.setOnClickListener {
+            removeFutureDateLayout()
+        }
+        calendarViewFutureTask.setOnDateChangeListener { view, year, month, dayOfMonth ->
+            calendarFuture.set(year, month, dayOfMonth)
+//            startDate = "$year-$month-$dayOfMonth"
+        }
+        buttonFutureTaskDateCreate.setSafeOnClickListener {
+            futureStartDate = calendarViewFutureTask.date
+            Log.d("time", futureStartDate.toString())
+            Log.d("time", System.currentTimeMillis().toString())
+            imageButtonFutureTaskRemoveDate.visibility = View.VISIBLE
+            removeFutureDateLayout()
+        }
+        buttonFutureTaskDateCancel.setSafeOnClickListener {
+            removeFutureDateLayout()
+        }
+    }
+
+    private fun initializeFutureTimeLayout() {
+        removeFutureTimeLayout()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewFutureTime =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.future_time_picker, rootView, false)
+        windowManagerParamsFutureTime =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerFutureTime = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerFutureTime as WindowManager).addView(
+            viewFutureTime,
+            windowManagerParamsFutureTime
+        )
+        frameLayoutTime = viewFutureTime.findViewById(R.id.future_time_view_layout)
+        timePickerFutureTask = viewFutureTime.findViewById(R.id.timePicker_start_time)
+        buttonFutureTaskTimeCreate = viewFutureTime.findViewById(R.id.button_future_time_ok)
+        buttonFutureTaskTimeCancel = viewFutureTime.findViewById(R.id.button_future_time_cancel)
+
+        buttonClicksFutureTime()
+
+    }
+
+    private fun removeFutureTimeLayout() {
+        if (this::viewFutureTime.isInitialized && windowManagerFutureTime != null) {
+            (windowManagerFutureTime as WindowManager).removeViewImmediate(
+                viewFutureTime
+            )
+            windowManagerFutureTime = null
+        }
+    }
+
+    private fun buttonClicksFutureTime() {
+        frameLayoutTime.setOnClickListener {
+            removeFutureTimeLayout()
+        }
+//        timePickerFutureTask.setOnTimeChangedListener { view, hourOfDay, minute ->
+//
+//        }
+        buttonFutureTaskTimeCreate.setSafeOnClickListener {
+            calendarFuture.set(Calendar.HOUR_OF_DAY, timePickerFutureTask.hour)
+            calendarFuture.set(Calendar.MINUTE, timePickerFutureTask.minute)
+            futureStartTime =
+                timePickerFutureTask.hour.toLong() + timePickerFutureTask.minute.toLong()
+            imageButtonFutureTaskRemoveTime.visibility = View.VISIBLE
+            removeFutureTimeLayout()
+        }
+        buttonFutureTaskTimeCancel.setSafeOnClickListener {
+            removeFutureTimeLayout()
+        }
+    }
+
+    private fun checkDateAndTimeEmpty(filePathMedia: File) {
+        if (futureStartDate != null && futureStartTime != null) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.future_task_gathered)
+            )
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+            with(sharedPref.edit()) {
+                putLong("future_task_time", calendarFuture.timeInMillis)
+                putString("future_file_path", filePathMedia.absolutePath)
+                commit()
+            }
+            removeFutureLayout()
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.future_task_empty)
+            )
+        }
+    }
+
+    private fun setEmailTo(to: String) {
+        this.emailTo = to
+    }
+
+    private fun setEmailMessage(message: String) {
+        this.emailMessage = message
+    }
+
+    private fun setEmailSubject(subject: String) {
+        this.emailSubject = subject
+    }
+
+    private fun setEmailFile(file: File) {
+        this.emailFile = file
+    }
+
+    private fun setEmailArrayListFilePath(arrayListFilePath: ArrayList<File>) {
+        this.emailArrayListFilePath = arrayListFilePath
+    }
+
+    internal fun getEmailTo(): String {
+        return emailTo
+    }
+
+    internal fun getEmailMessage(): String {
+        return emailMessage
+    }
+
+    internal fun getEmailSubject(): String {
+        return emailSubject
+    }
+
+    internal fun getEmailFile(): File {
+        return emailFile
+    }
+
+    internal fun getArrayListFilePath(): ArrayList<File> {
+        return emailArrayListFilePath
     }
 
 
