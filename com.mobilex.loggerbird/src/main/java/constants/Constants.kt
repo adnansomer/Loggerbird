@@ -74,7 +74,7 @@ internal class Constants {
         const val discardFileTag:String = "Discard File"
         const val jiraTag:String = "Jira"
         const val recyclerViewJiraAdapterTag:String = "RecyclerView Jira Adapter"
-        const val slackTag:String = "Slack"
+        const val slackTag:String = "Slack Authorization"
         const val recyclerViewSlackAdapterTag:String = "RecyclerView Slack Adapter"
         const val loggerBirdToastTag:String = "LoggerBird Toast"
         const val unhandledExceptionPopupTag:String = "Unhandled Exception Popup"

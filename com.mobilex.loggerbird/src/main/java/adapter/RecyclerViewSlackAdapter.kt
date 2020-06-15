@@ -21,6 +21,7 @@ import android.widget.Button
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
+import services.LoggerBirdService
 
 class RecyclerViewSlackAdapter(
     private val fileList: ArrayList<RecyclerViewModel>,
@@ -57,7 +58,6 @@ class RecyclerViewSlackAdapter(
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        //        private lateinit var alertDialogItemDelete: AlertDialog
         private var windowManagerRecyclerViewItemPopup: Any? = null
         private lateinit var windowManagerParamsRecyclerViewItemPopup: WindowManager.LayoutParams
         private lateinit var viewRecyclerViewItems: View
@@ -133,7 +133,6 @@ class RecyclerViewSlackAdapter(
                     windowManagerRecyclerViewItemPopup =
                         activity.getSystemService(Context.WINDOW_SERVICE)!!
                     if (windowManagerRecyclerViewItemPopup != null) {
-//                    windowManagerParamsFeedback.gravity = Gravity.BOTTOM
                         (windowManagerRecyclerViewItemPopup as WindowManager).addView(
                             viewRecyclerViewItems,
                             windowManagerParamsRecyclerViewItemPopup
@@ -152,20 +151,6 @@ class RecyclerViewSlackAdapter(
                     tag = Constants.recyclerViewSlackAdapterTag
                 )
             }
-
-
-//            val alertDialogBuilder = AlertDialog.Builder(context)
-//            alertDialogBuilder.setTitle("Delete File:")
-//            alertDialogBuilder.setMessage("Are you sure to remove file from attachments?")
-//            alertDialogBuilder.setPositiveButton("Yes") { dialog, which ->
-//                fileList.removeAt(position)
-//                adapter.notifyDataSetChanged()
-//            }
-//            alertDialogBuilder.setNegativeButton("No") { dialog, which ->
-//                alertDialogItemDelete.dismiss()
-//            }
-//            alertDialogItemDelete = alertDialogBuilder.create()
-//            alertDialogItemDelete.show()
         }
 
         private fun buttonClicksSlackPopup(fileList: ArrayList<RecyclerViewModel>, position: Int, adapter: RecyclerViewSlackAdapter) {
@@ -174,11 +159,16 @@ class RecyclerViewSlackAdapter(
                 arrayListFilePaths = fileList
                 adapter.notifyDataSetChanged()
                 removePopupLayout()
+                if(arrayListFilePaths.isEmpty()){
+                    LoggerBirdService.recyclerViewSlackAttachmentUser.visibility = View.GONE
+                    LoggerBirdService.recyclerViewSlackAttachment.visibility = View.GONE
+                    LoggerBirdService.recyclerViewSlackNoAttachment.visibility = View.VISIBLE
+                    LoggerBirdService.recyclerViewSlackUserNoAttachment.visibility = View.VISIBLE
+                }
             }
             buttonNo.setSafeOnClickListener {
                 removePopupLayout()
             }
-
         }
 
         private fun removePopupLayout(){

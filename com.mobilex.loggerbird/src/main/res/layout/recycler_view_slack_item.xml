@@ -6,8 +6,8 @@
     android:layout_height="wrap_content"
     android:gravity="center"
     android:orientation="horizontal"
-    android:layout_marginRight="5dp"
-    android:layout_marginEnd="7dp">
+    android:layout_marginRight="8dp"
+    android:layout_marginEnd="8dp">
 
         <TextView
             android:id="@+id/textView_file_name"
@@ -16,7 +16,6 @@
             android:text="PLACEHOLDER.TXT"
             android:textStyle="italic"
             android:background="@color/white"
-            android:textColor="@color/black"
             android:textSize="14sp"
             android:layout_marginRight="3dp">
         </TextView>
@@ -26,7 +25,7 @@
             android:layout_width="10dp"
             android:layout_height="10dp"
             android:layout_gravity="center"
-            android:tint="@color/secondaryColor"
+            android:tint="@color/orange"
             app:srcCompat="@drawable/ic_close_black_24dp"
             android:background="@color/white">
         </ImageButton>

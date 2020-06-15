@@ -49,7 +49,7 @@ class LoggerBirdForegroundServiceVideo : Service() {
             val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             val notification = notificationBuilder.setOngoing(true)
                 .setContentTitle(resources.getString(R.string.foreground_service_video_notification_title))
-                .setSmallIcon(R.drawable.loggerbird_icon)
+                .setSmallIcon(R.drawable.loggerbird)
                 .build()
             startForeground(5, notification)
             LoggerBirdService.callEnqueue()
