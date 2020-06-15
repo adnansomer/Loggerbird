@@ -52,6 +52,10 @@ android {
         exclude 'META-INF/jersey-module-version'
     }
 
+    configurations {
+        all*.exclude module: 'support-v4' // This removes all other versions of `support-v4` if gets duplicated from all the artifacts.
+    }
+
 }
 
 dependencies {
@@ -85,4 +89,5 @@ dependencies {
     implementation 'jp.wasabeef:glide-transformations:4.0.0'
     implementation 'com.irozon.sneaker:sneaker:2.0.0'
     implementation 'com.jakewharton.rxbinding2:rxbinding-kotlin:2.2.0'
+
 }
