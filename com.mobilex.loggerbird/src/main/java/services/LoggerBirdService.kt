@@ -29,7 +29,9 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
-import android.view.animation.*
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.view.animation.BounceInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -37,7 +39,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.isEmpty
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -61,17 +62,16 @@ import loggerbird.LoggerBird
 import models.RecyclerViewModel
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
+import org.gitlab4j.api.GitLabApi
+import org.gitlab4j.api.Pager
+import org.gitlab4j.api.models.Issue
 import paint.PaintActivity
 import paint.PaintView
 import utils.*
-import utils.EmailUtil
-import utils.LinkedBlockingQueueUtil
 import java.io.File
-import java.io.FileNotFoundException
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 internal class LoggerBirdService() : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:

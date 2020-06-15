@@ -88,4 +88,6 @@ dependencies {
     implementation 'com.jakewharton.rxbinding2:rxbinding-kotlin:2.2.0'
     implementation 'com.github.mejdi14:AndroidColorPicker:1.0.2'
 
+    compile group: 'org.gitlab4j', name: 'gitlab4j-api', version: '4.14.30'
+
 }

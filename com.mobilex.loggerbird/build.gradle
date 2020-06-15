@@ -113,6 +113,7 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.slack.api:slack-api-client:1.0.7")
+    compile group: 'org.gitlab4j', name: 'gitlab4j-api', version: '4.14.30'
 }
 repositories {
     maven { url "https://jitpack.io" }
