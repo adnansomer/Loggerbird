@@ -3746,20 +3746,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         windowManagerParamsSlack
                     )
 
-                    if (Build.VERSION.SDK_INT >= 23) {
-                        activity.window.navigationBarColor =
-                            resources.getColor(R.color.black, theme)
-                        activity.window.statusBarColor =
-                            resources.getColor(R.color.black, theme)
-                    } else {
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            activity.window.navigationBarColor =
-                                resources.getColor(R.color.black)
-                            activity.window.statusBarColor = resources.getColor(R.color.black)
-                        }
-                    }
-
                     spinnerChannels = viewSlack.findViewById(R.id.spinner_slack_channel)
                     spinnerUsers = viewSlack.findViewById(R.id.spinner_slack_user)
                     slackChannelLayout = viewSlack.findViewById(R.id.slack_send_channel_layout)
