@@ -4,12 +4,14 @@ import adapter.RecyclerViewEmailAdapter
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.preference.PreferenceManager
 import constants.Constants
 import loggerbird.LoggerBird
 import authentication.SMTPAuthenticator
@@ -108,6 +110,7 @@ internal class EmailUtil {
                             to = to,
                             subject = subject,
                             message = message,
+                            controlServiceTask = false,
                             progressBar = progressBar
                         )
                         Log.d(
@@ -221,7 +224,8 @@ internal class EmailUtil {
                             subject = "unhandled_log_details",
                             file = file,
                             context = context,
-                            to = to
+                            to = to,
+                            controlServiceTask = false
                         )
                         Log.d(
                             "email_time",
@@ -284,7 +288,8 @@ internal class EmailUtil {
                             message = message,
                             subject = "feed_back_details",
                             context = context,
-                            to = to
+                            to = to,
+                            controlServiceTask = false
                         )
                         Log.d(
                             "email_time",
@@ -352,7 +357,7 @@ internal class EmailUtil {
          * Exceptions:
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        private suspend fun initializeEmail(context: Context, to: String, subject: String? = null) {
+        private  fun initializeEmail(context: Context, to: String, subject: String? = null) {
             try {
                 properties = Properties()
                 properties["mail.transport.protocol"] = "smtp"
@@ -379,13 +384,17 @@ internal class EmailUtil {
                 mimeMessage.subject = subject
                 transport.connect()
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        context,
-                        R.string.email_send_failure,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                val coroutineCallMain = CoroutineScope(Dispatchers.Main)
+                coroutineCallMain.launch {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            context,
+                            R.string.email_send_failure,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
+
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
@@ -407,7 +416,7 @@ internal class EmailUtil {
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-        internal suspend fun sendSingleEmail(
+        internal  fun sendSingleEmail(
             context: Context,
             activity: Activity? = null,
             to: String,
@@ -415,12 +424,16 @@ internal class EmailUtil {
             message: String? = null,
             file: File? = null,
             arrayListFilePaths: ArrayList<File>? = null,
+            controlServiceTask: Boolean,
             progressBar: ProgressBar? = null
         ) {
             try {
+                val coroutineCallMain = CoroutineScope(Dispatchers.Main)
                 if (progressBar != null) {
-                    withContext(Dispatchers.Main) {
-                        progressBar.visibility = View.VISIBLE
+                    coroutineCallMain.launch {
+                        withContext(Dispatchers.Main) {
+                            progressBar.visibility = View.VISIBLE
+                        }
                     }
                 }
                 initializeEmail(context = context, to = to, subject = subject)
@@ -443,7 +456,7 @@ internal class EmailUtil {
                         }
                     }
                 }
-                if(file!=null){
+                if (file != null) {
                     createFileMultiPart(file = file)
                 }
                 mimeMessage.setContent(
@@ -454,26 +467,31 @@ internal class EmailUtil {
                         mimeMessage,
                         mimeMessage.getRecipients(Message.RecipientType.TO)
                     )
-                    var toastMessage: String? = null
-                    when (subject) {
-                        "feed_back_details" -> toastMessage =
-                            context.resources.getString(R.string.feed_back_email_success)
-                        "unhandled_log_details" -> toastMessage =
-                            context.resources.getString(R.string.unhandled_exception_success)
-                        else -> withContext(Dispatchers.Main) {
-                            defaultConnectionQueueUtil.cancelTimer()
-                            LoggerBirdService.callEnqueueEmail()
+                    if (!controlServiceTask) {
+                        var toastMessage: String? = null
+                        when (subject) {
+                            "feed_back_details" -> toastMessage =
+                                context.resources.getString(R.string.feed_back_email_success)
+                            "unhandled_log_details" -> toastMessage =
+                                context.resources.getString(R.string.unhandled_exception_success)
+                            else ->
+                                coroutineCallMain.launch {
+                                    withContext(Dispatchers.Main) {
+                                        defaultConnectionQueueUtil.cancelTimer()
+                                        LoggerBirdService.callEnqueueEmail()
+                                    }
+                                }
+
                         }
-                    }
-                    if (toastMessage != null) {
-                        if (message != null) {
-                            val emailUtil = EmailUtil()
-                            emailUtil.smartReplyFeedback(
-                                context = context,
-                                message = message,
-                                toastMessage = toastMessage
-                            )
-                        }
+                        if (toastMessage != null) {
+                            if (message != null) {
+                                val emailUtil = EmailUtil()
+                                emailUtil.smartReplyFeedback(
+                                    context = context,
+                                    message = message,
+                                    toastMessage = toastMessage
+                                )
+                            }
 //                        else {
 //                            withContext(Dispatchers.Main) {
 //                                Toast.makeText(
@@ -484,22 +502,48 @@ internal class EmailUtil {
 //                            }
 //                        }
 
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(
-                                context,
-                                R.string.email_send_failure,
-                                Toast.LENGTH_SHORT
-                            ).show()
+                        } else {
+                            coroutineCallMain.launch {
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.email_send_failure,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+
                         }
-                    }
-                    if (progressBar != null) {
-                        withContext(Dispatchers.Main) {
-                            progressBar.visibility = View.GONE
+                        if (progressBar != null) {
+                            coroutineCallMain.launch {
+                                withContext(Dispatchers.Main) {
+                                    progressBar.visibility = View.GONE
+                                }
+                            }
+
+                        }
+                    }else{
+                        LoggerBirdFutureTaskService.callEnqueueEmail()
+                        if(LoggerBirdFutureTaskService.runnableListEmail.size == 0){
+                            arrayListFilePaths?.forEach {
+                                if(it.exists()){
+                                    it.delete()
+                                }
+                            }
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+                            val editor: SharedPreferences.Editor = sharedPref.edit()
+                            editor.remove("future_task_email_message")
+                            editor.remove("file_future_list")
+                            editor.remove("future_task_email_to")
+                            editor.remove("future_task_time")
+                            editor.remove("future_task_email_subject")
+                            editor.remove("future_task_check")
+                            editor.apply()
+                            context.stopService(Intent(context, LoggerBirdFutureTaskService::class.java))
                         }
                     }
                     transport.close()
-                    context.stopService(Intent(context, LoggerBirdFutureTaskService::class.java))
                 }
             } catch (e: Exception) {
                 if (activity != null) {
@@ -513,12 +557,15 @@ internal class EmailUtil {
                         )
                     }
                 } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            context,
-                            R.string.email_send_failure,
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    val coroutineCallMain = CoroutineScope(Dispatchers.Main)
+                    coroutineCallMain.launch {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                context,
+                                R.string.email_send_failure,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 }
                 e.printStackTrace()
@@ -540,7 +587,8 @@ internal class EmailUtil {
                 LoggerBirdService.resetEnqueueMail()
             }
         }
-        private fun createFileMultiPart(file: File){
+
+        private fun createFileMultiPart(file: File) {
             mimeBodyPart = MimeBodyPart()
             dataSource = FileDataSource(file.path)
             mimeBodyPart.dataHandler = DataHandler(

@@ -31,9 +31,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.view.animation.BounceInterpolator
+import android.view.animation.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -68,10 +66,13 @@ import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
 import paint.PaintView
 import utils.*
+import utils.EmailUtil
+import utils.LinkedBlockingQueueUtil
 import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
@@ -356,6 +357,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var textView_share_jira: TextView
         private lateinit var textView_share_slack: TextView
         private lateinit var textView_discard: TextView
+        //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
         private lateinit var textView_counter_audio: TextView
         private lateinit var textView_video_size: TextView
@@ -663,6 +665,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     .setStartDelay(0)
                     .start()
 
+
                 if (Settings.canDrawOverlays(activity)) {
                     windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         WindowManager.LayoutParams(
@@ -703,11 +706,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
                     textView_audio_size = view.findViewById(R.id.fragment_textView_size_audio)
                     checkBoxFutureTask = view.findViewById(R.id.checkBox_future_task)
-
-                    floating_action_button.imageTintList =
-                        ColorStateList.valueOf(resources.getColor(R.color.white))
-                    floating_action_button.backgroundTintList =
-                        ColorStateList.valueOf(resources.getColor(R.color.black))
 
                     if (audioRecording || videoRecording || screenshotDrawing) {
                         workingAnimation =
@@ -2104,7 +2102,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (sessionTimeEnd != null && sessionTimeStart != null) {
             val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
             val sharedPref =
-                PreferenceManager.getDefaultSharedPreferences(logActivityLifeCycleObserver.activityInstance().applicationContext)
+                PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
                     ?: return
             with(sharedPref.edit()) {
                 putLong("session_time", sharedPref.getLong("session_time", 0) + sessionDuration)
@@ -2616,7 +2614,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeJiraLayout(filePathMedia: File) {
         try {
-
             if (windowManagerJira != null && this::viewJira.isInitialized) {
                 (windowManagerJira as WindowManager).removeViewImmediate(viewJira)
                 arrayListJiraFileName.clear()
@@ -3750,6 +3747,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         windowManagerParamsSlack
                     )
 
+                    if (Build.VERSION.SDK_INT >= 23) {
+                        activity.window.navigationBarColor =
+                            resources.getColor(R.color.black, theme)
+                        activity.window.statusBarColor =
+                            resources.getColor(R.color.black, theme)
+                    } else {
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            activity.window.navigationBarColor =
+                                resources.getColor(R.color.black)
+                            activity.window.statusBarColor = resources.getColor(R.color.black)
+                        }
+                    }
+
                     spinnerChannels = viewSlack.findViewById(R.id.spinner_slack_channel)
                     spinnerUsers = viewSlack.findViewById(R.id.spinner_slack_user)
                     slackChannelLayout = viewSlack.findViewById(R.id.slack_send_channel_layout)
@@ -4461,28 +4472,29 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         try {
             buttonEmailCreate.setSafeOnClickListener {
                 if (checkBoxFutureTask.isChecked) {
-
-                    if (arraylistEmailToUsername.isNotEmpty()) {
-                        arraylistEmailToUsername.forEach {
-                            createFutureTaskEmail(filePathMedia = filePathMedia)
-                        }
-//                            emailArrayListFilePath.clear()
-//                            setEmailArrayListFilePath(arrayListFilePath = arrayListFile)
-//                            setEmailFile(file = filePathMedia)
-//                            setEmailTo(to = it.email)
-//                            setEmailMessage(message = editTextContent.text.toString())
-//                            setEmailSubject(subject = editTextSubject.text.toString())
-                    } else {
-                        if (checkEmailFormat(editTextTo.text.toString())) {
-                            createFutureTaskEmail(filePathMedia = filePathMedia)
+                    attachProgressBar()
+                    val coroutineCallFutureTask = CoroutineScope(Dispatchers.IO)
+                    coroutineCallFutureTask.async {
+//                        if (arraylistEmailToUsername.isNotEmpty()) {
+//                            arraylistEmailToUsername.forEach {
+//                                createFutureTaskEmail()
+//                            }
+//                        } else {
+//                            if (checkEmailFormat(editTextTo.text.toString())) {
+//                                createFutureTaskEmail()
+//                            }
+//                        }
+                        createFutureTaskEmail()
+                        activity.runOnUiThread {
+                            removeEmailLayout()
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = activity.resources.getString(R.string.future_task_enabled)
+                            )
+                            finishShareLayout(message = "single_email")
                         }
                     }
-                    removeEmailLayout()
-                    defaultToast.attachToast(
-                        activity = activity,
-                        toastMessage = activity.resources.getString(R.string.future_task_enabled)
-                    )
-                    finishShareLayout(message = "single_email")
+
                 } else {
                     if (arraylistEmailToUsername.isNotEmpty()) {
                         arraylistEmailToUsername.forEach {
@@ -4505,7 +4517,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 if (checkEmailFormat(editTextTo.text.toString())) {
                     cardViewToList.visibility = View.VISIBLE
                     addEmailToUser(email = editTextTo.text.toString())
-                    editTextTo.text = null
                 }
             }
             toolbarEmail.setNavigationOnClickListener {
@@ -4523,22 +4534,27 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-    private fun createFutureTaskEmail(filePathMedia: File) {
+    private fun createFutureTaskEmail() {
         val sharedPref =
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         with(sharedPref.edit()) {
-            putString("future_task_email_to", editTextTo.text.toString())
+            if(arraylistEmailToUsername.isNotEmpty()){
+                addFutureUserList()
+            }else{
+                putString("future_task_email_to", editTextTo.text.toString())
+            }
             putString("future_task_email_subject", editTextSubject.text.toString())
             putString("future_task_email_message", editTextContent.text.toString())
-            putString("future_task_email_file", filePathMedia.absolutePath)
+//            putString("future_task_email_file", filePathMedia.absolutePath)
             commit()
         }
+        addFutureFileList()
         val intentServiceFuture =
             Intent(context, LoggerBirdFutureTaskService::class.java)
         context.startForegroundService(intentServiceFuture)
+        controlFutureTask = true
     }
 
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun createEmailTask(filePathMedia: File, to: String) {
         try {
             attachProgressBar()
@@ -4880,44 +4896,49 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-    private fun setEmailTo(to: String) {
-        this.emailTo = to
-    }
+    private fun addFutureFileList() {
+        val arrayListFileNames: ArrayList<String> = ArrayList()
+        RecyclerViewEmailAdapter.ViewHolder.arrayListFilePaths.forEach {
+            if (it.file.name == "logger_bird_details.txt") {
+                val futureLoggerBirdFile = File(context.filesDir,"logger_bird_details_future.txt")
+                if(!futureLoggerBirdFile.exists()){
+                    futureLoggerBirdFile.createNewFile()
+                }else{
+                    futureLoggerBirdFile.delete()
+                    futureLoggerBirdFile.createNewFile()
+                }
+                val scanner = Scanner(it.file)
+                do {
+                    futureLoggerBirdFile.appendText(scanner.nextLine() + "\n")
+                } while (scanner.hasNextLine())
+                arrayListFileNames.add(futureLoggerBirdFile.absolutePath)
+            }else{
+                arrayListFileNames.add(it.file.absolutePath)
+            }
 
-    private fun setEmailMessage(message: String) {
-        this.emailMessage = message
+        }
+        val gson = Gson()
+        val json = gson.toJson(arrayListFileNames)
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
+        with(sharedPref.edit()) {
+            putString("file_future_list", json)
+            commit()
+        }
     }
-
-    private fun setEmailSubject(subject: String) {
-        this.emailSubject = subject
-    }
-
-    private fun setEmailFile(file: File) {
-        this.emailFile = file
-    }
-
-    private fun setEmailArrayListFilePath(arrayListFilePath: ArrayList<File>) {
-        this.emailArrayListFilePath = arrayListFilePath
-    }
-
-    internal fun getEmailTo(): String {
-        return emailTo
-    }
-
-    internal fun getEmailMessage(): String {
-        return emailMessage
-    }
-
-    internal fun getEmailSubject(): String {
-        return emailSubject
-    }
-
-    internal fun getEmailFile(): File {
-        return emailFile
-    }
-
-    internal fun getArrayListFilePath(): ArrayList<File> {
-        return emailArrayListFilePath
+    private fun addFutureUserList() {
+        val arrayListUsers:ArrayList<String> = ArrayList()
+        arraylistEmailToUsername.forEach {
+            arrayListUsers.add(it.email)
+        }
+        val gson = Gson()
+        val json = gson.toJson(arrayListUsers)
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
+        with(sharedPref.edit()) {
+            putString("user_future_list", json)
+            commit()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
