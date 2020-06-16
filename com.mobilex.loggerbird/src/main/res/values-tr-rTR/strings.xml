@@ -108,7 +108,8 @@
     <string name="textView_loggerbird_slack_title">Slack ile paylaş</string>
     <string name="textView_loggerbird_discard_title">Dosyayı sil</string>
     <string name="textView_loggerbird_future_title">Gelecek zaman görevi olarak ata</string>
-    <string name="textView_loggerbird_gitlab_title">Send to Gitlab</string>
+    <string name="textView_loggerbird_gitlab_title">Gitlab ile paylaş</string>
+    <string name="textView_loggerbird_github_title">Github ile paylaş</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça boyutu ayarla</string>
     <!-- activity_paint_save_dialog-->

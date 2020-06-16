@@ -109,6 +109,7 @@
     <string name="textView_loggerbird_discard_title">Discard</string>
     <string name="textView_loggerbird_future_title">Set as future task</string>
     <string name="textView_loggerbird_gitlab_title">Send to Gitlab</string>
+    <string name="textView_loggerbird_github_title">Send to Github</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>
     <!-- activity_paint_save_dialog-->
