@@ -356,6 +356,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var textView_send_email: TextView
         private lateinit var textView_share_jira: TextView
         private lateinit var textView_share_slack: TextView
+        private lateinit var textView_share_gitlab: TextView
         private lateinit var textView_discard: TextView
         //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
@@ -706,6 +707,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
                     textView_audio_size = view.findViewById(R.id.fragment_textView_size_audio)
                     checkBoxFutureTask = view.findViewById(R.id.checkBox_future_task)
+                    textView_share_gitlab = view.findViewById(R.id.textView_share_gitlab)
 
                     floating_action_button.imageTintList =
                         ColorStateList.valueOf(resources.getColor(R.color.white))
@@ -988,28 +990,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             textView_send_email.setSafeOnClickListener {
-                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    attachProgressBar()
-//                }
-//                sendSingleMediaFile(filePathMedia = filePathMedia)
                 initializeEmailLayout(filePathMedia = filePathMedia)
             }
 
             textView_share_jira.setSafeOnClickListener {
-                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    attachProgressBar()
-//                }
-//                jiraAuthentication.callJiraIssue(
-//                    filePathName = filePathMedia,
-//                    context = context,
-//                    activity = activity
-//                )
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
                     initializeJiraLayout(filePathMedia = filePathMedia)
-//                    initializeJiraAuthLayout(filePathMedia = filePathMedia)
                 }
             }
 
@@ -1022,9 +1012,21 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
 
+            textView_share_gitlab.setSafeOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
+                    }
+                    initializeSlackLayout(filePathMedia = filePathMedia)
+                }
+            }
+
             textView_discard.setSafeOnClickListener {
                 discardMediaFile()
             }
+
+
+
 
             if (sharedPref.getBoolean("future_task_check", false)) {
                 checkBoxFutureTask.isChecked = true
@@ -3809,7 +3811,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
         }
     }
-
 
     private fun removeSlackLayout() {
         if (windowManagerSlack != null && this::viewSlack.isInitialized) {
