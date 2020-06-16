@@ -20,6 +20,7 @@ import com.slack.api.methods.request.usergroups.UsergroupsListRequest
 import com.slack.api.methods.request.users.UsersInfoRequest
 import com.slack.api.methods.request.users.UsersListRequest
 import com.slack.api.model.Conversation
+import com.slack.api.model.ConversationType
 import com.slack.api.model.Usergroup
 import constants.Constants
 import exception.LoggerBirdException
@@ -64,9 +65,12 @@ class SlackAuthentication {
     private var messagePath: String? = null
     private var slackType: String? = null
     private var controlcallSlack : Boolean = false
+    private lateinit var timerTaskQueue: TimerTask
 
     /** Loggerbird slack app client information **/
     companion object{
+        //xoxb-1176309019584-1152486968594-MLP1jZhF2cUlWeFcUMCa3d9j
+
         private const val CLIENT_ID = "1176309019584.1151103028997"
         private const val CLIENT_SECRET = "6147f0bd55a0c777893d07c91f3b16ef"
         private const val REDIRECT_URL = "https://app.slack.com/client"
@@ -146,6 +150,7 @@ class SlackAuthentication {
                 Log.d("response_code", response.code.toString())
                 try {
                     if (response.code in 200..299) {
+                        checkTimeOut(activity = activity)
                         coroutineCallSlack.async {
                             try {
                                 slackAuthentication(
@@ -275,9 +280,11 @@ class SlackAuthentication {
                     slackTaskGatherUsers(slack = slack, token = token)
                 }
             }catch(e: SocketTimeoutException){
-                LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
+                LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
                 Log.d(Constants.slackTag,"No Authorizated Token")
                 slackExceptionHandler(e = e, filePathName = filePathMedia, socketTimeOut = SocketTimeoutException())
+
+
 
             }
         }
@@ -285,6 +292,7 @@ class SlackAuthentication {
 
     private fun updateFields(){
         queueCounter--
+        timerTaskQueue.cancel()
         if(queueCounter == 0){
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeSlackSpinner(
@@ -305,6 +313,8 @@ class SlackAuthentication {
                     arrayListUsersName.add(it.name)
                     hashMapUser[it.name] = it.id
                 }
+
+
                 updateFields()
             }catch(e: Exception) {
 
@@ -316,9 +326,9 @@ class SlackAuthentication {
                         slackTask,
                         messagePath,
                         slackType )
+                    timerTaskQueue.cancel()
                 }
 
-                checkTimeOut(activity = activity)
                 Log.d(Constants.slackTag,"Not Authorizated Token")
                 e.printStackTrace()
             }
@@ -329,12 +339,14 @@ class SlackAuthentication {
         queueCounter++
         withContext(Dispatchers.IO) {
             try {
-                val conversationListBuilder = ConversationsListRequest.builder().build()
+                val list : List<ConversationType> = listOf(ConversationType.PRIVATE_CHANNEL,ConversationType.PUBLIC_CHANNEL)
+                val conversationListBuilder = ConversationsListRequest.builder().types(list).build()
                 val channelResponse = slack.methods(token).conversationsList(conversationListBuilder).channels.forEach {
                     arrayListChannels.add(it.name)
                     arrayListChannelsId.add(it.id)
                     hashMapChannel[it.name] = it.id
                 }
+
                 updateFields()
             }catch(e: Exception) {
 
@@ -347,6 +359,7 @@ class SlackAuthentication {
                         messagePath,
                         slackType )
                 }
+
                 Log.d(Constants.slackTag,"Not Authorizated Token")
                 e.printStackTrace()
             }
@@ -459,6 +472,7 @@ class SlackAuthentication {
                     }
 
                 } catch (e: Exception) {
+                    LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
                     slackExceptionHandler(e = e, filePathName = filePathMedia, socketTimeOut = SocketTimeoutException())
                 }
             }
@@ -525,12 +539,16 @@ class SlackAuthentication {
         this.arrayListRecyclerViewItems = arrayListRecyclerViewItems
     }
 
-    private fun checkTimeOut(activity: Activity){
-        Timer().schedule(object : TimerTask() {
+    private fun checkTimeOut(activity: Activity) {
+        val timerQueue = Timer()
+        timerTaskQueue = object : TimerTask() {
             override fun run() {
-                LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
+                activity.runOnUiThread {
+                    LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
+                }
             }
-        }, 15000)
+        }
+        timerQueue.schedule(timerTaskQueue, 15000)
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -540,6 +558,9 @@ class SlackAuthentication {
         throwable: Throwable? = null,
         socketTimeOut: SocketTimeoutException? = null
     ) {
+        if (this::timerTaskQueue.isInitialized) {
+            timerTaskQueue.cancel()
+        }
         LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
         e?.printStackTrace()
         socketTimeOut?.message

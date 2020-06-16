@@ -26,16 +26,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center"
-            >
+            android:padding="4dp">
             <CheckBox
                 android:id="@+id/checkBox_future_task"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:drawablePadding="16dp"
-                android:layout_marginLeft="5dp"
-                android:layout_marginStart="5dp"
                 android:buttonTint="@color/black"
                 android:background="@null" />
             <TextView
@@ -46,9 +41,11 @@
                 android:textColor="@android:color/black"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                 android:gravity="center_vertical"
-                android:textSize="12sp"
-                android:padding="8dp" />
+                android:layout_marginLeft="12dp"
+                android:textSize="12sp" />
         </LinearLayout>
+
+
         <TextView
             android:id="@+id/textView_send_email"
             android:layout_width="match_parent"
