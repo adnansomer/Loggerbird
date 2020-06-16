@@ -20,6 +20,7 @@ import com.slack.api.methods.request.usergroups.UsergroupsListRequest
 import com.slack.api.methods.request.users.UsersInfoRequest
 import com.slack.api.methods.request.users.UsersListRequest
 import com.slack.api.model.Conversation
+import com.slack.api.model.ConversationType
 import com.slack.api.model.Usergroup
 import constants.Constants
 import exception.LoggerBirdException
@@ -68,6 +69,8 @@ class SlackAuthentication {
 
     /** Loggerbird slack app client information **/
     companion object{
+        //xoxb-1176309019584-1152486968594-MLP1jZhF2cUlWeFcUMCa3d9j
+
         private const val CLIENT_ID = "1176309019584.1151103028997"
         private const val CLIENT_SECRET = "6147f0bd55a0c777893d07c91f3b16ef"
         private const val REDIRECT_URL = "https://app.slack.com/client"
@@ -281,6 +284,8 @@ class SlackAuthentication {
                 Log.d(Constants.slackTag,"No Authorizated Token")
                 slackExceptionHandler(e = e, filePathName = filePathMedia, socketTimeOut = SocketTimeoutException())
 
+
+
             }
         }
     }
@@ -308,6 +313,8 @@ class SlackAuthentication {
                     arrayListUsersName.add(it.name)
                     hashMapUser[it.name] = it.id
                 }
+
+
                 updateFields()
             }catch(e: Exception) {
 
@@ -332,12 +339,14 @@ class SlackAuthentication {
         queueCounter++
         withContext(Dispatchers.IO) {
             try {
-                val conversationListBuilder = ConversationsListRequest.builder().build()
+                val list : List<ConversationType> = listOf(ConversationType.PRIVATE_CHANNEL,ConversationType.PUBLIC_CHANNEL)
+                val conversationListBuilder = ConversationsListRequest.builder().types(list).build()
                 val channelResponse = slack.methods(token).conversationsList(conversationListBuilder).channels.forEach {
                     arrayListChannels.add(it.name)
                     arrayListChannelsId.add(it.id)
                     hashMapChannel[it.name] = it.id
                 }
+
                 updateFields()
             }catch(e: Exception) {
 
