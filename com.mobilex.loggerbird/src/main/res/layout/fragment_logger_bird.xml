@@ -50,6 +50,19 @@
                 android:padding="8dp" />
         </LinearLayout>
         <TextView
+            android:id="@+id/textView_share_github"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="16dp"
+            android:textColor="@color/black"
+            android:drawableLeft="@drawable/ic_github_icon"
+            android:drawableStart="@drawable/ic_github_icon"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+            android:gravity="center_vertical"
+            android:textSize="12sp"
+            android:padding="8dp"
+            android:text="@string/textView_loggerbird_github_title" />
+        <TextView
             android:id="@+id/textView_send_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -11,20 +11,26 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import com.mobilex.loggerbird.R
 import com.slack.api.RequestConfigurator
 import com.slack.api.Slack
 import com.slack.api.methods.request.admin.usergroups.AdminUsergroupsListChannelsRequest
+import com.slack.api.methods.request.conversations.ConversationsInviteRequest
 import com.slack.api.methods.request.conversations.ConversationsListRequest
 import com.slack.api.methods.request.usergroups.UsergroupsListRequest
 import com.slack.api.methods.request.users.UsersInfoRequest
 import com.slack.api.methods.request.users.UsersListRequest
 import com.slack.api.model.Conversation
+import com.slack.api.model.ConversationType
 import com.slack.api.model.Usergroup
 import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
+import models.AccountIdService
 import models.RecyclerViewModel
 import okhttp3.*
 import services.LoggerBirdService
@@ -67,8 +73,8 @@ class SlackAuthentication {
 
     /** Loggerbird slack app client information **/
     companion object{
-        private const val CLIENT_ID = "1176309019584.1151103028997"
-        private const val CLIENT_SECRET = "6147f0bd55a0c777893d07c91f3b16ef"
+        internal const val CLIENT_ID = "1176309019584.1151103028997"
+        internal const val CLIENT_SECRET = "6147f0bd55a0c777893d07c91f3b16ef"
         private const val REDIRECT_URL = "https://app.slack.com/client"
         private const val APP_ID = "A014F310UVB"
         private const val INVITATION_URL = "https://slack.com/oauth/v2/authorize?client_id=1176309019584.1151103028997&scope=app_mentions:read,channels:join,channels:read,chat:write,files:write,groups:read,groups:write,im:write,incoming-webhook,mpim:read,mpim:write,usergroups:write,users:read,users:write,usergroups:read,users.profile:read,chat:write.public,team:read"
@@ -148,6 +154,8 @@ class SlackAuthentication {
                     if (response.code in 200..299) {
                         coroutineCallSlack.async {
                             try {
+//                                gatherVerificationToken()
+//                                gatherOauthToken()
                                 slackAuthentication(
                                     activity = activity,
                                     context = context,
@@ -195,6 +203,7 @@ class SlackAuthentication {
     ) {
 
         try{
+
             this.activity = activity
             val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             val token = sharedPref.getString("slackAccessToken", "")
@@ -329,12 +338,25 @@ class SlackAuthentication {
         queueCounter++
         withContext(Dispatchers.IO) {
             try {
-                val conversationListBuilder = ConversationsListRequest.builder().build()
+                val conversationInviteRequest = ConversationsInviteRequest.builder().channel("loggerbird").build()
+                val conversationInvite = slack.methods(token).conversationsInvite(conversationInviteRequest)
+                val list:List<ConversationType> = listOf(ConversationType.PRIVATE_CHANNEL,ConversationType.PUBLIC_CHANNEL)
+                val conversationListBuilder = ConversationsListRequest.builder()
+                    .types(list)
+                    .build()
                 val channelResponse = slack.methods(token).conversationsList(conversationListBuilder).channels.forEach {
                     arrayListChannels.add(it.name)
                     arrayListChannelsId.add(it.id)
                     hashMapChannel[it.name] = it.id
                 }
+
+//                val privateResponse = slack.methods(token).conversationsList {
+//                    it.build().types.forEach {
+//
+//                    }
+//                    val privateList:List<ConversationType> = List(2,)
+//                    it.types("private_channel")
+//                }
                 updateFields()
             }catch(e: Exception) {
 
@@ -550,4 +572,73 @@ class SlackAuthentication {
             throwable = throwable
         )
     }
+
+    private fun gatherVerificationToken(){
+        RetrofitUserSlackClient.getSlackUserClient(url = "https://slack.com/oauth/")
+            .create(AccountIdService::class.java)
+            .getSlackVerification()
+            .enqueue(object : retrofit2.Callback<JsonElement> {
+                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                override fun onFailure(
+                    call: retrofit2.Call<JsonElement>,
+                    t: Throwable
+                ) {
+                    Log.d("slack_failure","retrofit failed!")
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonElement>,
+                    response: retrofit2.Response<JsonElement>
+                ) {
+                    Log.d("slack_success", response.code().toString())
+                    val slackBody = response.raw().request.url
+                    RetrofitUserSlackClient.getSlackUserClient(url = slackBody.toString()+"/")
+                        .create(AccountIdService::class.java)
+                        .getSlackVerificationToken()
+                        .enqueue(object : retrofit2.Callback<JsonObject> {
+                            @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                            override fun onFailure(
+                                call: retrofit2.Call<JsonObject>,
+                                t: Throwable
+                            ) {
+                                Log.d("slack_failure","retrofit failed!")
+                            }
+
+                            override fun onResponse(
+                                call: retrofit2.Call<JsonObject>,
+                                response: retrofit2.Response<JsonObject>
+                            ) {
+                                Log.d("slack_success", response.code().toString())
+                                val slackBodyVerfication = response.body()
+                            }
+                        })
+
+
+                }
+            })
+    }
+
+    private fun gatherOauthToken(){
+        RetrofitUserSlackClient.getSlackUserClient(url = "https://slack.com/api/")
+            .create(AccountIdService::class.java)
+            .getSlackAuth()
+            .enqueue(object : retrofit2.Callback<JsonObject> {
+                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                override fun onFailure(
+                    call: retrofit2.Call<JsonObject>,
+                    t: Throwable
+                ) {
+                  Log.d("slack_failure","retrofit failed!")
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonObject>,
+                    response: retrofit2.Response<JsonObject>
+                ) {
+                    Log.d("slack_success", response.code().toString())
+                    val slackBody = response.body()
+                }
+            })
+    }
+
 }

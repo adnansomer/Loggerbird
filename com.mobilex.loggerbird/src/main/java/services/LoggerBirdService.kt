@@ -92,6 +92,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerFutureTask: Any? = null
     private var windowManagerFutureDate: Any? = null
     private var windowManagerFutureTime: Any? = null
+    private var windowManagerGithub: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -104,6 +105,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsFutureTask: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFutureDate: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFutureTime: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsGithub: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -155,6 +157,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewFutureTask: View
     private lateinit var viewFutureDate: View
     private lateinit var viewFutureTime: View
+    private lateinit var viewGithub: View
     private lateinit var wrapper: FrameLayout
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
@@ -344,6 +347,26 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var emailSubject: String
     private lateinit var emailArrayListFilePath: ArrayList<File>
 
+    //Github
+    internal val githubAuthentication = GithubAuthentication()
+    private lateinit var buttonGithubCreate: Button
+    private lateinit var buttonGithubCancel: Button
+    private lateinit var editTextGithubTitle: EditText
+    private lateinit var editTextGithubComment: EditText
+    private lateinit var toolbarGithub: Toolbar
+    private lateinit var recyclerViewGithubAttachment: RecyclerView
+    //    private lateinit var githubAdapter:
+    private lateinit var autoTextViewGithubAssignee: AutoCompleteTextView
+    private lateinit var autoTextViewGithubLabels: AutoCompleteTextView
+    private lateinit var autoTextViewGithubProject: AutoCompleteTextView
+    private lateinit var autoTextViewGithubMileStone: AutoCompleteTextView
+    private lateinit var autoTextViewGithubLinkedRequests: AutoCompleteTextView
+    private lateinit var autoTextViewGithubAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGithubLabelsAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGithubProjectsAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGithubMileStoneAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGithubLinkedRequestsAdapter: ArrayAdapter<String>
+
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
@@ -356,6 +379,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var textView_send_email: TextView
         private lateinit var textView_share_jira: TextView
         private lateinit var textView_share_slack: TextView
+        private lateinit var textView_share_github: TextView
         private lateinit var textView_discard: TextView
         //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
@@ -701,6 +725,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_discard = view.findViewById(R.id.textView_discard)
                     textView_share_jira = view.findViewById(R.id.textView_share_jira)
                     textView_share_slack = view.findViewById(R.id.textView_share_slack)
+                    textView_share_github = view.findViewById(R.id.textView_share_github)
                     textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
                     textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
@@ -1014,6 +1039,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         floatingActionButtonView.visibility = View.GONE
                     }
                     initializeSlackLayout(filePathMedia = filePathMedia)
+                }
+            }
+
+            textView_share_github.setSafeOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
+                    }
+                    initializeGithubLayout(filePathMedia = filePathMedia)
                 }
             }
 
@@ -1896,7 +1930,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     editText_feedback = viewFeedback.findViewById(R.id.editText_feed_back)
                     toolbarFeedback = viewFeedback.findViewById(R.id.toolbar_feedback)
                     progressBarFeedback = viewFeedback.findViewById(R.id.feedback_progressbar)
-                    progressBarFeedbackLayout = viewFeedback.findViewById(R.id.feedback_progressbar_background)
+                    progressBarFeedbackLayout =
+                        viewFeedback.findViewById(R.id.feedback_progressbar_background)
                     buttonClicksFeedback()
                 }
             }
@@ -1945,7 +1980,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     message = editText_feedback.text.toString(),
                     to = to
                 )
-                withContext(Dispatchers.Main){
+                withContext(Dispatchers.Main) {
                     Toast.makeText(
                         context,
                         R.string.feed_back_email_success,
@@ -2386,9 +2421,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
                 "slack_error_time_out" -> {
                     removeSlackLayout()
-                    Toast.makeText(context, R.string.slack_sent_error_time_out, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.slack_sent_error_time_out, Toast.LENGTH_SHORT)
+                        .show()
                     progressBarSlackLayout.visibility = View.GONE
                     progressBarSlack.visibility = View.GONE
+                }
+                "github"->{
+                    detachProgressBar()
+                    removeGithubLayout()
+                    Toast.makeText(context, R.string.github_issue_success, Toast.LENGTH_SHORT).show()
+                    finishSuccessFab()
                 }
 
             }
@@ -4475,7 +4517,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     attachProgressBar()
                     val coroutineCallFutureTask = CoroutineScope(Dispatchers.IO)
                     coroutineCallFutureTask.async {
-//                        if (arraylistEmailToUsername.isNotEmpty()) {
+                        //                        if (arraylistEmailToUsername.isNotEmpty()) {
 //                            arraylistEmailToUsername.forEach {
 //                                createFutureTaskEmail()
 //                            }
@@ -4538,9 +4580,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val sharedPref =
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         with(sharedPref.edit()) {
-            if(arraylistEmailToUsername.isNotEmpty()){
+            if (arraylistEmailToUsername.isNotEmpty()) {
                 addFutureUserList()
-            }else{
+            } else {
                 putString("future_task_email_to", editTextTo.text.toString())
             }
             putString("future_task_email_subject", editTextSubject.text.toString())
@@ -4900,10 +4942,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val arrayListFileNames: ArrayList<String> = ArrayList()
         RecyclerViewEmailAdapter.ViewHolder.arrayListFilePaths.forEach {
             if (it.file.name == "logger_bird_details.txt") {
-                val futureLoggerBirdFile = File(context.filesDir,"logger_bird_details_future.txt")
-                if(!futureLoggerBirdFile.exists()){
+                val futureLoggerBirdFile = File(context.filesDir, "logger_bird_details_future.txt")
+                if (!futureLoggerBirdFile.exists()) {
                     futureLoggerBirdFile.createNewFile()
-                }else{
+                } else {
                     futureLoggerBirdFile.delete()
                     futureLoggerBirdFile.createNewFile()
                 }
@@ -4912,7 +4954,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     futureLoggerBirdFile.appendText(scanner.nextLine() + "\n")
                 } while (scanner.hasNextLine())
                 arrayListFileNames.add(futureLoggerBirdFile.absolutePath)
-            }else{
+            } else {
                 arrayListFileNames.add(it.file.absolutePath)
             }
 
@@ -4926,8 +4968,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             commit()
         }
     }
+
     private fun addFutureUserList() {
-        val arrayListUsers:ArrayList<String> = ArrayList()
+        val arrayListUsers: ArrayList<String> = ArrayList()
         arraylistEmailToUsername.forEach {
             arrayListUsers.add(it.email)
         }
@@ -4939,6 +4982,125 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             putString("user_future_list", json)
             commit()
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeGithubLayout(filePathMedia: File) {
+        try {
+            removeGithubLayout()
+            viewGithub = LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_github_popup, (this.rootView as ViewGroup), false)
+
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsGithub = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerGithub = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                (windowManagerGithub as WindowManager).addView(
+                    viewGithub,
+                    windowManagerParamsGithub
+                )
+
+                if (Build.VERSION.SDK_INT >= 23) {
+                    activity.window.navigationBarColor =
+                        resources.getColor(R.color.black, theme)
+                    activity.window.statusBarColor =
+                        resources.getColor(R.color.black, theme)
+                } else {
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        activity.window.navigationBarColor =
+                            resources.getColor(R.color.black)
+                        activity.window.statusBarColor = resources.getColor(R.color.black)
+                    }
+                }
+                buttonGithubCreate = viewGithub.findViewById(R.id.button_github_create)
+                buttonGithubCancel = viewGithub.findViewById(R.id.button_github_cancel)
+                autoTextViewGithubAssignee =
+                    viewGithub.findViewById(R.id.auto_textView_github_assignee)
+                autoTextViewGithubLabels = viewGithub.findViewById(R.id.auto_textView_github_labels)
+                autoTextViewGithubLinkedRequests =
+                    viewGithub.findViewById(R.id.auto_textView_github_linked_requests)
+                autoTextViewGithubMileStone =
+                    viewGithub.findViewById(R.id.auto_textView_github_milestone)
+                autoTextViewGithubProject =
+                    viewGithub.findViewById(R.id.auto_textView_github_project)
+                editTextGithubTitle = viewGithub.findViewById(R.id.editText_github_title)
+                editTextGithubComment = viewGithub.findViewById(R.id.editText_github_comment)
+
+                buttonClicksGithub(filePathMedia = filePathMedia)
+//                    progressBarSlackLayout.visibility = View.VISIBLE
+//                    progressBarSlack.visibility = View.VISIBLE
+
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.githubTag)
+        }
+    }
+
+    internal fun removeGithubLayout() {
+        if (this::viewGithub.isInitialized && windowManagerGithub != null) {
+            (windowManagerGithub as WindowManager).removeViewImmediate(
+                viewGithub
+            )
+            windowManagerGithub = null
+        }
+    }
+
+    private fun buttonClicksGithub(filePathMedia: File) {
+        buttonGithubCreate.setSafeOnClickListener {
+            if (checkGithubTitleEmpty()) {
+                attachProgressBar()
+                githubAuthentication.gatherAutoTextDetails(
+                    autoTextViewAssignee = autoTextViewGithubAssignee,
+                    autoTextViewProject = autoTextViewGithubProject,
+                    autoTextViewLabels = autoTextViewGithubLabels,
+                    autoTextViewLinkedRequests = autoTextViewGithubLinkedRequests,
+                    autoTextViewMileStone = autoTextViewGithubMileStone
+                )
+                githubAuthentication.gatherEditTextDetails(
+                    editTextComment = editTextGithubComment,
+                    editTextTitle = editTextGithubTitle
+                )
+                githubAuthentication.callGithub(
+                    activity = activity,
+                    context = context,
+                    filePathMedia = filePathMedia
+                )
+            }
+        }
+        buttonGithubCancel.setSafeOnClickListener {
+            removeGithubLayout()
+        }
+    }
+
+    private fun checkGithubTitleEmpty(): Boolean {
+        if (editTextGithubTitle.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.github_title_empty)
+            )
+        }
+        return false
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

@@ -5,14 +5,14 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class RetrofitUserJiraClient {
+class RetrofitUserGithubClient {
     companion object {
-       internal fun getJiraUserClient(url:String): Retrofit {
+       internal fun getGithubUserClient(url:String): Retrofit {
             val client = OkHttpClient.Builder()
                 .addInterceptor(
-                    BasicAuthJiraInterceptor(
-                        LoggerBird.jiraUserName,
-                        LoggerBird.jiraApiToken
+                    BasicAuthGithubInterceptor(
+                        LoggerBird.githubUserName,
+                        LoggerBird.githubPassword
                     )
                 )
                 .build()
