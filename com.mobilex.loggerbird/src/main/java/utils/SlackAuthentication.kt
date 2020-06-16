@@ -313,6 +313,8 @@ class SlackAuthentication {
                     arrayListUsersName.add(it.name)
                     hashMapUser[it.name] = it.id
                 }
+
+
                 updateFields()
             }catch(e: Exception) {
 
@@ -337,7 +339,7 @@ class SlackAuthentication {
         queueCounter++
         withContext(Dispatchers.IO) {
             try {
-                val list : List<ConversationType> = listOf(ConversationType.PUBLIC_CHANNEL,ConversationType.PRIVATE_CHANNEL)
+                val list : List<ConversationType> = listOf(ConversationType.PRIVATE_CHANNEL,ConversationType.PUBLIC_CHANNEL)
                 val conversationListBuilder = ConversationsListRequest.builder().types(list).build()
                 val channelResponse = slack.methods(token).conversationsList(conversationListBuilder).channels.forEach {
                     arrayListChannels.add(it.name)

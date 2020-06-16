@@ -714,6 +714,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     floating_action_button.backgroundTintList =
                         ColorStateList.valueOf(resources.getColor(R.color.black))
 
+                    floating_action_button.imageTintList =
+                        ColorStateList.valueOf(resources.getColor(R.color.white))
+                    floating_action_button.backgroundTintList =
+                        ColorStateList.valueOf(resources.getColor(R.color.black))
+
                     if (audioRecording || videoRecording || screenshotDrawing) {
                         workingAnimation =
                             AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
