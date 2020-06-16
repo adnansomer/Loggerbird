@@ -192,7 +192,8 @@
     <string name="textView_email_issue">Yeni İleti</string>
     <string name="editText_email_to">Alıcılar:</string>
     <string name="editText_email_subject">Konu:</string>
-    <string name="editText_email_content">Mesajınızı buraya yazınız:</string>
+    <string name="editText_email_content">Mesajınızı buraya yazınız!</string>
+    <string name="textView_email_message">Mesaj</string>
     <string name="textView_email_attachments">Eklentiler</string>
     <string name="textView_email_to_list">Alıcılar Listesi</string>
     <string name="button_email_create">Oluştur</string>
