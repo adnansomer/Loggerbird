@@ -70,6 +70,7 @@ class SlackAuthentication {
     private var messagePath: String? = null
     private var slackType: String? = null
     private var controlcallSlack : Boolean = false
+    private lateinit var timerTaskQueue: TimerTask
 
     /** Loggerbird slack app client information **/
     companion object{
@@ -152,6 +153,7 @@ class SlackAuthentication {
                 Log.d("response_code", response.code.toString())
                 try {
                     if (response.code in 200..299) {
+                        checkTimeOut(activity = activity)
                         coroutineCallSlack.async {
                             try {
 //                                gatherVerificationToken()
@@ -294,6 +296,7 @@ class SlackAuthentication {
 
     private fun updateFields(){
         queueCounter--
+        timerTaskQueue.cancel()
         if(queueCounter == 0){
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeSlackSpinner(
@@ -325,9 +328,10 @@ class SlackAuthentication {
                         slackTask,
                         messagePath,
                         slackType )
+                    timerTaskQueue.cancel()
                 }
 
-                checkTimeOut(activity = activity)
+//                checkTimeOut(activity = activity)
                 Log.d(Constants.slackTag,"Not Authorizated Token")
                 e.printStackTrace()
             }
@@ -338,8 +342,6 @@ class SlackAuthentication {
         queueCounter++
         withContext(Dispatchers.IO) {
             try {
-                val conversationInviteRequest = ConversationsInviteRequest.builder().channel("loggerbird").build()
-                val conversationInvite = slack.methods(token).conversationsInvite(conversationInviteRequest)
                 val list:List<ConversationType> = listOf(ConversationType.PRIVATE_CHANNEL,ConversationType.PUBLIC_CHANNEL)
                 val conversationListBuilder = ConversationsListRequest.builder()
                     .types(list)
