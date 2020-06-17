@@ -1,9 +1,6 @@
 package services
 
-import adapter.RecyclerViewEmaiToListAdapter
-import adapter.RecyclerViewEmailAdapter
-import adapter.RecyclerViewJiraAdapter
-import adapter.RecyclerViewSlackAdapter
+import adapter.*
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -355,7 +352,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var editTextGithubComment: EditText
     private lateinit var toolbarGithub: Toolbar
     private lateinit var recyclerViewGithubAttachment: RecyclerView
-    //    private lateinit var githubAdapter:
+    private lateinit var githubAdapter:RecyclerViewGithubAdapter
     private lateinit var autoTextViewGithubAssignee: AutoCompleteTextView
     private lateinit var autoTextViewGithubLabels: AutoCompleteTextView
     private lateinit var autoTextViewGithubProject: AutoCompleteTextView
@@ -366,6 +363,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewGithubProjectsAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewGithubMileStoneAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewGithubLinkedRequestsAdapter: ArrayAdapter<String>
+    private val arrayListGithubFileName: ArrayList<RecyclerViewModel> = ArrayList()
 
     //Static global variables:
     internal companion object {
@@ -2431,6 +2429,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     removeGithubLayout()
                     Toast.makeText(context, R.string.github_issue_success, Toast.LENGTH_SHORT).show()
                     finishSuccessFab()
+                }
+                "github_error"->{
+                    detachProgressBar()
+                    removeGithubLayout()
+                    Toast.makeText(context, R.string.github_issue_failure, Toast.LENGTH_SHORT).show()
+                }
+                "github_error_time_out"->{
+                    detachProgressBar()
+                    removeGithubLayout()
+                    Toast.makeText(context, R.string.github_issue_time_out, Toast.LENGTH_SHORT).show()
                 }
 
             }
@@ -5042,7 +5050,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     viewGithub.findViewById(R.id.auto_textView_github_project)
                 editTextGithubTitle = viewGithub.findViewById(R.id.editText_github_title)
                 editTextGithubComment = viewGithub.findViewById(R.id.editText_github_comment)
-
+                recyclerViewGithubAttachment = viewGithub.findViewById(R.id.recycler_view_github_attachment)
+                initializeGithubRecyclerView(filePathMedia = filePathMedia)
                 buttonClicksGithub(filePathMedia = filePathMedia)
 //                    progressBarSlackLayout.visibility = View.VISIBLE
 //                    progressBarSlack.visibility = View.VISIBLE
@@ -5082,13 +5091,41 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 githubAuthentication.callGithub(
                     activity = activity,
                     context = context,
+                    task = "get",
                     filePathMedia = filePathMedia
                 )
             }
         }
         buttonGithubCancel.setSafeOnClickListener {
             removeGithubLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeGithubRecyclerView(filePathMedia: File) {
+        arrayListGithubFileName.clear()
+        recyclerViewGithubAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        githubAdapter = RecyclerViewGithubAdapter(
+            addGithubFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewGithubAttachment.adapter = githubAdapter
+    }
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addGithubFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListGithubFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListGithubFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListGithubFileName
     }
 
     private fun checkGithubTitleEmpty(): Boolean {

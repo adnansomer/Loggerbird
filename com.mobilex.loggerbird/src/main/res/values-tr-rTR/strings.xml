@@ -92,6 +92,8 @@
     <string name="future_task_gathered">Gelecek zaman detayları alındı!</string>
     <string name="github_title_empty">Başlık boş olamaz!</string>
     <string name="github_issue_success">Görev başarılı bir şekilde açıldı!</string>
+    <string name="github_issue_failure">Github görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="github_issue_time_out">Github görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
@@ -225,4 +227,6 @@
     <string name="textView_github_attachment">Eklentiler</string>
     <string name="button_github_create">Oluştur</string>
     <string name="button_github_cancel">İptal</string>
+    <!-- recycler_view_github_item_popup-->
+    <string name="textView_recyclerView_github_popup_title">Github görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
 </resources>

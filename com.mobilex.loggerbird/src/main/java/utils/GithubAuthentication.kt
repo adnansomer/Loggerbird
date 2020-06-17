@@ -15,6 +15,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
 import models.AccountIdService
+import models.GithubAssigneeModel
+import models.GithubRepoModel
 import okhttp3.*
 import services.LoggerBirdService
 import java.io.File
@@ -34,9 +36,12 @@ internal class GithubAuthentication {
     private var projects:String? = null
     private var mileStone:String? = null
     private var linkedRequests:String? = null
+    private var arrayListRepo:ArrayList<String> = ArrayList()
+    private var arrayListAssignee:ArrayList<String> = ArrayList()
     internal fun callGithub(
         activity: Activity,
         context: Context,
+        task:String,
         filePathMedia: File? = null
     ) {
         this.activity = activity
@@ -48,6 +53,7 @@ internal class GithubAuthentication {
                     okHttpSlackAuthentication(
                         activity = activity,
                         context = context,
+                        task = task,
                         filePathMediaName = filePathMedia
                     )
                 } else {
@@ -74,6 +80,7 @@ internal class GithubAuthentication {
     private fun okHttpSlackAuthentication(
         context: Context,
         activity: Activity,
+        task: String,
         filePathMediaName: File?
         ) {
         val client = OkHttpClient()
@@ -94,7 +101,11 @@ internal class GithubAuthentication {
                     if (response.code in 200..299) {
                         coroutineCallGithub.async {
                             try {
-                                githubCreateIssue(activity = activity)
+                                when(task){
+                                    "create" ->  githubCreateIssue(activity = activity)
+                                    "get" -> gatherGithubDetails()
+                                }
+
                             } catch (e: Exception) {
                                 e.printStackTrace()
                                 LoggerBird.callEnqueue()
@@ -185,6 +196,75 @@ internal class GithubAuthentication {
     internal fun gatherEditTextDetails(editTextTitle: EditText,editTextComment:EditText){
         title = editTextTitle.text.toString()
         comment = editTextComment.text.toString()
+    }
+    private fun gatherGithubDetails(){
+        arrayListRepo.clear()
+        arrayListAssignee.clear()
+        gatherTaskRepositories()
+    }
+
+    private fun gatherTaskRepositories(){
+        RetrofitUserGithubClient.getGithubUserClient(url = "https://api.github.com/user/")
+            .create(AccountIdService::class.java)
+            .getGithubRepo()
+            .enqueue(object : retrofit2.Callback<List<GithubRepoModel>> {
+                override fun onFailure(
+                    call: retrofit2.Call<List<GithubRepoModel>>,
+                    t: Throwable
+                ) {
+                    t.printStackTrace()
+                    LoggerBird.callEnqueue()
+                    LoggerBird.callExceptionDetails(throwable = t, tag = Constants.githubTag)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<List<GithubRepoModel>>,
+                    response: retrofit2.Response<List<GithubRepoModel>>
+                ) {
+                    val coroutineCallGithubRepo = CoroutineScope(Dispatchers.IO)
+                    coroutineCallGithubRepo.async {
+                        Log.d("github_repo_success", response.code().toString())
+                        val githubList = response.body()
+                        githubList?.forEach {
+                            if(it.name != null){
+                                arrayListRepo.add(it.name!!)
+                                gatherTaskAssignee(repo = it.name!!)
+                            }
+                        }
+                    }
+                }
+            })
+    }
+    private fun gatherTaskAssignee(repo:String){
+        RetrofitUserGithubClient.getGithubUserClient(url = "https://api.github.com/repos/${LoggerBird.githubUserName}/$repo")
+            .create(AccountIdService::class.java)
+            .getGithubAssignees()
+            .enqueue(object : retrofit2.Callback<List<GithubAssigneeModel>> {
+                override fun onFailure(
+                    call: retrofit2.Call<List<GithubAssigneeModel>>,
+                    t: Throwable
+                ) {
+                    t.printStackTrace()
+                    LoggerBird.callEnqueue()
+                    LoggerBird.callExceptionDetails(throwable = t, tag = Constants.githubTag)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<List<GithubAssigneeModel>>,
+                    response: retrofit2.Response<List<GithubAssigneeModel>>
+                ) {
+                    val coroutineCallGithubAssignee = CoroutineScope(Dispatchers.IO)
+                    coroutineCallGithubAssignee.async {
+                        Log.d("github_assignee_success", response.code().toString())
+                        val githubList = response.body()
+                        githubList?.forEach {
+                            if(it.login != null){
+                                arrayListAssignee.add(it.login!!)
+                            }
+                        }
+                    }
+                }
+            })
     }
 
 }

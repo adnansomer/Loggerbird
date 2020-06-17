@@ -92,6 +92,8 @@
     <string name="future_task_gathered">Future-task details have been gathered!</string>
     <string name="github_title_empty">Title cannot be empty!</string>
     <string name="github_issue_success">Issue opened successfully!</string>
+    <string name="github_issue_failure">An error happened while trying to open github issue!</string>
+    <string name="github_issue_time_out">An error happened while trying to open github issue , system has been timed out!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -224,4 +226,6 @@
     <string name="textView_github_attachment">Attachments</string>
     <string name="button_github_create">Create</string>
     <string name="button_github_cancel">Cancel</string>
+    <!-- recycler_view_github_item_popup-->
+    <string name="textView_recyclerView_github_popup_title">Are you sure to remove attachment from your Github issue?</string>
 </resources>
