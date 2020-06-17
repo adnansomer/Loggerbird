@@ -66,8 +66,8 @@
             android:layout_height="wrap_content"
             android:drawablePadding="16dp"
             android:textColor="@color/black"
-            android:drawableLeft="@drawable/ic_jira_color_24dp"
-            android:drawableStart="@drawable/ic_jira_color_24dp"
+            android:drawableLeft="@drawable/ic_jira_logo_24dp"
+            android:drawableStart="@drawable/ic_jira_logo_24dp"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
             android:gravity="center_vertical"
             android:textSize="12sp"
@@ -89,6 +89,34 @@
             android:drawableLeft="@drawable/ic_slack_logo_24dp" />
 
         <TextView
+            android:id="@+id/textView_share_gitlab"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="16dp"
+            android:textColor="@color/black"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+            android:gravity="center_vertical"
+            android:textSize="12sp"
+            android:padding="8dp"
+            android:text="@string/textView_loggerbird_gitlab_title"
+            android:drawableStart="@drawable/ic_gitlab_logo_24dp"
+            android:drawableLeft="@drawable/ic_gitlab_logo_24dp" />
+
+        <TextView
+            android:id="@+id/textView_share_github"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="16dp"
+            android:textColor="@color/black"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+            android:gravity="center_vertical"
+            android:textSize="12sp"
+            android:padding="8dp"
+            android:text="@string/textView_loggerbird_github_title"
+            android:drawableStart="@drawable/ic_github_logo_24dp"
+            android:drawableLeft="@drawable/ic_github_logo_24dp" />
+
+        <TextView
             android:id="@+id/textView_discard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -101,6 +129,9 @@
             android:text="@string/textView_loggerbird_discard_title"
             android:drawableStart="@drawable/ic_delete_sweep_black_24dp"
             android:drawableLeft="@drawable/ic_delete_sweep_black_24dp" />
+
+
+
 
         <!--   <TextView
                android:id="@+id/textView_dismiss"
