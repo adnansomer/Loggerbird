@@ -57,4 +57,9 @@ interface AccountIdService {
 //    fun getCompList(): Call<List<JiraProjectmodel>>
 //    @GET("versions")
 //    fun getVersionsList(): Call<List<JiraProjectmodel>>
+
+
+    //gitlab
+    @POST("issues")
+    fun createGitlabIssue(@Body jsonObject: JsonObject): Call<JsonObject>
 }

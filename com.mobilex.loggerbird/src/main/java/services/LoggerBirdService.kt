@@ -1,9 +1,6 @@
 package services
 
-import adapter.RecyclerViewEmaiToListAdapter
-import adapter.RecyclerViewEmailAdapter
-import adapter.RecyclerViewJiraAdapter
-import adapter.RecyclerViewSlackAdapter
+import adapter.*
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -92,6 +89,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerFutureTask: Any? = null
     private var windowManagerFutureDate: Any? = null
     private var windowManagerFutureTime: Any? = null
+    private var windowManagerGitlab: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -104,6 +102,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsFutureTask: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFutureDate: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFutureTime: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsGitlab: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -155,6 +154,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewFutureTask: View
     private lateinit var viewFutureDate: View
     private lateinit var viewFutureTime: View
+    private lateinit var viewGitlab: View
     private lateinit var wrapper: FrameLayout
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
@@ -172,7 +172,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     //Jira:
     internal val jiraAuthentication = JiraAuthentication()
-    private val slackAuthentication = SlackAuthentication()
     //    private lateinit var spinnerProject: Spinner
     private lateinit var autoTextViewProject: AutoCompleteTextView
     //    private lateinit var spinnerIssueType: Spinner
@@ -280,6 +279,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var progressBarFeedbackLayout: FrameLayout
 
     //Slack:
+    private val slackAuthentication = SlackAuthentication()
     private lateinit var buttonSlackCreate: Button
     internal lateinit var buttonSlackCancel: Button
     private lateinit var buttonSlackCreateUser: Button
@@ -344,6 +344,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var emailSubject: String
     private lateinit var emailArrayListFilePath: ArrayList<File>
 
+    //Gitlab:
+    private val gitlabAuthentication = GitlabAuthentication()
+    private lateinit var editTextGitlabTitle: EditText
+    private lateinit var editTextGitlabDescription: EditText
+    private lateinit var editTextGitlabMilestone: EditText
+    private lateinit var editTextGitlabAssignee: EditText
+    private lateinit var buttonGitlabCreate: Button
+    private lateinit var buttonGitlabCancel: Button
+    private lateinit var toolbarGitlab: Toolbar
+    private lateinit var recyclerViewGitlabAttachment: RecyclerView
+    private lateinit var gitlabAdapter:RecyclerViewGitlabAdapter
+    private val arrayListGitlabFileName: ArrayList<RecyclerViewModel> = ArrayList()
+
+
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
@@ -358,7 +372,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var textView_share_slack: TextView
         private lateinit var textView_share_gitlab: TextView
         private lateinit var textView_discard: TextView
-        //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
         private lateinit var textView_counter_audio: TextView
         private lateinit var textView_video_size: TextView
@@ -958,7 +971,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     internal fun shareView(filePathMedia: File) {
         floating_action_button.backgroundTintList =
             ColorStateList.valueOf(resources.getColor(R.color.black))
@@ -1022,16 +1035,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    initializeSlackLayout(filePathMedia = filePathMedia)
+                    initializeGitlabLayout(filePathMedia = filePathMedia)
                 }
             }
 
             textView_discard.setSafeOnClickListener {
                 discardMediaFile()
             }
-
-
-
 
             if (sharedPref.getBoolean("future_task_check", false)) {
                 checkBoxFutureTask.isChecked = true
@@ -3722,13 +3732,160 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //        return arrayListJiraPriority
 //    }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeGitlabLayout(filePathMedia: File){
+        try {
+            removeGitlabLayout()
+            viewGitlab = LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_gitlab_popup, (this.rootView as ViewGroup), false)
+
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsGitlab = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerGitlab = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                if (windowManagerGitlab != null) {
+                    (windowManagerGitlab as WindowManager).addView(
+                        viewGitlab,
+                        windowManagerParamsGitlab
+                    )
+                }
+
+                if (Build.VERSION.SDK_INT >= 23) {
+                    activity.window.navigationBarColor =
+                        resources.getColor(R.color.black, theme)
+                    activity.window.statusBarColor =
+                        resources.getColor(R.color.black, theme)
+                } else {
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        activity.window.navigationBarColor =
+                            resources.getColor(R.color.black)
+                        activity.window.statusBarColor = resources.getColor(R.color.black)
+                    }
+                }
+
+                toolbarGitlab = viewGitlab.findViewById(R.id.toolbar_gitlab)
+                editTextGitlabTitle = viewGitlab.findViewById(R.id.editText_gitlab_title)
+                editTextGitlabDescription = viewGitlab.findViewById(R.id.editText_gitlab_description)
+               // editTextGitlabMilestone = viewGitlab.findViewById(R.id.editText_gitlab_milestone)
+               // editTextGitlabAssignee = viewGitlab.findViewById(R.id.editText_gitlab_assignee)
+                buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
+                buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
+                recyclerViewGitlabAttachment = viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
+                initializeGitlabRecyclerView(filePathMedia = filePathMedia)
+                buttonClicksGitlab(filePathMedia = filePathMedia)
+            }
+        }catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
+        }
+    }
+
+    private fun removeGitlabLayout(){
+        if (windowManagerGitlab != null && this::viewGitlab.isInitialized) {
+            (windowManagerGitlab as WindowManager).removeViewImmediate(viewGitlab)
+            windowManagerGitlab = null
+            arrayListGitlabFileName.clear()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun buttonClicksGitlab(filePathMedia: File){
+
+        buttonGitlabCreate.setSafeOnClickListener {
+            if(checkGitlabTitleEmpty()){
+                attachProgressBar()
+//                gitlabAuthentication.gatherAutoTextDetails(
+//                    autoTextViewAssignee = autoTextViewGithubAssignee,
+//                    autoTextViewProject = autoTextViewGithubProject,
+//                    autoTextViewLabels = autoTextViewGithubLabels,
+//                    autoTextViewLinkedRequests = autoTextViewGithubLinkedRequests,
+//                    autoTextViewMileStone = autoTextViewGithubMileStone
+//                )
+
+                gitlabAuthentication.callGitlab(
+                    activity = activity,
+                    context = context,
+                    task = "create",
+                    filePathMedia = filePathMedia
+                )
+            }
+        }
+
+        toolbarGitlab.setNavigationOnClickListener {
+            removeGitlabLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+
+        buttonGitlabCancel.setSafeOnClickListener {
+            removeGitlabLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeGitlabRecyclerView(filePathMedia: File) {
+        arrayListGitlabFileName.clear()
+        recyclerViewGitlabAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        gitlabAdapter = RecyclerViewGitlabAdapter(
+            addGitlabFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewGitlabAttachment.adapter = gitlabAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addGitlabFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListGitlabFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListGitlabFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListGitlabFileName
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun checkGitlabTitleEmpty(): Boolean {
+        if (editTextGitlabTitle.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.editText_gitlab_title_empty)
+            )
+        }
+        return false
+    }
+
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeSlackLayout(filePathMedia: File) {
         try {
-            if (windowManagerSlack != null && this::viewSlack.isInitialized) {
-                (windowManagerSlack as WindowManager).removeViewImmediate(viewSlack)
-                arrayListSlackFileName.clear()
-            }
+            removeSlackLayout()
             viewSlack = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_slack_popup, (this.rootView as ViewGroup), false)
 
@@ -3946,7 +4103,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     }
 
-
     private fun addSlackFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         arrayListSlackFileName.add(RecyclerViewModel(file = filePathMedia))
         arrayListSlackFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -3973,7 +4129,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         progressBarSlackLayout.visibility = View.GONE
 
     }
-
 
     private fun hideKeyboard(activity: Activity) {
         val inputMethodManager =
@@ -4937,6 +5092,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             commit()
         }
     }
+
     private fun addFutureUserList() {
         val arrayListUsers:ArrayList<String> = ArrayList()
         arraylistEmailToUsername.forEach {

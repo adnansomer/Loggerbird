@@ -211,4 +211,22 @@
     <string name="button_future_task_cancel">Cancel</string>
     <string name="textView_future_task_date">Start date</string>
     <string name="textView_future_task_time">Start time</string>
+    <!-- loggerbird_gitlab_popup-->
+    <string name="textView_gitlab_toolbar_title">Create Gitlab Issue</string>
+    <string name="textView_gitlab_title">Title</string>
+    <string name="editText_gitlab_title">Write your issue title here!</string>
+    <string name="textView_gitlab_description">Description</string>
+    <string name="editText_gitlab_description">Write your issue description here!</string>
+    <string name="textView_gitlab_assignee">Assignee</string>
+    <string name="textView_gitlab_labels">Labels</string>
+    <string name="textView_gitlab_weight">Weight</string>
+    <string name="textView_gitlab_milestone">Milestone</string>
+    <string name="editText_gitlab_title_empty">Your title cannot be empty!</string>
+    <!-- recycler_view_slack_item_popup-->
+    <string name="textView_recyclerView_gitlab_popup_title">Are you sure to remove attachment from your Gitlab Issue?</string>
+    <string name="button_recyclerView_gitlab_yes">Delete Attachment</string>
+    <string name="button_recyclerView_gitlab_no">Keep File</string>
+
+
+
 </resources>

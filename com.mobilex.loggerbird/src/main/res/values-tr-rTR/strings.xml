@@ -212,4 +212,19 @@
     <string name="button_future_task_cancel">İptal</string>
     <string name="textView_future_task_date">Başlangıç tarihi</string>
     <string name="textView_future_task_time">Başlangıç zamanı</string>
+    <!-- loggerbird_gitlab_popup-->
+    <string name="textView_gitlab_toolbar_title">Gitlab konusu olustur</string>
+    <string name="textView_gitlab_title">Baslik</string>
+    <string name="editText_gitlab_title">Konu basligini buraya yaziniz</string>
+    <string name="textView_gitlab_description">Aciklama</string>
+    <string name="editText_gitlab_description">Konu aciklamasini buraya yaziniz</string>
+    <string name="textView_gitlab_assignee">Sorumlu</string>
+    <string name="textView_gitlab_labels">Etiket</string>
+    <string name="textView_gitlab_weight">Agirlik</string>
+    <string name="textView_gitlab_milestone">Donum noktasi</string>
+    <string name="editText_gitlab_title_empty">Basligi bos birakamazsiniz!</string>
+    <!-- recycler_view_slack_item_popup-->
+    <string name="textView_recyclerView_gitlab_popup_title">Gitlab konusundan bu eki kaldirmak istediginize emin misiniz?</string>
+    <string name="button_recyclerView_gitlab_yes">Eki sil</string>
+    <string name="button_recyclerView_gitlab_no">Dosyayi tut</string>
 </resources>

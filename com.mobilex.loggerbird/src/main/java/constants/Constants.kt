@@ -80,5 +80,7 @@ internal class Constants {
         const val unhandledExceptionPopupTag:String = "Unhandled Exception Popup"
         const val jiraDatePopupTag:String = "Jira Date Popup"
         const val futureTaskTag:String = "Future Task"
+        const val gitlabTag: String = "GitLab"
+
     }
 }
