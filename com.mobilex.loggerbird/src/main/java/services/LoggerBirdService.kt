@@ -377,6 +377,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var textView_send_email: TextView
         private lateinit var textView_share_jira: TextView
         private lateinit var textView_share_slack: TextView
+        private lateinit var textView_share_gitlab: TextView
         private lateinit var textView_share_github: TextView
         private lateinit var textView_discard: TextView
         //private lateinit var textView_dismiss : TextView
@@ -729,6 +730,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
                     textView_audio_size = view.findViewById(R.id.fragment_textView_size_audio)
                     checkBoxFutureTask = view.findViewById(R.id.checkBox_future_task)
+                    textView_share_gitlab = view.findViewById(R.id.textView_share_gitlab)
+                    floating_action_button.imageTintList =
+                        ColorStateList.valueOf(resources.getColor(R.color.white))
+                    floating_action_button.backgroundTintList =
+                        ColorStateList.valueOf(resources.getColor(R.color.black))
+
 
                     if (audioRecording || videoRecording || screenshotDrawing) {
                         workingAnimation =
@@ -1048,6 +1055,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     initializeGithubLayout(filePathMedia = filePathMedia)
                 }
             }
+
+            textView_share_gitlab.setSafeOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
+                    }
+//                    initializeSlackLayout(filePathMedia = filePathMedia)
+                }
+            }
+
 
             textView_discard.setSafeOnClickListener {
                 discardMediaFile()
