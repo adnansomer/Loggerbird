@@ -62,7 +62,13 @@ interface AccountIdService {
     //Gitlab
     @POST("issues")
     fun createGitlabIssue(@Body jsonObject: JsonObject): Call<JsonObject>
-    @GET("projects/?owned=true")
-    fun gatherGitlabProjects(): Call<List<GitlabProjectModel>>
+    @GET("projects/?membership=true")
+    fun getGitlabProjects(): Call<List<GitlabProjectModel>>
+    @GET("milestones")
+    fun getGitlabMilestones(): Call<List<GitlabMilestonesModel>>
+    @GET("labels")
+    fun getGitlabLabels(): Call<List<GitlabLabelsModel>>
+    @GET("users")
+    fun getGitlabUsers(): Call<List<GitlabUsersModel>>
 
 }

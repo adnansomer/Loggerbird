@@ -40,7 +40,16 @@ class GitlabAuthentication {
     private var spinnerPositionProject: Int = 0
     private val arrayListProjects: ArrayList<String> = ArrayList()
     private val arrayListProjectsId: ArrayList<String> = ArrayList()
+    private val arrayListMilestones: ArrayList<String> = ArrayList()
+    private val arrayListMilestonesId: ArrayList<String> = ArrayList()
+    private val arrayListLabels: ArrayList<String> = ArrayList()
+    private val arrayListLabelsId: ArrayList<String> = ArrayList()
+    private val arrayListUsers: ArrayList<String> = ArrayList()
+    private val arrayListUsersId: ArrayList<String> = ArrayList()
     private var hashMapProjects: HashMap<String, String> = HashMap()
+    private var hashMapMilestones: HashMap<String, String> = HashMap()
+    private var hashMapLabels: HashMap<String, String> = HashMap()
+    private var hashMapUsers: HashMap<String, String> = HashMap()
 
     internal fun callGitlab(
         activity: Activity,
@@ -100,7 +109,9 @@ class GitlabAuthentication {
                             try {
                                 when (task) {
                                     "create" -> gitlabCreateIssue(
-                                        activity = activity
+                                        activity = activity,
+                                        context = context,
+                                        filePathMedia = filePathMedia
                                     )
 
                                     "get" -> gatherGitlabDetails(
@@ -149,7 +160,9 @@ class GitlabAuthentication {
     }
 
     private fun gitlabCreateIssue(
-        activity: Activity
+        activity: Activity,
+        context: Context,
+        filePathMedia: File?
     ) {
         try {
             this.activity = activity
@@ -189,7 +202,6 @@ class GitlabAuthentication {
                         }
                     }
                 })
-            updateFields()
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -200,7 +212,7 @@ class GitlabAuthentication {
         try {
             RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/")
                 .create(AccountIdService::class.java)
-                .gatherGitlabProjects()
+                .getGitlabProjects()
                 .enqueue(object : retrofit2.Callback<List<GitlabProjectModel>> {
                     override fun onFailure(
                         call: retrofit2.Call<List<GitlabProjectModel>>,
@@ -229,7 +241,129 @@ class GitlabAuthentication {
                                     hashMapProjects[it.name!!] = it.id!!
                                 }
                             }
-                            updateFields()
+                        }
+                    }
+                })
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.gitlabTag)
+        }
+    }
+
+    private fun gatherGitlabMilestonesDetails() {
+        try {
+            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/19430667/")
+                .create(AccountIdService::class.java)
+                .getGitlabMilestones()
+                .enqueue(object : retrofit2.Callback<List<GitlabMilestonesModel>> {
+
+                    override fun onFailure(
+                        call: retrofit2.Call<List<GitlabMilestonesModel>>, t: Throwable) {
+                        t.printStackTrace()
+                        LoggerBird.callEnqueue()
+                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<List<GitlabMilestonesModel>>, response: retrofit2.Response<List<GitlabMilestonesModel>>) {
+
+                        val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
+                        coroutineCallGitlabDetails.async {
+                            Log.d("gitlabmilestones", response.code().toString())
+                            val gitlab = response.body()
+                            Log.d("gitlabmilestones", gitlab.toString())
+
+                            val gitlabMilestonesList = response.body()
+                            gitlabMilestonesList?.forEach {
+                                if (it.id != null) {
+                                    arrayListMilestones.add(it.title!!)
+                                    arrayListMilestonesId.add(it.id!!)
+                                    hashMapProjects[it.title!!] = it.id!!
+                                }
+                            }
+                        }
+                    }
+                })
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.gitlabTag)
+        }
+    }
+
+    private fun gatherGitlabLabelsDetails() {
+        try {
+            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/19430667/")
+                .create(AccountIdService::class.java)
+                .getGitlabLabels()
+                .enqueue(object : retrofit2.Callback<List<GitlabLabelsModel>> {
+
+                    override fun onFailure(
+                        call: retrofit2.Call<List<GitlabLabelsModel>>, t: Throwable) {
+                        t.printStackTrace()
+                        LoggerBird.callEnqueue()
+                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<List<GitlabLabelsModel>>, response: retrofit2.Response<List<GitlabLabelsModel>>) {
+
+                        val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
+                        coroutineCallGitlabDetails.async {
+                            Log.d("gitlablabels", response.code().toString())
+                            val gitlab = response.body()
+                            Log.d("gitlablabels", gitlab.toString())
+
+                            val gitlabLabelsList = response.body()
+                            gitlabLabelsList?.forEach {
+                                if (it.id != null) {
+                                    arrayListLabels.add(it.name!!)
+                                    arrayListLabelsId.add(it.id!!)
+                                    hashMapLabels[it.name!!] = it.id!!
+                                }
+                            }
+                        }
+                    }
+                })
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.gitlabTag)
+        }
+    }
+
+    private fun gatherGitlabUsersDetails() {
+        try {
+            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/19430667/")
+                .create(AccountIdService::class.java)
+                .getGitlabUsers()
+                .enqueue(object : retrofit2.Callback<List<GitlabUsersModel>> {
+
+                    override fun onFailure(
+                        call: retrofit2.Call<List<GitlabUsersModel>>, t: Throwable) {
+                        t.printStackTrace()
+                        LoggerBird.callEnqueue()
+                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<List<GitlabUsersModel>>, response: retrofit2.Response<List<GitlabUsersModel>>) {
+
+                        val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
+                        coroutineCallGitlabDetails.async {
+                            Log.d("gitlabusers", response.code().toString())
+                            val gitlab = response.body()
+                            Log.d("gitlabusers", gitlab.toString())
+
+                            val gitlabMilestonesList = response.body()
+                            gitlabMilestonesList?.forEach {
+                                if (it.id != null) {
+                                    arrayListUsers.add(it.name!!)
+                                    arrayListUsersId.add(it.id!!)
+                                    hashMapUsers[it.name!!] = it.id!!
+                                }
+                            }
                         }
                     }
                 })
@@ -255,6 +389,9 @@ class GitlabAuthentication {
 
                 withContext(Dispatchers.IO) {
                     gatherGitlabProjectDetails()
+                    gatherGitlabMilestonesDetails()
+                    gatherGitlabLabelsDetails()
+                    gatherGitlabUsersDetails()
                 }
             } catch (e: Exception) {
                 LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error")

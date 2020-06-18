@@ -29,156 +29,167 @@ class RecyclerViewGitlabAdapter(
     private val rootView: View
 ) : RecyclerView.Adapter<RecyclerViewGitlabAdapter.ViewHolder>() {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            return ViewHolder(
-                LayoutInflater.from(parent.context).inflate(
-                    R.layout.recycler_view_gitlab_item,
-                    parent,
-                    false
-                )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder(
+            LayoutInflater.from(parent.context).inflate(
+                R.layout.recycler_view_gitlab_item,
+                parent,
+                false
             )
+        )
+    }
+
+    override fun getItemCount(): Int {
+        return fileList.size
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bindItems(
+            item = fileList[position],
+            adapter = this,
+            position = position,
+            fileList = fileList,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+    }
+
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        private var windowManagerRecyclerViewItemPopup: Any? = null
+        private lateinit var windowManagerParamsRecyclerViewItemPopup: WindowManager.LayoutParams
+        private lateinit var viewRecyclerViewItems: View
+        private lateinit var textViewTitle: TextView
+        private lateinit var buttonYes: Button
+        private lateinit var buttonNo: Button
+
+        companion object {
+            internal lateinit var arrayListFilePaths: ArrayList<RecyclerViewModel>
         }
 
-        override fun getItemCount(): Int {
-            return fileList.size
-        }
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.bindItems(
-                item = fileList[position],
-                adapter = this,
-                position = position,
-                fileList = fileList,
-                context = context,
-                activity = activity,
-                rootView = rootView
-            )
-        }
-
-        class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            private var windowManagerRecyclerViewItemPopup: Any? = null
-            private lateinit var windowManagerParamsRecyclerViewItemPopup: WindowManager.LayoutParams
-            private lateinit var viewRecyclerViewItems: View
-            private lateinit var textViewTitle: TextView
-            private lateinit var buttonYes: Button
-            private lateinit var buttonNo: Button
-
-            companion object{
-                internal lateinit var arrayListFilePaths:ArrayList<RecyclerViewModel>
-            }
-
-
-            fun bindItems(
-                item: RecyclerViewModel,
-                adapter: RecyclerViewGitlabAdapter,
-                position: Int,
-                fileList: ArrayList<RecyclerViewModel>,
-                context: Context,
-                activity: Activity,
-                rootView: View
-            ) {
-                arrayListFilePaths = fileList
-                val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
-                val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
-                textViewFileName.text = item.file.name
-                imageButtonCross.setSafeOnClickListener {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        removeItemPopup(
-                            activity = activity,
-                            rootView = rootView,
-                            fileList = fileList,
-                            position = position,
-                            adapter = adapter
-                        )
-                    }
+        fun bindItems(
+            item: RecyclerViewModel,
+            adapter: RecyclerViewGitlabAdapter,
+            position: Int,
+            fileList: ArrayList<RecyclerViewModel>,
+            context: Context,
+            activity: Activity,
+            rootView: View
+        ) {
+            arrayListFilePaths = fileList
+            val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
+            val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
+            textViewFileName.text = item.file.name
+            imageButtonCross.setSafeOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    removeItemPopup(
+                        activity = activity,
+                        rootView = rootView,
+                        fileList = fileList,
+                        position = position,
+                        adapter = adapter
+                    )
                 }
             }
+        }
 
-            @RequiresApi(Build.VERSION_CODES.M)
-            private fun removeItemPopup(
-                activity: Activity,
-                rootView: View,
-                fileList: ArrayList<RecyclerViewModel>,
-                position: Int,
-                adapter: RecyclerViewGitlabAdapter
-            ) {
-                try {
-                    viewRecyclerViewItems = LayoutInflater.from(activity)
-                        .inflate(
-                            R.layout.recycler_view_gitlab_item_popup,
-                            (rootView as ViewGroup),
-                            false
-                        )
-                    if (Settings.canDrawOverlays(activity)) {
-                        windowManagerParamsRecyclerViewItemPopup =
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                WindowManager.LayoutParams(
-                                    WindowManager.LayoutParams.MATCH_PARENT,
-                                    WindowManager.LayoutParams.MATCH_PARENT,
-                                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                                    PixelFormat.TRANSLUCENT
-                                )
-                            } else {
-                                WindowManager.LayoutParams(
-                                    WindowManager.LayoutParams.MATCH_PARENT,
-                                    WindowManager.LayoutParams.MATCH_PARENT,
-                                    WindowManager.LayoutParams.TYPE_APPLICATION,
-                                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                                    PixelFormat.TRANSLUCENT
-                                )
-                            }
-
-                        windowManagerRecyclerViewItemPopup =
-                            activity.getSystemService(Context.WINDOW_SERVICE)!!
-                        if (windowManagerRecyclerViewItemPopup != null) {
-                            (windowManagerRecyclerViewItemPopup as WindowManager).addView(
-                                viewRecyclerViewItems,
-                                windowManagerParamsRecyclerViewItemPopup
+        @RequiresApi(Build.VERSION_CODES.M)
+        private fun removeItemPopup(
+            activity: Activity,
+            rootView: View,
+            fileList: ArrayList<RecyclerViewModel>,
+            position: Int,
+            adapter: RecyclerViewGitlabAdapter
+        ) {
+            try {
+                viewRecyclerViewItems = LayoutInflater.from(activity)
+                    .inflate(
+                        R.layout.recycler_view_gitlab_item_popup,
+                        (rootView as ViewGroup),
+                        false
+                    )
+                if (Settings.canDrawOverlays(activity)) {
+                    windowManagerParamsRecyclerViewItemPopup =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            WindowManager.LayoutParams(
+                                WindowManager.LayoutParams.MATCH_PARENT,
+                                WindowManager.LayoutParams.MATCH_PARENT,
+                                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                                PixelFormat.TRANSLUCENT
                             )
-                            textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_gitlab_title)
-                            buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_gitlab_yes)
-                            buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_gitlab_no)
-                            buttonClicksGithubPopup(adapter = adapter , fileList = fileList , position = position)
+                        } else {
+                            WindowManager.LayoutParams(
+                                WindowManager.LayoutParams.MATCH_PARENT,
+                                WindowManager.LayoutParams.MATCH_PARENT,
+                                WindowManager.LayoutParams.TYPE_APPLICATION,
+                                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                                PixelFormat.TRANSLUCENT
+                            )
                         }
+
+                    windowManagerRecyclerViewItemPopup =
+                        activity.getSystemService(Context.WINDOW_SERVICE)!!
+                    if (windowManagerRecyclerViewItemPopup != null) {
+                        (windowManagerRecyclerViewItemPopup as WindowManager).addView(
+                            viewRecyclerViewItems,
+                            windowManagerParamsRecyclerViewItemPopup
+                        )
+                        textViewTitle =
+                            viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_gitlab_title)
+                        buttonYes =
+                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_gitlab_yes)
+                        buttonNo =
+                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_gitlab_no)
+                        buttonClicksGithubPopup(
+                            adapter = adapter,
+                            fileList = fileList,
+                            position = position
+                        )
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    LoggerBird.callEnqueue()
-                    LoggerBird.callExceptionDetails(
-                        exception = e,
-                        tag = Constants.recyclerViewJiraAdapterTag
-                    )
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(
+                    exception = e,
+                    tag = Constants.recyclerViewJiraAdapterTag
+                )
+            }
+        }
+
+        private fun buttonClicksGithubPopup(
+            fileList: ArrayList<RecyclerViewModel>,
+            position: Int,
+            adapter: RecyclerViewGitlabAdapter
+        ) {
+            buttonYes.setSafeOnClickListener {
+                fileList.removeAt(position)
+                arrayListFilePaths = fileList
+                adapter.notifyDataSetChanged()
+                removePopupLayout()
+            }
+            buttonNo.setSafeOnClickListener {
+                removePopupLayout()
             }
 
-            private fun buttonClicksGithubPopup(fileList: ArrayList<RecyclerViewModel>, position: Int, adapter: RecyclerViewGitlabAdapter) {
-                buttonYes.setSafeOnClickListener {
-                    fileList.removeAt(position)
-                    arrayListFilePaths = fileList
-                    adapter.notifyDataSetChanged()
-                    removePopupLayout()
-                }
-                buttonNo.setSafeOnClickListener {
-                    removePopupLayout()
-                }
+        }
 
+        private fun removePopupLayout() {
+            if (windowManagerRecyclerViewItemPopup != null && this::viewRecyclerViewItems.isInitialized) {
+                (windowManagerRecyclerViewItemPopup as WindowManager).removeViewImmediate(
+                    viewRecyclerViewItems
+                )
+                windowManagerRecyclerViewItemPopup = null
             }
+        }
 
-            private fun removePopupLayout(){
-                if (windowManagerRecyclerViewItemPopup != null && this::viewRecyclerViewItems.isInitialized) {
-                    (windowManagerRecyclerViewItemPopup as WindowManager).removeViewImmediate(
-                        viewRecyclerViewItems
-                    )
-                    windowManagerRecyclerViewItemPopup = null
-                }
-            }
-
-            @SuppressLint("CheckResult")
-            fun View.setSafeOnClickListener(onClick: (View) -> Unit) {
-                RxView.clicks(this).throttleFirst(2000, TimeUnit.MILLISECONDS).subscribe {
-                    onClick(this)
-                }
+        @SuppressLint("CheckResult")
+        fun View.setSafeOnClickListener(onClick: (View) -> Unit) {
+            RxView.clicks(this).throttleFirst(2000, TimeUnit.MILLISECONDS).subscribe {
+                onClick(this)
             }
         }
     }
+}

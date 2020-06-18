@@ -1,6 +1,5 @@
 package utils
 
-import loggerbird.LoggerBird
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -9,11 +8,7 @@ class RetrofitUserGitlabClient {
     companion object {
         internal fun getGitlabUserClient(url:String): Retrofit {
             val client = OkHttpClient.Builder()
-                .addInterceptor(
-                    BasicAuthGitlabInterceptor(
-
-                    )
-                )
+                .addInterceptor(BasicAuthGitlabInterceptor())
                 .build()
             return Retrofit.Builder()
                 .baseUrl(url)
