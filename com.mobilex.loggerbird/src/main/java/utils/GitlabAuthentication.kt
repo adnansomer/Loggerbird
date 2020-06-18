@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import android.widget.AutoCompleteTextView
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.Toast
 import com.google.gson.JsonObject
 import com.mobilex.loggerbird.R
@@ -13,8 +14,9 @@ import exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
-import models.AccountIdService
+import models.*
 import okhttp3.*
 import services.LoggerBirdService
 import java.io.File
@@ -28,17 +30,22 @@ class GitlabAuthentication {
     private val coroutineCallOkHttpGitlab = CoroutineScope(Dispatchers.IO)
     private val coroutineCallGitlab = CoroutineScope(Dispatchers.IO)
     private val internetConnectionUtil = InternetConnectionUtil()
-    private var title:String = "adnan"
-    private var description:String? = "somer"
-    private var assignee:String? = null
-    private var labels:String? = null
-    private var weight:String? = null
-    private var arrayListAssignee:ArrayList<String> = ArrayList()
+    private var title: String? = ""
+    private var description: String? = ""
+    private var weight: String? = ""
+    private var owned: String? = "true"
+    private var assignee: String? = null
+    private var labels: String? = null
+    private var project: String? = null
+    private var spinnerPositionProject: Int = 0
+    private val arrayListProjects: ArrayList<String> = ArrayList()
+    private val arrayListProjectsId: ArrayList<String> = ArrayList()
+    private var hashMapProjects: HashMap<String, String> = HashMap()
 
     internal fun callGitlab(
         activity: Activity,
         context: Context,
-        task:String,
+        task: String,
         filePathMedia: File? = null
     ) {
         this.activity = activity
@@ -91,9 +98,17 @@ class GitlabAuthentication {
                     if (response.code in 200..299) {
                         coroutineCallGitlab.async {
                             try {
-                                when(task){
-                                    "create" ->  gitlabCreateIssue(activity = activity)
-                                    //"get" ->     gatherGitlabDetails()
+                                when (task) {
+                                    "create" -> gitlabCreateIssue(
+                                        activity = activity
+                                    )
+
+                                    "get" -> gatherGitlabDetails(
+                                        activity = activity,
+                                        context = context,
+                                        filePathMedia = filePathMedia
+                                    )
+
                                 }
 
                             } catch (e: Exception) {
@@ -140,14 +155,14 @@ class GitlabAuthentication {
             this.activity = activity
             val coroutineCallGitlabIssue = CoroutineScope(Dispatchers.IO)
             val jsonObject = JsonObject()
-//            if(title!=null){
-//                jsonObject.addProperty()
-//                jsonObject.addProperty("body",title)
-//            }
-            jsonObject.addProperty("title",title)
-            jsonObject.addProperty("description",description)
-            jsonObject.addProperty("weight")
-            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/19430667/")
+            if (title != null) {
+                jsonObject.addProperty("title", title)
+            }
+            if (description != null) {
+                jsonObject.addProperty("description", description)
+            }
+            jsonObject.addProperty("weight", weight)
+            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/" + hashMapProjects[arrayListProjects[spinnerPositionProject]] + "/")
                 .create(AccountIdService::class.java)
                 .createGitlabIssue(jsonObject = jsonObject)
                 .enqueue(object : retrofit2.Callback<JsonObject> {
@@ -165,18 +180,129 @@ class GitlabAuthentication {
                         response: retrofit2.Response<JsonObject>
                     ) {
                         coroutineCallGitlabIssue.async {
-
+                            activity.runOnUiThread {
+                                LoggerBirdService.loggerBirdService.buttonGitlabCancel.performClick()
+                            }
+                            LoggerBirdService.loggerBirdService.finishShareLayout("gitlab")
                             Log.d("gitlab", response.code().toString())
                             val gitlab = response.body()
                         }
                     }
                 })
+            updateFields()
 
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun gatherGitlabProjectDetails() {
+        try {
+            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/")
+                .create(AccountIdService::class.java)
+                .gatherGitlabProjects()
+                .enqueue(object : retrofit2.Callback<List<GitlabProjectModel>> {
+                    override fun onFailure(
+                        call: retrofit2.Call<List<GitlabProjectModel>>,
+                        t: Throwable
+                    ) {
+                        t.printStackTrace()
+                        LoggerBird.callEnqueue()
+                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<List<GitlabProjectModel>>,
+                        response: retrofit2.Response<List<GitlabProjectModel>>
+                    ) {
+                        val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
+                        coroutineCallGitlabDetails.async {
+                            Log.d("gitlabprojects", response.code().toString())
+                            val gitlab = response.body()
+                            Log.d("gitlabprojects", gitlab.toString())
+
+                            val gitlabList = response.body()
+                            gitlabList?.forEach {
+                                if (it.id != null) {
+                                    arrayListProjects.add(it.name!!)
+                                    arrayListProjectsId.add(it.id!!)
+                                    hashMapProjects[it.name!!] = it.id!!
+                                }
+                            }
+                            updateFields()
+                        }
+                    }
+                })
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.gitlabTag)
         }
     }
+
+    private suspend fun gatherGitlabDetails(
+        activity: Activity,
+        context: Context,
+        filePathMedia: File?
+    ) {
+
+        val coroutineCallGatherDetails = CoroutineScope(Dispatchers.IO)
+        coroutineCallGatherDetails.async(Dispatchers.IO) {
+            try {
+                hashMapProjects.clear()
+                arrayListProjects.clear()
+                arrayListProjectsId.clear()
+
+                withContext(Dispatchers.IO) {
+                    gatherGitlabProjectDetails()
+                }
+            } catch (e: Exception) {
+                LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error")
+                gitlabExceptionHandler(e = e, filePathName = filePathMedia)
+
+            }
+        }
+    }
+
+    private fun updateFields() {
+        activity.runOnUiThread {
+            LoggerBirdService.loggerBirdService.initializeGitlabSpinner(
+                arrayListProjects = arrayListProjects
+            )
+        }
+    }
+
+    internal fun gatherGitlabEditTextDetails(
+        editTextTitle: EditText,
+        editTextDescription: EditText,
+        editTextWeight: EditText
+    ) {
+        title = editTextTitle.text.toString()
+        description = editTextDescription.text.toString()
+        weight = editTextWeight.text.toString()
+    }
+
+    internal fun gatherGitlabProjectSpinnerDetails(
+        spinnerProject: Spinner
+    ) {
+        spinnerPositionProject = spinnerProject.selectedItemPosition
+        project = spinnerProject.selectedItem.toString()
+    }
+
+    private fun gitlabExceptionHandler(
+        e: Exception? = null,
+        filePathName: File? = null,
+        throwable: Throwable? = null
+    ) {
+        LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error")
+        e?.printStackTrace()
+        LoggerBird.callEnqueue()
+        LoggerBird.callExceptionDetails(
+            exception = e,
+            tag = Constants.gitlabTag,
+            throwable = throwable
+        )
+    }
+
 
 }

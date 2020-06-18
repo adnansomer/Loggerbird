@@ -68,6 +68,32 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="7dp"
                         app:cardElevation="5dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="10dp"
+                                android:text="@string/textView_gitlab_project"
+                                android:textColor="@color/black"
+                                android:textSize="16sp">
+                            </TextView>
+                            <Spinner
+                                android:id="@+id/spinner_gitlab_project"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+                            </Spinner>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="7dp"
+                        app:cardElevation="5dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -162,7 +188,7 @@
                                 android:textSize="16sp">
                             </TextView>
                             <Spinner
-                                android:id="@+id/editText_gitlab_assignee"
+                                android:id="@+id/spinner_gitlab_assignee"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content">
                             </Spinner>
@@ -188,7 +214,7 @@
                                 android:textSize="16sp">
                             </TextView>
                             <Spinner
-                                android:id="@+id/editText_gitlab_milestone"
+                                android:id="@+id/spinner_gitlab_milestone"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content">
                             </Spinner>
@@ -214,7 +240,7 @@
                                 android:textSize="16sp">
                             </TextView>
                             <Spinner
-                                android:id="@+id/editText_gitlab_labels"
+                                android:id="@+id/spinner_gitlab_labels"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content">
                             </Spinner>
@@ -239,11 +265,20 @@
                                 android:textColor="@color/black"
                                 android:textSize="16sp">
                             </TextView>
-                            <Spinner
+                            <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/editText_gitlab_weight"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-                            </Spinner>
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="5dp"
+                                android:layout_marginRight="5dp"
+                                android:layout_marginBottom="10dp"
+                                android:background="@null"
+                                android:cursorVisible="true"
+                                android:gravity="top"
+                                android:hint="@string/editText_gitlab_weight"
+                                android:textCursorDrawable="@color/colorBlack"
+                                android:textSize="16sp">
+                            </com.google.android.material.textfield.TextInputEditText>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
@@ -365,7 +400,7 @@
             android:indeterminate="true"
             android:indeterminateDrawable="@drawable/progress_bar_loading"
             android:indeterminateDuration="1000"
-            android:visibility="visible">
+            android:visibility="gone">
         </ProgressBar>
 
     </FrameLayout>

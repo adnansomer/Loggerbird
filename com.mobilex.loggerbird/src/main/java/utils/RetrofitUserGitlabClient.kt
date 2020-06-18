@@ -11,8 +11,7 @@ class RetrofitUserGitlabClient {
             val client = OkHttpClient.Builder()
                 .addInterceptor(
                     BasicAuthGitlabInterceptor(
-                        LoggerBird.gitlabDomainName,
-                        LoggerBird.gitlabAccessToken
+
                     )
                 )
                 .build()

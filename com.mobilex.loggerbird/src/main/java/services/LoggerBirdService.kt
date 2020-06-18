@@ -346,15 +346,22 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     //Gitlab:
     private val gitlabAuthentication = GitlabAuthentication()
+    private lateinit var spinnerGitlabProject: Spinner
     private lateinit var editTextGitlabTitle: EditText
     private lateinit var editTextGitlabDescription: EditText
-    private lateinit var editTextGitlabMilestone: EditText
-    private lateinit var editTextGitlabAssignee: EditText
+    private lateinit var spinnetGitlabProject: Spinner
+    private lateinit var spinnerGitlabMilestone: Spinner
+    private lateinit var spinnerGitlabAssignee: Spinner
+    private lateinit var editTextGitlabWeight: EditText
+    private lateinit var spinnerGitlabLabels: Spinner
     private lateinit var buttonGitlabCreate: Button
-    private lateinit var buttonGitlabCancel: Button
+    internal lateinit var buttonGitlabCancel: Button
     private lateinit var toolbarGitlab: Toolbar
     private lateinit var recyclerViewGitlabAttachment: RecyclerView
     private lateinit var gitlabAdapter:RecyclerViewGitlabAdapter
+    private lateinit var progressBarGitlab: ProgressBar
+    private lateinit var progressBarGitlabLayout: FrameLayout
+    private lateinit var spinnerGitlabProjectAdapter: ArrayAdapter<String>
     private val arrayListGitlabFileName: ArrayList<RecyclerViewModel> = ArrayList()
 
 
@@ -2413,6 +2420,28 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     progressBarSlack.visibility = View.GONE
                 }
 
+                "gitlab" -> {
+                    Toast.makeText(context, R.string.gitlab_sent, Toast.LENGTH_SHORT).show()
+                    finishSuccessFab()
+                    progressBarGitlabLayout.visibility = View.GONE
+                    progressBarGitlab.visibility = View.GONE
+                }
+
+                "gitlab_error" -> {
+                    removeGitlabLayout()
+                    Toast.makeText(context, R.string.gitlab_sent_error, Toast.LENGTH_SHORT).show()
+                    progressBarGitlabLayout.visibility = View.GONE
+                    progressBarGitlab.visibility = View.GONE
+
+                }
+
+                "gitlab_error_time_out" -> {
+                    removeSlackLayout()
+                    Toast.makeText(context, R.string.gitlab_sent_error_time_out, Toast.LENGTH_SHORT).show()
+                    progressBarGitlabLayout.visibility = View.GONE
+                    progressBarGitlab.visibility = View.GONE
+                }
+
             }
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
@@ -3781,13 +3810,24 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
 
                 toolbarGitlab = viewGitlab.findViewById(R.id.toolbar_gitlab)
+                spinnerGitlabProject = viewGitlab.findViewById(R.id.spinner_gitlab_project)
                 editTextGitlabTitle = viewGitlab.findViewById(R.id.editText_gitlab_title)
                 editTextGitlabDescription = viewGitlab.findViewById(R.id.editText_gitlab_description)
-               // editTextGitlabMilestone = viewGitlab.findViewById(R.id.editText_gitlab_milestone)
-               // editTextGitlabAssignee = viewGitlab.findViewById(R.id.editText_gitlab_assignee)
+                editTextGitlabWeight = viewGitlab.findViewById(R.id.editText_gitlab_weight)
+                spinnerGitlabMilestone = viewGitlab.findViewById(R.id.spinner_gitlab_milestone)
+                spinnerGitlabAssignee = viewGitlab.findViewById(R.id.spinner_gitlab_assignee)
+                spinnerGitlabLabels = viewGitlab.findViewById(R.id.spinner_gitlab_labels)
                 buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
                 buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
+                progressBarGitlab = viewGitlab.findViewById(R.id.gitlab_progressbar)
+                progressBarGitlabLayout = viewGitlab.findViewById(R.id.gitlab_progressbar_background)
                 recyclerViewGitlabAttachment = viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
+                gitlabAuthentication.callGitlab(
+                    activity = activity,
+                    context = context,
+                    task = "get",
+                    filePathMedia = filePathMedia
+                )
                 initializeGitlabRecyclerView(filePathMedia = filePathMedia)
                 buttonClicksGitlab(filePathMedia = filePathMedia)
             }
@@ -3811,15 +3851,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
         buttonGitlabCreate.setSafeOnClickListener {
             if(checkGitlabTitleEmpty()){
-                attachProgressBar()
-//                gitlabAuthentication.gatherAutoTextDetails(
-//                    autoTextViewAssignee = autoTextViewGithubAssignee,
-//                    autoTextViewProject = autoTextViewGithubProject,
-//                    autoTextViewLabels = autoTextViewGithubLabels,
-//                    autoTextViewLinkedRequests = autoTextViewGithubLinkedRequests,
-//                    autoTextViewMileStone = autoTextViewGithubMileStone
-//                )
-
+                progressBarGitlabLayout.visibility = View.VISIBLE
+                progressBarGitlab.visibility = View.VISIBLE
+                gitlabAuthentication.gatherGitlabEditTextDetails(
+                    editTextTitle = editTextGitlabTitle,
+                    editTextDescription = editTextGitlabDescription,
+                    editTextWeight = editTextGitlabWeight
+                )
                 gitlabAuthentication.callGitlab(
                     activity = activity,
                     context = context,
@@ -3857,6 +3895,22 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         )
         recyclerViewGitlabAttachment.adapter = gitlabAdapter
     }
+
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun initializeGitlabSpinner(
+        arrayListProjects: ArrayList<String>
+    ) {
+
+        spinnerGitlabProjectAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjects)
+        spinnerGitlabProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerGitlabProject.adapter = spinnerGitlabProjectAdapter
+
+        progressBarGitlab.visibility = View.GONE
+        progressBarGitlabLayout.visibility = View.GONE
+
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun addGitlabFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {

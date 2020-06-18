@@ -214,10 +214,12 @@
     <string name="textView_future_task_time">Başlangıç zamanı</string>
     <!-- loggerbird_gitlab_popup-->
     <string name="textView_gitlab_toolbar_title">Gitlab konusu olustur</string>
+    <string name="textView_gitlab_project">Proje</string>
     <string name="textView_gitlab_title">Baslik</string>
     <string name="editText_gitlab_title">Konu basligini buraya yaziniz</string>
     <string name="textView_gitlab_description">Aciklama</string>
     <string name="editText_gitlab_description">Konu aciklamasini buraya yaziniz</string>
+    <string name="editText_gitlab_weight">Konu agirligini buraya yaziniz</string>
     <string name="textView_gitlab_assignee">Sorumlu</string>
     <string name="textView_gitlab_labels">Etiket</string>
     <string name="textView_gitlab_weight">Agirlik</string>

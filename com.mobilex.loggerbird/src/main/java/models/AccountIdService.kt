@@ -59,7 +59,10 @@ interface AccountIdService {
 //    fun getVersionsList(): Call<List<JiraProjectmodel>>
 
 
-    //gitlab
+    //Gitlab
     @POST("issues")
     fun createGitlabIssue(@Body jsonObject: JsonObject): Call<JsonObject>
+    @GET("projects/?owned=true")
+    fun gatherGitlabProjects(): Call<List<GitlabProjectModel>>
+
 }
