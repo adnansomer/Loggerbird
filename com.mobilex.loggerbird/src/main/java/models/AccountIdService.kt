@@ -75,4 +75,15 @@ interface AccountIdService {
     fun getGithubRepo():Call<List<GithubRepoModel>>
     @GET("assignees")
     fun getGithubAssignees():Call<List<GithubAssigneeModel>>
+    @GET("labels")
+    fun getGithubLabels():Call<List<GithubLabelsModel>>
+    @GET("milestones")
+    fun getGithubMileStones():Call<List<GithubMileStoneModel>>
+    @GET("pulls")
+    fun getGithubPullRequest():Call<List<GithubPullRequestsModel>>
+//    @Multipart
+    @PUT("contents/{file_name}")
+    fun setGithubAttachments(@Body jsonObject: JsonObject,@Path("file_name")fileName:String):Call<JsonObject>
+    @PATCH("issues/{id}")
+    fun setGithubIssue(@Body jsonObject: JsonObject,@Path("id")id:Int):Call<JsonObject>
 }

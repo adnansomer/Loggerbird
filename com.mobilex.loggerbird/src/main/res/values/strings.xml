@@ -94,6 +94,10 @@
     <string name="github_issue_success">Issue opened successfully!</string>
     <string name="github_issue_failure">An error happened while trying to open github issue!</string>
     <string name="github_issue_time_out">An error happened while trying to open github issue , system has been timed out!</string>
+    <string name="github_issue_preferences_save">Issue preferences are saved!</string>
+    <string name="github_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="github_repo_empty">Repository cannot be empty!</string>
+    <string name="github_repo_doesnt_exist">This repository doesn\'t exist!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -167,6 +171,9 @@
     <string name="textView_recyclerView_popup_title">Are you sure to remove attachment from your Jira issue?</string>
     <string name="button_recyclerView_yes">Delete Attachment</string>
     <string name="button_recyclerView_no">Keep File</string>
+    <!-- loggerbird_jira_menu-->
+    <string name="textView_jira_menu_save">Save Issue Info</string>
+    <string name="textView_jira_menu_clear">Clear Issue Info</string>
     <!-- loggerbird_slack_popup-->
     <string name="textView_slack_title">Create Slack Message</string>
     <string name="textView_slack_message">Message</string>
@@ -200,6 +207,7 @@
     <string name="editText_email_content">Write your message here:</string>
     <string name="textView_email_attachments">Attachments</string>
     <string name="textView_email_to_list">To list</string>
+    <string name="textView_email_content">Message</string>
     <string name="button_email_create">Create</string>
     <string name="button_email_cancel">Cancel</string>
     <string name="textView_recyclerView_email_popup_title">Are you sure to remove attachment from your Email?</string>
@@ -215,7 +223,7 @@
     <string name="textView_future_task_date">Start date</string>
     <string name="textView_future_task_time">Start time</string>
     <!-- loggerbird_github_popup-->
-    <string name="textView_github_project">Project</string>
+    <string name="textView_github_repo">Repository</string>
     <string name="textView_github_assignee">Assignee</string>
     <string name="textView_github_title">Title</string>
     <string name="editText_github_title">Write a title about your issue.</string>
@@ -229,4 +237,7 @@
     <string name="button_github_cancel">Cancel</string>
     <!-- recycler_view_github_item_popup-->
     <string name="textView_recyclerView_github_popup_title">Are you sure to remove attachment from your Github issue?</string>
+    <!-- loggerbird_github_menu-->
+    <string name="textView_github_menu_save">Save Issue Info</string>
+    <string name="textView_github_menu_clear">Clear Issue Info</string>
 </resources>

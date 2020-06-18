@@ -20,9 +20,9 @@
             android:orientation="vertical">
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/textView_github_title"
+                android:id="@+id/toolbar_github"
                 app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
-                app:menu="@menu/loggerbird_jira_menu"
+                app:menu="@menu/loggerbird_github_menu"
                 android:layout_width="match_parent"
                 android:background="@color/colorFab"
                 android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
                 android:orientation="vertical"
                 android:background="#f5f5f5">
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_project"
+                        android:id="@+id/cardView_repo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:cardElevation="5dp"
@@ -70,16 +70,16 @@
                             android:orientation="vertical">
 
                             <TextView
-                                android:id="@+id/textView_github_project"
+                                android:id="@+id/textView_github_repo"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/black"
                                 android:textSize="17sp"
                                 android:layout_marginBottom="5dp"
-                                android:text="@string/textView_github_project">
+                                android:text="@string/textView_github_repo">
                             </TextView>
                             <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_github_project"
+                                android:id="@+id/auto_textView_github_repo"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:background="@null"

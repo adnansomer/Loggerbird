@@ -217,7 +217,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //  private lateinit var buttonJiraAuthNext: Button
     private lateinit var layoutJira: FrameLayout
     private lateinit var toolbarJira: Toolbar
-    private lateinit var toolbarSlack: Toolbar
     private lateinit var progressBarJira: ProgressBar
     private lateinit var progressBarJiraLayout: FrameLayout
     private lateinit var cardViewSprint: CardView
@@ -299,6 +298,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var slackChannelLayout: ScrollView
     private lateinit var slackUserLayout: ScrollView
     private lateinit var slackBottomNavigationView: BottomNavigationView
+    private lateinit var toolbarSlack: Toolbar
 
     //Email:
     private lateinit var buttonEmailCreate: Button
@@ -352,18 +352,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var editTextGithubComment: EditText
     private lateinit var toolbarGithub: Toolbar
     private lateinit var recyclerViewGithubAttachment: RecyclerView
-    private lateinit var githubAdapter:RecyclerViewGithubAdapter
+    private lateinit var githubAdapter: RecyclerViewGithubAdapter
     private lateinit var autoTextViewGithubAssignee: AutoCompleteTextView
     private lateinit var autoTextViewGithubLabels: AutoCompleteTextView
-    private lateinit var autoTextViewGithubProject: AutoCompleteTextView
+    private lateinit var autoTextViewGithubRepo: AutoCompleteTextView
     private lateinit var autoTextViewGithubMileStone: AutoCompleteTextView
     private lateinit var autoTextViewGithubLinkedRequests: AutoCompleteTextView
     private lateinit var autoTextViewGithubAssigneeAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewGithubLabelsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubProjectsAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGithubRepoAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewGithubMileStoneAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewGithubLinkedRequestsAdapter: ArrayAdapter<String>
     private val arrayListGithubFileName: ArrayList<RecyclerViewModel> = ArrayList()
+    private lateinit var scrollViewGithub: ScrollView
+
 
     //Static global variables:
     internal companion object {
@@ -2441,21 +2443,24 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     progressBarSlackLayout.visibility = View.GONE
                     progressBarSlack.visibility = View.GONE
                 }
-                "github"->{
+                "github" -> {
                     detachProgressBar()
                     removeGithubLayout()
-                    Toast.makeText(context, R.string.github_issue_success, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.github_issue_success, Toast.LENGTH_SHORT)
+                        .show()
                     finishSuccessFab()
                 }
-                "github_error"->{
+                "github_error" -> {
                     detachProgressBar()
                     removeGithubLayout()
-                    Toast.makeText(context, R.string.github_issue_failure, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.github_issue_failure, Toast.LENGTH_SHORT)
+                        .show()
                 }
-                "github_error_time_out"->{
+                "github_error_time_out" -> {
                     detachProgressBar()
                     removeGithubLayout()
-                    Toast.makeText(context, R.string.github_issue_time_out, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.github_issue_time_out, Toast.LENGTH_SHORT)
+                        .show()
                 }
 
             }
@@ -2777,7 +2782,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
                     scrollViewJira.setOnTouchListener { v, event ->
                         if (event.action == MotionEvent.ACTION_DOWN) {
-                            hideKeyboard(activity = activity)
+                            hideKeyboard(activity = activity, view = viewJira)
                         }
                         return@setOnTouchListener false
                     }
@@ -3258,7 +3263,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
             autoTextViewSprint.setOnItemClickListener { parent, view, position, id ->
                 jiraAuthentication.setSprintPosition(sprintPosition = position)
-                hideKeyboard(activity = activity)
+                hideKeyboard(activity = activity, view = viewJira)
             }
         } else {
             cardViewSprint.visibility = View.GONE
@@ -3293,7 +3298,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             false
         }
         autoTextViewEpicLink.setOnItemClickListener { parent, view, position, id ->
-            hideKeyboard(activity = activity)
+            hideKeyboard(activity = activity, view = viewJira)
         }
     }
 
@@ -3314,7 +3319,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             false
         }
         autoTextViewLabel.setOnItemClickListener { parent, view, position, id ->
-            hideKeyboard(activity = activity)
+            hideKeyboard(activity = activity, view = viewJira)
         }
     }
 
@@ -3345,7 +3350,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewFixVersions.setOnItemClickListener { parent, view, position, id ->
             jiraAuthentication.setFixVersionsPosition(fixVersionsPosition = position)
-            hideKeyboard(activity = activity)
+            hideKeyboard(activity = activity, view = viewJira)
         }
     }
 
@@ -3409,7 +3414,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewPriority.setOnItemClickListener { parent, view, position, id ->
             jiraAuthentication.setPriorityPosition(priorityPosition = position)
-            hideKeyboard(activity = activity)
+            hideKeyboard(activity = activity, view = viewJira)
         }
         autoTextViewPriority.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
@@ -3459,7 +3464,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewAssignee.setOnItemClickListener { parent, view, position, id ->
             jiraAuthentication.setAssigneePosition(assigneePosition = position)
-            hideKeyboard(activity = activity)
+            hideKeyboard(activity = activity, view = viewJira)
         }
     }
 
@@ -3512,7 +3517,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewLinkedIssue.setOnItemClickListener { parent, view, position, id ->
             jiraAuthentication.setLinkedIssueTypePosition(linkedIssueTypePosition = position)
-            hideKeyboard(activity = activity)
+            hideKeyboard(activity = activity, view = viewJira)
         }
         autoTextViewLinkedIssue.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
@@ -3561,7 +3566,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewReporter.setOnItemClickListener { parent, view, position, id ->
             jiraAuthentication.setReporterPosition(reporterPosition = position)
-            hideKeyboard(activity = activity)
+            hideKeyboard(activity = activity, view = viewJira)
         }
     }
 
@@ -3601,7 +3606,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewIssueType.setOnItemClickListener { parent, view, position, id ->
             jiraAuthentication.setIssueTypePosition(issueTypePosition = position)
-            hideKeyboard(activity = activity)
+            hideKeyboard(activity = activity, view = viewJira)
             initializeEpicName(arrayListEpicName = arrayListEpicName, sharedPref = sharedPref)
         }
         autoTextViewIssueType.setOnFocusChangeListener { v, hasFocus ->
@@ -3659,7 +3664,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 progressBarJiraLayout.visibility = View.VISIBLE
 //                    attachProgressBar()
             }
-            hideKeyboard(activity = activity)
+            hideKeyboard(activity = activity, view = viewJira)
             jiraAuthentication.callJiraIssue(
                 context = context,
                 activity = activity,
@@ -3715,7 +3720,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
             autoTextViewEpicName.setOnItemClickListener { parentEpic, viewEpic, positionEpic, idEpic ->
                 jiraAuthentication.setEpicNamePosition(epicNamePosition = positionEpic)
-                hideKeyboard(activity = activity)
+                hideKeyboard(activity = activity, view = viewJira)
             }
             autoTextViewEpicName.setOnFocusChangeListener { v, hasFocus ->
                 if (!hasFocus && autoTextViewEpicName.text.toString().isEmpty()) {
@@ -4031,11 +4036,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
 
-    private fun hideKeyboard(activity: Activity) {
+    private fun hideKeyboard(activity: Activity, view: View) {
         val inputMethodManager =
             (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-        inputMethodManager.hideSoftInputFromWindow(viewJira.windowToken, 0)
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
+
 
     private fun initializeStartDatePicker() {
         val calendar = Calendar.getInstance()
@@ -5009,6 +5015,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeGithubLayout(filePathMedia: File) {
         try {
@@ -5063,13 +5070,99 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     viewGithub.findViewById(R.id.auto_textView_github_linked_requests)
                 autoTextViewGithubMileStone =
                     viewGithub.findViewById(R.id.auto_textView_github_milestone)
-                autoTextViewGithubProject =
-                    viewGithub.findViewById(R.id.auto_textView_github_project)
+                autoTextViewGithubRepo =
+                    viewGithub.findViewById(R.id.auto_textView_github_repo)
                 editTextGithubTitle = viewGithub.findViewById(R.id.editText_github_title)
                 editTextGithubComment = viewGithub.findViewById(R.id.editText_github_comment)
-                recyclerViewGithubAttachment = viewGithub.findViewById(R.id.recycler_view_github_attachment)
+                recyclerViewGithubAttachment =
+                    viewGithub.findViewById(R.id.recycler_view_github_attachment)
+                toolbarGithub = viewGithub.findViewById(R.id.toolbar_github)
+                scrollViewGithub = viewGithub.findViewById(R.id.scrollView_github)
+                scrollViewGithub.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        hideKeyboard(activity = activity, view = viewGithub)
+                    }
+                    return@setOnTouchListener false
+                }
+
+
+
+                toolbarGithub.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.github_menu_save -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            with(sharedPref.edit()) {
+                                putString(
+                                    "github_repo",
+                                    autoTextViewGithubRepo.editableText.toString()
+                                )
+//                                putInt("jira_project_position", projectPosition)
+                                putString("github_title", editTextGithubTitle.text.toString())
+                                putString("github_comment", editTextGithubComment.text.toString())
+                                putString(
+                                    "github_assignee",
+                                    autoTextViewGithubAssignee.editableText.toString()
+                                )
+                                putString(
+                                    "github_labels",
+                                    autoTextViewGithubLabels.editableText.toString()
+                                )
+                                putString(
+                                    "github_milestone",
+                                    autoTextViewGithubMileStone.editableText.toString()
+                                )
+                                putString(
+                                    "github_pull_requests",
+                                    autoTextViewGithubLinkedRequests.editableText.toString()
+                                )
+                                commit()
+                            }
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.github_issue_preferences_save)
+                            )
+                        }
+                        R.id.github_menu_clear -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            val editor: SharedPreferences.Editor = sharedPref.edit()
+                            editor.remove("github_comment")
+                            editor.remove("github_title")
+                            editor.remove("github_repo")
+                            editor.remove("github_milestone")
+                            editor.remove("github_assignee")
+                            editor.remove("github_labels")
+                            editor.remove("github_pull_requests")
+                            editor.apply()
+//                            projectPosition = 0
+                            clearGithubComponents()
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.github_issue_preferences_delete)
+                            )
+                        }
+                    }
+                    return@setOnMenuItemClickListener true
+                }
+
+                toolbarGithub.setNavigationOnClickListener {
+                    removeGithubLayout()
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.VISIBLE
+                    }
+                }
+
+
                 initializeGithubRecyclerView(filePathMedia = filePathMedia)
                 buttonClicksGithub(filePathMedia = filePathMedia)
+                githubAuthentication.callGithub(
+                    activity = activity,
+                    context = context,
+                    task = "get",
+                    filePathMedia = filePathMedia
+                )
+                attachProgressBar()
 //                    progressBarSlackLayout.visibility = View.VISIBLE
 //                    progressBarSlack.visibility = View.VISIBLE
 
@@ -5079,6 +5172,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.githubTag)
         }
+    }
+
+    private fun clearGithubComponents() {
+        editTextGithubTitle.text = null
+        editTextGithubComment.text = null
+//        autoTextViewGithubRepo.setText("", false)
+        autoTextViewGithubAssignee.setText("", false)
+        autoTextViewGithubLabels.setText("", false)
+        autoTextViewGithubMileStone.setText("", false)
+        autoTextViewGithubLinkedRequests.setText("", false)
     }
 
     internal fun removeGithubLayout() {
@@ -5092,11 +5195,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     private fun buttonClicksGithub(filePathMedia: File) {
         buttonGithubCreate.setSafeOnClickListener {
-            if (checkGithubTitleEmpty()) {
+            if (checkGithubTitleEmpty() && githubAuthentication.checkGithubRepoEmpty(
+                    activity = activity,
+                    autoTextViewGithubRepo = autoTextViewGithubRepo
+                )
+            ) {
                 attachProgressBar()
                 githubAuthentication.gatherAutoTextDetails(
                     autoTextViewAssignee = autoTextViewGithubAssignee,
-                    autoTextViewProject = autoTextViewGithubProject,
+                    autoTextViewRepos = autoTextViewGithubRepo,
                     autoTextViewLabels = autoTextViewGithubLabels,
                     autoTextViewLinkedRequests = autoTextViewGithubLinkedRequests,
                     autoTextViewMileStone = autoTextViewGithubMileStone
@@ -5108,7 +5215,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 githubAuthentication.callGithub(
                     activity = activity,
                     context = context,
-                    task = "get",
+                    task = "create",
                     filePathMedia = filePathMedia
                 )
             }
@@ -5134,6 +5241,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         )
         recyclerViewGithubAttachment.adapter = githubAdapter
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun addGithubFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
@@ -5155,6 +5263,349 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
         }
         return false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    internal fun initializeGithubAutoTextViews(
+        arrayListRepos: ArrayList<String>,
+        arrayListAssignee: ArrayList<String>,
+        arrayListMileStones: ArrayList<String>,
+        arrayListLinkedRequests: ArrayList<String>,
+        arrayListLabels: ArrayList<String>
+    ) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        editTextGithubTitle.setText(sharedPref.getString("github_title", null))
+        editTextGithubComment.setText(sharedPref.getString("github_comment", null))
+        initializeGithubRepos(arrayListRepos = arrayListRepos, sharedPref = sharedPref)
+        initializeGithubAssignee(arrayListAssignee = arrayListAssignee, sharedPref = sharedPref)
+        initializeGithubMileStones(
+            arrayListMileStones = arrayListMileStones,
+            sharedPref = sharedPref
+        )
+        initializeGithubLinkedRequests(
+            arrayListLinkedRequests = arrayListLinkedRequests,
+            sharedPref = sharedPref
+        )
+        initializeGithubLabels(arrayListLabels = arrayListLabels, sharedPref = sharedPref)
+        detachProgressBar()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeGithubRepos(
+        arrayListRepos: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewGithubRepoAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListRepos
+        )
+        autoTextViewGithubRepo.setAdapter(autoTextViewGithubRepoAdapter)
+        if (arrayListRepos.isNotEmpty() && autoTextViewGithubRepo.text.isEmpty()) {
+            if (sharedPref.getString("github_repo", null) != null) {
+                autoTextViewGithubRepo.setText(
+                    sharedPref.getString("github_repo", null),
+                    false
+                )
+            } else {
+                autoTextViewGithubRepo.setText(arrayListRepos[0], false)
+            }
+        }
+        autoTextViewGithubRepo.setOnTouchListener { v, event ->
+            autoTextViewGithubRepo.showDropDown()
+            false
+        }
+        autoTextViewGithubRepo.setOnItemClickListener { parent, view, position, id ->
+            //            projectPosition = position
+//            controlProjectPosition = true
+            githubAuthentication.setRepoPosition(repoPosition = position)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                progressBarJira.visibility = View.VISIBLE
+//                progressBarJiraLayout.visibility = View.VISIBLE
+                attachProgressBar()
+            }
+            hideKeyboard(activity = activity, view = viewGithub)
+            clearGithubComponents()
+            githubAuthentication.callGithub(
+                context = context,
+                activity = activity,
+                task = "get"
+            )
+        }
+        autoTextViewGithubRepo.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListRepos.contains(autoTextViewGithubRepo.editableText.toString())) {
+                    if (arrayListRepos.isNotEmpty()) {
+                        if (sharedPref.getString("github_repo", null) != null) {
+                            if (arrayListRepos.contains(
+                                    sharedPref.getString(
+                                        "github_repo",
+                                        null
+                                    )!!
+                                )
+                            ) {
+                                autoTextViewGithubRepo.setText(
+                                    sharedPref.getString("github_repo", null),
+                                    false
+                                )
+                            } else {
+                                autoTextViewGithubRepo.setText(arrayListRepos[0], false)
+                            }
+                        } else {
+                            autoTextViewGithubRepo.setText(arrayListRepos[0], false)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeGithubAssignee(
+        arrayListAssignee: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewGithubAssigneeAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListAssignee
+        )
+        autoTextViewGithubAssignee.setAdapter(autoTextViewGithubAssigneeAdapter)
+        if (arrayListAssignee.isNotEmpty() && autoTextViewGithubAssignee.text.isEmpty()) {
+            if (sharedPref.getString("github_assignee", null) != null) {
+                if (arrayListAssignee.contains(sharedPref.getString("github_assignee", null)!!)) {
+                    autoTextViewGithubAssignee.setText(
+                        sharedPref.getString("github_assignee", null),
+                        false
+                    )
+                } else {
+                    autoTextViewGithubAssignee.setText(arrayListAssignee[0], false)
+                }
+            } else {
+                autoTextViewGithubAssignee.setText(arrayListAssignee[0], false)
+            }
+        }
+        autoTextViewGithubAssignee.setOnTouchListener { v, event ->
+            autoTextViewGithubAssignee.showDropDown()
+            false
+        }
+//        autoTextViewProject.setOnItemClickListener { parent, view, position, id ->
+//            projectPosition = position
+//            controlProjectPosition = true
+//            jiraAuthentication.setProjectPosition(projectPosition = position)
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                progressBarJira.visibility = View.VISIBLE
+//                progressBarJiraLayout.visibility = View.VISIBLE
+////                    attachProgressBar()
+//            }
+//            hideKeyboard(activity = activity)
+//            jiraAuthentication.callJiraIssue(
+//                context = context,
+//                activity = activity,
+//                jiraTask = "get",
+//                createMethod = "normal"
+//            )
+//        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeGithubMileStones(
+        arrayListMileStones: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewGithubMileStoneAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListMileStones
+        )
+        autoTextViewGithubMileStone.setAdapter(autoTextViewGithubMileStoneAdapter)
+        if (arrayListMileStones.isNotEmpty() && autoTextViewGithubMileStone.text.isEmpty()) {
+            if (sharedPref.getString("github_milestone", null) != null) {
+                if (arrayListMileStones.contains(
+                        sharedPref.getString(
+                            "github_milestone",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewGithubMileStone.setText(
+                        sharedPref.getString("github_milestone", null),
+                        false
+                    )
+                } else {
+                    autoTextViewGithubMileStone.setText(arrayListMileStones[0], false)
+                }
+            } else {
+                autoTextViewGithubMileStone.setText(arrayListMileStones[0], false)
+            }
+        }
+        autoTextViewGithubMileStone.setOnTouchListener { v, event ->
+            autoTextViewGithubMileStone.showDropDown()
+            false
+        }
+        autoTextViewGithubMileStone.setOnItemClickListener { parent, view, position, id ->
+            githubAuthentication.setMileStonePosition(mileStonePosition = position)
+            hideKeyboard(activity = activity, view = viewGithub)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeGithubLabels(
+        arrayListLabels: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewGithubLabelsAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListLabels
+        )
+        autoTextViewGithubLabels.setAdapter(autoTextViewGithubLabelsAdapter)
+        if (arrayListLabels.isNotEmpty() && autoTextViewGithubLabels.text.isEmpty()) {
+            if (sharedPref.getString("github_labels", null) != null) {
+                if (arrayListLabels.contains(sharedPref.getString("github_labels", null)!!)) {
+                    autoTextViewGithubLabels.setText(
+                        sharedPref.getString("github_labels", null),
+                        false
+                    )
+                } else {
+                    autoTextViewGithubLabels.setText(arrayListLabels[0], false)
+                }
+            } else {
+                autoTextViewGithubLabels.setText(arrayListLabels[0], false)
+            }
+        }
+        autoTextViewGithubLabels.setOnTouchListener { v, event ->
+            autoTextViewGithubLabels.showDropDown()
+            false
+        }
+//        autoTextViewProject.setOnItemClickListener { parent, view, position, id ->
+//            projectPosition = position
+//            controlProjectPosition = true
+//            jiraAuthentication.setProjectPosition(projectPosition = position)
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                progressBarJira.visibility = View.VISIBLE
+//                progressBarJiraLayout.visibility = View.VISIBLE
+////                    attachProgressBar()
+//            }
+//            hideKeyboard(activity = activity)
+//            jiraAuthentication.callJiraIssue(
+//                context = context,
+//                activity = activity,
+//                jiraTask = "get",
+//                createMethod = "normal"
+//            )
+//        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeGithubLinkedRequests(
+        arrayListLinkedRequests: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewGithubLinkedRequestsAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListLinkedRequests
+        )
+        autoTextViewGithubLinkedRequests.setAdapter(autoTextViewGithubLinkedRequestsAdapter)
+        if (arrayListLinkedRequests.isNotEmpty() && autoTextViewGithubLinkedRequests.text.isEmpty()) {
+            if (sharedPref.getString("github_pull_requests", null) != null) {
+                if (arrayListLinkedRequests.contains(
+                        sharedPref.getString(
+                            "github_pull_requests",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewGithubLinkedRequests.setText(
+                        sharedPref.getString("github_pull_requests", null),
+                        false
+                    )
+                } else {
+                    autoTextViewGithubLinkedRequests.setText(arrayListLinkedRequests[0], false)
+                }
+            } else {
+                autoTextViewGithubLinkedRequests.setText(arrayListLinkedRequests[0], false)
+            }
+        }
+        autoTextViewGithubLinkedRequests.setOnTouchListener { v, event ->
+            autoTextViewGithubLinkedRequests.showDropDown()
+            false
+        }
+        autoTextViewGithubLinkedRequests.setOnItemClickListener { parent, view, position, id ->
+            jiraAuthentication.setProjectPosition(projectPosition = position)
+            hideKeyboard(activity = activity, view = viewGithub)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
