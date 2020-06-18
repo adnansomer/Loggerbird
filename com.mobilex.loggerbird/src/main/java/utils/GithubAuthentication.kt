@@ -21,11 +21,10 @@ import kotlinx.coroutines.async
 import loggerbird.LoggerBird
 import models.*
 import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody.Companion.asRequestBody
 import services.LoggerBirdService
 import java.io.File
 import java.io.IOException
+import java.lang.StringBuilder
 import java.nio.file.Files
 import java.util.*
 import kotlin.collections.ArrayList
@@ -59,6 +58,10 @@ internal class GithubAuthentication {
     private var linkedRequestPosition = 0
     private val defaultToast = DefaultToast()
     private var repoId: Int? = null
+    private var workQueueLinkedGithubAttachments: LinkedBlockingQueueUtil =
+        LinkedBlockingQueueUtil()
+    private var runnableListGithubAttachments: ArrayList<Runnable> = ArrayList()
+    private val arrayListAttachmentsUrl: ArrayList<String> = ArrayList()
     internal fun callGithub(
         activity: Activity,
         context: Context,
@@ -92,9 +95,7 @@ internal class GithubAuthentication {
                 }
 
             } catch (e: Exception) {
-                e.printStackTrace()
-                LoggerBird.callEnqueue()
-                LoggerBird.callExceptionDetails(exception = e, tag = Constants.githubTag)
+                githubExceptionHandler(e = e)
             }
         }
     }
@@ -111,9 +112,7 @@ internal class GithubAuthentication {
             .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-                LoggerBird.callEnqueue()
-                LoggerBird.callExceptionDetails(exception = e, tag = Constants.githubTag)
+                githubExceptionHandler(e = e)
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -150,9 +149,7 @@ internal class GithubAuthentication {
                         )
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
-                    LoggerBird.callEnqueue()
-                    LoggerBird.callExceptionDetails(exception = e, tag = Constants.githubTag)
+                    githubExceptionHandler(e = e)
                 }
             }
         })
@@ -162,6 +159,7 @@ internal class GithubAuthentication {
         activity: Activity
     ) {
         try {
+            arrayListAttachmentsUrl.clear()
             this.activity = activity
             val jsonObject = JsonObject()
             val gson = Gson()
@@ -195,9 +193,7 @@ internal class GithubAuthentication {
                         call: retrofit2.Call<JsonObject>,
                         t: Throwable
                     ) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.githubTag)
+                        githubExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
@@ -212,24 +208,23 @@ internal class GithubAuthentication {
                             RecyclerViewGithubAdapter.ViewHolder.arrayListFilePaths.forEach {
                                 val file = it.file
                                 if (file.exists()) {
-                                    createAttachments(
+                                    callGithubAttachments(
                                         repo = repos!!,
-                                        file = file
+                                        filePathMedia = file
                                     )
                                 }
                             }
-                            activity.runOnUiThread {
-                                LoggerBirdService.loggerBirdService.finishShareLayout("github")
+                            if (RecyclerViewGithubAdapter.ViewHolder.arrayListFilePaths.isEmpty()) {
+                                activity.runOnUiThread {
+                                    LoggerBirdService.loggerBirdService.finishShareLayout("github")
+                                }
                             }
-
                         }
                     }
                 })
 
         } catch (e: Exception) {
-            e.printStackTrace()
-            LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e, tag = Constants.githubTag)
+            githubExceptionHandler(e = e)
         }
     }
 
@@ -264,9 +259,7 @@ internal class GithubAuthentication {
             hashMapLinkedRequests.clear()
             gatherTaskRepositories()
         } catch (e: Exception) {
-            e.printStackTrace()
-            LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e, tag = Constants.githubTag)
+            githubExceptionHandler(e = e)
         }
     }
 
@@ -280,9 +273,7 @@ internal class GithubAuthentication {
                     call: retrofit2.Call<List<GithubRepoModel>>,
                     t: Throwable
                 ) {
-                    t.printStackTrace()
-                    LoggerBird.callEnqueue()
-                    LoggerBird.callExceptionDetails(throwable = t, tag = Constants.githubTag)
+                    githubExceptionHandler(throwable = t)
                 }
 
                 override fun onResponse(
@@ -322,9 +313,7 @@ internal class GithubAuthentication {
                     call: retrofit2.Call<List<GithubAssigneeModel>>,
                     t: Throwable
                 ) {
-                    t.printStackTrace()
-                    LoggerBird.callEnqueue()
-                    LoggerBird.callExceptionDetails(throwable = t, tag = Constants.githubTag)
+                    githubExceptionHandler(throwable = t)
                 }
 
                 override fun onResponse(
@@ -358,9 +347,7 @@ internal class GithubAuthentication {
                     call: retrofit2.Call<List<GithubLabelsModel>>,
                     t: Throwable
                 ) {
-                    t.printStackTrace()
-                    LoggerBird.callEnqueue()
-                    LoggerBird.callExceptionDetails(throwable = t, tag = Constants.githubTag)
+                    githubExceptionHandler(throwable = t)
                 }
 
                 override fun onResponse(
@@ -392,9 +379,7 @@ internal class GithubAuthentication {
                     call: retrofit2.Call<List<GithubMileStoneModel>>,
                     t: Throwable
                 ) {
-                    t.printStackTrace()
-                    LoggerBird.callEnqueue()
-                    LoggerBird.callExceptionDetails(throwable = t, tag = Constants.githubTag)
+                    githubExceptionHandler(throwable = t)
                 }
 
                 override fun onResponse(
@@ -427,9 +412,7 @@ internal class GithubAuthentication {
                     call: retrofit2.Call<List<GithubPullRequestsModel>>,
                     t: Throwable
                 ) {
-                    t.printStackTrace()
-                    LoggerBird.callEnqueue()
-                    LoggerBird.callExceptionDetails(throwable = t, tag = Constants.githubTag)
+                    githubExceptionHandler(throwable = t)
                 }
 
                 override fun onResponse(
@@ -524,84 +507,180 @@ internal class GithubAuthentication {
         try {
 //            val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
 //            val body = MultipartBody.Part.createFormData("file",file.name,requestFile)
-            val jsonObject = JsonObject()
-            jsonObject.addProperty("message", "loggerbird_file")
-            jsonObject.addProperty(
-                "content",
-                Base64.getEncoder().encodeToString(Files.readAllBytes(file.toPath()))
-            )
+            val coroutineCallAttachments = CoroutineScope(Dispatchers.IO)
+            coroutineCallAttachments.async {
+                val jsonObject = JsonObject()
+                jsonObject.addProperty(
+                    "message",
+                    "loggerbirdfile" + System.currentTimeMillis() + "." + file.absolutePath.substringAfterLast(
+                        "."
+                    )
+                )
+                jsonObject.addProperty(
+                    "content",
+                    Base64.getEncoder().encodeToString(Files.readAllBytes(file.toPath()))
+                )
+                RetrofitUserGithubClient.getGithubUserClient(url = "https://api.github.com/repos/${LoggerBird.githubUserName}/$repo/")
+                    .create(AccountIdService::class.java)
+                    .setGithubAttachments(
+//                    file = body,
+                        jsonObject = jsonObject,
+                        fileName = file.name.replace("_", "") + System.currentTimeMillis()
+                    )
+                    .enqueue(object : retrofit2.Callback<JsonObject> {
+                        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                        override fun onFailure(
+                            call: retrofit2.Call<JsonObject>,
+                            t: Throwable
+                        ) {
+                            githubExceptionHandler(throwable = t)
+                        }
+
+                        override fun onResponse(
+                            call: retrofit2.Call<JsonObject>,
+                            response: retrofit2.Response<JsonObject>
+                        ) {
+                            if (file.name != "logger_bird_details.txt") {
+                                if (file.exists()) {
+                                    file.delete()
+                                }
+                            }
+                            Log.d("attachment_put_success", response.code().toString())
+                            Log.d("attachment_put_succes", response.message())
+                            if (response.body() != null) {
+//                            val jsonObjectIssue = JsonObject()
+//                            jsonObjectIssue.addProperty(
+//                                "body",
+//                                "[" + response.body()!!["content"].asJsonObject["name"].asString + "]" + "(" +
+//                                        response.body()!!["content"].asJsonObject["download_url"].asString + ")"
+//                            )
+//                            jsonObjectIssue.addProperty(
+//                                "body",
+//                                        response.body()!!["content"].asJsonObject["download_url"].asString
+//                            )
+                                arrayListAttachmentsUrl.add(response.body()!!["content"].asJsonObject["download_url"].asString)
+                                callEnqueueGithubAttachments(repo = repo)
+                            }
+                        }
+                    })
+            }
+        } catch (e: Exception) {
+            githubExceptionHandler(e = e)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun githubExceptionHandler(
+        e: Exception? = null,
+        throwable: Throwable? = null
+    ) {
+        resetGithubValues()
+        if (this::timerTaskQueue.isInitialized) {
+            timerTaskQueue.cancel()
+        }
+        LoggerBirdService.loggerBirdService.finishShareLayout("github_error")
+        throwable?.printStackTrace()
+        e?.printStackTrace()
+        LoggerBird.callEnqueue()
+        LoggerBird.callExceptionDetails(
+            exception = e,
+            tag = Constants.githubTag,
+            throwable = throwable
+        )
+    }
+
+    private fun callGithubAttachments(filePathMedia: File, repo: String) {
+        if (LoggerBird.isLogInitAttached()) {
+            if (runnableListGithubAttachments.isEmpty()) {
+                workQueueLinkedGithubAttachments.put {
+                    createAttachments(repo = repo, file = filePathMedia)
+                }
+            }
+            runnableListGithubAttachments.add(Runnable {
+                createAttachments(repo = repo, file = filePathMedia)
+            })
+        } else {
+            throw LoggerBirdException(Constants.logInitErrorMessage)
+        }
+    }
+
+    private fun callEnqueueGithubAttachments(repo: String) {
+        workQueueLinkedGithubAttachments.controlRunnable = false
+        if (runnableListGithubAttachments.size > 0) {
+            runnableListGithubAttachments.removeAt(0)
+            if (runnableListGithubAttachments.size > 0) {
+                workQueueLinkedGithubAttachments.put(runnableListGithubAttachments[0])
+            } else {
+                if (arrayListAttachmentsUrl.isNotEmpty()) {
+//                    val gson = Gson()
+//                    val jsonArrayAttachments = gson.toJsonTree(arrayListAttachmentsUrl).asJsonArray
+                    val stringBuilder = StringBuilder()
+                    stringBuilder.append("Description:$comment")
+                    var attachmentCounter = 0
+                    arrayListAttachmentsUrl.forEach {
+                        stringBuilder.append("\nattachment_$attachmentCounter:$it")
+                        attachmentCounter++
+                    }
+                    val jsonObjectAttachments = JsonObject()
+                    jsonObjectAttachments.addProperty("body", stringBuilder.toString())
+                    addAttachmentsToIssue(jsonObjectIssue = jsonObjectAttachments, repo = repo)
+                } else {
+                    LoggerBirdService.loggerBirdService.finishShareLayout("github")
+                }
+
+            }
+        } else {
+            LoggerBirdService.loggerBirdService.finishShareLayout("github")
+        }
+    }
+
+    private fun addAttachmentsToIssue(jsonObjectIssue: JsonObject, repo: String) {
+        val coroutineCallAttachments = CoroutineScope(Dispatchers.IO)
+        coroutineCallAttachments.async {
             RetrofitUserGithubClient.getGithubUserClient(url = "https://api.github.com/repos/${LoggerBird.githubUserName}/$repo/")
                 .create(AccountIdService::class.java)
-                .setGithubAttachments(
-//                    file = body,
-                    jsonObject = jsonObject,
-                    fileName = file.name
-                )
+                .setGithubIssue(jsonObject = jsonObjectIssue, id = repoId!!)
                 .enqueue(object : retrofit2.Callback<JsonObject> {
-                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
                         call: retrofit2.Call<JsonObject>,
                         t: Throwable
                     ) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.githubTag)
+                        githubExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-                        if (file.name != "logger_bird_details.txt") {
-                            if (file.exists()) {
-                                file.delete()
-                            }
-                        }
-                        Log.d("attachment_put_success", response.code().toString())
-                        Log.d("attachment_put_succes", response.message())
-                        if (response.body() != null) {
-                            val jsonObjectIssue = JsonObject()
-                            jsonObjectIssue.addProperty(
-                                "body",
-                                "[" + response.body()!!["content"].asJsonObject["name"].asString + "]" + "(" +
-                                        response.body()!!["content"].asJsonObject["download_url"].asString + ")"
-                            )
-                            RetrofitUserGithubClient.getGithubUserClient(url = "https://api.github.com/repos/${LoggerBird.githubUserName}/$repo/")
-                                .create(AccountIdService::class.java)
-                                .setGithubIssue(jsonObject = jsonObjectIssue,id = repoId!!)
-                                .enqueue(object : retrofit2.Callback<JsonObject> {
-                                    override fun onFailure(
-                                        call: retrofit2.Call<JsonObject>,
-                                        t: Throwable
-                                    ) {
-                                        t.printStackTrace()
-                                        LoggerBird.callEnqueue()
-                                        LoggerBird.callExceptionDetails(
-                                            throwable = t,
-                                            tag = Constants.githubTag
-                                        )
-                                    }
-
-                                    override fun onResponse(
-                                        call: retrofit2.Call<JsonObject>,
-                                        response: retrofit2.Response<JsonObject>
-                                    ) {
-                                            Log.d(
-                                                "github_issue_attachment",
-                                                response.code().toString()
-                                            )
-                                            val githubList = response.body()
-                                    }
-                                })
+                        Log.d(
+                            "github_issue_attachment",
+                            response.code().toString()
+                        )
+                        val githubList = response.body()
+                        activity.runOnUiThread {
+                            LoggerBirdService.loggerBirdService.finishShareLayout("github")
                         }
                     }
                 })
-        } catch (e: Exception) {
-            e.printStackTrace()
-            LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e, tag = Constants.githubTag)
         }
     }
 
+    private fun resetGithubValues() {
+        arrayListAttachmentsUrl.clear()
+        arrayListLinkedRequests.clear()
+        arrayListLabels.clear()
+        arrayListMileStones.clear()
+        arrayListAssignee.clear()
+        arrayListRepo.clear()
+        title = ""
+        comment = null
+        assignee = null
+        labels = null
+        repos = null
+        mileStone = null
+        linkedRequests = null
+        runnableListGithubAttachments.clear()
+        workQueueLinkedGithubAttachments.controlRunnable = false
+    }
 
 }
