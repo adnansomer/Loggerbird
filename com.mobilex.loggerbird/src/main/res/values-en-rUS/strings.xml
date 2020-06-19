@@ -98,6 +98,11 @@
     <string name="github_issue_preferences_delete">Issue preferences are deleted!</string>
     <string name="github_repo_empty">Repository cannot be empty!</string>
     <string name="github_repo_doesnt_exist">This repository doesn\'t exist!</string>
+    <string name="github_assignee_exist">This assignee already added to list!</string>
+    <string name="github_assignee_doesnt_exist">This assignee doesn\'t exist!</string>
+    <string name="github_label_exist">This label already added to list!</string>
+    <string name="github_label_doesnt_exist">This label doesn\'t exist!</string>
+    <string name="github_mile_stone_doesnt_exist">This milestone doesn\'t exist!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -225,6 +230,7 @@
     <string name="textView_future_task_time">Start time</string>
     <!-- loggerbird_github_popup-->
     <string name="textView_github_repo">Repository</string>
+    <string name="textView_github_project">Project</string>
     <string name="textView_github_assignee">Assignee</string>
     <string name="textView_github_title">Title</string>
     <string name="editText_github_title">Write a title about your issue.</string>
@@ -234,6 +240,8 @@
     <string name="textView_github_milestone">Milestone</string>
     <string name="textView_github_linked_requests">Linked pull requests</string>
     <string name="textView_github_attachment">Attachments</string>
+    <string name="textView_github_assignee_list">Assignee list</string>
+    <string name="textView_github_label_list">Label list</string>
     <string name="button_github_create">Create</string>
     <string name="button_github_cancel">Cancel</string>
     <!-- recycler_view_github_item_popup-->
@@ -241,4 +249,14 @@
     <!-- loggerbird_github_menu-->
     <string name="textView_github_menu_save">Save Issue Info</string>
     <string name="textView_github_menu_clear">Clear Issue Info</string>
+    <!-- recycler_view_github_assignee_popup-->
+    <string name="textView_recyclerView_github_assignee_header">Delete assignee</string>
+    <string name="textView_recyclerView_github_assignee_title">Are you sure to remove assignee from your github issue?</string>
+    <string name="button_recyclerView_github_assignee_delete">Delete assignee</string>
+    <string name="button_recyclerView_github_assignee_keep">Keep assignee</string>
+    <!-- recycler_view_github_label_popup-->
+    <string name="textView_recyclerView_github_label_header">Delete label</string>
+    <string name="textView_recyclerView_github_label_title">Are you sure to remove label from your github issue?</string>
+    <string name="button_recyclerView_github_label_delete">Delete label</string>
+    <string name="button_recyclerView_github_label_keep">Keep label</string>
 </resources>

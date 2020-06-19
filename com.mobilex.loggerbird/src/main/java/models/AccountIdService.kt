@@ -73,6 +73,8 @@ interface AccountIdService {
     fun createGithubIssue(@Body jsonObject:JsonObject):Call<JsonObject>
     @GET("repos")
     fun getGithubRepo():Call<List<GithubRepoModel>>
+    @GET("projects")
+    fun getGithubProjects():Call<List<GithubProjectModel>>
     @GET("assignees")
     fun getGithubAssignees():Call<List<GithubAssigneeModel>>
     @GET("labels")

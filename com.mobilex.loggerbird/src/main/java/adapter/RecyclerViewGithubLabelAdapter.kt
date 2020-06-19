@@ -14,26 +14,27 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
-import models.RecyclerViewModel
 import java.util.concurrent.TimeUnit
 import android.provider.Settings
 import android.widget.Button
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
+import models.RecyclerViewModelLabel
+import services.LoggerBirdService
 
-class RecyclerViewGithubAdapter(
-    private val fileList: ArrayList<RecyclerViewModel>,
+class RecyclerViewGithubLabelAdapter(
+    private val fileList: ArrayList<RecyclerViewModelLabel>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View
 ) :
-    RecyclerView.Adapter<RecyclerViewGithubAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerViewGithubLabelAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_github_item,
+                R.layout.recycler_view_github_label_item,
                 parent,
                 false
             )
@@ -49,7 +50,7 @@ class RecyclerViewGithubAdapter(
             item = fileList[position],
             adapter = this,
             position = position,
-            fileList = fileList,
+            labelList = fileList,
             context = context,
             activity = activity,
             rootView = rootView
@@ -66,29 +67,29 @@ class RecyclerViewGithubAdapter(
         private lateinit var buttonNo: Button
 
         companion object{
-             internal lateinit var arrayListFilePaths:ArrayList<RecyclerViewModel>
+             internal  var arrayListLabelNames:ArrayList<RecyclerViewModelLabel> = ArrayList()
         }
 
 
         fun bindItems(
-            item: RecyclerViewModel,
-            adapter: RecyclerViewGithubAdapter,
+            item: RecyclerViewModelLabel,
+            adapter: RecyclerViewGithubLabelAdapter,
             position: Int,
-            fileList: ArrayList<RecyclerViewModel>,
+            labelList: ArrayList<RecyclerViewModelLabel>,
             context: Context,
             activity: Activity,
             rootView: View
         ) {
-            arrayListFilePaths = fileList
+            arrayListLabelNames = labelList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
-            textViewFileName.text = item.file.name
+            textViewFileName.text = item.labelName
             imageButtonCross.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
-                        fileList = fileList,
+                        fileList = labelList,
                         position = position,
                         adapter = adapter
                     )
@@ -101,14 +102,14 @@ class RecyclerViewGithubAdapter(
         private fun removeItemPopup(
             activity: Activity,
             rootView: View,
-            fileList: ArrayList<RecyclerViewModel>,
+            fileList: ArrayList<RecyclerViewModelLabel>,
             position: Int,
-            adapter: RecyclerViewGithubAdapter
+            adapter: RecyclerViewGithubLabelAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_github_item_popup,
+                        R.layout.recycler_view_github_label_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -170,11 +171,14 @@ class RecyclerViewGithubAdapter(
 //            alertDialogItemDelete.show()
         }
 
-        private fun buttonClicksGithubPopup(fileList: ArrayList<RecyclerViewModel>, position: Int, adapter: RecyclerViewGithubAdapter) {
+        private fun buttonClicksGithubPopup(fileList: ArrayList<RecyclerViewModelLabel>, position: Int, adapter: RecyclerViewGithubLabelAdapter) {
             buttonYes.setSafeOnClickListener {
                 fileList.removeAt(position)
-                arrayListFilePaths = fileList
+                arrayListLabelNames = fileList
                 adapter.notifyDataSetChanged()
+                if(fileList.size <=0){
+                    LoggerBirdService.loggerBirdService.cardViewLabelList.visibility = View.GONE
+                }
                 removePopupLayout()
             }
             buttonNo.setSafeOnClickListener {

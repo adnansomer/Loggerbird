@@ -10,7 +10,8 @@ class BasicAuthGithubInterceptor(username: String, password: String) : Intercept
     override fun intercept(chain: Interceptor.Chain): Response {
         var request = chain.request()
         request = request.newBuilder().header("Authorization", credentials)
-            .header("Content-Type", "application/json").build()
+            .header("Content-Type", "application/json")
+            .header("Accept", "application/vnd.github.inertia-preview+json").build()
         return chain.proceed(request)
     }
 }

@@ -81,5 +81,7 @@ internal class Constants {
         const val jiraDatePopupTag:String = "Jira Date Popup"
         const val futureTaskTag:String = "Future Task"
         const val githubTag:String = "Github"
+        const val recyclerViewEmailAdapterTag:String = "RecyclerView Email Adapter"
+        const val recyclerViewGithubAdapterTag:String = "RecyclerView Github Adapter"
     }
 }

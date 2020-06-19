@@ -1,6 +1,8 @@
 package utils
 
 import adapter.RecyclerViewGithubAdapter
+import adapter.RecyclerViewGithubAssigneeAdapter
+import adapter.RecyclerViewGithubLabelAdapter
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -18,6 +20,7 @@ import exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
 import models.*
 import okhttp3.*
@@ -44,11 +47,15 @@ internal class GithubAuthentication {
     private var repos: String? = null
     private var mileStone: String? = null
     private var linkedRequests: String? = null
+    private var project:String? = null
     private var arrayListRepo: ArrayList<String> = ArrayList()
+    private var arrayListProject:ArrayList<String> = ArrayList()
+    private var arrayListProjectUrl:ArrayList<String> = ArrayList()
     private var arrayListAssignee: ArrayList<String> = ArrayList()
     private var arrayListMileStones: ArrayList<String> = ArrayList()
     private var hashMapMileStones: HashMap<String, Int> = HashMap()
     private var arrayListLinkedRequests: ArrayList<String> = ArrayList()
+    private var arrayListLinkedRequestsUrl:ArrayList<String> = ArrayList()
     private var hashMapLinkedRequests: HashMap<String, Int> = HashMap()
     private var arrayListLabels: ArrayList<String> = ArrayList()
     private var queueCounter = 0
@@ -56,12 +63,14 @@ internal class GithubAuthentication {
     private var repoPosition = 0
     private var mileStonePosition = 0
     private var linkedRequestPosition = 0
+    private var projectPosition = 0
     private val defaultToast = DefaultToast()
     private var repoId: Int? = null
     private var workQueueLinkedGithubAttachments: LinkedBlockingQueueUtil =
         LinkedBlockingQueueUtil()
     private var runnableListGithubAttachments: ArrayList<Runnable> = ArrayList()
     private val arrayListAttachmentsUrl: ArrayList<String> = ArrayList()
+     private val stringBuilderGithub = StringBuilder()
     internal fun callGithub(
         activity: Activity,
         context: Context,
@@ -159,6 +168,7 @@ internal class GithubAuthentication {
         activity: Activity
     ) {
         try {
+            stringBuilderGithub.clear()
             arrayListAttachmentsUrl.clear()
             this.activity = activity
             val jsonObject = JsonObject()
@@ -166,23 +176,48 @@ internal class GithubAuthentication {
 //            if(linkedRequests != null){
 //                jsonObject.addProperty("",hashMapLinkedRequests[linkedRequests!!])
 //            }
-            if (labels != null) {
-                if (arrayListLabels.isNotEmpty()) {
-                    val jsonArrayLabels = JsonArray()
-                    val jsonObjectLabels = JsonObject()
-                    jsonObjectLabels.addProperty("name", labels)
-                    jsonArrayLabels.add(jsonObjectLabels)
-                    jsonObject.add("labels", jsonArrayLabels)
+            if(RecyclerViewGithubLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()){
+                val jsonArrayLabels = JsonArray()
+                RecyclerViewGithubLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
+                    jsonArrayLabels.add(it.labelName)
+                }
+                jsonObject.add("labels", jsonArrayLabels)
+            }else{
+                if (!labels.isNullOrEmpty()) {
+                    if (arrayListLabels.isNotEmpty()) {
+                        val jsonArrayLabels = JsonArray()
+                        val jsonObjectLabels = JsonObject()
+                        jsonArrayLabels.add(jsonObjectLabels)
+                        jsonObject.add("labels", jsonArrayLabels)
+                    }
                 }
             }
-            if (mileStone != null) {
+            if (!mileStone.isNullOrEmpty()) {
                 jsonObject.addProperty("milestone", hashMapMileStones[mileStone!!])
             }
-            if (assignee != null) {
-                jsonObject.addProperty("assignee", assignee)
+            if (RecyclerViewGithubAssigneeAdapter.ViewHolder.arrayListAssigneeNames.isNotEmpty()) {
+                val jsonArrayAssignee = JsonArray()
+                RecyclerViewGithubAssigneeAdapter.ViewHolder.arrayListAssigneeNames.forEach {
+                    jsonArrayAssignee.add(it.assigneeName)
+                }
+                jsonObject.add("assignees", jsonArrayAssignee)
+            } else {
+                if (!assignee.isNullOrEmpty()) {
+                    jsonObject.addProperty("assignee", assignee)
+                }
             }
-            if (comment != null) {
-                jsonObject.addProperty("body", comment)
+
+            if (!comment.isNullOrEmpty()) {
+                stringBuilderGithub.append("Comment:$comment\n")
+            }
+            if(!linkedRequests.isNullOrEmpty() && arrayListLinkedRequestsUrl.size > linkedRequestPosition){
+                stringBuilderGithub.append("Linked Pull Request:" + arrayListLinkedRequestsUrl[linkedRequestPosition] + "\n")
+            }
+            if(!project.isNullOrEmpty() && arrayListProjectUrl.size > projectPosition){
+                stringBuilderGithub.append("Project:" + arrayListProjectUrl[projectPosition] + "\n")
+            }
+            if(stringBuilderGithub.isNotEmpty()){
+                jsonObject.addProperty("body", stringBuilderGithub.toString())
             }
             jsonObject.addProperty("title", title)
             RetrofitUserGithubClient.getGithubUserClient(url = "https://api.github.com/repos/${LoggerBird.githubUserName}/$repos/")
@@ -232,6 +267,7 @@ internal class GithubAuthentication {
         autoTextViewAssignee: AutoCompleteTextView,
         autoTextViewLabels: AutoCompleteTextView,
         autoTextViewRepos: AutoCompleteTextView,
+        autoTextViewProject:AutoCompleteTextView,
         autoTextViewMileStone: AutoCompleteTextView,
         autoTextViewLinkedRequests: AutoCompleteTextView
     ) {
@@ -240,6 +276,7 @@ internal class GithubAuthentication {
         repos = autoTextViewRepos.editableText.toString()
         mileStone = autoTextViewMileStone.editableText.toString()
         linkedRequests = autoTextViewLinkedRequests.editableText.toString()
+        project = autoTextViewProject.editableText.toString()
     }
 
     internal fun gatherEditTextDetails(editTextTitle: EditText, editTextComment: EditText) {
@@ -251,11 +288,14 @@ internal class GithubAuthentication {
         try {
             queueCounter = 0
             arrayListRepo.clear()
+            arrayListProject.clear()
+            arrayListProjectUrl.clear()
             arrayListAssignee.clear()
             arrayListMileStones.clear()
             hashMapMileStones.clear()
             arrayListLabels.clear()
             arrayListLinkedRequests.clear()
+            arrayListLinkedRequestsUrl.clear()
             hashMapLinkedRequests.clear()
             gatherTaskRepositories()
         } catch (e: Exception) {
@@ -290,6 +330,7 @@ internal class GithubAuthentication {
                             }
                         }
                         if (arrayListRepo.size > repoPosition) {
+                            gatherTaskProject(repo = arrayListRepo[repoPosition])
                             gatherTaskAssignee(repo = arrayListRepo[repoPosition])
                             gatherTaskLabels(repo = arrayListRepo[repoPosition])
                             gatherTaskMileStone(repo = arrayListRepo[repoPosition])
@@ -329,6 +370,39 @@ internal class GithubAuthentication {
                                 if (!arrayListAssignee.contains(it.login!!)) {
                                     arrayListAssignee.add(it.login!!)
                                 }
+                            }
+                        }
+                        updateFields()
+                    }
+                }
+            })
+    }
+
+    private fun gatherTaskProject(repo: String) {
+        queueCounter++
+        RetrofitUserGithubClient.getGithubUserClient(url = "https://api.github.com/repos/${LoggerBird.githubUserName}/$repo/")
+            .create(AccountIdService::class.java)
+            .getGithubProjects()
+            .enqueue(object : retrofit2.Callback<List<GithubProjectModel>> {
+                override fun onFailure(
+                    call: retrofit2.Call<List<GithubProjectModel>>,
+                    t: Throwable
+                ) {
+                    githubExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<List<GithubProjectModel>>,
+                    response: retrofit2.Response<List<GithubProjectModel>>
+                ) {
+                    val coroutineCallGithubProject = CoroutineScope(Dispatchers.IO)
+                    coroutineCallGithubProject.async {
+                        Log.d("github_project_success", response.code().toString())
+                        val githubList = response.body()
+                        githubList?.forEach {
+                            if (it.url != null && it.name != null) {
+                                arrayListProject.add(it.name!!)
+                                arrayListProjectUrl.add(it.url!!)
                             }
                         }
                         updateFields()
@@ -424,9 +498,10 @@ internal class GithubAuthentication {
                         Log.d("github_pull_requests", response.code().toString())
                         val githubList = response.body()
                         githubList?.forEach {
-                            if (it.title != null && it.number != null) {
+                            if (it.title != null && it.url!= null) {
                                 arrayListLinkedRequests.add(it.title!!)
-                                hashMapLinkedRequests[it.title!!] = it.number!!
+                                arrayListLinkedRequestsUrl.add(it.url!!)
+//                                hashMapLinkedRequests[it.title!!] = it.number!!
                             }
                         }
                         updateFields()
@@ -443,6 +518,7 @@ internal class GithubAuthentication {
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeGithubAutoTextViews(
                     arrayListRepos = arrayListRepo,
+                    arrayListProject = arrayListProject,
                     arrayListAssignee = arrayListAssignee,
                     arrayListMileStones = arrayListMileStones,
                     arrayListLinkedRequests = arrayListLinkedRequests,
@@ -477,6 +553,9 @@ internal class GithubAuthentication {
     internal fun setLinkedRequestPosition(linkedRequestPosition: Int) {
         this.linkedRequestPosition = linkedRequestPosition
     }
+    internal fun setProjectPosition(projectPosition:Int){
+        this.projectPosition = projectPosition
+    }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun checkGithubRepoEmpty(
@@ -502,6 +581,51 @@ internal class GithubAuthentication {
         return false
     }
 
+    internal fun checkGithubAssignee(
+        activity: Activity,
+        autoTextViewAssignee: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListAssignee.contains(autoTextViewAssignee.editableText.toString()) || autoTextViewAssignee.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.github_assignee_doesnt_exist)
+            )
+        }
+        return false
+    }
+
+    internal fun checkGithubLabel(
+        activity: Activity,
+        autoTextViewGithubLabels: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListLabels.contains(autoTextViewGithubLabels.editableText.toString()) || autoTextViewGithubLabels.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.github_label_doesnt_exist)
+            )
+        }
+        return false
+    }
+
+    internal fun checkGithubMileStone(
+        activity: Activity,
+        autoTextViewMileStone: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListMileStones.contains(autoTextViewMileStone.editableText.toString()) || autoTextViewMileStone.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.github_mile_stone_doesnt_exist)
+            )
+        }
+        return false
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createAttachments(repo: String, file: File) {
         try {
@@ -509,6 +633,7 @@ internal class GithubAuthentication {
 //            val body = MultipartBody.Part.createFormData("file",file.name,requestFile)
             val coroutineCallAttachments = CoroutineScope(Dispatchers.IO)
             coroutineCallAttachments.async {
+
                 val jsonObject = JsonObject()
                 jsonObject.addProperty(
                     "message",
@@ -516,10 +641,12 @@ internal class GithubAuthentication {
                         "."
                     )
                 )
-                jsonObject.addProperty(
-                    "content",
-                    Base64.getEncoder().encodeToString(Files.readAllBytes(file.toPath()))
-                )
+                withContext(Dispatchers.IO){
+                    jsonObject.addProperty(
+                        "content",
+                        Base64.getEncoder().encodeToString(Files.readAllBytes(file.toPath()))
+                    )
+                }
                 RetrofitUserGithubClient.getGithubUserClient(url = "https://api.github.com/repos/${LoggerBird.githubUserName}/$repo/")
                     .create(AccountIdService::class.java)
                     .setGithubAttachments(
@@ -615,7 +742,9 @@ internal class GithubAuthentication {
 //                    val gson = Gson()
 //                    val jsonArrayAttachments = gson.toJsonTree(arrayListAttachmentsUrl).asJsonArray
                     val stringBuilder = StringBuilder()
-                    stringBuilder.append("Description:$comment")
+                    if(stringBuilderGithub.isNotEmpty()){
+                        stringBuilder.append(stringBuilderGithub.toString())
+                    }
                     var attachmentCounter = 0
                     arrayListAttachmentsUrl.forEach {
                         stringBuilder.append("\nattachment_$attachmentCounter:$it")
@@ -667,8 +796,12 @@ internal class GithubAuthentication {
 
     private fun resetGithubValues() {
         arrayListAttachmentsUrl.clear()
+        stringBuilderGithub.clear()
         arrayListLinkedRequests.clear()
+        arrayListLinkedRequestsUrl.clear()
         arrayListLabels.clear()
+        arrayListProjectUrl.clear()
+        arrayListProject.clear()
         arrayListMileStones.clear()
         arrayListAssignee.clear()
         arrayListRepo.clear()

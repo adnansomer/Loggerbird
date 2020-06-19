@@ -157,7 +157,7 @@ class RecyclerViewEmailAdapter(
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
-                    tag = Constants.recyclerViewJiraAdapterTag
+                    tag = Constants.recyclerViewEmailAdapterTag
                 )
             }
 

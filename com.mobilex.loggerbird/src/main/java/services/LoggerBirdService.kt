@@ -57,6 +57,8 @@ import kotlinx.coroutines.withContext
 import listeners.*
 import loggerbird.LoggerBird
 import models.RecyclerViewModel
+import models.RecyclerViewModelAssignee
+import models.RecyclerViewModelLabel
 import models.RecyclerViewModelTo
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
@@ -356,15 +358,29 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewGithubAssignee: AutoCompleteTextView
     private lateinit var autoTextViewGithubLabels: AutoCompleteTextView
     private lateinit var autoTextViewGithubRepo: AutoCompleteTextView
+    private lateinit var autoTextViewGithubProject: AutoCompleteTextView
     private lateinit var autoTextViewGithubMileStone: AutoCompleteTextView
     private lateinit var autoTextViewGithubLinkedRequests: AutoCompleteTextView
     private lateinit var autoTextViewGithubAssigneeAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewGithubLabelsAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewGithubRepoAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGithubProjectAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewGithubMileStoneAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewGithubLinkedRequestsAdapter: ArrayAdapter<String>
     private val arrayListGithubFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var scrollViewGithub: ScrollView
+    private lateinit var recyclerViewGithubAssignee: RecyclerView
+    private lateinit var githubAssigneeAdapter: RecyclerViewGithubAssigneeAdapter
+    internal lateinit var cardViewAssigneeList: CardView
+    private val arrayListGithubAssigneeName: ArrayList<RecyclerViewModelAssignee> = ArrayList()
+    private lateinit var imageViewAssignee: ImageView
+    private lateinit var arrayListGithubAssignee: ArrayList<String>
+    private lateinit var recyclerViewGithubLabel: RecyclerView
+    private lateinit var githubLabelAdapter: RecyclerViewGithubLabelAdapter
+    internal lateinit var cardViewLabelList: CardView
+    private val arrayListGithubLabelName: ArrayList<RecyclerViewModelLabel> = ArrayList()
+    private lateinit var imageViewLabel: ImageView
+    private lateinit var arrayListGithubLabel: ArrayList<String>
 
 
     //Static global variables:
@@ -5072,6 +5088,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     viewGithub.findViewById(R.id.auto_textView_github_milestone)
                 autoTextViewGithubRepo =
                     viewGithub.findViewById(R.id.auto_textView_github_repo)
+                autoTextViewGithubProject =
+                    viewGithub.findViewById(R.id.auto_textView_github_project)
                 editTextGithubTitle = viewGithub.findViewById(R.id.editText_github_title)
                 editTextGithubComment = viewGithub.findViewById(R.id.editText_github_comment)
                 recyclerViewGithubAttachment =
@@ -5084,7 +5102,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     }
                     return@setOnTouchListener false
                 }
+                recyclerViewGithubAssignee =
+                    viewGithub.findViewById(R.id.recycler_view_assignee_list)
+                cardViewAssigneeList = viewGithub.findViewById(R.id.cardView_assignee_list)
+                imageViewAssignee = viewGithub.findViewById(R.id.imageView_assignee_add)
 
+                recyclerViewGithubLabel = viewGithub.findViewById(R.id.recycler_view_label_list)
+                cardViewLabelList = viewGithub.findViewById(R.id.cardView_label_list)
+                imageViewLabel = viewGithub.findViewById(R.id.imageView_label_add)
 
 
                 toolbarGithub.setOnMenuItemClickListener {
@@ -5098,6 +5123,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                     autoTextViewGithubRepo.editableText.toString()
                                 )
 //                                putInt("jira_project_position", projectPosition)
+                                putString(
+                                    "github_project",
+                                    autoTextViewGithubProject.editableText.toString()
+                                )
                                 putString("github_title", editTextGithubTitle.text.toString())
                                 putString("github_comment", editTextGithubComment.text.toString())
                                 putString(
@@ -5130,6 +5159,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             editor.remove("github_comment")
                             editor.remove("github_title")
                             editor.remove("github_repo")
+                            editor.remove("github_project")
                             editor.remove("github_milestone")
                             editor.remove("github_assignee")
                             editor.remove("github_labels")
@@ -5153,8 +5183,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     }
                 }
 
-
                 initializeGithubRecyclerView(filePathMedia = filePathMedia)
+                initializeGithubAssigneeRecyclerView()
+                initializeGithubLabelRecyclerView()
                 buttonClicksGithub(filePathMedia = filePathMedia)
                 githubAuthentication.callGithub(
                     activity = activity,
@@ -5175,6 +5206,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     private fun clearGithubComponents() {
+        cardViewAssigneeList.visibility = View.GONE
+        arrayListGithubAssigneeName.clear()
+        githubAssigneeAdapter.notifyDataSetChanged()
         editTextGithubTitle.text = null
         editTextGithubComment.text = null
 //        autoTextViewGithubRepo.setText("", false)
@@ -5198,12 +5232,22 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (checkGithubTitleEmpty() && githubAuthentication.checkGithubRepoEmpty(
                     activity = activity,
                     autoTextViewGithubRepo = autoTextViewGithubRepo
+                ) && githubAuthentication.checkGithubAssignee(
+                    activity = activity,
+                    autoTextViewAssignee = autoTextViewGithubAssignee
+                ) && githubAuthentication.checkGithubLabel(
+                    activity = activity,
+                    autoTextViewGithubLabels = autoTextViewGithubLabels
+                ) && githubAuthentication.checkGithubMileStone(
+                    activity = activity,
+                    autoTextViewMileStone = autoTextViewGithubMileStone
                 )
             ) {
                 attachProgressBar()
                 githubAuthentication.gatherAutoTextDetails(
                     autoTextViewAssignee = autoTextViewGithubAssignee,
                     autoTextViewRepos = autoTextViewGithubRepo,
+                    autoTextViewProject = autoTextViewGithubProject,
                     autoTextViewLabels = autoTextViewGithubLabels,
                     autoTextViewLinkedRequests = autoTextViewGithubLinkedRequests,
                     autoTextViewMileStone = autoTextViewGithubMileStone
@@ -5225,6 +5269,62 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
             }
+        }
+        imageViewAssignee.setSafeOnClickListener {
+            if (!arrayListGithubAssigneeName.contains(
+                    RecyclerViewModelAssignee(
+                        autoTextViewGithubAssignee.editableText.toString()
+                    )
+                ) && arrayListGithubAssignee.contains(autoTextViewGithubAssignee.editableText.toString())
+            ) {
+                arrayListGithubAssigneeName.add(RecyclerViewModelAssignee(autoTextViewGithubAssignee.editableText.toString()))
+                githubAssigneeAdapter.notifyDataSetChanged()
+                cardViewAssigneeList.visibility = View.VISIBLE
+            } else if (arrayListGithubAssigneeName.contains(
+                    RecyclerViewModelAssignee(
+                        autoTextViewGithubAssignee.editableText.toString()
+                    )
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.github_assignee_exist)
+                )
+            } else if (!arrayListGithubAssignee.contains(autoTextViewGithubAssignee.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.github_assignee_doesnt_exist)
+                )
+            }
+
+        }
+        imageViewLabel.setSafeOnClickListener {
+            if (!arrayListGithubLabelName.contains(
+                    RecyclerViewModelLabel(
+                        autoTextViewGithubLabels.editableText.toString()
+                    )
+                ) && arrayListGithubLabel.contains(
+                    autoTextViewGithubLabels.editableText.toString()
+                )
+            ) {
+                arrayListGithubLabelName.add(RecyclerViewModelLabel(autoTextViewGithubLabels.editableText.toString()))
+                githubLabelAdapter.notifyDataSetChanged()
+                cardViewLabelList.visibility = View.VISIBLE
+            } else if (arrayListGithubLabelName.contains(
+                    RecyclerViewModelLabel(autoTextViewGithubLabels.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.github_label_exist)
+                )
+            } else if (!arrayListGithubLabel.contains(autoTextViewGithubLabels.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.github_label_doesnt_exist)
+                )
+            }
+
         }
     }
 
@@ -5253,6 +5353,34 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         return arrayListGithubFileName
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeGithubAssigneeRecyclerView() {
+        arrayListGithubAssigneeName.clear()
+        recyclerViewGithubAssignee.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        githubAssigneeAdapter = RecyclerViewGithubAssigneeAdapter(
+            arrayListGithubAssigneeName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewGithubAssignee.adapter = githubAssigneeAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeGithubLabelRecyclerView() {
+        arrayListGithubLabelName.clear()
+        recyclerViewGithubLabel.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        githubLabelAdapter = RecyclerViewGithubLabelAdapter(
+            arrayListGithubLabelName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewGithubLabel.adapter = githubLabelAdapter
+    }
+
     private fun checkGithubTitleEmpty(): Boolean {
         if (editTextGithubTitle.text.toString().isNotEmpty()) {
             return true
@@ -5268,6 +5396,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     internal fun initializeGithubAutoTextViews(
         arrayListRepos: ArrayList<String>,
+        arrayListProject: ArrayList<String>,
         arrayListAssignee: ArrayList<String>,
         arrayListMileStones: ArrayList<String>,
         arrayListLinkedRequests: ArrayList<String>,
@@ -5278,6 +5407,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         editTextGithubTitle.setText(sharedPref.getString("github_title", null))
         editTextGithubComment.setText(sharedPref.getString("github_comment", null))
         initializeGithubRepos(arrayListRepos = arrayListRepos, sharedPref = sharedPref)
+        initializeGithubProject(arrayListProject = arrayListProject, sharedPref = sharedPref)
         initializeGithubAssignee(arrayListAssignee = arrayListAssignee, sharedPref = sharedPref)
         initializeGithubMileStones(
             arrayListMileStones = arrayListMileStones,
@@ -5288,6 +5418,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             sharedPref = sharedPref
         )
         initializeGithubLabels(arrayListLabels = arrayListLabels, sharedPref = sharedPref)
+        this.arrayListGithubAssignee = arrayListAssignee
+        this.arrayListGithubLabel = arrayListLabels
         detachProgressBar()
     }
 
@@ -5487,6 +5619,64 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeGithubProject(
+        arrayListProject: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewGithubProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListProject
+        )
+        autoTextViewGithubProject.setAdapter(autoTextViewGithubProjectAdapter)
+        if (arrayListProject.isNotEmpty() && autoTextViewGithubProject.text.isEmpty()) {
+            if (sharedPref.getString("github_project", null) != null) {
+                if (arrayListProject.contains(
+                        sharedPref.getString(
+                            "github_project",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewGithubProject.setText(
+                        sharedPref.getString("github_project", null),
+                        false
+                    )
+                } else {
+                    autoTextViewGithubProject.setText(arrayListProject[0], false)
+                }
+            } else {
+                autoTextViewGithubProject.setText(arrayListProject[0], false)
+            }
+        }
+        autoTextViewGithubProject.setOnTouchListener { v, event ->
+            autoTextViewGithubProject.showDropDown()
+            false
+        }
+        autoTextViewGithubProject.setOnItemClickListener { parent, view, position, id ->
+            githubAuthentication.setProjectPosition(projectPosition = position)
+            hideKeyboard(activity = activity, view = viewGithub)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializeGithubLabels(
         arrayListLabels: ArrayList<String>,
         sharedPref: SharedPreferences
@@ -5587,7 +5777,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             false
         }
         autoTextViewGithubLinkedRequests.setOnItemClickListener { parent, view, position, id ->
-            jiraAuthentication.setProjectPosition(projectPosition = position)
+            githubAuthentication.setLinkedRequestPosition(linkedRequestPosition = position)
             hideKeyboard(activity = activity, view = viewGithub)
         }
 //        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
