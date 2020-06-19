@@ -186,8 +186,7 @@ internal class GithubAuthentication {
                 if (!labels.isNullOrEmpty()) {
                     if (arrayListLabels.isNotEmpty()) {
                         val jsonArrayLabels = JsonArray()
-                        val jsonObjectLabels = JsonObject()
-                        jsonArrayLabels.add(jsonObjectLabels)
+                        jsonArrayLabels.add(labels)
                         jsonObject.add("labels", jsonArrayLabels)
                     }
                 }
@@ -400,9 +399,9 @@ internal class GithubAuthentication {
                         Log.d("github_project_success", response.code().toString())
                         val githubList = response.body()
                         githubList?.forEach {
-                            if (it.url != null && it.name != null) {
+                            if (it.html_url != null && it.name != null) {
                                 arrayListProject.add(it.name!!)
-                                arrayListProjectUrl.add(it.url!!)
+                                arrayListProjectUrl.add(it.html_url!!)
                             }
                         }
                         updateFields()
@@ -498,9 +497,9 @@ internal class GithubAuthentication {
                         Log.d("github_pull_requests", response.code().toString())
                         val githubList = response.body()
                         githubList?.forEach {
-                            if (it.title != null && it.url!= null) {
+                            if (it.title != null && it.html_url!= null) {
                                 arrayListLinkedRequests.add(it.title!!)
-                                arrayListLinkedRequestsUrl.add(it.url!!)
+                                arrayListLinkedRequestsUrl.add(it.html_url!!)
 //                                hashMapLinkedRequests[it.title!!] = it.number!!
                             }
                         }

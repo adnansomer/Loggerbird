@@ -4,6 +4,6 @@ package models
 
 data class GithubPullRequestsModel(
     var title:String? = null,
-    var url:String? = null
+    var html_url:String? = null
 )
 
