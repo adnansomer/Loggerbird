@@ -1,25 +1,27 @@
 package utils
 
+import com.google.gson.GsonBuilder
 import loggerbird.LoggerBird
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class RetrofitUserJiraClient {
+class RetrofitUserSlackClient {
     companion object {
-       internal fun getJiraUserClient(url:String): Retrofit {
+       internal fun getSlackUserClient(url:String): Retrofit {
+           val gson = GsonBuilder().setLenient().create()
             val client = OkHttpClient.Builder()
                 .addInterceptor(
-                    BasicAuthJiraInterceptor(
-                        LoggerBird.jiraUserName,
-                        LoggerBird.jiraApiToken
+                    OauthInterceptor(
+                        SlackAuthentication.CLIENT_ID,
+                        SlackAuthentication.CLIENT_SECRET
                     )
                 )
                 .build()
             return Retrofit.Builder()
                 .baseUrl(url)
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create()).build()
+                .addConverterFactory(GsonConverterFactory.create(gson)).build()
         }
     }
 }

@@ -14,28 +14,26 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
+import models.RecyclerViewModel
 import java.util.concurrent.TimeUnit
 import android.provider.Settings
 import android.widget.Button
 import androidx.annotation.RequiresApi
-import androidx.cardview.widget.CardView
 import constants.Constants
 import loggerbird.LoggerBird
-import models.RecyclerViewModelTo
 
-class RecyclerViewEmaiToListAdapter(
-    private val fileList: ArrayList<RecyclerViewModelTo>,
-    private val cardView: CardView,
+class RecyclerViewGithubAdapter(
+    private val fileList: ArrayList<RecyclerViewModel>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View
 ) :
-    RecyclerView.Adapter<RecyclerViewEmaiToListAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerViewGithubAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_email_to_item,
+                R.layout.recycler_view_github_item,
                 parent,
                 false
             )
@@ -52,7 +50,6 @@ class RecyclerViewEmaiToListAdapter(
             adapter = this,
             position = position,
             fileList = fileList,
-            cardView = cardView,
             context = context,
             activity = activity,
             rootView = rootView
@@ -68,17 +65,16 @@ class RecyclerViewEmaiToListAdapter(
         private lateinit var buttonYes: Button
         private lateinit var buttonNo: Button
 
-        companion object {
-            internal lateinit var arrayListFilePaths: ArrayList<RecyclerViewModelTo>
+        companion object{
+             internal lateinit var arrayListFilePaths:ArrayList<RecyclerViewModel>
         }
 
 
         fun bindItems(
-            item: RecyclerViewModelTo,
-            adapter: RecyclerViewEmaiToListAdapter,
+            item: RecyclerViewModel,
+            adapter: RecyclerViewGithubAdapter,
             position: Int,
-            fileList: ArrayList<RecyclerViewModelTo>,
-            cardView: CardView,
+            fileList: ArrayList<RecyclerViewModel>,
             context: Context,
             activity: Activity,
             rootView: View
@@ -86,7 +82,7 @@ class RecyclerViewEmaiToListAdapter(
             arrayListFilePaths = fileList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
-            textViewFileName.text = item.email
+            textViewFileName.text = item.file.name
             imageButtonCross.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
@@ -94,8 +90,7 @@ class RecyclerViewEmaiToListAdapter(
                         rootView = rootView,
                         fileList = fileList,
                         position = position,
-                        adapter = adapter,
-                        cardView = cardView
+                        adapter = adapter
                     )
                 }
             }
@@ -106,15 +101,14 @@ class RecyclerViewEmaiToListAdapter(
         private fun removeItemPopup(
             activity: Activity,
             rootView: View,
-            fileList: ArrayList<RecyclerViewModelTo>,
+            fileList: ArrayList<RecyclerViewModel>,
             position: Int,
-            adapter: RecyclerViewEmaiToListAdapter,
-            cardView: CardView
+            adapter: RecyclerViewGithubAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_email_item_to_popup,
+                        R.layout.recycler_view_github_item_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -146,18 +140,10 @@ class RecyclerViewEmaiToListAdapter(
                             viewRecyclerViewItems,
                             windowManagerParamsRecyclerViewItemPopup
                         )
-                        textViewTitle =
-                            viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_email_title)
-                        buttonYes =
-                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_email_yes)
-                        buttonNo =
-                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_email_no)
-                        buttonClicksEmailPopup(
-                            adapter = adapter,
-                            fileList = fileList,
-                            position = position,
-                            cardView = cardView
-                        )
+                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_github_title)
+                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_github_yes)
+                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_github_no)
+                        buttonClicksGithubPopup(adapter = adapter , fileList = fileList , position = position)
                     }
                 }
             } catch (e: Exception) {
@@ -165,7 +151,7 @@ class RecyclerViewEmaiToListAdapter(
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
-                    tag = Constants.recyclerViewEmailAdapterTag
+                    tag = Constants.recyclerViewGithubAdapterTag
                 )
             }
 
@@ -184,19 +170,11 @@ class RecyclerViewEmaiToListAdapter(
 //            alertDialogItemDelete.show()
         }
 
-        private fun buttonClicksEmailPopup(
-            fileList: ArrayList<RecyclerViewModelTo>,
-            position: Int,
-            adapter: RecyclerViewEmaiToListAdapter,
-            cardView: CardView
-        ) {
+        private fun buttonClicksGithubPopup(fileList: ArrayList<RecyclerViewModel>, position: Int, adapter: RecyclerViewGithubAdapter) {
             buttonYes.setSafeOnClickListener {
                 fileList.removeAt(position)
                 arrayListFilePaths = fileList
                 adapter.notifyDataSetChanged()
-                if (arrayListFilePaths.isEmpty()) {
-                    cardView.visibility = View.GONE
-                }
                 removePopupLayout()
             }
             buttonNo.setSafeOnClickListener {
@@ -206,7 +184,7 @@ class RecyclerViewEmaiToListAdapter(
         }
 
 
-        private fun removePopupLayout() {
+        private fun removePopupLayout(){
             if (windowManagerRecyclerViewItemPopup != null && this::viewRecyclerViewItems.isInitialized) {
                 (windowManagerRecyclerViewItemPopup as WindowManager).removeViewImmediate(
                     viewRecyclerViewItems

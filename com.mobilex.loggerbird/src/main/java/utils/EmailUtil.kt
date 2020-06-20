@@ -535,11 +535,12 @@ internal class EmailUtil {
                             val editor: SharedPreferences.Editor = sharedPref.edit()
                             editor.remove("future_task_email_message")
                             editor.remove("file_future_list")
+                            editor.remove("user_future_list")
                             editor.remove("future_task_email_to")
                             editor.remove("future_task_time")
                             editor.remove("future_task_email_subject")
                             editor.remove("future_task_check")
-                            editor.apply()
+                            editor.commit()
                             context.stopService(Intent(context, LoggerBirdFutureTaskService::class.java))
                         }
                     }

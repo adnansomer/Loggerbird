@@ -90,6 +90,19 @@
     <string name="future_task_disabled">Gelecek zaman görevi kapatıldı!</string>
     <string name="future_task_empty">Tarih ve saati boş olamaz!</string>
     <string name="future_task_gathered">Gelecek zaman detayları alındı!</string>
+    <string name="github_title_empty">Başlık boş olamaz!</string>
+    <string name="github_issue_success">Görev başarılı bir şekilde açıldı!</string>
+    <string name="github_issue_failure">Github görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="github_issue_time_out">Github görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="github_issue_preferences_save">Konu tercihleri kaydedildi!</string>
+    <string name="github_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="github_repo_empty">Veri deposu boş olamaz!</string>
+    <string name="github_repo_doesnt_exist">Böyle bir veri deposu bulunamadı!</string>
+    <string name="github_assignee_exist">Bu sorumlu zaten listeye eklendi!</string>
+    <string name="github_assignee_doesnt_exist">Bu sorumlu bulunamadı!</string>
+    <string name="github_label_exist">Bu etiket zaten listeye eklendi!</string>
+    <string name="github_label_doesnt_exist">Bu etiket bulunamadı!</string>
+    <string name="github_mile_stone_doesnt_exist">Bu kilometre taşı bulunamadı!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
@@ -110,6 +123,8 @@
     <string name="textView_loggerbird_future_title">Gelecek zaman görevi olarak ata</string>
     <string name="textView_loggerbird_gitlab_title">Gitlab ile paylaş</string>
     <string name="textView_loggerbird_github_title">Github ile paylaş</string>
+
+
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça boyutu ayarla</string>
     <!-- activity_paint_save_dialog-->
@@ -164,6 +179,9 @@
     <string name="textView_recyclerView_popup_title">Jira görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_yes">Evet</string>
     <string name="button_recyclerView_no">Hayır</string>
+    <!-- loggerbird_jira_menu-->
+    <string name="textView_jira_menu_save">Görev detayı kaydet</string>
+    <string name="textView_jira_menu_clear">Görev detayı temizle</string>
     <!-- loggerbird_slack_popup-->
     <string name="textView_slack_title">Slack mesajı oluştur</string>
     <string name="textView_slack_message">Mesaj</string>
@@ -194,10 +212,10 @@
     <string name="textView_email_issue">Yeni İleti</string>
     <string name="editText_email_to">Alıcılar:</string>
     <string name="editText_email_subject">Konu:</string>
-    <string name="editText_email_content">Mesajınızı buraya yazınız!</string>
-    <string name="textView_email_message">Mesaj</string>
+    <string name="editText_email_content">Mesajınızı buraya yazınız:</string>
     <string name="textView_email_attachments">Eklentiler</string>
     <string name="textView_email_to_list">Alıcılar Listesi</string>
+    <string name="textView_email_content">Mesaj</string>
     <string name="button_email_create">Oluştur</string>
     <string name="button_email_cancel">İptal</string>
     <string name="textView_recyclerView_email_popup_title">E-mailiniz\'den bu eklentiyi kaldırmaktan eminmisiniz?</string>
@@ -212,4 +230,35 @@
     <string name="button_future_task_cancel">İptal</string>
     <string name="textView_future_task_date">Başlangıç tarihi</string>
     <string name="textView_future_task_time">Başlangıç zamanı</string>
+    <!-- loggerbird_github_popup-->
+    <string name="textView_github_repo">Veri deposu</string>
+    <string name="textView_github_project">Proje</string>
+    <string name="textView_github_assignee">Sorumlu</string>
+    <string name="textView_github_title">Başlık</string>
+    <string name="editText_github_title">Gönderiniz için bir başlık yazınız.</string>
+    <string name="editText_github_comment">Sorunu detayli bir sekilde yorumlayınız.</string>
+    <string name="textView_github_comment">Yorum</string>
+    <string name="textView_github_labels">Etiketler</string>
+    <string name="textView_github_milestone">Kilometre Taşı</string>
+    <string name="textView_github_linked_requests">Bağlantılı çekme isteği</string>
+    <string name="textView_github_attachment">Eklentiler</string>
+    <string name="textView_github_assignee_list">Sorumlu listesi</string>
+    <string name="textView_github_label_list">Etiketler listesi</string>
+    <string name="button_github_create">Oluştur</string>
+    <string name="button_github_cancel">İptal</string>
+    <!-- recycler_view_github_item_popup-->
+    <string name="textView_recyclerView_github_popup_title">Github görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
+    <!-- loggerbird_github_menu-->
+    <string name="textView_github_menu_save">Görev detayı kaydet</string>
+    <string name="textView_github_menu_clear">Görev detayı temizle</string>
+    <!-- recycler_view_github_assignee_popup-->
+    <string name="textView_recyclerView_github_assignee_header">Sorumluyu sil</string>
+    <string name="textView_recyclerView_github_assignee_title">Github görevlendirmenizden bu sorumluyu kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_github_assignee_delete">Sorumluyu sil</string>
+    <string name="button_recyclerView_github_assignee_keep">Sorumluyu tut</string>
+    <!-- recycler_view_github_label_popup-->
+    <string name="textView_recyclerView_github_label_header">Etiketi sil</string>
+    <string name="textView_recyclerView_github_label_title">Github görevlendirmenizden bu etiketi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_github_label_delete">Etiketi sil</string>
+    <string name="button_recyclerView_github_label_keep">Etiketi tut</string>
 </resources>

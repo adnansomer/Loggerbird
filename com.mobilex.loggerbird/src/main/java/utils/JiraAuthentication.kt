@@ -250,6 +250,7 @@ class JiraAuthentication {
             timerTaskQueue.cancel()
         }
         LoggerBirdService.loggerBirdService.finishShareLayout("jira_error")
+        throwable?.printStackTrace()
         e?.printStackTrace()
         LoggerBird.callEnqueue()
         LoggerBird.callExceptionDetails(
