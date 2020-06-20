@@ -418,15 +418,32 @@
                                 android:textSize="16sp"
                                 android:layout_marginBottom="5dp"
                                 android:text="@string/textView_jira_issue" />
-                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_jira_issues"
+
+                            <LinearLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@null"
-                                android:singleLine="true"
-                                android:dropDownHeight="100dp"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center"
                                 >
-                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                    android:id="@+id/auto_textView_jira_issues"
+                                    android:layout_width="0dp"
+                                    android:layout_weight="1"
+                                    android:layout_height="match_parent"
+                                    android:background="@null"
+                                    android:singleLine="true"
+                                    android:dropDownHeight="100dp"
+                                    >
+                                </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+
+                                <ImageView
+                                    android:id="@+id/imageView_issue_add"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    app:srcCompat="@drawable/ic_add_black_24dp" />
+                            </LinearLayout>
+
+                        </LinearLayout>
                             <!--
                             <Spinner
                                 android:id="@+id/spinner_jira_issue_issues"
@@ -434,9 +451,55 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginBottom="10dp"/>-->
 
+                    </androidx.cardview.widget.CardView>
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_issues_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:visibility="gone"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_issues_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_issue_list"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:srcCompat="@drawable/ic_account_circle_black_24dp">
+
+                            </ImageView>
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/recycler_view_issues_list"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent">
+                            </androidx.recyclerview.widget.RecyclerView>
+
                         </LinearLayout>
 
-                    </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+
+
+                </androidx.cardview.widget.CardView>
 
                     <androidx.cardview.widget.CardView
                         android:id="@+id/cardView_assignee"

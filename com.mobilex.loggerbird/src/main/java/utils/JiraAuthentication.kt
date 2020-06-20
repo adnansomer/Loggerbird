@@ -1,6 +1,7 @@
 package utils
 
 import adapter.RecyclerViewJiraAdapter
+import adapter.RecyclerViewJiraIssueAdapter
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
@@ -14,7 +15,6 @@ import androidx.preference.PreferenceManager
 //import com.atlassian.jira.rest.client.api.domain.*
 //import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder
 //import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -30,7 +30,6 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import services.LoggerBirdService
 import java.io.*
-import java.net.URI
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -77,6 +76,8 @@ class JiraAuthentication {
     private val arrayListIssueTypesId: ArrayList<Int> = ArrayList()
     private val arrayListAssignee: ArrayList<String> = ArrayList()
     private val arrayListIssueLinkedTypes: ArrayList<String> = ArrayList()
+    private val arrayListOutwardLinkedTypes:ArrayList<String> = ArrayList()
+    private val arrayListInwardLinkedTypes:ArrayList<String> = ArrayList()
     private val arrayListIssues: ArrayList<String> = ArrayList()
     private val arrayListReporter: ArrayList<String> = ArrayList()
     private val arrayListPriorities: ArrayList<String> = ArrayList()
@@ -414,38 +415,68 @@ class JiraAuthentication {
                         }
                         if (epicLink != null) {
                             if (epicLink!!.isNotEmpty()) {
-                                jsonObjectContent.addProperty(epicLinkField, epicLink)
+                                jsonObjectContent.addProperty(epicLinkField, epicLink!!.substringAfter("(").substringBefore(")"))
                             }
                         }
 
                         jsonObjectIssue.add("fields", jsonObjectContent)
+                        if (issue != null || RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.isNotEmpty()) {
+                            val jsonArrayIssue = JsonArray()
+                            var jsonObjectIssueAdd = JsonObject()
+                            var jsonObjectIssueLink = JsonObject()
+                            var jsonObjectIssueLinkType = JsonObject()
+                            var jsonObjectOutwardIssueKey = JsonObject()
+                            val jsonObjectUpdate = JsonObject()
+                            if(RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.isNotEmpty()){
+                                RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.forEach {
+                                    jsonObjectOutwardIssueKey = JsonObject()
+                                    jsonObjectIssueAdd = JsonObject()
+                                    jsonObjectIssueLink = JsonObject()
+                                    jsonObjectIssueLinkType = JsonObject()
+                                    jsonObjectIssueLinkType.addProperty(
+                                        "name",
+                                        hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
+                                    )
+                                    jsonObjectOutwardIssueKey.addProperty("key", it.issueName)
+                                    jsonObjectIssueLink.add("type", jsonObjectIssueLinkType)
 
-                        if (issue != null) {
-                            if (issue!!.isNotEmpty()) {
-                                val jsonArrayIssue = JsonArray()
-                                val jsonObjectIssueAdd = JsonObject()
-                                val jsonObjectIssueLink = JsonObject()
-                                val jsonObjectIssueLinkType = JsonObject()
-                                val jsonObjectOutwardIssueKey = JsonObject()
-                                val jsonObjectUpdate = JsonObject()
-                                jsonObjectIssueLinkType.addProperty(
-                                    "name",
-                                    hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
-                                )
-                                jsonObjectOutwardIssueKey.addProperty("key", issue)
-                                jsonObjectIssueLink.add("type", jsonObjectIssueLinkType)
-                                jsonObjectIssueLink.add("outwardIssue", jsonObjectOutwardIssueKey)
-                                jsonObjectIssueAdd.add("add", jsonObjectIssueLink)
-                                jsonArrayIssue.add(jsonObjectIssueAdd)
-                                jsonObjectUpdate.add("issuelinks", jsonArrayIssue)
-                                jsonObjectIssue.add("update", jsonObjectUpdate)
+                                    if(arrayListInwardLinkedTypes.contains(arrayListIssueLinkedTypes[linkedIssueTypePosition])){
+                                        jsonObjectIssueLink.add("inwardIssue", jsonObjectOutwardIssueKey)
+
+                                    }else if(arrayListOutwardLinkedTypes.contains(arrayListIssueLinkedTypes[linkedIssueTypePosition])){
+                                        jsonObjectIssueLink.add("outwardIssue", jsonObjectOutwardIssueKey)
+                                    }
+                                    jsonObjectIssueAdd.add("add", jsonObjectIssueLink)
+                                    jsonArrayIssue.add(jsonObjectIssueAdd)
+                                }
+                            }else{
+                                if (issue!!.isNotEmpty()) {
+                                    jsonObjectIssueLinkType.addProperty(
+                                        "name",
+                                        hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
+                                    )
+                                    jsonObjectOutwardIssueKey.addProperty("key", issue)
+                                    jsonObjectIssueLink.add("type", jsonObjectIssueLinkType)
+
+                                    if(arrayListInwardLinkedTypes.contains(arrayListIssueLinkedTypes[linkedIssueTypePosition])){
+                                        jsonObjectIssueLink.add("inwardIssue", jsonObjectOutwardIssueKey)
+
+                                    }else if(arrayListOutwardLinkedTypes.contains(arrayListIssueLinkedTypes[linkedIssueTypePosition])){
+                                        jsonObjectIssueLink.add("outwardIssue", jsonObjectOutwardIssueKey)
+                                    }
+                                    jsonObjectIssueAdd.add("add", jsonObjectIssueLink)
+                                    jsonArrayIssue.add(jsonObjectIssueAdd)
 //                                val linkIssueInput = LinkIssuesInput(
 //                            issueKey,
 //                            this.issue,
 //                            hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
 //                        )
 //                        issueClient.linkIssue(linkIssueInput)
+                                }
                             }
+                            jsonObjectUpdate.add("issuelinks", jsonArrayIssue)
+                            jsonObjectIssue.add("update", jsonObjectUpdate)
+
                         }
                         RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
                             .create(AccountIdService::class.java)
@@ -755,6 +786,8 @@ class JiraAuthentication {
                 arrayListAvatarUrls.clear()
                 arrayListIssueTypesId.clear()
                 arrayListIssueLinkedTypes.clear()
+                arrayListOutwardLinkedTypes.clear()
+                arrayListInwardLinkedTypes.clear()
                 arrayListIssues.clear()
                 arrayListPriorities.clear()
                 arrayListPrioritiesId.clear()
@@ -1010,11 +1043,13 @@ class JiraAuthentication {
                             linkedIssueDetails?.getAsJsonArray("issueLinkTypes")?.forEach {
                                 if (!arrayListIssueLinkedTypes.contains(it.asJsonObject["inward"].asString)) {
                                     arrayListIssueLinkedTypes.add(it.asJsonObject["inward"].asString)
+                                    arrayListInwardLinkedTypes.add(it.asJsonObject["inward"].asString)
                                     hashMapLinkedIssues[it.asJsonObject["inward"].asString] =
                                         it.asJsonObject["name"].asString
                                 }
                                 if (!arrayListIssueLinkedTypes.contains(it.asJsonObject["outward"].asString)) {
                                     arrayListIssueLinkedTypes.add(it.asJsonObject["outward"].asString)
+                                    arrayListOutwardLinkedTypes.add(it.asJsonObject["outward"].asString)
                                     hashMapLinkedIssues[it.asJsonObject["outward"].asString] =
                                         it.asJsonObject["name"].asString
                                 }
@@ -1162,8 +1197,9 @@ class JiraAuthentication {
                             Log.d("epic_details", response.code().toString())
                             val epicList = response.body()
                             epicList?.getAsJsonArray("issues")?.forEach {
-                                if (!arrayListEpicLink.contains(it.asJsonObject["key"].asString)) {
-                                    arrayListEpicLink.add(it.asJsonObject["key"].asString)
+
+                                if (!arrayListEpicLink.contains(it.asJsonObject["fields"].asJsonObject[epicNameField].asString+" "+"-"+" "+"("+it.asJsonObject["key"].asString+")")) {
+                                    arrayListEpicLink.add(it.asJsonObject["fields"].asJsonObject[epicNameField].asString+" "+"-"+" "+"("+it.asJsonObject["key"].asString+")")
                                 }
                                 if (!arrayListEpicName.contains(it.asJsonObject["fields"].asJsonObject[epicNameField].asString)) {
                                     arrayListEpicName.add(it.asJsonObject["fields"].asJsonObject[epicNameField].asString)
