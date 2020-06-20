@@ -30,6 +30,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import services.LoggerBirdService
 import java.io.*
+import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -369,9 +370,16 @@ class JiraAuthentication {
                         jsonObjectContent.add("project", jsonObjectProjectId)
                         jsonObjectContent.add("issuetype", jsonObjectIssueType)
                         jsonObjectContent.addProperty("summary", summary)
-                        if (description != null) {
-                            if (description!!.isNotEmpty()) {
-                                jsonObjectContent.addProperty("description", description)
+                        if (description != null || RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.isNotEmpty()) {
+                            if (description!!.isNotEmpty() || RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.isNotEmpty()) {
+                                val stringBuilderDescription = StringBuilder()
+                                stringBuilderDescription.append("Description:$description")
+                                var counter = 0
+                                RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.forEach {
+                                    stringBuilderDescription.append("\n" + "Linked Issue_"+counter+":" + LoggerBird.jiraDomainName+"/browse/"+it.issueName )
+                                    counter++
+                                }
+                                jsonObjectContent.addProperty("description", stringBuilderDescription.toString())
                             }
                         }
                         if (arrayListChoosenLabel.isNotEmpty()) {
@@ -428,7 +436,7 @@ class JiraAuthentication {
                             var jsonObjectOutwardIssueKey = JsonObject()
                             val jsonObjectUpdate = JsonObject()
                             if(RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.isNotEmpty()){
-                                RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.forEach {
+//                                RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.forEach {
                                     jsonObjectOutwardIssueKey = JsonObject()
                                     jsonObjectIssueAdd = JsonObject()
                                     jsonObjectIssueLink = JsonObject()
@@ -437,7 +445,7 @@ class JiraAuthentication {
                                         "name",
                                         hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
                                     )
-                                    jsonObjectOutwardIssueKey.addProperty("key", it.issueName)
+                                    jsonObjectOutwardIssueKey.addProperty("key", RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames[0].issueName)
                                     jsonObjectIssueLink.add("type", jsonObjectIssueLinkType)
 
                                     if(arrayListInwardLinkedTypes.contains(arrayListIssueLinkedTypes[linkedIssueTypePosition])){
@@ -448,7 +456,7 @@ class JiraAuthentication {
                                     }
                                     jsonObjectIssueAdd.add("add", jsonObjectIssueLink)
                                     jsonArrayIssue.add(jsonObjectIssueAdd)
-                                }
+//                                }
                             }else{
                                 if (issue!!.isNotEmpty()) {
                                     jsonObjectIssueLinkType.addProperty(
