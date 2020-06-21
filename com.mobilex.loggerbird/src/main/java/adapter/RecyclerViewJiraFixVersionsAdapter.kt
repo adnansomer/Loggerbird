@@ -20,21 +20,21 @@ import android.widget.Button
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
-import models.RecyclerViewModelIssue
+import models.RecyclerViewModelFixVersions
 import services.LoggerBirdService
 
-class RecyclerViewJiraIssueAdapter(
-    private val issueList: ArrayList<RecyclerViewModelIssue>,
+class RecyclerViewJiraFixVersionsAdapter(
+    private val fixVersionsList: ArrayList<RecyclerViewModelFixVersions>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View
 ) :
-    RecyclerView.Adapter<RecyclerViewJiraIssueAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerViewJiraFixVersionsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_jira_issue_item,
+                R.layout.recycler_view_jira_fix_item,
                 parent,
                 false
             )
@@ -42,15 +42,15 @@ class RecyclerViewJiraIssueAdapter(
     }
 
     override fun getItemCount(): Int {
-        return issueList.size
+        return fixVersionsList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindItems(
-            item = issueList[position],
+            item = fixVersionsList[position],
             adapter = this,
             position = position,
-            issueList = issueList,
+            fixVersionsList = fixVersionsList,
             context = context,
             activity = activity,
             rootView = rootView
@@ -67,29 +67,29 @@ class RecyclerViewJiraIssueAdapter(
         private lateinit var buttonNo: Button
 
         companion object{
-             internal  var arrayListIssueNames:ArrayList<RecyclerViewModelIssue> = ArrayList()
+             internal  var arrayListFixVersionsNames:ArrayList<RecyclerViewModelFixVersions> = ArrayList()
         }
 
 
         fun bindItems(
-            item: RecyclerViewModelIssue,
-            adapter: RecyclerViewJiraIssueAdapter,
+            item: RecyclerViewModelFixVersions,
+            adapter: RecyclerViewJiraFixVersionsAdapter,
             position: Int,
-            issueList: ArrayList<RecyclerViewModelIssue>,
+            fixVersionsList: ArrayList<RecyclerViewModelFixVersions>,
             context: Context,
             activity: Activity,
             rootView: View
         ) {
-            arrayListIssueNames = issueList
+            arrayListFixVersionsNames = fixVersionsList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
-            textViewFileName.text = item.issueName
+            textViewFileName.text = item.fixVersionsName
             imageButtonCross.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
-                        issueList = issueList,
+                        fixVersionsList = fixVersionsList,
                         position = position,
                         adapter = adapter
                     )
@@ -102,14 +102,14 @@ class RecyclerViewJiraIssueAdapter(
         private fun removeItemPopup(
             activity: Activity,
             rootView: View,
-            issueList: ArrayList<RecyclerViewModelIssue>,
+            fixVersionsList: ArrayList<RecyclerViewModelFixVersions>,
             position: Int,
-            adapter: RecyclerViewJiraIssueAdapter
+            adapter: RecyclerViewJiraFixVersionsAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_jira_issue_popup,
+                        R.layout.recycler_view_jira_fix_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -144,7 +144,7 @@ class RecyclerViewJiraIssueAdapter(
                         textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_jira_title)
                         buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_jira_yes)
                         buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_jira_no)
-                        buttonClicksJiraPopup(adapter = adapter , issueList = issueList , position = position)
+                        buttonClicksFixVersionPopup(adapter = adapter , fixVersionList = fixVersionsList , position = position)
                     }
                 }
             } catch (e: Exception) {
@@ -171,13 +171,13 @@ class RecyclerViewJiraIssueAdapter(
 //            alertDialogItemDelete.show()
         }
 
-        private fun buttonClicksJiraPopup(issueList: ArrayList<RecyclerViewModelIssue>, position: Int, adapter: RecyclerViewJiraIssueAdapter) {
+        private fun buttonClicksFixVersionPopup(fixVersionList: ArrayList<RecyclerViewModelFixVersions>, position: Int, adapter: RecyclerViewJiraFixVersionsAdapter) {
             buttonYes.setSafeOnClickListener {
-                issueList.removeAt(position)
-                arrayListIssueNames = issueList
+                fixVersionList.removeAt(position)
+                arrayListFixVersionsNames = fixVersionList
                 adapter.notifyDataSetChanged()
-                if(issueList.size <=0){
-                    LoggerBirdService.loggerBirdService.cardViewJiraIssueList.visibility = View.GONE
+                if(fixVersionList.size <=0){
+                    LoggerBirdService.loggerBirdService.cardViewJiraFixVersionsList.visibility = View.GONE
                 }
                 removePopupLayout()
             }

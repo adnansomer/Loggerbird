@@ -28,7 +28,7 @@
                 android:layout_gravity="center"
                 android:textSize="20sp"
                 android:textColor="@color/black"
-                android:text="@string/textView_recyclerView_jira_issue_header" />
+                android:text="@string/textView_recyclerView_jira_component_header" />
 
         </LinearLayout>
 
@@ -45,7 +45,7 @@
                 android:layout_gravity="center"
                 android:textSize="16sp"
                 android:textColor="@color/black"
-                android:text="@string/textView_recyclerView_jira_issue_title" />
+                android:text="@string/textView_recyclerView_jira_component_title" />
         </LinearLayout>
 
     <LinearLayout
@@ -62,7 +62,7 @@
             android:textSize="15sp"
             android:textColor="@color/colorFab"
             android:background="@drawable/pop_up_button_shape"
-            android:text="@string/button_recyclerView_jira_issue_delete" />
+            android:text="@string/button_recyclerView_jira_component_delete" />
 
         <Button
             android:id="@+id/button_recycler_view_jira_no"
@@ -71,7 +71,7 @@
             android:textSize="15sp"
             android:textColor="@color/colorBlack"
             android:background="@color/colorFab"
-            android:text="@string/button_recyclerView_jira_issue_keep" />
+            android:text="@string/button_recyclerView_jira_component_keep" />
         </LinearLayout>
 
     </LinearLayout>

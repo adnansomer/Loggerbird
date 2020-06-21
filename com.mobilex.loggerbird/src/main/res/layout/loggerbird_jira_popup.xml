@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_jira"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:layout_height="match_parent">
 
 
     <LinearLayout
+        style="@style/Dialog"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorFab"
-        android:orientation="vertical"
-        style="@style/Dialog">
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -21,23 +21,22 @@
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/textView_jira_title"
-                app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
-                app:menu="@menu/loggerbird_jira_menu"
                 android:layout_width="match_parent"
-                android:background="@color/colorFab"
                 android:layout_height="wrap_content"
-                app:titleTextColor="@color/black"
-                app:title="@string/textView_jira_title">
-            </androidx.appcompat.widget.Toolbar>
+                android:background="@color/colorFab"
+                app:menu="@menu/loggerbird_jira_menu"
+                app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
+                app:title="@string/textView_jira_title"
+                app:titleTextColor="@color/black"></androidx.appcompat.widget.Toolbar>
 
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="3dp"
-                    android:background="@drawable/toolbar_shadow">
-                </View>
+                    android:background="@drawable/toolbar_shadow"></View>
 
             </FrameLayout>
 
@@ -47,108 +46,107 @@
             android:id="@+id/scrollView_jira"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/white"
             android:clickable="true"
-            android:focusable="true"
-            android:background="@color/white">
+            android:focusable="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="#f5f5f5">
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_project"
+                android:background="#f5f5f5"
+                android:orientation="vertical">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_project"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:id="@+id/textView_jira_project"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_project"
+                            android:textColor="@color/black"
+                            android:textSize="17sp"></TextView>
 
-                            <TextView
-                                android:id="@+id/textView_jira_project"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/black"
-                                android:textSize="17sp"
-                                android:layout_marginBottom="5dp"
-                                android:text="@string/textView_jira_project">
-                            </TextView>
-                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_jira_project"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@null"
-                                android:singleLine="true"
-                                android:dropDownHeight="100dp"
-                                >
-                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                            android:id="@+id/auto_textView_jira_project"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:dropDownHeight="100dp"
+                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
-                            <!--
-                            <Spinner
-                                android:id="@+id/spinner_jira_project"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent">
-                            </Spinner>
+                        <!--
+                        <Spinner
+                            android:id="@+id/spinner_jira_project"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                        </Spinner>
 -->
-                        </LinearLayout>
+                    </LinearLayout>
 
 
-                    </androidx.cardview.widget.CardView>
+                </androidx.cardview.widget.CardView>
 
 
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_issue_type"
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_issue_type"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
 
-                        <LinearLayout
+                        <TextView
+                            android:id="@+id/textView_jira_issue_type"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_issue_type"
+                            android:textColor="@color/black"
+                            android:textSize="17sp" />
 
-                            <TextView
-                                android:id="@+id/textView_jira_issue_type"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/black"
-                                android:textSize="17sp"
-                                android:layout_marginBottom="5dp"
-                                android:text="@string/textView_jira_issue_type" />
-                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_jira_issue_type"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@null"
-                                android:singleLine="true"
-                                android:dropDownHeight="100dp"
-                                >
-                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-                            <!--
-                            <Spinner
-                                android:id="@+id/spinner_jira_issue_type"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>
-                                -->
-                        </LinearLayout>
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                            android:id="@+id/auto_textView_jira_issue_type"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:dropDownHeight="100dp"
+                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                        <!--
+                        <Spinner
+                            android:id="@+id/spinner_jira_issue_type"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"/>
+                            -->
+                    </LinearLayout>
 
 
-                    </androidx.cardview.widget.CardView>
+                </androidx.cardview.widget.CardView>
+
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardView_epic_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardElevation="5dp"
+                    android:layout_marginBottom="7dp"
                     android:visibility="gone"
-                    android:layout_marginBottom="7dp">
+                    app:cardElevation="5dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -160,20 +158,18 @@
                             android:id="@+id/textView_jira_epic_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"
                             android:layout_marginBottom="5dp"
-                            android:text="@string/textView_jira_epic_name" />
+                            android:text="@string/textView_jira_epic_name"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
 
                         <androidx.appcompat.widget.AppCompatAutoCompleteTextView
                             android:id="@+id/auto_textView_jira_epic_name"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:background="@null"
-                            android:singleLine="true"
                             android:dropDownHeight="100dp"
-                            >
-                        </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
                         <!--  <Spinner
                               android:id="@+id/spinner_jira_sprint"
                               android:layout_width="match_parent"
@@ -184,274 +180,330 @@
 
                 </androidx.cardview.widget.CardView>
 
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_summary"
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_summary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:text="@string/textView_jira_summary"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"></TextView>
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editText_jira_summary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="10dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:background="@null"
+                            android:cursorVisible="true"
+                            android:hint="@string/editText_jira_summary"
+                            android:maxLines="3"
+                            android:textCursorDrawable="@color/colorBlack"
+                            android:textSize="16sp">
+
+
+                        </com.google.android.material.textfield.TextInputEditText>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:text="@string/textView_jira_description"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"></TextView>
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editText_jira_description"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="5dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginBottom="10dp"
+                            android:background="@null"
+                            android:cursorVisible="true"
+                            android:gravity="top"
+                            android:hint="@string/editText_jira_description"
+                            android:lines="5"
+                            android:maxLines="5"
+                            android:textCursorDrawable="@color/colorBlack"
+                            android:textSize="16sp">
+
+                        </com.google.android.material.textfield.TextInputEditText>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_component"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_component"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:baselineAligned="false"
+                            android:text="@string/textView_jira_component"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
+                            android:gravity="center"
+                            android:orientation="horizontal">
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="16sp"
-                                android:textColor="@color/black"
-                                android:layout_marginBottom="10dp"
-                                android:text="@string/textView_jira_summary">
-                            </TextView>
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/editText_jira_summary"
-                                android:textSize="16sp"
-                                android:layout_width="match_parent"
-                                android:layout_marginRight="10dp"
-                                android:cursorVisible="true"
-                                android:maxLines="3"
-                                android:background="@null"
-                                android:textCursorDrawable="@color/colorBlack"
-                                android:layout_marginBottom="10dp"
-                                android:hint="@string/editText_jira_summary"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="10dp">
-
-
-                            </com.google.android.material.textfield.TextInputEditText>
-
-                        </LinearLayout>
-
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_description"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/textView_jira_description"
-                                android:textSize="16sp"
-                                android:textColor="@color/black"
-                                android:layout_marginBottom="10dp">
-                            </TextView>
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/editText_jira_description"
-                                android:hint="@string/editText_jira_description"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="16sp"
-                                android:gravity="top"
-                                android:cursorVisible="true"
-                                android:textCursorDrawable="@color/colorBlack"
-                                android:background="@null"
-                                android:layout_marginRight="5dp"
-                                android:layout_marginBottom="10dp"
-                                android:lines="5"
-                                android:maxLines="5"
-                                android:layout_marginEnd="5dp">
-
-                            </com.google.android.material.textfield.TextInputEditText>
-
-                        </LinearLayout>
-
-                    </androidx.cardview.widget.CardView>
-
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_component"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/textView_jira_component"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:baselineAligned="false"
-                                android:text="@string/textView_jira_component"
-                                android:textColor="@color/black"
-                                android:textSize="16sp" />
                             <androidx.appcompat.widget.AppCompatAutoCompleteTextView
                                 android:id="@+id/auto_textView_jira_component"
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="match_parent"
+                                android:layout_weight="1"
                                 android:background="@null"
-                                android:singleLine="true"
                                 android:dropDownHeight="100dp"
-                                >
-                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                                android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
-                           <!-- <Spinner
-                                android:id="@+id/spinner_jira_issue_component"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>-->
+                            <ImageView
+                                android:id="@+id/imageView_component_add"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                app:srcCompat="@drawable/ic_add_black_24dp" />
 
                         </LinearLayout>
 
-                    </androidx.cardview.widget.CardView>
+                        <!-- <Spinner
+                             android:id="@+id/spinner_jira_issue_component"
+                             android:layout_width="match_parent"
+                             android:layout_height="wrap_content"
+                             android:layout_marginBottom="10dp"/>-->
 
+                    </LinearLayout>
 
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_reporter"
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_component_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:visibility="gone"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_component_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_component_list"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
+                            android:layout_marginBottom="10dp"
+                            android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/textView_jira_reporter"
-                                android:layout_width="match_parent"
+                            <ImageView
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:baselineAligned="false"
-                                android:text="@string/textView_jira_reporter"
-                                android:textColor="@color/black"
-                                android:textSize="16sp" />
+                                app:srcCompat="@drawable/ic_timeline_black_24dp">
+
+                            </ImageView>
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/recycler_view_component_list"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_reporter"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_reporter"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:baselineAligned="false"
+                            android:text="@string/textView_jira_reporter"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
+
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                            android:id="@+id/auto_textView_jira_reporter"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:dropDownHeight="100dp"
+                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+
+                        <!--<Spinner
+                            android:id="@+id/spinner_jira_issue_reporter"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"/-->
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_linked_issues"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_linked_issues"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_linked_issue"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
+
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                            android:id="@+id/auto_textView_jira_linked_issues"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:dropDownHeight="100dp"
+                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                        <!--   <Spinner
+                               android:id="@+id/spinner_jira_issue_linked_issues"
+                               android:layout_width="match_parent"
+                               android:layout_height="wrap_content"
+                               android:layout_marginBottom="10dp"/>-->
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_issues"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_issues"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_issue"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="horizontal">
+
                             <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_jira_reporter"
-                                android:layout_width="match_parent"
+                                android:id="@+id/auto_textView_jira_issues"
+                                android:layout_width="0dp"
                                 android:layout_height="match_parent"
+                                android:layout_weight="1"
                                 android:background="@null"
-                                android:singleLine="true"
                                 android:dropDownHeight="100dp"
-                                >
-                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                                android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
-                            <!--<Spinner
-                                android:id="@+id/spinner_jira_issue_reporter"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/-->
-
+                            <ImageView
+                                android:id="@+id/imageView_issue_add"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                app:srcCompat="@drawable/ic_add_black_24dp" />
                         </LinearLayout>
 
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_linked_issues"
+                    </LinearLayout>
+                    <!--
+                    <Spinner
+                        android:id="@+id/spinner_jira_issue_issues"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
+                        android:layout_marginBottom="10dp"/>-->
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
+                </androidx.cardview.widget.CardView>
 
-                            <TextView
-                                android:id="@+id/textView_jira_linked_issues"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/black"
-                                android:textSize="16sp"
-                                android:layout_marginBottom="5dp"
-                                android:text="@string/textView_jira_linked_issue" />
-                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_jira_linked_issues"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@null"
-                                android:singleLine="true"
-                                android:dropDownHeight="100dp"
-                                >
-                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-                         <!--   <Spinner
-                                android:id="@+id/spinner_jira_issue_linked_issues"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>-->
-
-                        </LinearLayout>
-
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_issues"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/textView_jira_issues"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/black"
-                                android:textSize="16sp"
-                                android:layout_marginBottom="5dp"
-                                android:text="@string/textView_jira_issue" />
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center"
-                                >
-                                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                    android:id="@+id/auto_textView_jira_issues"
-                                    android:layout_width="0dp"
-                                    android:layout_weight="1"
-                                    android:layout_height="match_parent"
-                                    android:background="@null"
-                                    android:singleLine="true"
-                                    android:dropDownHeight="100dp"
-                                    >
-                                </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-
-                                <ImageView
-                                    android:id="@+id/imageView_issue_add"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="match_parent"
-                                    app:srcCompat="@drawable/ic_add_black_24dp" />
-                            </LinearLayout>
-
-                        </LinearLayout>
-                            <!--
-                            <Spinner
-                                android:id="@+id/spinner_jira_issue_issues"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>-->
-
-                    </androidx.cardview.widget.CardView>
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardView_issues_list"
                     android:layout_width="match_parent"
@@ -484,15 +536,14 @@
                             <ImageView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                app:srcCompat="@drawable/ic_account_circle_black_24dp">
+                                app:srcCompat="@drawable/ic_assignment_black_24dp">
 
                             </ImageView>
 
                             <androidx.recyclerview.widget.RecyclerView
                                 android:id="@+id/recycler_view_issues_list"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent">
-                            </androidx.recyclerview.widget.RecyclerView>
+                                android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
 
                         </LinearLayout>
 
@@ -501,255 +552,376 @@
 
                 </androidx.cardview.widget.CardView>
 
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_assignee"
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_assignee"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_assignee"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_assignee"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
+
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                            android:id="@+id/auto_textView_jira_assignee"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:dropDownHeight="100dp"
+                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                        <!--  <Spinner
+                              android:id="@+id/spinner_jira_issue_assignee"
+                              android:layout_width="match_parent"
+                              android:layout_height="wrap_content"
+                              android:layout_marginBottom="10dp"/>-->
+
+                    </LinearLayout>
+
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_fix_versions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_fix_versions"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:baselineAligned="false"
+                            android:text="@string/textView_jira_fix_versions"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
+                            android:gravity="center"
+                            android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/textView_jira_assignee"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/black"
-                                android:textSize="16sp"
-                                android:layout_marginBottom="5dp"
-                                android:text="@string/textView_jira_assignee" />
-                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_jira_assignee"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@null"
-                                android:singleLine="true"
-                                android:dropDownHeight="100dp"
-                                >
-                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-                          <!--  <Spinner
-                                android:id="@+id/spinner_jira_issue_assignee"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>-->
-
-                        </LinearLayout>
-
-
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_fix_versions"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/textView_jira_fix_versions"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:baselineAligned="false"
-                                android:text="@string/textView_jira_fix_versions"
-                                android:textColor="@color/black"
-                                android:textSize="16sp" />
                             <androidx.appcompat.widget.AppCompatAutoCompleteTextView
                                 android:id="@+id/auto_textView_jira_fix_versions"
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="match_parent"
+                                android:layout_weight="1"
                                 android:background="@null"
-                                android:singleLine="true"
                                 android:dropDownHeight="100dp"
-                                >
-                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-                           <!-- <Spinner
-                                android:id="@+id/spinner_jira_issue_fix_versions"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>-->
+                                android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+
+                            <ImageView
+                                android:id="@+id/imageView_fix_versions_add"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                app:srcCompat="@drawable/ic_add_black_24dp" />
 
                         </LinearLayout>
+                        <!-- <Spinner
+                             android:id="@+id/spinner_jira_issue_fix_versions"
+                             android:layout_width="match_parent"
+                             android:layout_height="wrap_content"
+                             android:layout_marginBottom="10dp"/>-->
 
-                    </androidx.cardview.widget.CardView>
+                    </LinearLayout>
 
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_priority"
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_fix_versions_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:visibility="gone"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_fix_versions_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_fix_versions_list"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
+                            android:layout_marginBottom="10dp"
+                            android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/textView_jira_priority"
-                                android:layout_width="match_parent"
+                            <ImageView
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/black"
-                                android:textSize="16sp"
-                                android:layout_marginBottom="5dp"
-                                android:text="@string/textView_jira_priority" />
-                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_jira_priority"
+                                app:srcCompat="@drawable/ic_build_black_24dp">
+
+                            </ImageView>
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/recycler_view_fix_versions_list"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@null"
-                                android:singleLine="true"
-                                android:dropDownHeight="100dp"
-                                >
-                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                                android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_priority"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_priority"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_priority"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
+
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                            android:id="@+id/auto_textView_jira_priority"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:dropDownHeight="100dp"
+                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
                         <!--    <Spinner
                                 android:id="@+id/spinner_jira_issue_priority"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginBottom="10dp"/>-->
 
-                        </LinearLayout>
+                    </LinearLayout>
 
-                    </androidx.cardview.widget.CardView>
+                </androidx.cardview.widget.CardView>
 
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_labels"
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_labels"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_labels"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_label"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
+                            android:gravity="center"
+                            android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/textView_jira_labels"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/black"
-                                android:textSize="16sp"
-                                android:layout_marginBottom="5dp"
-                                android:text="@string/textView_jira_label" />
                             <androidx.appcompat.widget.AppCompatAutoCompleteTextView
                                 android:id="@+id/auto_textView_jira_labels"
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="match_parent"
+                                android:layout_weight="1"
                                 android:background="@null"
-                                android:singleLine="true"
                                 android:dropDownHeight="100dp"
-                                >
-                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-                            <!--<Spinner
-                                android:id="@+id/spinner_jira_labels"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>-->
+                                android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
+                            <ImageView
+                                android:id="@+id/imageView_label_add"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                app:srcCompat="@drawable/ic_add_black_24dp" />
                         </LinearLayout>
 
-                    </androidx.cardview.widget.CardView>
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_epic_link"
+                        <!--<Spinner
+                            android:id="@+id/spinner_jira_labels"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"/>-->
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_label_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:visibility="gone"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_label_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_label_list"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
+                            android:layout_marginBottom="10dp"
+                            android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/textView_jira_epic_link"
-                                android:layout_width="match_parent"
+                            <ImageView
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/black"
-                                android:textSize="16sp"
-                                android:layout_marginBottom="5dp"
-                                android:text="@string/textView_jira_epic_link" />
-                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_jira_epic_link"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@null"
-                                android:singleLine="true"
-                                android:dropDownHeight="100dp"
-                                >
-                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                                app:srcCompat="@drawable/ic_label_black_24dp">
 
-                           <!-- <Spinner
-                                android:id="@+id/spinner_jira_epic_link"
+                            </ImageView>
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/recycler_view_label_list"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>-->
+                                android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
 
                         </LinearLayout>
 
-                    </androidx.cardview.widget.CardView>
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_sprint"
+                    </LinearLayout>
+
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_epic_link"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:visibility="gone"
-                        android:layout_marginBottom="7dp">
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
 
-                        <LinearLayout
+                        <TextView
+                            android:id="@+id/textView_jira_epic_link"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_epic_link"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
 
-                            <TextView
-                                android:id="@+id/textView_jira_sprint"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/black"
-                                android:textSize="16sp"
-                                android:layout_marginBottom="5dp"
-                                android:text="@string/textView_jira_sprint" />
-                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_jira_sprint"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@null"
-                                android:singleLine="true"
-                                android:dropDownHeight="100dp"
-                                >
-                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-                          <!--  <Spinner
-                                android:id="@+id/spinner_jira_sprint"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"/>-->
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                            android:id="@+id/auto_textView_jira_epic_link"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:dropDownHeight="100dp"
+                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
-                        </LinearLayout>
+                        <!-- <Spinner
+                             android:id="@+id/spinner_jira_epic_link"
+                             android:layout_width="match_parent"
+                             android:layout_height="wrap_content"
+                             android:layout_marginBottom="10dp"/>-->
 
-                    </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_sprint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:visibility="gone"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_sprint"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_sprint"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
+
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                            android:id="@+id/auto_textView_jira_sprint"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:dropDownHeight="100dp"
+                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                        <!--  <Spinner
+                              android:id="@+id/spinner_jira_sprint"
+                              android:layout_width="match_parent"
+                              android:layout_height="wrap_content"
+                              android:layout_marginBottom="10dp"/>-->
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardView_start_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:cardElevation="5dp"
+                    android:layout_marginBottom="7dp"
                     android:visibility="gone"
-                    android:layout_marginBottom="7dp">
+                    app:cardElevation="5dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -762,20 +934,20 @@
                             android:id="@+id/textView_jira_start_date"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"
                             android:layout_gravity="center"
-                            android:text="@string/textView_jira_start_date" />
+                            android:text="@string/textView_jira_start_date"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
 
 
                         <ImageView
                             android:id="@+id/imageView_start_date"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center"
                             android:layout_marginStart="5dp"
                             android:layout_marginLeft="5dp"
-                            android:layout_gravity="center"
-                            app:srcCompat="@drawable/ic_date_range_black_24dp" >
+                            app:srcCompat="@drawable/ic_date_range_black_24dp">
 
                         </ImageView>
 
@@ -783,13 +955,12 @@
                             android:id="@+id/image_button_jira_remove_date"
                             android:layout_width="16dp"
                             android:layout_height="16dp"
-                            android:visibility="gone"
+                            android:layout_gravity="center"
                             android:layout_marginStart="5dp"
                             android:layout_marginLeft="5dp"
-                            app:srcCompat="@drawable/ic_close_black_24dp"
-                            android:layout_gravity="center"
-                            android:background="@color/white">
-                        </ImageButton>
+                            android:background="@color/white"
+                            android:visibility="gone"
+                            app:srcCompat="@drawable/ic_close_black_24dp"></ImageButton>
                         <!--  <Spinner
                               android:id="@+id/spinner_jira_sprint"
                               android:layout_width="match_parent"
@@ -800,93 +971,92 @@
 
                 </androidx.cardview.widget.CardView>
 
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardView_attachment"
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_attachment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardElevation="5dp"
-                        android:layout_marginBottom="7dp">
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_jira_attachments"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_jira_attachment"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_margin="5dp"
-                            android:orientation="vertical">
+                            android:layout_marginBottom="10dp"
+                            android:gravity="center"
+                            android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/textView_jira_attachments"
-                                android:layout_width="match_parent"
+                            <ImageView
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/black"
-                                android:textSize="16sp"
-                                android:text="@string/textView_jira_attachment"
-                                android:layout_marginBottom="5dp" />
+                                app:srcCompat="@drawable/ic_attach_file_black_24dp">
 
-                            <LinearLayout
+                            </ImageView>
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/recycler_view_jira_attachment"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center"
-                                android:layout_marginBottom="10dp">
-
-                                <ImageView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    app:srcCompat="@drawable/ic_attach_file_black_24dp">
-
-                                </ImageView>
-
-                                <androidx.recyclerview.widget.RecyclerView
-                                    android:id="@+id/recycler_view_jira_attachment"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent">
-                                </androidx.recyclerview.widget.RecyclerView>
-
-                            </LinearLayout>
+                                android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
 
                         </LinearLayout>
 
-
-                    </androidx.cardview.widget.CardView>
-
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"
-                        android:layout_margin="10dp"
-                        android:weightSum="2">
-
-                        <Button
-                            android:id="@+id/button_jira_cancel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:textColor="@color/secondaryColor"
-                            android:textSize="18sp"
-                            app:elevation="5dp"
-                            android:textAllCaps="false"
-                            android:layout_gravity="start"
-                            android:background="@color/colorFab"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginLeft="5dp"
-                            style="@style/Widget.AppCompat.Button.Borderless"
-                            android:text="@string/button_jira_cancel" />
-
-                        <Button
-                            android:id="@+id/button_jira_create"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:textColor="@color/black"
-                            android:textSize="18sp"
-                            app:elevation="5dp"
-                            android:textAllCaps="false"
-                            android:background="@color/colorFab"
-                            style="@style/Widget.AppCompat.Button.Borderless"
-                            android:text="@string/button_jira_create" />
-
                     </LinearLayout>
+
+
+                </androidx.cardview.widget.CardView>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <Button
+                        android:id="@+id/button_jira_cancel"
+                        style="@style/Widget.AppCompat.Button.Borderless"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="1"
+                        android:background="@color/colorFab"
+                        android:text="@string/button_jira_cancel"
+                        android:textAllCaps="false"
+                        android:textColor="@color/secondaryColor"
+                        android:textSize="18sp"
+                        app:elevation="5dp" />
+
+                    <Button
+                        android:id="@+id/button_jira_create"
+                        style="@style/Widget.AppCompat.Button.Borderless"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@color/colorFab"
+                        android:text="@string/button_jira_create"
+                        android:textAllCaps="false"
+                        android:textColor="@color/black"
+                        android:textSize="18sp"
+                        app:elevation="5dp" />
+
+                </LinearLayout>
 
 
             </LinearLayout>
@@ -895,25 +1065,24 @@
 
     </LinearLayout>
 
-   <FrameLayout
+    <FrameLayout
         android:id="@+id/jira_progressbar_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
+        android:background="@color/darkTransparent"
         android:clickable="true"
         android:focusable="true"
-        android:background="@color/darkTransparent">
+        android:visibility="gone">
 
         <ProgressBar
             android:id="@+id/jira_progressbar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="gone"
+            android:indeterminate="true"
             android:indeterminateDrawable="@drawable/progress_bar_loading"
             android:indeterminateDuration="1000"
-            android:indeterminate="true">
-        </ProgressBar>
+            android:visibility="gone"></ProgressBar>
 
     </FrameLayout>
 

@@ -1,7 +1,6 @@
 package utils
 
-import adapter.RecyclerViewJiraAdapter
-import adapter.RecyclerViewJiraIssueAdapter
+import adapter.*
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
@@ -66,7 +65,9 @@ class JiraAuthentication {
     private var component: String? = null
     private var fixVersion: String? = null
     private val hashMapComponent: HashMap<String, String> = HashMap()
+    private val hashMapComponentPosition:HashMap<String,Int> = HashMap()
     private val hashMapFixVersions: HashMap<String, String> = HashMap()
+    private val hashMapFixVersionsPosition:HashMap<String,Int> = HashMap()
     private val hashMapLinkedIssues: HashMap<String, String> = HashMap()
     private val hashMapSprint: HashMap<String, String> = HashMap()
     private val hashMapBoard: HashMap<String, String> = HashMap()
@@ -382,42 +383,72 @@ class JiraAuthentication {
                                 jsonObjectContent.addProperty("description", stringBuilderDescription.toString())
                             }
                         }
-                        if (arrayListChoosenLabel.isNotEmpty()) {
-                            val jsonArrayLabels = gson.toJsonTree(arrayListChoosenLabel).asJsonArray
+                        if(RecyclerViewJiraLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()){
+                            val jsonArrayLabels = JsonArray()
+                            RecyclerViewJiraLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
+                                jsonArrayLabels.add(it.labelName)
+                            }
                             jsonObjectContent.add("labels", jsonArrayLabels)
+                        }else{
+                            if (arrayListChoosenLabel.isNotEmpty()) {
+                                val jsonArrayLabels = gson.toJsonTree(arrayListChoosenLabel).asJsonArray
+                                jsonObjectContent.add("labels", jsonArrayLabels)
+                            }
                         }
                         if (issueType == "Epic") {
                             if (epicName.isNotEmpty() && epicNameField != null) {
                                 jsonObjectContent.addProperty(epicNameField, epicName)
                             }
                         }
-                        if (arrayListComponents.size > componentPosition) {
-                            if (arrayListComponents[componentPosition].isNotEmpty() && component != null) {
-                                if (component!!.isNotEmpty()) {
-                                    val jsonArrayComponent = JsonArray()
-                                    val jsonObjectComponentId = JsonObject()
-                                    jsonObjectComponentId.addProperty(
-                                        "id",
-                                        hashMapComponent[arrayListComponents[componentPosition]]
-                                    )
-                                    jsonArrayComponent.add(jsonObjectComponentId)
-                                    jsonObjectContent.add("components", jsonArrayComponent)
-                                }
 
+                        if(RecyclerViewJiraComponentAdapter.ViewHolder.arrayListComponentNames.isNotEmpty()){
+                            val jsonArrayComponent = JsonArray()
+                            var jsonObjectComponentId:JsonObject
+                            RecyclerViewJiraComponentAdapter.ViewHolder.arrayListComponentNames.forEach {
+                                jsonObjectComponentId = JsonObject()
+                                jsonObjectComponentId.addProperty("id",hashMapComponent[arrayListComponents[hashMapComponentPosition[it.componentName]!!]])
+                                jsonArrayComponent.add(jsonObjectComponentId)
+                            }
+                            jsonObjectContent.add("components",jsonArrayComponent)
+                        }else{
+                            if (arrayListComponents.size > componentPosition) {
+                                if (arrayListComponents[componentPosition].isNotEmpty() && component != null) {
+                                    if (component!!.isNotEmpty()) {
+                                        val jsonArrayComponent = JsonArray()
+                                        val jsonObjectComponentId = JsonObject()
+                                        jsonObjectComponentId.addProperty(
+                                            "id",
+                                            hashMapComponent[arrayListComponents[componentPosition]]
+                                        )
+                                        jsonArrayComponent.add(jsonObjectComponentId)
+                                        jsonObjectContent.add("components", jsonArrayComponent)
+                                    }
+
+                                }
                             }
                         }
-
-                        if (arrayListFixVersions.size > fixVersionPosition) {
-                            if (arrayListFixVersions[fixVersionPosition].isNotEmpty() && fixVersion != null) {
-                                if (fixVersion!!.isNotEmpty()) {
-                                    val jsonArrayFixVersions = JsonArray()
-                                    val jsonObjectFixVersionsId = JsonObject()
-                                    jsonObjectFixVersionsId.addProperty(
-                                        "id",
-                                        hashMapFixVersions[arrayListFixVersions[fixVersionPosition]]
-                                    )
-                                    jsonArrayFixVersions.add(jsonObjectFixVersionsId)
-                                    jsonObjectContent.add("fixVersions", jsonArrayFixVersions)
+                        if(RecyclerViewJiraFixVersionsAdapter.ViewHolder.arrayListFixVersionsNames.isNotEmpty()){
+                            val jsonArrayFixVersions = JsonArray()
+                            var jsonObjectFixVersionsId :JsonObject
+                            RecyclerViewJiraFixVersionsAdapter.ViewHolder.arrayListFixVersionsNames.forEach {
+                                jsonObjectFixVersionsId = JsonObject()
+                                jsonObjectFixVersionsId.addProperty("id",hashMapFixVersions[arrayListFixVersions[hashMapFixVersionsPosition[it.fixVersionsName]!!]])
+                                jsonArrayFixVersions.add(jsonObjectFixVersionsId)
+                            }
+                            jsonObjectContent.add("fixVersions", jsonArrayFixVersions)
+                        }else{
+                            if (arrayListFixVersions.size > fixVersionPosition) {
+                                if (arrayListFixVersions[fixVersionPosition].isNotEmpty() && fixVersion != null) {
+                                    if (fixVersion!!.isNotEmpty()) {
+                                        val jsonArrayFixVersions = JsonArray()
+                                        val jsonObjectFixVersionsId = JsonObject()
+                                        jsonObjectFixVersionsId.addProperty(
+                                            "id",
+                                            hashMapFixVersions[arrayListFixVersions[fixVersionPosition]]
+                                        )
+                                        jsonArrayFixVersions.add(jsonObjectFixVersionsId)
+                                        jsonObjectContent.add("fixVersions", jsonArrayFixVersions)
+                                    }
                                 }
                             }
                         }
@@ -809,7 +840,9 @@ class JiraAuthentication {
                 arrayListEpicName.clear()
                 arrayListBoardId.clear()
                 hashMapComponent.clear()
+                hashMapComponentPosition.clear()
                 hashMapFixVersions.clear()
+                hashMapFixVersionsPosition.clear()
                 hashMapLinkedIssues.clear()
                 hashMapSprint.clear()
                 hashMapBoard.clear()
@@ -1291,19 +1324,25 @@ class JiraAuthentication {
                         coroutineCallGatherfixComp.async {
                             Log.d("fix_comp_details", response.code().toString())
                             val fixCompList = response.body()
+                            var compPositionCounter =0
                             fixCompList?.getAsJsonArray("components")?.forEach {
                                 if (!arrayListComponents.contains(it.asJsonObject["name"].asString)) {
                                     arrayListComponents.add(it.asJsonObject["name"].asString)
                                     hashMapComponent[it.asJsonObject["name"].asString] =
                                         it.asJsonObject["id"].asString
+                                    hashMapComponentPosition[it.asJsonObject["name"].asString] = compPositionCounter
                                 }
+                                compPositionCounter++
                             }
+                            var fixPositionCounter =0
                             fixCompList?.getAsJsonArray("versions")?.forEach {
                                 if (!arrayListFixVersions.contains(it.asJsonObject["name"].asString)) {
                                     arrayListFixVersions.add(it.asJsonObject["name"].asString)
                                     hashMapFixVersions[it.asJsonObject["name"].asString] =
                                         it.asJsonObject["id"].asString
+                                    hashMapFixVersionsPosition[it.asJsonObject["name"].asString] = fixPositionCounter
                                 }
+                                fixPositionCounter++
                             }
                             updateFields()
                         }
