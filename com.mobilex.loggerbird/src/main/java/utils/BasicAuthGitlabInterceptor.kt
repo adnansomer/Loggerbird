@@ -10,7 +10,7 @@ class BasicAuthGitlabInterceptor:Interceptor {
         var request = chain.request()
         request = request.newBuilder()
             .header("Content-Type", "application/json")
-            .header("PRIVATE-TOKEN",LoggerBird.gitlabAccessToken)
+            .header("PRIVATE-TOKEN",LoggerBird.gitlabApiToken)
             .build()
         return chain.proceed(request)
     }

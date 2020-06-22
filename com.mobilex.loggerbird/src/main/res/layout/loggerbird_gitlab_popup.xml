@@ -262,6 +262,32 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginBottom="10dp"
+                                android:text="@string/textView_gitlab_confidentiality"
+                                android:textColor="@color/black"
+                                android:textSize="16sp">
+                            </TextView>
+                            <Spinner
+                                android:id="@+id/spinner_gitlab_confidentiality"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+                            </Spinner>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="7dp"
+                        app:cardElevation="5dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="10dp"
                                 android:text="@string/textView_gitlab_weight"
                                 android:textColor="@color/black"
                                 android:textSize="16sp">
@@ -281,6 +307,28 @@
                                 android:textCursorDrawable="@color/colorBlack"
                                 android:textSize="16sp">
                             </com.google.android.material.textfield.TextInputEditText>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="7dp"
+                        app:cardElevation="5dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="10dp"
+                                android:text="@string/textView_gitlab_due_date"
+                                android:textColor="@color/black"
+                                android:textSize="16sp">
+                            </TextView>
+
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 

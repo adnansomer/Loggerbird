@@ -3,6 +3,9 @@ package utils
 import android.text.InputFilter
 import android.text.Spanned
 
+/** Input type filter @author Adnan Somer
+ *  0-100 **/
+
 class InputTypeFilter : InputFilter {
     private var mIntMin: Int
     private var mIntMax: Int
@@ -29,6 +32,7 @@ class InputTypeFilter : InputFilter {
             val input = (dest.toString() + source.toString()).toInt()
             if (isInRange(mIntMin, mIntMax, input)) return null
         } catch (nfe: NumberFormatException) {
+
         }
         return ""
     }

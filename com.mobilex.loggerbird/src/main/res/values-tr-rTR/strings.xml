@@ -225,6 +225,8 @@
     <string name="textView_gitlab_weight">Agirlik</string>
     <string name="textView_gitlab_milestone">Donum noktasi</string>
     <string name="editText_gitlab_title_empty">Basligi bos birakamazsiniz!</string>
+    <string name="textView_gitlab_due_date">Bitis Tarihi</string>
+    <string name="textView_gitlab_confidentiality">Gizlilik</string>
     <!-- recycler_view_slack_item_popup-->
     <string name="textView_recyclerView_gitlab_popup_title">Gitlab konusundan bu eki kaldirmak istediginize emin misiniz?</string>
     <string name="button_recyclerView_gitlab_yes">Eki sil</string>
