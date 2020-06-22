@@ -56,10 +56,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import listeners.*
 import loggerbird.LoggerBird
-import models.RecyclerViewModel
-import models.RecyclerViewModelAssignee
-import models.RecyclerViewModelLabel
-import models.RecyclerViewModelTo
+import models.*
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
@@ -224,6 +221,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var cardViewSprint: CardView
     private lateinit var cardViewStartDate: CardView
     private lateinit var cardViewEpicName: CardView
+    private lateinit var cardViewEpicLink: CardView
     private lateinit var imageViewStartDate: ImageView
     //    private lateinit var textViewRemoveDate: TextView
     private lateinit var imageButtonRemoveDate: ImageButton
@@ -270,8 +268,30 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewEpicNameAdapter: ArrayAdapter<String>
     private var projectPosition: Int = 0
     private var controlProjectPosition: Boolean = false
-
-
+    internal lateinit var cardViewJiraIssueList:CardView
+    private lateinit var recyclerViewJiraIssueList:RecyclerView
+    private lateinit var jiraAdapterIssueList:RecyclerViewJiraIssueAdapter
+    private lateinit var imageViewJiraIssue:ImageView
+    private val arrayListJiraIssueName:ArrayList<RecyclerViewModelIssue> = ArrayList()
+    private var arrayListJiraIssue:ArrayList<String> = ArrayList()
+    internal lateinit var cardViewJiraLabelList:CardView
+    private lateinit var recyclerViewJiraLabelList:RecyclerView
+    private lateinit var jiraAdapterLabelList:RecyclerViewJiraLabelAdapter
+    private lateinit var imageViewJiraLabel:ImageView
+    private val arrayListJiraLabelName:ArrayList<RecyclerViewModelLabel> = ArrayList()
+    private var arrayListJiraLabel:ArrayList<String> = ArrayList()
+    internal lateinit var cardViewJiraComponentList:CardView
+    private lateinit var recyclerViewJiraComponentList:RecyclerView
+    private lateinit var jiraAdapterComponentList:RecyclerViewJiraComponentAdapter
+    private lateinit var imageViewJiraComponent:ImageView
+    private val arrayListJiraComponentName:ArrayList<RecyclerViewModelComponent> = ArrayList()
+    private var arrayListJiraComponent:ArrayList<String> = ArrayList()
+    internal lateinit var cardViewJiraFixVersionsList:CardView
+    private lateinit var recyclerViewJiraFixVersionsList:RecyclerView
+    private lateinit var jiraAdapterFixVersionsList:RecyclerViewJiraFixVersionsAdapter
+    private lateinit var imageViewJiraFixVersions:ImageView
+    private val arrayListJiraFixVersionsName:ArrayList<RecyclerViewModelFixVersions> = ArrayList()
+    private var arrayListJiraFixVersions:ArrayList<String> = ArrayList()
     //Feedback:
     private lateinit var floating_action_button_feedback: Button
     private lateinit var floating_action_button_feed_close: Button
@@ -2790,6 +2810,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     cardViewSprint = viewJira.findViewById(R.id.cardView_sprint)
                     cardViewStartDate = viewJira.findViewById(R.id.cardView_start_date)
                     cardViewEpicName = viewJira.findViewById(R.id.cardView_epic_name)
+                    cardViewEpicLink = viewJira.findViewById(R.id.cardView_epic_link)
                     imageViewStartDate = viewJira.findViewById(R.id.imageView_start_date)
 //                    textViewRemoveDate = viewJira.findViewById(R.id.textView_jira_remove_date)
                     imageButtonRemoveDate =
@@ -2802,6 +2823,22 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         }
                         return@setOnTouchListener false
                     }
+                    cardViewJiraIssueList = viewJira.findViewById(R.id.cardView_issues_list)
+                    imageViewJiraIssue = viewJira.findViewById(R.id.imageView_issue_add)
+                    recyclerViewJiraIssueList = viewJira.findViewById(R.id.recycler_view_issues_list)
+
+                    cardViewJiraLabelList = viewJira.findViewById(R.id.cardView_label_list)
+                    imageViewJiraLabel = viewJira.findViewById(R.id.imageView_label_add)
+                    recyclerViewJiraLabelList = viewJira.findViewById(R.id.recycler_view_label_list)
+
+                    cardViewJiraComponentList = viewJira.findViewById(R.id.cardView_component_list)
+                    imageViewJiraComponent = viewJira.findViewById(R.id.imageView_component_add)
+                    recyclerViewJiraComponentList = viewJira.findViewById(R.id.recycler_view_component_list)
+
+                    cardViewJiraFixVersionsList = viewJira.findViewById(R.id.cardView_fix_versions_list)
+                    imageViewJiraFixVersions = viewJira.findViewById(R.id.imageView_fix_versions_add)
+                    recyclerViewJiraFixVersionsList = viewJira.findViewById(R.id.recycler_view_fix_versions_list)
+
                     jiraAuthentication.callJiraIssue(
                         context = context,
                         activity = activity,
@@ -2824,6 +2861,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                    )
 
                     initializeJiraRecyclerView(filePathMedia = filePathMedia)
+                    initializeJiraIssueRecyclerView()
+                    initializeJiraLabelRecyclerView()
+                    initializeJiraComponentRecyclerView()
+                    initializeJiraFixVersionsRecyclerView()
                     buttonClicksJira(filePathMedia = filePathMedia)
 //                    attachProgressBar()
                     progressBarJiraLayout.visibility = View.VISIBLE
@@ -3056,6 +3097,164 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             jiraAuthentication.setStartDate(startDate = null)
             imageButtonRemoveDate.visibility = View.GONE
         }
+        imageViewJiraIssue.setSafeOnClickListener {
+                if (!arrayListJiraIssueName.contains(
+                        RecyclerViewModelIssue(
+                            autoTextViewIssue.editableText.toString()
+                        )
+                    ) && arrayListJiraIssue.contains(
+                        autoTextViewIssue.editableText.toString()
+                    )
+                ) {
+                    arrayListJiraIssueName.add(RecyclerViewModelIssue(autoTextViewIssue.editableText.toString()))
+                    jiraAdapterIssueList.notifyDataSetChanged()
+                    cardViewJiraIssueList.visibility = View.VISIBLE
+                } else if (arrayListJiraIssueName.contains(
+                        RecyclerViewModelIssue(autoTextViewIssue.editableText.toString())
+                    )
+                ) {
+                    defaultToast.attachToast(
+                        activity = activity,
+                        toastMessage = activity.resources.getString(R.string.jira_issue_exist)
+                    )
+                } else if (!arrayListJiraIssue.contains(autoTextViewIssue.editableText.toString())) {
+                    defaultToast.attachToast(
+                        activity = activity,
+                        toastMessage = activity.resources.getString(R.string.jira_issue_doesnt_exist)
+                    )
+                }
+
+        }
+        imageViewJiraLabel.setSafeOnClickListener {
+            if (!arrayListJiraLabelName.contains(
+                    RecyclerViewModelLabel(
+                        autoTextViewLabel.editableText.toString()
+                    )
+                ) && arrayListJiraLabel.contains(
+                    autoTextViewLabel.editableText.toString()
+                )
+            ) {
+                arrayListJiraLabelName.add(RecyclerViewModelLabel(autoTextViewLabel.editableText.toString()))
+                jiraAdapterLabelList.notifyDataSetChanged()
+                cardViewJiraLabelList.visibility = View.VISIBLE
+            } else if (arrayListJiraLabelName.contains(
+                    RecyclerViewModelLabel(autoTextViewLabel.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.jira_label_exist)
+                )
+            } else if (!arrayListJiraLabel.contains(autoTextViewLabel.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.jira_label_doesnt_exist)
+                )
+            }
+
+        }
+        imageViewJiraComponent.setSafeOnClickListener {
+            if (!arrayListJiraComponentName.contains(
+                    RecyclerViewModelComponent(
+                        autoTextViewComponent.editableText.toString()
+                    )
+                ) && arrayListJiraComponent.contains(
+                    autoTextViewComponent.editableText.toString()
+                )
+            ) {
+                arrayListJiraComponentName.add(RecyclerViewModelComponent(autoTextViewComponent.editableText.toString()))
+                jiraAdapterComponentList.notifyDataSetChanged()
+                cardViewJiraComponentList.visibility = View.VISIBLE
+            } else if (arrayListJiraComponentName.contains(
+                    RecyclerViewModelComponent(autoTextViewComponent.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.jira_component_exist)
+                )
+            } else if (!arrayListJiraComponent.contains(autoTextViewComponent.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.jira_component_doesnt_exist)
+                )
+            }
+
+        }
+
+        imageViewJiraFixVersions.setSafeOnClickListener {
+            if (!arrayListJiraFixVersionsName.contains(
+                    RecyclerViewModelFixVersions(
+                        autoTextViewFixVersions.editableText.toString()
+                    )
+                ) && arrayListJiraFixVersions.contains(
+                    autoTextViewFixVersions.editableText.toString()
+                )
+            ) {
+                arrayListJiraFixVersionsName.add(RecyclerViewModelFixVersions(autoTextViewFixVersions.editableText.toString()))
+                jiraAdapterFixVersionsList.notifyDataSetChanged()
+                cardViewJiraFixVersionsList.visibility = View.VISIBLE
+            } else if (arrayListJiraFixVersionsName.contains(
+                    RecyclerViewModelFixVersions(autoTextViewFixVersions.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.jira_fix_versions_exist)
+                )
+            } else if (!arrayListJiraFixVersions.contains(autoTextViewFixVersions.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.jira_fix_versions_doesnt_exist)
+                )
+            }
+
+        }
+
+    }
+    private fun initializeJiraIssueRecyclerView(){
+        arrayListJiraIssueName.clear()
+        recyclerViewJiraIssueList.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
+        jiraAdapterIssueList = RecyclerViewJiraIssueAdapter(
+            arrayListJiraIssueName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewJiraIssueList.adapter = jiraAdapterIssueList
+    }
+    private fun initializeJiraLabelRecyclerView(){
+        arrayListJiraLabelName.clear()
+        recyclerViewJiraLabelList.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
+        jiraAdapterLabelList = RecyclerViewJiraLabelAdapter(
+            arrayListJiraLabelName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewJiraLabelList.adapter = jiraAdapterLabelList
+    }
+    private fun initializeJiraComponentRecyclerView(){
+        arrayListJiraComponentName.clear()
+        recyclerViewJiraComponentList.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
+        jiraAdapterComponentList = RecyclerViewJiraComponentAdapter(
+            arrayListJiraComponentName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewJiraComponentList.adapter = jiraAdapterComponentList
+    }
+    private fun initializeJiraFixVersionsRecyclerView(){
+        arrayListJiraFixVersionsName.clear()
+        recyclerViewJiraFixVersionsList.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
+        jiraAdapterFixVersionsList = RecyclerViewJiraFixVersionsAdapter(
+            arrayListJiraFixVersionsName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewJiraFixVersionsList.adapter = jiraAdapterFixVersionsList
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -3177,6 +3376,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     ) {
 
         try {
+            this.arrayListJiraIssue.clear()
+            this.arrayListJiraLabel
             val sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             editTextSummary.setText(sharedPref.getString("jira_summary", null))
@@ -3207,7 +3408,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 sharedPref = sharedPref
             )
             initializeLabels(arrayListLabel = arrayListLabel, sharedPref = sharedPref)
-            initializeEpicLink(arrayListEpicLink = arrayListEpicLink, sharedPref = sharedPref)
+            initializeEpicLink(
+                arrayListEpicLink = arrayListEpicLink,
+                sharedPref = sharedPref
+            )
             initializeSprint(
                 arrayListSprint = arrayListSprint,
                 hashMapBoardList = hashMapBoardList,
@@ -3337,6 +3541,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewLabel.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewJira)
         }
+        this.arrayListJiraLabel = arrayListLabel
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -3368,6 +3573,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             jiraAuthentication.setFixVersionsPosition(fixVersionsPosition = position)
             hideKeyboard(activity = activity, view = viewJira)
         }
+        this.arrayListJiraFixVersions = arrayListFixVersions
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -3399,6 +3605,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewComponent.setOnItemClickListener { parent, view, position, id ->
             jiraAuthentication.setComponentPosition(componentPosition = position)
         }
+        this.arrayListJiraComponent = arrayListComponent
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -3503,6 +3710,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             autoTextViewIssue.showDropDown()
             false
         }
+        autoTextViewIssue.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity ,view = viewJira)
+        }
+        this.arrayListJiraIssue = arrayListIssues
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -3714,6 +3925,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     ) {
         if (autoTextViewIssueType.editableText.toString() == "Epic") {
             cardViewEpicName.visibility = View.VISIBLE
+            cardViewEpicLink.visibility = View.GONE
             autoTextViewEpicNameAdapter = ArrayAdapter(
                 this,
                 android.R.layout.simple_dropdown_item_1line,
@@ -3758,6 +3970,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
         } else {
             cardViewEpicName.visibility = View.GONE
+            cardViewEpicLink.visibility = View.VISIBLE
         }
     }
 

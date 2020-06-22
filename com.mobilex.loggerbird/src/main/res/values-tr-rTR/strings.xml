@@ -72,6 +72,14 @@
     <string name="jira_description_unhandled_exception">Beklenmeyen bir hata tespit edilmiştir daha çok detay için log dosyasına bakınız!</string>
     <string name="jira_issue_preferences_save">Konu tercihleri kaydedildi!</string>
     <string name="jira_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="jira_issue_exist">Bu görev zaten listeye eklendi!</string>
+    <string name="jira_issue_doesnt_exist">Bu görev bulunamadı!</string>
+    <string name="jira_label_exist">Bu eklenti zaten listeye eklendi!</string>
+    <string name="jira_label_doesnt_exist">Bu eklenti bulunamadı!</string>
+    <string name="jira_component_exist">Bu komponent zaten listeye eklendi!</string>
+    <string name="jira_component_doesnt_exist">Bu komponent bulunamadı!</string>
+    <string name="jira_fix_versions_exist">Bu düzeltme versiyonu zaten listeye eklendi!</string>
+    <string name="jira_fix_versions_doesnt_exist">Bu düzeltme versiyonu bulunamadı!</string>
     <string name="slack_message_empty">Mesaj boş olamaz!</string>
     <string name="slack_sent">Slack mesajı gönderildi!</string>
     <string name="slack_sent_error">Slack mesajı gönderilmeye çalışırken bir hatayla karşılaşıldı!</string>
@@ -156,12 +164,16 @@
     <string name="editText_jira_description">Sorunu detayli bir sekilde anlatiniz.</string>
     <string name="textView_jira_reporter">Bildiren</string>
     <string name="textView_jira_component">Bileşen</string>
+    <string name="textView_jira_component_list">Komponent listesi</string>
     <string name="textView_jira_fix_versions">Düzeltme versiyonu</string>
+    <string name="textView_jira_fix_versions_list">Düzeltme versiyonu listesi</string>
     <string name="textView_jira_linked_issue">Bağlantılı Konu</string>
     <string name="textView_jira_issue">Konu</string>
+    <string name="textView_jira_issue_list">Konu listesi</string>
     <string name="textView_jira_assignee">Sorumlu</string>
     <string name="textView_jira_priority">Öncelik</string>
-    <string name="textView_jira_label">Etiketler</string>
+    <string name="textView_jira_label">Etiket</string>
+    <string name="textView_jira_label_list">Etiket listesi</string>
     <string name="textView_jira_epic_link">Epik konu</string>
     <string name="textView_jira_sprint">Sprint</string>
     <string name="textView_jira_epic_name">Epik İsim</string>
@@ -182,6 +194,26 @@
     <!-- loggerbird_jira_menu-->
     <string name="textView_jira_menu_save">Görev detayı kaydet</string>
     <string name="textView_jira_menu_clear">Görev detayı temizle</string>
+    <!-- recycler_view_jira_issue_popup-->
+    <string name="textView_recyclerView_jira_issue_header">Görev sil</string>
+    <string name="textView_recyclerView_jira_issue_title">Jira görevlendirmenizden bu görevi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_jira_issue_delete">Görevi sil</string>
+    <string name="button_recyclerView_jira_issue_keep">Görevi tut</string>
+    <!-- recycler_view_jira_label_popup-->
+    <string name="textView_recyclerView_jira_label_header">Etiketi sil</string>
+    <string name="textView_recyclerView_jira_label_title">Jira görevlendirmenizden bu etiketi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_jira_label_delete">Etiketi sil</string>
+    <string name="button_recyclerView_jira_label_keep">Etiketi tut</string>
+    <!-- recycler_view_jira_component_popup-->
+    <string name="textView_recyclerView_jira_component_header">Komponenti sil</string>
+    <string name="textView_recyclerView_jira_component_title">Jira görevlendirmenizden bu komponenti kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_jira_component_delete">Komponenti sil</string>
+    <string name="button_recyclerView_jira_component_keep">Komponenti tut</string>
+    <!-- recycler_view_jira_fix_popup-->
+    <string name="textView_recyclerView_jira_fix_header">Düzeltme versiyonu sil</string>
+    <string name="textView_recyclerView_jira_fix_title">Jira görevlendirmenizden bu düzeltme versiyonunu kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_jira_fix_delete">Düzeltme versiyonu sil</string>
+    <string name="button_recyclerView_jira_fix_keep">Düzeltme versiyonu tut</string>
     <!-- loggerbird_slack_popup-->
     <string name="textView_slack_title">Slack mesajı oluştur</string>
     <string name="textView_slack_message">Mesaj</string>

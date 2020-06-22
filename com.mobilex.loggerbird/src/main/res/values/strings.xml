@@ -72,6 +72,14 @@
     <string name="jira_description_unhandled_exception">An unhandled exception detected check log file for more details!</string>
     <string name="jira_issue_preferences_save">Issue preferences are saved!</string>
     <string name="jira_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="jira_issue_exist">This issue already added to list!</string>
+    <string name="jira_issue_doesnt_exist">This issue doesn\'t exist!</string>
+    <string name="jira_label_exist">This label already added to list!</string>
+    <string name="jira_label_doesnt_exist">This label doesn\'t exist!</string>
+    <string name="jira_component_exist">This component already added to list!</string>
+    <string name="jira_component_doesnt_exist">This component doesn\'t exist!</string>
+    <string name="jira_fix_versions_exist">This fix-version already added to list!</string>
+    <string name="jira_fix_versions_doesnt_exist">This fix-version doesn\'t exist!</string>
     <string name="slack_message_empty">Message cannot be empty!</string>
     <string name="slack_sent">Slack message sent!</string>
     <string name="slack_sent_error">An error happened while trying to send slack message!</string>
@@ -153,12 +161,16 @@
     <string name="textView_jira_description">Description</string>
     <string name="textView_jira_reporter">Reporter</string>
     <string name="textView_jira_component">Component</string>
+    <string name="textView_jira_component_list">Component list</string>
     <string name="textView_jira_fix_versions">Fix versions</string>
+    <string name="textView_jira_fix_versions_list">Fix versions list</string>
     <string name="textView_jira_linked_issue">Linked Issues</string>
     <string name="textView_jira_issue">Issue</string>
+    <string name="textView_jira_issue_list">Issue list</string>
     <string name="textView_jira_assignee">Assignee</string>
     <string name="textView_jira_priority">Priority</string>
-    <string name="textView_jira_label">Labels</string>
+    <string name="textView_jira_label">Label</string>
+    <string name="textView_jira_label_list">Label list</string>
     <string name="textView_jira_epic_link">Epic Link</string>
     <string name="textView_jira_sprint">Sprint</string>
     <string name="textView_jira_epic_name">Epic Name</string>
@@ -179,6 +191,26 @@
     <!-- loggerbird_jira_menu-->
     <string name="textView_jira_menu_save">Save Issue Info</string>
     <string name="textView_jira_menu_clear">Clear Issue Info</string>
+    <!-- recycler_view_jira_issue_popup-->
+    <string name="textView_recyclerView_jira_issue_header">Delete issue</string>
+    <string name="textView_recyclerView_jira_issue_title">Are you sure to remove issue from your jira issue?</string>
+    <string name="button_recyclerView_jira_issue_delete">Delete issue</string>
+    <string name="button_recyclerView_jira_issue_keep">Keep issue</string>
+    <!-- recycler_view_jira_label_popup-->
+    <string name="textView_recyclerView_jira_label_header">Delete label</string>
+    <string name="textView_recyclerView_jira_label_title">Are you sure to remove label from your jira issue?</string>
+    <string name="button_recyclerView_jira_label_delete">Delete label</string>
+    <string name="button_recyclerView_jira_label_keep">Keep label</string>
+    <!-- recycler_view_jira_component_popup-->
+    <string name="textView_recyclerView_jira_component_header">Delete component</string>
+    <string name="textView_recyclerView_jira_component_title">Are you sure to remove component from your jira issue?</string>
+    <string name="button_recyclerView_jira_component_delete">Delete component</string>
+    <string name="button_recyclerView_jira_component_keep">Keep component</string>
+    <!-- recycler_view_jira_fix_popup-->
+    <string name="textView_recyclerView_jira_fix_header">Delete fix-version</string>
+    <string name="textView_recyclerView_jira_fix_title">Are you sure to remove fix-version from your jira issue?</string>
+    <string name="button_recyclerView_jira_fix_delete">Delete fix-version</string>
+    <string name="button_recyclerView_jira_fix_keep">Keep fix-version</string>
     <!-- loggerbird_slack_popup-->
     <string name="textView_slack_title">Create Slack Message</string>
     <string name="textView_slack_message">Message</string>

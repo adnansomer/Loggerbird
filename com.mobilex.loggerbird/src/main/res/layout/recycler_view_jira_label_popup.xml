@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:background="@color/darkTransparent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/pop_up_shape"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:text="@string/textView_recyclerView_jira_label_header" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:layout_gravity="center">
+
+            <TextView
+                android:id="@+id/textView_recycler_view_jira_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:text="@string/textView_recyclerView_jira_label_title" />
+        </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:layout_margin="5dp">
+
+        <Button
+            android:id="@+id/button_recycler_view_jira_yes"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:textColor="@color/colorFab"
+            android:background="@drawable/pop_up_button_shape"
+            android:text="@string/button_recyclerView_jira_label_delete" />
+
+        <Button
+            android:id="@+id/button_recycler_view_jira_no"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:textColor="@color/colorBlack"
+            android:background="@color/colorFab"
+            android:text="@string/button_recyclerView_jira_label_keep" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
