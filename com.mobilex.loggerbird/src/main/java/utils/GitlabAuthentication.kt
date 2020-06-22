@@ -186,7 +186,7 @@ class GitlabAuthentication {
             jsonObject.addProperty("assignee_ids", hashMapUsers[arrayListUsers[spinnerPositionAssignee]])
             jsonObject.addProperty("weight", weight)
 
-            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/" + hashMapProjects[arrayListProjects[spinnerPositionProject]] + "/")
+            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/" + hashMapProjects[arrayListProjects[projectPosition]] + "/")
                 .create(AccountIdService::class.java)
                 .createGitlabIssue(jsonObject = jsonObject)
                 .enqueue(object : retrofit2.Callback<JsonObject> {
@@ -420,7 +420,6 @@ class GitlabAuthentication {
 
     private fun updateFields() {
         activity.runOnUiThread {
-
             LoggerBirdService.loggerBirdService.initializeGitlabSpinner(
                 arrayListGitlabProjects = arrayListProjects,
                 arrayListGitlabUsers = arrayListUsers,
@@ -441,14 +440,11 @@ class GitlabAuthentication {
     }
 
     internal fun gatherGitlabProjectSpinnerDetails(
-        spinnerProject: Spinner,
         spinnerAssignee: Spinner,
         spinnerMilestone: Spinner,
         spinnerLabels: Spinner
 
     ) {
-        spinnerPositionProject = spinnerProject.selectedItemPosition
-        project = spinnerProject.selectedItem.toString()
 
         spinnerPositionAssignee = spinnerAssignee.selectedItemPosition
         assignee = spinnerAssignee.selectedItem.toString()
@@ -460,9 +456,17 @@ class GitlabAuthentication {
         milestones = spinnerLabels.selectedItem.toString()
     }
 
+    internal fun gatherGitlabProjectAutoTextDetails(
+        autoTextViewProject: AutoCompleteTextView
+    ) {
+
+        project = autoTextViewProject.editableText.toString()
+    }
+
+
     internal fun gitlabProjectPosition(projectPosition: Int){
 
-        this.spinnerPositionProject = projectPosition
+        this.projectPosition = projectPosition
     }
 
     internal fun gitlabAssigneePosition(assigneePosition: Int){

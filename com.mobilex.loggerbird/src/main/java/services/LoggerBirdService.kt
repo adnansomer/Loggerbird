@@ -346,7 +346,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     //Gitlab:
     private val gitlabAuthentication = GitlabAuthentication()
-    private lateinit var spinnerGitlabProject: Spinner
+    private lateinit var autoTextViewGitlabProject: AutoCompleteTextView
+    //private lateinit var spinnerGitlabProject: Spinner
     private lateinit var editTextGitlabTitle: EditText
     private lateinit var editTextGitlabDescription: EditText
     private lateinit var spinnerGitlabMilestone: Spinner
@@ -360,7 +361,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var gitlabAdapter:RecyclerViewGitlabAdapter
     private lateinit var progressBarGitlab: ProgressBar
     private lateinit var progressBarGitlabLayout: FrameLayout
-    private lateinit var spinnerGitlabProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGitlabProjectAdapter: ArrayAdapter<String>
+    //private lateinit var spinnerGitlabProjectAdapter: ArrayAdapter<String>
     private lateinit var spinnerGitlabAssigneeAdapter: ArrayAdapter<String>
     private lateinit var spinnerGitlabLabelsAdapter: ArrayAdapter<String>
     private lateinit var spinnerGitlabMilestoneAdapter: ArrayAdapter<String>
@@ -3812,7 +3814,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
 
                 toolbarGitlab = viewGitlab.findViewById(R.id.toolbar_gitlab)
-                spinnerGitlabProject = viewGitlab.findViewById(R.id.spinner_gitlab_project)
+                autoTextViewGitlabProject = viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
                 editTextGitlabTitle = viewGitlab.findViewById(R.id.editText_gitlab_title)
                 editTextGitlabDescription = viewGitlab.findViewById(R.id.editText_gitlab_description)
                 editTextGitlabWeight = viewGitlab.findViewById(R.id.editText_gitlab_weight)
@@ -3824,6 +3826,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 progressBarGitlab = viewGitlab.findViewById(R.id.gitlab_progressbar)
                 progressBarGitlabLayout = viewGitlab.findViewById(R.id.gitlab_progressbar_background)
                 recyclerViewGitlabAttachment = viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
+                editTextGitlabWeight.filters = InputFilter[]{MinMaxFilter("0", "100")};
+
                 gitlabAuthentication.callGitlab(
                     activity = activity,
                     context = context,
@@ -3863,10 +3867,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     editTextWeight = editTextGitlabWeight
                 )
                 gitlabAuthentication.gatherGitlabProjectSpinnerDetails(
-                    spinnerProject = spinnerGitlabProject,
                     spinnerAssignee = spinnerGitlabAssignee,
                     spinnerLabels = spinnerGitlabLabels,
                     spinnerMilestone = spinnerGitlabMilestone
+                )
+                gitlabAuthentication.gatherGitlabProjectAutoTextDetails(
+                    autoTextViewProject = autoTextViewGitlabProject
                 )
                 gitlabAuthentication.callGitlab(
                     activity = activity,
@@ -3906,7 +3912,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         recyclerViewGitlabAttachment.adapter = gitlabAdapter
     }
 
-
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun initializeGitlabSpinner(
         arrayListGitlabProjects: ArrayList<String>,
@@ -3929,25 +3934,24 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     internal fun initializeGitlabProject(
         arrayListGitlabProjects: ArrayList<String>){
-        spinnerGitlabProjectAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabProjects)
-        spinnerGitlabProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGitlabProject.adapter = spinnerGitlabProjectAdapter
 
-        spinnerGitlabProject.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
+        autoTextViewGitlabProjectAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabProjects)
+        autoTextViewGitlabProject.setAdapter(autoTextViewGitlabProjectAdapter)
 
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                gitlabAuthentication.gitlabProjectPosition(projectPosition = position)
-            }
+        autoTextViewGitlabProject.setOnTouchListener { v, event ->
+            autoTextViewGitlabProject.showDropDown()
+            false
         }
 
+        autoTextViewGitlabProject.setOnItemClickListener { parent, view, position, id ->
+            gitlabAuthentication.gitlabProjectPosition(projectPosition = position)
+
+            gitlabAuthentication.callGitlab(
+                    activity = activity,
+                    context = context,
+                    task = "get"
+                )
+        }
     }
 
     internal fun initializeGitLabAssignee(
