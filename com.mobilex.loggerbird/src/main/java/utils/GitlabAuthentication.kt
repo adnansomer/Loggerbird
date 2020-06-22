@@ -41,6 +41,10 @@ class GitlabAuthentication {
     private var spinnerPositionLabels: Int = 0
     private var spinnerPositionAssignee: Int = 0
     private var spinnerPositionMilestones: Int = 0
+    private var projectPosition = 0
+    private var assigneePosition = 0
+    private var labelPosition = 0
+    private var milestonePosition = 0
     private val arrayListProjects: ArrayList<String> = ArrayList()
     private val arrayListProjectsId: ArrayList<String> = ArrayList()
     private val arrayListMilestones: ArrayList<String> = ArrayList()
@@ -177,11 +181,11 @@ class GitlabAuthentication {
             if (description != null) {
                 jsonObject.addProperty("description", description)
             }
-//            jsonObject.addProperty("milestone", milestones)
-//            jsonObject.addProperty("labels", labels)
-//            jsonObject.addProperty("assignee", assignee)
-
+            jsonObject.addProperty("milestone_id", hashMapMilestones[arrayListMilestones[spinnerPositionMilestones]])
+            jsonObject.addProperty("labels", labels)
+            jsonObject.addProperty("assignee_ids", hashMapUsers[arrayListUsers[spinnerPositionAssignee]])
             jsonObject.addProperty("weight", weight)
+
             RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/" + hashMapProjects[arrayListProjects[spinnerPositionProject]] + "/")
                 .create(AccountIdService::class.java)
                 .createGitlabIssue(jsonObject = jsonObject)
@@ -225,7 +229,6 @@ class GitlabAuthentication {
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
                     }
-
                     override fun onResponse(
                         call: retrofit2.Call<List<GitlabProjectModel>>,
                         response: retrofit2.Response<List<GitlabProjectModel>>
@@ -242,11 +245,13 @@ class GitlabAuthentication {
                                     arrayListProjects.add(it.name!!)
                                     arrayListProjectsId.add(it.id!!)
                                     hashMapProjects[it.name!!] = it.id!!
-                                    gatherGitlabMilestonesDetails(projectId = it.id!!)
-                                    gatherGitlabLabelsDetails(projectId = it.id!!)
-                                    gatherGitlabUsersDetails(projectId = it.id!!)
+
                                 }
                             }
+                            gatherGitlabMilestonesDetails(projectId = arrayListProjectsId[projectPosition])
+                            gatherGitlabLabelsDetails(projectId = arrayListProjectsId[projectPosition])
+                            gatherGitlabUsersDetails(projectId = arrayListProjectsId[projectPosition])
+                            updateFields()
                         }
                     }
                 })
@@ -403,11 +408,8 @@ class GitlabAuthentication {
                 hashMapMilestones.clear()
                 hashMapLabels.clear()
                 hashMapUsers.clear()
+                gatherGitlabProjectDetails()
 
-                withContext(Dispatchers.IO) {
-                    gatherGitlabProjectDetails()
-
-                }
             } catch (e: Exception) {
                 LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error")
                 gitlabExceptionHandler(e = e, filePathName = filePathMedia)
@@ -418,6 +420,7 @@ class GitlabAuthentication {
 
     private fun updateFields() {
         activity.runOnUiThread {
+
             LoggerBirdService.loggerBirdService.initializeGitlabSpinner(
                 arrayListGitlabProjects = arrayListProjects,
                 arrayListGitlabUsers = arrayListUsers,
@@ -455,6 +458,26 @@ class GitlabAuthentication {
 
         spinnerPositionMilestones = spinnerMilestone.selectedItemPosition
         milestones = spinnerLabels.selectedItem.toString()
+    }
+
+    internal fun gitlabProjectPosition(projectPosition: Int){
+
+        this.spinnerPositionProject = projectPosition
+    }
+
+    internal fun gitlabAssigneePosition(assigneePosition: Int){
+
+        this.spinnerPositionAssignee = assigneePosition
+    }
+
+    internal fun gitlabLabelPosition(labelPosition: Int){
+
+        this.spinnerPositionLabels = labelPosition
+    }
+
+    internal fun gitlabMilestonesPosition(milestonePosition: Int){
+
+        this.spinnerPositionMilestones = milestonePosition
     }
 
     private fun gitlabExceptionHandler(

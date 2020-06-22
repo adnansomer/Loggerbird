@@ -3915,27 +3915,111 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGitlabLabels: ArrayList<String>
     ) {
 
+        initializeGitlabProject(arrayListGitlabProjects)
+
+        initializeGitLabAssignee(arrayListGitlabUsers)
+
+        initializeGitLabMilestones(arrayListGitlabMilestones)
+
+        initializeGitLabLabels(arrayListGitlabLabels)
+
+        progressBarGitlab.visibility = View.GONE
+        progressBarGitlabLayout.visibility = View.GONE
+    }
+
+    internal fun initializeGitlabProject(
+        arrayListGitlabProjects: ArrayList<String>){
         spinnerGitlabProjectAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabProjects)
         spinnerGitlabProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabProject.adapter = spinnerGitlabProjectAdapter
 
+        spinnerGitlabProject.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                gitlabAuthentication.gitlabProjectPosition(projectPosition = position)
+            }
+        }
+
+    }
+
+    internal fun initializeGitLabAssignee(
+        arrayListGitlabUsers: ArrayList<String>
+    ){
         spinnerGitlabAssigneeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabUsers)
         spinnerGitlabAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabAssignee.adapter = spinnerGitlabAssigneeAdapter
 
+        spinnerGitlabAssignee.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                gitlabAuthentication.gitlabAssigneePosition(assigneePosition = position)
+            }
+        }
+    }
+
+    internal fun initializeGitLabLabels(
+        arrayListGitlabLabels: ArrayList<String>
+    ){
         spinnerGitlabLabelsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabLabels)
         spinnerGitlabLabelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabLabels.adapter = spinnerGitlabLabelsAdapter
 
+        spinnerGitlabLabels.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                gitlabAuthentication.gitlabLabelPosition(labelPosition = position)
+            }
+        }
+    }
+
+    internal fun initializeGitLabMilestones(
+        arrayListGitlabMilestones: ArrayList<String>
+    ){
         spinnerGitlabMilestoneAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabMilestones)
         spinnerGitlabMilestoneAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabMilestone.adapter = spinnerGitlabMilestoneAdapter
 
-        progressBarGitlab.visibility = View.GONE
-        progressBarGitlabLayout.visibility = View.GONE
+        spinnerGitlabMilestoneAdapter.notifyDataSetChanged()
 
+        spinnerGitlabMilestone.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = position)
+            }
+        }
     }
-
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun addGitlabFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
@@ -3960,6 +4044,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         return false
     }
+
+
+
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeSlackLayout(filePathMedia: File) {
@@ -4013,25 +4100,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     spinnerUsers = viewSlack.findViewById(R.id.spinner_slack_user)
                     slackChannelLayout = viewSlack.findViewById(R.id.slack_send_channel_layout)
                     slackUserLayout = viewSlack.findViewById(R.id.slack_send_user_layout)
-                    recyclerViewSlackAttachment =
-                        viewSlack.findViewById(R.id.recycler_view_slack_attachment)
-                    recyclerViewSlackAttachmentUser =
-                        viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
+                    recyclerViewSlackAttachment = viewSlack.findViewById(R.id.recycler_view_slack_attachment)
+                    recyclerViewSlackAttachmentUser = viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
                     editTextMessage = viewSlack.findViewById(R.id.editText_slack_message)
-                    editTextMessageUser =
-                        viewSlack.findViewById(R.id.editText_slack_message_user)
+                    editTextMessageUser = viewSlack.findViewById(R.id.editText_slack_message_user)
                     buttonSlackCancel = viewSlack.findViewById(R.id.button_slack_cancel)
                     buttonSlackCreate = viewSlack.findViewById(R.id.button_slack_create)
-                    buttonSlackCancelUser =
-                        viewSlack.findViewById(R.id.button_slack_cancel_user)
-                    buttonSlackCreateUser =
-                        viewSlack.findViewById(R.id.button_slack_create_user)
+                    buttonSlackCancelUser = viewSlack.findViewById(R.id.button_slack_cancel_user)
+                    buttonSlackCreateUser = viewSlack.findViewById(R.id.button_slack_create_user)
                     progressBarSlack = viewSlack.findViewById(R.id.slack_progressbar)
                     toolbarSlack = viewSlack.findViewById(R.id.toolbar_slack)
-                    slackBottomNavigationView =
-                        viewSlack.findViewById(R.id.slack_bottom_nav_view)
-                    progressBarSlackLayout =
-                        viewSlack.findViewById(R.id.slack_progressbar_background)
+                    slackBottomNavigationView = viewSlack.findViewById(R.id.slack_bottom_nav_view)
+                    progressBarSlackLayout = viewSlack.findViewById(R.id.slack_progressbar_background)
 
                     slackAuthentication.callSlack(
                         context = context,
