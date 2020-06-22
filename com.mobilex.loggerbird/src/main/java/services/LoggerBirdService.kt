@@ -349,7 +349,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var spinnerGitlabProject: Spinner
     private lateinit var editTextGitlabTitle: EditText
     private lateinit var editTextGitlabDescription: EditText
-    private lateinit var spinnetGitlabProject: Spinner
     private lateinit var spinnerGitlabMilestone: Spinner
     private lateinit var spinnerGitlabAssignee: Spinner
     private lateinit var editTextGitlabWeight: EditText
@@ -362,6 +361,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var progressBarGitlab: ProgressBar
     private lateinit var progressBarGitlabLayout: FrameLayout
     private lateinit var spinnerGitlabProjectAdapter: ArrayAdapter<String>
+    private lateinit var spinnerGitlabAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var spinnerGitlabLabelsAdapter: ArrayAdapter<String>
+    private lateinit var spinnerGitlabMilestoneAdapter: ArrayAdapter<String>
     private val arrayListGitlabFileName: ArrayList<RecyclerViewModel> = ArrayList()
 
 
@@ -3828,6 +3830,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     task = "get",
                     filePathMedia = filePathMedia
                 )
+                progressBarGitlab.visibility = View.VISIBLE
+                progressBarGitlabLayout.visibility = View.VISIBLE
                 initializeGitlabRecyclerView(filePathMedia = filePathMedia)
                 buttonClicksGitlab(filePathMedia = filePathMedia)
             }
@@ -3857,6 +3861,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     editTextTitle = editTextGitlabTitle,
                     editTextDescription = editTextGitlabDescription,
                     editTextWeight = editTextGitlabWeight
+                )
+                gitlabAuthentication.gatherGitlabProjectSpinnerDetails(
+                    spinnerProject = spinnerGitlabProject,
+                    spinnerAssignee = spinnerGitlabAssignee,
+                    spinnerLabels = spinnerGitlabLabels,
+                    spinnerMilestone = spinnerGitlabMilestone
                 )
                 gitlabAuthentication.callGitlab(
                     activity = activity,
@@ -3899,12 +3909,27 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun initializeGitlabSpinner(
-        arrayListProjects: ArrayList<String>
+        arrayListGitlabProjects: ArrayList<String>,
+        arrayListGitlabUsers: ArrayList<String>,
+        arrayListGitlabMilestones: ArrayList<String>,
+        arrayListGitlabLabels: ArrayList<String>
     ) {
 
-        spinnerGitlabProjectAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListProjects)
+        spinnerGitlabProjectAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabProjects)
         spinnerGitlabProjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabProject.adapter = spinnerGitlabProjectAdapter
+
+        spinnerGitlabAssigneeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabUsers)
+        spinnerGitlabAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerGitlabAssignee.adapter = spinnerGitlabAssigneeAdapter
+
+        spinnerGitlabLabelsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabLabels)
+        spinnerGitlabLabelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerGitlabLabels.adapter = spinnerGitlabLabelsAdapter
+
+        spinnerGitlabMilestoneAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabMilestones)
+        spinnerGitlabMilestoneAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerGitlabMilestone.adapter = spinnerGitlabMilestoneAdapter
 
         progressBarGitlab.visibility = View.GONE
         progressBarGitlabLayout.visibility = View.GONE

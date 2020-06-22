@@ -33,11 +33,14 @@ class GitlabAuthentication {
     private var title: String? = ""
     private var description: String? = ""
     private var weight: String? = ""
-    private var owned: String? = "true"
     private var assignee: String? = null
     private var labels: String? = null
+    private var milestones: String? = null
     private var project: String? = null
     private var spinnerPositionProject: Int = 0
+    private var spinnerPositionLabels: Int = 0
+    private var spinnerPositionAssignee: Int = 0
+    private var spinnerPositionMilestones: Int = 0
     private val arrayListProjects: ArrayList<String> = ArrayList()
     private val arrayListProjectsId: ArrayList<String> = ArrayList()
     private val arrayListMilestones: ArrayList<String> = ArrayList()
@@ -174,6 +177,10 @@ class GitlabAuthentication {
             if (description != null) {
                 jsonObject.addProperty("description", description)
             }
+//            jsonObject.addProperty("milestone", milestones)
+//            jsonObject.addProperty("labels", labels)
+//            jsonObject.addProperty("assignee", assignee)
+
             jsonObject.addProperty("weight", weight)
             RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/" + hashMapProjects[arrayListProjects[spinnerPositionProject]] + "/")
                 .create(AccountIdService::class.java)
@@ -202,7 +209,6 @@ class GitlabAuthentication {
                         }
                     }
                 })
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -214,10 +220,7 @@ class GitlabAuthentication {
                 .create(AccountIdService::class.java)
                 .getGitlabProjects()
                 .enqueue(object : retrofit2.Callback<List<GitlabProjectModel>> {
-                    override fun onFailure(
-                        call: retrofit2.Call<List<GitlabProjectModel>>,
-                        t: Throwable
-                    ) {
+                    override fun onFailure(call: retrofit2.Call<List<GitlabProjectModel>>, t: Throwable) {
                         t.printStackTrace()
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
@@ -239,6 +242,9 @@ class GitlabAuthentication {
                                     arrayListProjects.add(it.name!!)
                                     arrayListProjectsId.add(it.id!!)
                                     hashMapProjects[it.name!!] = it.id!!
+                                    gatherGitlabMilestonesDetails(projectId = it.id!!)
+                                    gatherGitlabLabelsDetails(projectId = it.id!!)
+                                    gatherGitlabUsersDetails(projectId = it.id!!)
                                 }
                             }
                         }
@@ -251,9 +257,9 @@ class GitlabAuthentication {
         }
     }
 
-    private fun gatherGitlabMilestonesDetails() {
+    private fun gatherGitlabMilestonesDetails(projectId: String) {
         try {
-            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/19430667/")
+            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/$projectId/")
                 .create(AccountIdService::class.java)
                 .getGitlabMilestones()
                 .enqueue(object : retrofit2.Callback<List<GitlabMilestonesModel>> {
@@ -279,9 +285,10 @@ class GitlabAuthentication {
                                 if (it.id != null) {
                                     arrayListMilestones.add(it.title!!)
                                     arrayListMilestonesId.add(it.id!!)
-                                    hashMapProjects[it.title!!] = it.id!!
+                                    hashMapMilestones[it.title!!] = it.id!!
                                 }
                             }
+                            updateFields()
                         }
                     }
                 })
@@ -292,9 +299,9 @@ class GitlabAuthentication {
         }
     }
 
-    private fun gatherGitlabLabelsDetails() {
+    private fun gatherGitlabLabelsDetails(projectId: String) {
         try {
-            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/19430667/")
+            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/$projectId/")
                 .create(AccountIdService::class.java)
                 .getGitlabLabels()
                 .enqueue(object : retrofit2.Callback<List<GitlabLabelsModel>> {
@@ -323,6 +330,7 @@ class GitlabAuthentication {
                                     hashMapLabels[it.name!!] = it.id!!
                                 }
                             }
+                            updateFields()
                         }
                     }
                 })
@@ -333,9 +341,9 @@ class GitlabAuthentication {
         }
     }
 
-    private fun gatherGitlabUsersDetails() {
+    private fun gatherGitlabUsersDetails(projectId: String) {
         try {
-            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/19430667/")
+            RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/$projectId/")
                 .create(AccountIdService::class.java)
                 .getGitlabUsers()
                 .enqueue(object : retrofit2.Callback<List<GitlabUsersModel>> {
@@ -352,7 +360,6 @@ class GitlabAuthentication {
 
                         val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
                         coroutineCallGitlabDetails.async {
-                            Log.d("gitlabusers", response.code().toString())
                             val gitlab = response.body()
                             Log.d("gitlabusers", gitlab.toString())
 
@@ -364,6 +371,7 @@ class GitlabAuthentication {
                                     hashMapUsers[it.name!!] = it.id!!
                                 }
                             }
+                            updateFields()
                         }
                     }
                 })
@@ -383,15 +391,22 @@ class GitlabAuthentication {
         val coroutineCallGatherDetails = CoroutineScope(Dispatchers.IO)
         coroutineCallGatherDetails.async(Dispatchers.IO) {
             try {
-                hashMapProjects.clear()
                 arrayListProjects.clear()
                 arrayListProjectsId.clear()
+                arrayListMilestones.clear()
+                arrayListMilestonesId.clear()
+                arrayListLabels.clear()
+                arrayListLabelsId.clear()
+                arrayListUsers.clear()
+                arrayListUsersId.clear()
+                hashMapProjects.clear()
+                hashMapMilestones.clear()
+                hashMapLabels.clear()
+                hashMapUsers.clear()
 
                 withContext(Dispatchers.IO) {
                     gatherGitlabProjectDetails()
-                    gatherGitlabMilestonesDetails()
-                    gatherGitlabLabelsDetails()
-                    gatherGitlabUsersDetails()
+
                 }
             } catch (e: Exception) {
                 LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error")
@@ -404,7 +419,10 @@ class GitlabAuthentication {
     private fun updateFields() {
         activity.runOnUiThread {
             LoggerBirdService.loggerBirdService.initializeGitlabSpinner(
-                arrayListProjects = arrayListProjects
+                arrayListGitlabProjects = arrayListProjects,
+                arrayListGitlabUsers = arrayListUsers,
+                arrayListGitlabMilestones = arrayListMilestones,
+                arrayListGitlabLabels = arrayListLabels
             )
         }
     }
@@ -420,10 +438,23 @@ class GitlabAuthentication {
     }
 
     internal fun gatherGitlabProjectSpinnerDetails(
-        spinnerProject: Spinner
+        spinnerProject: Spinner,
+        spinnerAssignee: Spinner,
+        spinnerMilestone: Spinner,
+        spinnerLabels: Spinner
+
     ) {
         spinnerPositionProject = spinnerProject.selectedItemPosition
         project = spinnerProject.selectedItem.toString()
+
+        spinnerPositionAssignee = spinnerAssignee.selectedItemPosition
+        assignee = spinnerAssignee.selectedItem.toString()
+
+        spinnerPositionLabels = spinnerLabels.selectedItemPosition
+        labels = spinnerMilestone.selectedItem.toString()
+
+        spinnerPositionMilestones = spinnerMilestone.selectedItemPosition
+        milestones = spinnerLabels.selectedItem.toString()
     }
 
     private fun gitlabExceptionHandler(
@@ -440,6 +471,4 @@ class GitlabAuthentication {
             throwable = throwable
         )
     }
-
-
 }
