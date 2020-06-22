@@ -89,6 +89,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerFutureDate: Any? = null
     private var windowManagerFutureTime: Any? = null
     private var windowManagerGithub: Any? = null
+    private var windowManagerTrello: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -102,6 +103,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsFutureDate: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFutureTime: WindowManager.LayoutParams
     private lateinit var windowManagerParamsGithub: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsTrello: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -154,6 +156,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewFutureDate: View
     private lateinit var viewFutureTime: View
     private lateinit var viewGithub: View
+    private lateinit var viewTrello: View
     private lateinit var wrapper: FrameLayout
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
@@ -268,30 +271,30 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewEpicNameAdapter: ArrayAdapter<String>
     private var projectPosition: Int = 0
     private var controlProjectPosition: Boolean = false
-    internal lateinit var cardViewJiraIssueList:CardView
-    private lateinit var recyclerViewJiraIssueList:RecyclerView
-    private lateinit var jiraAdapterIssueList:RecyclerViewJiraIssueAdapter
-    private lateinit var imageViewJiraIssue:ImageView
-    private val arrayListJiraIssueName:ArrayList<RecyclerViewModelIssue> = ArrayList()
-    private var arrayListJiraIssue:ArrayList<String> = ArrayList()
-    internal lateinit var cardViewJiraLabelList:CardView
-    private lateinit var recyclerViewJiraLabelList:RecyclerView
-    private lateinit var jiraAdapterLabelList:RecyclerViewJiraLabelAdapter
-    private lateinit var imageViewJiraLabel:ImageView
-    private val arrayListJiraLabelName:ArrayList<RecyclerViewModelLabel> = ArrayList()
-    private var arrayListJiraLabel:ArrayList<String> = ArrayList()
-    internal lateinit var cardViewJiraComponentList:CardView
-    private lateinit var recyclerViewJiraComponentList:RecyclerView
-    private lateinit var jiraAdapterComponentList:RecyclerViewJiraComponentAdapter
-    private lateinit var imageViewJiraComponent:ImageView
-    private val arrayListJiraComponentName:ArrayList<RecyclerViewModelComponent> = ArrayList()
-    private var arrayListJiraComponent:ArrayList<String> = ArrayList()
-    internal lateinit var cardViewJiraFixVersionsList:CardView
-    private lateinit var recyclerViewJiraFixVersionsList:RecyclerView
-    private lateinit var jiraAdapterFixVersionsList:RecyclerViewJiraFixVersionsAdapter
-    private lateinit var imageViewJiraFixVersions:ImageView
-    private val arrayListJiraFixVersionsName:ArrayList<RecyclerViewModelFixVersions> = ArrayList()
-    private var arrayListJiraFixVersions:ArrayList<String> = ArrayList()
+    internal lateinit var cardViewJiraIssueList: CardView
+    private lateinit var recyclerViewJiraIssueList: RecyclerView
+    private lateinit var jiraAdapterIssueList: RecyclerViewJiraIssueAdapter
+    private lateinit var imageViewJiraIssue: ImageView
+    private val arrayListJiraIssueName: ArrayList<RecyclerViewModelIssue> = ArrayList()
+    private var arrayListJiraIssue: ArrayList<String> = ArrayList()
+    internal lateinit var cardViewJiraLabelList: CardView
+    private lateinit var recyclerViewJiraLabelList: RecyclerView
+    private lateinit var jiraAdapterLabelList: RecyclerViewJiraLabelAdapter
+    private lateinit var imageViewJiraLabel: ImageView
+    private val arrayListJiraLabelName: ArrayList<RecyclerViewModelLabel> = ArrayList()
+    private var arrayListJiraLabel: ArrayList<String> = ArrayList()
+    internal lateinit var cardViewJiraComponentList: CardView
+    private lateinit var recyclerViewJiraComponentList: RecyclerView
+    private lateinit var jiraAdapterComponentList: RecyclerViewJiraComponentAdapter
+    private lateinit var imageViewJiraComponent: ImageView
+    private val arrayListJiraComponentName: ArrayList<RecyclerViewModelComponent> = ArrayList()
+    private var arrayListJiraComponent: ArrayList<String> = ArrayList()
+    internal lateinit var cardViewJiraFixVersionsList: CardView
+    private lateinit var recyclerViewJiraFixVersionsList: RecyclerView
+    private lateinit var jiraAdapterFixVersionsList: RecyclerViewJiraFixVersionsAdapter
+    private lateinit var imageViewJiraFixVersions: ImageView
+    private val arrayListJiraFixVersionsName: ArrayList<RecyclerViewModelFixVersions> = ArrayList()
+    private var arrayListJiraFixVersions: ArrayList<String> = ArrayList()
     //Feedback:
     private lateinit var floating_action_button_feedback: Button
     private lateinit var floating_action_button_feed_close: Button
@@ -402,6 +405,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var imageViewLabel: ImageView
     private lateinit var arrayListGithubLabel: ArrayList<String>
 
+    //Trello
+    internal val trelloAuthentication = TrelloAuthentication()
+    private lateinit var buttonTrelloCreate: Button
+    private lateinit var buttonTrelloCancel: Button
+    private lateinit var editTextTrelloTitle: EditText
+    private lateinit var toolbarTrello: Toolbar
+    private lateinit var recyclerViewTrelloAttachment: RecyclerView
+    private lateinit var trelloAdapter: RecyclerViewTrelloAdapter
+    private lateinit var autoTextViewTrelloProject: AutoCompleteTextView
+    private lateinit var autoTextViewTrelloBoard: AutoCompleteTextView
+    private lateinit var autoTextViewTrelloProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewTrelloBoardAdapter: ArrayAdapter<String>
+    private val arrayListTrelloFileName: ArrayList<RecyclerViewModel> = ArrayList()
 
     //Static global variables:
     internal companion object {
@@ -417,6 +433,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var textView_share_slack: TextView
         private lateinit var textView_share_gitlab: TextView
         private lateinit var textView_share_github: TextView
+        private lateinit var textView_share_trello: TextView
         private lateinit var textView_discard: TextView
         //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
@@ -763,6 +780,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_share_jira = view.findViewById(R.id.textView_share_jira)
                     textView_share_slack = view.findViewById(R.id.textView_share_slack)
                     textView_share_github = view.findViewById(R.id.textView_share_github)
+                    textView_share_trello = view.findViewById(R.id.textView_share_trello)
                     textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
                     textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
@@ -1100,6 +1118,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         floatingActionButtonView.visibility = View.GONE
                     }
 //                    initializeSlackLayout(filePathMedia = filePathMedia)
+                }
+            }
+            textView_share_trello.setSafeOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
+                    }
+                    initializeTrelloLayout(filePathMedia = filePathMedia)
                 }
             }
 
@@ -2498,7 +2524,25 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     Toast.makeText(context, R.string.github_issue_time_out, Toast.LENGTH_SHORT)
                         .show()
                 }
-
+                "trello" -> {
+                    detachProgressBar()
+                    removeTrelloLayout()
+                    Toast.makeText(context, R.string.trello_issue_success, Toast.LENGTH_SHORT)
+                        .show()
+                    finishSuccessFab()
+                }
+                "trello_error" -> {
+                    detachProgressBar()
+                    removeTrelloLayout()
+                    Toast.makeText(context, R.string.trello_issue_failure, Toast.LENGTH_SHORT)
+                        .show()
+                }
+                "trello_error_time_out" -> {
+                    detachProgressBar()
+                    removeTrelloLayout()
+                    Toast.makeText(context, R.string.trello_issue_time_out, Toast.LENGTH_SHORT)
+                        .show()
+                }
             }
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
@@ -2825,7 +2869,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     }
                     cardViewJiraIssueList = viewJira.findViewById(R.id.cardView_issues_list)
                     imageViewJiraIssue = viewJira.findViewById(R.id.imageView_issue_add)
-                    recyclerViewJiraIssueList = viewJira.findViewById(R.id.recycler_view_issues_list)
+                    recyclerViewJiraIssueList =
+                        viewJira.findViewById(R.id.recycler_view_issues_list)
 
                     cardViewJiraLabelList = viewJira.findViewById(R.id.cardView_label_list)
                     imageViewJiraLabel = viewJira.findViewById(R.id.imageView_label_add)
@@ -2833,11 +2878,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
                     cardViewJiraComponentList = viewJira.findViewById(R.id.cardView_component_list)
                     imageViewJiraComponent = viewJira.findViewById(R.id.imageView_component_add)
-                    recyclerViewJiraComponentList = viewJira.findViewById(R.id.recycler_view_component_list)
+                    recyclerViewJiraComponentList =
+                        viewJira.findViewById(R.id.recycler_view_component_list)
 
-                    cardViewJiraFixVersionsList = viewJira.findViewById(R.id.cardView_fix_versions_list)
-                    imageViewJiraFixVersions = viewJira.findViewById(R.id.imageView_fix_versions_add)
-                    recyclerViewJiraFixVersionsList = viewJira.findViewById(R.id.recycler_view_fix_versions_list)
+                    cardViewJiraFixVersionsList =
+                        viewJira.findViewById(R.id.cardView_fix_versions_list)
+                    imageViewJiraFixVersions =
+                        viewJira.findViewById(R.id.imageView_fix_versions_add)
+                    recyclerViewJiraFixVersionsList =
+                        viewJira.findViewById(R.id.recycler_view_fix_versions_list)
 
                     jiraAuthentication.callJiraIssue(
                         context = context,
@@ -3098,31 +3147,31 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             imageButtonRemoveDate.visibility = View.GONE
         }
         imageViewJiraIssue.setSafeOnClickListener {
-                if (!arrayListJiraIssueName.contains(
-                        RecyclerViewModelIssue(
-                            autoTextViewIssue.editableText.toString()
-                        )
-                    ) && arrayListJiraIssue.contains(
+            if (!arrayListJiraIssueName.contains(
+                    RecyclerViewModelIssue(
                         autoTextViewIssue.editableText.toString()
                     )
-                ) {
-                    arrayListJiraIssueName.add(RecyclerViewModelIssue(autoTextViewIssue.editableText.toString()))
-                    jiraAdapterIssueList.notifyDataSetChanged()
-                    cardViewJiraIssueList.visibility = View.VISIBLE
-                } else if (arrayListJiraIssueName.contains(
-                        RecyclerViewModelIssue(autoTextViewIssue.editableText.toString())
-                    )
-                ) {
-                    defaultToast.attachToast(
-                        activity = activity,
-                        toastMessage = activity.resources.getString(R.string.jira_issue_exist)
-                    )
-                } else if (!arrayListJiraIssue.contains(autoTextViewIssue.editableText.toString())) {
-                    defaultToast.attachToast(
-                        activity = activity,
-                        toastMessage = activity.resources.getString(R.string.jira_issue_doesnt_exist)
-                    )
-                }
+                ) && arrayListJiraIssue.contains(
+                    autoTextViewIssue.editableText.toString()
+                )
+            ) {
+                arrayListJiraIssueName.add(RecyclerViewModelIssue(autoTextViewIssue.editableText.toString()))
+                jiraAdapterIssueList.notifyDataSetChanged()
+                cardViewJiraIssueList.visibility = View.VISIBLE
+            } else if (arrayListJiraIssueName.contains(
+                    RecyclerViewModelIssue(autoTextViewIssue.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.jira_issue_exist)
+                )
+            } else if (!arrayListJiraIssue.contains(autoTextViewIssue.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.jira_issue_doesnt_exist)
+                )
+            }
 
         }
         imageViewJiraLabel.setSafeOnClickListener {
@@ -3191,7 +3240,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     autoTextViewFixVersions.editableText.toString()
                 )
             ) {
-                arrayListJiraFixVersionsName.add(RecyclerViewModelFixVersions(autoTextViewFixVersions.editableText.toString()))
+                arrayListJiraFixVersionsName.add(
+                    RecyclerViewModelFixVersions(
+                        autoTextViewFixVersions.editableText.toString()
+                    )
+                )
                 jiraAdapterFixVersionsList.notifyDataSetChanged()
                 cardViewJiraFixVersionsList.visibility = View.VISIBLE
             } else if (arrayListJiraFixVersionsName.contains(
@@ -3212,9 +3265,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
 
     }
-    private fun initializeJiraIssueRecyclerView(){
+
+    private fun initializeJiraIssueRecyclerView() {
         arrayListJiraIssueName.clear()
-        recyclerViewJiraIssueList.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
+        recyclerViewJiraIssueList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         jiraAdapterIssueList = RecyclerViewJiraIssueAdapter(
             arrayListJiraIssueName,
             context = context,
@@ -3223,9 +3278,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         )
         recyclerViewJiraIssueList.adapter = jiraAdapterIssueList
     }
-    private fun initializeJiraLabelRecyclerView(){
+
+    private fun initializeJiraLabelRecyclerView() {
         arrayListJiraLabelName.clear()
-        recyclerViewJiraLabelList.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
+        recyclerViewJiraLabelList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         jiraAdapterLabelList = RecyclerViewJiraLabelAdapter(
             arrayListJiraLabelName,
             context = context,
@@ -3234,9 +3291,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         )
         recyclerViewJiraLabelList.adapter = jiraAdapterLabelList
     }
-    private fun initializeJiraComponentRecyclerView(){
+
+    private fun initializeJiraComponentRecyclerView() {
         arrayListJiraComponentName.clear()
-        recyclerViewJiraComponentList.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
+        recyclerViewJiraComponentList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         jiraAdapterComponentList = RecyclerViewJiraComponentAdapter(
             arrayListJiraComponentName,
             context = context,
@@ -3245,9 +3304,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         )
         recyclerViewJiraComponentList.adapter = jiraAdapterComponentList
     }
-    private fun initializeJiraFixVersionsRecyclerView(){
+
+    private fun initializeJiraFixVersionsRecyclerView() {
         arrayListJiraFixVersionsName.clear()
-        recyclerViewJiraFixVersionsList.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
+        recyclerViewJiraFixVersionsList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         jiraAdapterFixVersionsList = RecyclerViewJiraFixVersionsAdapter(
             arrayListJiraFixVersionsName,
             context = context,
@@ -3711,7 +3772,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             false
         }
         autoTextViewIssue.setOnItemClickListener { parent, view, position, id ->
-            hideKeyboard(activity = activity ,view = viewJira)
+            hideKeyboard(activity = activity, view = viewJira)
         }
         this.arrayListJiraIssue = arrayListIssues
     }
@@ -6010,6 +6071,343 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //            }
 //        }
     }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeTrelloLayout(filePathMedia: File) {
+        try {
+            removeTrelloLayout()
+            viewTrello = LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_trello_popup, (this.rootView as ViewGroup), false)
+
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsTrello = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerTrello = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                (windowManagerTrello as WindowManager).addView(
+                    viewTrello,
+                    windowManagerParamsTrello
+                )
+
+                if (Build.VERSION.SDK_INT >= 23) {
+                    activity.window.navigationBarColor =
+                        resources.getColor(R.color.black, theme)
+                    activity.window.statusBarColor =
+                        resources.getColor(R.color.black, theme)
+                } else {
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        activity.window.navigationBarColor =
+                            resources.getColor(R.color.black)
+                        activity.window.statusBarColor = resources.getColor(R.color.black)
+                    }
+                }
+
+                buttonTrelloCancel = viewTrello.findViewById(R.id.button_trello_cancel)
+                buttonTrelloCreate = viewTrello.findViewById(R.id.button_trello_create)
+                editTextTrelloTitle = viewTrello.findViewById(R.id.editText_trello_title)
+                toolbarTrello = viewTrello.findViewById(R.id.toolbar_trello)
+                recyclerViewTrelloAttachment =
+                    viewTrello.findViewById(R.id.recycler_view_trello_attachment)
+                autoTextViewTrelloProject =
+                    viewTrello.findViewById(R.id.auto_textView_trello_project)
+                autoTextViewTrelloBoard = viewTrello.findViewById(R.id.auto_textView_trello_board)
+
+
+                toolbarTrello.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.github_menu_save -> {
+//                            val sharedPref =
+//                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+//                            with(sharedPref.edit()) {
+//                                putString(
+//                                    "github_repo",
+//                                    autoTextViewGithubRepo.editableText.toString()
+//                                )
+////                                putInt("jira_project_position", projectPosition)
+//                                putString(
+//                                    "github_project",
+//                                    autoTextViewGithubProject.editableText.toString()
+//                                )
+//                                putString("github_title", editTextGithubTitle.text.toString())
+//                                putString("github_comment", editTextGithubComment.text.toString())
+//                                putString(
+//                                    "github_assignee",
+//                                    autoTextViewGithubAssignee.editableText.toString()
+//                                )
+//                                putString(
+//                                    "github_labels",
+//                                    autoTextViewGithubLabels.editableText.toString()
+//                                )
+//                                putString(
+//                                    "github_milestone",
+//                                    autoTextViewGithubMileStone.editableText.toString()
+//                                )
+//                                putString(
+//                                    "github_pull_requests",
+//                                    autoTextViewGithubLinkedRequests.editableText.toString()
+//                                )
+//                                commit()
+//                            }
+//                            defaultToast.attachToast(
+//                                activity = activity,
+//                                toastMessage = context.resources.getString(R.string.github_issue_preferences_save)
+//                            )
+                        }
+                        R.id.github_menu_clear -> {
+//                            val sharedPref =
+//                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+//                            val editor: SharedPreferences.Editor = sharedPref.edit()
+//                            editor.remove("github_comment")
+//                            editor.remove("github_title")
+//                            editor.remove("github_repo")
+//                            editor.remove("github_project")
+//                            editor.remove("github_milestone")
+//                            editor.remove("github_assignee")
+//                            editor.remove("github_labels")
+//                            editor.remove("github_pull_requests")
+//                            editor.apply()
+////                            projectPosition = 0
+//                            clearGithubComponents()
+//                            defaultToast.attachToast(
+//                                activity = activity,
+//                                toastMessage = context.resources.getString(R.string.github_issue_preferences_delete)
+//                            )
+                        }
+                    }
+                    return@setOnMenuItemClickListener true
+                }
+
+                toolbarTrello.setNavigationOnClickListener {
+                    removeTrelloLayout()
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.VISIBLE
+                    }
+                }
+                initializeTrelloRecyclerView(filePathMedia = filePathMedia)
+                buttonClicksTrello()
+                trelloAuthentication.callTrello(
+                    activity = activity,
+                    context = context,
+                    task = "get",
+                    filePathMedia = filePathMedia
+                )
+                attachProgressBar()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.trelloTag)
+        }
+    }
+
+    internal fun removeTrelloLayout() {
+        if (this::viewTrello.isInitialized && windowManagerTrello != null) {
+            (windowManagerTrello as WindowManager).removeViewImmediate(
+                viewTrello
+            )
+            windowManagerTrello = null
+        }
+    }
+
+    private fun buttonClicksTrello() {
+        buttonTrelloCreate.setSafeOnClickListener {
+            attachProgressBar()
+            trelloAuthentication.gatherAutoTextDetails(autoTextViewProject = autoTextViewTrelloProject ,autoTextViewBoard = autoTextViewTrelloBoard)
+            trelloAuthentication.gatherEditTextDetails(editTextTitle = editTextTrelloTitle)
+            trelloAuthentication.callTrello(
+                activity = activity,
+                context = context,
+                task = "create"
+            )
+        }
+        buttonTrelloCancel.setSafeOnClickListener {
+            removeTrelloLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    internal fun initializeTrelloAutoTextViews(
+        arrayListProject: ArrayList<String>,
+        arrayListBoards: ArrayList<String>
+    ) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+//        editTextGithubTitle.setText(sharedPref.getString("github_title", null))
+//        editTextGithubComment.setText(sharedPref.getString("github_comment", null))
+        initializeTrelloProject(arrayListProject = arrayListProject, sharedPref = sharedPref)
+        initializeTrelloBoard(arrayListBoards = arrayListBoards, sharedPref = sharedPref)
+//        this.arrayListGithubAssignee = arrayListAssignee
+//        this.arrayListGithubLabel = arrayListLabels
+        detachProgressBar()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeTrelloProject(
+        arrayListProject: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewTrelloProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListProject
+        )
+        autoTextViewTrelloProject.setAdapter(autoTextViewTrelloProjectAdapter)
+        if (arrayListProject.isNotEmpty() && autoTextViewTrelloProject.text.isEmpty()) {
+            if (sharedPref.getString("trello_project", null) != null) {
+                if (arrayListProject.contains(
+                        sharedPref.getString(
+                            "trello_project",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewTrelloProject.setText(
+                        sharedPref.getString("trello_project", null),
+                        false
+                    )
+                } else {
+                    autoTextViewTrelloProject.setText(arrayListProject[0], false)
+                }
+            } else {
+                autoTextViewTrelloProject.setText(arrayListProject[0], false)
+            }
+        }
+        autoTextViewTrelloProject.setOnTouchListener { v, event ->
+            autoTextViewTrelloProject.showDropDown()
+            false
+        }
+        autoTextViewTrelloProject.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewTrello)
+            trelloAuthentication.setProjectPosition(projectPosition = position)
+            trelloAuthentication.callTrello(
+                activity = activity,
+                context = context,
+                task = "get"
+            )
+            attachProgressBar()
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeTrelloBoard(
+        arrayListBoards: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewTrelloBoardAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListBoards
+        )
+        autoTextViewTrelloBoard.setAdapter(autoTextViewTrelloBoardAdapter)
+        if (arrayListBoards.isNotEmpty() && autoTextViewTrelloBoard.text.isEmpty()) {
+            if (sharedPref.getString("trello_board", null) != null) {
+                if (arrayListBoards.contains(
+                        sharedPref.getString(
+                            "trello_board",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewTrelloBoard.setText(
+                        sharedPref.getString("trello_board", null),
+                        false
+                    )
+                } else {
+                    autoTextViewTrelloBoard.setText(arrayListBoards[0], false)
+                }
+            } else {
+                autoTextViewTrelloBoard.setText(arrayListBoards[0], false)
+            }
+        }
+        autoTextViewTrelloBoard.setOnTouchListener { v, event ->
+            autoTextViewTrelloBoard.showDropDown()
+            false
+        }
+        autoTextViewTrelloBoard.setOnItemClickListener { parent, view, position, id ->
+            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewTrello)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeTrelloRecyclerView(filePathMedia: File) {
+        arrayListTrelloFileName.clear()
+        recyclerViewTrelloAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        trelloAdapter = RecyclerViewTrelloAdapter(
+            addTrelloFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewTrelloAttachment.adapter = trelloAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addTrelloFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListTrelloFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListTrelloFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListTrelloFileName
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {

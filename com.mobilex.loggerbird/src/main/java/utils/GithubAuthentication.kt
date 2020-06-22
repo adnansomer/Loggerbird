@@ -84,7 +84,7 @@ internal class GithubAuthentication {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
                     checkQueueTime(activity = activity)
-                    okHttpSlackAuthentication(
+                    okHttpGithubAuthentication(
                         activity = activity,
                         context = context,
                         task = task,
@@ -109,7 +109,7 @@ internal class GithubAuthentication {
         }
     }
 
-    private fun okHttpSlackAuthentication(
+    private fun okHttpGithubAuthentication(
         context: Context,
         activity: Activity,
         task: String,
@@ -141,7 +141,7 @@ internal class GithubAuthentication {
                                 LoggerBird.callEnqueue()
                                 LoggerBird.callExceptionDetails(
                                     exception = e,
-                                    tag = Constants.slackTag
+                                    tag = Constants.githubTag
                                 )
                             }
                         }

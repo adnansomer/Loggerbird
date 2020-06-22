@@ -111,6 +111,9 @@
     <string name="github_label_exist">This label already added to list!</string>
     <string name="github_label_doesnt_exist">This label doesn\'t exist!</string>
     <string name="github_mile_stone_doesnt_exist">This milestone doesn\'t exist!</string>
+    <string name="trello_issue_success">Issue opened successfully!</string>
+    <string name="trello_issue_failure">An error happened while trying to open trello issue!</string>
+    <string name="trello_issue_time_out">An error happened while trying to open trello issue , system has been timed out!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -131,7 +134,7 @@
     <string name="textView_loggerbird_future_title">Set as future task</string>
     <string name="textView_loggerbird_gitlab_title">Send to Gitlab</string>
     <string name="textView_loggerbird_github_title">Send to Github</string>
-
+    <string name="textView_loggerbird_trello_title">Share with Trello</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>
     <!-- activity_paint_save_dialog-->
@@ -291,4 +294,16 @@
     <string name="textView_recyclerView_github_label_title">Are you sure to remove label from your github issue?</string>
     <string name="button_recyclerView_github_label_delete">Delete label</string>
     <string name="button_recyclerView_github_label_keep">Keep label</string>
+    <!-- loggerbird_trello_popup-->
+    <!-- loggerbird_trello_popup-->
+    <string name="textView_trello_project">Project</string>
+    <string name="textView_trello_list">Card list</string>
+    <string name="textView_trello_title">Title</string>
+    <string name="editText_trello_title_hint">Enter a title for this card…</string>
+    <string name="textView_trello_attachment">Attachments</string>
+    <string name="button_trello_create">Create</string>
+    <string name="button_trello_cancel">Cancel</string>
+    <!-- loggerbird_trello_menu-->
+    <string name="textView_trello_menu_save">Save Issue Info</string>
+    <string name="textView_trello_menu_clear">Clear Issue Info</string>
 </resources>
