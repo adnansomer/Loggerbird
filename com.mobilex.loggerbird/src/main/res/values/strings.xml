@@ -229,6 +229,7 @@
     <string name="editText_gitlab_title_empty">Your title cannot be empty!</string>
     <string name="textView_gitlab_due_date">Due Date</string>
     <string name="textView_gitlab_confidentiality">Confidentiality</string>
+    <string name="textView_gitlab_enter_due_date">Set a due date for issue!</string>
     <!-- recycler_view_slack_item_popup-->
     <string name="textView_recyclerView_gitlab_popup_title">Are you sure to remove attachment from your Gitlab Issue?</string>
     <string name="button_recyclerView_gitlab_yes">Delete Attachment</string>

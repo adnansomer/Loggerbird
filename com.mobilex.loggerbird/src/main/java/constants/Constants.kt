@@ -81,6 +81,7 @@ internal class Constants {
         const val jiraDatePopupTag:String = "Jira Date Popup"
         const val futureTaskTag:String = "Future Task"
         const val gitlabTag: String = "GitLab"
+        const val gitlabDatePopupTag:String = "Gitlab Date Popup"
 
     }
 }

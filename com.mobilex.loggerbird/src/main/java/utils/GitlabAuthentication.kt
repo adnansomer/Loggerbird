@@ -14,13 +14,15 @@ import exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
 import models.*
 import okhttp3.*
 import services.LoggerBirdService
 import java.io.File
 import java.io.IOException
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class GitlabAuthentication {
 
@@ -38,6 +40,7 @@ class GitlabAuthentication {
     private var milestones: String? = null
     private var project: String? = null
     private var confidentiality: String? = null
+    internal var dueDate: String? = null
     private var spinnerPositionProject: Int = 0
     private var spinnerPositionLabels: Int = 0
     private var spinnerPositionAssignee: Int = 0
@@ -61,6 +64,7 @@ class GitlabAuthentication {
     private var hashMapMilestones: HashMap<String, String> = HashMap()
     private var hashMapLabels: HashMap<String, String> = HashMap()
     private var hashMapUsers: HashMap<String, String> = HashMap()
+    private lateinit var timerTaskQueue: TimerTask
 
     internal fun callGitlab(
         activity: Activity,
@@ -74,6 +78,7 @@ class GitlabAuthentication {
         coroutineCallOkHttpGitlab.async {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
+                    checkQueueTime(activity = activity)
                     okHttpGitlabAuthentication(
                         activity = activity,
                         context = context,
@@ -190,12 +195,14 @@ class GitlabAuthentication {
                 hashMapMilestones[arrayListMilestones[spinnerPositionMilestones]]
             )
             jsonObject.addProperty("labels", labels)
-            jsonObject.addProperty(
-                "assignee_ids",
+            jsonObject.addProperty("assignee_ids",
                 hashMapUsers[arrayListUsers[spinnerPositionAssignee]]
             )
             if(weight != null){
                 jsonObject.addProperty("weight", weight)
+            }
+            if(dueDate != null){
+                jsonObject.addProperty("due_date", dueDate)
             }
             jsonObject.addProperty("confidential", confidentiality)
 
@@ -439,8 +446,8 @@ class GitlabAuthentication {
                 hashMapLabels.clear()
                 hashMapUsers.clear()
                 arrayListConfidentiality.clear()
-                arrayListConfidentiality.add("true")
                 arrayListConfidentiality.add("false")
+                arrayListConfidentiality.add("true")
                 gatherGitlabProjectDetails()
 
             } catch (e: Exception) {
@@ -452,6 +459,7 @@ class GitlabAuthentication {
     }
 
     private fun updateFields() {
+        timerTaskQueue.cancel()
         activity.runOnUiThread {
             LoggerBirdService.loggerBirdService.initializeGitlabSpinner(
                 arrayListGitlabProjects = arrayListProjects,
@@ -462,6 +470,19 @@ class GitlabAuthentication {
             )
         }
     }
+
+    private fun checkQueueTime(activity: Activity) {
+        val timerQueue = Timer()
+        timerTaskQueue = object : TimerTask() {
+            override fun run() {
+                activity.runOnUiThread {
+                    LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error_time_out")
+                }
+            }
+        }
+        timerQueue.schedule(timerTaskQueue, 180000)
+    }
+
 
     internal fun gatherGitlabEditTextDetails(
         editTextTitle: EditText,
@@ -531,6 +552,9 @@ class GitlabAuthentication {
         filePathName: File? = null,
         throwable: Throwable? = null
     ) {
+        if (this::timerTaskQueue.isInitialized) {
+            timerTaskQueue.cancel()
+        }
         LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error")
         e?.printStackTrace()
         LoggerBird.callEnqueue()

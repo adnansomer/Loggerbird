@@ -12,6 +12,7 @@ import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
@@ -67,6 +68,7 @@ import utils.*
 import utils.EmailUtil
 import utils.LinkedBlockingQueueUtil
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -85,6 +87,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerJira: Any? = null
     private var windowManagerSlack: Any? = null
     private var windowManagerJiraDatePicker: Any? = null
+    private var windowManagerGitlabDatePicker: Any? = null
     private var windowManagerUnhandledDuplication: Any? = null
     private var windowManagerEmail: Any? = null
     private var windowManagerFutureTask: Any? = null
@@ -98,6 +101,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsJiraAuth: WindowManager.LayoutParams
     private lateinit var windowManagerParamsSlack: WindowManager.LayoutParams
     private lateinit var windowManagerParamsJiraDatePicker: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsGitlabDatePicker: WindowManager.LayoutParams
     private lateinit var windowManagerParamsUnhandledDuplication: WindowManager.LayoutParams
     private lateinit var windowManagerParamsEmail: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFutureTask: WindowManager.LayoutParams
@@ -355,9 +359,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var editTextGitlabWeight: EditText
     private lateinit var spinnerGitlabLabels: Spinner
     private lateinit var spinnerGitlabConfidentiality: Spinner
+    private lateinit var textViewGitlabDueDate: TextView
     private lateinit var buttonGitlabCreate: Button
     internal lateinit var buttonGitlabCancel: Button
     private lateinit var toolbarGitlab: Toolbar
+    private lateinit var calendarViewGitlabView: View
+    private lateinit var calendarViewGitlabLayout: FrameLayout
+    private lateinit var calendarViewGitlabDueDate: CalendarView
+    private var calendarViewGitlabDate: Long? = null
+    private lateinit var buttonCalendarViewGitlabCancel: Button
+    private lateinit var buttonCalendarViewGitlabOk: Button
+
     private lateinit var recyclerViewGitlabAttachment: RecyclerView
     private lateinit var gitlabAdapter:RecyclerViewGitlabAdapter
     private lateinit var progressBarGitlab: ProgressBar
@@ -1712,8 +1724,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun hearShake() {
         try {
-//            val file:File ?  = null
-//            file!!.createNewFile()
             Log.d("shake", "shake fired!!")
             if (Settings.canDrawOverlays(this.activity)) {
                 if (checkUnhandledFilePath()) {
@@ -1762,8 +1772,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.shakerTag)
-//            val file: File? = null
-//            file!!.createNewFile()
         }
     }
 
@@ -3823,6 +3831,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 spinnerGitlabAssignee = viewGitlab.findViewById(R.id.spinner_gitlab_assignee)
                 spinnerGitlabLabels = viewGitlab.findViewById(R.id.spinner_gitlab_labels)
                 spinnerGitlabConfidentiality = viewGitlab.findViewById(R.id.spinner_gitlab_confidentiality)
+                textViewGitlabDueDate = viewGitlab.findViewById(R.id.textView_gitlab_due_date)
                 buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
                 buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
                 progressBarGitlab = viewGitlab.findViewById(R.id.gitlab_progressbar)
@@ -3845,6 +3854,95 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
+        }
+    }
+
+    private fun initializeGitlabDatePicker() {
+
+        val calendar = Calendar.getInstance()
+        var mYear = calendar.get(Calendar.YEAR)
+        var mMonth = calendar.get(Calendar.MONTH)
+        var mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        var dueDate: String = ""
+        val simpleDateFormat = SimpleDateFormat("MM/dd/yyyy")
+        calendarViewGitlabLayout = calendarViewGitlabView.findViewById(R.id.gitlab_calendar_view_layout)
+        calendarViewGitlabDueDate = calendarViewGitlabView.findViewById(R.id.calendarView_gitlab_due_date)
+        buttonCalendarViewGitlabCancel = calendarViewGitlabView.findViewById(R.id.button_gitlab_calendar_cancel)
+        buttonCalendarViewGitlabOk = calendarViewGitlabView.findViewById(R.id.button_gitlab_calendar_ok)
+
+        calendarViewGitlabDueDate.minDate = System.currentTimeMillis()
+        if (calendarViewGitlabDate != null) {
+            calendarViewGitlabDueDate.date = calendarViewGitlabDate!!
+        }
+
+        buttonCalendarViewGitlabCancel.setOnClickListener {
+            detachGitlabDatePicker()
+        }
+
+        buttonCalendarViewGitlabOk.setOnClickListener {
+            if(dueDate != null){
+                gitlabAuthentication.dueDate = dueDate
+            }
+            detachGitlabDatePicker()
+        }
+
+        calendarViewGitlabDueDate.setOnDateChangeListener { viewStartDate, year, month, dayOfMonth ->
+            mYear = year
+            mMonth = month+1
+            mDayOfMonth = dayOfMonth
+            calendarViewGitlabDate = viewStartDate.date
+            dueDate = "$mYear-$mMonth-$mDayOfMonth"
+            val dueDateFormat = "$mMonth/$mDayOfMonth/$mYear"
+            activity.runOnUiThread {
+                textViewGitlabDueDate.text = dueDateFormat
+                textViewGitlabDueDate.setTextColor(resources.getColor(R.color.black))
+            }
+        }
+    }
+
+    private fun attachGitlabDatePicker() {
+        try {
+            val rootView: ViewGroup =
+                activity.window.decorView.findViewById(android.R.id.content)
+            calendarViewGitlabView =
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.gitlab_calendar_view, rootView, false)
+            windowManagerParamsGitlabDatePicker =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+            windowManagerGitlabDatePicker = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerGitlabDatePicker as WindowManager).addView(
+                calendarViewGitlabView,
+                windowManagerParamsGitlabDatePicker
+            )
+            initializeGitlabDatePicker()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.gitlabDatePopupTag)
+        }
+    }
+
+    private fun detachGitlabDatePicker() {
+        if (this::calendarViewGitlabView.isInitialized) {
+            (windowManagerGitlabDatePicker as WindowManager).removeViewImmediate(
+                calendarViewGitlabView
+            )
         }
     }
 
@@ -3884,6 +3982,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     filePathMedia = filePathMedia
                 )
             }
+        }
+
+        textViewGitlabDueDate.setSafeOnClickListener {
+            attachGitlabDatePicker()
         }
 
         toolbarGitlab.setNavigationOnClickListener {
@@ -4039,7 +4141,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-
     internal fun initializeGitLabMilestones(
         arrayListGitlabMilestones: ArrayList<String>
     ){
@@ -4064,6 +4165,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
         }
     }
+
+
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun addGitlabFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {

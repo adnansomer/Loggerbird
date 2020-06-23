@@ -329,6 +329,17 @@
                                 android:textSize="16sp">
                             </TextView>
 
+                            <TextView
+                                android:id="@+id/textView_gitlab_due_date"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="5dp"
+                                android:textCursorDrawable="@color/colorBlack"
+                                android:layout_marginBottom="10dp"
+                                android:textSize="16sp"
+                                android:text="@string/textView_gitlab_enter_due_date"
+                                android:layout_marginEnd="5dp" />
+
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
