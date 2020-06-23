@@ -177,7 +177,7 @@ class RecyclerViewGithubAssigneeAdapter(
                 arrayListAssigneeNames = fileList
                 adapter.notifyDataSetChanged()
                 if(fileList.size <=0){
-                    LoggerBirdService.loggerBirdService.cardViewAssigneeList.visibility = View.GONE
+                    LoggerBirdService.loggerBirdService.cardViewGithubAssigneeList.visibility = View.GONE
                 }
                 removePopupLayout()
             }

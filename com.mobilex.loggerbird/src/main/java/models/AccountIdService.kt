@@ -99,5 +99,12 @@ interface AccountIdService {
     @Multipart
     @POST("attachments")
     fun setTrelloAttachments(@Part file:MultipartBody.Part,@Query("key") key:String,@Query("token") token:String): Call<JsonObject>
-
+    @GET("memberships?")
+    fun getTrelloMembers(@Query("key") key:String,@Query("token") token:String):Call<JsonArray>
+    @GET("{idName}?")
+    fun getTrelloMembersName(@Path("idName") idName:String,@Query("key") key:String,@Query("token") token:String ):Call<JsonObject>
+    @GET("labels?")
+    fun getTrelloLabels(@Query("key") key:String,@Query("token") token:String):Call<JsonArray>
+    @POST("idLabels?")
+    fun setTrelloLabels(@Body jsonArray: JsonArray,@Query("key") key:String,@Query("token") token:String): Call<JsonObject>
 }

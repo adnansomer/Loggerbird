@@ -2116,42 +2116,42 @@ class JiraAuthentication {
         }
     }
 
-    private fun createAttachments(issueKey: String, file:File,activity: Activity,task:String) {
-        if(task != "unhandled"){
-            queueCreateTask++
-        }
+        private fun createAttachments(issueKey: String, file:File,activity: Activity,task:String) {
+            if(task != "unhandled"){
+                queueCreateTask++
+            }
 
-        val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
-        val body = MultipartBody.Part.createFormData("file",file.name,requestFile)
-        RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
-            .create(AccountIdService::class.java)
-            .setAttachments(file= body)
-            .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
-                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                override fun onFailure(
-                    call: retrofit2.Call<List<JiraSprintModel>>,
-                    t: Throwable
-                ) {
-                    if(task != "unhandled"){
-                        resetJiraValues(activity = activity)
-                    }
-                    jiraExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<List<JiraSprintModel>>,
-                    response: retrofit2.Response<List<JiraSprintModel>>
-                ) {
-                    if(task != "unhandled"){
-                        resetJiraValues(activity = activity)
-                    }
-                    if (file.name != "logger_bird_details.txt") {
-                        if (file.exists()) {
-                            file.delete()
+            val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+            val body = MultipartBody.Part.createFormData("file",file.name,requestFile)
+            RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+                .create(AccountIdService::class.java)
+                .setAttachments(file= body)
+                .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<List<JiraSprintModel>>,
+                        t: Throwable
+                    ) {
+                        if(task != "unhandled"){
+                            resetJiraValues(activity = activity)
                         }
+                        jiraExceptionHandler(throwable = t)
                     }
-                    Log.d("attachment_put_success", response.code().toString())
-                }
-            })
-    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<List<JiraSprintModel>>,
+                        response: retrofit2.Response<List<JiraSprintModel>>
+                    ) {
+                        if(task != "unhandled"){
+                            resetJiraValues(activity = activity)
+                        }
+                        if (file.name != "logger_bird_details.txt") {
+                            if (file.exists()) {
+                                file.delete()
+                            }
+                        }
+                        Log.d("attachment_put_success", response.code().toString())
+                    }
+                })
+        }
 }
