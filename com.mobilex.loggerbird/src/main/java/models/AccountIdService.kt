@@ -70,5 +70,9 @@ interface AccountIdService {
     fun getGitlabLabels(): Call<List<GitlabLabelsModel>>
     @GET("users")
     fun getGitlabUsers(): Call<List<GitlabUsersModel>>
+    @Multipart
+    @POST("uploads")
+    fun sendGitlabAttachments(@Part file:MultipartBody.Part):Call<JsonObject>
+
 
 }

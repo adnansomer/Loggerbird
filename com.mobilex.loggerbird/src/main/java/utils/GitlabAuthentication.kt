@@ -2,12 +2,13 @@ package utils
 
 import android.app.Activity
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
-import com.google.gson.JsonObject
+import androidx.annotation.RequiresApi
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
@@ -23,6 +24,11 @@ import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
+
 
 class GitlabAuthentication {
 
@@ -225,6 +231,9 @@ class GitlabAuthentication {
                         response: retrofit2.Response<JsonObject>
                     ) {
                         coroutineCallGitlabIssue.async {
+
+                            createAttachments(projectId = arrayListProjectsId[projectPosition], filePathMedia = filePathMedia)
+
                             activity.runOnUiThread {
                                 LoggerBirdService.loggerBirdService.buttonGitlabCancel.performClick()
                             }
@@ -281,7 +290,6 @@ class GitlabAuthentication {
                             updateFields()
                         }
                     }
-
                 })
         } catch (e: Exception) {
             e.printStackTrace()
@@ -424,11 +432,7 @@ class GitlabAuthentication {
         }
     }
 
-    private suspend fun gatherGitlabDetails(
-        activity: Activity,
-        context: Context,
-        filePathMedia: File?
-    ) {
+    private suspend fun gatherGitlabDetails(activity: Activity, context: Context, filePathMedia: File?) {
 
         val coroutineCallGatherDetails = CoroutineScope(Dispatchers.IO)
         coroutineCallGatherDetails.async(Dispatchers.IO) {
@@ -458,6 +462,44 @@ class GitlabAuthentication {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createAttachments(projectId: String, filePathMedia: File?) {
+        try {
+                val jsonObject = JsonObject()
+                val requestFile = filePathMedia!!.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+                val filePathMediaName = "@" + filePathMedia!!.name.replace("_", "")
+                val body = MultipartBody.Part.createFormData("file",filePathMediaName,requestFile)
+
+                RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/" + hashMapProjects[arrayListProjects[projectPosition]] + "/")
+                    .create(AccountIdService::class.java)
+                    .sendGitlabAttachments(file = body)
+                    .enqueue(object : retrofit2.Callback<JsonObject>{
+                        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                        override fun onFailure(
+                            call: retrofit2.Call<JsonObject>,
+                            t: Throwable
+                        ) {
+                            LoggerBirdService.loggerBirdService.finishShareLayout("gitlab")
+                            t.printStackTrace()
+                            LoggerBird.callEnqueue()
+                            LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
+                        }
+
+                        override fun onResponse(
+                            call: retrofit2.Call<JsonObject>,
+                            response: retrofit2.Response<JsonObject>
+                        ) {
+
+                            Log.d("attachment_put_success", response.code().toString())
+                            Log.d("attachment_put_succes", response.body().toString())
+                        }
+                    })
+
+        } catch (e: Exception) {
+            gitlabExceptionHandler(e = e)
+        }
+    }
+
     private fun updateFields() {
         timerTaskQueue.cancel()
         activity.runOnUiThread {
@@ -482,7 +524,6 @@ class GitlabAuthentication {
         }
         timerQueue.schedule(timerTaskQueue, 180000)
     }
-
 
     internal fun gatherGitlabEditTextDetails(
         editTextTitle: EditText,
