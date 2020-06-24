@@ -636,9 +636,7 @@ internal class GithubAuthentication {
                 val jsonObject = JsonObject()
                 jsonObject.addProperty(
                     "message",
-                    "loggerbirdfile" + System.currentTimeMillis() + "." + file.absolutePath.substringAfterLast(
-                        "."
-                    )
+                    "loggerbirdfile"
                 )
                 withContext(Dispatchers.IO){
                     jsonObject.addProperty(
