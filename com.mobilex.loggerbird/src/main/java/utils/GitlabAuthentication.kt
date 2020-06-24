@@ -522,7 +522,6 @@ class GitlabAuthentication {
                         }
                         addAttachmentsToIssue(projectId = projectId, issueId = issueId, descriptionStringBuilder= stringBuilder.toString())
                     }
-
                 })
 
         } catch (e: Exception) {
