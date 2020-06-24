@@ -30,9 +30,7 @@ import com.google.gson.JsonObject
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 
-
 class GitlabAuthentication {
-
     private lateinit var activity: Activity
     private lateinit var context: Context
     private var filePathMedia: File? = null
@@ -47,7 +45,6 @@ class GitlabAuthentication {
     private var milestones: String? = null
     private var project: String? = null
     private var confidentiality: String? = null
-    internal var dueDate: String? = null
     private var spinnerPositionProject: Int = 0
     private var spinnerPositionLabels: Int = 0
     private var spinnerPositionAssignee: Int = 0
@@ -74,9 +71,9 @@ class GitlabAuthentication {
     private var hashMapUsers: HashMap<String, String> = HashMap()
     private var workQueueLinkedGitlabAttachments: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
     private var runnableListGitlabAttachments: ArrayList<Runnable> = ArrayList()
-    //private val stringBuilderGitlab = StringBuilder()
     private lateinit var timerTaskQueue: TimerTask
     private lateinit var issueId: String
+    internal var dueDate: String? = null
 
     internal fun callGitlab(
         activity: Activity,
@@ -147,9 +144,7 @@ class GitlabAuthentication {
                                         context = context,
                                         filePathMedia = filePathMedia
                                     )
-
                                 }
-
                             } catch (e: Exception) {
                                 e.printStackTrace()
                                 LoggerBird.callEnqueue()
@@ -297,7 +292,6 @@ class GitlabAuthentication {
                                     arrayListProjects.add(it.name!!)
                                     arrayListProjectsId.add(it.id!!)
                                     hashMapProjects[it.name!!] = it.id!!
-
                                 }
                             }
                             gatherGitlabMilestonesDetails(projectId = arrayListProjectsId[projectPosition])
@@ -453,7 +447,6 @@ class GitlabAuthentication {
         context: Context,
         filePathMedia: File?
     ) {
-
         val coroutineCallGatherDetails = CoroutineScope(Dispatchers.IO)
         coroutineCallGatherDetails.async(Dispatchers.IO) {
             try {
@@ -465,6 +458,7 @@ class GitlabAuthentication {
                 arrayListLabelsId.clear()
                 arrayListUsers.clear()
                 arrayListUsersId.clear()
+                arrayListAttachments.clear()
                 hashMapProjects.clear()
                 hashMapMilestones.clear()
                 hashMapLabels.clear()
@@ -504,7 +498,6 @@ class GitlabAuthentication {
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
                     }
-
                     override fun onResponse(
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
@@ -520,10 +513,17 @@ class GitlabAuthentication {
                             stringBuilder.append("\nattachment_$attachmentCounter:$it")
                             attachmentCounter++
                         }
+
+                        if (filePathMedia.name != "logger_bird_details.txt") {
+                            if (filePathMedia.exists()) {
+                                filePathMedia.delete()
+                            }
+                        }
+
                         addAttachmentsToIssue(projectId = projectId, issueId = issueId, descriptionStringBuilder= stringBuilder.toString())
                     }
                 })
-
+            
         } catch (e: Exception) {
             gitlabExceptionHandler(e = e)
         }
@@ -577,6 +577,7 @@ class GitlabAuthentication {
                         response: retrofit2.Response<JsonObject>
                     ) {
                         Log.d("github_issue_attachment", response.code().toString())
+                        arrayListAttachments.clear()
                         val githubList = response.body()
                         activity.runOnUiThread {
                             LoggerBirdService.loggerBirdService.finishShareLayout("gitlab")
