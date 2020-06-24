@@ -73,6 +73,9 @@ interface AccountIdService {
     @Multipart
     @POST("uploads")
     fun sendGitlabAttachments(@Part file:MultipartBody.Part):Call<JsonObject>
+    @PUT("{iid}")
+    fun setGitlabIssue(@Path("iid")iid:String,@Query("description") description:String):Call<JsonObject>
+    //query soru isareinden sonra
 
 
 }

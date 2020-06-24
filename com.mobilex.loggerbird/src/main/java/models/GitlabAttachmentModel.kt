@@ -1,5 +1,5 @@
 package models
 
 data class GitlabAttachmentModel (
-    var url:String? = null
+    var full_path:String? = null
 )
