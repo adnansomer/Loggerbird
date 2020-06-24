@@ -455,7 +455,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var imageButtonTrelloTimeRemove:ImageButton
     private lateinit var buttonTrelloTimelineProceed: Button
     private lateinit var buttonTrelloTimelineCancel: Button
-    private val calendarTrello = Calendar.getInstance()
+    private var calendarTrello:Calendar?= null
 //
     //trello_date:
     private var trelloStartDate: Long? = null
@@ -6774,6 +6774,7 @@ private fun clearTrelloComponents() {
 
     private fun initializeTrelloDateLayout() {
         removeTrelloDateLayout()
+        calendarTrello =  Calendar.getInstance()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         viewTrelloDate =
             LayoutInflater.from(activity)
@@ -6821,13 +6822,13 @@ private fun clearTrelloComponents() {
         val mYear = calendar.get(Calendar.YEAR)
         val mMonth = calendar.get(Calendar.MONTH)
         val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
-        calendarTrello.set(mYear, mMonth, mDayOfMonth)
+        calendarTrello?.set(mYear, mMonth, mDayOfMonth)
         calendarViewTrello.minDate = System.currentTimeMillis()
         frameLayoutTrelloDate.setOnClickListener {
             removeTrelloDateLayout()
         }
         calendarViewTrello.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            calendarTrello.set(year, month, dayOfMonth)
+            calendarTrello?.set(year, month, dayOfMonth)
 //            startDate = "$year-$month-$dayOfMonth"
         }
         buttonTrelloDateCreate.setSafeOnClickListener {
@@ -6892,8 +6893,8 @@ private fun clearTrelloComponents() {
 //
 //        }
         buttonTrelloTimeCreate.setSafeOnClickListener {
-            calendarTrello.set(Calendar.HOUR_OF_DAY, timePickerTrello.hour)
-            calendarTrello.set(Calendar.MINUTE, timePickerTrello.minute)
+            calendarTrello?.set(Calendar.HOUR_OF_DAY, timePickerTrello.hour)
+            calendarTrello?.set(Calendar.MINUTE, timePickerTrello.minute)
             trelloStartTime =
                 timePickerTrello.hour.toLong() + timePickerTrello.minute.toLong()
             imageButtonTrelloTimeRemove.visibility = View.VISIBLE

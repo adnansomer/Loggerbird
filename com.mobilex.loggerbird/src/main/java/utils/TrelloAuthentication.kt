@@ -184,8 +184,8 @@ internal class TrelloAuthentication {
                 }
             }
             if(calendar!= null){
-                val dateFormatter =SimpleDateFormat.getDateTimeInstance()
-                jsonObject.addProperty("due",dateFormatter.format(calendar!!.time))
+//                val dateFormatter =SimpleDateFormat.getDateTimeInstance()
+                jsonObject.addProperty("due",Date(calendar!!.timeInMillis).toString())
             }
             jsonObject.add("idMembers",jsonArrayMembers)
             jsonObject.add("idLabels",jsonArrayLabels)
@@ -469,7 +469,7 @@ internal class TrelloAuthentication {
     internal fun gatherEditTextDetails(editTextTitle: EditText) {
         title = editTextTitle.text.toString()
     }
-    internal fun gatherCalendarDetails(calendar: Calendar){
+    internal fun gatherCalendarDetails(calendar: Calendar?){
         this.calendar = calendar
     }
 
