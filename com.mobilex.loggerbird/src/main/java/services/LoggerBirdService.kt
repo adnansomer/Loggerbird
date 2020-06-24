@@ -90,6 +90,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerFutureTime: Any? = null
     private var windowManagerGithub: Any? = null
     private var windowManagerTrello: Any? = null
+    private var windowManagerTrelloTimeline: Any? = null
+    private var windowManagerTrelloTime: Any? = null
+    private var windowManagerTrelloDate: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -104,6 +107,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsFutureTime: WindowManager.LayoutParams
     private lateinit var windowManagerParamsGithub: WindowManager.LayoutParams
     private lateinit var windowManagerParamsTrello: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsTrelloTimeline: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsTrelloDate: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsTrelloTime: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -157,6 +163,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewFutureTime: View
     private lateinit var viewGithub: View
     private lateinit var viewTrello: View
+    private lateinit var viewTrelloTimeline: View
+    private lateinit var viewTrelloDate:View
+    private lateinit var viewTrelloTime:View
     private lateinit var wrapper: FrameLayout
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
@@ -353,13 +362,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     //Future-Task-Date:
     private var futureStartDate: Long? = null
-    private lateinit var frameLayoutDate: FrameLayout
+    private lateinit var frameLayoutFutureDate: FrameLayout
     private lateinit var calendarViewFutureTask: CalendarView
     private lateinit var buttonFutureTaskDateCreate: Button
     private lateinit var buttonFutureTaskDateCancel: Button
     //Future-Task-Time:
     private var futureStartTime: Long? = null
-    private lateinit var frameLayoutTime: FrameLayout
+    private lateinit var frameLayoutFutureTime: FrameLayout
     private lateinit var timePickerFutureTask: TimePicker
     private lateinit var buttonFutureTaskTimeCreate: Button
     private lateinit var buttonFutureTaskTimeCancel: Button
@@ -435,6 +444,32 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var arrayListTrelloMemberName: ArrayList<RecyclerViewModelMember> = ArrayList()
     private lateinit var imageViewTrelloMember: ImageView
     private lateinit var arrayListTrelloMember: ArrayList<String>
+
+    //trello_timeline:
+    private lateinit var imageViewTrelloCalendar: ImageView
+    private lateinit var imageButtonTrelloRemoveTimeline: ImageButton
+    
+    private lateinit var imageViewTrelloDate:ImageView
+    private lateinit var imageButtonTrelloDateRemove:ImageButton
+    private lateinit var imageViewTrelloTime:ImageView
+    private lateinit var imageButtonTrelloTimeRemove:ImageButton
+    private lateinit var buttonTrelloTimelineProceed: Button
+    private lateinit var buttonTrelloTimelineCancel: Button
+    private val calendarTrello = Calendar.getInstance()
+//
+    //trello_date:
+    private var trelloStartDate: Long? = null
+    private lateinit var frameLayoutTrelloDate: FrameLayout
+    private lateinit var calendarViewTrello: CalendarView
+    private lateinit var buttonTrelloDateCreate: Button
+    private lateinit var buttonTrelloDateCancel: Button
+
+    //trello_time:
+    private var trelloStartTime: Long? = null
+    private lateinit var frameLayoutTrelloTime: FrameLayout
+    private lateinit var timePickerTrello:TimePicker
+    private lateinit var buttonTrelloTimeCreate: Button
+    private lateinit var buttonTrelloTimeCancel: Button
 
     //Static global variables:
     internal companion object {
@@ -5082,7 +5117,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             imageButtonFutureTaskRemoveTime.visibility = View.GONE
         }
         buttonFutureTaskProceed.setSafeOnClickListener {
-            checkDateAndTimeEmpty(filePathMedia = filePathMedia)
+            checkFutureDateAndTimeEmpty(filePathMedia = filePathMedia)
         }
         buttonFutureTaskCancel.setSafeOnClickListener {
             checkBoxFutureTask.isChecked = false
@@ -5132,7 +5167,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             viewFutureDate,
             windowManagerParamsFutureDate
         )
-        frameLayoutDate = viewFutureDate.findViewById(R.id.future_calendar_view_layout)
+        frameLayoutFutureDate = viewFutureDate.findViewById(R.id.future_calendar_view_layout)
         calendarViewFutureTask = viewFutureDate.findViewById(R.id.calendarView_start_date)
         buttonFutureTaskDateCreate = viewFutureDate.findViewById(R.id.button_future_calendar_ok)
         buttonFutureTaskDateCancel = viewFutureDate.findViewById(R.id.button_future_calendar_cancel)
@@ -5157,7 +5192,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         calendarFuture.set(mYear, mMonth, mDayOfMonth)
         calendarViewFutureTask.minDate = System.currentTimeMillis()
-        frameLayoutDate.setOnClickListener {
+        frameLayoutFutureDate.setOnClickListener {
             removeFutureDateLayout()
         }
         calendarViewFutureTask.setOnDateChangeListener { view, year, month, dayOfMonth ->
@@ -5205,7 +5240,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             viewFutureTime,
             windowManagerParamsFutureTime
         )
-        frameLayoutTime = viewFutureTime.findViewById(R.id.future_time_view_layout)
+        frameLayoutFutureTime = viewFutureTime.findViewById(R.id.future_time_view_layout)
         timePickerFutureTask = viewFutureTime.findViewById(R.id.timePicker_start_time)
         buttonFutureTaskTimeCreate = viewFutureTime.findViewById(R.id.button_future_time_ok)
         buttonFutureTaskTimeCancel = viewFutureTime.findViewById(R.id.button_future_time_cancel)
@@ -5224,7 +5259,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     private fun buttonClicksFutureTime() {
-        frameLayoutTime.setOnClickListener {
+        frameLayoutFutureTime.setOnClickListener {
             removeFutureTimeLayout()
         }
 //        timePickerFutureTask.setOnTimeChangedListener { view, hourOfDay, minute ->
@@ -5243,7 +5278,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-    private fun checkDateAndTimeEmpty(filePathMedia: File) {
+    private fun checkFutureDateAndTimeEmpty(filePathMedia: File) {
         if (futureStartDate != null && futureStartTime != null) {
             defaultToast.attachToast(
                 activity = activity,
@@ -6129,6 +6164,8 @@ private fun initializeTrelloLayout(filePathMedia: File) {
             recyclerViewTrelloMember = viewTrello.findViewById(R.id.recycler_view_member_list)
             imageViewTrelloMember = viewTrello.findViewById(R.id.imageView_member_add)
             cardViewTrelloMemberList = viewTrello.findViewById(R.id.cardView_member_list)
+            imageViewTrelloCalendar = viewTrello.findViewById(R.id.imageView_start_date)
+            imageButtonTrelloRemoveTimeline = viewTrello.findViewById(R.id.image_button_trello_remove_date)
             scrollViewTrello = viewTrello.findViewById(R.id.scrollView_trello)
             scrollViewTrello.setOnTouchListener { v, event ->
                 if (event.action == MotionEvent.ACTION_DOWN) {
@@ -6231,6 +6268,7 @@ private fun buttonClicksTrello() {
             autoTextViewLabel = autoTextViewTrelloLabel
         )
         trelloAuthentication.gatherEditTextDetails(editTextTitle = editTextTrelloTitle)
+        trelloAuthentication.gatherCalendarDetails(calendar = calendarTrello)
         if (trelloAuthentication.checkTitle(
                 activity = activity,
                 context = context
@@ -6318,6 +6356,16 @@ private fun buttonClicksTrello() {
                 toastMessage = activity.resources.getString(R.string.trello_member_doesnt_exist)
             )
         }
+
+    }
+    imageViewTrelloCalendar.setSafeOnClickListener {
+        initializeTrelloTimelineLayout()
+    }
+
+    imageButtonTrelloRemoveTimeline.setSafeOnClickListener {
+        trelloStartDate = null
+        trelloStartTime = null
+        imageButtonTrelloRemoveTimeline.visibility = View.GONE
 
     }
 }
@@ -6651,7 +6699,227 @@ private fun clearTrelloComponents() {
 //        autoTextViewTrelloProject.setText("",false)
 }
 
+    private fun initializeTrelloTimelineLayout() {
+        removeTrelloTimelineLayout()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewTrelloTimeline =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_trello_start_date_popup, rootView, false)
+        windowManagerParamsTrelloTimeline =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerTrelloTimeline= activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerTrelloTimeline as WindowManager).addView(
+            viewTrelloTimeline,
+            windowManagerParamsTrelloTimeline
+        )
+            imageViewTrelloDate = viewTrelloTimeline.findViewById(R.id.imageView_trello_date)
+            imageButtonTrelloDateRemove = viewTrelloTimeline.findViewById(R.id.image_button_trello_date_remove)
+            imageViewTrelloTime = viewTrelloTimeline.findViewById(R.id.imageView_trello_time)
+            imageButtonTrelloTimeRemove = viewTrelloTimeline.findViewById(R.id.image_button_trello_time_remove)
+            buttonTrelloTimelineCancel = viewTrelloTimeline.findViewById(R.id.button_trello_date_cancel)
+            buttonTrelloTimelineProceed = viewTrelloTimeline.findViewById(R.id.button_trello_date_proceed)
+            buttonClicksTrelloTimeline()
+    }
 
+    private fun removeTrelloTimelineLayout() {
+        if (this::viewTrelloTimeline.isInitialized && windowManagerTrelloTimeline != null) {
+            (windowManagerTrelloTimeline as WindowManager).removeViewImmediate(
+                viewTrelloTimeline
+            )
+            windowManagerTrelloTimeline= null
+        }
+    }
+
+    private fun buttonClicksTrelloTimeline(){
+        imageViewTrelloDate.setSafeOnClickListener {
+            initializeTrelloDateLayout()
+        }
+        imageButtonTrelloDateRemove.setSafeOnClickListener {
+            trelloStartDate = null
+            imageButtonTrelloDateRemove.visibility = View.GONE
+        }
+        imageViewTrelloTime.setSafeOnClickListener {
+            initializeTrelloTimeLayout()
+        }
+        imageButtonTrelloTimeRemove.setSafeOnClickListener {
+            trelloStartTime = null
+            imageButtonTrelloTimeRemove.visibility = View.GONE
+        }
+
+        buttonTrelloTimelineProceed.setSafeOnClickListener {
+            if(checkTrelloDateAndTimeEmpty()){
+                imageButtonTrelloRemoveTimeline.visibility = View.VISIBLE
+            }
+        }
+        buttonTrelloTimelineCancel.setSafeOnClickListener {
+            removeTrelloTimelineLayout()
+        }
+    }
+
+    private fun initializeTrelloDateLayout() {
+        removeTrelloDateLayout()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewTrelloDate =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.trello_calendar_view, rootView, false)
+        windowManagerParamsTrelloDate=
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerTrelloDate = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerTrelloDate as WindowManager).addView(
+            viewTrelloDate,
+            windowManagerParamsTrelloDate
+        )
+        frameLayoutTrelloDate = viewTrelloDate.findViewById(R.id.trello_calendar_view_layout)
+        calendarViewTrello = viewTrelloDate.findViewById(R.id.calendarView_start_date)
+        buttonTrelloDateCancel = viewTrelloDate.findViewById(R.id.button_trello_calendar_cancel)
+        buttonTrelloDateCreate = viewTrelloDate.findViewById(R.id.button_trello_calendar_ok)
+        buttonClicksTrelloDateLayout()
+    }
+    private fun removeTrelloDateLayout() {
+        if (this::viewTrelloDate.isInitialized && windowManagerTrelloDate!= null) {
+            (windowManagerTrelloDate as WindowManager).removeViewImmediate(
+                viewTrelloDate
+            )
+            windowManagerTrelloDate= null
+        }
+    }
+
+    private fun buttonClicksTrelloDateLayout(){
+        val calendar = Calendar.getInstance()
+        val mYear = calendar.get(Calendar.YEAR)
+        val mMonth = calendar.get(Calendar.MONTH)
+        val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        calendarTrello.set(mYear, mMonth, mDayOfMonth)
+        calendarViewTrello.minDate = System.currentTimeMillis()
+        frameLayoutTrelloDate.setOnClickListener {
+            removeTrelloDateLayout()
+        }
+        calendarViewTrello.setOnDateChangeListener { view, year, month, dayOfMonth ->
+            calendarTrello.set(year, month, dayOfMonth)
+//            startDate = "$year-$month-$dayOfMonth"
+        }
+        buttonTrelloDateCreate.setSafeOnClickListener {
+            trelloStartDate= calendarViewTrello.date
+            Log.d("time", trelloStartDate.toString())
+            Log.d("time", System.currentTimeMillis().toString())
+            imageButtonTrelloDateRemove.visibility = View.VISIBLE
+            removeTrelloDateLayout()
+        }
+        buttonTrelloDateCancel.setSafeOnClickListener {
+            removeTrelloDateLayout()
+        }
+    }
+    private fun initializeTrelloTimeLayout() {
+        removeTrelloTimeLayout()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewTrelloTime =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.trello_time_picker, rootView, false)
+        windowManagerParamsTrelloTime=
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerTrelloTime = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerTrelloTime as WindowManager).addView(
+            viewTrelloTime,
+            windowManagerParamsTrelloTime
+        )
+        frameLayoutTrelloTime = viewTrelloTime.findViewById(R.id.trello_time_view_layout)
+        timePickerTrello = viewTrelloTime.findViewById(R.id.timePicker_start_time)
+        buttonTrelloTimeCancel = viewTrelloTime.findViewById(R.id.button_trello_time_cancel)
+        buttonTrelloTimeCreate = viewTrelloTime.findViewById(R.id.button_trello_time_ok)
+        buttonClicksTrelloTimeLayout()
+    }
+    private fun removeTrelloTimeLayout() {
+        if (this::viewTrelloTime.isInitialized && windowManagerTrelloTime!= null) {
+            (windowManagerTrelloTime as WindowManager).removeViewImmediate(
+                viewTrelloTime
+            )
+            windowManagerTrelloTime= null
+        }
+    }
+    private fun buttonClicksTrelloTimeLayout(){
+        frameLayoutTrelloTime.setOnClickListener {
+            removeTrelloTimeLayout()
+        }
+//        timePickerFutureTask.setOnTimeChangedListener { view, hourOfDay, minute ->
+//
+//        }
+        buttonTrelloTimeCreate.setSafeOnClickListener {
+            calendarTrello.set(Calendar.HOUR_OF_DAY, timePickerTrello.hour)
+            calendarTrello.set(Calendar.MINUTE, timePickerTrello.minute)
+            trelloStartTime =
+                timePickerTrello.hour.toLong() + timePickerTrello.minute.toLong()
+            imageButtonTrelloTimeRemove.visibility = View.VISIBLE
+            removeTrelloTimeLayout()
+        }
+        buttonTrelloTimeCancel.setSafeOnClickListener {
+            removeTrelloTimeLayout()
+        }
+    }
+
+    private fun checkTrelloDateAndTimeEmpty():Boolean {
+        if (trelloStartDate != null && trelloStartTime != null) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.trello_time_line_success)
+            )
+            removeTrelloTimelineLayout()
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.trello_time_line_empty)
+            )
+        }
+        return false
+    }
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 inner class MediaProjectionCallback : MediaProjection.Callback() {
     override fun onStop() {

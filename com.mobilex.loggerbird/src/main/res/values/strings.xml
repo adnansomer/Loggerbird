@@ -125,6 +125,8 @@
     <string name="trello_title_empty">Title cannot be empty!</string>
     <string name="trello_issue_preferences_save">Issue preferences are saved!</string>
     <string name="trello_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="trello_time_line_empty">Date or time cannot be empty!</string>
+    <string name="trello_time_line_success">Timeline details have been gathered!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -314,6 +316,7 @@
     <string name="textView_trello_member_list">Member list</string>
     <string name="textView_trello_label">Label</string>
     <string name="textView_trello_label_list">Label list</string>
+    <string name="textView_trello_start_date">Start date</string>
     <string name="textView_trello_attachment">Attachments</string>
     <string name="button_trello_create">Create</string>
     <string name="button_trello_cancel">Cancel</string>
@@ -332,4 +335,9 @@
     <string name="textView_recyclerView_trello_member_title">Are you sure to remove member from your trello issue?</string>
     <string name="button_recyclerView_trello_member_delete">Delete member</string>
     <string name="button_recyclerView_trello_member_keep">Keep member</string>
+    <!-- loggerbird_trello_start_date_popup-->
+    <string name="textView_trello_date_title">Set timeline</string>
+    <string name="button_trello_date_proceed">Proceed</string>
+    <string name="button_trello_date_cancel">Cancel</string>
+    <string name="textView_trello_start_time">Start time</string>
 </resources>

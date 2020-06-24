@@ -30,6 +30,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
+import java.text.SimpleDateFormat
 import kotlin.collections.HashMap
 
 internal class TrelloAuthentication {
@@ -61,6 +62,7 @@ internal class TrelloAuthentication {
     private var member: String? = null
     private var label: String? = null
     private val defaultToast = DefaultToast()
+    private  var calendar:Calendar? = null
     internal fun callTrello(
         activity: Activity,
         context: Context,
@@ -180,6 +182,10 @@ internal class TrelloAuthentication {
                 {
                 jsonArrayMembers.add(hashMapMember[member!!])
                 }
+            }
+            if(calendar!= null){
+                val dateFormatter =SimpleDateFormat.getDateTimeInstance()
+                jsonObject.addProperty("due",dateFormatter.format(calendar!!.time))
             }
             jsonObject.add("idMembers",jsonArrayMembers)
             jsonObject.add("idLabels",jsonArrayLabels)
@@ -463,6 +469,9 @@ internal class TrelloAuthentication {
     internal fun gatherEditTextDetails(editTextTitle: EditText) {
         title = editTextTitle.text.toString()
     }
+    internal fun gatherCalendarDetails(calendar: Calendar){
+        this.calendar = calendar
+    }
 
     private fun gatherTrelloDetails() {
         try {
@@ -566,6 +575,7 @@ internal class TrelloAuthentication {
             boardPosition = 0
             board = null
             project = null
+            calendar = null
             title = ""
             member = null
             label = null

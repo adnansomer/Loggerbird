@@ -125,6 +125,8 @@
     <string name="trello_title_empty">Başlık boş olamaz!</string>
     <string name="trello_issue_preferences_save">Konu tercihleri kaydedildi!</string>
     <string name="trello_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="trello_time_line_empty">Tarih veya zaman boş olamaz!</string>
+    <string name="trello_time_line_success">Zaman çizelgesi detayları alındı!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
@@ -316,6 +318,7 @@
     <string name="textView_trello_member_list">Üye listesi</string>
     <string name="textView_trello_label">Etiket</string>
     <string name="textView_trello_label_list">Etiket listesi</string>
+    <string name="textView_trello_start_date">Başlangıç tarihi</string>
     <string name="textView_trello_attachment">Eklentiler</string>
     <string name="button_trello_create">Oluştur</string>
     <string name="button_trello_cancel">İptal</string>
@@ -334,5 +337,10 @@
     <string name="textView_recyclerView_trello_member_title">Trello görevlendirmenizden bu üyeyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_trello_member_delete">Üyeyi sil</string>
     <string name="button_recyclerView_trello_member_keep">Üyeyi tut</string>
+    <!-- loggerbird_trello_start_date_popup-->
+    <string name="textView_trello_date_title">Zaman çizelgesi belirle</string>
+    <string name="button_trello_date_proceed">Devam</string>
+    <string name="button_trello_date_cancel">İptal</string>
+    <string name="textView_trello_start_time">Başlangıç zamanı</string>
 
 </resources>

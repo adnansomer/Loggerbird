@@ -85,7 +85,7 @@ interface AccountIdService {
     @GET("pulls")
     fun getGithubPullRequest():Call<List<GithubPullRequestsModel>>
 //    @Multipart
-    @PUT("contents/{file_name}")
+    @PUT("contents/LoggerBirdFiles/{file_name}")
     fun setGithubAttachments(@Body jsonObject: JsonObject,@Path("file_name")fileName:String):Call<JsonObject>
     @PATCH("issues/{id}")
     fun setGithubIssue(@Body jsonObject: JsonObject,@Path("id")id:Int):Call<JsonObject>
