@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/layout_trello"
+    android:id="@+id/layout_pivotal_tracker"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -20,11 +20,11 @@
             android:orientation="vertical">
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar_trello"
+                android:id="@+id/toolbar_pivotal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/colorFab"
-                app:menu="@menu/loggerbird_trello_menu"
+                app:menu="@menu/loggerbird_pivotal_menu"
                 app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
                 app:title="@string/textView_jira_title"
                 app:titleTextColor="@color/black"></androidx.appcompat.widget.Toolbar>
@@ -43,7 +43,7 @@
         </LinearLayout>
 
         <ScrollView
-            android:id="@+id/scrollView_trello"
+            android:id="@+id/scrollView_pivotal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/white"
@@ -70,77 +70,21 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/textView_trello_project"
+                            android:id="@+id/textView_pivotal_project"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="5dp"
-                            android:text="@string/textView_trello_project"
+                            android:text="@string/textView_pivotal_project"
                             android:textColor="@color/black"
                             android:textSize="17sp"></TextView>
 
                         <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                            android:id="@+id/auto_textView_trello_project"
+                            android:id="@+id/auto_textView_pivotal_project"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:background="@null"
                             android:dropDownHeight="100dp"
                             android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-
-                        <!--
-                        <Spinner
-                            android:id="@+id/spinner_jira_project"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-                        </Spinner>
--->
-                    </LinearLayout>
-
-
-                </androidx.cardview.widget.CardView>
-
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_assignee_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    android:visibility="gone"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView_assignee_list"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/textView_github_assignee_list"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                app:srcCompat="@drawable/ic_account_circle_black_24dp">
-
-                            </ImageView>
-
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/recycler_view_assignee_list"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
-
-                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -164,54 +108,21 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
-                            android:text="@string/textView_trello_board"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"></TextView>
-
-                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                            android:id="@+id/auto_textView_trello_board"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@null"
-                            android:dropDownHeight="100dp"
-                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_comment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_trello_title"
+                            android:text="@string/textView_pivotal_title"
                             android:textColor="@color/black"
                             android:textSize="16sp"></TextView>
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editText_trello_title"
+                            android:id="@+id/editText_pivotal_title"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="30dp"
                             android:layout_marginEnd="5dp"
                             android:layout_marginRight="5dp"
                             android:layout_marginBottom="10dp"
                             android:background="@null"
                             android:cursorVisible="true"
                             android:gravity="top"
-                            android:hint="@string/editText_trello_title_hint"
+                            android:hint="@string/editText_pivotal_title_hint"
                             android:lines="5"
                             android:maxLines="5"
                             android:textCursorDrawable="@color/colorBlack"
@@ -224,7 +135,112 @@
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_member"
+                    android:id="@+id/cardView_story_type"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_pivotal_story_type"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_pivotal_type"
+                            android:textColor="@color/black"
+                            android:textSize="17sp"></TextView>
+
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                            android:id="@+id/auto_textView_pivotal_story_type"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:dropDownHeight="100dp"
+                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+
+                    </LinearLayout>
+
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_points"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_pivotal_points"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_pivotal_points"
+                            android:textColor="@color/black"
+                            android:textSize="17sp"></TextView>
+
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                            android:id="@+id/auto_textView_pivotal_points"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:dropDownHeight="100dp"
+                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+
+                    </LinearLayout>
+
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_requester"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_pivotal_requester"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_pivotal_requester"
+                            android:textColor="@color/black"
+                            android:textSize="17sp"></TextView>
+
+                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                            android:id="@+id/auto_textView_pivotal_requester"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:dropDownHeight="100dp"
+                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+
+                    </LinearLayout>
+
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_owner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="7dp"
@@ -240,7 +256,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
-                            android:text="@string/textView_trello_member"
+                            android:text="@string/textView_pivotal_owners"
                             android:textColor="@color/black"
                             android:textSize="16sp"></TextView>
 
@@ -250,7 +266,7 @@
                             android:orientation="horizontal">
 
                             <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_trello_member"
+                                android:id="@+id/auto_textView_pivotal_owner"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
@@ -259,7 +275,7 @@
                                 android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
                             <ImageView
-                                android:id="@+id/imageView_member_add"
+                                android:id="@+id/imageView_owner_add"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 app:srcCompat="@drawable/ic_add_black_24dp" />
@@ -270,7 +286,7 @@
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_member_list"
+                    android:id="@+id/cardView_owner_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="7dp"
@@ -284,11 +300,11 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/textView_member_list"
+                            android:id="@+id/textView_owner_list"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="5dp"
-                            android:text="@string/textView_trello_member_list"
+                            android:text="@string/textView_pivotal_owners_list"
                             android:textColor="@color/black"
                             android:textSize="16sp" />
 
@@ -306,7 +322,7 @@
                             </ImageView>
 
                             <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/recycler_view_member_list"
+                                android:id="@+id/recycler_view_pivotal_owner_list"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
 
@@ -314,6 +330,154 @@
 
                     </LinearLayout>
 
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_blockers"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:text="@string/textView_pivotal_blockers"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"></TextView>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editText_pivotal_blockers"
+                                android:layout_width="0dp"
+                                android:layout_height="30dp"
+                                android:layout_marginEnd="5dp"
+                                android:layout_marginRight="5dp"
+                                android:layout_marginBottom="10dp"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:cursorVisible="true"
+                                android:gravity="top"
+                                android:hint="@string/editText_pivotal_block"
+                                android:lines="5"
+                                android:maxLines="5"
+                                android:textCursorDrawable="@color/colorBlack"
+                                android:textSize="16sp">
+
+                            </com.google.android.material.textfield.TextInputEditText>
+
+                            <ImageView
+                                android:id="@+id/imageView_block_add"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                app:srcCompat="@drawable/ic_add_black_24dp" />
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_blockers_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:visibility="gone"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_blockers_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_pivotal_blockers_list"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:srcCompat="@drawable/ic_account_circle_black_24dp">
+
+                            </ImageView>
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/recycler_view_pivotal_blockers_list"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:text="@string/textView_pivotal_description"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"></TextView>
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editText_pivotal_description"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="5dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginBottom="10dp"
+                            android:background="@null"
+                            android:cursorVisible="true"
+                            android:gravity="top"
+                            android:hint="@string/editText_pivotal_description"
+                            android:lines="5"
+                            android:maxLines="5"
+                            android:textCursorDrawable="@color/colorBlack"
+                            android:textSize="16sp">
+
+                        </com.google.android.material.textfield.TextInputEditText>
+
+                    </LinearLayout>
 
                 </androidx.cardview.widget.CardView>
 
@@ -334,7 +498,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
-                            android:text="@string/textView_trello_label"
+                            android:text="@string/textView_pivotal_labels"
                             android:textColor="@color/black"
                             android:textSize="16sp"></TextView>
 
@@ -344,7 +508,7 @@
                             android:orientation="horizontal">
 
                             <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_trello_label"
+                                android:id="@+id/auto_textView_pivotal_label"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
@@ -383,7 +547,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="5dp"
-                            android:text="@string/textView_trello_label_list"
+                            android:text="@string/textView_pivotal_labels_list"
                             android:textColor="@color/black"
                             android:textSize="16sp" />
 
@@ -401,7 +565,7 @@
                             </ImageView>
 
                             <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/recycler_view_label_list"
+                                android:id="@+id/recycler_view_pivotal_label_list"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
 
@@ -411,59 +575,109 @@
 
 
                 </androidx.cardview.widget.CardView>
+
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_start_date"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/cardView_tasks"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="7dp"
-                    android:visibility="visible"
                     app:cardElevation="5dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/textView_trello_start_date"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="@string/textView_jira_start_date"
+                            android:layout_marginBottom="10dp"
+                            android:text="@string/textView_pivotal_tasks"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"></TextView>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editText_pivotal_tasks"
+                                android:layout_width="0dp"
+                                android:layout_height="30dp"
+                                android:layout_marginEnd="5dp"
+                                android:layout_marginRight="5dp"
+                                android:layout_marginBottom="10dp"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:cursorVisible="true"
+                                android:gravity="top"
+                                android:hint="@string/editText_pivotal_task"
+                                android:lines="5"
+                                android:maxLines="5"
+                                android:textCursorDrawable="@color/colorBlack"
+                                android:textSize="16sp">
+
+                            </com.google.android.material.textfield.TextInputEditText>
+
+                            <ImageView
+                                android:id="@+id/imageView_task_add"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                app:srcCompat="@drawable/ic_add_black_24dp" />
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView_task_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="7dp"
+                    android:visibility="gone"
+                    app:cardElevation="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textView_task_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:text="@string/textView_pivotal_tasks_list"
                             android:textColor="@color/black"
                             android:textSize="16sp" />
 
-
-                        <ImageView
-                            android:id="@+id/imageView_start_date"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="5dp"
-                            android:layout_marginLeft="5dp"
-                            app:srcCompat="@drawable/ic_date_range_black_24dp">
+                            android:layout_marginBottom="10dp"
+                            android:orientation="horizontal">
 
-                        </ImageView>
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:srcCompat="@drawable/ic_account_circle_black_24dp">
 
-                        <ImageButton
-                            android:id="@+id/image_button_trello_remove_date"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="5dp"
-                            android:layout_marginLeft="5dp"
-                            android:background="@color/white"
-                            android:visibility="gone"
-                            app:srcCompat="@drawable/ic_close_black_24dp"></ImageButton>
-                        <!--  <Spinner
-                              android:id="@+id/spinner_jira_sprint"
-                              android:layout_width="match_parent"
-                              android:layout_height="wrap_content"
-                              android:layout_marginBottom="10dp"/>-->
+                            </ImageView>
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/recycler_view_pivotal_task_list"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
+
+                        </LinearLayout>
 
                     </LinearLayout>
+
 
                 </androidx.cardview.widget.CardView>
 
@@ -481,11 +695,11 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/textView_trello_attachments"
+                            android:id="@+id/textView_pivotal_attachments"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="5dp"
-                            android:text="@string/textView_trello_attachment"
+                            android:text="@string/textView_pivotal_attachment"
                             android:textColor="@color/black"
                             android:textSize="16sp" />
 
@@ -504,7 +718,7 @@
                             </ImageView>
 
                             <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/recycler_view_trello_attachment"
+                                android:id="@+id/recycler_view_pivotal_attachment"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
 
@@ -524,7 +738,7 @@
                     android:weightSum="2">
 
                     <Button
-                        android:id="@+id/button_trello_cancel"
+                        android:id="@+id/button_pivotal_cancel"
                         style="@style/Widget.AppCompat.Button.Borderless"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -533,20 +747,20 @@
                         android:layout_marginRight="5dp"
                         android:layout_weight="1"
                         android:background="@color/colorFab"
-                        android:text="@string/button_trello_cancel"
+                        android:text="@string/button_pivotal_cancel"
                         android:textAllCaps="false"
                         android:textColor="@color/secondaryColor"
                         android:textSize="18sp"
                         app:elevation="5dp" />
 
                     <Button
-                        android:id="@+id/button_trello_create"
+                        android:id="@+id/button_pivotal_create"
                         style="@style/Widget.AppCompat.Button.Borderless"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@color/colorFab"
-                        android:text="@string/button_trello_create"
+                        android:text="@string/button_pivotal_create"
                         android:textAllCaps="false"
                         android:textColor="@color/black"
                         android:textSize="18sp"

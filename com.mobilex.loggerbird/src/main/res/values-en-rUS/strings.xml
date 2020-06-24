@@ -127,6 +127,11 @@
     <string name="trello_issue_preferences_delete">Issue preferences are deleted!</string>
     <string name="trello_time_line_empty">Date or time cannot be empty!</string>
     <string name="trello_time_line_success">Timeline details have been gathered!</string>
+    <string name="pivotal_issue_success">Issue opened successfully!</string>
+    <string name="pivotal_issue_failure">An error happened while trying to open pivotal issue!</string>
+    <string name="pivotal_issue_time_out">An error happened while trying to open pivotal issue , system has been timed out!</string>
+    <string name="pivotal_issue_preferences_save">Issue preferences are saved!</string>
+    <string name="pivotal_issue_preferences_delete">Issue preferences are deleted!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -148,6 +153,7 @@
     <string name="textView_loggerbird_gitlab_title">Send to Gitlab</string>
     <string name="textView_loggerbird_github_title">Send to Github</string>
     <string name="textView_loggerbird_trello_title">Share with Trello</string>
+    <string name="textView_loggerbird_pivotal_title">Share with Pivotal-tracker</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>
     <!-- activity_paint_save_dialog-->
@@ -340,4 +346,30 @@
     <string name="button_trello_date_proceed">Proceed</string>
     <string name="button_trello_date_cancel">Cancel</string>
     <string name="textView_trello_start_time">Start time</string>
+    <!-- loggerbird_pivotal_menu-->
+    <string name="textView_pivotal_menu_save">Save Issue Info</string>
+    <string name="textView_pivotal_menu_clear">Clear Issue Info</string>
+    <!-- loggerbird_pivotal_popup-->
+    <string name="textView_pivotal_project">Project</string>
+    <string name="textView_pivotal_title">Title</string>
+    <string name="editText_pivotal_title_hint">Enter a title for this story…</string>
+    <string name="textView_pivotal_type">Story Type</string>
+    <string name="textView_pivotal_requester">Requester</string>
+    <string name="textView_pivotal_points">Pivotal</string>
+    <string name="textView_pivotal_owners">Owners</string>
+    <string name="textView_pivotal_owners_list">Owners list</string>
+    <string name="textView_pivotal_blockers">Blockers</string>
+    <string name="textView_pivotal_blockers_list">Blockers list</string>
+    <string name="textView_pivotal_description">Description</string>
+    <string name="textView_pivotal_labels">Labels</string>
+    <string name="textView_pivotal_labels_list">Labels list</string>
+    <string name="textView_pivotal_tasks">Task</string>
+    <string name="textView_pivotal_tasks_list">Task list</string>
+    <string name="textView_pivotal_attachment">Attachments</string>
+    <string name="editText_pivotal_description">Enter a description for this story …</string>
+    <string name="editText_pivotal_task">Enter a task for this story …</string>
+    <string name="editText_pivotal_block">Enter a block for this story …</string>
+    <string name="editText_pivotal_title">Enter a title for this story …</string>
+    <string name="button_pivotal_create">Create</string>
+    <string name="button_pivotal_cancel">Cancel</string>
 </resources>
