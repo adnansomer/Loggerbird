@@ -113,6 +113,19 @@
             android:text="@string/textView_loggerbird_github_title"
             android:drawableStart="@drawable/ic_github_logo_24dp"
             android:drawableLeft="@drawable/ic_github_logo_24dp" />
+        <TextView
+            android:id="@+id/textView_share_trello"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="16dp"
+            android:textColor="@color/black"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+            android:gravity="center_vertical"
+            android:textSize="12sp"
+            android:padding="8dp"
+            android:text="@string/textView_loggerbird_trello_title"
+            android:drawableStart="@drawable/ic_trello_seeklogo"
+            android:drawableLeft="@drawable/ic_trello_seeklogo" />
 
         <TextView
             android:id="@+id/textView_discard"

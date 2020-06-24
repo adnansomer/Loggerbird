@@ -83,5 +83,7 @@ internal class Constants {
         const val githubTag:String = "Github"
         const val recyclerViewEmailAdapterTag:String = "RecyclerView Email Adapter"
         const val recyclerViewGithubAdapterTag:String = "RecyclerView Github Adapter"
+        const val trelloTag:String = "Trello"
+        const val recyclerViewTrelloAdapterTag:String = "RecyclerView Trello Adapter"
     }
 }

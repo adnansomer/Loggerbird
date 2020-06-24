@@ -1,5 +1,6 @@
 package models
 
+import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
@@ -88,4 +89,22 @@ interface AccountIdService {
     fun setGithubAttachments(@Body jsonObject: JsonObject,@Path("file_name")fileName:String):Call<JsonObject>
     @PATCH("issues/{id}")
     fun setGithubIssue(@Body jsonObject: JsonObject,@Path("id")id:Int):Call<JsonObject>
+    //trello
+    @GET("boards?")
+    fun getTrelloProjects(@Query("key") key:String,@Query("token") token:String):Call<List<TrelloProjectModel>>
+    @GET("actions?")
+    fun getTrelloBoards(@Query("key") key:String,@Query("token") token:String):Call<JsonArray>
+    @POST("cards?")
+    fun createTrelloIssue(@Body jsonObject: JsonObject,@Query("key") key:String,@Query("token") token:String,@Query("idList") idList:String):Call<JsonObject>
+    @Multipart
+    @POST("attachments")
+    fun setTrelloAttachments(@Part file:MultipartBody.Part,@Query("key") key:String,@Query("token") token:String): Call<JsonObject>
+    @GET("memberships?")
+    fun getTrelloMembers(@Query("key") key:String,@Query("token") token:String):Call<JsonArray>
+    @GET("{idName}?")
+    fun getTrelloMembersName(@Path("idName") idName:String,@Query("key") key:String,@Query("token") token:String ):Call<JsonObject>
+    @GET("labels?")
+    fun getTrelloLabels(@Query("key") key:String,@Query("token") token:String):Call<JsonArray>
+    @POST("idLabels?")
+    fun setTrelloLabels(@Body jsonArray: JsonArray,@Query("key") key:String,@Query("token") token:String): Call<JsonObject>
 }

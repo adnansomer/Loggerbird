@@ -111,6 +111,20 @@
     <string name="github_label_exist">Bu etiket zaten listeye eklendi!</string>
     <string name="github_label_doesnt_exist">Bu etiket bulunamadı!</string>
     <string name="github_mile_stone_doesnt_exist">Bu kilometre taşı bulunamadı!</string>
+    <string name="trello_issue_success">Görev başarılı bir şekilde açıldı!</string>
+    <string name="trello_issue_failure">Trello görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="trello_issue_time_out">Trello görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="trello_label_exist">Bu etiket zaten listeye eklendi!</string>
+    <string name="trello_label_doesnt_exist">Bu etiket bulunamadı!</string>
+    <string name="trello_member_exist">Bu üye zaten listeye eklendi!</string>
+    <string name="trello_member_doesnt_exist">Bu üye bulunamadı!</string>
+    <string name="trello_project_empty">Proje boş olamaz!</string>
+    <string name="trello_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="trello_board_empty">Pano boş olamaz!</string>
+    <string name="trello_board_doesnt_exist">Bu pano bulunamadı!</string>
+    <string name="trello_title_empty">Başlık boş olamaz!</string>
+    <string name="trello_issue_preferences_save">Konu tercihleri kaydedildi!</string>
+    <string name="trello_issue_preferences_delete">Konu tercihleri silindi!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
@@ -131,7 +145,7 @@
     <string name="textView_loggerbird_future_title">Gelecek zaman görevi olarak ata</string>
     <string name="textView_loggerbird_gitlab_title">Gitlab ile paylaş</string>
     <string name="textView_loggerbird_github_title">Github ile paylaş</string>
-
+    <string name="textView_loggerbird_trello_title">Trello ile paylaş</string>
 
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça boyutu ayarla</string>
@@ -293,4 +307,32 @@
     <string name="textView_recyclerView_github_label_title">Github görevlendirmenizden bu etiketi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_github_label_delete">Etiketi sil</string>
     <string name="button_recyclerView_github_label_keep">Etiketi tut</string>
+    <!-- loggerbird_trello_popup-->
+    <string name="textView_trello_project">Proje</string>
+    <string name="textView_trello_board">Pano</string>
+    <string name="textView_trello_title">Başlık</string>
+    <string name="editText_trello_title_hint">Bu kart için bir başlık giriniz…</string>
+    <string name="textView_trello_member">Üye</string>
+    <string name="textView_trello_member_list">Üye listesi</string>
+    <string name="textView_trello_label">Etiket</string>
+    <string name="textView_trello_label_list">Etiket listesi</string>
+    <string name="textView_trello_attachment">Eklentiler</string>
+    <string name="button_trello_create">Oluştur</string>
+    <string name="button_trello_cancel">İptal</string>
+    <!-- loggerbird_trello_menu-->
+    <string name="textView_trello_menu_save">Görev detayı kaydet</string>
+    <string name="textView_trello_menu_clear">Görev detayı temizle</string>
+    <!-- recycler_view_trello_item_popup-->
+    <string name="textView_recyclerView_popup_trello_title">Trello görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
+    <!-- recycler_view_trello_label_popup-->
+    <string name="textView_recyclerView_trello_label_header">Etiketi sil</string>
+    <string name="textView_recyclerView_trello_label_title">Trello görevlendirmenizden bu etiketi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_trello_label_delete">Etiketi sil</string>
+    <string name="button_recyclerView_trello_label_keep">Etiketi tut</string>
+    <!-- recycler_view_trello_label_popup-->
+    <string name="textView_recyclerView_trello_member_header">Üyeyi sil</string>
+    <string name="textView_recyclerView_trello_member_title">Trello görevlendirmenizden bu üyeyi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_trello_member_delete">Üyeyi sil</string>
+    <string name="button_recyclerView_trello_member_keep">Üyeyi tut</string>
+
 </resources>

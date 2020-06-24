@@ -23,18 +23,18 @@ import loggerbird.LoggerBird
 import models.RecyclerViewModelLabel
 import services.LoggerBirdService
 
-class RecyclerViewGithubLabelAdapter(
+class RecyclerViewTrelloLabelAdapter(
     private val labelList: ArrayList<RecyclerViewModelLabel>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View
 ) :
-    RecyclerView.Adapter<RecyclerViewGithubLabelAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerViewTrelloLabelAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_github_label_item,
+                R.layout.recycler_view_trello_label_item,
                 parent,
                 false
             )
@@ -73,7 +73,7 @@ class RecyclerViewGithubLabelAdapter(
 
         fun bindItems(
             item: RecyclerViewModelLabel,
-            adapter: RecyclerViewGithubLabelAdapter,
+            adapter: RecyclerViewTrelloLabelAdapter,
             position: Int,
             labelList: ArrayList<RecyclerViewModelLabel>,
             context: Context,
@@ -89,7 +89,7 @@ class RecyclerViewGithubLabelAdapter(
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
-                        fileList = labelList,
+                        labelList = labelList,
                         position = position,
                         adapter = adapter
                     )
@@ -102,14 +102,14 @@ class RecyclerViewGithubLabelAdapter(
         private fun removeItemPopup(
             activity: Activity,
             rootView: View,
-            fileList: ArrayList<RecyclerViewModelLabel>,
+            labelList: ArrayList<RecyclerViewModelLabel>,
             position: Int,
-            adapter: RecyclerViewGithubLabelAdapter
+            adapter: RecyclerViewTrelloLabelAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_github_label_popup,
+                        R.layout.recycler_view_trello_label_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -141,10 +141,10 @@ class RecyclerViewGithubLabelAdapter(
                             viewRecyclerViewItems,
                             windowManagerParamsRecyclerViewItemPopup
                         )
-                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_github_title)
-                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_github_yes)
-                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_github_no)
-                        buttonClicksGithubPopup(adapter = adapter , labelList = fileList , position = position)
+                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_trello_title)
+                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_trello_yes)
+                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_trello_no)
+                        buttonClicksTrelloPopup(adapter = adapter , trelloList = labelList , position = position)
                     }
                 }
             } catch (e: Exception) {
@@ -152,7 +152,7 @@ class RecyclerViewGithubLabelAdapter(
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
-                    tag = Constants.recyclerViewGithubAdapterTag
+                    tag = Constants.recyclerViewTrelloAdapterTag
                 )
             }
 
@@ -171,13 +171,13 @@ class RecyclerViewGithubLabelAdapter(
 //            alertDialogItemDelete.show()
         }
 
-        private fun buttonClicksGithubPopup(labelList: ArrayList<RecyclerViewModelLabel>, position: Int, adapter: RecyclerViewGithubLabelAdapter) {
+        private fun buttonClicksTrelloPopup(trelloList: ArrayList<RecyclerViewModelLabel>, position: Int, adapter: RecyclerViewTrelloLabelAdapter) {
             buttonYes.setSafeOnClickListener {
-                labelList.removeAt(position)
-                arrayListLabelNames = labelList
+                trelloList.removeAt(position)
+                arrayListLabelNames = trelloList
                 adapter.notifyDataSetChanged()
-                if(labelList.size <=0){
-                    LoggerBirdService.loggerBirdService.cardViewGithubLabelList.visibility = View.GONE
+                if(trelloList.size <=0){
+                    LoggerBirdService.loggerBirdService.cardViewTrelloLabelList.visibility = View.GONE
                 }
                 removePopupLayout()
             }

@@ -14,27 +14,26 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
+import models.RecyclerViewModel
 import java.util.concurrent.TimeUnit
 import android.provider.Settings
 import android.widget.Button
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
-import models.RecyclerViewModelLabel
-import services.LoggerBirdService
 
-class RecyclerViewGithubLabelAdapter(
-    private val labelList: ArrayList<RecyclerViewModelLabel>,
+class RecyclerViewTrelloAdapter(
+    private val fileList: ArrayList<RecyclerViewModel>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View
 ) :
-    RecyclerView.Adapter<RecyclerViewGithubLabelAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerViewTrelloAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_github_label_item,
+                R.layout.recycler_view_trello_item,
                 parent,
                 false
             )
@@ -42,15 +41,15 @@ class RecyclerViewGithubLabelAdapter(
     }
 
     override fun getItemCount(): Int {
-        return labelList.size
+        return fileList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindItems(
-            item = labelList[position],
+            item = fileList[position],
             adapter = this,
             position = position,
-            labelList = labelList,
+            fileList = fileList,
             context = context,
             activity = activity,
             rootView = rootView
@@ -67,29 +66,29 @@ class RecyclerViewGithubLabelAdapter(
         private lateinit var buttonNo: Button
 
         companion object{
-             internal  var arrayListLabelNames:ArrayList<RecyclerViewModelLabel> = ArrayList()
+             internal lateinit var arrayListFilePaths:ArrayList<RecyclerViewModel>
         }
 
 
         fun bindItems(
-            item: RecyclerViewModelLabel,
-            adapter: RecyclerViewGithubLabelAdapter,
+            item: RecyclerViewModel,
+            adapter: RecyclerViewTrelloAdapter,
             position: Int,
-            labelList: ArrayList<RecyclerViewModelLabel>,
+            fileList: ArrayList<RecyclerViewModel>,
             context: Context,
             activity: Activity,
             rootView: View
         ) {
-            arrayListLabelNames = labelList
+            arrayListFilePaths = fileList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
-            textViewFileName.text = item.labelName
+            textViewFileName.text = item.file.name
             imageButtonCross.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
-                        fileList = labelList,
+                        fileList = fileList,
                         position = position,
                         adapter = adapter
                     )
@@ -102,14 +101,14 @@ class RecyclerViewGithubLabelAdapter(
         private fun removeItemPopup(
             activity: Activity,
             rootView: View,
-            fileList: ArrayList<RecyclerViewModelLabel>,
+            fileList: ArrayList<RecyclerViewModel>,
             position: Int,
-            adapter: RecyclerViewGithubLabelAdapter
+            adapter: RecyclerViewTrelloAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_github_label_popup,
+                        R.layout.recycler_view_trello_item_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -141,10 +140,10 @@ class RecyclerViewGithubLabelAdapter(
                             viewRecyclerViewItems,
                             windowManagerParamsRecyclerViewItemPopup
                         )
-                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_github_title)
-                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_github_yes)
-                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_github_no)
-                        buttonClicksGithubPopup(adapter = adapter , labelList = fileList , position = position)
+                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_trello_title)
+                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_trello_yes)
+                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_trello_no)
+                        buttonClicksTrelloPopup(adapter = adapter , fileList = fileList , position = position)
                     }
                 }
             } catch (e: Exception) {
@@ -152,7 +151,7 @@ class RecyclerViewGithubLabelAdapter(
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
-                    tag = Constants.recyclerViewGithubAdapterTag
+                    tag = Constants.recyclerViewTrelloAdapterTag
                 )
             }
 
@@ -171,14 +170,11 @@ class RecyclerViewGithubLabelAdapter(
 //            alertDialogItemDelete.show()
         }
 
-        private fun buttonClicksGithubPopup(labelList: ArrayList<RecyclerViewModelLabel>, position: Int, adapter: RecyclerViewGithubLabelAdapter) {
+        private fun buttonClicksTrelloPopup(fileList: ArrayList<RecyclerViewModel>, position: Int, adapter: RecyclerViewTrelloAdapter) {
             buttonYes.setSafeOnClickListener {
-                labelList.removeAt(position)
-                arrayListLabelNames = labelList
+                fileList.removeAt(position)
+                arrayListFilePaths = fileList
                 adapter.notifyDataSetChanged()
-                if(labelList.size <=0){
-                    LoggerBirdService.loggerBirdService.cardViewGithubLabelList.visibility = View.GONE
-                }
                 removePopupLayout()
             }
             buttonNo.setSafeOnClickListener {
