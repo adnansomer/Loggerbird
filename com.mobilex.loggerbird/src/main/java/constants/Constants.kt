@@ -80,8 +80,11 @@ internal class Constants {
         const val unhandledExceptionPopupTag:String = "Unhandled Exception Popup"
         const val jiraDatePopupTag:String = "Jira Date Popup"
         const val futureTaskTag:String = "Future Task"
-        const val gitlabTag: String = "GitLab"
-        const val gitlabDatePopupTag:String = "Gitlab Date Popup"
-
+        const val githubTag:String = "Github"
+        const val recyclerViewEmailAdapterTag:String = "RecyclerView Email Adapter"
+        const val recyclerViewGithubAdapterTag:String = "RecyclerView Github Adapter"
+        const val trelloTag:String = "Trello"
+        const val recyclerViewTrelloAdapterTag:String = "RecyclerView Trello Adapter"
+        const val pivotalTag:String = "Pivotal"
     }
 }

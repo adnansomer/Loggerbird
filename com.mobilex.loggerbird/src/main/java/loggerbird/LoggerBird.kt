@@ -148,7 +148,12 @@ class LoggerBird : LifecycleObserver {
         internal lateinit var jiraApiToken: String
         private val defaultToast = DefaultToast()
         internal lateinit var slackApiToken: String
-        internal lateinit var gitlabApiToken: String
+        internal lateinit var githubUserName:String
+        internal lateinit var githubPassword:String
+        internal lateinit var trelloUserName:String
+        internal lateinit var trelloPassword:String
+        internal lateinit var trelloKey:String
+        internal lateinit var trelloToken:String
 //        private val loggerBirdService: LoggerBirdService = LoggerBirdService()
 
 
@@ -177,8 +182,13 @@ class LoggerBird : LifecycleObserver {
             jiraDomainName: String,
             jiraUserName: String,
             jiraApiToken: String,
-            slackApiToken: String,
-            gitlabApiToken: String,
+            slackApiToken:String,
+            githubUserName:String,
+            githubPassword:String,
+            trelloUserName:String,
+            trelloPassword:String,
+            trelloKey:String,
+            trelloToken:String,
             filePathName: String? = null
         ): Boolean {
             this.context = context
@@ -189,7 +199,12 @@ class LoggerBird : LifecycleObserver {
                     Companion.jiraUserName = jiraUserName
                     Companion.jiraApiToken = jiraApiToken
                     Companion.slackApiToken = slackApiToken
-                    Companion.gitlabApiToken = gitlabApiToken
+                    Companion.githubUserName = githubUserName
+                    Companion.githubPassword = githubPassword
+                    Companion.trelloUserName = trelloUserName
+                    Companion.trelloPassword = trelloPassword
+                    Companion.trelloKey = trelloKey
+                    Companion.trelloToken = trelloToken
                     logAttachLifeCycleObservers(context = context)
                     fileDirectory = context.filesDir
                     if (filePathName != null) {

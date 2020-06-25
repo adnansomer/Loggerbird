@@ -10,7 +10,7 @@ class RetrofitUserJiraClient {
        internal fun getJiraUserClient(url:String): Retrofit {
             val client = OkHttpClient.Builder()
                 .addInterceptor(
-                    BasicAuthInterceptor(
+                    BasicAuthJiraInterceptor(
                         LoggerBird.jiraUserName,
                         LoggerBird.jiraApiToken
                     )

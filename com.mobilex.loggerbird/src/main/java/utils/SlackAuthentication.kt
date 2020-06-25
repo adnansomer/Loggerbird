@@ -11,10 +11,14 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import com.mobilex.loggerbird.R
 import com.slack.api.RequestConfigurator
 import com.slack.api.Slack
 import com.slack.api.methods.request.admin.usergroups.AdminUsergroupsListChannelsRequest
+import com.slack.api.methods.request.conversations.ConversationsInviteRequest
 import com.slack.api.methods.request.conversations.ConversationsListRequest
 import com.slack.api.methods.request.usergroups.UsergroupsListRequest
 import com.slack.api.methods.request.users.UsersInfoRequest
@@ -26,6 +30,7 @@ import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
+import models.AccountIdService
 import models.RecyclerViewModel
 import okhttp3.*
 import services.LoggerBirdService
@@ -69,10 +74,8 @@ class SlackAuthentication {
 
     /** Loggerbird slack app client information **/
     companion object{
-        //xoxb-1176309019584-1152486968594-MLP1jZhF2cUlWeFcUMCa3d9j
-
-        private const val CLIENT_ID = "1176309019584.1151103028997"
-        private const val CLIENT_SECRET = "6147f0bd55a0c777893d07c91f3b16ef"
+        internal const val CLIENT_ID = "1176309019584.1151103028997"
+        internal const val CLIENT_SECRET = "6147f0bd55a0c777893d07c91f3b16ef"
         private const val REDIRECT_URL = "https://app.slack.com/client"
         private const val APP_ID = "A014F310UVB"
         private const val INVITATION_URL = "https://slack.com/oauth/v2/authorize?client_id=1176309019584.1151103028997&scope=app_mentions:read,channels:join,channels:read,chat:write,files:write,groups:read,groups:write,im:write,incoming-webhook,mpim:read,mpim:write,usergroups:write,users:read,users:write,usergroups:read,users.profile:read,chat:write.public,team:read"
@@ -153,6 +156,8 @@ class SlackAuthentication {
                         checkTimeOut(activity = activity)
                         coroutineCallSlack.async {
                             try {
+//                                gatherVerificationToken()
+//                                gatherOauthToken()
                                 slackAuthentication(
                                     activity = activity,
                                     context = context,
@@ -200,6 +205,7 @@ class SlackAuthentication {
     ) {
 
         try{
+
             this.activity = activity
             val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             val token = sharedPref.getString("slackAccessToken", "")
@@ -280,11 +286,9 @@ class SlackAuthentication {
                     slackTaskGatherUsers(slack = slack, token = token)
                 }
             }catch(e: SocketTimeoutException){
-                LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
+                LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
                 Log.d(Constants.slackTag,"No Authorizated Token")
                 slackExceptionHandler(e = e, filePathName = filePathMedia, socketTimeOut = SocketTimeoutException())
-
-
 
             }
         }
@@ -313,8 +317,6 @@ class SlackAuthentication {
                     arrayListUsersName.add(it.name)
                     hashMapUser[it.name] = it.id
                 }
-
-
                 updateFields()
             }catch(e: Exception) {
 
@@ -329,6 +331,7 @@ class SlackAuthentication {
                     timerTaskQueue.cancel()
                 }
 
+//                checkTimeOut(activity = activity)
                 Log.d(Constants.slackTag,"Not Authorizated Token")
                 e.printStackTrace()
             }
@@ -339,14 +342,23 @@ class SlackAuthentication {
         queueCounter++
         withContext(Dispatchers.IO) {
             try {
-                val list : List<ConversationType> = listOf(ConversationType.PRIVATE_CHANNEL,ConversationType.PUBLIC_CHANNEL)
-                val conversationListBuilder = ConversationsListRequest.builder().types(list).build()
+                val list:List<ConversationType> = listOf(ConversationType.PRIVATE_CHANNEL,ConversationType.PUBLIC_CHANNEL)
+                val conversationListBuilder = ConversationsListRequest.builder()
+                    .types(list)
+                    .build()
                 val channelResponse = slack.methods(token).conversationsList(conversationListBuilder).channels.forEach {
                     arrayListChannels.add(it.name)
                     arrayListChannelsId.add(it.id)
                     hashMapChannel[it.name] = it.id
                 }
 
+//                val privateResponse = slack.methods(token).conversationsList {
+//                    it.build().types.forEach {
+//
+//                    }
+//                    val privateList:List<ConversationType> = List(2,)
+//                    it.types("private_channel")
+//                }
                 updateFields()
             }catch(e: Exception) {
 
@@ -359,7 +371,6 @@ class SlackAuthentication {
                         messagePath,
                         slackType )
                 }
-
                 Log.d(Constants.slackTag,"Not Authorizated Token")
                 e.printStackTrace()
             }
@@ -472,7 +483,6 @@ class SlackAuthentication {
                     }
 
                 } catch (e: Exception) {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
                     slackExceptionHandler(e = e, filePathName = filePathMedia, socketTimeOut = SocketTimeoutException())
                 }
             }
@@ -539,16 +549,12 @@ class SlackAuthentication {
         this.arrayListRecyclerViewItems = arrayListRecyclerViewItems
     }
 
-    private fun checkTimeOut(activity: Activity) {
-        val timerQueue = Timer()
-        timerTaskQueue = object : TimerTask() {
+    private fun checkTimeOut(activity: Activity){
+        Timer().schedule(object : TimerTask() {
             override fun run() {
-                activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
-                }
+                LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
             }
-        }
-        timerQueue.schedule(timerTaskQueue, 15000)
+        }, 15000)
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -558,9 +564,6 @@ class SlackAuthentication {
         throwable: Throwable? = null,
         socketTimeOut: SocketTimeoutException? = null
     ) {
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
-        }
         LoggerBirdService.loggerBirdService.finishShareLayout("slack_error")
         e?.printStackTrace()
         socketTimeOut?.message
@@ -571,4 +574,73 @@ class SlackAuthentication {
             throwable = throwable
         )
     }
+
+    private fun gatherVerificationToken(){
+        RetrofitUserSlackClient.getSlackUserClient(url = "https://slack.com/oauth/")
+            .create(AccountIdService::class.java)
+            .getSlackVerification()
+            .enqueue(object : retrofit2.Callback<JsonElement> {
+                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                override fun onFailure(
+                    call: retrofit2.Call<JsonElement>,
+                    t: Throwable
+                ) {
+                    Log.d("slack_failure","retrofit failed!")
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonElement>,
+                    response: retrofit2.Response<JsonElement>
+                ) {
+                    Log.d("slack_success", response.code().toString())
+                    val slackBody = response.raw().request.url
+                    RetrofitUserSlackClient.getSlackUserClient(url = slackBody.toString()+"/")
+                        .create(AccountIdService::class.java)
+                        .getSlackVerificationToken()
+                        .enqueue(object : retrofit2.Callback<JsonObject> {
+                            @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                            override fun onFailure(
+                                call: retrofit2.Call<JsonObject>,
+                                t: Throwable
+                            ) {
+                                Log.d("slack_failure","retrofit failed!")
+                            }
+
+                            override fun onResponse(
+                                call: retrofit2.Call<JsonObject>,
+                                response: retrofit2.Response<JsonObject>
+                            ) {
+                                Log.d("slack_success", response.code().toString())
+                                val slackBodyVerfication = response.body()
+                            }
+                        })
+
+
+                }
+            })
+    }
+
+    private fun gatherOauthToken(){
+        RetrofitUserSlackClient.getSlackUserClient(url = "https://slack.com/api/")
+            .create(AccountIdService::class.java)
+            .getSlackAuth()
+            .enqueue(object : retrofit2.Callback<JsonObject> {
+                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                override fun onFailure(
+                    call: retrofit2.Call<JsonObject>,
+                    t: Throwable
+                ) {
+                  Log.d("slack_failure","retrofit failed!")
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonObject>,
+                    response: retrofit2.Response<JsonObject>
+                ) {
+                    Log.d("slack_success", response.code().toString())
+                    val slackBody = response.body()
+                }
+            })
+    }
+
 }

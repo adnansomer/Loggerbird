@@ -87,19 +87,31 @@ class LoggerBirdFutureTaskService : Service() {
                     }
                     val subject = sharedPref.getString("future_task_email_subject", null)
                     val message = sharedPref.getString("future_task_email_message", null)
-                    val arrayListUserList :ArrayList<String>? = getUserList(context = this@LoggerBirdFutureTaskService)
-                    if(arrayListUserList != null){
-                        if(arrayListUserList.isNotEmpty()){
+                    val arrayListUserList: ArrayList<String>? =
+                        getUserList(context = this@LoggerBirdFutureTaskService)
+                    if (arrayListUserList != null) {
+                        if (arrayListUserList.isNotEmpty()) {
                             arrayListUserList.forEach {
-                                callEmail(
+                                addQueue(
                                     to = it,
                                     arrayListFilePath = arrayListFilePath,
 //                        file = filePath,
                                     message = message,
                                     subject = subject
                                 )
+//                                callEmail(
+//                                    to = it,
+//                                    arrayListFilePath = arrayListFilePath,
+////                        file = filePath,
+//                                    message = message,
+//                                    subject = subject
+//                                )
                             }
-                        }else{
+                            runnableListEmail.forEach {
+                                it.run()
+                            }
+
+                        } else {
                             val to = sharedPref.getString("future_task_email_to", null)
                             callEmail(
                                 to = to!!,
@@ -109,7 +121,7 @@ class LoggerBirdFutureTaskService : Service() {
                                 subject = subject
                             )
                         }
-                    }else{
+                    } else {
                         val to = sharedPref.getString("future_task_email_to", null)
                         callEmail(
                             to = to!!,
@@ -171,6 +183,7 @@ class LoggerBirdFutureTaskService : Service() {
         }
         return null
     }
+
     private fun getUserList(context: Context): ArrayList<String>? {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         val gson = Gson()
@@ -184,37 +197,43 @@ class LoggerBirdFutureTaskService : Service() {
     private fun callEmail(
         to: String,
 //        context: Context,
-        arrayListFilePath: ArrayList<File> ? =null,
+        arrayListFilePath: ArrayList<File>? = null,
         message: String? = null,
         subject: String? = null
 //        controlService: Boolean
     ) {
-            if (runnableListEmail.isEmpty()) {
-                workQueueLinkedEmail.put {
-                    EmailUtil.sendSingleEmail(
-                        to = to,
-                        context = this@LoggerBirdFutureTaskService,
-                        arrayListFilePaths = arrayListFilePath,
+        workQueueLinkedEmail.put {
+            EmailUtil.sendSingleEmail(
+                to = to,
+                context = this@LoggerBirdFutureTaskService,
+                arrayListFilePaths = arrayListFilePath,
 //                        file = filePath,
-                        message = message,
-                        subject = subject,
-                        controlServiceTask = true
-                    )
-                }
-            }
-            runnableListEmail.add(Runnable {
-                EmailUtil.sendSingleEmail(
-                    to = to,
-                    context = this@LoggerBirdFutureTaskService,
-                    arrayListFilePaths = arrayListFilePath,
-//                        file = filePath,
-                    message = message,
-                    subject = subject,
-                    controlServiceTask = true
-                )
-            })
+                message = message,
+                subject = subject,
+                controlServiceTask = true
+            )
+        }
 
     }
 
-
+    private fun addQueue(
+        to: String,
+//        context: Context,
+        arrayListFilePath: ArrayList<File>? = null,
+        message: String? = null,
+        subject: String? = null
+//        controlService: Boolean
+    ) {
+        runnableListEmail.add(Runnable {
+            EmailUtil.sendSingleEmail(
+                to = to,
+                context = this@LoggerBirdFutureTaskService,
+                arrayListFilePaths = arrayListFilePath,
+//                        file = filePath,
+                message = message,
+                subject = subject,
+                controlServiceTask = true
+            )
+        })
+    }
 }
