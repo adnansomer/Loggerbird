@@ -11,7 +11,6 @@ class RetrofitUserPivotalClient {
             val client = OkHttpClient.Builder()
                 .addInterceptor(
                     BasicAuthPivotalTrackerInterceptor(
-                        LoggerBird.pivotalUserName,
                         LoggerBird.pivotalApiToken
                     )
                 )

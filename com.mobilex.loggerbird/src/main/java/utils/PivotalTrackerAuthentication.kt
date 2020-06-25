@@ -21,7 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
 import models.AccountIdService
-import models.PivotalProjectModel
 import okhttp3.*
 import services.LoggerBirdService
 import java.io.File
@@ -44,7 +43,6 @@ internal class PivotalTrackerAuthentication {
     private val arrayListProjectNames: ArrayList<String> = ArrayList()
     private val arrayListProjectId: ArrayList<String> = ArrayList()
     private val arrayListStoryTypeNames: ArrayList<String> = ArrayList()
-    private val arrayListBoardId: ArrayList<String> = ArrayList()
     private val arrayListRequesterNames: ArrayList<String> = ArrayList()
     private val arrayListMemberId: ArrayList<String> = ArrayList()
     private val arrayListOwnersNames: ArrayList<String> = ArrayList()
@@ -54,9 +52,7 @@ internal class PivotalTrackerAuthentication {
     private val hashMapLabel:HashMap<String,String> = HashMap()
     private val hashMapMember:HashMap<String,String> = HashMap()
     private var projectPosition = 0
-    private var boardPosition = 0
     private var labelPosition: Int = 0
-    private var board: String? = null
     private var project: String? = null
     private var title: String = ""
     private var member: String? = null
@@ -124,7 +120,7 @@ internal class PivotalTrackerAuthentication {
                         coroutineCallPivotal.async {
                             try {
                                 when (task) {
-                                    "create" -> pivotalCreateIssue(activity = activity)
+//                                    "create" -> pivotalCreateIssue(activity = activity)
                                     "get" -> gatherPivotalDetails()
                                 }
 
@@ -156,129 +152,129 @@ internal class PivotalTrackerAuthentication {
         })
     }
 
-    private fun pivotalCreateIssue(activity: Activity) {
-        try {
-            queueCounter = 0
-            queueCounter++
-            this.activity = activity
-            val jsonObject = JsonObject()
-            val jsonArrayLabels = JsonArray()
-            if (RecyclerViewTrelloLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()) {
-                RecyclerViewTrelloLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
-                    jsonArrayLabels.add(hashMapLabel[it.labelName])
-                }
-            } else {
-                if (!label.isNullOrEmpty()) {
-                    jsonArrayLabels.add(hashMapLabel[label!!])
-                }
-            }
-            val jsonArrayMembers = JsonArray()
-            if(RecyclerViewTrelloMemberAdapter.ViewHolder.arrayListMemberNames.isNotEmpty()){
-                RecyclerViewTrelloMemberAdapter.ViewHolder.arrayListMemberNames.forEach {
-                    jsonArrayMembers.add(hashMapMember[it.memberName])
-                }
-            }else{
-                if(!member.isNullOrEmpty())
-                {
-                jsonArrayMembers.add(hashMapMember[member!!])
-                }
-            }
-            if(calendar!= null){
-//                val dateFormatter =SimpleDateFormat.getDateTimeInstance()
-                jsonObject.addProperty("due",Date(calendar!!.timeInMillis).toString())
-            }
-            jsonObject.add("idMembers",jsonArrayMembers)
-            jsonObject.add("idLabels",jsonArrayLabels)
-            jsonObject.addProperty("name", title)
-            RetrofitUserTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/")
-                .create(AccountIdService::class.java)
-                .createTrelloIssue(
-                    jsonObject = jsonObject,
-                    key = LoggerBird.trelloKey,
-                    token = LoggerBird.trelloToken,
-                    idList = arrayListBoardId[boardPosition]
-                )
-                .enqueue(object : retrofit2.Callback<JsonObject> {
-                    override fun onFailure(
-                        call: retrofit2.Call<JsonObject>,
-                        t: Throwable
-                    ) {
-                        pivotalExceptionHandler(throwable = t)
-                    }
-
-                    override fun onResponse(
-                        call: retrofit2.Call<JsonObject>,
-                        response: retrofit2.Response<JsonObject>
-                    ) {
-                        val coroutineCallTrelloAttachments = CoroutineScope(Dispatchers.IO)
-                        Log.d("trello_details", response.code().toString())
-                        val trelloList = response.body()
-                        RecyclerViewTrelloAdapter.ViewHolder.arrayListFilePaths.forEach {
-                            queueCounter++
-                            coroutineCallTrelloAttachments.async {
-                                createAttachments(
-                                    activity = activity,
-                                    file = it.file,
-                                    cardId = trelloList!!["id"].asString
-                                )
-                            }
-//                            repoId = githubList!!["url"].asString.substringAfterLast("/").toInt()
-//                            RecyclerViewGithubAdapter.ViewHolder.arrayListFilePaths.forEach {
-//                                val file = it.file
-//                                if (file.exists()) {
-//                                    callGithubAttachments(
-//                                        repo = repos!!,
-//                                        filePathMedia = file
-//                                    )
-//                                }
+//    private fun pivotalCreateIssue(activity: Activity) {
+//        try {
+//            queueCounter = 0
+//            queueCounter++
+//            this.activity = activity
+//            val jsonObject = JsonObject()
+//            val jsonArrayLabels = JsonArray()
+//            if (RecyclerViewTrelloLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()) {
+//                RecyclerViewTrelloLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
+//                    jsonArrayLabels.add(hashMapLabel[it.labelName])
+//                }
+//            } else {
+//                if (!label.isNullOrEmpty()) {
+//                    jsonArrayLabels.add(hashMapLabel[label!!])
+//                }
+//            }
+//            val jsonArrayMembers = JsonArray()
+//            if(RecyclerViewTrelloMemberAdapter.ViewHolder.arrayListMemberNames.isNotEmpty()){
+//                RecyclerViewTrelloMemberAdapter.ViewHolder.arrayListMemberNames.forEach {
+//                    jsonArrayMembers.add(hashMapMember[it.memberName])
+//                }
+//            }else{
+//                if(!member.isNullOrEmpty())
+//                {
+//                jsonArrayMembers.add(hashMapMember[member!!])
+//                }
+//            }
+//            if(calendar!= null){
+////                val dateFormatter =SimpleDateFormat.getDateTimeInstance()
+//                jsonObject.addProperty("due",Date(calendar!!.timeInMillis).toString())
+//            }
+//            jsonObject.add("idMembers",jsonArrayMembers)
+//            jsonObject.add("idLabels",jsonArrayLabels)
+//            jsonObject.addProperty("name", title)
+//            RetrofitUserTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/")
+//                .create(AccountIdService::class.java)
+//                .createTrelloIssue(
+//                    jsonObject = jsonObject,
+//                    key = LoggerBird.trelloKey,
+//                    token = LoggerBird.trelloToken,
+//                    idList = arrayListBoardId[boardPosition]
+//                )
+//                .enqueue(object : retrofit2.Callback<JsonObject> {
+//                    override fun onFailure(
+//                        call: retrofit2.Call<JsonObject>,
+//                        t: Throwable
+//                    ) {
+//                        pivotalExceptionHandler(throwable = t)
+//                    }
+//
+//                    override fun onResponse(
+//                        call: retrofit2.Call<JsonObject>,
+//                        response: retrofit2.Response<JsonObject>
+//                    ) {
+//                        val coroutineCallTrelloAttachments = CoroutineScope(Dispatchers.IO)
+//                        Log.d("trello_details", response.code().toString())
+//                        val trelloList = response.body()
+//                        RecyclerViewTrelloAdapter.ViewHolder.arrayListFilePaths.forEach {
+//                            queueCounter++
+//                            coroutineCallTrelloAttachments.async {
+//                                createAttachments(
+//                                    activity = activity,
+//                                    file = it.file,
+//                                    cardId = trelloList!!["id"].asString
+//                                )
 //                            }
-//                            if (RecyclerViewGithubAdapter.ViewHolder.arrayListFilePaths.isEmpty()) {
-//                                activity.runOnUiThread {
-//                                    LoggerBirdService.loggerBirdService.finishShareLayout("github")
-//                                }
-//                            }
-                        }
-                        resetPivotalValues()
-                    }
-                })
-
-        } catch (e: Exception) {
-            pivotalExceptionHandler(e = e)
-        }
-    }
+////                            repoId = githubList!!["url"].asString.substringAfterLast("/").toInt()
+////                            RecyclerViewGithubAdapter.ViewHolder.arrayListFilePaths.forEach {
+////                                val file = it.file
+////                                if (file.exists()) {
+////                                    callGithubAttachments(
+////                                        repo = repos!!,
+////                                        filePathMedia = file
+////                                    )
+////                                }
+////                            }
+////                            if (RecyclerViewGithubAdapter.ViewHolder.arrayListFilePaths.isEmpty()) {
+////                                activity.runOnUiThread {
+////                                    LoggerBirdService.loggerBirdService.finishShareLayout("github")
+////                                }
+////                            }
+//                        }
+//                        resetPivotalValues()
+//                    }
+//                })
+//
+//        } catch (e: Exception) {
+//            pivotalExceptionHandler(e = e)
+//        }
+//    }
 
     private fun gatherTaskProject() {
         queueCounter++
         RetrofitUserPivotalClient.getPivotalUserClient(url = "https://pivotaltracker.com/services/v5/")
             .create(AccountIdService::class.java)
             .getPivotalProjects()
-            .enqueue(object : retrofit2.Callback<List<PivotalProjectModel>> {
+            .enqueue(object : retrofit2.Callback<JsonArray> {
                 override fun onFailure(
-                    call: retrofit2.Call<List<PivotalProjectModel>>,
+                    call: retrofit2.Call<JsonArray>,
                     t: Throwable
                 ) {
                     pivotalExceptionHandler(throwable = t)
                 }
 
                 override fun onResponse(
-                    call: retrofit2.Call<List<PivotalProjectModel>>,
-                    response: retrofit2.Response<List<PivotalProjectModel>>
+                    call: retrofit2.Call<JsonArray>,
+                    response: retrofit2.Response<JsonArray>
                 ) {
                     val coroutineCallPivotalProject = CoroutineScope(Dispatchers.IO)
                     coroutineCallPivotalProject.async {
                         Log.d("pivotal_project_success", response.code().toString())
-                        val trelloList = response.body()
-                        trelloList?.forEach {
-                            if (it.name != null) {
-                                arrayListProjectNames.add(it.name!!)
-                                arrayListProjectId.add(it.id!!)
+                        val pivotalList = response.body()
+                        pivotalList?.forEach {
+                            if (it.asJsonObject["name"] != null) {
+                                arrayListProjectNames.add(it.asJsonObject["name"].asString)
+                                arrayListProjectId.add(it.asJsonObject["id"].asString)
                             }
                         }
-//                        if (arrayListProjectId.size > projectPosition) {
-//                            gatherTaskBoard(projectId = arrayListProjectId[projectPosition])
-//                            gatherTaskMember(projectId = arrayListProjectId[projectPosition])
+                        if (arrayListProjectId.size > projectPosition) {
+                            gatherTaskLabel(projectId = arrayListProjectId[projectPosition])
+                            gatherTaskMembers(projectId = arrayListProjectId[projectPosition])
 //                            gatherTaskLabel(projectId = arrayListProjectId[projectPosition])
-//                        }
+                        }
                         updateFields()
 
                     }
@@ -286,136 +282,24 @@ internal class PivotalTrackerAuthentication {
             })
     }
 
-    private fun gatherTaskBoard(projectId: String) {
-        queueCounter++
-        RetrofitUserTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/boards/$projectId/")
-            .create(AccountIdService::class.java)
-            .getTrelloBoards(key = LoggerBird.trelloKey, token = LoggerBird.trelloToken)
-            .enqueue(object : retrofit2.Callback<JsonArray> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonArray>,
-                    t: Throwable
-                ) {
-                    pivotalExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<JsonArray>,
-                    response: retrofit2.Response<JsonArray>
-                ) {
-                    val coroutineCallTrelloBoard = CoroutineScope(Dispatchers.IO)
-                    coroutineCallTrelloBoard.async {
-                        try {
-                            Log.d("trello_board_success", response.code().toString())
-                            val trelloList = response.body()?.asJsonArray
-                            trelloList?.forEach {
-                                if (it.asJsonObject["data"].asJsonObject["board"].asJsonObject["id"].asString == projectId) {
-                                    if (it.asJsonObject["data"].asJsonObject["list"] != null) {
-                                        if (!arrayListStoryTypeNames.contains(it.asJsonObject["data"].asJsonObject["list"].asJsonObject["name"].asString)) {
-                                            arrayListStoryTypeNames.add(it.asJsonObject["data"].asJsonObject["list"].asJsonObject["name"].asString)
-                                        }
-                                        if (!arrayListBoardId.contains(it.asJsonObject["data"].asJsonObject["list"].asJsonObject["id"].asString)) {
-                                            arrayListBoardId.add(it.asJsonObject["data"].asJsonObject["list"].asJsonObject["id"].asString)
-                                        }
-                                    }
-                                }
-                            }
-
-//                        githubList?.forEach {
-//                            if (it.html_url != null && it.name != null) {
-//                                arrayListProject.add(it.name!!)
-//                                arrayListProjectUrl.add(it.html_url!!)
-//                            }
-//                        }
-                            updateFields()
-                        } catch (e: Exception) {
-                            pivotalExceptionHandler(e = e)
-                        }
-                    }
-                }
-            })
+    private fun gatherTaskStoryType() {
+        arrayListStoryTypeNames.add("feature")
+        arrayListStoryTypeNames.add("bug")
+        arrayListStoryTypeNames.add("chore")
+        arrayListStoryTypeNames.add("release")
     }
-
-    private fun gatherTaskMember(projectId: String) {
-        queueCounter++
-        RetrofitUserTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/boards/$projectId/")
-            .create(AccountIdService::class.java)
-            .getTrelloMembers(key = LoggerBird.trelloKey, token = LoggerBird.trelloToken)
-            .enqueue(object : retrofit2.Callback<JsonArray> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonArray>,
-                    t: Throwable
-                ) {
-                    pivotalExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<JsonArray>,
-                    response: retrofit2.Response<JsonArray>
-                ) {
-                    val coroutineCallTrelloMember = CoroutineScope(Dispatchers.IO)
-                    coroutineCallTrelloMember.async {
-                        try {
-                            Log.d("trello_member_success", response.code().toString())
-                            val trelloList = response.body()
-                            trelloList?.forEach {
-                                gatherTaskMemberNames(idName = it.asJsonObject["idMember"].asString)
-                            }
-                            updateFields()
-                        } catch (e: Exception) {
-                            pivotalExceptionHandler(e = e)
-                        }
-                    }
-                }
-            })
-    }
-
-    private fun gatherTaskMemberNames(idName: String) {
-        queueCounter++
-        RetrofitUserTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/members/")
-            .create(AccountIdService::class.java)
-            .getTrelloMembersName(
-                key = LoggerBird.trelloKey,
-                token = LoggerBird.trelloToken,
-                idName = idName
-            )
-            .enqueue(object : retrofit2.Callback<JsonObject> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonObject>,
-                    t: Throwable
-                ) {
-                    pivotalExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<JsonObject>,
-                    response: retrofit2.Response<JsonObject>
-                ) {
-                    val coroutineCallTrelloMemberName = CoroutineScope(Dispatchers.IO)
-                    coroutineCallTrelloMemberName.async {
-                        try {
-                            Log.d("trello_name_success", response.code().toString())
-                            val trelloList = response.body()
-                            if (trelloList != null) {
-                                arrayListRequesterNames.add(trelloList.asJsonObject["username"].asString)
-                                arrayListMemberId.add(trelloList.asJsonObject["id"].asString)
-                                hashMapMember[trelloList.asJsonObject["username"].asString] = trelloList.asJsonObject["id"].asString
-                            }
-
-                            updateFields()
-                        } catch (e: Exception) {
-                            pivotalExceptionHandler(e = e)
-                        }
-                    }
-                }
-            })
+    private fun gatherTaskPoints() {
+        arrayListPoints.add("0")
+        arrayListPoints.add("1")
+        arrayListPoints.add("2")
+        arrayListPoints.add("3")
     }
 
     private fun gatherTaskLabel(projectId: String) {
         queueCounter++
-        RetrofitUserTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/boards/$projectId/")
+        RetrofitUserPivotalClient.getPivotalUserClient(url = "https://pivotaltracker.com/services/v5/projects/$projectId/")
             .create(AccountIdService::class.java)
-            .getTrelloLabels(key = LoggerBird.trelloKey, token = LoggerBird.trelloToken)
+            .getPivotalLabels()
             .enqueue(object : retrofit2.Callback<JsonArray> {
                 override fun onFailure(
                     call: retrofit2.Call<JsonArray>,
@@ -428,21 +312,56 @@ internal class PivotalTrackerAuthentication {
                     call: retrofit2.Call<JsonArray>,
                     response: retrofit2.Response<JsonArray>
                 ) {
-                    val coroutineCallGithubProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallGithubProject.async {
+                    val coroutineCallLabel = CoroutineScope(Dispatchers.IO)
+                    coroutineCallLabel.async {
                         try {
-                            Log.d("trello_member_success", response.code().toString())
-                            val trelloList = response.body()
-                            trelloList?.forEach {
-                                if (it.asJsonObject["name"].asString.isNotEmpty() && it.asJsonObject["name"].asString != null ) {
-                                    arrayListOwnersNames.add(it.asJsonObject["name"].asString)
-                                    hashMapLabel[it.asJsonObject["name"].asString] = it.asJsonObject["id"].asString
-                                } else {
-                                    arrayListOwnersNames.add(it.asJsonObject["id"].asString)
-                                    hashMapLabel[it.asJsonObject["id"].asString] = it.asJsonObject["id"].asString
-                                }
+                            Log.d("pivotal_label_success", response.code().toString())
+                            val labelList = response.body()
+                            labelList?.forEach {
+//                                if (it.asJsonObject["name"].asString.isNotEmpty() && it.asJsonObject["name"].asString != null ) {
+//                                    arrayListOwnersNames.add(it.asJsonObject["name"].asString)
+//                                    hashMapLabel[it.asJsonObject["name"].asString] = it.asJsonObject["id"].asString
+//                                } else {
+//                                    arrayListOwnersNames.add(it.asJsonObject["id"].asString)
+//                                    hashMapLabel[it.asJsonObject["id"].asString] = it.asJsonObject["id"].asString
+//                                }
                                 arrayListLabelId.add(it.asJsonObject["id"].asString)
-                                arrayListLabelNames.add(it.asJsonObject["color"].asString)
+                                arrayListLabelNames.add(it.asJsonObject["name"].asString)
+                            }
+                            updateFields()
+                        } catch (e: Exception) {
+                            pivotalExceptionHandler(e = e)
+                        }
+                    }
+                }
+            })
+    }
+    private fun gatherTaskMembers(projectId: String) {
+        queueCounter++
+        RetrofitUserPivotalClient.getPivotalUserClient(url = "https://pivotaltracker.com/services/v5/projects/$projectId/")
+            .create(AccountIdService::class.java)
+            .getPivotalMembers()
+            .enqueue(object : retrofit2.Callback<JsonArray> {
+                override fun onFailure(
+                    call: retrofit2.Call<JsonArray>,
+                    t: Throwable
+                ) {
+                    pivotalExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonArray>,
+                    response: retrofit2.Response<JsonArray>
+                ) {
+                    val coroutineCallLabel = CoroutineScope(Dispatchers.IO)
+                    coroutineCallLabel.async {
+                        try {
+                            Log.d("pivotal_member_success", response.code().toString())
+                            val memberList = response.body()
+                            memberList?.forEach {
+                                arrayListMemberId.add(it.asJsonObject["person"].asJsonObject["id"].asString)
+                                arrayListRequesterNames.add(it.asJsonObject["person"].asJsonObject["name"].asString)
+                                arrayListOwnersNames.add(it.asJsonObject["person"].asJsonObject["name"].asString)
                             }
                             updateFields()
                         } catch (e: Exception) {
@@ -461,7 +380,6 @@ internal class PivotalTrackerAuthentication {
         autoTextViewLabel: AutoCompleteTextView
     ) {
         project = autoTextViewProject.editableText.toString()
-        board = autoTextViewBoard.editableText.toString()
         member = autoTextViewMember.editableText.toString()
         label = autoTextViewLabel.editableText.toString()
     }
@@ -479,7 +397,6 @@ internal class PivotalTrackerAuthentication {
             arrayListProjectNames.clear()
             arrayListProjectId.clear()
             arrayListStoryTypeNames.clear()
-            arrayListBoardId.clear()
             arrayListRequesterNames.clear()
             arrayListMemberId.clear()
             hashMapLabel.clear()
@@ -489,6 +406,8 @@ internal class PivotalTrackerAuthentication {
             arrayListLabelNames.clear()
             arrayListPoints.clear()
             gatherTaskProject()
+            gatherTaskStoryType()
+            gatherTaskPoints()
         } catch (e: Exception) {
             pivotalExceptionHandler(e = e)
         }
@@ -551,10 +470,6 @@ internal class PivotalTrackerAuthentication {
         this.projectPosition = projectPosition
     }
 
-    internal fun setBoardPosition(boardPosition: Int) {
-        this.boardPosition = boardPosition
-    }
-
     internal fun setLabelPosition(labelPosition: Int) {
         this.labelPosition = labelPosition
     }
@@ -567,15 +482,12 @@ internal class PivotalTrackerAuthentication {
             arrayListProjectNames.clear()
             arrayListProjectId.clear()
             arrayListStoryTypeNames.clear()
-            arrayListBoardId.clear()
             arrayListOwnersNames.clear()
             hashMapLabel.clear()
             hashMapMember.clear()
             arrayListLabelId.clear()
             arrayListLabelNames.clear()
             projectPosition = 0
-            boardPosition = 0
-            board = null
             project = null
             calendar = null
             title = ""

@@ -18,7 +18,8 @@ class application : Application() {
             trelloPassword = "umbasta1",
             trelloKey = "4b4185b55f32b9e76fef2effcc9147c8",
             trelloToken = "23c4a97f599e7db20e36b32d38853210cf2120bbb955a7cc4fe9550a24f8b32c",
-            gitlabApiToken = "wLD4tf4jyKRmCM27S27d"
+            gitlabApiToken = "wLD4tf4jyKRmCM27S27d",
+            pivotalApiToken = "fb4f04edbdeaeed3758839f75c1939b1"
         )
     }
 }

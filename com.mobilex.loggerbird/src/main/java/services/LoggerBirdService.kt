@@ -549,7 +549,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var recyclerViewPivotalTaskList: RecyclerView
     internal lateinit var cardViewPivotalAttachments: CardView
     private lateinit var recyclerViewPivotalAttachmentList: RecyclerView
-
+    private val arrayListPivotalFileName: ArrayList<RecyclerViewModel> = ArrayList()
+    private lateinit var pivotalAdapter: RecyclerViewPivotalAdapter
+    private val arrayListPivotalTaskName: ArrayList<RecyclerViewModelTask> = ArrayList()
+    private lateinit var pivotalTaskAdapter: RecyclerViewPivotalTaskAdapter
+    private val arrayListPivotalBlockerName: ArrayList<RecyclerViewModelBlocker> = ArrayList()
+    private lateinit var pivotalBlockerAdapter: RecyclerViewPivotalBlockerAdapter
+    private val arrayListPivotalLabelName: ArrayList<RecyclerViewModelLabel> = ArrayList()
+    private lateinit var pivotalLabelAdapter: RecyclerViewPivotalLabelAdapter
+    private lateinit var arrayListPivotalLabel: ArrayList<String>
+    private val arrayListPivotalOwnerName: ArrayList<RecyclerViewModelOwner> = ArrayList()
+    private lateinit var pivotalOwnerAdapter: RecyclerViewPivotalOwnerAdapter
+    private lateinit var arrayListPivotalOwner: ArrayList<String>
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
@@ -7666,9 +7677,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         floatingActionButtonView.visibility = View.VISIBLE
                     }
                 }
-//                initializeTrelloRecyclerView(filePathMedia = filePathMedia)
-//                initializeTrelloLabelRecyclerView()
-//                initializeTrelloMemberRecyclerView()
+                initializePivotalRecyclerView(filePathMedia = filePathMedia)
+                initializePivotalTaskRecyclerView()
+                initializePivotalBlockerRecyclerView()
+                initializePivotalLabelRecyclerView()
+                initializePivotalOwnerRecyclerView()
                 buttonClicksPivotal()
                 pivotalAuthentication.callPivotal(
                     activity = activity,
@@ -7704,6 +7717,114 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
             }
+        }
+        imageViewPivotalTask.setSafeOnClickListener {
+            hideKeyboard(activity = activity, view = viewPivotal)
+            if (!arrayListPivotalTaskName.contains(
+                    RecyclerViewModelTask(
+                       editTextPivotalTasks.text.toString()
+                    )
+                ) && editTextPivotalTasks.text.isNotEmpty()
+            ) {
+                arrayListPivotalTaskName.add(RecyclerViewModelTask(editTextPivotalTasks.text.toString()))
+                pivotalTaskAdapter.notifyDataSetChanged()
+                cardViewPivotalTasksList.visibility = View.VISIBLE
+            } else if (arrayListPivotalTaskName.contains(
+                    RecyclerViewModelTask(editTextPivotalTasks.text.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_task_exist)
+                )
+            }else if(editTextPivotalTasks.text.isEmpty()){
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_task_empty)
+                )
+            }
+        }
+        imageViewPivotalBlockers.setSafeOnClickListener {
+            hideKeyboard(activity = activity, view = viewPivotal)
+            if (!arrayListPivotalBlockerName.contains(
+                    RecyclerViewModelBlocker(
+                        editTextPivotalBlockers.text.toString()
+                    )
+                ) && editTextPivotalBlockers.text.isNotEmpty()
+            ) {
+                arrayListPivotalBlockerName.add(RecyclerViewModelBlocker(editTextPivotalBlockers.text.toString()))
+                pivotalBlockerAdapter.notifyDataSetChanged()
+                cardViewPivotalBlockersList.visibility = View.VISIBLE
+            } else if (arrayListPivotalBlockerName.contains(
+                    RecyclerViewModelBlocker(editTextPivotalBlockers.text.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_blocker_exist)
+                )
+            }else if(editTextPivotalBlockers.text.isEmpty()){
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_blocker_empty)
+                )
+            }
+        }
+        imageViewPivotalLabel.setSafeOnClickListener {
+            if (!arrayListPivotalLabelName.contains(
+                    RecyclerViewModelLabel(
+                        autoTextViewPivotalLabel.editableText.toString()
+                    )
+                ) && arrayListPivotalLabel.contains(
+                    autoTextViewPivotalLabel.editableText.toString()
+                )
+            ) {
+                arrayListPivotalLabelName.add(RecyclerViewModelLabel(autoTextViewPivotalLabel.editableText.toString()))
+                pivotalLabelAdapter.notifyDataSetChanged()
+                cardViewPivotalLabelList.visibility = View.VISIBLE
+            } else if (arrayListPivotalLabelName.contains(
+                    RecyclerViewModelLabel(autoTextViewPivotalLabel.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_label_exist)
+                )
+            } else if (!arrayListPivotalLabel.contains(autoTextViewPivotalLabel.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_label_doesnt_exist)
+                )
+            }
+
+        }
+        imageViewPivotalOwners.setSafeOnClickListener {
+            if (!arrayListPivotalOwnerName.contains(
+                    RecyclerViewModelOwner(
+                        autoTextViewPivotalOwners.editableText.toString()
+                    )
+                ) && arrayListPivotalOwner.contains(
+                    autoTextViewPivotalOwners.editableText.toString()
+                )
+            ) {
+                arrayListPivotalOwnerName.add(RecyclerViewModelOwner(autoTextViewPivotalOwners.editableText.toString()))
+                pivotalOwnerAdapter.notifyDataSetChanged()
+                cardViewPivotalOwnersList.visibility = View.VISIBLE
+            } else if (arrayListPivotalOwnerName.contains(
+                    RecyclerViewModelOwner(autoTextViewPivotalOwners.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_owner_exist)
+                )
+            } else if (!arrayListPivotalOwner.contains(autoTextViewPivotalOwners.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_owner_doesnt_exist)
+                )
+            }
+
         }
     }
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -7767,7 +7888,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewPivotalProject.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewPivotal)
-//            clearTrelloComponents()
+            clearPivotalComponents()
             pivotalAuthentication.setProjectPosition(projectPosition = position)
             pivotalAuthentication.callPivotal(
                 activity = activity,
@@ -8021,6 +8142,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                }
 //            }
 //        }
+        this.arrayListPivotalOwner = arrayListOwners
     }
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -8078,8 +8200,109 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                }
 //            }
 //        }
+        this.arrayListPivotalLabel = arrayListLabel
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializePivotalRecyclerView(filePathMedia: File) {
+        arrayListPivotalFileName.clear()
+        recyclerViewPivotalAttachmentList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        pivotalAdapter = RecyclerViewPivotalAdapter(
+            addPivotalFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewPivotalAttachmentList.adapter = pivotalAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addPivotalFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListPivotalFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListPivotalFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListPivotalFileName
+    }
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializePivotalTaskRecyclerView() {
+        arrayListPivotalTaskName.clear()
+        recyclerViewPivotalTaskList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        pivotalTaskAdapter = RecyclerViewPivotalTaskAdapter(
+            arrayListPivotalTaskName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewPivotalTaskList.adapter = pivotalTaskAdapter
+    }
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializePivotalBlockerRecyclerView() {
+        arrayListPivotalBlockerName.clear()
+        recyclerViewPivotalBlockersList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        pivotalBlockerAdapter= RecyclerViewPivotalBlockerAdapter(
+            arrayListPivotalBlockerName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewPivotalBlockersList.adapter = pivotalBlockerAdapter
+    }
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializePivotalLabelRecyclerView() {
+        arrayListPivotalLabelName.clear()
+        recyclerViewPivotalLabelList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        pivotalLabelAdapter= RecyclerViewPivotalLabelAdapter(
+            arrayListPivotalLabelName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewPivotalLabelList.adapter = pivotalLabelAdapter
+    }
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializePivotalOwnerRecyclerView() {
+        arrayListPivotalOwnerName.clear()
+        recyclerViewPivotalOwnerList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        pivotalOwnerAdapter= RecyclerViewPivotalOwnerAdapter(
+            arrayListPivotalOwnerName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewPivotalOwnerList.adapter = pivotalOwnerAdapter
+    }
+    private fun clearPivotalComponents() {
+        cardViewPivotalBlockersList.visibility = View.GONE
+        cardViewPivotalTasksList.visibility = View.GONE
+        cardViewPivotalLabelList.visibility = View.GONE
+        cardViewPivotalOwnersList.visibility = View.GONE
+        arrayListPivotalOwnerName.clear()
+        arrayListPivotalLabelName.clear()
+        arrayListPivotalTaskName.clear()
+        arrayListPivotalBlockerName.clear()
+        pivotalOwnerAdapter.notifyDataSetChanged()
+        pivotalLabelAdapter.notifyDataSetChanged()
+        pivotalBlockerAdapter.notifyDataSetChanged()
+        pivotalTaskAdapter.notifyDataSetChanged()
+        editTextPivotalBlockers.text = null
+        editTextPivotalDescription.text = null
+        editTextPivotalTasks.text = null
+        editTextPivotalTitle.text = null
+        autoTextViewPivotalOwners.setText("", false)
+        autoTextViewPivotalLabel.setText("", false)
+        autoTextViewPivotalRequester.setText("", false)
+        autoTextViewPivotalPoints.setText("", false)
+        autoTextViewPivotalStoryType.setText("", false)
+//        autoTextViewPivotalProject.setText("",false)
+    }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {
