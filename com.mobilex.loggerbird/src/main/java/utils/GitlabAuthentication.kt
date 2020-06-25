@@ -219,7 +219,6 @@ class GitlabAuthentication {
                         call: retrofit2.Call<JsonObject>,
                         t: Throwable
                     ) {
-                        LoggerBirdService.loggerBirdService.finishShareLayout("gitlab")
                         t.printStackTrace()
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
@@ -493,7 +492,6 @@ class GitlabAuthentication {
                         call: retrofit2.Call<JsonObject>,
                         t: Throwable
                     ) {
-                        LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error")
                         t.printStackTrace()
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
@@ -514,12 +512,6 @@ class GitlabAuthentication {
                             attachmentCounter++
                         }
 
-                        if (filePathMedia.name != "logger_bird_details.txt") {
-                            if (filePathMedia.exists()) {
-                                filePathMedia.delete()
-                            }
-                        }
-
                         addAttachmentsToIssue(projectId = projectId, issueId = issueId, descriptionStringBuilder= stringBuilder.toString())
                     }
                 })
@@ -528,36 +520,6 @@ class GitlabAuthentication {
             gitlabExceptionHandler(e = e)
         }
     }
-
-//    private fun callEnqueueGitlabAttachments(projectId: String, issueId: String) {
-//        workQueueLinkedGitlabAttachments.controlRunnable = false
-//        if (runnableListGitlabAttachments.size > 0) {
-//            runnableListGitlabAttachments.removeAt(0)
-//            if (runnableListGitlabAttachments.size > 0) {
-//                workQueueLinkedGitlabAttachments.put(runnableListGitlabAttachments[0])
-//            } else {
-//                if (arrayListAttachments.isNotEmpty()) {
-//                    val stringBuilder = StringBuilder()
-//                    if(stringBuilderGitlab.isNotEmpty()){
-//                        stringBuilder.append(stringBuilderGitlab.toString())
-//                    }
-//                    var attachmentCounter = 0
-//                    arrayListAttachments.forEach {
-//                        stringBuilder.append("\nattachment_$attachmentCounter:$it")
-//                        attachmentCounter++
-//                    }
-//                    val jsonObjectAttachments = JsonObject()
-//                    jsonObjectAttachments.addProperty("body", stringBuilder.toString())
-//
-//                    addAttachmentsToIssue(jsonObjectIssue = jsonObjectAttachments, projectId = projectId, issueId = issueId, descriptionStringBuilder= stringBuilder.toString())
-//                } else {
-//                    LoggerBirdService.loggerBirdService.finishShareLayout("gitlab")
-//                }
-//            }
-//        } else {
-//            LoggerBirdService.loggerBirdService.finishShareLayout("gitlab")
-//        }
-//    }
 
     private fun addAttachmentsToIssue(projectId: String, issueId: String, descriptionStringBuilder: String) {
         val coroutineCallAttachments = CoroutineScope(Dispatchers.IO)
@@ -578,6 +540,11 @@ class GitlabAuthentication {
                     ) {
                         Log.d("github_issue_attachment", response.code().toString())
                         arrayListAttachments.clear()
+                        if (filePathMedia!!.name != "logger_bird_details.txt") {
+                            if (filePathMedia!!.exists()) {
+                                filePathMedia!!.delete()
+                            }
+                        }
                         val githubList = response.body()
                         activity.runOnUiThread {
                             LoggerBirdService.loggerBirdService.finishShareLayout("gitlab")
