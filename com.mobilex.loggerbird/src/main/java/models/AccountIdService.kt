@@ -89,6 +89,26 @@ interface AccountIdService {
     fun setGithubAttachments(@Body jsonObject: JsonObject,@Path("file_name")fileName:String):Call<JsonObject>
     @PATCH("issues/{id}")
     fun setGithubIssue(@Body jsonObject: JsonObject,@Path("id")id:Int):Call<JsonObject>
+
+    //Gitlab
+    @POST("issues")
+    fun createGitlabIssue(@Body jsonObject: JsonObject): Call<JsonObject>
+    @GET("projects/?membership=true")
+    fun getGitlabProjects(): Call<List<GitlabProjectModel>>
+    @GET("milestones")
+    fun getGitlabMilestones(): Call<List<GitlabMilestonesModel>>
+    @GET("labels")
+    fun getGitlabLabels(): Call<List<GitlabLabelsModel>>
+    @GET("users")
+    fun getGitlabUsers(): Call<List<GitlabUsersModel>>
+    @Multipart
+    @POST("uploads")
+    fun sendGitlabAttachments(@Part file:MultipartBody.Part):Call<JsonObject>
+    @PUT("{iid}")
+    fun setGitlabIssue(@Path("iid")iid:String,@Query("description") description:String):Call<JsonObject>
+    //query soru isareinden sonra
+
+
     //trello
     @GET("boards?")
     fun getTrelloProjects(@Query("key") key:String,@Query("token") token:String):Call<List<TrelloProjectModel>>

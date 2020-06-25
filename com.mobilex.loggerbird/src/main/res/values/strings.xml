@@ -111,6 +111,9 @@
     <string name="github_label_exist">This label already added to list!</string>
     <string name="github_label_doesnt_exist">This label doesn\'t exist!</string>
     <string name="github_mile_stone_doesnt_exist">This milestone doesn\'t exist!</string>
+    <string name="gitlab_sent">Gitlab issue is created!</string>
+    <string name="gitlab_sent_error">An error happened while trying to create Gitlab issue!</string>
+    <string name="gitlab_sent_error_time_out">An error happened while trying to open Gitlab issue , system has been timed out!</string>
     <string name="trello_issue_success">Issue opened successfully!</string>
     <string name="trello_issue_failure">An error happened while trying to open trello issue!</string>
     <string name="trello_issue_time_out">An error happened while trying to open trello issue , system has been timed out!</string>
@@ -313,6 +316,22 @@
     <string name="textView_recyclerView_github_label_title">Are you sure to remove label from your github issue?</string>
     <string name="button_recyclerView_github_label_delete">Delete label</string>
     <string name="button_recyclerView_github_label_keep">Keep label</string>
+    <!-- loggerbird_gitlab_popup-->
+    <string name="textView_gitlab_toolbar_title">Create Gitlab Issue</string>
+    <string name="textView_gitlab_project">Project</string>
+    <string name="textView_gitlab_title">Title</string>
+    <string name="editText_gitlab_title">Write your issue title here!</string>
+    <string name="textView_gitlab_description">Description</string>
+    <string name="editText_gitlab_description">Write your issue description here!</string>
+    <string name="editText_gitlab_weight">Write your issue weight here!</string>
+    <string name="textView_gitlab_assignee">Assignee</string>
+    <string name="textView_gitlab_labels">Labels</string>
+    <string name="textView_gitlab_weight">Weight</string>
+    <string name="textView_gitlab_milestone">Milestone</string>
+    <string name="editText_gitlab_title_empty">Your title cannot be empty!</string>
+    <string name="textView_gitlab_due_date">Due Date</string>
+    <string name="textView_gitlab_confidentiality">Confidentiality</string>
+    <string name="textView_gitlab_enter_due_date">Set a due date for issue!</string>
     <!-- loggerbird_trello_popup-->
     <string name="textView_trello_project">Project</string>
     <string name="textView_trello_board">Board</string>
