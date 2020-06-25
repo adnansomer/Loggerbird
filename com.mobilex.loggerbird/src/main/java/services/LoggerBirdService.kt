@@ -7264,6 +7264,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if(checkGitlabTitleEmpty()){
                 progressBarGitlabLayout.visibility = View.VISIBLE
                 progressBarGitlab.visibility = View.VISIBLE
+                attachProgressBar()
                 gitlabAuthentication.gatherGitlabEditTextDetails(
                     editTextTitle = editTextGitlabTitle,
                     editTextDescription = editTextGitlabDescription,
@@ -7468,7 +7469,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
         }
     }
-
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
