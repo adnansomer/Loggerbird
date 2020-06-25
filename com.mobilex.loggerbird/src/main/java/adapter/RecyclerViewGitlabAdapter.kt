@@ -21,20 +21,18 @@ import android.widget.Button
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
-import services.LoggerBirdService
 
-class RecyclerViewSlackAdapter(
+class RecyclerViewGitlabAdapter(
     private val fileList: ArrayList<RecyclerViewModel>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View
-) :
-    RecyclerView.Adapter<RecyclerViewSlackAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<RecyclerViewGitlabAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_slack_item,
+                R.layout.recycler_view_gitlab_item,
                 parent,
                 false
             )
@@ -65,13 +63,14 @@ class RecyclerViewSlackAdapter(
         private lateinit var buttonYes: Button
         private lateinit var buttonNo: Button
 
-        companion object{
-             internal lateinit var arrayListFilePaths:ArrayList<RecyclerViewModel>
+        companion object {
+            internal lateinit var arrayListFilePaths: ArrayList<RecyclerViewModel>
         }
-        
+
+
         fun bindItems(
             item: RecyclerViewModel,
-            adapter: RecyclerViewSlackAdapter,
+            adapter: RecyclerViewGitlabAdapter,
             position: Int,
             fileList: ArrayList<RecyclerViewModel>,
             context: Context,
@@ -101,12 +100,12 @@ class RecyclerViewSlackAdapter(
             rootView: View,
             fileList: ArrayList<RecyclerViewModel>,
             position: Int,
-            adapter: RecyclerViewSlackAdapter
+            adapter: RecyclerViewGitlabAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_slack_item_popup,
+                        R.layout.recycler_view_gitlab_item_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -137,10 +136,17 @@ class RecyclerViewSlackAdapter(
                             viewRecyclerViewItems,
                             windowManagerParamsRecyclerViewItemPopup
                         )
-                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_slack_title)
-                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_slack_yes)
-                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_slack_no)
-                        buttonClicksSlackPopup(adapter = adapter , fileList = fileList , position = position)
+                        textViewTitle =
+                            viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_gitlab_title)
+                        buttonYes =
+                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_gitlab_yes)
+                        buttonNo =
+                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_gitlab_no)
+                        buttonClicksGithubPopup(
+                            adapter = adapter,
+                            fileList = fileList,
+                            position = position
+                        )
                     }
                 }
             } catch (e: Exception) {
@@ -148,30 +154,29 @@ class RecyclerViewSlackAdapter(
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
-                    tag = Constants.recyclerViewSlackAdapterTag
+                    tag = Constants.recyclerViewJiraAdapterTag
                 )
             }
         }
 
-        private fun buttonClicksSlackPopup(fileList: ArrayList<RecyclerViewModel>, position: Int, adapter: RecyclerViewSlackAdapter) {
+        private fun buttonClicksGithubPopup(
+            fileList: ArrayList<RecyclerViewModel>,
+            position: Int,
+            adapter: RecyclerViewGitlabAdapter
+        ) {
             buttonYes.setSafeOnClickListener {
                 fileList.removeAt(position)
                 arrayListFilePaths = fileList
                 adapter.notifyDataSetChanged()
                 removePopupLayout()
-                if(arrayListFilePaths.isEmpty()){
-                    LoggerBirdService.recyclerViewSlackAttachmentUser.visibility = View.GONE
-                    LoggerBirdService.recyclerViewSlackAttachment.visibility = View.GONE
-                    LoggerBirdService.recyclerViewSlackNoAttachment.visibility = View.VISIBLE
-                    LoggerBirdService.recyclerViewSlackUserNoAttachment.visibility = View.VISIBLE
-                }
             }
             buttonNo.setSafeOnClickListener {
                 removePopupLayout()
             }
+
         }
 
-        private fun removePopupLayout(){
+        private fun removePopupLayout() {
             if (windowManagerRecyclerViewItemPopup != null && this::viewRecyclerViewItems.isInitialized) {
                 (windowManagerRecyclerViewItemPopup as WindowManager).removeViewImmediate(
                     viewRecyclerViewItems

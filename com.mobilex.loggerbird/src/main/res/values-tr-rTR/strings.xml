@@ -314,6 +314,22 @@
     <string name="textView_recyclerView_github_label_title">Github görevlendirmenizden bu etiketi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_github_label_delete">Etiketi sil</string>
     <string name="button_recyclerView_github_label_keep">Etiketi tut</string>
+    <!-- loggerbird_gitlab_popup-->
+    <string name="textView_gitlab_toolbar_title">Gitlab Konusu Olustur</string>
+    <string name="textView_gitlab_project">Proje</string>
+    <string name="textView_gitlab_title">Baslik</string>
+    <string name="editText_gitlab_title">Konu basliginizi buraya yaziniz!</string>
+    <string name="textView_gitlab_description">Aciklama</string>
+    <string name="editText_gitlab_description">Konu aciklamanizi buraya yaziniz!</string>
+    <string name="editText_gitlab_weight">Konu agirligini buraya giriniz!</string>
+    <string name="textView_gitlab_assignee">Sorumlu</string>
+    <string name="textView_gitlab_labels">Etiket</string>
+    <string name="textView_gitlab_weight">Agirlik</string>
+    <string name="textView_gitlab_milestone">Donum noktasi</string>
+    <string name="editText_gitlab_title_empty">Konu basliginiz bos olamaz!</string>
+    <string name="textView_gitlab_due_date">Bitis tarihi</string>
+    <string name="textView_gitlab_confidentiality">Gizlilik</string>
+    <string name="textView_gitlab_enter_due_date">Konunuz icin bitis tarihi giriniz!</string>
     <!-- loggerbird_trello_popup-->
     <string name="textView_trello_project">Proje</string>
     <string name="textView_trello_board">Pano</string>
