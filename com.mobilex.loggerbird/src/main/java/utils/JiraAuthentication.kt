@@ -24,6 +24,7 @@ import exception.LoggerBirdException
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import models.*
+import models.jira.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody

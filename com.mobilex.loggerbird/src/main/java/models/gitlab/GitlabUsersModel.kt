@@ -1,7 +1,6 @@
-package models
+package models.gitlab
 
-data class GitlabProjectModel (
+data class GitlabUsersModel (
     var id:String? = null,
     var name:String? = null
 )
-

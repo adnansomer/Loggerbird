@@ -1,4 +1,4 @@
-package models
+package models.jira
 
 data class JiraUserModel(
     var displayName: String? = null,

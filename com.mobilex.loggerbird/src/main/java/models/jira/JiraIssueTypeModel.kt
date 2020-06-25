@@ -1,6 +1,6 @@
-package models
+package models.jira
 
-data class JiraFieldModel(
+data class JiraIssueTypeModel(
     var name: String? = null,
     var id:String? = null
 )

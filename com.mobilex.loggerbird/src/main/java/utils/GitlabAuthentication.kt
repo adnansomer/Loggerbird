@@ -17,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
+import models.gitlab.*
 import models.*
 import okhttp3.*
 import services.LoggerBirdService
@@ -480,7 +481,7 @@ class GitlabAuthentication {
         try {
             val jsonObject = JsonObject()
             val requestFile = filePathMedia!!.asRequestBody("multipart/form-data".toMediaTypeOrNull())
-            val filePathMediaName = "@" + filePathMedia!!.name.replace("_", "")
+            val filePathMediaName = "@" + filePathMedia!!.name
             val body = MultipartBody.Part.createFormData("file", filePathMediaName, requestFile)
 
             RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/" + hashMapProjects[arrayListProjects[projectPosition]] + "/")

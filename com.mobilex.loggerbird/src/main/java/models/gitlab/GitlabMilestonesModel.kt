@@ -1,4 +1,4 @@
-package models
+package models.gitlab
 
 data class GitlabMilestonesModel (
     var id:String? = null,

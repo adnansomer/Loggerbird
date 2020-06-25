@@ -23,6 +23,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
 import models.*
+import models.github.*
 import okhttp3.*
 import services.LoggerBirdService
 import java.io.File

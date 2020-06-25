@@ -3,11 +3,15 @@ package models
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
+import models.github.*
+import models.gitlab.GitlabLabelsModel
+import models.gitlab.GitlabMilestonesModel
+import models.gitlab.GitlabProjectModel
+import models.gitlab.GitlabUsersModel
+import models.jira.*
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.*
-import java.io.InputStream
 
 interface AccountIdService {
     // jira

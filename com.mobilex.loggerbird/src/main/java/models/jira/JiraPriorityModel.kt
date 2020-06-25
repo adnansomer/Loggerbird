@@ -1,4 +1,4 @@
-package models
+package models.jira
 
 data class JiraPriorityModel(
     var name: String? = null,
