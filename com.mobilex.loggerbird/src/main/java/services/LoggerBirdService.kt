@@ -475,29 +475,36 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonTrelloTimeCancel: Button
 
     //Pivotal Tracker
+    internal val pivotalAuthentication = PivotalTrackerAuthentication()
     private lateinit var buttonPivotalCreate: Button
     private lateinit var buttonPivotalCancel: Button
     private lateinit var toolbarPivotal: Toolbar
     private lateinit var scrollViewPivotal: ScrollView
     private lateinit var autoTextViewPivotalProject: AutoCompleteTextView
     private lateinit var editTextPivotalTitle: EditText
+    private lateinit var editTextPivotalBlockers: EditText
+    private lateinit var editTextPivotalDescription: EditText
+    private lateinit var editTextPivotalTasks: EditText
     private lateinit var autoTextViewPivotalStoryType: AutoCompleteTextView
     private lateinit var autoTextViewPivotalPoints: AutoCompleteTextView
     private lateinit var autoTextViewPivotalOwners: AutoCompleteTextView
+    private lateinit var autoTextViewPivotalLabel: AutoCompleteTextView
     private lateinit var autoTextViewPivotalRequester: AutoCompleteTextView
+    private lateinit var autoTextViewPivotalProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalLabelAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalStoryTypeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalPointsAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalOwnersAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalRequesterAdapter: ArrayAdapter<String>
     private lateinit var imageViewPivotalOwners: ImageView
     internal lateinit var cardViewPivotalOwnersList: CardView
     private lateinit var recyclerViewPivotalOwnerList: RecyclerView
-    private lateinit var editTextPivotalBlockers: EditText
     private lateinit var imageViewPivotalBlockers: ImageView
     internal lateinit var cardViewPivotalBlockersList: CardView
     private lateinit var recyclerViewPivotalBlockersList: RecyclerView
-    private lateinit var editTextPivotalDescription: EditText
-    private lateinit var autoTextViewPivotalLabel: AutoCompleteTextView
     private lateinit var imageViewPivotalLabel: ImageView
     internal lateinit var cardViewPivotalLabelList: CardView
     private lateinit var recyclerViewPivotalLabelList: RecyclerView
-    private lateinit var editTextPivotalTasks: EditText
     private lateinit var imageViewPivotalTask: ImageView
     internal lateinit var cardViewPivotalTasksList: CardView
     private lateinit var recyclerViewPivotalTaskList: RecyclerView
@@ -7182,13 +7189,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                initializeTrelloLabelRecyclerView()
 //                initializeTrelloMemberRecyclerView()
                 buttonClicksPivotal()
-//                trelloAuthentication.callTrello(
-//                    activity = activity,
-//                    context = context,
-//                    task = "get",
-//                    filePathMedia = filePathMedia
-//                )
-//                attachProgressBar()
+                pivotalAuthentication.callPivotal(
+                    activity = activity,
+                    context = context,
+                    task = "get",
+                    filePathMedia = filePathMedia
+                )
+                attachProgressBar()
             }
         } catch (e: Exception) {
             finishShareLayout("pivotal_error")
@@ -7217,6 +7224,380 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
         }
     }
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    internal fun initializePivotalAutoTextViews(
+        arrayListProject: ArrayList<String>,
+        arrayListStoryType: ArrayList<String>,
+        arrayListPoints: ArrayList<String>,
+        arrayListRequester: ArrayList<String>,
+        arrayListOwners: ArrayList<String>,
+        arrayListLabels: ArrayList<String>
+        ) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        editTextPivotalTitle.setText(sharedPref.getString("pivotal_title", null))
+        editTextPivotalTasks.setText(sharedPref.getString("pivotal_tasks",null))
+        editTextPivotalDescription.setText(sharedPref.getString("pivotal_description",null))
+        editTextPivotalBlockers.setText(sharedPref.getString("pivotal_blockers",null))
+        initializePivotalProject(arrayListProject = arrayListProject, sharedPref = sharedPref)
+        initializePivotalStoryType(arrayListStoryType = arrayListStoryType , sharedPref = sharedPref)
+        initializePivotalPoints(arrayListPoints = arrayListPoints , sharedPref = sharedPref)
+        initializePivotalRequester(arrayListRequester = arrayListRequester , sharedPref = sharedPref)
+        initializePivotalOwners(arrayListOwners = arrayListOwners , sharedPref = sharedPref)
+        initializePivotalLabel(arrayListLabel = arrayListLabels , sharedPref = sharedPref)
+        detachProgressBar()
+    }
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializePivotalProject(
+        arrayListProject: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPivotalProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListProject
+        )
+        autoTextViewPivotalProject.setAdapter(autoTextViewPivotalProjectAdapter)
+        if (arrayListProject.isNotEmpty() && autoTextViewPivotalProject.editableText.isEmpty()) {
+            if (sharedPref.getString("pivotal_project", null) != null) {
+                if (arrayListProject.contains(
+                        sharedPref.getString(
+                            "pivotal_project",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewPivotalProject.setText(
+                        sharedPref.getString("pivotal_project", null),
+                        false
+                    )
+                } else {
+                    autoTextViewPivotalProject.setText(arrayListProject[0], false)
+                }
+            } else {
+                autoTextViewPivotalProject.setText(arrayListProject[0], false)
+            }
+        }
+        autoTextViewPivotalProject.setOnTouchListener { v, event ->
+            autoTextViewPivotalProject.showDropDown()
+            false
+        }
+        autoTextViewPivotalProject.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewPivotal)
+//            clearTrelloComponents()
+            pivotalAuthentication.setProjectPosition(projectPosition = position)
+            pivotalAuthentication.callPivotal(
+                activity = activity,
+                context = context,
+                task = "get"
+            )
+            attachProgressBar()
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializePivotalStoryType(
+        arrayListStoryType: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPivotalStoryTypeAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListStoryType
+        )
+        autoTextViewPivotalStoryType.setAdapter(autoTextViewPivotalStoryTypeAdapter)
+        if (arrayListStoryType.isNotEmpty() && autoTextViewPivotalStoryType.editableText.isEmpty()) {
+            if (sharedPref.getString("pivotal_story_type", null) != null) {
+                if (arrayListStoryType.contains(
+                        sharedPref.getString(
+                            "pivotal_story_type",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewPivotalStoryType.setText(
+                        sharedPref.getString("pivotal_story_type", null),
+                        false
+                    )
+                } else {
+                    autoTextViewPivotalStoryType.setText(arrayListStoryType[0], false)
+                }
+            } else {
+                autoTextViewPivotalStoryType.setText(arrayListStoryType[0], false)
+            }
+        }
+        autoTextViewPivotalStoryType.setOnTouchListener { v, event ->
+            autoTextViewPivotalStoryType.showDropDown()
+            false
+        }
+        autoTextViewPivotalStoryType.setOnItemClickListener { parent, view, position, id ->
+//            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewPivotal)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializePivotalPoints(
+        arrayListPoints: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPivotalPointsAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListPoints
+        )
+        autoTextViewPivotalPoints.setAdapter(autoTextViewPivotalPointsAdapter)
+        if (arrayListPoints.isNotEmpty() && autoTextViewPivotalPoints.editableText.isEmpty()) {
+            if (sharedPref.getString("pivotal_points", null) != null) {
+                if (arrayListPoints.contains(
+                        sharedPref.getString(
+                            "pivotal_points",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewPivotalPoints.setText(
+                        sharedPref.getString("pivotal_points", null),
+                        false
+                    )
+                } else {
+                    autoTextViewPivotalPoints.setText(arrayListPoints[0], false)
+                }
+            } else {
+                autoTextViewPivotalPoints.setText(arrayListPoints[0], false)
+            }
+        }
+        autoTextViewPivotalPoints.setOnTouchListener { v, event ->
+            autoTextViewPivotalPoints.showDropDown()
+            false
+        }
+        autoTextViewPivotalPoints.setOnItemClickListener { parent, view, position, id ->
+            //            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewPivotal)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializePivotalRequester(
+        arrayListRequester: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPivotalRequesterAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListRequester
+        )
+        autoTextViewPivotalRequester.setAdapter(autoTextViewPivotalRequesterAdapter)
+        if (arrayListRequester.isNotEmpty() && autoTextViewPivotalRequester.editableText.isEmpty()) {
+            if (sharedPref.getString("pivotal_requester", null) != null) {
+                if (arrayListRequester.contains(
+                        sharedPref.getString(
+                            "pivotal_requester",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewPivotalRequester.setText(
+                        sharedPref.getString("pivotal_requester", null),
+                        false
+                    )
+                } else {
+                    autoTextViewPivotalRequester.setText(arrayListRequester[0], false)
+                }
+            } else {
+                autoTextViewPivotalRequester.setText(arrayListRequester[0], false)
+            }
+        }
+        autoTextViewPivotalRequester.setOnTouchListener { v, event ->
+            autoTextViewPivotalRequester.showDropDown()
+            false
+        }
+        autoTextViewPivotalRequester.setOnItemClickListener { parent, view, position, id ->
+            //            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewPivotal)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializePivotalOwners(
+        arrayListOwners: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPivotalOwnersAdapter= ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListOwners
+        )
+        autoTextViewPivotalOwners.setAdapter(autoTextViewPivotalOwnersAdapter)
+        if (arrayListOwners.isNotEmpty() && autoTextViewPivotalOwners.editableText.isEmpty()) {
+            if (sharedPref.getString("pivotal_owner", null) != null) {
+                if (arrayListOwners.contains(
+                        sharedPref.getString(
+                            "pivotal_owner",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewPivotalOwners.setText(
+                        sharedPref.getString("pivotal_owner", null),
+                        false
+                    )
+                } else {
+                    autoTextViewPivotalOwners.setText(arrayListOwners[0], false)
+                }
+            } else {
+                autoTextViewPivotalOwners.setText(arrayListOwners[0], false)
+            }
+        }
+        autoTextViewPivotalOwners.setOnTouchListener { v, event ->
+            autoTextViewPivotalOwners.showDropDown()
+            false
+        }
+        autoTextViewPivotalOwners.setOnItemClickListener { parent, view, position, id ->
+            //            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewPivotal)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializePivotalLabel(
+        arrayListLabel: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPivotalLabelAdapter= ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListLabel
+        )
+        autoTextViewPivotalLabel.setAdapter(autoTextViewPivotalLabelAdapter)
+        if (arrayListLabel.isNotEmpty() && autoTextViewPivotalLabel.editableText.isEmpty()) {
+            if (sharedPref.getString("pivotal_label", null) != null) {
+                if (arrayListLabel.contains(
+                        sharedPref.getString(
+                            "pivotal_label",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewPivotalLabel.setText(
+                        sharedPref.getString("pivotal_label", null),
+                        false
+                    )
+                } else {
+                    autoTextViewPivotalLabel.setText(arrayListLabel[0], false)
+                }
+            } else {
+                autoTextViewPivotalLabel.setText(arrayListLabel[0], false)
+            }
+        }
+        autoTextViewPivotalLabel.setOnTouchListener { v, event ->
+            autoTextViewPivotalLabel.showDropDown()
+            false
+        }
+        autoTextViewPivotalLabel.setOnItemClickListener { parent, view, position, id ->
+            //            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewPivotal)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {

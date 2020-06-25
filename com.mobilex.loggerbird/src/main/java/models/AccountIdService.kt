@@ -107,4 +107,7 @@ interface AccountIdService {
     fun getTrelloLabels(@Query("key") key:String,@Query("token") token:String):Call<JsonArray>
     @POST("idLabels?")
     fun setTrelloLabels(@Body jsonArray: JsonArray,@Query("key") key:String,@Query("token") token:String): Call<JsonObject>
+    //pivotal
+    @GET("projects")
+    fun getPivotalProjects():Call<List<PivotalProjectModel>>
 }

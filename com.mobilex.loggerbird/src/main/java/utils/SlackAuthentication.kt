@@ -440,7 +440,6 @@ class SlackAuthentication {
                 try {
                     withContext(Dispatchers.IO) {
                         if(messagePath != null){
-
                             slack.methods(token).conversationsJoin {
                                 it.channel(hashMapChannel[arrayListChannels[spinnerPositionChannel]].toString())
                             }
@@ -548,13 +547,16 @@ class SlackAuthentication {
     internal fun gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems: ArrayList<RecyclerViewModel>) {
         this.arrayListRecyclerViewItems = arrayListRecyclerViewItems
     }
-
-    private fun checkTimeOut(activity: Activity){
-        Timer().schedule(object : TimerTask() {
+    private fun checkTimeOut(activity: Activity) {
+        val timerQueue = Timer()
+        timerTaskQueue = object : TimerTask() {
             override fun run() {
-                LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
+                activity.runOnUiThread {
+                    LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
+                }
             }
-        }, 15000)
+        }
+        timerQueue.schedule(timerTaskQueue, 15000)
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)

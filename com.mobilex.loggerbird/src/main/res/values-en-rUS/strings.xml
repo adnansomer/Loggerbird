@@ -355,7 +355,7 @@
     <string name="editText_pivotal_title_hint">Enter a title for this story…</string>
     <string name="textView_pivotal_type">Story Type</string>
     <string name="textView_pivotal_requester">Requester</string>
-    <string name="textView_pivotal_points">Pivotal</string>
+    <string name="textView_pivotal_points">Points</string>
     <string name="textView_pivotal_owners">Owners</string>
     <string name="textView_pivotal_owners_list">Owners list</string>
     <string name="textView_pivotal_blockers">Blockers</string>
