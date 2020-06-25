@@ -111,6 +111,9 @@
     <string name="github_label_exist">This label already added to list!</string>
     <string name="github_label_doesnt_exist">This label doesn\'t exist!</string>
     <string name="github_mile_stone_doesnt_exist">This milestone doesn\'t exist!</string>
+    <string name="gitlab_sent">Gitlab issue is created!</string>
+    <string name="gitlab_sent_error">An error happened while trying to create Gitlab issue!</string>
+    <string name="gitlab_sent_error_time_out">An error happened while trying to open Gitlab issue , system has been timed out!</string>
     <string name="trello_issue_success">Issue opened successfully!</string>
     <string name="trello_issue_failure">An error happened while trying to open trello issue!</string>
     <string name="trello_issue_time_out">An error happened while trying to open trello issue , system has been timed out!</string>

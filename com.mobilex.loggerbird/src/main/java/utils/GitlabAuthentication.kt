@@ -545,7 +545,6 @@ class GitlabAuthentication {
                                 filePathMedia!!.delete()
                             }
                         }
-                        val githubList = response.body()
                         activity.runOnUiThread {
                             LoggerBirdService.loggerBirdService.finishShareLayout("gitlab")
                         }

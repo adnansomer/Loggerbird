@@ -2667,6 +2667,29 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     progressBarSlackLayout.visibility = View.GONE
                     progressBarSlack.visibility = View.GONE
                 }
+
+                "gitlab" -> {
+                    Toast.makeText(context, R.string.gitlab_sent, Toast.LENGTH_SHORT).show()
+                    finishSuccessFab()
+                    progressBarGitlabLayout.visibility = View.GONE
+                    progressBarGitlab.visibility = View.GONE
+                }
+
+                "gitlab_error" -> {
+                    removeGitlabLayout()
+                    Toast.makeText(context, R.string.gitlab_sent_error, Toast.LENGTH_SHORT).show()
+                    progressBarGitlabLayout.visibility = View.GONE
+                    progressBarGitlab.visibility = View.GONE
+
+                }
+
+                "gitlab_error_time_out" -> {
+                    removeSlackLayout()
+                    Toast.makeText(context, R.string.gitlab_sent_error_time_out, Toast.LENGTH_SHORT).show()
+                    progressBarGitlabLayout.visibility = View.GONE
+                    progressBarGitlab.visibility = View.GONE
+                }
+
                 "github" -> {
                     detachProgressBar()
                     removeGithubLayout()
