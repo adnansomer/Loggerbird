@@ -313,6 +313,22 @@
     <string name="textView_recyclerView_github_label_title">Are you sure to remove label from your github issue?</string>
     <string name="button_recyclerView_github_label_delete">Delete label</string>
     <string name="button_recyclerView_github_label_keep">Keep label</string>
+    <!-- loggerbird_gitlab_popup-->
+    <string name="textView_gitlab_toolbar_title">Create Gitlab Issue</string>
+    <string name="textView_gitlab_project">Project</string>
+    <string name="textView_gitlab_title">Title</string>
+    <string name="editText_gitlab_title">Write your issue title here!</string>
+    <string name="textView_gitlab_description">Description</string>
+    <string name="editText_gitlab_description">Write your issue description here!</string>
+    <string name="editText_gitlab_weight">Write your issue weight here!</string>
+    <string name="textView_gitlab_assignee">Assignee</string>
+    <string name="textView_gitlab_labels">Labels</string>
+    <string name="textView_gitlab_weight">Weight</string>
+    <string name="textView_gitlab_milestone">Milestone</string>
+    <string name="editText_gitlab_title_empty">Your title cannot be empty!</string>
+    <string name="textView_gitlab_due_date">Due Date</string>
+    <string name="textView_gitlab_confidentiality">Confidentiality</string>
+    <string name="textView_gitlab_enter_due_date">Set a due date for issue!</string>
     <!-- loggerbird_trello_popup-->
     <string name="textView_trello_project">Project</string>
     <string name="textView_trello_board">Board</string>
