@@ -90,6 +90,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerFutureTime: Any? = null
     private var windowManagerGithub: Any? = null
     private var windowManagerTrello: Any? = null
+    private var windowManagerTrelloTimeline: Any? = null
+    private var windowManagerTrelloTime: Any? = null
+    private var windowManagerTrelloDate: Any? = null
+    private var windowManagerPivotal: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -104,6 +108,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsFutureTime: WindowManager.LayoutParams
     private lateinit var windowManagerParamsGithub: WindowManager.LayoutParams
     private lateinit var windowManagerParamsTrello: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsTrelloTimeline: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsTrelloDate: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsTrelloTime: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsPivotal: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -157,6 +165,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewFutureTime: View
     private lateinit var viewGithub: View
     private lateinit var viewTrello: View
+    private lateinit var viewTrelloTimeline: View
+    private lateinit var viewTrelloDate: View
+    private lateinit var viewTrelloTime: View
+    private lateinit var viewPivotal: View
     private lateinit var wrapper: FrameLayout
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
@@ -353,13 +365,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     //Future-Task-Date:
     private var futureStartDate: Long? = null
-    private lateinit var frameLayoutDate: FrameLayout
+    private lateinit var frameLayoutFutureDate: FrameLayout
     private lateinit var calendarViewFutureTask: CalendarView
     private lateinit var buttonFutureTaskDateCreate: Button
     private lateinit var buttonFutureTaskDateCancel: Button
     //Future-Task-Time:
     private var futureStartTime: Long? = null
-    private lateinit var frameLayoutTime: FrameLayout
+    private lateinit var frameLayoutFutureTime: FrameLayout
     private lateinit var timePickerFutureTask: TimePicker
     private lateinit var buttonFutureTaskTimeCreate: Button
     private lateinit var buttonFutureTaskTimeCancel: Button
@@ -436,6 +448,62 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var imageViewTrelloMember: ImageView
     private lateinit var arrayListTrelloMember: ArrayList<String>
 
+    //trello_timeline:
+    private lateinit var imageViewTrelloCalendar: ImageView
+    private lateinit var imageButtonTrelloRemoveTimeline: ImageButton
+
+    private lateinit var imageViewTrelloDate: ImageView
+    private lateinit var imageButtonTrelloDateRemove: ImageButton
+    private lateinit var imageViewTrelloTime: ImageView
+    private lateinit var imageButtonTrelloTimeRemove: ImageButton
+    private lateinit var buttonTrelloTimelineProceed: Button
+    private lateinit var buttonTrelloTimelineCancel: Button
+    private var calendarTrello: Calendar? = null
+    //
+    //trello_date:
+    private var trelloStartDate: Long? = null
+    private lateinit var frameLayoutTrelloDate: FrameLayout
+    private lateinit var calendarViewTrello: CalendarView
+    private lateinit var buttonTrelloDateCreate: Button
+    private lateinit var buttonTrelloDateCancel: Button
+
+    //trello_time:
+    private var trelloStartTime: Long? = null
+    private lateinit var frameLayoutTrelloTime: FrameLayout
+    private lateinit var timePickerTrello: TimePicker
+    private lateinit var buttonTrelloTimeCreate: Button
+    private lateinit var buttonTrelloTimeCancel: Button
+
+    //Pivotal Tracker
+    private lateinit var buttonPivotalCreate: Button
+    private lateinit var buttonPivotalCancel: Button
+    private lateinit var toolbarPivotal: Toolbar
+    private lateinit var scrollViewPivotal: ScrollView
+    private lateinit var autoTextViewPivotalProject: AutoCompleteTextView
+    private lateinit var editTextPivotalTitle: EditText
+    private lateinit var autoTextViewPivotalStoryType: AutoCompleteTextView
+    private lateinit var autoTextViewPivotalPoints: AutoCompleteTextView
+    private lateinit var autoTextViewPivotalOwners: AutoCompleteTextView
+    private lateinit var autoTextViewPivotalRequester: AutoCompleteTextView
+    private lateinit var imageViewPivotalOwners: ImageView
+    internal lateinit var cardViewPivotalOwnersList: CardView
+    private lateinit var recyclerViewPivotalOwnerList: RecyclerView
+    private lateinit var editTextPivotalBlockers: EditText
+    private lateinit var imageViewPivotalBlockers: ImageView
+    internal lateinit var cardViewPivotalBlockersList: CardView
+    private lateinit var recyclerViewPivotalBlockersList: RecyclerView
+    private lateinit var editTextPivotalDescription: EditText
+    private lateinit var autoTextViewPivotalLabel: AutoCompleteTextView
+    private lateinit var imageViewPivotalLabel: ImageView
+    internal lateinit var cardViewPivotalLabelList: CardView
+    private lateinit var recyclerViewPivotalLabelList: RecyclerView
+    private lateinit var editTextPivotalTasks: EditText
+    private lateinit var imageViewPivotalTask: ImageView
+    internal lateinit var cardViewPivotalTasksList: CardView
+    private lateinit var recyclerViewPivotalTaskList: RecyclerView
+    internal lateinit var cardViewPivotalAttachments: CardView
+    private lateinit var recyclerViewPivotalAttachmentList: RecyclerView
+
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
@@ -451,6 +519,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var textView_share_gitlab: TextView
         private lateinit var textView_share_github: TextView
         private lateinit var textView_share_trello: TextView
+        private lateinit var textView_share_pivotal: TextView
         private lateinit var textView_discard: TextView
         //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
@@ -798,6 +867,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_share_slack = view.findViewById(R.id.textView_share_slack)
                     textView_share_github = view.findViewById(R.id.textView_share_github)
                     textView_share_trello = view.findViewById(R.id.textView_share_trello)
+                    textView_share_pivotal = view.findViewById(R.id.textView_share_pivotal)
                     textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
                     textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
@@ -816,7 +886,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         if (controlWorkingAnimation()) {
                             floating_action_button.startAnimation(workingAnimation)
                             floating_action_button.backgroundTintList =
-                                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.mediaRecordColor))
+                                ColorStateList.valueOf(
+                                    ContextCompat.getColor(
+                                        this,
+                                        R.color.mediaRecordColor
+                                    )
+                                )
                             floating_action_button.imageTintList =
                                 ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white))
                             if (audioRecording) {
@@ -1146,6 +1221,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
 
+            textView_share_pivotal.setSafeOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
+                    }
+                    initializePivotalLayout(filePathMedia = filePathMedia)
+                }
+            }
+
 
             textView_discard.setSafeOnClickListener {
                 discardMediaFile()
@@ -1341,9 +1425,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                 AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
                             floating_action_button.startAnimation(workingAnimation)
                             floating_action_button.backgroundTintList =
-                                ColorStateList.valueOf(ContextCompat.getColor(this@LoggerBirdService, R.color.mediaRecordColor))
+                                ColorStateList.valueOf(
+                                    ContextCompat.getColor(
+                                        this@LoggerBirdService,
+                                        R.color.mediaRecordColor
+                                    )
+                                )
                             floating_action_button.imageTintList =
-                                ColorStateList.valueOf(ContextCompat.getColor(this@LoggerBirdService, R.color.white))
+                                ColorStateList.valueOf(
+                                    ContextCompat.getColor(
+                                        this@LoggerBirdService,
+                                        R.color.white
+                                    )
+                                )
                             context.startActivity(screenshotIntent)
                             context.overridePendingTransition(
                                 R.anim.slide_in_right,
@@ -1416,9 +1510,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                 floating_action_button.startAnimation(workingAnimation)
                                 floating_action_button.backgroundTintList =
 
-                                    ColorStateList.valueOf(ContextCompat.getColor(this@LoggerBirdService, R.color.mediaRecordColor))
+                                    ColorStateList.valueOf(
+                                        ContextCompat.getColor(
+                                            this@LoggerBirdService,
+                                            R.color.mediaRecordColor
+                                        )
+                                    )
                                 floating_action_button.imageTintList =
-                                    ColorStateList.valueOf(ContextCompat.getColor(this@LoggerBirdService, R.color.white))
+                                    ColorStateList.valueOf(
+                                        ContextCompat.getColor(
+                                            this@LoggerBirdService,
+                                            R.color.white
+                                        )
+                                    )
                             }
                         } else {
                             withContext(Dispatchers.Main) {
@@ -2561,6 +2665,25 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     Toast.makeText(context, R.string.trello_issue_time_out, Toast.LENGTH_SHORT)
                         .show()
                 }
+                "pivotal" -> {
+                    detachProgressBar()
+                    removePivotalLayout()
+                    Toast.makeText(context, R.string.pivotal_issue_success, Toast.LENGTH_SHORT)
+                        .show()
+                    finishSuccessFab()
+                }
+                "pivotal_error" -> {
+                    detachProgressBar()
+                    removeTrelloLayout()
+                    Toast.makeText(context, R.string.pivotal_issue_failure, Toast.LENGTH_SHORT)
+                        .show()
+                }
+                "pivotal_error_time_out" -> {
+                    detachProgressBar()
+                    removeTrelloLayout()
+                    Toast.makeText(context, R.string.pivotal_issue_time_out, Toast.LENGTH_SHORT)
+                        .show()
+                }
             }
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
@@ -3158,7 +3281,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             imageButtonRemoveDate.visibility = View.GONE
         }
         imageViewJiraIssue.setSafeOnClickListener {
-            hideKeyboard(activity = activity , view = viewJira)
+            hideKeyboard(activity = activity, view = viewJira)
             if (!arrayListJiraIssueName.contains(
                     RecyclerViewModelIssue(
                         autoTextViewIssue.editableText.toString()
@@ -3187,7 +3310,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
         }
         imageViewJiraLabel.setSafeOnClickListener {
-            hideKeyboard(activity = activity , view = viewJira)
+            hideKeyboard(activity = activity, view = viewJira)
             if (!arrayListJiraLabelName.contains(
                     RecyclerViewModelLabel(
                         autoTextViewLabel.editableText.toString()
@@ -3216,7 +3339,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
         }
         imageViewJiraComponent.setSafeOnClickListener {
-            hideKeyboard(activity = activity , view = viewJira)
+            hideKeyboard(activity = activity, view = viewJira)
             if (!arrayListJiraComponentName.contains(
                     RecyclerViewModelComponent(
                         autoTextViewComponent.editableText.toString()
@@ -3246,7 +3369,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
 
         imageViewJiraFixVersions.setSafeOnClickListener {
-            hideKeyboard(activity = activity , view = viewJira)
+            hideKeyboard(activity = activity, view = viewJira)
             if (!arrayListJiraFixVersionsName.contains(
                     RecyclerViewModelFixVersions(
                         autoTextViewFixVersions.editableText.toString()
@@ -4882,7 +5005,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 removeEmailLayout()
             }
             imageViewEmailAdd.setSafeOnClickListener {
-                hideKeyboard(activity = activity , view = viewEmail)
+                hideKeyboard(activity = activity, view = viewEmail)
                 if (checkEmailFormat(editTextTo.text.toString())) {
                     cardViewToList.visibility = View.VISIBLE
                     addEmailToUser(email = editTextTo.text.toString())
@@ -5082,7 +5205,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             imageButtonFutureTaskRemoveTime.visibility = View.GONE
         }
         buttonFutureTaskProceed.setSafeOnClickListener {
-            checkDateAndTimeEmpty(filePathMedia = filePathMedia)
+            checkFutureDateAndTimeEmpty(filePathMedia = filePathMedia)
         }
         buttonFutureTaskCancel.setSafeOnClickListener {
             checkBoxFutureTask.isChecked = false
@@ -5132,7 +5255,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             viewFutureDate,
             windowManagerParamsFutureDate
         )
-        frameLayoutDate = viewFutureDate.findViewById(R.id.future_calendar_view_layout)
+        frameLayoutFutureDate = viewFutureDate.findViewById(R.id.future_calendar_view_layout)
         calendarViewFutureTask = viewFutureDate.findViewById(R.id.calendarView_start_date)
         buttonFutureTaskDateCreate = viewFutureDate.findViewById(R.id.button_future_calendar_ok)
         buttonFutureTaskDateCancel = viewFutureDate.findViewById(R.id.button_future_calendar_cancel)
@@ -5157,7 +5280,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         calendarFuture.set(mYear, mMonth, mDayOfMonth)
         calendarViewFutureTask.minDate = System.currentTimeMillis()
-        frameLayoutDate.setOnClickListener {
+        frameLayoutFutureDate.setOnClickListener {
             removeFutureDateLayout()
         }
         calendarViewFutureTask.setOnDateChangeListener { view, year, month, dayOfMonth ->
@@ -5205,7 +5328,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             viewFutureTime,
             windowManagerParamsFutureTime
         )
-        frameLayoutTime = viewFutureTime.findViewById(R.id.future_time_view_layout)
+        frameLayoutFutureTime = viewFutureTime.findViewById(R.id.future_time_view_layout)
         timePickerFutureTask = viewFutureTime.findViewById(R.id.timePicker_start_time)
         buttonFutureTaskTimeCreate = viewFutureTime.findViewById(R.id.button_future_time_ok)
         buttonFutureTaskTimeCancel = viewFutureTime.findViewById(R.id.button_future_time_cancel)
@@ -5224,7 +5347,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     private fun buttonClicksFutureTime() {
-        frameLayoutTime.setOnClickListener {
+        frameLayoutFutureTime.setOnClickListener {
             removeFutureTimeLayout()
         }
 //        timePickerFutureTask.setOnTimeChangedListener { view, hourOfDay, minute ->
@@ -5243,7 +5366,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-    private fun checkDateAndTimeEmpty(filePathMedia: File) {
+    private fun checkFutureDateAndTimeEmpty(filePathMedia: File) {
         if (futureStartDate != null && futureStartTime != null) {
             defaultToast.attachToast(
                 activity = activity,
@@ -5348,459 +5471,458 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     ContextCompat.getColor(this, R.color.black)
                 activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
 
-            buttonGithubCreate = viewGithub.findViewById(R.id.button_github_create)
-            buttonGithubCancel = viewGithub.findViewById(R.id.button_github_cancel)
-            autoTextViewGithubAssignee =
-                viewGithub.findViewById(R.id.auto_textView_github_assignee)
-            autoTextViewGithubLabels = viewGithub.findViewById(R.id.auto_textView_github_labels)
-            autoTextViewGithubLinkedRequests =
-                viewGithub.findViewById(R.id.auto_textView_github_linked_requests)
-            autoTextViewGithubMileStone =
-                viewGithub.findViewById(R.id.auto_textView_github_milestone)
-            autoTextViewGithubRepo =
-                viewGithub.findViewById(R.id.auto_textView_github_repo)
-            autoTextViewGithubProject =
-                viewGithub.findViewById(R.id.auto_textView_github_project)
-            editTextGithubTitle = viewGithub.findViewById(R.id.editText_github_title)
-            editTextGithubComment = viewGithub.findViewById(R.id.editText_github_comment)
-            recyclerViewGithubAttachment =
-                viewGithub.findViewById(R.id.recycler_view_github_attachment)
-            toolbarGithub = viewGithub.findViewById(R.id.toolbar_github)
-            scrollViewGithub = viewGithub.findViewById(R.id.scrollView_github)
-            scrollViewGithub.setOnTouchListener { v, event ->
-                if (event.action == MotionEvent.ACTION_DOWN) {
-                    hideKeyboard(activity = activity, view = viewGithub)
+                buttonGithubCreate = viewGithub.findViewById(R.id.button_github_create)
+                buttonGithubCancel = viewGithub.findViewById(R.id.button_github_cancel)
+                autoTextViewGithubAssignee =
+                    viewGithub.findViewById(R.id.auto_textView_github_assignee)
+                autoTextViewGithubLabels = viewGithub.findViewById(R.id.auto_textView_github_labels)
+                autoTextViewGithubLinkedRequests =
+                    viewGithub.findViewById(R.id.auto_textView_github_linked_requests)
+                autoTextViewGithubMileStone =
+                    viewGithub.findViewById(R.id.auto_textView_github_milestone)
+                autoTextViewGithubRepo =
+                    viewGithub.findViewById(R.id.auto_textView_github_repo)
+                autoTextViewGithubProject =
+                    viewGithub.findViewById(R.id.auto_textView_github_project)
+                editTextGithubTitle = viewGithub.findViewById(R.id.editText_github_title)
+                editTextGithubComment = viewGithub.findViewById(R.id.editText_github_comment)
+                recyclerViewGithubAttachment =
+                    viewGithub.findViewById(R.id.recycler_view_github_attachment)
+                toolbarGithub = viewGithub.findViewById(R.id.toolbar_github)
+                scrollViewGithub = viewGithub.findViewById(R.id.scrollView_github)
+                scrollViewGithub.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        hideKeyboard(activity = activity, view = viewGithub)
+                    }
+                    return@setOnTouchListener false
                 }
-                return@setOnTouchListener false
-            }
-            recyclerViewGithubAssignee =
-                viewGithub.findViewById(R.id.recycler_view_assignee_list)
-            cardViewGithubAssigneeList = viewGithub.findViewById(R.id.cardView_assignee_list)
-            imageViewAssignee = viewGithub.findViewById(R.id.imageView_assignee_add)
+                recyclerViewGithubAssignee =
+                    viewGithub.findViewById(R.id.recycler_view_assignee_list)
+                cardViewGithubAssigneeList = viewGithub.findViewById(R.id.cardView_assignee_list)
+                imageViewAssignee = viewGithub.findViewById(R.id.imageView_assignee_add)
 
-            recyclerViewGithubLabel = viewGithub.findViewById(R.id.recycler_view_label_list)
-            cardViewGithubLabelList = viewGithub.findViewById(R.id.cardView_label_list)
-            imageViewGithubLabel = viewGithub.findViewById(R.id.imageView_label_add)
+                recyclerViewGithubLabel = viewGithub.findViewById(R.id.recycler_view_label_list)
+                cardViewGithubLabelList = viewGithub.findViewById(R.id.cardView_label_list)
+                imageViewGithubLabel = viewGithub.findViewById(R.id.imageView_label_add)
 
 
-            toolbarGithub.setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.github_menu_save -> {
-                        val sharedPref =
-                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                        with(sharedPref.edit()) {
-                            putString(
-                                "github_repo",
-                                autoTextViewGithubRepo.editableText.toString()
-                            )
+                toolbarGithub.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.github_menu_save -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            with(sharedPref.edit()) {
+                                putString(
+                                    "github_repo",
+                                    autoTextViewGithubRepo.editableText.toString()
+                                )
 //                                putInt("jira_project_position", projectPosition)
-                            putString(
-                                "github_project",
-                                autoTextViewGithubProject.editableText.toString()
+                                putString(
+                                    "github_project",
+                                    autoTextViewGithubProject.editableText.toString()
+                                )
+                                putString("github_title", editTextGithubTitle.text.toString())
+                                putString("github_comment", editTextGithubComment.text.toString())
+                                putString(
+                                    "github_assignee",
+                                    autoTextViewGithubAssignee.editableText.toString()
+                                )
+                                putString(
+                                    "github_labels",
+                                    autoTextViewGithubLabels.editableText.toString()
+                                )
+                                putString(
+                                    "github_milestone",
+                                    autoTextViewGithubMileStone.editableText.toString()
+                                )
+                                putString(
+                                    "github_pull_requests",
+                                    autoTextViewGithubLinkedRequests.editableText.toString()
+                                )
+                                commit()
+                            }
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.github_issue_preferences_save)
                             )
-                            putString("github_title", editTextGithubTitle.text.toString())
-                            putString("github_comment", editTextGithubComment.text.toString())
-                            putString(
-                                "github_assignee",
-                                autoTextViewGithubAssignee.editableText.toString()
-                            )
-                            putString(
-                                "github_labels",
-                                autoTextViewGithubLabels.editableText.toString()
-                            )
-                            putString(
-                                "github_milestone",
-                                autoTextViewGithubMileStone.editableText.toString()
-                            )
-                            putString(
-                                "github_pull_requests",
-                                autoTextViewGithubLinkedRequests.editableText.toString()
-                            )
-                            commit()
                         }
-                        defaultToast.attachToast(
-                            activity = activity,
-                            toastMessage = context.resources.getString(R.string.github_issue_preferences_save)
-                        )
-                    }
-                    R.id.github_menu_clear -> {
-                        val sharedPref =
-                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                        val editor: SharedPreferences.Editor = sharedPref.edit()
-                        editor.remove("github_comment")
-                        editor.remove("github_title")
-                        editor.remove("github_repo")
-                        editor.remove("github_project")
-                        editor.remove("github_milestone")
-                        editor.remove("github_assignee")
-                        editor.remove("github_labels")
-                        editor.remove("github_pull_requests")
-                        editor.apply()
+                        R.id.github_menu_clear -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            val editor: SharedPreferences.Editor = sharedPref.edit()
+                            editor.remove("github_comment")
+                            editor.remove("github_title")
+                            editor.remove("github_repo")
+                            editor.remove("github_project")
+                            editor.remove("github_milestone")
+                            editor.remove("github_assignee")
+                            editor.remove("github_labels")
+                            editor.remove("github_pull_requests")
+                            editor.apply()
 //                            projectPosition = 0
-                        clearGithubComponents()
-                        defaultToast.attachToast(
-                            activity = activity,
-                            toastMessage = context.resources.getString(R.string.github_issue_preferences_delete)
-                        )
+                            clearGithubComponents()
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.github_issue_preferences_delete)
+                            )
+                        }
+                    }
+                    return@setOnMenuItemClickListener true
+                }
+
+                toolbarGithub.setNavigationOnClickListener {
+                    removeGithubLayout()
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.VISIBLE
                     }
                 }
-                return@setOnMenuItemClickListener true
-            }
 
-            toolbarGithub.setNavigationOnClickListener {
-                removeGithubLayout()
-                if (controlFloatingActionButtonView()) {
-                    floatingActionButtonView.visibility = View.VISIBLE
-                }
-            }
-
-            initializeGithubRecyclerView(filePathMedia = filePathMedia)
-            initializeGithubAssigneeRecyclerView()
-            initializeGithubLabelRecyclerView()
-            buttonClicksGithub(filePathMedia = filePathMedia)
-            githubAuthentication.callGithub(
-                activity = activity,
-                context = context,
-                task = "get",
-                filePathMedia = filePathMedia
-            )
-            attachProgressBar()
+                initializeGithubRecyclerView(filePathMedia = filePathMedia)
+                initializeGithubAssigneeRecyclerView()
+                initializeGithubLabelRecyclerView()
+                buttonClicksGithub(filePathMedia = filePathMedia)
+                githubAuthentication.callGithub(
+                    activity = activity,
+                    context = context,
+                    task = "get",
+                    filePathMedia = filePathMedia
+                )
+                attachProgressBar()
 //                    progressBarSlackLayout.visibility = View.VISIBLE
 //                    progressBarSlack.visibility = View.VISIBLE
 
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.githubTag)
         }
-    } catch (e: Exception)
-    {
-        e.printStackTrace()
-        LoggerBird.callEnqueue()
-        LoggerBird.callExceptionDetails(exception = e, tag = Constants.githubTag)
     }
-}
 
-private fun clearGithubComponents() {
-    cardViewGithubAssigneeList.visibility = View.GONE
-    cardViewGithubLabelList.visibility = View.GONE
-    arrayListGithubAssigneeName.clear()
-    arrayListGithubLabelName.clear()
-    githubAssigneeAdapter.notifyDataSetChanged()
-    githubLabelAdapter.notifyDataSetChanged()
-    editTextGithubTitle.text = null
-    editTextGithubComment.text = null
+    private fun clearGithubComponents() {
+        cardViewGithubAssigneeList.visibility = View.GONE
+        cardViewGithubLabelList.visibility = View.GONE
+        arrayListGithubAssigneeName.clear()
+        arrayListGithubLabelName.clear()
+        githubAssigneeAdapter.notifyDataSetChanged()
+        githubLabelAdapter.notifyDataSetChanged()
+        editTextGithubTitle.text = null
+        editTextGithubComment.text = null
 //        autoTextViewGithubRepo.setText("", false)
-    autoTextViewGithubAssignee.setText("", false)
-    autoTextViewGithubLabels.setText("", false)
-    autoTextViewGithubMileStone.setText("", false)
-    autoTextViewGithubLinkedRequests.setText("", false)
-}
-
-internal fun removeGithubLayout() {
-    if (this::viewGithub.isInitialized && windowManagerGithub != null) {
-        (windowManagerGithub as WindowManager).removeViewImmediate(
-            viewGithub
-        )
-        windowManagerGithub = null
+        autoTextViewGithubAssignee.setText("", false)
+        autoTextViewGithubLabels.setText("", false)
+        autoTextViewGithubMileStone.setText("", false)
+        autoTextViewGithubLinkedRequests.setText("", false)
     }
-}
 
-private fun buttonClicksGithub(filePathMedia: File) {
-    buttonGithubCreate.setSafeOnClickListener {
-        if (checkGithubTitleEmpty() && githubAuthentication.checkGithubRepoEmpty(
-                activity = activity,
-                autoTextViewGithubRepo = autoTextViewGithubRepo
-            ) && githubAuthentication.checkGithubAssignee(
-                activity = activity,
-                autoTextViewAssignee = autoTextViewGithubAssignee
-            ) && githubAuthentication.checkGithubLabel(
-                activity = activity,
-                autoTextViewGithubLabels = autoTextViewGithubLabels
-            ) && githubAuthentication.checkGithubMileStone(
-                activity = activity,
-                autoTextViewMileStone = autoTextViewGithubMileStone
+    internal fun removeGithubLayout() {
+        if (this::viewGithub.isInitialized && windowManagerGithub != null) {
+            (windowManagerGithub as WindowManager).removeViewImmediate(
+                viewGithub
             )
-        ) {
-            attachProgressBar()
-            githubAuthentication.gatherAutoTextDetails(
-                autoTextViewAssignee = autoTextViewGithubAssignee,
-                autoTextViewRepos = autoTextViewGithubRepo,
-                autoTextViewProject = autoTextViewGithubProject,
-                autoTextViewLabels = autoTextViewGithubLabels,
-                autoTextViewLinkedRequests = autoTextViewGithubLinkedRequests,
-                autoTextViewMileStone = autoTextViewGithubMileStone
-            )
-            githubAuthentication.gatherEditTextDetails(
-                editTextComment = editTextGithubComment,
-                editTextTitle = editTextGithubTitle
-            )
-            githubAuthentication.callGithub(
-                activity = activity,
-                context = context,
-                task = "create",
-                filePathMedia = filePathMedia
-            )
+            windowManagerGithub = null
         }
     }
-    buttonGithubCancel.setSafeOnClickListener {
-        removeGithubLayout()
-        if (controlFloatingActionButtonView()) {
-            floatingActionButtonView.visibility = View.VISIBLE
-        }
-    }
-    imageViewAssignee.setSafeOnClickListener {
-        hideKeyboard(activity = activity, view = viewGithub)
-        if (!arrayListGithubAssigneeName.contains(
-                RecyclerViewModelAssignee(
-                    autoTextViewGithubAssignee.editableText.toString()
+
+    private fun buttonClicksGithub(filePathMedia: File) {
+        buttonGithubCreate.setSafeOnClickListener {
+            if (checkGithubTitleEmpty() && githubAuthentication.checkGithubRepoEmpty(
+                    activity = activity,
+                    autoTextViewGithubRepo = autoTextViewGithubRepo
+                ) && githubAuthentication.checkGithubAssignee(
+                    activity = activity,
+                    autoTextViewAssignee = autoTextViewGithubAssignee
+                ) && githubAuthentication.checkGithubLabel(
+                    activity = activity,
+                    autoTextViewGithubLabels = autoTextViewGithubLabels
+                ) && githubAuthentication.checkGithubMileStone(
+                    activity = activity,
+                    autoTextViewMileStone = autoTextViewGithubMileStone
                 )
-            ) && arrayListGithubAssignee.contains(autoTextViewGithubAssignee.editableText.toString())
-        ) {
-            arrayListGithubAssigneeName.add(RecyclerViewModelAssignee(autoTextViewGithubAssignee.editableText.toString()))
-            githubAssigneeAdapter.notifyDataSetChanged()
-            cardViewGithubAssigneeList.visibility = View.VISIBLE
-        } else if (arrayListGithubAssigneeName.contains(
-                RecyclerViewModelAssignee(
-                    autoTextViewGithubAssignee.editableText.toString()
+            ) {
+                attachProgressBar()
+                githubAuthentication.gatherAutoTextDetails(
+                    autoTextViewAssignee = autoTextViewGithubAssignee,
+                    autoTextViewRepos = autoTextViewGithubRepo,
+                    autoTextViewProject = autoTextViewGithubProject,
+                    autoTextViewLabels = autoTextViewGithubLabels,
+                    autoTextViewLinkedRequests = autoTextViewGithubLinkedRequests,
+                    autoTextViewMileStone = autoTextViewGithubMileStone
                 )
-            )
-        ) {
-            defaultToast.attachToast(
-                activity = activity,
-                toastMessage = activity.resources.getString(R.string.github_assignee_exist)
-            )
-        } else if (!arrayListGithubAssignee.contains(autoTextViewGithubAssignee.editableText.toString())) {
-            defaultToast.attachToast(
-                activity = activity,
-                toastMessage = activity.resources.getString(R.string.github_assignee_doesnt_exist)
-            )
+                githubAuthentication.gatherEditTextDetails(
+                    editTextComment = editTextGithubComment,
+                    editTextTitle = editTextGithubTitle
+                )
+                githubAuthentication.callGithub(
+                    activity = activity,
+                    context = context,
+                    task = "create",
+                    filePathMedia = filePathMedia
+                )
+            }
         }
+        buttonGithubCancel.setSafeOnClickListener {
+            removeGithubLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+        imageViewAssignee.setSafeOnClickListener {
+            hideKeyboard(activity = activity, view = viewGithub)
+            if (!arrayListGithubAssigneeName.contains(
+                    RecyclerViewModelAssignee(
+                        autoTextViewGithubAssignee.editableText.toString()
+                    )
+                ) && arrayListGithubAssignee.contains(autoTextViewGithubAssignee.editableText.toString())
+            ) {
+                arrayListGithubAssigneeName.add(RecyclerViewModelAssignee(autoTextViewGithubAssignee.editableText.toString()))
+                githubAssigneeAdapter.notifyDataSetChanged()
+                cardViewGithubAssigneeList.visibility = View.VISIBLE
+            } else if (arrayListGithubAssigneeName.contains(
+                    RecyclerViewModelAssignee(
+                        autoTextViewGithubAssignee.editableText.toString()
+                    )
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.github_assignee_exist)
+                )
+            } else if (!arrayListGithubAssignee.contains(autoTextViewGithubAssignee.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.github_assignee_doesnt_exist)
+                )
+            }
 
-    }
-    imageViewGithubLabel.setSafeOnClickListener {
-        hideKeyboard(activity = activity, view = viewGithub)
-        if (!arrayListGithubLabelName.contains(
-                RecyclerViewModelLabel(
+        }
+        imageViewGithubLabel.setSafeOnClickListener {
+            hideKeyboard(activity = activity, view = viewGithub)
+            if (!arrayListGithubLabelName.contains(
+                    RecyclerViewModelLabel(
+                        autoTextViewGithubLabels.editableText.toString()
+                    )
+                ) && arrayListGithubLabel.contains(
                     autoTextViewGithubLabels.editableText.toString()
                 )
-            ) && arrayListGithubLabel.contains(
-                autoTextViewGithubLabels.editableText.toString()
-            )
-        ) {
-            arrayListGithubLabelName.add(RecyclerViewModelLabel(autoTextViewGithubLabels.editableText.toString()))
-            githubLabelAdapter.notifyDataSetChanged()
-            cardViewGithubLabelList.visibility = View.VISIBLE
-        } else if (arrayListGithubLabelName.contains(
-                RecyclerViewModelLabel(autoTextViewGithubLabels.editableText.toString())
-            )
-        ) {
-            defaultToast.attachToast(
-                activity = activity,
-                toastMessage = activity.resources.getString(R.string.github_label_exist)
-            )
-        } else if (!arrayListGithubLabel.contains(autoTextViewGithubLabels.editableText.toString())) {
-            defaultToast.attachToast(
-                activity = activity,
-                toastMessage = activity.resources.getString(R.string.github_label_doesnt_exist)
-            )
-        }
+            ) {
+                arrayListGithubLabelName.add(RecyclerViewModelLabel(autoTextViewGithubLabels.editableText.toString()))
+                githubLabelAdapter.notifyDataSetChanged()
+                cardViewGithubLabelList.visibility = View.VISIBLE
+            } else if (arrayListGithubLabelName.contains(
+                    RecyclerViewModelLabel(autoTextViewGithubLabels.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.github_label_exist)
+                )
+            } else if (!arrayListGithubLabel.contains(autoTextViewGithubLabels.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.github_label_doesnt_exist)
+                )
+            }
 
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-private fun initializeGithubRecyclerView(filePathMedia: File) {
-    arrayListGithubFileName.clear()
-    recyclerViewGithubAttachment.layoutManager =
-        LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-    githubAdapter = RecyclerViewGithubAdapter(
-        addGithubFileNames(filePathMedia = filePathMedia),
-        context = context,
-        activity = activity,
-        rootView = rootView
-    )
-    recyclerViewGithubAttachment.adapter = githubAdapter
-}
-
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-private fun addGithubFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
-    if (filePathMedia.exists()) {
-        arrayListGithubFileName.add(RecyclerViewModel(file = filePathMedia))
-    }
-    if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
-        arrayListGithubFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
-    }
-    return arrayListGithubFileName
-}
-
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-private fun initializeGithubAssigneeRecyclerView() {
-    arrayListGithubAssigneeName.clear()
-    recyclerViewGithubAssignee.layoutManager =
-        LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-    githubAssigneeAdapter = RecyclerViewGithubAssigneeAdapter(
-        arrayListGithubAssigneeName,
-        context = context,
-        activity = activity,
-        rootView = rootView
-    )
-    recyclerViewGithubAssignee.adapter = githubAssigneeAdapter
-}
-
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-private fun initializeGithubLabelRecyclerView() {
-    arrayListGithubLabelName.clear()
-    recyclerViewGithubLabel.layoutManager =
-        LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-    githubLabelAdapter = RecyclerViewGithubLabelAdapter(
-        arrayListGithubLabelName,
-        context = context,
-        activity = activity,
-        rootView = rootView
-    )
-    recyclerViewGithubLabel.adapter = githubLabelAdapter
-}
-
-private fun checkGithubTitleEmpty(): Boolean {
-    if (editTextGithubTitle.text.toString().isNotEmpty()) {
-        return true
-    } else {
-        defaultToast.attachToast(
-            activity = activity,
-            toastMessage = activity.resources.getString(R.string.github_title_empty)
-        )
-    }
-    return false
-}
-
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-internal fun initializeGithubAutoTextViews(
-    arrayListRepos: ArrayList<String>,
-    arrayListProject: ArrayList<String>,
-    arrayListAssignee: ArrayList<String>,
-    arrayListMileStones: ArrayList<String>,
-    arrayListLinkedRequests: ArrayList<String>,
-    arrayListLabels: ArrayList<String>
-) {
-    val sharedPref =
-        PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-    editTextGithubTitle.setText(sharedPref.getString("github_title", null))
-    editTextGithubComment.setText(sharedPref.getString("github_comment", null))
-    initializeGithubRepos(arrayListRepos = arrayListRepos, sharedPref = sharedPref)
-    initializeGithubProject(arrayListProject = arrayListProject, sharedPref = sharedPref)
-    initializeGithubAssignee(arrayListAssignee = arrayListAssignee, sharedPref = sharedPref)
-    initializeGithubMileStones(
-        arrayListMileStones = arrayListMileStones,
-        sharedPref = sharedPref
-    )
-    initializeGithubLinkedRequests(
-        arrayListLinkedRequests = arrayListLinkedRequests,
-        sharedPref = sharedPref
-    )
-    initializeGithubLabels(arrayListLabels = arrayListLabels, sharedPref = sharedPref)
-    this.arrayListGithubAssignee = arrayListAssignee
-    this.arrayListGithubLabel = arrayListLabels
-    detachProgressBar()
-}
-
-@SuppressLint("ClickableViewAccessibility")
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-private fun initializeGithubRepos(
-    arrayListRepos: ArrayList<String>,
-    sharedPref: SharedPreferences
-) {
-    autoTextViewGithubRepoAdapter = ArrayAdapter(
-        this,
-        android.R.layout.simple_dropdown_item_1line,
-        arrayListRepos
-    )
-    autoTextViewGithubRepo.setAdapter(autoTextViewGithubRepoAdapter)
-    if (arrayListRepos.isNotEmpty() && autoTextViewGithubRepo.editableText.isEmpty()) {
-        if (sharedPref.getString("github_repo", null) != null) {
-            autoTextViewGithubRepo.setText(
-                sharedPref.getString("github_repo", null),
-                false
-            )
-        } else {
-            autoTextViewGithubRepo.setText(arrayListRepos[0], false)
         }
     }
-    autoTextViewGithubRepo.setOnTouchListener { v, event ->
-        autoTextViewGithubRepo.showDropDown()
-        false
-    }
-    autoTextViewGithubRepo.setOnItemClickListener { parent, view, position, id ->
-        //            projectPosition = position
-//            controlProjectPosition = true
-        githubAuthentication.setRepoPosition(repoPosition = position)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                progressBarJira.visibility = View.VISIBLE
-//                progressBarJiraLayout.visibility = View.VISIBLE
-            attachProgressBar()
-        }
-        hideKeyboard(activity = activity, view = viewGithub)
-        clearGithubComponents()
-        githubAuthentication.callGithub(
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeGithubRecyclerView(filePathMedia: File) {
+        arrayListGithubFileName.clear()
+        recyclerViewGithubAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        githubAdapter = RecyclerViewGithubAdapter(
+            addGithubFileNames(filePathMedia = filePathMedia),
             context = context,
             activity = activity,
-            task = "get"
+            rootView = rootView
         )
+        recyclerViewGithubAttachment.adapter = githubAdapter
     }
-    autoTextViewGithubRepo.setOnFocusChangeListener { v, hasFocus ->
-        if (!hasFocus) {
-            if (!arrayListRepos.contains(autoTextViewGithubRepo.editableText.toString())) {
-                if (arrayListRepos.isNotEmpty()) {
-                    if (sharedPref.getString("github_repo", null) != null) {
-                        if (arrayListRepos.contains(
-                                sharedPref.getString(
-                                    "github_repo",
-                                    null
-                                )!!
-                            )
-                        ) {
-                            autoTextViewGithubRepo.setText(
-                                sharedPref.getString("github_repo", null),
-                                false
-                            )
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addGithubFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListGithubFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListGithubFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListGithubFileName
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeGithubAssigneeRecyclerView() {
+        arrayListGithubAssigneeName.clear()
+        recyclerViewGithubAssignee.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        githubAssigneeAdapter = RecyclerViewGithubAssigneeAdapter(
+            arrayListGithubAssigneeName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewGithubAssignee.adapter = githubAssigneeAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeGithubLabelRecyclerView() {
+        arrayListGithubLabelName.clear()
+        recyclerViewGithubLabel.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        githubLabelAdapter = RecyclerViewGithubLabelAdapter(
+            arrayListGithubLabelName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewGithubLabel.adapter = githubLabelAdapter
+    }
+
+    private fun checkGithubTitleEmpty(): Boolean {
+        if (editTextGithubTitle.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.github_title_empty)
+            )
+        }
+        return false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    internal fun initializeGithubAutoTextViews(
+        arrayListRepos: ArrayList<String>,
+        arrayListProject: ArrayList<String>,
+        arrayListAssignee: ArrayList<String>,
+        arrayListMileStones: ArrayList<String>,
+        arrayListLinkedRequests: ArrayList<String>,
+        arrayListLabels: ArrayList<String>
+    ) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        editTextGithubTitle.setText(sharedPref.getString("github_title", null))
+        editTextGithubComment.setText(sharedPref.getString("github_comment", null))
+        initializeGithubRepos(arrayListRepos = arrayListRepos, sharedPref = sharedPref)
+        initializeGithubProject(arrayListProject = arrayListProject, sharedPref = sharedPref)
+        initializeGithubAssignee(arrayListAssignee = arrayListAssignee, sharedPref = sharedPref)
+        initializeGithubMileStones(
+            arrayListMileStones = arrayListMileStones,
+            sharedPref = sharedPref
+        )
+        initializeGithubLinkedRequests(
+            arrayListLinkedRequests = arrayListLinkedRequests,
+            sharedPref = sharedPref
+        )
+        initializeGithubLabels(arrayListLabels = arrayListLabels, sharedPref = sharedPref)
+        this.arrayListGithubAssignee = arrayListAssignee
+        this.arrayListGithubLabel = arrayListLabels
+        detachProgressBar()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeGithubRepos(
+        arrayListRepos: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewGithubRepoAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListRepos
+        )
+        autoTextViewGithubRepo.setAdapter(autoTextViewGithubRepoAdapter)
+        if (arrayListRepos.isNotEmpty() && autoTextViewGithubRepo.editableText.isEmpty()) {
+            if (sharedPref.getString("github_repo", null) != null) {
+                autoTextViewGithubRepo.setText(
+                    sharedPref.getString("github_repo", null),
+                    false
+                )
+            } else {
+                autoTextViewGithubRepo.setText(arrayListRepos[0], false)
+            }
+        }
+        autoTextViewGithubRepo.setOnTouchListener { v, event ->
+            autoTextViewGithubRepo.showDropDown()
+            false
+        }
+        autoTextViewGithubRepo.setOnItemClickListener { parent, view, position, id ->
+            //            projectPosition = position
+//            controlProjectPosition = true
+            githubAuthentication.setRepoPosition(repoPosition = position)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                progressBarJira.visibility = View.VISIBLE
+//                progressBarJiraLayout.visibility = View.VISIBLE
+                attachProgressBar()
+            }
+            hideKeyboard(activity = activity, view = viewGithub)
+            clearGithubComponents()
+            githubAuthentication.callGithub(
+                context = context,
+                activity = activity,
+                task = "get"
+            )
+        }
+        autoTextViewGithubRepo.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListRepos.contains(autoTextViewGithubRepo.editableText.toString())) {
+                    if (arrayListRepos.isNotEmpty()) {
+                        if (sharedPref.getString("github_repo", null) != null) {
+                            if (arrayListRepos.contains(
+                                    sharedPref.getString(
+                                        "github_repo",
+                                        null
+                                    )!!
+                                )
+                            ) {
+                                autoTextViewGithubRepo.setText(
+                                    sharedPref.getString("github_repo", null),
+                                    false
+                                )
+                            } else {
+                                autoTextViewGithubRepo.setText(arrayListRepos[0], false)
+                            }
                         } else {
                             autoTextViewGithubRepo.setText(arrayListRepos[0], false)
                         }
-                    } else {
-                        autoTextViewGithubRepo.setText(arrayListRepos[0], false)
                     }
                 }
             }
         }
     }
-}
 
-@SuppressLint("ClickableViewAccessibility")
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-private fun initializeGithubAssignee(
-    arrayListAssignee: ArrayList<String>,
-    sharedPref: SharedPreferences
-) {
-    autoTextViewGithubAssigneeAdapter = ArrayAdapter(
-        this,
-        android.R.layout.simple_dropdown_item_1line,
-        arrayListAssignee
-    )
-    autoTextViewGithubAssignee.setAdapter(autoTextViewGithubAssigneeAdapter)
-    if (arrayListAssignee.isNotEmpty() && autoTextViewGithubAssignee.editableText.isEmpty()) {
-        if (sharedPref.getString("github_assignee", null) != null) {
-            if (arrayListAssignee.contains(sharedPref.getString("github_assignee", null)!!)) {
-                autoTextViewGithubAssignee.setText(
-                    sharedPref.getString("github_assignee", null),
-                    false
-                )
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeGithubAssignee(
+        arrayListAssignee: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewGithubAssigneeAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListAssignee
+        )
+        autoTextViewGithubAssignee.setAdapter(autoTextViewGithubAssigneeAdapter)
+        if (arrayListAssignee.isNotEmpty() && autoTextViewGithubAssignee.editableText.isEmpty()) {
+            if (sharedPref.getString("github_assignee", null) != null) {
+                if (arrayListAssignee.contains(sharedPref.getString("github_assignee", null)!!)) {
+                    autoTextViewGithubAssignee.setText(
+                        sharedPref.getString("github_assignee", null),
+                        false
+                    )
+                } else {
+                    autoTextViewGithubAssignee.setText(arrayListAssignee[0], false)
+                }
             } else {
                 autoTextViewGithubAssignee.setText(arrayListAssignee[0], false)
             }
-        } else {
-            autoTextViewGithubAssignee.setText(arrayListAssignee[0], false)
         }
-    }
-    autoTextViewGithubAssignee.setOnTouchListener { v, event ->
-        autoTextViewGithubAssignee.showDropDown()
-        false
-    }
+        autoTextViewGithubAssignee.setOnTouchListener { v, event ->
+            autoTextViewGithubAssignee.showDropDown()
+            false
+        }
 //        autoTextViewProject.setOnItemClickListener { parent, view, position, id ->
 //            projectPosition = position
 //            controlProjectPosition = true
@@ -5834,48 +5956,48 @@ private fun initializeGithubAssignee(
 //                }
 //            }
 //        }
-}
+    }
 
-@SuppressLint("ClickableViewAccessibility")
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-private fun initializeGithubMileStones(
-    arrayListMileStones: ArrayList<String>,
-    sharedPref: SharedPreferences
-) {
-    autoTextViewGithubMileStoneAdapter = ArrayAdapter(
-        this,
-        android.R.layout.simple_dropdown_item_1line,
-        arrayListMileStones
-    )
-    autoTextViewGithubMileStone.setAdapter(autoTextViewGithubMileStoneAdapter)
-    if (arrayListMileStones.isNotEmpty() && autoTextViewGithubMileStone.editableText.isEmpty()) {
-        if (sharedPref.getString("github_milestone", null) != null) {
-            if (arrayListMileStones.contains(
-                    sharedPref.getString(
-                        "github_milestone",
-                        null
-                    )!!
-                )
-            ) {
-                autoTextViewGithubMileStone.setText(
-                    sharedPref.getString("github_milestone", null),
-                    false
-                )
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeGithubMileStones(
+        arrayListMileStones: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewGithubMileStoneAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListMileStones
+        )
+        autoTextViewGithubMileStone.setAdapter(autoTextViewGithubMileStoneAdapter)
+        if (arrayListMileStones.isNotEmpty() && autoTextViewGithubMileStone.editableText.isEmpty()) {
+            if (sharedPref.getString("github_milestone", null) != null) {
+                if (arrayListMileStones.contains(
+                        sharedPref.getString(
+                            "github_milestone",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewGithubMileStone.setText(
+                        sharedPref.getString("github_milestone", null),
+                        false
+                    )
+                } else {
+                    autoTextViewGithubMileStone.setText(arrayListMileStones[0], false)
+                }
             } else {
                 autoTextViewGithubMileStone.setText(arrayListMileStones[0], false)
             }
-        } else {
-            autoTextViewGithubMileStone.setText(arrayListMileStones[0], false)
         }
-    }
-    autoTextViewGithubMileStone.setOnTouchListener { v, event ->
-        autoTextViewGithubMileStone.showDropDown()
-        false
-    }
-    autoTextViewGithubMileStone.setOnItemClickListener { parent, view, position, id ->
-        githubAuthentication.setMileStonePosition(mileStonePosition = position)
-        hideKeyboard(activity = activity, view = viewGithub)
-    }
+        autoTextViewGithubMileStone.setOnTouchListener { v, event ->
+            autoTextViewGithubMileStone.showDropDown()
+            false
+        }
+        autoTextViewGithubMileStone.setOnItemClickListener { parent, view, position, id ->
+            githubAuthentication.setMileStonePosition(mileStonePosition = position)
+            hideKeyboard(activity = activity, view = viewGithub)
+        }
 //        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
 //            if (!hasFocus) {
 //                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
@@ -5892,48 +6014,48 @@ private fun initializeGithubMileStones(
 //                }
 //            }
 //        }
-}
+    }
 
-@SuppressLint("ClickableViewAccessibility")
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-private fun initializeGithubProject(
-    arrayListProject: ArrayList<String>,
-    sharedPref: SharedPreferences
-) {
-    autoTextViewGithubProjectAdapter = ArrayAdapter(
-        this,
-        android.R.layout.simple_dropdown_item_1line,
-        arrayListProject
-    )
-    autoTextViewGithubProject.setAdapter(autoTextViewGithubProjectAdapter)
-    if (arrayListProject.isNotEmpty() && autoTextViewGithubProject.editableText.isEmpty()) {
-        if (sharedPref.getString("github_project", null) != null) {
-            if (arrayListProject.contains(
-                    sharedPref.getString(
-                        "github_project",
-                        null
-                    )!!
-                )
-            ) {
-                autoTextViewGithubProject.setText(
-                    sharedPref.getString("github_project", null),
-                    false
-                )
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeGithubProject(
+        arrayListProject: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewGithubProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListProject
+        )
+        autoTextViewGithubProject.setAdapter(autoTextViewGithubProjectAdapter)
+        if (arrayListProject.isNotEmpty() && autoTextViewGithubProject.editableText.isEmpty()) {
+            if (sharedPref.getString("github_project", null) != null) {
+                if (arrayListProject.contains(
+                        sharedPref.getString(
+                            "github_project",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewGithubProject.setText(
+                        sharedPref.getString("github_project", null),
+                        false
+                    )
+                } else {
+                    autoTextViewGithubProject.setText(arrayListProject[0], false)
+                }
             } else {
                 autoTextViewGithubProject.setText(arrayListProject[0], false)
             }
-        } else {
-            autoTextViewGithubProject.setText(arrayListProject[0], false)
         }
-    }
-    autoTextViewGithubProject.setOnTouchListener { v, event ->
-        autoTextViewGithubProject.showDropDown()
-        false
-    }
-    autoTextViewGithubProject.setOnItemClickListener { parent, view, position, id ->
-        githubAuthentication.setProjectPosition(projectPosition = position)
-        hideKeyboard(activity = activity, view = viewGithub)
-    }
+        autoTextViewGithubProject.setOnTouchListener { v, event ->
+            autoTextViewGithubProject.showDropDown()
+            false
+        }
+        autoTextViewGithubProject.setOnItemClickListener { parent, view, position, id ->
+            githubAuthentication.setProjectPosition(projectPosition = position)
+            hideKeyboard(activity = activity, view = viewGithub)
+        }
 //        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
 //            if (!hasFocus) {
 //                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
@@ -5950,38 +6072,38 @@ private fun initializeGithubProject(
 //                }
 //            }
 //        }
-}
+    }
 
-@SuppressLint("ClickableViewAccessibility")
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-private fun initializeGithubLabels(
-    arrayListLabels: ArrayList<String>,
-    sharedPref: SharedPreferences
-) {
-    autoTextViewGithubLabelsAdapter = ArrayAdapter(
-        this,
-        android.R.layout.simple_dropdown_item_1line,
-        arrayListLabels
-    )
-    autoTextViewGithubLabels.setAdapter(autoTextViewGithubLabelsAdapter)
-    if (arrayListLabels.isNotEmpty() && autoTextViewGithubLabels.editableText.isEmpty()) {
-        if (sharedPref.getString("github_labels", null) != null) {
-            if (arrayListLabels.contains(sharedPref.getString("github_labels", null)!!)) {
-                autoTextViewGithubLabels.setText(
-                    sharedPref.getString("github_labels", null),
-                    false
-                )
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeGithubLabels(
+        arrayListLabels: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewGithubLabelsAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListLabels
+        )
+        autoTextViewGithubLabels.setAdapter(autoTextViewGithubLabelsAdapter)
+        if (arrayListLabels.isNotEmpty() && autoTextViewGithubLabels.editableText.isEmpty()) {
+            if (sharedPref.getString("github_labels", null) != null) {
+                if (arrayListLabels.contains(sharedPref.getString("github_labels", null)!!)) {
+                    autoTextViewGithubLabels.setText(
+                        sharedPref.getString("github_labels", null),
+                        false
+                    )
+                } else {
+                    autoTextViewGithubLabels.setText(arrayListLabels[0], false)
+                }
             } else {
                 autoTextViewGithubLabels.setText(arrayListLabels[0], false)
             }
-        } else {
-            autoTextViewGithubLabels.setText(arrayListLabels[0], false)
         }
-    }
-    autoTextViewGithubLabels.setOnTouchListener { v, event ->
-        autoTextViewGithubLabels.showDropDown()
-        false
-    }
+        autoTextViewGithubLabels.setOnTouchListener { v, event ->
+            autoTextViewGithubLabels.showDropDown()
+            false
+        }
 //        autoTextViewProject.setOnItemClickListener { parent, view, position, id ->
 //            projectPosition = position
 //            controlProjectPosition = true
@@ -6015,48 +6137,48 @@ private fun initializeGithubLabels(
 //                }
 //            }
 //        }
-}
+    }
 
-@SuppressLint("ClickableViewAccessibility")
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-private fun initializeGithubLinkedRequests(
-    arrayListLinkedRequests: ArrayList<String>,
-    sharedPref: SharedPreferences
-) {
-    autoTextViewGithubLinkedRequestsAdapter = ArrayAdapter(
-        this,
-        android.R.layout.simple_dropdown_item_1line,
-        arrayListLinkedRequests
-    )
-    autoTextViewGithubLinkedRequests.setAdapter(autoTextViewGithubLinkedRequestsAdapter)
-    if (arrayListLinkedRequests.isNotEmpty() && autoTextViewGithubLinkedRequests.editableText.isEmpty()) {
-        if (sharedPref.getString("github_pull_requests", null) != null) {
-            if (arrayListLinkedRequests.contains(
-                    sharedPref.getString(
-                        "github_pull_requests",
-                        null
-                    )!!
-                )
-            ) {
-                autoTextViewGithubLinkedRequests.setText(
-                    sharedPref.getString("github_pull_requests", null),
-                    false
-                )
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeGithubLinkedRequests(
+        arrayListLinkedRequests: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewGithubLinkedRequestsAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListLinkedRequests
+        )
+        autoTextViewGithubLinkedRequests.setAdapter(autoTextViewGithubLinkedRequestsAdapter)
+        if (arrayListLinkedRequests.isNotEmpty() && autoTextViewGithubLinkedRequests.editableText.isEmpty()) {
+            if (sharedPref.getString("github_pull_requests", null) != null) {
+                if (arrayListLinkedRequests.contains(
+                        sharedPref.getString(
+                            "github_pull_requests",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewGithubLinkedRequests.setText(
+                        sharedPref.getString("github_pull_requests", null),
+                        false
+                    )
+                } else {
+                    autoTextViewGithubLinkedRequests.setText(arrayListLinkedRequests[0], false)
+                }
             } else {
                 autoTextViewGithubLinkedRequests.setText(arrayListLinkedRequests[0], false)
             }
-        } else {
-            autoTextViewGithubLinkedRequests.setText(arrayListLinkedRequests[0], false)
         }
-    }
-    autoTextViewGithubLinkedRequests.setOnTouchListener { v, event ->
-        autoTextViewGithubLinkedRequests.showDropDown()
-        false
-    }
-    autoTextViewGithubLinkedRequests.setOnItemClickListener { parent, view, position, id ->
-        githubAuthentication.setLinkedRequestPosition(linkedRequestPosition = position)
-        hideKeyboard(activity = activity, view = viewGithub)
-    }
+        autoTextViewGithubLinkedRequests.setOnTouchListener { v, event ->
+            autoTextViewGithubLinkedRequests.showDropDown()
+            false
+        }
+        autoTextViewGithubLinkedRequests.setOnItemClickListener { parent, view, position, id ->
+            githubAuthentication.setLinkedRequestPosition(linkedRequestPosition = position)
+            hideKeyboard(activity = activity, view = viewGithub)
+        }
 //        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
 //            if (!hasFocus) {
 //                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
@@ -6073,18 +6195,606 @@ private fun initializeGithubLinkedRequests(
 //                }
 //            }
 //        }
-}
+    }
 
-@SuppressLint("ClickableViewAccessibility")
-@RequiresApi(Build.VERSION_CODES.M)
-private fun initializeTrelloLayout(filePathMedia: File) {
-    try {
-        removeTrelloLayout()
-        viewTrello = LayoutInflater.from(activity)
-            .inflate(R.layout.loggerbird_trello_popup, (this.rootView as ViewGroup), false)
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeTrelloLayout(filePathMedia: File) {
+        try {
+            removeTrelloLayout()
+            viewTrello = LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_trello_popup, (this.rootView as ViewGroup), false)
 
-        if (Settings.canDrawOverlays(activity)) {
-            windowManagerParamsTrello = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsTrello = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerTrello = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                (windowManagerTrello as WindowManager).addView(
+                    viewTrello,
+                    windowManagerParamsTrello
+                )
+
+                activity.window.navigationBarColor =
+                    ContextCompat.getColor(this, R.color.black)
+                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+                buttonTrelloCancel = viewTrello.findViewById(R.id.button_trello_cancel)
+                buttonTrelloCreate = viewTrello.findViewById(R.id.button_trello_create)
+                editTextTrelloTitle = viewTrello.findViewById(R.id.editText_trello_title)
+                toolbarTrello = viewTrello.findViewById(R.id.toolbar_trello)
+                recyclerViewTrelloAttachment =
+                    viewTrello.findViewById(R.id.recycler_view_trello_attachment)
+                autoTextViewTrelloProject =
+                    viewTrello.findViewById(R.id.auto_textView_trello_project)
+                autoTextViewTrelloBoard = viewTrello.findViewById(R.id.auto_textView_trello_board)
+                autoTextViewTrelloMember = viewTrello.findViewById(R.id.auto_textView_trello_member)
+                autoTextViewTrelloLabel = viewTrello.findViewById(R.id.auto_textView_trello_label)
+                recyclerViewTrelloLabel = viewTrello.findViewById(R.id.recycler_view_label_list)
+                imageViewTrelloLabel = viewTrello.findViewById(R.id.imageView_label_add)
+                cardViewTrelloLabelList = viewTrello.findViewById(R.id.cardView_label_list)
+                recyclerViewTrelloMember = viewTrello.findViewById(R.id.recycler_view_member_list)
+                imageViewTrelloMember = viewTrello.findViewById(R.id.imageView_member_add)
+                cardViewTrelloMemberList = viewTrello.findViewById(R.id.cardView_member_list)
+                imageViewTrelloCalendar = viewTrello.findViewById(R.id.imageView_start_date)
+                imageButtonTrelloRemoveTimeline =
+                    viewTrello.findViewById(R.id.image_button_trello_remove_date)
+                scrollViewTrello = viewTrello.findViewById(R.id.scrollView_trello)
+                scrollViewTrello.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        hideKeyboard(activity = activity, view = viewTrello)
+                    }
+                    return@setOnTouchListener false
+                }
+
+                toolbarTrello.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.trello_menu_save -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            with(sharedPref.edit()) {
+                                putString(
+                                    "trello_project",
+                                    autoTextViewTrelloProject.editableText.toString()
+                                )
+                                putString(
+                                    "trello_board",
+                                    autoTextViewTrelloBoard.editableText.toString()
+                                )
+                                putString("trello_title", editTextTrelloTitle.text.toString())
+                                putString(
+                                    "trello_member",
+                                    autoTextViewTrelloMember.editableText.toString()
+                                )
+                                putString(
+                                    "trello_label",
+                                    autoTextViewTrelloLabel.editableText.toString()
+                                )
+                                commit()
+                            }
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.trello_issue_preferences_save)
+                            )
+                        }
+                        R.id.trello_menu_clear -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            val editor: SharedPreferences.Editor = sharedPref.edit()
+                            editor.remove("trello_title")
+                            editor.remove("trello_project")
+                            editor.remove("trello_board")
+                            editor.remove("trello_member")
+                            editor.remove("trello_label")
+                            editor.apply()
+                            clearTrelloComponents()
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.trello_issue_preferences_delete)
+                            )
+                        }
+                    }
+                    return@setOnMenuItemClickListener true
+                }
+
+                toolbarTrello.setNavigationOnClickListener {
+                    removeTrelloLayout()
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.VISIBLE
+                    }
+                }
+                initializeTrelloRecyclerView(filePathMedia = filePathMedia)
+                initializeTrelloLabelRecyclerView()
+                initializeTrelloMemberRecyclerView()
+                buttonClicksTrello()
+                trelloAuthentication.callTrello(
+                    activity = activity,
+                    context = context,
+                    task = "get",
+                    filePathMedia = filePathMedia
+                )
+                attachProgressBar()
+            }
+        } catch (e: Exception) {
+            finishShareLayout("trello_error")
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.trelloTag)
+        }
+    }
+
+    internal fun removeTrelloLayout() {
+        if (this::viewTrello.isInitialized && windowManagerTrello != null) {
+            (windowManagerTrello as WindowManager).removeViewImmediate(
+                viewTrello
+            )
+            windowManagerTrello = null
+        }
+    }
+
+    private fun buttonClicksTrello() {
+        buttonTrelloCreate.setSafeOnClickListener {
+            trelloAuthentication.gatherAutoTextDetails(
+                autoTextViewProject = autoTextViewTrelloProject,
+                autoTextViewBoard = autoTextViewTrelloBoard,
+                autoTextViewMember = autoTextViewTrelloMember,
+                autoTextViewLabel = autoTextViewTrelloLabel
+            )
+            trelloAuthentication.gatherEditTextDetails(editTextTitle = editTextTrelloTitle)
+            trelloAuthentication.gatherCalendarDetails(calendar = calendarTrello)
+            if (trelloAuthentication.checkTitle(
+                    activity = activity,
+                    context = context
+                ) && trelloAuthentication.checkTrelloBoardEmpty(
+                    activity = activity,
+                    autoTextViewTrelloBoard = autoTextViewTrelloBoard
+                ) && trelloAuthentication.checkTrelloLabel(
+                    activity = activity,
+                    autoTextViewTrelloLabel = autoTextViewTrelloLabel
+                ) && trelloAuthentication.checkTrelloMember(
+                    activity = activity,
+                    autoTextViewTrelloMember = autoTextViewTrelloMember
+                ) && trelloAuthentication.checkTrelloProjectEmpty(
+                    activity = activity,
+                    autoTextViewTrelloProject = autoTextViewTrelloProject
+                )
+            ) {
+                attachProgressBar()
+                trelloAuthentication.callTrello(
+                    activity = activity,
+                    context = context,
+                    task = "create"
+                )
+            }
+
+        }
+        buttonTrelloCancel.setSafeOnClickListener {
+            removeTrelloLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+        imageViewTrelloLabel.setSafeOnClickListener {
+            if (!arrayListTrelloLabelName.contains(
+                    RecyclerViewModelLabel(
+                        autoTextViewTrelloLabel.editableText.toString()
+                    )
+                ) && arrayListTrelloLabel.contains(
+                    autoTextViewTrelloLabel.editableText.toString()
+                )
+            ) {
+                arrayListTrelloLabelName.add(RecyclerViewModelLabel(autoTextViewTrelloLabel.editableText.toString()))
+                trelloLabelAdapter.notifyDataSetChanged()
+                cardViewTrelloLabelList.visibility = View.VISIBLE
+            } else if (arrayListTrelloLabelName.contains(
+                    RecyclerViewModelLabel(autoTextViewTrelloLabel.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.trello_label_exist)
+                )
+            } else if (!arrayListTrelloLabel.contains(autoTextViewTrelloLabel.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.trello_label_doesnt_exist)
+                )
+            }
+
+        }
+        imageViewTrelloMember.setSafeOnClickListener {
+            hideKeyboard(activity = activity, view = viewTrello)
+            if (!arrayListTrelloMemberName.contains(
+                    RecyclerViewModelMember(
+                        autoTextViewTrelloMember.editableText.toString()
+                    )
+                ) && arrayListTrelloMember.contains(
+                    autoTextViewTrelloMember.editableText.toString()
+                )
+            ) {
+                arrayListTrelloMemberName.add(RecyclerViewModelMember(autoTextViewTrelloMember.editableText.toString()))
+                trelloMemberAdapter.notifyDataSetChanged()
+                cardViewTrelloMemberList.visibility = View.VISIBLE
+            } else if (arrayListTrelloMemberName.contains(
+                    RecyclerViewModelMember(autoTextViewTrelloMember.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.trello_member_exist)
+                )
+            } else if (!arrayListTrelloMember.contains(autoTextViewTrelloMember.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.trello_member_doesnt_exist)
+                )
+            }
+
+        }
+        imageViewTrelloCalendar.setSafeOnClickListener {
+            initializeTrelloTimelineLayout()
+        }
+
+        imageButtonTrelloRemoveTimeline.setSafeOnClickListener {
+            trelloStartDate = null
+            trelloStartTime = null
+            imageButtonTrelloRemoveTimeline.visibility = View.GONE
+
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    internal fun initializeTrelloAutoTextViews(
+        arrayListProject: ArrayList<String>,
+        arrayListBoards: ArrayList<String>,
+        arrayListMember: ArrayList<String>,
+        arrayListLabel: ArrayList<String>,
+        arrayListLabelColor: ArrayList<String>
+    ) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        editTextTrelloTitle.setText(sharedPref.getString("trello_title", null))
+        initializeTrelloProject(arrayListProject = arrayListProject, sharedPref = sharedPref)
+        initializeTrelloBoard(arrayListBoards = arrayListBoards, sharedPref = sharedPref)
+        initializeTrelloMember(arrayListMember = arrayListMember, sharedPref = sharedPref)
+        initializeTrelloLabel(
+            arrayListLabel = arrayListLabel,
+            arrayListLabelColor = arrayListLabelColor,
+            sharedPref = sharedPref
+        )
+        this.arrayListTrelloLabel = arrayListLabel
+        this.arrayListTrelloMember = arrayListMember
+        detachProgressBar()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeTrelloProject(
+        arrayListProject: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewTrelloProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListProject
+        )
+        autoTextViewTrelloProject.setAdapter(autoTextViewTrelloProjectAdapter)
+        if (arrayListProject.isNotEmpty() && autoTextViewTrelloProject.editableText.isEmpty()) {
+            if (sharedPref.getString("trello_project", null) != null) {
+                if (arrayListProject.contains(
+                        sharedPref.getString(
+                            "trello_project",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewTrelloProject.setText(
+                        sharedPref.getString("trello_project", null),
+                        false
+                    )
+                } else {
+                    autoTextViewTrelloProject.setText(arrayListProject[0], false)
+                }
+            } else {
+                autoTextViewTrelloProject.setText(arrayListProject[0], false)
+            }
+        }
+        autoTextViewTrelloProject.setOnTouchListener { v, event ->
+            autoTextViewTrelloProject.showDropDown()
+            false
+        }
+        autoTextViewTrelloProject.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewTrello)
+            clearTrelloComponents()
+            trelloAuthentication.setProjectPosition(projectPosition = position)
+            trelloAuthentication.callTrello(
+                activity = activity,
+                context = context,
+                task = "get"
+            )
+            attachProgressBar()
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeTrelloBoard(
+        arrayListBoards: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewTrelloBoardAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListBoards
+        )
+        autoTextViewTrelloBoard.setAdapter(autoTextViewTrelloBoardAdapter)
+        if (arrayListBoards.isNotEmpty() && autoTextViewTrelloBoard.editableText.isEmpty()) {
+            if (sharedPref.getString("trello_board", null) != null) {
+                if (arrayListBoards.contains(
+                        sharedPref.getString(
+                            "trello_board",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewTrelloBoard.setText(
+                        sharedPref.getString("trello_board", null),
+                        false
+                    )
+                } else {
+                    autoTextViewTrelloBoard.setText(arrayListBoards[0], false)
+                }
+            } else {
+                autoTextViewTrelloBoard.setText(arrayListBoards[0], false)
+            }
+        }
+        autoTextViewTrelloBoard.setOnTouchListener { v, event ->
+            autoTextViewTrelloBoard.showDropDown()
+            false
+        }
+        autoTextViewTrelloBoard.setOnItemClickListener { parent, view, position, id ->
+            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewTrello)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeTrelloMember(
+        arrayListMember: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewTrelloMemberAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListMember
+        )
+        autoTextViewTrelloMember.setAdapter(autoTextViewTrelloMemberAdapter)
+        if (arrayListMember.isNotEmpty() && autoTextViewTrelloMember.editableText.isEmpty()) {
+            if (sharedPref.getString("trello_member", null) != null) {
+                if (arrayListMember.contains(
+                        sharedPref.getString(
+                            "trello_member",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewTrelloMember.setText(
+                        sharedPref.getString("trello_member", null),
+                        false
+                    )
+                } else {
+                    autoTextViewTrelloMember.setText(arrayListMember[0], false)
+                }
+            } else {
+                autoTextViewTrelloMember.setText(arrayListMember[0], false)
+            }
+        }
+        autoTextViewTrelloMember.setOnTouchListener { v, event ->
+            autoTextViewTrelloMember.showDropDown()
+            false
+        }
+        autoTextViewTrelloMember.setOnItemClickListener { parent, view, position, id ->
+            //            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewTrello)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeTrelloLabel(
+        arrayListLabel: ArrayList<String>,
+        arrayListLabelColor: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewTrelloLabelAdapter = AutoCompleteTextViewTrelloAdapter(
+            this, R.layout.auto_text_view_trello_label_item, arrayListLabel, arrayListLabelColor
+        )
+        autoTextViewTrelloLabel.setAdapter(autoTextViewTrelloLabelAdapter)
+        if (arrayListLabel.isNotEmpty() && autoTextViewTrelloLabel.editableText.isEmpty()) {
+            if (sharedPref.getString("trello_label", null) != null) {
+                if (arrayListLabel.contains(
+                        sharedPref.getString(
+                            "trello_label",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewTrelloLabel.setText(
+                        sharedPref.getString("trello_label", null),
+                        false
+                    )
+                } else {
+                    autoTextViewTrelloLabel.setText(arrayListLabel[0], false)
+                }
+            } else {
+                autoTextViewTrelloLabel.setText(arrayListLabel[0], false)
+            }
+        }
+        autoTextViewTrelloLabel.setOnTouchListener { v, event ->
+            autoTextViewTrelloLabel.showDropDown()
+            false
+        }
+        autoTextViewTrelloLabel.setOnItemClickListener { parent, view, position, id ->
+            trelloAuthentication.setLabelPosition(labelPosition = position)
+            hideKeyboard(activity = activity, view = viewTrello)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeTrelloRecyclerView(filePathMedia: File) {
+        arrayListTrelloFileName.clear()
+        recyclerViewTrelloAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        trelloAdapter = RecyclerViewTrelloAdapter(
+            addTrelloFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewTrelloAttachment.adapter = trelloAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addTrelloFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListTrelloFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListTrelloFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListTrelloFileName
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeTrelloLabelRecyclerView() {
+        arrayListTrelloLabelName.clear()
+        recyclerViewTrelloLabel.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        trelloLabelAdapter = RecyclerViewTrelloLabelAdapter(
+            arrayListTrelloLabelName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewTrelloLabel.adapter = trelloLabelAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeTrelloMemberRecyclerView() {
+        arrayListTrelloMemberName.clear()
+        recyclerViewTrelloMember.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        trelloMemberAdapter = RecyclerViewTrelloMemberAdapter(
+            arrayListTrelloMemberName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewTrelloMember.adapter = trelloMemberAdapter
+    }
+
+    private fun clearTrelloComponents() {
+        cardViewTrelloMemberList.visibility = View.GONE
+        cardViewTrelloLabelList.visibility = View.GONE
+        arrayListTrelloMemberName.clear()
+        arrayListTrelloLabelName.clear()
+        trelloMemberAdapter.notifyDataSetChanged()
+        trelloLabelAdapter.notifyDataSetChanged()
+        editTextTrelloTitle.text = null
+        autoTextViewTrelloLabel.setText("", false)
+        autoTextViewTrelloMember.setText("", false)
+        autoTextViewTrelloBoard.setText("", false)
+//        autoTextViewTrelloProject.setText("",false)
+    }
+
+    private fun initializeTrelloTimelineLayout() {
+        removeTrelloTimelineLayout()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewTrelloTimeline =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_trello_start_date_popup, rootView, false)
+        windowManagerParamsTrelloTimeline =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams(
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT,
@@ -6101,563 +6811,419 @@ private fun initializeTrelloLayout(filePathMedia: File) {
                     PixelFormat.TRANSLUCENT
                 )
             }
+        windowManagerTrelloTimeline = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerTrelloTimeline as WindowManager).addView(
+            viewTrelloTimeline,
+            windowManagerParamsTrelloTimeline
+        )
+        imageViewTrelloDate = viewTrelloTimeline.findViewById(R.id.imageView_trello_date)
+        imageButtonTrelloDateRemove =
+            viewTrelloTimeline.findViewById(R.id.image_button_trello_date_remove)
+        imageViewTrelloTime = viewTrelloTimeline.findViewById(R.id.imageView_trello_time)
+        imageButtonTrelloTimeRemove =
+            viewTrelloTimeline.findViewById(R.id.image_button_trello_time_remove)
+        buttonTrelloTimelineCancel = viewTrelloTimeline.findViewById(R.id.button_trello_date_cancel)
+        buttonTrelloTimelineProceed =
+            viewTrelloTimeline.findViewById(R.id.button_trello_date_proceed)
+        buttonClicksTrelloTimeline()
+    }
 
-            windowManagerTrello = activity.getSystemService(Context.WINDOW_SERVICE)!!
-            (windowManagerTrello as WindowManager).addView(
-                viewTrello,
-                windowManagerParamsTrello
+    private fun removeTrelloTimelineLayout() {
+        if (this::viewTrelloTimeline.isInitialized && windowManagerTrelloTimeline != null) {
+            (windowManagerTrelloTimeline as WindowManager).removeViewImmediate(
+                viewTrelloTimeline
             )
+            windowManagerTrelloTimeline = null
+        }
+    }
 
-            activity.window.navigationBarColor =
-                ContextCompat.getColor(this, R.color.black)
-            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+    private fun buttonClicksTrelloTimeline() {
+        imageViewTrelloDate.setSafeOnClickListener {
+            initializeTrelloDateLayout()
+        }
+        imageButtonTrelloDateRemove.setSafeOnClickListener {
+            trelloStartDate = null
+            imageButtonTrelloDateRemove.visibility = View.GONE
+        }
+        imageViewTrelloTime.setSafeOnClickListener {
+            initializeTrelloTimeLayout()
+        }
+        imageButtonTrelloTimeRemove.setSafeOnClickListener {
+            trelloStartTime = null
+            imageButtonTrelloTimeRemove.visibility = View.GONE
+        }
 
-            buttonTrelloCancel = viewTrello.findViewById(R.id.button_trello_cancel)
-            buttonTrelloCreate = viewTrello.findViewById(R.id.button_trello_create)
-            editTextTrelloTitle = viewTrello.findViewById(R.id.editText_trello_title)
-            toolbarTrello = viewTrello.findViewById(R.id.toolbar_trello)
-            recyclerViewTrelloAttachment =
-                viewTrello.findViewById(R.id.recycler_view_trello_attachment)
-            autoTextViewTrelloProject =
-                viewTrello.findViewById(R.id.auto_textView_trello_project)
-            autoTextViewTrelloBoard = viewTrello.findViewById(R.id.auto_textView_trello_board)
-            autoTextViewTrelloMember = viewTrello.findViewById(R.id.auto_textView_trello_member)
-            autoTextViewTrelloLabel = viewTrello.findViewById(R.id.auto_textView_trello_label)
-            recyclerViewTrelloLabel = viewTrello.findViewById(R.id.recycler_view_label_list)
-            imageViewTrelloLabel = viewTrello.findViewById(R.id.imageView_label_add)
-            cardViewTrelloLabelList = viewTrello.findViewById(R.id.cardView_label_list)
-            recyclerViewTrelloMember = viewTrello.findViewById(R.id.recycler_view_member_list)
-            imageViewTrelloMember = viewTrello.findViewById(R.id.imageView_member_add)
-            cardViewTrelloMemberList = viewTrello.findViewById(R.id.cardView_member_list)
-            scrollViewTrello = viewTrello.findViewById(R.id.scrollView_trello)
-            scrollViewTrello.setOnTouchListener { v, event ->
-                if (event.action == MotionEvent.ACTION_DOWN) {
-                    hideKeyboard(activity = activity, view = viewTrello)
-                }
-                return@setOnTouchListener false
+        buttonTrelloTimelineProceed.setSafeOnClickListener {
+            if (checkTrelloDateAndTimeEmpty()) {
+                imageButtonTrelloRemoveTimeline.visibility = View.VISIBLE
             }
+        }
+        buttonTrelloTimelineCancel.setSafeOnClickListener {
+            removeTrelloTimelineLayout()
+        }
+    }
 
-            toolbarTrello.setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.trello_menu_save -> {
-                        val sharedPref =
-                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                        with(sharedPref.edit()) {
-                            putString(
-                                "trello_project",
-                                autoTextViewTrelloProject.editableText.toString()
+    private fun initializeTrelloDateLayout() {
+        removeTrelloDateLayout()
+        calendarTrello = Calendar.getInstance()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewTrelloDate =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.trello_calendar_view, rootView, false)
+        windowManagerParamsTrelloDate =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerTrelloDate = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerTrelloDate as WindowManager).addView(
+            viewTrelloDate,
+            windowManagerParamsTrelloDate
+        )
+        frameLayoutTrelloDate = viewTrelloDate.findViewById(R.id.trello_calendar_view_layout)
+        calendarViewTrello = viewTrelloDate.findViewById(R.id.calendarView_start_date)
+        buttonTrelloDateCancel = viewTrelloDate.findViewById(R.id.button_trello_calendar_cancel)
+        buttonTrelloDateCreate = viewTrelloDate.findViewById(R.id.button_trello_calendar_ok)
+        buttonClicksTrelloDateLayout()
+    }
+
+    private fun removeTrelloDateLayout() {
+        if (this::viewTrelloDate.isInitialized && windowManagerTrelloDate != null) {
+            (windowManagerTrelloDate as WindowManager).removeViewImmediate(
+                viewTrelloDate
+            )
+            windowManagerTrelloDate = null
+        }
+    }
+
+    private fun buttonClicksTrelloDateLayout() {
+        val calendar = Calendar.getInstance()
+        val mYear = calendar.get(Calendar.YEAR)
+        val mMonth = calendar.get(Calendar.MONTH)
+        val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        calendarTrello?.set(mYear, mMonth, mDayOfMonth)
+        calendarViewTrello.minDate = System.currentTimeMillis()
+        frameLayoutTrelloDate.setOnClickListener {
+            removeTrelloDateLayout()
+        }
+        calendarViewTrello.setOnDateChangeListener { view, year, month, dayOfMonth ->
+            calendarTrello?.set(year, month, dayOfMonth)
+//            startDate = "$year-$month-$dayOfMonth"
+        }
+        buttonTrelloDateCreate.setSafeOnClickListener {
+            trelloStartDate = calendarViewTrello.date
+            Log.d("time", trelloStartDate.toString())
+            Log.d("time", System.currentTimeMillis().toString())
+            imageButtonTrelloDateRemove.visibility = View.VISIBLE
+            removeTrelloDateLayout()
+        }
+        buttonTrelloDateCancel.setSafeOnClickListener {
+            removeTrelloDateLayout()
+        }
+    }
+
+    private fun initializeTrelloTimeLayout() {
+        removeTrelloTimeLayout()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewTrelloTime =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.trello_time_picker, rootView, false)
+        windowManagerParamsTrelloTime =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerTrelloTime = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerTrelloTime as WindowManager).addView(
+            viewTrelloTime,
+            windowManagerParamsTrelloTime
+        )
+        frameLayoutTrelloTime = viewTrelloTime.findViewById(R.id.trello_time_view_layout)
+        timePickerTrello = viewTrelloTime.findViewById(R.id.timePicker_start_time)
+        buttonTrelloTimeCancel = viewTrelloTime.findViewById(R.id.button_trello_time_cancel)
+        buttonTrelloTimeCreate = viewTrelloTime.findViewById(R.id.button_trello_time_ok)
+        buttonClicksTrelloTimeLayout()
+    }
+
+    private fun removeTrelloTimeLayout() {
+        if (this::viewTrelloTime.isInitialized && windowManagerTrelloTime != null) {
+            (windowManagerTrelloTime as WindowManager).removeViewImmediate(
+                viewTrelloTime
+            )
+            windowManagerTrelloTime = null
+        }
+    }
+
+    private fun buttonClicksTrelloTimeLayout() {
+        frameLayoutTrelloTime.setOnClickListener {
+            removeTrelloTimeLayout()
+        }
+//        timePickerFutureTask.setOnTimeChangedListener { view, hourOfDay, minute ->
+//
+//        }
+        buttonTrelloTimeCreate.setSafeOnClickListener {
+            calendarTrello?.set(Calendar.HOUR_OF_DAY, timePickerTrello.hour)
+            calendarTrello?.set(Calendar.MINUTE, timePickerTrello.minute)
+            trelloStartTime =
+                timePickerTrello.hour.toLong() + timePickerTrello.minute.toLong()
+            imageButtonTrelloTimeRemove.visibility = View.VISIBLE
+            removeTrelloTimeLayout()
+        }
+        buttonTrelloTimeCancel.setSafeOnClickListener {
+            removeTrelloTimeLayout()
+        }
+    }
+
+    private fun checkTrelloDateAndTimeEmpty(): Boolean {
+        if (trelloStartDate != null && trelloStartTime != null) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.trello_time_line_success)
+            )
+            removeTrelloTimelineLayout()
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.trello_time_line_empty)
+            )
+        }
+        return false
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializePivotalLayout(filePathMedia: File) {
+        try {
+            removePivotalLayout()
+            viewPivotal = LayoutInflater.from(activity)
+                .inflate(
+                    R.layout.loggerbird_pivotal_tracker_popup,
+                    (this.rootView as ViewGroup),
+                    false
+                )
+
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsPivotal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerPivotal = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                (windowManagerPivotal as WindowManager).addView(
+                    viewPivotal,
+                    windowManagerParamsPivotal
+                )
+
+                activity.window.navigationBarColor =
+                    ContextCompat.getColor(this, R.color.black)
+                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+                buttonPivotalCancel = viewPivotal.findViewById(R.id.button_pivotal_cancel)
+                buttonPivotalCreate = viewPivotal.findViewById(R.id.button_pivotal_create)
+                toolbarPivotal = viewPivotal.findViewById(R.id.toolbar_pivotal)
+                scrollViewPivotal = viewPivotal.findViewById(R.id.scrollView_pivotal)
+                editTextPivotalTitle = viewPivotal.findViewById(R.id.editText_pivotal_title)
+                autoTextViewPivotalStoryType =
+                    viewPivotal.findViewById(R.id.auto_textView_pivotal_story_type)
+                autoTextViewPivotalPoints =
+                    viewPivotal.findViewById(R.id.auto_textView_pivotal_points)
+                autoTextViewPivotalRequester =
+                    viewPivotal.findViewById(R.id.auto_textView_pivotal_requester)
+                autoTextViewPivotalProject =
+                    viewPivotal.findViewById(R.id.auto_textView_pivotal_project)
+                autoTextViewPivotalOwners =
+                    viewPivotal.findViewById(R.id.auto_textView_pivotal_owner)
+                autoTextViewPivotalLabel =
+                    viewPivotal.findViewById(R.id.auto_textView_pivotal_label)
+                imageViewPivotalOwners = viewPivotal.findViewById(R.id.imageView_owner_add)
+                cardViewPivotalOwnersList = viewPivotal.findViewById(R.id.cardView_owner_list)
+                recyclerViewPivotalOwnerList =
+                    viewPivotal.findViewById(R.id.recycler_view_pivotal_owner_list)
+                editTextPivotalBlockers = viewPivotal.findViewById(R.id.editText_pivotal_blockers)
+                imageViewPivotalBlockers = viewPivotal.findViewById(R.id.imageView_block_add)
+                cardViewPivotalBlockersList = viewPivotal.findViewById(R.id.cardView_blockers_list)
+                recyclerViewPivotalBlockersList =
+                    viewPivotal.findViewById(R.id.recycler_view_pivotal_blockers_list)
+                editTextPivotalDescription =
+                    viewPivotal.findViewById(R.id.editText_pivotal_description)
+                imageViewPivotalLabel = viewPivotal.findViewById(R.id.imageView_label_add)
+                cardViewPivotalLabelList = viewPivotal.findViewById(R.id.cardView_label_list)
+                recyclerViewPivotalLabelList =
+                    viewPivotal.findViewById(R.id.recycler_view_pivotal_label_list)
+                editTextPivotalTasks = viewPivotal.findViewById(R.id.editText_pivotal_tasks)
+                imageViewPivotalTask = viewPivotal.findViewById(R.id.imageView_task_add)
+                cardViewPivotalTasksList = viewPivotal.findViewById(R.id.cardView_task_list)
+                recyclerViewPivotalTaskList =
+                    viewPivotal.findViewById(R.id.recycler_view_pivotal_task_list)
+                cardViewPivotalAttachments = viewPivotal.findViewById(R.id.cardView_attachment)
+                recyclerViewPivotalAttachmentList =
+                    viewPivotal.findViewById(R.id.recycler_view_pivotal_attachment)
+
+                scrollViewPivotal.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        hideKeyboard(activity = activity, view = viewPivotal)
+                    }
+                    return@setOnTouchListener false
+                }
+
+                toolbarPivotal.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.pivotal_menu_save -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            with(sharedPref.edit()) {
+                                putString(
+                                    "pivotal_project",
+                                    autoTextViewPivotalProject.editableText.toString()
+                                )
+                                putString(
+                                    "pivotal_label",
+                                    autoTextViewPivotalLabel.editableText.toString()
+                                )
+                                putString(
+                                    "pivotal_owner",
+                                    autoTextViewPivotalOwners.editableText.toString()
+                                )
+                                putString(
+                                    "pivotal_points",
+                                    autoTextViewPivotalPoints.editableText.toString()
+                                )
+                                putString(
+                                    "pivotal_requester",
+                                    autoTextViewPivotalRequester.editableText.toString()
+                                )
+                                putString(
+                                    "pivotal_story_type",
+                                    autoTextViewPivotalStoryType.editableText.toString()
+                                )
+                                putString("pivotal_title", editTextPivotalTitle.text.toString())
+                                putString("pivotal_blockers", editTextPivotalBlockers.text.toString())
+                                putString("pivotal_description", editTextPivotalDescription.text.toString())
+                                putString("pivotal_tasks", editTextPivotalTasks.text.toString())
+                                commit()
+                            }
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.pivotal_issue_preferences_save)
                             )
-                            putString(
-                                "trello_board",
-                                autoTextViewTrelloBoard.editableText.toString()
-                            )
-                            putString("trello_title", editTextTrelloTitle.text.toString())
-                            putString(
-                                "trello_member",
-                                autoTextViewTrelloMember.editableText.toString()
-                            )
-                            putString(
-                                "trello_label",
-                                autoTextViewTrelloLabel.editableText.toString()
-                            )
-                            commit()
                         }
-                        defaultToast.attachToast(
-                            activity = activity,
-                            toastMessage = context.resources.getString(R.string.trello_issue_preferences_save)
-                        )
+                        R.id.pivotal_menu_clear -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            val editor: SharedPreferences.Editor = sharedPref.edit()
+                            editor.remove("pivotal_project")
+                            editor.remove("pivotal_label")
+                            editor.remove("pivotal_owner")
+                            editor.remove("pivotal_points")
+                            editor.remove("pivotal_requester")
+                            editor.remove("pivotal_story_type")
+                            editor.remove("pivotal_title")
+                            editor.remove("pivotal_blockers")
+                            editor.remove("pivotal_description")
+                            editor.remove("pivotal_tasks")
+                            editor.apply()
+                            clearTrelloComponents()
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.pivotal_issue_preferences_delete)
+                            )
+                        }
                     }
-                    R.id.trello_menu_clear -> {
-                        val sharedPref =
-                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                        val editor: SharedPreferences.Editor = sharedPref.edit()
-                        editor.remove("trello_title")
-                        editor.remove("trello_project")
-                        editor.remove("trello_board")
-                        editor.remove("trello_member")
-                        editor.remove("trello_label")
-                        editor.apply()
-                        clearTrelloComponents()
-                        defaultToast.attachToast(
-                            activity = activity,
-                            toastMessage = context.resources.getString(R.string.trello_issue_preferences_delete)
-                        )
+                    return@setOnMenuItemClickListener true
+                }
+
+                toolbarPivotal.setNavigationOnClickListener {
+                    removePivotalLayout()
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.VISIBLE
                     }
                 }
-                return@setOnMenuItemClickListener true
+//                initializeTrelloRecyclerView(filePathMedia = filePathMedia)
+//                initializeTrelloLabelRecyclerView()
+//                initializeTrelloMemberRecyclerView()
+                buttonClicksPivotal()
+//                trelloAuthentication.callTrello(
+//                    activity = activity,
+//                    context = context,
+//                    task = "get",
+//                    filePathMedia = filePathMedia
+//                )
+//                attachProgressBar()
             }
+        } catch (e: Exception) {
+            finishShareLayout("pivotal_error")
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.pivotalTag)
+        }
+    }
 
-            toolbarTrello.setNavigationOnClickListener {
-                removeTrelloLayout()
-                if (controlFloatingActionButtonView()) {
-                    floatingActionButtonView.visibility = View.VISIBLE
-                }
+    internal fun removePivotalLayout() {
+        if (this::viewPivotal.isInitialized && windowManagerPivotal != null) {
+            (windowManagerPivotal as WindowManager).removeViewImmediate(
+                viewPivotal
+            )
+            windowManagerPivotal = null
+        }
+    }
+    private fun buttonClicksPivotal(){
+        buttonPivotalCreate.setSafeOnClickListener {
+            removePivotalLayout()
+        }
+        buttonPivotalCancel.setSafeOnClickListener {
+            removePivotalLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
             }
-            initializeTrelloRecyclerView(filePathMedia = filePathMedia)
-            initializeTrelloLabelRecyclerView()
-            initializeTrelloMemberRecyclerView()
-            buttonClicksTrello()
-            trelloAuthentication.callTrello(
-                activity = activity,
-                context = context,
-                task = "get",
-                filePathMedia = filePathMedia
-            )
-            attachProgressBar()
-        }
-    } catch (e: Exception) {
-        finishShareLayout("trello_error")
-        e.printStackTrace()
-        LoggerBird.callEnqueue()
-        LoggerBird.callExceptionDetails(exception = e, tag = Constants.trelloTag)
-    }
-}
-
-internal fun removeTrelloLayout() {
-    if (this::viewTrello.isInitialized && windowManagerTrello != null) {
-        (windowManagerTrello as WindowManager).removeViewImmediate(
-            viewTrello
-        )
-        windowManagerTrello = null
-    }
-}
-
-private fun buttonClicksTrello() {
-    buttonTrelloCreate.setSafeOnClickListener {
-        trelloAuthentication.gatherAutoTextDetails(
-            autoTextViewProject = autoTextViewTrelloProject,
-            autoTextViewBoard = autoTextViewTrelloBoard,
-            autoTextViewMember = autoTextViewTrelloMember,
-            autoTextViewLabel = autoTextViewTrelloLabel
-        )
-        trelloAuthentication.gatherEditTextDetails(editTextTitle = editTextTrelloTitle)
-        if (trelloAuthentication.checkTitle(
-                activity = activity,
-                context = context
-            ) && trelloAuthentication.checkTrelloBoardEmpty(
-                activity = activity,
-                autoTextViewTrelloBoard = autoTextViewTrelloBoard
-            ) && trelloAuthentication.checkTrelloLabel(
-                activity = activity,
-                autoTextViewTrelloLabel = autoTextViewTrelloLabel
-            ) && trelloAuthentication.checkTrelloMember(
-                activity = activity,
-                autoTextViewTrelloMember = autoTextViewTrelloMember
-            ) && trelloAuthentication.checkTrelloProjectEmpty(
-                activity = activity,
-                autoTextViewTrelloProject = autoTextViewTrelloProject
-            )
-        ) {
-            attachProgressBar()
-            trelloAuthentication.callTrello(
-                activity = activity,
-                context = context,
-                task = "create"
-            )
-        }
-
-    }
-    buttonTrelloCancel.setSafeOnClickListener {
-        removeTrelloLayout()
-        if (controlFloatingActionButtonView()) {
-            floatingActionButtonView.visibility = View.VISIBLE
         }
     }
-    imageViewTrelloLabel.setSafeOnClickListener {
-        if (!arrayListTrelloLabelName.contains(
-                RecyclerViewModelLabel(
-                    autoTextViewTrelloLabel.editableText.toString()
-                )
-            ) && arrayListTrelloLabel.contains(
-                autoTextViewTrelloLabel.editableText.toString()
-            )
-        ) {
-            arrayListTrelloLabelName.add(RecyclerViewModelLabel(autoTextViewTrelloLabel.editableText.toString()))
-            trelloLabelAdapter.notifyDataSetChanged()
-            cardViewTrelloLabelList.visibility = View.VISIBLE
-        } else if (arrayListTrelloLabelName.contains(
-                RecyclerViewModelLabel(autoTextViewTrelloLabel.editableText.toString())
-            )
-        ) {
-            defaultToast.attachToast(
-                activity = activity,
-                toastMessage = activity.resources.getString(R.string.trello_label_exist)
-            )
-        } else if (!arrayListTrelloLabel.contains(autoTextViewTrelloLabel.editableText.toString())) {
-            defaultToast.attachToast(
-                activity = activity,
-                toastMessage = activity.resources.getString(R.string.trello_label_doesnt_exist)
-            )
-        }
 
-    }
-    imageViewTrelloMember.setSafeOnClickListener {
-        hideKeyboard(activity = activity, view = viewTrello)
-        if (!arrayListTrelloMemberName.contains(
-                RecyclerViewModelMember(
-                    autoTextViewTrelloMember.editableText.toString()
-                )
-            ) && arrayListTrelloMember.contains(
-                autoTextViewTrelloMember.editableText.toString()
-            )
-        ) {
-            arrayListTrelloMemberName.add(RecyclerViewModelMember(autoTextViewTrelloMember.editableText.toString()))
-            trelloMemberAdapter.notifyDataSetChanged()
-            cardViewTrelloMemberList.visibility = View.VISIBLE
-        } else if (arrayListTrelloMemberName.contains(
-                RecyclerViewModelMember(autoTextViewTrelloMember.editableText.toString())
-            )
-        ) {
-            defaultToast.attachToast(
-                activity = activity,
-                toastMessage = activity.resources.getString(R.string.trello_member_exist)
-            )
-        } else if (!arrayListTrelloMember.contains(autoTextViewTrelloMember.editableText.toString())) {
-            defaultToast.attachToast(
-                activity = activity,
-                toastMessage = activity.resources.getString(R.string.trello_member_doesnt_exist)
-            )
-        }
-
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-internal fun initializeTrelloAutoTextViews(
-    arrayListProject: ArrayList<String>,
-    arrayListBoards: ArrayList<String>,
-    arrayListMember: ArrayList<String>,
-    arrayListLabel: ArrayList<String>,
-    arrayListLabelColor: ArrayList<String>
-) {
-    val sharedPref =
-        PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-    editTextTrelloTitle.setText(sharedPref.getString("trello_title", null))
-    initializeTrelloProject(arrayListProject = arrayListProject, sharedPref = sharedPref)
-    initializeTrelloBoard(arrayListBoards = arrayListBoards, sharedPref = sharedPref)
-    initializeTrelloMember(arrayListMember = arrayListMember, sharedPref = sharedPref)
-    initializeTrelloLabel(
-        arrayListLabel = arrayListLabel,
-        arrayListLabelColor = arrayListLabelColor,
-        sharedPref = sharedPref
-    )
-    this.arrayListTrelloLabel = arrayListLabel
-    this.arrayListTrelloMember = arrayListMember
-    detachProgressBar()
-}
-
-@SuppressLint("ClickableViewAccessibility")
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-private fun initializeTrelloProject(
-    arrayListProject: ArrayList<String>,
-    sharedPref: SharedPreferences
-) {
-    autoTextViewTrelloProjectAdapter = ArrayAdapter(
-        this,
-        android.R.layout.simple_dropdown_item_1line,
-        arrayListProject
-    )
-    autoTextViewTrelloProject.setAdapter(autoTextViewTrelloProjectAdapter)
-    if (arrayListProject.isNotEmpty() && autoTextViewTrelloProject.editableText.isEmpty()) {
-        if (sharedPref.getString("trello_project", null) != null) {
-            if (arrayListProject.contains(
-                    sharedPref.getString(
-                        "trello_project",
-                        null
-                    )!!
-                )
-            ) {
-                autoTextViewTrelloProject.setText(
-                    sharedPref.getString("trello_project", null),
-                    false
-                )
-            } else {
-                autoTextViewTrelloProject.setText(arrayListProject[0], false)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    inner class MediaProjectionCallback : MediaProjection.Callback() {
+        override fun onStop() {
+            activity.runOnUiThread {
+                textView_counter_video.performClick()
             }
-        } else {
-            autoTextViewTrelloProject.setText(arrayListProject[0], false)
         }
     }
-    autoTextViewTrelloProject.setOnTouchListener { v, event ->
-        autoTextViewTrelloProject.showDropDown()
-        false
-    }
-    autoTextViewTrelloProject.setOnItemClickListener { parent, view, position, id ->
-        hideKeyboard(activity = activity, view = viewTrello)
-        clearTrelloComponents()
-        trelloAuthentication.setProjectPosition(projectPosition = position)
-        trelloAuthentication.callTrello(
-            activity = activity,
-            context = context,
-            task = "get"
-        )
-        attachProgressBar()
-    }
-//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
-//            if (!hasFocus) {
-//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
-//                    if (arrayListProjectNames.isNotEmpty()) {
-//                        if (sharedPref.getString("jira_project", null) != null) {
-//                            autoTextViewProject.setText(
-//                                sharedPref.getString("jira_project", null),
-//                                false
-//                            )
-//                        } else {
-//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-}
-
-@SuppressLint("ClickableViewAccessibility")
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-private fun initializeTrelloBoard(
-    arrayListBoards: ArrayList<String>,
-    sharedPref: SharedPreferences
-) {
-    autoTextViewTrelloBoardAdapter = ArrayAdapter(
-        this,
-        android.R.layout.simple_dropdown_item_1line,
-        arrayListBoards
-    )
-    autoTextViewTrelloBoard.setAdapter(autoTextViewTrelloBoardAdapter)
-    if (arrayListBoards.isNotEmpty() && autoTextViewTrelloBoard.editableText.isEmpty()) {
-        if (sharedPref.getString("trello_board", null) != null) {
-            if (arrayListBoards.contains(
-                    sharedPref.getString(
-                        "trello_board",
-                        null
-                    )!!
-                )
-            ) {
-                autoTextViewTrelloBoard.setText(
-                    sharedPref.getString("trello_board", null),
-                    false
-                )
-            } else {
-                autoTextViewTrelloBoard.setText(arrayListBoards[0], false)
-            }
-        } else {
-            autoTextViewTrelloBoard.setText(arrayListBoards[0], false)
-        }
-    }
-    autoTextViewTrelloBoard.setOnTouchListener { v, event ->
-        autoTextViewTrelloBoard.showDropDown()
-        false
-    }
-    autoTextViewTrelloBoard.setOnItemClickListener { parent, view, position, id ->
-        trelloAuthentication.setBoardPosition(boardPosition = position)
-        hideKeyboard(activity = activity, view = viewTrello)
-    }
-//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
-//            if (!hasFocus) {
-//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
-//                    if (arrayListProjectNames.isNotEmpty()) {
-//                        if (sharedPref.getString("jira_project", null) != null) {
-//                            autoTextViewProject.setText(
-//                                sharedPref.getString("jira_project", null),
-//                                false
-//                            )
-//                        } else {
-//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-}
-
-@SuppressLint("ClickableViewAccessibility")
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-private fun initializeTrelloMember(
-    arrayListMember: ArrayList<String>,
-    sharedPref: SharedPreferences
-) {
-    autoTextViewTrelloMemberAdapter = ArrayAdapter(
-        this,
-        android.R.layout.simple_dropdown_item_1line,
-        arrayListMember
-    )
-    autoTextViewTrelloMember.setAdapter(autoTextViewTrelloMemberAdapter)
-    if (arrayListMember.isNotEmpty() && autoTextViewTrelloMember.editableText.isEmpty()) {
-        if (sharedPref.getString("trello_member", null) != null) {
-            if (arrayListMember.contains(
-                    sharedPref.getString(
-                        "trello_member",
-                        null
-                    )!!
-                )
-            ) {
-                autoTextViewTrelloMember.setText(
-                    sharedPref.getString("trello_member", null),
-                    false
-                )
-            } else {
-                autoTextViewTrelloMember.setText(arrayListMember[0], false)
-            }
-        } else {
-            autoTextViewTrelloMember.setText(arrayListMember[0], false)
-        }
-    }
-    autoTextViewTrelloMember.setOnTouchListener { v, event ->
-        autoTextViewTrelloMember.showDropDown()
-        false
-    }
-    autoTextViewTrelloMember.setOnItemClickListener { parent, view, position, id ->
-        //            trelloAuthentication.setBoardPosition(boardPosition = position)
-        hideKeyboard(activity = activity, view = viewTrello)
-    }
-//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
-//            if (!hasFocus) {
-//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
-//                    if (arrayListProjectNames.isNotEmpty()) {
-//                        if (sharedPref.getString("jira_project", null) != null) {
-//                            autoTextViewProject.setText(
-//                                sharedPref.getString("jira_project", null),
-//                                false
-//                            )
-//                        } else {
-//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-}
-
-@SuppressLint("ClickableViewAccessibility")
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-private fun initializeTrelloLabel(
-    arrayListLabel: ArrayList<String>,
-    arrayListLabelColor: ArrayList<String>,
-    sharedPref: SharedPreferences
-) {
-    autoTextViewTrelloLabelAdapter = AutoCompleteTextViewTrelloAdapter(
-        this, R.layout.auto_text_view_trello_label_item, arrayListLabel, arrayListLabelColor
-    )
-    autoTextViewTrelloLabel.setAdapter(autoTextViewTrelloLabelAdapter)
-    if (arrayListLabel.isNotEmpty() && autoTextViewTrelloLabel.editableText.isEmpty()) {
-        if (sharedPref.getString("trello_label", null) != null) {
-            if (arrayListLabel.contains(
-                    sharedPref.getString(
-                        "trello_label",
-                        null
-                    )!!
-                )
-            ) {
-                autoTextViewTrelloLabel.setText(
-                    sharedPref.getString("trello_label", null),
-                    false
-                )
-            } else {
-                autoTextViewTrelloLabel.setText(arrayListLabel[0], false)
-            }
-        } else {
-            autoTextViewTrelloLabel.setText(arrayListLabel[0], false)
-        }
-    }
-    autoTextViewTrelloLabel.setOnTouchListener { v, event ->
-        autoTextViewTrelloLabel.showDropDown()
-        false
-    }
-    autoTextViewTrelloLabel.setOnItemClickListener { parent, view, position, id ->
-        trelloAuthentication.setLabelPosition(labelPosition = position)
-        hideKeyboard(activity = activity, view = viewTrello)
-    }
-//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
-//            if (!hasFocus) {
-//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
-//                    if (arrayListProjectNames.isNotEmpty()) {
-//                        if (sharedPref.getString("jira_project", null) != null) {
-//                            autoTextViewProject.setText(
-//                                sharedPref.getString("jira_project", null),
-//                                false
-//                            )
-//                        } else {
-//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-}
-
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-private fun initializeTrelloRecyclerView(filePathMedia: File) {
-    arrayListTrelloFileName.clear()
-    recyclerViewTrelloAttachment.layoutManager =
-        LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-    trelloAdapter = RecyclerViewTrelloAdapter(
-        addTrelloFileNames(filePathMedia = filePathMedia),
-        context = context,
-        activity = activity,
-        rootView = rootView
-    )
-    recyclerViewTrelloAttachment.adapter = trelloAdapter
-}
-
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-private fun addTrelloFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
-    if (filePathMedia.exists()) {
-        arrayListTrelloFileName.add(RecyclerViewModel(file = filePathMedia))
-    }
-    if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
-        arrayListTrelloFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
-    }
-    return arrayListTrelloFileName
-}
-
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-private fun initializeTrelloLabelRecyclerView() {
-    arrayListTrelloLabelName.clear()
-    recyclerViewTrelloLabel.layoutManager =
-        LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-    trelloLabelAdapter = RecyclerViewTrelloLabelAdapter(
-        arrayListTrelloLabelName,
-        context = context,
-        activity = activity,
-        rootView = rootView
-    )
-    recyclerViewTrelloLabel.adapter = trelloLabelAdapter
-}
-
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-private fun initializeTrelloMemberRecyclerView() {
-    arrayListTrelloMemberName.clear()
-    recyclerViewTrelloMember.layoutManager =
-        LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-    trelloMemberAdapter = RecyclerViewTrelloMemberAdapter(
-        arrayListTrelloMemberName,
-        context = context,
-        activity = activity,
-        rootView = rootView
-    )
-    recyclerViewTrelloMember.adapter = trelloMemberAdapter
-}
-
-private fun clearTrelloComponents() {
-    cardViewTrelloMemberList.visibility = View.GONE
-    cardViewTrelloLabelList.visibility = View.GONE
-    arrayListTrelloMemberName.clear()
-    arrayListTrelloLabelName.clear()
-    trelloMemberAdapter.notifyDataSetChanged()
-    trelloLabelAdapter.notifyDataSetChanged()
-    editTextTrelloTitle.text = null
-    autoTextViewTrelloLabel.setText("", false)
-    autoTextViewTrelloMember.setText("", false)
-    autoTextViewTrelloBoard.setText("", false)
-//        autoTextViewTrelloProject.setText("",false)
-}
-
-
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-inner class MediaProjectionCallback : MediaProjection.Callback() {
-    override fun onStop() {
-        activity.runOnUiThread {
-            textView_counter_video.performClick()
-        }
-    }
-}
 }

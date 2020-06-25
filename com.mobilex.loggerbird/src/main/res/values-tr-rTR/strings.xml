@@ -125,6 +125,13 @@
     <string name="trello_title_empty">Başlık boş olamaz!</string>
     <string name="trello_issue_preferences_save">Konu tercihleri kaydedildi!</string>
     <string name="trello_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="trello_time_line_empty">Tarih veya zaman boş olamaz!</string>
+    <string name="trello_time_line_success">Zaman çizelgesi detayları alındı!</string>
+    <string name="pivotal_issue_success">Görev başarılı bir şekilde açıldı!</string>
+    <string name="pivotal_issue_failure">Pivotal görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="pivotal_issue_time_out">Pivotal görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="pivotal_issue_preferences_save">Konu tercihleri kaydedildi!</string>
+    <string name="pivotal_issue_preferences_delete">Konu tercihleri silindi!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
@@ -146,7 +153,7 @@
     <string name="textView_loggerbird_gitlab_title">Gitlab ile paylaş</string>
     <string name="textView_loggerbird_github_title">Github ile paylaş</string>
     <string name="textView_loggerbird_trello_title">Trello ile paylaş</string>
-
+    <string name="textView_loggerbird_pivotal_title">Pivotal-tracker ile paylaş</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça boyutu ayarla</string>
     <!-- activity_paint_save_dialog-->
@@ -316,6 +323,7 @@
     <string name="textView_trello_member_list">Üye listesi</string>
     <string name="textView_trello_label">Etiket</string>
     <string name="textView_trello_label_list">Etiket listesi</string>
+    <string name="textView_trello_start_date">Başlangıç tarihi</string>
     <string name="textView_trello_attachment">Eklentiler</string>
     <string name="button_trello_create">Oluştur</string>
     <string name="button_trello_cancel">İptal</string>
@@ -334,5 +342,36 @@
     <string name="textView_recyclerView_trello_member_title">Trello görevlendirmenizden bu üyeyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_trello_member_delete">Üyeyi sil</string>
     <string name="button_recyclerView_trello_member_keep">Üyeyi tut</string>
+    <!-- loggerbird_trello_start_date_popup-->
+    <string name="textView_trello_date_title">Zaman çizelgesi belirle</string>
+    <string name="button_trello_date_proceed">Devam</string>
+    <string name="button_trello_date_cancel">İptal</string>
+    <string name="textView_trello_start_time">Başlangıç zamanı</string>
+    <!-- loggerbird_pivotal_menu-->
+    <string name="textView_pivotal_menu_save">Görev detayı kaydet</string>
+    <string name="textView_pivotal_menu_clear">Görev detayı temizle</string>
+    <!-- loggerbird_pivotal_popup-->
+    <string name="textView_pivotal_project">Proje</string>
+    <string name="textView_pivotal_title">Başlık</string>
+    <string name="editText_pivotal_title_hint">Bu hikaye için bir başlık giriniz…</string>
+    <string name="textView_pivotal_type">Hikaye tipi</string>
+    <string name="textView_pivotal_requester">İsteyen</string>
+    <string name="textView_pivotal_points">Puanlar</string>
+    <string name="textView_pivotal_owners">Sahipler</string>
+    <string name="textView_pivotal_owners_list">Sahipler listesi</string>
+    <string name="textView_pivotal_blockers">Bloklayan</string>
+    <string name="textView_pivotal_blockers_list">Blocklayan listesi</string>
+    <string name="textView_pivotal_description">Açıklama</string>
+    <string name="textView_pivotal_labels">Etiketler</string>
+    <string name="textView_pivotal_labels_list">Etiketler listesi</string>
+    <string name="textView_pivotal_tasks">Görevler</string>
+    <string name="textView_pivotal_tasks_list">Görevler listesi</string>
+    <string name="textView_pivotal_attachment">Eklentiler</string>
+    <string name="editText_pivotal_description">Bu hikaye için bir açıklama giriniz …</string>
+    <string name="editText_pivotal_task">Bu hikaye için bir görev giriniz …</string>
+    <string name="editText_pivotal_block">Bu hikaye için bir engelleyen giriniz …</string>
+    <string name="editText_pivotal_title">Bu hikaye için bir başlık giriniz … …</string>
+    <string name="button_pivotal_create">Oluştur</string>
+    <string name="button_pivotal_cancel">İptal</string>
 
 </resources>
