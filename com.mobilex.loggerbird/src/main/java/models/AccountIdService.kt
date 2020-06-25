@@ -134,4 +134,6 @@ interface AccountIdService {
     fun getPivotalLabels():Call<JsonArray>
     @GET("memberships")
     fun getPivotalMembers():Call<JsonArray>
+    @POST("stories")
+    fun createPivotalStory(@Body  jsonObject: JsonObject):Call<JsonObject>
 }

@@ -409,7 +409,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonCalendarViewGitlabCancel: Button
     private lateinit var buttonCalendarViewGitlabOk: Button
     private lateinit var recyclerViewGitlabAttachment: RecyclerView
-    private lateinit var gitlabAdapter:RecyclerViewGitlabAdapter
+    private lateinit var gitlabAdapter: RecyclerViewGitlabAdapter
     private lateinit var progressBarGitlab: ProgressBar
     private lateinit var progressBarGitlabLayout: FrameLayout
     private lateinit var autoTextViewGitlabProjectAdapter: ArrayAdapter<String>
@@ -561,6 +561,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private val arrayListPivotalOwnerName: ArrayList<RecyclerViewModelOwner> = ArrayList()
     private lateinit var pivotalOwnerAdapter: RecyclerViewPivotalOwnerAdapter
     private lateinit var arrayListPivotalOwner: ArrayList<String>
+
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
@@ -2703,7 +2704,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
                 "gitlab_error_time_out" -> {
                     removeSlackLayout()
-                    Toast.makeText(context, R.string.gitlab_sent_error_time_out, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.gitlab_sent_error_time_out, Toast.LENGTH_SHORT)
+                        .show()
                     progressBarGitlabLayout.visibility = View.GONE
                     progressBarGitlab.visibility = View.GONE
                 }
@@ -7096,7 +7098,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun initializeGitlabLayout(filePathMedia: File){
+    private fun initializeGitlabLayout(filePathMedia: File) {
         try {
             removeGitlabLayout()
             viewGitlab = LayoutInflater.from(activity)
@@ -7144,20 +7146,25 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
 
                 toolbarGitlab = viewGitlab.findViewById(R.id.toolbar_gitlab)
-                autoTextViewGitlabProject = viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
+                autoTextViewGitlabProject =
+                    viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
                 editTextGitlabTitle = viewGitlab.findViewById(R.id.editText_gitlab_title)
-                editTextGitlabDescription = viewGitlab.findViewById(R.id.editText_gitlab_description)
+                editTextGitlabDescription =
+                    viewGitlab.findViewById(R.id.editText_gitlab_description)
                 editTextGitlabWeight = viewGitlab.findViewById(R.id.editText_gitlab_weight)
                 spinnerGitlabMilestone = viewGitlab.findViewById(R.id.spinner_gitlab_milestone)
                 spinnerGitlabAssignee = viewGitlab.findViewById(R.id.spinner_gitlab_assignee)
                 spinnerGitlabLabels = viewGitlab.findViewById(R.id.spinner_gitlab_labels)
-                spinnerGitlabConfidentiality = viewGitlab.findViewById(R.id.spinner_gitlab_confidentiality)
+                spinnerGitlabConfidentiality =
+                    viewGitlab.findViewById(R.id.spinner_gitlab_confidentiality)
                 textViewGitlabDueDate = viewGitlab.findViewById(R.id.textView_gitlab_due_date)
                 buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
                 buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
                 progressBarGitlab = viewGitlab.findViewById(R.id.gitlab_progressbar)
-                progressBarGitlabLayout = viewGitlab.findViewById(R.id.gitlab_progressbar_background)
-                recyclerViewGitlabAttachment = viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
+                progressBarGitlabLayout =
+                    viewGitlab.findViewById(R.id.gitlab_progressbar_background)
+                recyclerViewGitlabAttachment =
+                    viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
                 editTextGitlabWeight.filters = arrayOf<InputFilter>(InputTypeFilter("0", "100"))
 
                 gitlabAuthentication.callGitlab(
@@ -7171,7 +7178,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 initializeGitlabRecyclerView(filePathMedia = filePathMedia)
                 buttonClicksGitlab(filePathMedia = filePathMedia)
             }
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
@@ -7186,10 +7193,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         var mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         var dueDate: String = ""
         val simpleDateFormat = SimpleDateFormat("MM/dd/yyyy")
-        calendarViewGitlabLayout = calendarViewGitlabView.findViewById(R.id.gitlab_calendar_view_layout)
-        calendarViewGitlabDueDate = calendarViewGitlabView.findViewById(R.id.calendarView_gitlab_due_date)
-        buttonCalendarViewGitlabCancel = calendarViewGitlabView.findViewById(R.id.button_gitlab_calendar_cancel)
-        buttonCalendarViewGitlabOk = calendarViewGitlabView.findViewById(R.id.button_gitlab_calendar_ok)
+        calendarViewGitlabLayout =
+            calendarViewGitlabView.findViewById(R.id.gitlab_calendar_view_layout)
+        calendarViewGitlabDueDate =
+            calendarViewGitlabView.findViewById(R.id.calendarView_gitlab_due_date)
+        buttonCalendarViewGitlabCancel =
+            calendarViewGitlabView.findViewById(R.id.button_gitlab_calendar_cancel)
+        buttonCalendarViewGitlabOk =
+            calendarViewGitlabView.findViewById(R.id.button_gitlab_calendar_ok)
 
         calendarViewGitlabDueDate.minDate = System.currentTimeMillis()
         if (calendarViewGitlabDate != null) {
@@ -7201,7 +7212,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
 
         buttonCalendarViewGitlabOk.setOnClickListener {
-            if(dueDate != null){
+            if (dueDate != null) {
                 gitlabAuthentication.dueDate = dueDate
             }
             detachGitlabDatePicker()
@@ -7209,7 +7220,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
         calendarViewGitlabDueDate.setOnDateChangeListener { viewStartDate, year, month, dayOfMonth ->
             mYear = year
-            mMonth = month+1
+            mMonth = month + 1
             mDayOfMonth = dayOfMonth
             calendarViewGitlabDate = viewStartDate.date
             dueDate = "$mYear-$mMonth-$mDayOfMonth"
@@ -7267,7 +7278,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-    private fun removeGitlabLayout(){
+    private fun removeGitlabLayout() {
         if (windowManagerGitlab != null && this::viewGitlab.isInitialized) {
             (windowManagerGitlab as WindowManager).removeViewImmediate(viewGitlab)
             windowManagerGitlab = null
@@ -7276,10 +7287,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun buttonClicksGitlab(filePathMedia: File){
+    private fun buttonClicksGitlab(filePathMedia: File) {
 
         buttonGitlabCreate.setSafeOnClickListener {
-            if(checkGitlabTitleEmpty()){
+            if (checkGitlabTitleEmpty()) {
                 progressBarGitlabLayout.visibility = View.VISIBLE
                 progressBarGitlab.visibility = View.VISIBLE
                 attachProgressBar()
@@ -7364,9 +7375,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     @SuppressLint("ClickableViewAccessibility")
     internal fun initializeGitlabProject(
-        arrayListGitlabProjects: ArrayList<String>){
+        arrayListGitlabProjects: ArrayList<String>
+    ) {
 
-        autoTextViewGitlabProjectAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabProjects)
+        autoTextViewGitlabProjectAdapter =
+            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabProjects)
         autoTextViewGitlabProject.setAdapter(autoTextViewGitlabProjectAdapter)
 
         if (arrayListGitlabProjects.isNotEmpty() && autoTextViewGitlabProject.text.isEmpty()) {
@@ -7396,12 +7409,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     internal fun initializeGitLabAssignee(
         arrayListGitlabUsers: ArrayList<String>
-    ){
-        spinnerGitlabAssigneeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabUsers)
+    ) {
+        spinnerGitlabAssigneeAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabUsers)
         spinnerGitlabAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabAssignee.adapter = spinnerGitlabAssigneeAdapter
 
-        spinnerGitlabAssignee.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+        spinnerGitlabAssignee.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 TODO("Not yet implemented")
             }
@@ -7419,12 +7433,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     internal fun initializeGitLabLabels(
         arrayListGitlabLabels: ArrayList<String>
-    ){
-        spinnerGitlabLabelsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabLabels)
+    ) {
+        spinnerGitlabLabelsAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabLabels)
         spinnerGitlabLabelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabLabels.adapter = spinnerGitlabLabelsAdapter
 
-        spinnerGitlabLabels.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+        spinnerGitlabLabels.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 TODO("Not yet implemented")
             }
@@ -7442,50 +7457,54 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     internal fun initializeGitLabConfidentiality(
         arrayListGitlabConfidentiality: ArrayList<String>
-    ){
-        spinnerGitlabConfidentialityAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabConfidentiality)
+    ) {
+        spinnerGitlabConfidentialityAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabConfidentiality)
         spinnerGitlabConfidentialityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabConfidentiality.adapter = spinnerGitlabConfidentialityAdapter
 
-        spinnerGitlabConfidentiality.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
+        spinnerGitlabConfidentiality.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    TODO("Not yet implemented")
+                }
 
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                gitlabAuthentication.gitlabConfidentialityPosition(confidentialityPosition = position)
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    gitlabAuthentication.gitlabConfidentialityPosition(confidentialityPosition = position)
+                }
             }
-        }
     }
 
     internal fun initializeGitLabMilestones(
         arrayListGitlabMilestones: ArrayList<String>
-    ){
-        spinnerGitlabMilestoneAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabMilestones)
+    ) {
+        spinnerGitlabMilestoneAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabMilestones)
         spinnerGitlabMilestoneAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabMilestone.adapter = spinnerGitlabMilestoneAdapter
 
         spinnerGitlabMilestoneAdapter.notifyDataSetChanged()
 
-        spinnerGitlabMilestone.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
+        spinnerGitlabMilestone.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    TODO("Not yet implemented")
+                }
 
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = position)
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = position)
+                }
             }
-        }
     }
 
 
@@ -7512,8 +7531,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         return false
     }
-
-
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -7636,8 +7653,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                     autoTextViewPivotalStoryType.editableText.toString()
                                 )
                                 putString("pivotal_title", editTextPivotalTitle.text.toString())
-                                putString("pivotal_blockers", editTextPivotalBlockers.text.toString())
-                                putString("pivotal_description", editTextPivotalDescription.text.toString())
+                                putString(
+                                    "pivotal_blockers",
+                                    editTextPivotalBlockers.text.toString()
+                                )
+                                putString(
+                                    "pivotal_description",
+                                    editTextPivotalDescription.text.toString()
+                                )
                                 putString("pivotal_tasks", editTextPivotalTasks.text.toString())
                                 commit()
                             }
@@ -7708,9 +7731,59 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-    private fun buttonClicksPivotal(){
+    private fun buttonClicksPivotal() {
         buttonPivotalCreate.setSafeOnClickListener {
-            removePivotalLayout()
+            pivotalAuthentication.gatherAutoTextDetails(
+                autoTextViewProject = autoTextViewPivotalProject,
+                autoTextViewStoryType = autoTextViewPivotalStoryType,
+                autoTextViewLabel = autoTextViewPivotalLabel,
+                autoTextViewPoints = autoTextViewPivotalPoints,
+                autoTextViewOwners = autoTextViewPivotalOwners,
+                autoTextViewRequester = autoTextViewPivotalRequester
+            )
+            pivotalAuthentication.gatherEditTextDetails(
+                editTextTitle = editTextPivotalTitle,
+                editTextTasks = editTextPivotalTasks,
+                editTextDescription = editTextPivotalDescription,
+                editTextBlockers = editTextPivotalBlockers
+            )
+            if (pivotalAuthentication.checkPivotalProject(
+                    activity = activity,
+                    autoTextViewPivotalProject = autoTextViewPivotalProject
+                )
+                && pivotalAuthentication.checkPivotalStoryType(
+                    activity = activity,
+                    autoTextViewPivotalStoryType = autoTextViewPivotalStoryType
+                )
+                && pivotalAuthentication.checkPivotalTitle(
+                    activity = activity,
+                    editTextTitle = editTextPivotalTitle
+                )
+                && pivotalAuthentication.checkPivotalLabel(
+                    activity = activity,
+                    autoTextViewPivotalLabel = autoTextViewPivotalLabel
+                )
+                && pivotalAuthentication.checkPivotalPoint(
+                    activity = activity,
+                    autoTextViewPivotalPoint = autoTextViewPivotalPoints
+                )
+                && pivotalAuthentication.checkPivotalOwner(
+                    activity = activity,
+                    autoTextViewPivotalOwner = autoTextViewPivotalOwners
+                )
+                && pivotalAuthentication.checkPivotalRequester(
+                    activity = activity,
+                    autoTextViewPivotaRequester = autoTextViewPivotalRequester
+                )
+            ){
+                attachProgressBar()
+                pivotalAuthentication.callPivotal(
+                    activity = activity,
+                    context = context,
+                    task = "create"
+                )
+            }
+
         }
         buttonPivotalCancel.setSafeOnClickListener {
             removePivotalLayout()
@@ -7722,7 +7795,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             hideKeyboard(activity = activity, view = viewPivotal)
             if (!arrayListPivotalTaskName.contains(
                     RecyclerViewModelTask(
-                       editTextPivotalTasks.text.toString()
+                        editTextPivotalTasks.text.toString()
                     )
                 ) && editTextPivotalTasks.text.isNotEmpty()
             ) {
@@ -7737,7 +7810,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     activity = activity,
                     toastMessage = activity.resources.getString(R.string.pivotal_task_exist)
                 )
-            }else if(editTextPivotalTasks.text.isEmpty()){
+            } else if (editTextPivotalTasks.text.isEmpty()) {
                 defaultToast.attachToast(
                     activity = activity,
                     toastMessage = activity.resources.getString(R.string.pivotal_task_empty)
@@ -7763,7 +7836,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     activity = activity,
                     toastMessage = activity.resources.getString(R.string.pivotal_blocker_exist)
                 )
-            }else if(editTextPivotalBlockers.text.isEmpty()){
+            } else if (editTextPivotalBlockers.text.isEmpty()) {
                 defaultToast.attachToast(
                     activity = activity,
                     toastMessage = activity.resources.getString(R.string.pivotal_blocker_empty)
@@ -7827,6 +7900,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     internal fun initializePivotalAutoTextViews(
         arrayListProject: ArrayList<String>,
@@ -7835,21 +7909,22 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListRequester: ArrayList<String>,
         arrayListOwners: ArrayList<String>,
         arrayListLabels: ArrayList<String>
-        ) {
+    ) {
         val sharedPref =
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         editTextPivotalTitle.setText(sharedPref.getString("pivotal_title", null))
-        editTextPivotalTasks.setText(sharedPref.getString("pivotal_tasks",null))
-        editTextPivotalDescription.setText(sharedPref.getString("pivotal_description",null))
-        editTextPivotalBlockers.setText(sharedPref.getString("pivotal_blockers",null))
+        editTextPivotalTasks.setText(sharedPref.getString("pivotal_tasks", null))
+        editTextPivotalDescription.setText(sharedPref.getString("pivotal_description", null))
+        editTextPivotalBlockers.setText(sharedPref.getString("pivotal_blockers", null))
         initializePivotalProject(arrayListProject = arrayListProject, sharedPref = sharedPref)
-        initializePivotalStoryType(arrayListStoryType = arrayListStoryType , sharedPref = sharedPref)
-        initializePivotalPoints(arrayListPoints = arrayListPoints , sharedPref = sharedPref)
-        initializePivotalRequester(arrayListRequester = arrayListRequester , sharedPref = sharedPref)
-        initializePivotalOwners(arrayListOwners = arrayListOwners , sharedPref = sharedPref)
-        initializePivotalLabel(arrayListLabel = arrayListLabels , sharedPref = sharedPref)
+        initializePivotalStoryType(arrayListStoryType = arrayListStoryType, sharedPref = sharedPref)
+        initializePivotalPoints(arrayListPoints = arrayListPoints, sharedPref = sharedPref)
+        initializePivotalRequester(arrayListRequester = arrayListRequester, sharedPref = sharedPref)
+        initializePivotalOwners(arrayListOwners = arrayListOwners, sharedPref = sharedPref)
+        initializePivotalLabel(arrayListLabel = arrayListLabels, sharedPref = sharedPref)
         detachProgressBar()
     }
+
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializePivotalProject(
@@ -7952,7 +8027,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             false
         }
         autoTextViewPivotalStoryType.setOnItemClickListener { parent, view, position, id ->
-//            trelloAuthentication.setBoardPosition(boardPosition = position)
+            //            trelloAuthentication.setBoardPosition(boardPosition = position)
             hideKeyboard(activity = activity, view = viewPivotal)
         }
 //        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
@@ -7972,6 +8047,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //            }
 //        }
     }
+
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializePivotalPoints(
@@ -8029,6 +8105,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //            }
 //        }
     }
+
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializePivotalRequester(
@@ -8086,13 +8163,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //            }
 //        }
     }
+
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializePivotalOwners(
         arrayListOwners: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalOwnersAdapter= ArrayAdapter(
+        autoTextViewPivotalOwnersAdapter = ArrayAdapter(
             this,
             android.R.layout.simple_dropdown_item_1line,
             arrayListOwners
@@ -8144,13 +8222,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //        }
         this.arrayListPivotalOwner = arrayListOwners
     }
+
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializePivotalLabel(
         arrayListLabel: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalLabelAdapter= ArrayAdapter(
+        autoTextViewPivotalLabelAdapter = ArrayAdapter(
             this,
             android.R.layout.simple_dropdown_item_1line,
             arrayListLabel
@@ -8227,6 +8306,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         return arrayListPivotalFileName
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializePivotalTaskRecyclerView() {
         arrayListPivotalTaskName.clear()
@@ -8240,12 +8320,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         )
         recyclerViewPivotalTaskList.adapter = pivotalTaskAdapter
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializePivotalBlockerRecyclerView() {
         arrayListPivotalBlockerName.clear()
         recyclerViewPivotalBlockersList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        pivotalBlockerAdapter= RecyclerViewPivotalBlockerAdapter(
+        pivotalBlockerAdapter = RecyclerViewPivotalBlockerAdapter(
             arrayListPivotalBlockerName,
             context = context,
             activity = activity,
@@ -8253,12 +8334,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         )
         recyclerViewPivotalBlockersList.adapter = pivotalBlockerAdapter
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializePivotalLabelRecyclerView() {
         arrayListPivotalLabelName.clear()
         recyclerViewPivotalLabelList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        pivotalLabelAdapter= RecyclerViewPivotalLabelAdapter(
+        pivotalLabelAdapter = RecyclerViewPivotalLabelAdapter(
             arrayListPivotalLabelName,
             context = context,
             activity = activity,
@@ -8266,12 +8348,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         )
         recyclerViewPivotalLabelList.adapter = pivotalLabelAdapter
     }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializePivotalOwnerRecyclerView() {
         arrayListPivotalOwnerName.clear()
         recyclerViewPivotalOwnerList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        pivotalOwnerAdapter= RecyclerViewPivotalOwnerAdapter(
+        pivotalOwnerAdapter = RecyclerViewPivotalOwnerAdapter(
             arrayListPivotalOwnerName,
             context = context,
             activity = activity,
@@ -8279,6 +8362,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         )
         recyclerViewPivotalOwnerList.adapter = pivotalOwnerAdapter
     }
+
     private fun clearPivotalComponents() {
         cardViewPivotalBlockersList.visibility = View.GONE
         cardViewPivotalTasksList.visibility = View.GONE

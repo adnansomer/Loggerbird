@@ -1,8 +1,6 @@
 package utils
 
-import adapter.RecyclerViewTrelloAdapter
-import adapter.RecyclerViewTrelloLabelAdapter
-import adapter.RecyclerViewTrelloMemberAdapter
+import adapter.RecyclerViewPivotalLabelAdapter
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -48,17 +46,23 @@ internal class PivotalTrackerAuthentication {
     private val arrayListOwnersNames: ArrayList<String> = ArrayList()
     private val arrayListLabelId: ArrayList<String> = ArrayList()
     private val arrayListLabelNames: ArrayList<String> = ArrayList()
-    private val arrayListPoints:ArrayList<String> = ArrayList()
-    private val hashMapLabel:HashMap<String,String> = HashMap()
-    private val hashMapMember:HashMap<String,String> = HashMap()
+    private val arrayListPoints: ArrayList<String> = ArrayList()
+    private val hashMapLabel: HashMap<String, String> = HashMap()
+    private val hashMapMember: HashMap<String, String> = HashMap()
     private var projectPosition = 0
     private var labelPosition: Int = 0
     private var project: String? = null
+    private var projectId:String? = null
+    private var storyType: String? = null
+    private var points: String? = null
+    private var requester: String? = null
+    private var tasks: String? = null
+    private var description: String? = null
+    private var blockers: String? = null
     private var title: String = ""
-    private var member: String? = null
     private var label: String? = null
+    private var owners: String? = null
     private val defaultToast = DefaultToast()
-    private  var calendar:Calendar? = null
     internal fun callPivotal(
         activity: Activity,
         context: Context,
@@ -120,7 +124,7 @@ internal class PivotalTrackerAuthentication {
                         coroutineCallPivotal.async {
                             try {
                                 when (task) {
-//                                    "create" -> pivotalCreateIssue(activity = activity)
+                                    "create" -> pivotalCreateIssue(activity = activity)
                                     "get" -> gatherPivotalDetails()
                                 }
 
@@ -152,12 +156,13 @@ internal class PivotalTrackerAuthentication {
         })
     }
 
-//    private fun pivotalCreateIssue(activity: Activity) {
-//        try {
-//            queueCounter = 0
-//            queueCounter++
-//            this.activity = activity
-//            val jsonObject = JsonObject()
+    private fun pivotalCreateIssue(activity: Activity) {
+        try {
+            projectId = arrayListProjectId[projectPosition]
+            queueCounter = 0
+            queueCounter++
+            this.activity = activity
+            val jsonObject = JsonObject()
 //            val jsonArrayLabels = JsonArray()
 //            if (RecyclerViewTrelloLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()) {
 //                RecyclerViewTrelloLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
@@ -179,36 +184,41 @@ internal class PivotalTrackerAuthentication {
 //                jsonArrayMembers.add(hashMapMember[member!!])
 //                }
 //            }
-//            if(calendar!= null){
-////                val dateFormatter =SimpleDateFormat.getDateTimeInstance()
-//                jsonObject.addProperty("due",Date(calendar!!.timeInMillis).toString())
-//            }
 //            jsonObject.add("idMembers",jsonArrayMembers)
 //            jsonObject.add("idLabels",jsonArrayLabels)
-//            jsonObject.addProperty("name", title)
-//            RetrofitUserTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/")
-//                .create(AccountIdService::class.java)
-//                .createTrelloIssue(
-//                    jsonObject = jsonObject,
-//                    key = LoggerBird.trelloKey,
-//                    token = LoggerBird.trelloToken,
-//                    idList = arrayListBoardId[boardPosition]
-//                )
-//                .enqueue(object : retrofit2.Callback<JsonObject> {
-//                    override fun onFailure(
-//                        call: retrofit2.Call<JsonObject>,
-//                        t: Throwable
-//                    ) {
-//                        pivotalExceptionHandler(throwable = t)
-//                    }
-//
-//                    override fun onResponse(
-//                        call: retrofit2.Call<JsonObject>,
-//                        response: retrofit2.Response<JsonObject>
-//                    ) {
+            val jsonArrayLabels = JsonArray()
+            if(RecyclerViewPivotalLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()){
+                RecyclerViewPivotalLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
+                    jsonArrayLabels.add(hashMapLabel[it.labelName]?.toInt())
+                }
+            }else{
+                if(!label.isNullOrEmpty()){
+                    jsonArrayLabels.add(label)
+                }
+            }
+            if(!storyType.isNullOrEmpty()){
+                jsonObject.addProperty("story_type",storyType)
+            }
+            jsonObject.add("label_ids",jsonArrayLabels)
+            jsonObject.addProperty("name", title)
+            RetrofitUserPivotalClient.getPivotalUserClient(url = "https://www.pivotaltracker.com/services/v5/projects/$projectId/")
+                .create(AccountIdService::class.java)
+                .createPivotalStory(jsonObject = jsonObject)
+                .enqueue(object : retrofit2.Callback<JsonObject> {
+                    override fun onFailure(
+                        call: retrofit2.Call<JsonObject>,
+                        t: Throwable
+                    ) {
+                        pivotalExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
+                    ) {
 //                        val coroutineCallTrelloAttachments = CoroutineScope(Dispatchers.IO)
-//                        Log.d("trello_details", response.code().toString())
-//                        val trelloList = response.body()
+                        Log.d("pivotal_details", response.code().toString())
+                        val pivotalList = response.body()
 //                        RecyclerViewTrelloAdapter.ViewHolder.arrayListFilePaths.forEach {
 //                            queueCounter++
 //                            coroutineCallTrelloAttachments.async {
@@ -234,14 +244,14 @@ internal class PivotalTrackerAuthentication {
 ////                                }
 ////                            }
 //                        }
-//                        resetPivotalValues()
-//                    }
-//                })
-//
-//        } catch (e: Exception) {
-//            pivotalExceptionHandler(e = e)
-//        }
-//    }
+                        resetPivotalValues()
+                    }
+                })
+
+        } catch (e: Exception) {
+            pivotalExceptionHandler(e = e)
+        }
+    }
 
     private fun gatherTaskProject() {
         queueCounter++
@@ -273,7 +283,6 @@ internal class PivotalTrackerAuthentication {
                         if (arrayListProjectId.size > projectPosition) {
                             gatherTaskLabel(projectId = arrayListProjectId[projectPosition])
                             gatherTaskMembers(projectId = arrayListProjectId[projectPosition])
-//                            gatherTaskLabel(projectId = arrayListProjectId[projectPosition])
                         }
                         updateFields()
 
@@ -288,6 +297,7 @@ internal class PivotalTrackerAuthentication {
         arrayListStoryTypeNames.add("chore")
         arrayListStoryTypeNames.add("release")
     }
+
     private fun gatherTaskPoints() {
         arrayListPoints.add("0")
         arrayListPoints.add("1")
@@ -318,7 +328,7 @@ internal class PivotalTrackerAuthentication {
                             Log.d("pivotal_label_success", response.code().toString())
                             val labelList = response.body()
                             labelList?.forEach {
-//                                if (it.asJsonObject["name"].asString.isNotEmpty() && it.asJsonObject["name"].asString != null ) {
+                                //                                if (it.asJsonObject["name"].asString.isNotEmpty() && it.asJsonObject["name"].asString != null ) {
 //                                    arrayListOwnersNames.add(it.asJsonObject["name"].asString)
 //                                    hashMapLabel[it.asJsonObject["name"].asString] = it.asJsonObject["id"].asString
 //                                } else {
@@ -327,6 +337,7 @@ internal class PivotalTrackerAuthentication {
 //                                }
                                 arrayListLabelId.add(it.asJsonObject["id"].asString)
                                 arrayListLabelNames.add(it.asJsonObject["name"].asString)
+                                hashMapLabel[it.asJsonObject["name"].asString] = it.asJsonObject["id"].asString
                             }
                             updateFields()
                         } catch (e: Exception) {
@@ -336,6 +347,7 @@ internal class PivotalTrackerAuthentication {
                 }
             })
     }
+
     private fun gatherTaskMembers(projectId: String) {
         queueCounter++
         RetrofitUserPivotalClient.getPivotalUserClient(url = "https://pivotaltracker.com/services/v5/projects/$projectId/")
@@ -375,20 +387,30 @@ internal class PivotalTrackerAuthentication {
 
     internal fun gatherAutoTextDetails(
         autoTextViewProject: AutoCompleteTextView,
-        autoTextViewBoard: AutoCompleteTextView,
-        autoTextViewMember: AutoCompleteTextView,
-        autoTextViewLabel: AutoCompleteTextView
+        autoTextViewStoryType: AutoCompleteTextView,
+        autoTextViewPoints: AutoCompleteTextView,
+        autoTextViewRequester: AutoCompleteTextView,
+        autoTextViewLabel: AutoCompleteTextView,
+        autoTextViewOwners: AutoCompleteTextView
     ) {
         project = autoTextViewProject.editableText.toString()
-        member = autoTextViewMember.editableText.toString()
+        storyType = autoTextViewStoryType.editableText.toString()
+        points = autoTextViewPoints.editableText.toString()
+        requester = autoTextViewRequester.editableText.toString()
         label = autoTextViewLabel.editableText.toString()
+        owners = autoTextViewOwners.editableText.toString()
     }
 
-    internal fun gatherEditTextDetails(editTextTitle: EditText) {
+    internal fun gatherEditTextDetails(
+        editTextTitle: EditText,
+        editTextTasks: EditText,
+        editTextDescription: EditText,
+        editTextBlockers: EditText
+    ) {
         title = editTextTitle.text.toString()
-    }
-    internal fun gatherCalendarDetails(calendar: Calendar?){
-        this.calendar = calendar
+        tasks = editTextTasks.text.toString()
+        description = editTextDescription.text.toString()
+        blockers = editTextBlockers.text.toString()
     }
 
     private fun gatherPivotalDetails() {
@@ -399,11 +421,10 @@ internal class PivotalTrackerAuthentication {
             arrayListStoryTypeNames.clear()
             arrayListRequesterNames.clear()
             arrayListMemberId.clear()
-            hashMapLabel.clear()
-            hashMapMember.clear()
             arrayListOwnersNames.clear()
             arrayListLabelId.clear()
             arrayListLabelNames.clear()
+            hashMapLabel.clear()
             arrayListPoints.clear()
             gatherTaskProject()
             gatherTaskStoryType()
@@ -487,11 +508,10 @@ internal class PivotalTrackerAuthentication {
             hashMapMember.clear()
             arrayListLabelId.clear()
             arrayListLabelNames.clear()
+            hashMapLabel.clear()
             projectPosition = 0
             project = null
-            calendar = null
             title = ""
-            member = null
             label = null
             labelPosition = 0
             activity.runOnUiThread {
@@ -540,94 +560,112 @@ internal class PivotalTrackerAuthentication {
     }
 
 
-//    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-//    internal fun checkTrelloProjectEmpty(
-//        activity: Activity,
-//        autoTextViewTrelloProject: AutoCompleteTextView
-//    ): Boolean {
-//        if (autoTextViewTrelloProject.editableText.toString().isNotEmpty() && arrayListProjectNames.contains(
-//                autoTextViewTrelloProject.editableText.toString()
-//            )
-//        ) {
-//            return true
-//        } else if (autoTextViewTrelloProject.editableText.toString().isEmpty()) {
-//            defaultToast.attachToast(
-//                activity = activity,
-//                toastMessage = activity.resources.getString(R.string.trello_project_empty)
-//            )
-//        } else if (!arrayListProjectNames.contains(autoTextViewTrelloProject.editableText.toString())) {
-//            defaultToast.attachToast(
-//                activity = activity,
-//                toastMessage = activity.resources.getString(R.string.trello_project_doesnt_exist)
-//            )
-//        }
-//        return false
-//    }
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun checkPivotalProject(
+        activity: Activity,
+        autoTextViewPivotalProject: AutoCompleteTextView
+    ): Boolean {
+        if (autoTextViewPivotalProject.editableText.toString().isNotEmpty() && arrayListProjectNames.contains(
+                autoTextViewPivotalProject.editableText.toString()
+            )
+        ) {
+            return true
+        } else if (autoTextViewPivotalProject.editableText.toString().isEmpty()) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.pivotal_project_empty)
+            )
+        } else if (!arrayListProjectNames.contains(autoTextViewPivotalProject.editableText.toString())) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.pivotal_project_doesnt_exist)
+            )
+        }
+        return false
+    }
 
-//    internal fun checkTrelloLabel(
-//        activity: Activity,
-//        autoTextViewTrelloLabel: AutoCompleteTextView
-//    ): Boolean {
-//        if (arrayListLabelNames.contains(autoTextViewTrelloLabel.editableText.toString()) || autoTextViewTrelloLabel.editableText.toString().isEmpty()) {
-//            return true
-//        } else {
-//            defaultToast.attachToast(
-//                activity = activity,
-//                toastMessage = activity.resources.getString(R.string.trello_label_doesnt_exist)
-//            )
-//        }
-//        return false
-//    }
-//    internal fun checkTrelloMember(
-//        activity: Activity,
-//        autoTextViewTrelloMember: AutoCompleteTextView
-//    ): Boolean {
-//        if (arrayListMemberNames.contains(autoTextViewTrelloMember.editableText.toString()) || autoTextViewTrelloMember.editableText.toString().isEmpty()) {
-//            return true
-//        } else {
-//            defaultToast.attachToast(
-//                activity = activity,
-//                toastMessage = activity.resources.getString(R.string.trello_member_doesnt_exist)
-//            )
-//        }
-//        return false
-//    }
-//    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-//    internal fun checkTrelloBoardEmpty(
-//        activity: Activity,
-//        autoTextViewTrelloBoard: AutoCompleteTextView
-//    ): Boolean {
-//        if (autoTextViewTrelloBoard.editableText.toString().isNotEmpty() && arrayListBoardNames.contains(
-//                autoTextViewTrelloBoard.editableText.toString()
-//            )
-//        ) {
-//            return true
-//        } else if (autoTextViewTrelloBoard.editableText.toString().isEmpty()) {
-//            defaultToast.attachToast(
-//                activity = activity,
-//                toastMessage = activity.resources.getString(R.string.trello_board_empty)
-//            )
-//        } else if (!arrayListBoardNames.contains(autoTextViewTrelloBoard.editableText.toString())) {
-//            defaultToast.attachToast(
-//                activity = activity,
-//                toastMessage = activity.resources.getString(R.string.trello_board_doesnt_exist)
-//            )
-//        }
-//        return false
-//    }
-//    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-//    internal fun checkTitle(activity: Activity, context: Context): Boolean {
-//        return if (title.isNotEmpty()) {
-//            true
-//        } else {
-//            activity.runOnUiThread {
-//                defaultToast.attachToast(
-//                    activity = activity,
-//                    toastMessage = context.resources.getString(R.string.trello_title_empty)
-//                )
-//            }
-//            false
-//        }
-//    }
+    internal fun checkPivotalLabel(
+        activity: Activity,
+        autoTextViewPivotalLabel: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListLabelNames.contains(autoTextViewPivotalLabel.editableText.toString()) || autoTextViewPivotalLabel.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.pivotal_label_doesnt_exist)
+            )
+        }
+        return false
+    }
 
+    internal fun checkPivotalRequester(
+        activity: Activity,
+        autoTextViewPivotaRequester: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListRequesterNames.contains(autoTextViewPivotaRequester.editableText.toString()) || autoTextViewPivotaRequester.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.pivotal_requester_doesnt_exist)
+            )
+        }
+        return false
+    }
+
+    internal fun checkPivotalOwner(
+        activity: Activity,
+        autoTextViewPivotalOwner: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListOwnersNames.contains(autoTextViewPivotalOwner.editableText.toString()) || autoTextViewPivotalOwner.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.pivotal_owner_doesnt_exist)
+            )
+        }
+        return false
+    }
+    internal fun checkPivotalStoryType(
+        activity: Activity,
+        autoTextViewPivotalStoryType: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListStoryTypeNames.contains(autoTextViewPivotalStoryType.editableText.toString()) || autoTextViewPivotalStoryType.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.pivotal_story_type_doesnt_exist)
+            )
+        }
+        return false
+    }
+    internal fun checkPivotalPoint(
+        activity: Activity,
+        autoTextViewPivotalPoint: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListPoints.contains(autoTextViewPivotalPoint.editableText.toString()) || autoTextViewPivotalPoint.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.pivotal_points_doesnt_exist)
+            )
+        }
+        return false
+    }
+
+    internal fun checkPivotalTitle(activity: Activity, editTextTitle: EditText): Boolean {
+        if (editTextTitle.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.pivotal_project_empty)
+            )
+        }
+        return false
+    }
 }

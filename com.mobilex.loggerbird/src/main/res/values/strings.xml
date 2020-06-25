@@ -143,6 +143,12 @@
     <string name="pivotal_label_doesnt_exist">This label doesn\'t exist!</string>
     <string name="pivotal_owner_exist">This owner already added to list!</string>
     <string name="pivotal_owner_doesnt_exist">This owner doesn\'t exist!</string>
+    <string name="pivotal_project_empty">Project cannot be empty!</string>
+    <string name="pivotal_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="pivotal_requester_doesnt_exist">This requester doesn\'t exist!</string>
+    <string name="pivotal_title_empty">Title cannot be empty!</string>
+    <string name="pivotal_story_type_doesnt_exist">This story type doesn\'t exist!</string>
+    <string name="pivotal_points_doesnt_exist">This point value doesn\'t exist!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
