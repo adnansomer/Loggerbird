@@ -98,6 +98,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerTrelloTime: Any? = null
     private var windowManagerTrelloDate: Any? = null
     private var windowManagerPivotal: Any? = null
+    private var windowManagerBasecamp: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -118,6 +119,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsTrelloDate: WindowManager.LayoutParams
     private lateinit var windowManagerParamsTrelloTime: WindowManager.LayoutParams
     private lateinit var windowManagerParamsPivotal: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsBaseCamp:WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -176,6 +178,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewTrelloDate: View
     private lateinit var viewTrelloTime: View
     private lateinit var viewPivotal: View
+    private lateinit var viewBasecamp: View
     private lateinit var wrapper: FrameLayout
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
@@ -562,6 +565,28 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var pivotalOwnerAdapter: RecyclerViewPivotalOwnerAdapter
     private lateinit var arrayListPivotalOwner: ArrayList<String>
 
+    //Basecamp
+    private lateinit var buttonBasecampCancel:Button
+    private lateinit var buttonBasecampCreate:Button
+    private lateinit var toolbarBasecamp:Toolbar
+    private lateinit var scrollViewBasecamp:ScrollView
+    private lateinit var autoTextViewBasecampProject:AutoCompleteTextView
+    private lateinit var autoTextViewBasecampCategory:AutoCompleteTextView
+    private lateinit var autoTextViewBasecampAssignee:AutoCompleteTextView
+    private lateinit var autoTextViewBasecampNotify:AutoCompleteTextView
+    private lateinit var autoTextViewBasecampProjectAdapter:ArrayAdapter<String>
+    private lateinit var autoTextViewBasecampCategoryAdapter:ArrayAdapter<String>
+    private lateinit var autoTextViewBasecampAssigneeAdapter:ArrayAdapter<String>
+    private lateinit var autoTextViewBasecampNotifyAdapter:ArrayAdapter<String>
+    private lateinit var editTextBasecampDescriptionMessage:EditText
+    private lateinit var editTextBasecampDescriptionTodo:EditText
+    private lateinit var imageViewBasecampAssignee:ImageView
+    private lateinit var imageViewBasecampNotify:ImageView
+    private lateinit var cardViewBasecampAssigneeList:CardView
+    private lateinit var cardViewBasecampNotifyList:CardView
+    private lateinit var recyclerViewBasecampAttachmentList:RecyclerView
+    private lateinit var recyclerViewBasecampNotifyList:RecyclerView
+    private lateinit var recyclerViewBasecampAssigneeList:RecyclerView
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
@@ -578,6 +603,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var textView_share_github: TextView
         private lateinit var textView_share_trello: TextView
         private lateinit var textView_share_pivotal: TextView
+        private lateinit var textView_share_basecamp: TextView
         private lateinit var textView_discard: TextView
         //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
@@ -926,6 +952,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_share_github = view.findViewById(R.id.textView_share_github)
                     textView_share_trello = view.findViewById(R.id.textView_share_trello)
                     textView_share_pivotal = view.findViewById(R.id.textView_share_pivotal)
+                    textView_share_basecamp = view.findViewById(R.id.textView_share_basecamp)
                     textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
                     textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
@@ -1286,6 +1313,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         floatingActionButtonView.visibility = View.GONE
                     }
                     initializePivotalLayout(filePathMedia = filePathMedia)
+                }
+            }
+            textView_share_basecamp.setSafeOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
+                    }
+                    initializeBasecampLayout(filePathMedia = filePathMedia)
                 }
             }
 
@@ -2757,14 +2792,33 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
                 "pivotal_error" -> {
                     detachProgressBar()
-                    removeTrelloLayout()
+                    removePivotalLayout()
                     Toast.makeText(context, R.string.pivotal_issue_failure, Toast.LENGTH_SHORT)
                         .show()
                 }
                 "pivotal_error_time_out" -> {
                     detachProgressBar()
-                    removeTrelloLayout()
+                    removePivotalLayout()
                     Toast.makeText(context, R.string.pivotal_issue_time_out, Toast.LENGTH_SHORT)
+                        .show()
+                }
+                "basecamp" -> {
+                    detachProgressBar()
+                    removeBasecampLayout()
+                    Toast.makeText(context, R.string.basecamp_issue_success, Toast.LENGTH_SHORT)
+                        .show()
+                    finishSuccessFab()
+                }
+                "basecamp_error" -> {
+                    detachProgressBar()
+                    removeBasecampLayout()
+                    Toast.makeText(context, R.string.basecamp_issue_failure, Toast.LENGTH_SHORT)
+                        .show()
+                }
+                "basecamp_error_time_out" -> {
+                    detachProgressBar()
+                    removeBasecampLayout()
+                    Toast.makeText(context, R.string.basecamp_issue_time_out, Toast.LENGTH_SHORT)
                         .show()
                 }
             }
@@ -8362,6 +8416,174 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewPivotalPoints.setText("", false)
         autoTextViewPivotalStoryType.setText("", false)
 //        autoTextViewPivotalProject.setText("",false)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeBasecampLayout(filePathMedia: File) {
+        try {
+            removeBasecampLayout()
+            viewBasecamp = LayoutInflater.from(activity)
+                .inflate(
+                    R.layout.loggerbird_basecamp_popup,
+                    (this.rootView as ViewGroup),
+                    false
+                )
+
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsBaseCamp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerBasecamp = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                (windowManagerBasecamp as WindowManager).addView(
+                    viewBasecamp,
+                    windowManagerParamsBaseCamp
+                )
+
+                activity.window.navigationBarColor =
+                    ContextCompat.getColor(this, R.color.black)
+                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+               buttonBasecampCancel = viewBasecamp.findViewById(R.id.button_basecamp_cancel)
+                buttonBasecampCreate = viewBasecamp.findViewById(R.id.button_basecamp_create)
+                toolbarBasecamp =viewBasecamp.findViewById(R.id.toolbar_basecamp)
+                autoTextViewBasecampProject = viewBasecamp.findViewById(R.id.auto_textView_basecamp_project)
+                autoTextViewBasecampAssignee = viewBasecamp.findViewById(R.id.auto_textView_basecamp_assignee)
+                autoTextViewBasecampCategory = viewBasecamp.findViewById(R.id.auto_textView_basecamp_category)
+                autoTextViewBasecampNotify = viewBasecamp.findViewById(R.id.auto_textView_basecamp_notify)
+                editTextBasecampDescriptionMessage = viewBasecamp.findViewById(R.id.editText_basecamp_description_messsage)
+                editTextBasecampDescriptionTodo = viewBasecamp.findViewById(R.id.editText_basecamp_description_todo)
+                imageViewBasecampAssignee = viewBasecamp.findViewById(R.id.imageView_assignee_add)
+                imageViewBasecampNotify = viewBasecamp.findViewById(R.id.imageView_notify_add)
+                cardViewBasecampAssigneeList = viewBasecamp.findViewById(R.id.cardView_assignee_list)
+                cardViewBasecampNotifyList = viewBasecamp.findViewById(R.id.cardView_notify_list)
+                recyclerViewBasecampAssigneeList = viewBasecamp.findViewById(R.id.recycler_view_basecamp_assignee_list)
+                recyclerViewBasecampNotifyList = viewBasecamp.findViewById(R.id.recycler_view_basecamp_notify_list)
+                recyclerViewBasecampAttachmentList = viewBasecamp.findViewById(R.id.recycler_view_basecamp_attachment)
+                scrollViewBasecamp = viewBasecamp.findViewById(R.id.scrollView_basecamp)
+                scrollViewBasecamp.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        hideKeyboard(activity = activity, view = viewBasecamp)
+                    }
+                    return@setOnTouchListener false
+                }
+
+                toolbarBasecamp.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.basecamp_menu_save -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            with(sharedPref.edit()) {
+                                putString(
+                                    "basecamp_project",
+                                    autoTextViewBasecampProject.editableText.toString()
+                                )
+                                putString(
+                                    "basecamp_assignee",
+                                    autoTextViewBasecampAssignee.editableText.toString()
+                                )
+                                putString(
+                                    "basecamp_category",
+                                    autoTextViewBasecampCategory.editableText.toString()
+                                )
+                                putString(
+                                    "basecamp_notify",
+                                    autoTextViewBasecampNotify.editableText.toString()
+                                )
+                                putString(
+                                    "basecamp_description_message",
+                                    editTextBasecampDescriptionMessage.text.toString()
+                                )
+                                putString(
+                                    "basecamp_description_todo",
+                                    editTextBasecampDescriptionTodo.text.toString()
+                                )
+                                commit()
+                            }
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.basecamp_issue_preferences_save)
+                            )
+                        }
+                        R.id.pivotal_menu_clear -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            val editor: SharedPreferences.Editor = sharedPref.edit()
+                            editor.remove("basecamp_project")
+                            editor.remove("basecamp_assignee")
+                            editor.remove("basecamp_category")
+                            editor.remove("basecamp_notify")
+                            editor.remove("basecamp_description_message")
+                            editor.remove("basecamp_description_todo")
+                            editor.apply()
+//                            clearPivotalComponents()
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.basecamp_issue_preferences_delete)
+                            )
+                        }
+                    }
+                    return@setOnMenuItemClickListener true
+                }
+
+                toolbarBasecamp.setNavigationOnClickListener {
+                    removeBasecampLayout()
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.VISIBLE
+                    }
+                }
+//                initializePivotalRecyclerView(filePathMedia = filePathMedia)
+//                initializePivotalTaskRecyclerView()
+//                initializePivotalBlockerRecyclerView()
+//                initializePivotalLabelRecyclerView()
+//                initializePivotalOwnerRecyclerView()
+                buttonClicksBaseacamp()
+//                pivotalAuthentication.callPivotal(
+//                    activity = activity,
+//                    context = context,
+//                    task = "get",
+//                    filePathMedia = filePathMedia
+//                )
+//                attachProgressBar()
+            }
+        } catch (e: Exception) {
+            finishShareLayout("basecamp_error")
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.basecampTag)
+        }
+    }
+
+    internal fun removeBasecampLayout() {
+        if (this::viewBasecamp.isInitialized && windowManagerBasecamp != null) {
+            (windowManagerBasecamp as WindowManager).removeViewImmediate(
+                viewBasecamp
+            )
+            windowManagerBasecamp= null
+        }
+    }
+    private fun buttonClicksBaseacamp(){
+        buttonBasecampCreate.setSafeOnClickListener {
+
+        }
+        buttonBasecampCancel.setSafeOnClickListener {
+            removeBasecampLayout()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
