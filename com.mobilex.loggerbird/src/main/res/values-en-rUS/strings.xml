@@ -135,6 +135,18 @@
     <string name="pivotal_issue_time_out">An error happened while trying to open pivotal issue , system has been timed out!</string>
     <string name="pivotal_issue_preferences_save">Issue preferences are saved!</string>
     <string name="pivotal_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="pivotal_task_exist">This task already added to list!</string>
+    <string name="pivotal_task_empty">Task cannot be empty!</string>
+    <string name="pivotal_blocker_exist">This blocker already added to list!</string>
+    <string name="pivotal_blocker_empty">Blocker cannot be empty!</string>
+    <string name="pivotal_label_exist">This label already added to list!</string>
+    <string name="pivotal_label_doesnt_exist">This label doesn\'t exist!</string>
+    <string name="pivotal_owner_exist">This owner already added to list!</string>
+    <string name="pivotal_owner_doesnt_exist">This owner doesn\'t exist!</string>
+    <string name="pivotal_project_empty">Project cannot be empty!</string>
+    <string name="pivotal_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="pivotal_requester_doesnt_exist">This requester doesn\'t exist!</string>
+    <string name="pivotal_title_empty">Title cannot be empty!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -374,7 +386,7 @@
     <string name="editText_pivotal_title_hint">Enter a title for this story…</string>
     <string name="textView_pivotal_type">Story Type</string>
     <string name="textView_pivotal_requester">Requester</string>
-    <string name="textView_pivotal_points">Pivotal</string>
+    <string name="textView_pivotal_points">Points</string>
     <string name="textView_pivotal_owners">Owners</string>
     <string name="textView_pivotal_owners_list">Owners list</string>
     <string name="textView_pivotal_blockers">Blockers</string>
@@ -391,4 +403,26 @@
     <string name="editText_pivotal_title">Enter a title for this story …</string>
     <string name="button_pivotal_create">Create</string>
     <string name="button_pivotal_cancel">Cancel</string>
+    <!-- recycler_view_pivotal_item_popup-->
+    <string name="textView_recyclerView_pivotal_popup_title">Are you sure to remove attachment from your Pivotal issue?</string>
+    <!-- recycler_view_pivotal_task_item_popup-->
+    <string name="textView_recyclerView_pivotal_task_header">Delete task</string>
+    <string name="textView_recyclerView_pivotal_task_popup_title">Are you sure to remove task from your Pivotal issue?</string>
+    <string name="button_recyclerView_pivotal_task_delete">Delete task</string>
+    <string name="button_recyclerView_pivotal_task_keep">Keep task</string>
+    <!-- recycler_view_pivotal_blocker_item_popup-->
+    <string name="textView_recyclerView_pivotal_blocker_header">Delete blocker</string>
+    <string name="textView_recyclerView_pivotal_blocker_popup_title">Are you sure to remove blocker from your Pivotal issue?</string>
+    <string name="button_recyclerView_pivotal_blocker_delete">Delete blocker</string>
+    <string name="button_recyclerView_pivotal_blocker_keep">Keep blocker</string>
+    <!-- recycler_view_pivotal_label_item_popup-->
+    <string name="textView_recyclerView_pivotal_label_header">Delete label</string>
+    <string name="textView_recyclerView_pivotal_label_popup_title">Are you sure to remove label from your Pivotal issue?</string>
+    <string name="button_recyclerView_pivotal_label_delete">Delete label</string>
+    <string name="button_recyclerView_pivotal_label_keep">Keep label</string>
+    <!-- recycler_view_pivotal_owner_item_popup-->
+    <string name="textView_recyclerView_pivotal_owner_header">Delete owner</string>
+    <string name="textView_recyclerView_pivotal_owner_popup_title">Are you sure to remove owner from your Pivotal issue?</string>
+    <string name="button_recyclerView_pivotal_owner_delete">Delete owner</string>
+    <string name="button_recyclerView_pivotal_owner_keep">Keep owner</string>
 </resources>
