@@ -144,6 +144,8 @@
     <string name="pivotal_project_doesnt_exist">Bu proje boş olamaz!</string>
     <string name="pivotal_requester_doesnt_exist">Bu isteyen bulunamadı!</string>
     <string name="pivotal_title_empty">Başlık boş olamaz!</string>
+    <string name="pivotal_story_type_doesnt_exist">Bu hikaye tipi bulunamadı!</string>
+    <string name="pivotal_points_doesnt_exist">Bu puan bulunamadı!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>

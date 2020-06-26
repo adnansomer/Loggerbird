@@ -136,4 +136,13 @@ interface AccountIdService {
     fun getPivotalMembers():Call<JsonArray>
     @POST("stories")
     fun createPivotalStory(@Body  jsonObject: JsonObject):Call<JsonObject>
+    @Multipart
+    @POST("uploads")
+    fun setPivotalAttachments(@Part file:MultipartBody.Part): Call<JsonObject>
+    @POST("comments")
+    fun addPivotalAttachments(@Body jsonObject: JsonObject): Call<JsonObject>
+    @POST("blockers")
+    fun setPivotalBlockers(@Body jsonObject: JsonObject): Call<JsonObject>
+    @POST("tasks")
+    fun setPivotalTasks(@Body jsonObject: JsonObject): Call<JsonObject>
 }

@@ -67,7 +67,7 @@ class RecyclerViewPivotalBlockerAdapter(
         private lateinit var buttonNo: Button
 
         companion object{
-             internal lateinit var arrayListBlocker:ArrayList<RecyclerViewModelBlocker>
+             internal var arrayListBlocker:ArrayList<RecyclerViewModelBlocker> = ArrayList()
         }
 
 

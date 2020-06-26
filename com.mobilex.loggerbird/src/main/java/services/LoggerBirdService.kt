@@ -5995,8 +5995,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewGithubAssignee.setText(arrayListAssignee[0], false)
                 }
-            } else {
-                autoTextViewGithubAssignee.setText(arrayListAssignee[0], false)
             }
         }
         autoTextViewGithubAssignee.setOnTouchListener { v, event ->
@@ -6066,8 +6064,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewGithubMileStone.setText(arrayListMileStones[0], false)
                 }
-            } else {
-                autoTextViewGithubMileStone.setText(arrayListMileStones[0], false)
             }
         }
         autoTextViewGithubMileStone.setOnTouchListener { v, event ->
@@ -6124,8 +6120,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewGithubProject.setText(arrayListProject[0], false)
                 }
-            } else {
-                autoTextViewGithubProject.setText(arrayListProject[0], false)
             }
         }
         autoTextViewGithubProject.setOnTouchListener { v, event ->
@@ -6176,8 +6170,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewGithubLabels.setText(arrayListLabels[0], false)
                 }
-            } else {
-                autoTextViewGithubLabels.setText(arrayListLabels[0], false)
             }
         }
         autoTextViewGithubLabels.setOnTouchListener { v, event ->
@@ -6247,8 +6239,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewGithubLinkedRequests.setText(arrayListLinkedRequests[0], false)
                 }
-            } else {
-                autoTextViewGithubLinkedRequests.setText(arrayListLinkedRequests[0], false)
             }
         }
         autoTextViewGithubLinkedRequests.setOnTouchListener { v, event ->
@@ -6713,8 +6703,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewTrelloMember.setText(arrayListMember[0], false)
                 }
-            } else {
-                autoTextViewTrelloMember.setText(arrayListMember[0], false)
             }
         }
         autoTextViewTrelloMember.setOnTouchListener { v, event ->
@@ -6770,8 +6758,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewTrelloLabel.setText(arrayListLabel[0], false)
                 }
-            } else {
-                autoTextViewTrelloLabel.setText(arrayListLabel[0], false)
             }
         }
         autoTextViewTrelloLabel.setOnTouchListener { v, event ->
@@ -7684,7 +7670,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             editor.remove("pivotal_description")
                             editor.remove("pivotal_tasks")
                             editor.apply()
-                            clearTrelloComponents()
+                            clearPivotalComponents()
                             defaultToast.attachToast(
                                 activity = activity,
                                 toastMessage = context.resources.getString(R.string.pivotal_issue_preferences_delete)
@@ -8018,8 +8004,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewPivotalStoryType.setText(arrayListStoryType[0], false)
                 }
-            } else {
-                autoTextViewPivotalStoryType.setText(arrayListStoryType[0], false)
             }
         }
         autoTextViewPivotalStoryType.setOnTouchListener { v, event ->
@@ -8076,8 +8060,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewPivotalPoints.setText(arrayListPoints[0], false)
                 }
-            } else {
-                autoTextViewPivotalPoints.setText(arrayListPoints[0], false)
             }
         }
         autoTextViewPivotalPoints.setOnTouchListener { v, event ->
@@ -8134,8 +8116,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewPivotalRequester.setText(arrayListRequester[0], false)
                 }
-            } else {
-                autoTextViewPivotalRequester.setText(arrayListRequester[0], false)
             }
         }
         autoTextViewPivotalRequester.setOnTouchListener { v, event ->
@@ -8192,8 +8172,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewPivotalOwners.setText(arrayListOwners[0], false)
                 }
-            } else {
-                autoTextViewPivotalOwners.setText(arrayListOwners[0], false)
             }
         }
         autoTextViewPivotalOwners.setOnTouchListener { v, event ->
@@ -8251,8 +8229,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewPivotalLabel.setText(arrayListLabel[0], false)
                 }
-            } else {
-                autoTextViewPivotalLabel.setText(arrayListLabel[0], false)
             }
         }
         autoTextViewPivotalLabel.setOnTouchListener { v, event ->

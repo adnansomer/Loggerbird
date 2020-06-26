@@ -1,6 +1,6 @@
 package utils
 
-import adapter.RecyclerViewPivotalLabelAdapter
+import adapter.*
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -9,6 +9,7 @@ import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.mobilex.loggerbird.R
@@ -48,11 +49,11 @@ internal class PivotalTrackerAuthentication {
     private val arrayListLabelNames: ArrayList<String> = ArrayList()
     private val arrayListPoints: ArrayList<String> = ArrayList()
     private val hashMapLabel: HashMap<String, String> = HashMap()
-    private val hashMapMember: HashMap<String, String> = HashMap()
+    private val hashMapOwner: HashMap<String, String> = HashMap()
     private var projectPosition = 0
     private var labelPosition: Int = 0
     private var project: String? = null
-    private var projectId:String? = null
+    private var projectId: String? = null
     private var storyType: String? = null
     private var points: String? = null
     private var requester: String? = null
@@ -187,19 +188,41 @@ internal class PivotalTrackerAuthentication {
 //            jsonObject.add("idMembers",jsonArrayMembers)
 //            jsonObject.add("idLabels",jsonArrayLabels)
             val jsonArrayLabels = JsonArray()
-            if(RecyclerViewPivotalLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()){
+            if (RecyclerViewPivotalLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()) {
                 RecyclerViewPivotalLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
                     jsonArrayLabels.add(hashMapLabel[it.labelName]?.toInt())
                 }
-            }else{
-                if(!label.isNullOrEmpty()){
-                    jsonArrayLabels.add(label)
+                jsonObject.add("label_ids", jsonArrayLabels)
+            } else {
+                if (!label.isNullOrEmpty()) {
+                    jsonArrayLabels.add(hashMapLabel[label!!]?.toInt())
+                    jsonObject.add("label_ids", jsonArrayLabels)
                 }
             }
-            if(!storyType.isNullOrEmpty()){
-                jsonObject.addProperty("story_type",storyType)
+            val jsonArrayOwners = JsonArray()
+            if (RecyclerViewPivotalOwnerAdapter.ViewHolder.arrayListOwnerNames.isNotEmpty()) {
+                RecyclerViewPivotalOwnerAdapter.ViewHolder.arrayListOwnerNames.forEach {
+                    jsonArrayOwners.add(hashMapOwner[it.ownerName]?.toInt())
+                }
+                jsonObject.add("owner_ids", jsonArrayOwners)
+            } else {
+                if (!owners.isNullOrEmpty()) {
+                    jsonArrayOwners.add(hashMapOwner[owners!!]?.toInt())
+                    jsonObject.add("owner_ids", jsonArrayOwners)
+                }
             }
-            jsonObject.add("label_ids",jsonArrayLabels)
+            if (!points.isNullOrEmpty()) {
+                jsonObject.addProperty("estimate", points!!.toFloat())
+            }
+            if (!requester.isNullOrEmpty()) {
+                jsonObject.addProperty("requested_by_id", hashMapOwner[requester!!]?.toInt())
+            }
+            if (!storyType.isNullOrEmpty()) {
+                jsonObject.addProperty("story_type", storyType)
+            }
+            if (!description.isNullOrEmpty()) {
+                jsonObject.addProperty("description", description)
+            }
             jsonObject.addProperty("name", title)
             RetrofitUserPivotalClient.getPivotalUserClient(url = "https://www.pivotaltracker.com/services/v5/projects/$projectId/")
                 .create(AccountIdService::class.java)
@@ -216,35 +239,75 @@ internal class PivotalTrackerAuthentication {
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-//                        val coroutineCallTrelloAttachments = CoroutineScope(Dispatchers.IO)
+                        val coroutineCallPivotalAttachments = CoroutineScope(Dispatchers.IO)
+                        val coroutineCallPivotalBlockers = CoroutineScope(Dispatchers.IO)
+                        val coroutineCallPivotalTasks = CoroutineScope(Dispatchers.IO)
                         Log.d("pivotal_details", response.code().toString())
                         val pivotalList = response.body()
-//                        RecyclerViewTrelloAdapter.ViewHolder.arrayListFilePaths.forEach {
-//                            queueCounter++
-//                            coroutineCallTrelloAttachments.async {
-//                                createAttachments(
-//                                    activity = activity,
-//                                    file = it.file,
-//                                    cardId = trelloList!!["id"].asString
-//                                )
-//                            }
-////                            repoId = githubList!!["url"].asString.substringAfterLast("/").toInt()
-////                            RecyclerViewGithubAdapter.ViewHolder.arrayListFilePaths.forEach {
-////                                val file = it.file
-////                                if (file.exists()) {
-////                                    callGithubAttachments(
-////                                        repo = repos!!,
-////                                        filePathMedia = file
-////                                    )
-////                                }
-////                            }
-////                            if (RecyclerViewGithubAdapter.ViewHolder.arrayListFilePaths.isEmpty()) {
-////                                activity.runOnUiThread {
-////                                    LoggerBirdService.loggerBirdService.finishShareLayout("github")
-////                                }
-////                            }
-//                        }
-                        resetPivotalValues()
+                        RecyclerViewPivotalAdapter.ViewHolder.arrayListFilePaths.forEach {
+                            queueCounter++
+                            coroutineCallPivotalAttachments.async {
+                                createAttachments(
+                                    activity = activity,
+                                    file = it.file,
+                                    projectId = projectId!!,
+                                    storyId = pivotalList!!["id"].asString
+                                )
+                            }
+                        }
+                        if(RecyclerViewPivotalBlockerAdapter.ViewHolder.arrayListBlocker.isNotEmpty()){
+                            RecyclerViewPivotalBlockerAdapter.ViewHolder.arrayListBlocker.forEach {
+                                queueCounter++
+                                coroutineCallPivotalBlockers.async {
+                                    createBlockers(
+                                        activity = activity,
+                                        projectId = projectId!!,
+                                        storyId = pivotalList!!["id"].asString,
+                                        description = it.blockerName
+                                    )
+                                }
+                            }
+                        }else{
+                            if(!blockers.isNullOrEmpty()){
+                                queueCounter++
+                                coroutineCallPivotalBlockers.async {
+                                    createBlockers(
+                                        activity = activity,
+                                        projectId = projectId!!,
+                                        storyId = pivotalList!!["id"].asString,
+                                        description = blockers!!
+                                    )
+                                }
+                            }
+                        }
+
+                        if(RecyclerViewPivotalTaskAdapter.ViewHolder.arrayListTasks.isNotEmpty()){
+                            RecyclerViewPivotalTaskAdapter.ViewHolder.arrayListTasks.forEach {
+                                queueCounter++
+                                coroutineCallPivotalTasks.async {
+                                    createTasks(
+                                        activity = activity,
+                                        projectId = projectId!!,
+                                        storyId = pivotalList!!["id"].asString,
+                                        description = it.taskName
+                                    )
+                                }
+                            }
+                        }else{
+                            if(!tasks.isNullOrEmpty()){
+                                queueCounter++
+                                coroutineCallPivotalTasks.async {
+                                    createTasks(
+                                        activity = activity,
+                                        projectId = projectId!!,
+                                        storyId = pivotalList!!["id"].asString,
+                                        description = tasks!!
+                                    )
+                                }
+                            }
+                        }
+
+                        resetPivotalValues(shareLayoutMessage = "pivotal")
                     }
                 })
 
@@ -337,7 +400,8 @@ internal class PivotalTrackerAuthentication {
 //                                }
                                 arrayListLabelId.add(it.asJsonObject["id"].asString)
                                 arrayListLabelNames.add(it.asJsonObject["name"].asString)
-                                hashMapLabel[it.asJsonObject["name"].asString] = it.asJsonObject["id"].asString
+                                hashMapLabel[it.asJsonObject["name"].asString] =
+                                    it.asJsonObject["id"].asString
                             }
                             updateFields()
                         } catch (e: Exception) {
@@ -374,6 +438,8 @@ internal class PivotalTrackerAuthentication {
                                 arrayListMemberId.add(it.asJsonObject["person"].asJsonObject["id"].asString)
                                 arrayListRequesterNames.add(it.asJsonObject["person"].asJsonObject["name"].asString)
                                 arrayListOwnersNames.add(it.asJsonObject["person"].asJsonObject["name"].asString)
+                                hashMapOwner[it.asJsonObject["person"].asJsonObject["name"].asString] =
+                                    it.asJsonObject["person"].asJsonObject["id"].asString
                             }
                             updateFields()
                         } catch (e: Exception) {
@@ -425,6 +491,7 @@ internal class PivotalTrackerAuthentication {
             arrayListLabelId.clear()
             arrayListLabelNames.clear()
             hashMapLabel.clear()
+            hashMapOwner.clear()
             arrayListPoints.clear()
             gatherTaskProject()
             gatherTaskStoryType()
@@ -472,7 +539,7 @@ internal class PivotalTrackerAuthentication {
         e: Exception? = null,
         throwable: Throwable? = null
     ) {
-        resetPivotalValues()
+        resetPivotalValues(shareLayoutMessage = "pivotal_error")
         if (this::timerTaskQueue.isInitialized) {
             timerTaskQueue.cancel()
         }
@@ -496,8 +563,9 @@ internal class PivotalTrackerAuthentication {
     }
 
 
-    private fun resetPivotalValues() {
+    private fun resetPivotalValues(shareLayoutMessage: String) {
         queueCounter--
+        Log.d("queue_counter", queueCounter.toString())
         if (queueCounter == 0) {
             timerTaskQueue.cancel()
             arrayListProjectNames.clear()
@@ -505,58 +573,200 @@ internal class PivotalTrackerAuthentication {
             arrayListStoryTypeNames.clear()
             arrayListOwnersNames.clear()
             hashMapLabel.clear()
-            hashMapMember.clear()
+            hashMapOwner.clear()
             arrayListLabelId.clear()
             arrayListLabelNames.clear()
-            hashMapLabel.clear()
             projectPosition = 0
             project = null
             title = ""
             label = null
             labelPosition = 0
             activity.runOnUiThread {
-                LoggerBirdService.loggerBirdService.finishShareLayout("pivotal")
+                LoggerBirdService.loggerBirdService.finishShareLayout(shareLayoutMessage)
             }
         }
     }
 
-    private fun createAttachments(cardId: String, file: File, activity: Activity) {
-        val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
-        val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-        RetrofitUserTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/cards/$cardId/")
-            .create(AccountIdService::class.java)
-            .setTrelloAttachments(
-                file = body,
-                key = LoggerBird.trelloKey,
-                token = LoggerBird.trelloToken
-            )
-            .enqueue(object : retrofit2.Callback<JsonObject> {
-                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                override fun onFailure(
-                    call: retrofit2.Call<JsonObject>,
-                    t: Throwable
-                ) {
-                    resetPivotalValues()
-                    pivotalExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<JsonObject>,
-                    response: retrofit2.Response<JsonObject>
-                ) {
-                    val coroutineCallTrelloAttachments = CoroutineScope(Dispatchers.IO)
-                    coroutineCallTrelloAttachments.async {
-                        if (file.name != "logger_bird_details.txt") {
-                            if (file.exists()) {
-                                file.delete()
-                            }
-                        }
-                        Log.d("attachment_put_success", response.code().toString())
-                        Log.d("attachment_put_success", response.message())
-                        resetPivotalValues()
+    private fun createAttachments(
+        projectId: String,
+        storyId: String,
+        file: File,
+        activity: Activity
+    ) {
+        try {
+            val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+            val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+            RetrofitUserPivotalClient.getPivotalUserClient(url = "https://www.pivotaltracker.com/services/v5/projects/$projectId/")
+                .create(AccountIdService::class.java)
+                .setPivotalAttachments(
+                    file = body
+                )
+                .enqueue(object : retrofit2.Callback<JsonObject> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<JsonObject>,
+                        t: Throwable
+                    ) {
+                        pivotalExceptionHandler(throwable = t)
                     }
-                }
-            })
+
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
+                    ) {
+                        val coroutineCallPivotalAttachments = CoroutineScope(Dispatchers.IO)
+                        coroutineCallPivotalAttachments.async {
+                            if (file.name != "logger_bird_details.txt") {
+                                if (file.exists()) {
+                                    file.delete()
+                                }
+                            }
+                            val pivotalResponse = response.body()
+                            Log.d("attachment_put_success", response.code().toString())
+                            Log.d("attachment_put_success", response.message())
+                            if (pivotalResponse != null) {
+                                val coroutineCallPivotalAddAttachments =
+                                    CoroutineScope(Dispatchers.IO)
+                                coroutineCallPivotalAddAttachments.async {
+                                    addAttachments(
+                                        activity = activity,
+                                        projectId = projectId,
+                                        storyId = storyId,
+                                        attachmentId = pivotalResponse.getAsJsonPrimitive("id").asString
+                                    )
+                                }
+                            } else {
+                                resetPivotalValues(shareLayoutMessage = "pivotal_error")
+                            }
+
+                        }
+                    }
+                })
+        } catch (e: Exception) {
+            pivotalExceptionHandler(e = e)
+        }
+    }
+
+    private fun addAttachments(
+        activity: Activity,
+        projectId: String,
+        storyId: String,
+        attachmentId: String
+    ) {
+        try {
+            val jsonObject = JsonObject()
+            val jsonArray = JsonArray()
+            val jsonObjectId = JsonObject()
+            jsonObjectId.addProperty("id", attachmentId)
+            jsonArray.add(jsonObjectId)
+            jsonObject.add("file_attachments", jsonArray)
+            RetrofitUserPivotalClient.getPivotalUserClient(url = "https://www.pivotaltracker.com/services/v5/projects/$projectId/stories/$storyId/")
+                .create(AccountIdService::class.java)
+                .addPivotalAttachments(jsonObject = jsonObject)
+                .enqueue(object : retrofit2.Callback<JsonObject> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<JsonObject>,
+                        t: Throwable
+                    ) {
+                        resetPivotalValues(shareLayoutMessage = "pivotal_error")
+                        pivotalExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
+                    ) {
+                        Log.d("attachment_add_sucess", response.code().toString())
+                        Log.d("attachment_add_sucess", response.message())
+                        resetPivotalValues(shareLayoutMessage = "pivotal")
+                    }
+                })
+        } catch (e: Exception) {
+            pivotalExceptionHandler(e = e)
+        }
+    }
+
+    private fun createBlockers(
+        projectId: String,
+        storyId: String,
+        description:String,
+        activity: Activity
+    ) {
+        try {
+            val jsonObject = JsonObject()
+            jsonObject.addProperty("description",description)
+            RetrofitUserPivotalClient.getPivotalUserClient(url = "https://www.pivotaltracker.com/services/v5/projects/$projectId/stories/$storyId/")
+                .create(AccountIdService::class.java)
+                .setPivotalBlockers(jsonObject = jsonObject)
+                .enqueue(object : retrofit2.Callback<JsonObject> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<JsonObject>,
+                        t: Throwable
+                    ) {
+                        pivotalExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
+                    ) {
+                        val pivotalResponse = response.body()
+                        Log.d("blockers_put_success", response.code().toString())
+                        Log.d("blockers_put_success", response.message())
+                        if (pivotalResponse != null) {
+                            resetPivotalValues(shareLayoutMessage = "pivotal")
+                        } else {
+                            resetPivotalValues(shareLayoutMessage = "pivotal_error")
+                        }
+
+                    }
+                })
+        } catch (e: Exception) {
+            pivotalExceptionHandler(e = e)
+        }
+    }
+
+    private fun createTasks(
+        projectId: String,
+        storyId: String,
+        description:String,
+        activity: Activity
+    ) {
+        try {
+            val jsonObject = JsonObject()
+            jsonObject.addProperty("description",description)
+            RetrofitUserPivotalClient.getPivotalUserClient(url = "https://www.pivotaltracker.com/services/v5/projects/$projectId/stories/$storyId/")
+                .create(AccountIdService::class.java)
+                .setPivotalTasks(jsonObject = jsonObject)
+                .enqueue(object : retrofit2.Callback<JsonObject> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<JsonObject>,
+                        t: Throwable
+                    ) {
+                        pivotalExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
+                    ) {
+                        val pivotalResponse = response.body()
+                        Log.d("tasks_put_success", response.code().toString())
+                        Log.d("tasks_put_success", response.message())
+                        if (pivotalResponse != null) {
+                            resetPivotalValues(shareLayoutMessage = "pivotal")
+                        } else {
+                            resetPivotalValues(shareLayoutMessage = "pivotal_error")
+                        }
+
+                    }
+                })
+        } catch (e: Exception) {
+            pivotalExceptionHandler(e = e)
+        }
     }
 
 
@@ -628,6 +838,7 @@ internal class PivotalTrackerAuthentication {
         }
         return false
     }
+
     internal fun checkPivotalStoryType(
         activity: Activity,
         autoTextViewPivotalStoryType: AutoCompleteTextView
@@ -642,6 +853,7 @@ internal class PivotalTrackerAuthentication {
         }
         return false
     }
+
     internal fun checkPivotalPoint(
         activity: Activity,
         autoTextViewPivotalPoint: AutoCompleteTextView
@@ -663,7 +875,7 @@ internal class PivotalTrackerAuthentication {
         } else {
             defaultToast.attachToast(
                 activity = activity,
-                toastMessage = activity.resources.getString(R.string.pivotal_project_empty)
+                toastMessage = activity.resources.getString(R.string.pivotal_title_empty)
             )
         }
         return false
