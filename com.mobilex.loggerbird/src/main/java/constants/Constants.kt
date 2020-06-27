@@ -90,5 +90,6 @@ internal class Constants {
         const val pivotalTag:String = "Pivotal"
         const val recyclerViewPivotalAdapterTag:String = "RecyclerView Pivotal Adapter"
         const val basecampTag:String = "Basecamp"
+        const val recyclerViewBasecampAdapterTag:String = "RecyclerView Basecamp Adapter"
     }
 }

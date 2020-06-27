@@ -119,7 +119,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsTrelloDate: WindowManager.LayoutParams
     private lateinit var windowManagerParamsTrelloTime: WindowManager.LayoutParams
     private lateinit var windowManagerParamsPivotal: WindowManager.LayoutParams
-    private lateinit var windowManagerParamsBaseCamp:WindowManager.LayoutParams
+    private lateinit var windowManagerParamsBaseCamp: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -566,27 +566,36 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var arrayListPivotalOwner: ArrayList<String>
 
     //Basecamp
-    private lateinit var buttonBasecampCancel:Button
-    private lateinit var buttonBasecampCreate:Button
-    private lateinit var toolbarBasecamp:Toolbar
-    private lateinit var scrollViewBasecamp:ScrollView
-    private lateinit var autoTextViewBasecampProject:AutoCompleteTextView
-    private lateinit var autoTextViewBasecampCategory:AutoCompleteTextView
-    private lateinit var autoTextViewBasecampAssignee:AutoCompleteTextView
-    private lateinit var autoTextViewBasecampNotify:AutoCompleteTextView
-    private lateinit var autoTextViewBasecampProjectAdapter:ArrayAdapter<String>
-    private lateinit var autoTextViewBasecampCategoryAdapter:ArrayAdapter<String>
-    private lateinit var autoTextViewBasecampAssigneeAdapter:ArrayAdapter<String>
-    private lateinit var autoTextViewBasecampNotifyAdapter:ArrayAdapter<String>
-    private lateinit var editTextBasecampDescriptionMessage:EditText
-    private lateinit var editTextBasecampDescriptionTodo:EditText
-    private lateinit var imageViewBasecampAssignee:ImageView
-    private lateinit var imageViewBasecampNotify:ImageView
-    private lateinit var cardViewBasecampAssigneeList:CardView
-    private lateinit var cardViewBasecampNotifyList:CardView
-    private lateinit var recyclerViewBasecampAttachmentList:RecyclerView
-    private lateinit var recyclerViewBasecampNotifyList:RecyclerView
-    private lateinit var recyclerViewBasecampAssigneeList:RecyclerView
+    private lateinit var buttonBasecampCancel: Button
+    private lateinit var buttonBasecampCreate: Button
+    private lateinit var toolbarBasecamp: Toolbar
+    private lateinit var scrollViewBasecamp: ScrollView
+    private lateinit var autoTextViewBasecampProject: AutoCompleteTextView
+    private lateinit var autoTextViewBasecampCategory: AutoCompleteTextView
+    private lateinit var autoTextViewBasecampAssignee: AutoCompleteTextView
+    private lateinit var autoTextViewBasecampNotify: AutoCompleteTextView
+    private lateinit var autoTextViewBasecampProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBasecampCategoryAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBasecampAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBasecampNotifyAdapter: ArrayAdapter<String>
+    private lateinit var editTextBasecampDescriptionMessage: EditText
+    private lateinit var editTextBasecampDescriptionTodo: EditText
+    private lateinit var imageViewBasecampAssignee: ImageView
+    private lateinit var imageViewBasecampNotify: ImageView
+    internal lateinit var cardViewBasecampAssigneeList: CardView
+    internal lateinit var cardViewBasecampNotifyList: CardView
+    private lateinit var recyclerViewBasecampAttachmentList: RecyclerView
+    private lateinit var recyclerViewBasecampNotifyList: RecyclerView
+    private lateinit var recyclerViewBasecampAssigneeList: RecyclerView
+    private lateinit var basecampAdapter: RecyclerViewBasecampAdapter
+    private val arrayListBasecampFileName: ArrayList<RecyclerViewModel> = ArrayList()
+    private lateinit var basecampAssigneeAdapter:RecyclerViewBasecampAssigneeAdapter
+    private val arrayListBasecampAssigneeName: ArrayList<RecyclerViewModelAssignee> = ArrayList()
+    private lateinit var arrayListBasecampAssignee: ArrayList<String>
+    private lateinit var basecampNotifyAdapter:RecyclerViewBasecampNotifyAdapter
+    private val arrayListBasecampNotifyName:ArrayList<RecyclerViewModelNotify> = ArrayList()
+    private lateinit var arrayListBasecampNotify:ArrayList<String>
+
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
@@ -7815,7 +7824,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     activity = activity,
                     autoTextViewPivotaRequester = autoTextViewPivotalRequester
                 )
-            ){
+            ) {
                 attachProgressBar()
                 pivotalAuthentication.callPivotal(
                     activity = activity,
@@ -8459,22 +8468,32 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     ContextCompat.getColor(this, R.color.black)
                 activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
 
-               buttonBasecampCancel = viewBasecamp.findViewById(R.id.button_basecamp_cancel)
+                buttonBasecampCancel = viewBasecamp.findViewById(R.id.button_basecamp_cancel)
                 buttonBasecampCreate = viewBasecamp.findViewById(R.id.button_basecamp_create)
-                toolbarBasecamp =viewBasecamp.findViewById(R.id.toolbar_basecamp)
-                autoTextViewBasecampProject = viewBasecamp.findViewById(R.id.auto_textView_basecamp_project)
-                autoTextViewBasecampAssignee = viewBasecamp.findViewById(R.id.auto_textView_basecamp_assignee)
-                autoTextViewBasecampCategory = viewBasecamp.findViewById(R.id.auto_textView_basecamp_category)
-                autoTextViewBasecampNotify = viewBasecamp.findViewById(R.id.auto_textView_basecamp_notify)
-                editTextBasecampDescriptionMessage = viewBasecamp.findViewById(R.id.editText_basecamp_description_messsage)
-                editTextBasecampDescriptionTodo = viewBasecamp.findViewById(R.id.editText_basecamp_description_todo)
+                toolbarBasecamp = viewBasecamp.findViewById(R.id.toolbar_basecamp)
+                autoTextViewBasecampProject =
+                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_project)
+                autoTextViewBasecampAssignee =
+                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_assignee)
+                autoTextViewBasecampCategory =
+                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_category)
+                autoTextViewBasecampNotify =
+                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_notify)
+                editTextBasecampDescriptionMessage =
+                    viewBasecamp.findViewById(R.id.editText_basecamp_description_messsage)
+                editTextBasecampDescriptionTodo =
+                    viewBasecamp.findViewById(R.id.editText_basecamp_description_todo)
                 imageViewBasecampAssignee = viewBasecamp.findViewById(R.id.imageView_assignee_add)
                 imageViewBasecampNotify = viewBasecamp.findViewById(R.id.imageView_notify_add)
-                cardViewBasecampAssigneeList = viewBasecamp.findViewById(R.id.cardView_assignee_list)
+                cardViewBasecampAssigneeList =
+                    viewBasecamp.findViewById(R.id.cardView_assignee_list)
                 cardViewBasecampNotifyList = viewBasecamp.findViewById(R.id.cardView_notify_list)
-                recyclerViewBasecampAssigneeList = viewBasecamp.findViewById(R.id.recycler_view_basecamp_assignee_list)
-                recyclerViewBasecampNotifyList = viewBasecamp.findViewById(R.id.recycler_view_basecamp_notify_list)
-                recyclerViewBasecampAttachmentList = viewBasecamp.findViewById(R.id.recycler_view_basecamp_attachment)
+                recyclerViewBasecampAssigneeList =
+                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_assignee_list)
+                recyclerViewBasecampNotifyList =
+                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_notify_list)
+                recyclerViewBasecampAttachmentList =
+                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_attachment)
                 scrollViewBasecamp = viewBasecamp.findViewById(R.id.scrollView_basecamp)
                 scrollViewBasecamp.setOnTouchListener { v, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
@@ -8547,11 +8566,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         floatingActionButtonView.visibility = View.VISIBLE
                     }
                 }
-//                initializePivotalRecyclerView(filePathMedia = filePathMedia)
+                initializeBasecampRecyclerView(filePathMedia = filePathMedia)
+                initializeBasecampAssigneeRecyclerView()
+                initializeBasecampNotifyRecyclerView()
 //                initializePivotalTaskRecyclerView()
 //                initializePivotalBlockerRecyclerView()
 //                initializePivotalLabelRecyclerView()
-//                initializePivotalOwnerRecyclerView()
                 buttonClicksBaseacamp()
 //                pivotalAuthentication.callPivotal(
 //                    activity = activity,
@@ -8574,16 +8594,387 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             (windowManagerBasecamp as WindowManager).removeViewImmediate(
                 viewBasecamp
             )
-            windowManagerBasecamp= null
+            windowManagerBasecamp = null
         }
     }
-    private fun buttonClicksBaseacamp(){
+
+    private fun buttonClicksBaseacamp() {
         buttonBasecampCreate.setSafeOnClickListener {
 
         }
         buttonBasecampCancel.setSafeOnClickListener {
             removeBasecampLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
         }
+        imageViewBasecampAssignee.setSafeOnClickListener {
+            if (!arrayListBasecampAssigneeName.contains(
+                    RecyclerViewModelAssignee(
+                        autoTextViewBasecampAssignee.editableText.toString()
+                    )
+                ) && arrayListBasecampAssignee.contains(
+                    autoTextViewBasecampAssignee.editableText.toString()
+                )
+            ) {
+                arrayListBasecampAssigneeName.add(RecyclerViewModelAssignee(autoTextViewBasecampAssignee.editableText.toString()))
+                basecampAssigneeAdapter.notifyDataSetChanged()
+                cardViewBasecampAssigneeList.visibility = View.VISIBLE
+            } else if (arrayListBasecampAssigneeName.contains(
+                    RecyclerViewModelAssignee(autoTextViewBasecampAssignee.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.basecamp_assignee_exist)
+                )
+            } else if (!arrayListBasecampAssignee.contains(autoTextViewBasecampAssignee.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.basecamp_assignee_doesnt_exist)
+                )
+            }
+
+        }
+        imageViewBasecampNotify.setSafeOnClickListener {
+            if (!arrayListBasecampNotifyName.contains(
+                    RecyclerViewModelNotify(
+                        autoTextViewBasecampNotify.editableText.toString()
+                    )
+                ) && arrayListBasecampNotify.contains(
+                    autoTextViewBasecampNotify.editableText.toString()
+                )
+            ) {
+                arrayListBasecampNotifyName.add(RecyclerViewModelNotify(autoTextViewBasecampNotify.editableText.toString()))
+                basecampNotifyAdapter.notifyDataSetChanged()
+                cardViewBasecampNotifyList.visibility = View.VISIBLE
+            } else if (arrayListBasecampNotifyName.contains(
+                    RecyclerViewModelNotify(autoTextViewBasecampNotify.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.basecamp_notify_exist)
+                )
+            } else if (!arrayListBasecampNotify.contains(autoTextViewBasecampNotify.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.basecamp_notify_doesnt_exist)
+                )
+            }
+
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    internal fun initializeBasecampAutoTextViews(
+        arrayListProject: ArrayList<String>,
+        arrayListCategory: ArrayList<String>,
+        arrayListAssignee: ArrayList<String>,
+        arrayListNotify: ArrayList<String>
+    ) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        editTextBasecampDescriptionMessage.setText(
+            sharedPref.getString(
+                "basecamp_description_message",
+                null
+            )
+        )
+        editTextBasecampDescriptionTodo.setText(
+            sharedPref.getString(
+                "basecamp_description_todo",
+                null
+            )
+        )
+        initializeBasecampProject(arrayListProject = arrayListProject, sharedPref = sharedPref)
+        initializeBasecampCategory(arrayListCategory = arrayListCategory, sharedPref = sharedPref)
+        initializeBasecampAssignee(arrayListAssignee = arrayListAssignee, sharedPref = sharedPref)
+        initializeBasecampNotify(arrayListNotify = arrayListNotify, sharedPref = sharedPref)
+        detachProgressBar()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeBasecampProject(
+        arrayListProject: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewBasecampProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListProject
+        )
+        autoTextViewBasecampProject.setAdapter(autoTextViewBasecampProjectAdapter)
+        if (arrayListProject.isNotEmpty() && autoTextViewBasecampProject.editableText.isEmpty()) {
+            if (sharedPref.getString("basecamp_project", null) != null) {
+                if (arrayListProject.contains(
+                        sharedPref.getString(
+                            "basecamp_project",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewBasecampProject.setText(
+                        sharedPref.getString("basecamp_project", null),
+                        false
+                    )
+                } else {
+                    autoTextViewBasecampProject.setText(arrayListProject[0], false)
+                }
+            } else {
+                autoTextViewBasecampProject.setText(arrayListProject[0], false)
+            }
+        }
+        autoTextViewBasecampProject.setOnTouchListener { v, event ->
+            autoTextViewBasecampProject.showDropDown()
+            false
+        }
+        autoTextViewBasecampProject.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewBasecamp)
+//            clearPivotalComponents()
+//            pivotalAuthentication.setProjectPosition(projectPosition = position)
+//            pivotalAuthentication.callPivotal(
+//                activity = activity,
+//                context = context,
+//                task = "get"
+//            )
+//            attachProgressBar()
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeBasecampCategory(
+        arrayListCategory: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewBasecampCategoryAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListCategory
+        )
+        autoTextViewBasecampCategory.setAdapter(autoTextViewBasecampCategoryAdapter)
+        if (arrayListCategory.isNotEmpty() && autoTextViewBasecampCategory.editableText.isEmpty()) {
+            if (sharedPref.getString("basecamp_category", null) != null) {
+                if (arrayListCategory.contains(
+                        sharedPref.getString(
+                            "basecamp_category",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewBasecampCategory.setText(
+                        sharedPref.getString("basecamp_category", null),
+                        false
+                    )
+                } else {
+                    autoTextViewBasecampCategory.setText(arrayListCategory[0], false)
+                }
+            }
+        }
+        autoTextViewBasecampCategory.setOnTouchListener { v, event ->
+            autoTextViewBasecampCategory.showDropDown()
+            false
+        }
+        autoTextViewBasecampCategory.setOnItemClickListener { parent, view, position, id ->
+            //            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewBasecamp)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeBasecampAssignee(
+        arrayListAssignee: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewBasecampAssigneeAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListAssignee
+        )
+        autoTextViewBasecampAssignee.setAdapter(autoTextViewBasecampAssigneeAdapter)
+        if (arrayListAssignee.isNotEmpty() && autoTextViewBasecampAssignee.editableText.isEmpty()) {
+            if (sharedPref.getString("basecamp_assignee", null) != null) {
+                if (arrayListAssignee.contains(
+                        sharedPref.getString(
+                            "basecamp_assignee",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewBasecampAssignee.setText(
+                        sharedPref.getString("basecamp_assignee", null),
+                        false
+                    )
+                } else {
+                    autoTextViewBasecampAssignee.setText(arrayListAssignee[0], false)
+                }
+            }
+        }
+        autoTextViewBasecampAssignee.setOnTouchListener { v, event ->
+            autoTextViewBasecampAssignee.showDropDown()
+            false
+        }
+        autoTextViewBasecampAssignee.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewBasecamp)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        this.arrayListBasecampAssignee = arrayListAssignee
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeBasecampNotify(
+        arrayListNotify: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewBasecampNotifyAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListNotify
+        )
+        autoTextViewBasecampNotify.setAdapter(autoTextViewBasecampNotifyAdapter)
+        if (arrayListNotify.isNotEmpty() && autoTextViewBasecampNotify.editableText.isEmpty()) {
+            if (sharedPref.getString("basecamp_notify", null) != null) {
+                if (arrayListNotify.contains(
+                        sharedPref.getString(
+                            "basecamp_notify",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewBasecampNotify.setText(
+                        sharedPref.getString("basecamp_notify", null),
+                        false
+                    )
+                } else {
+                    autoTextViewBasecampNotify.setText(arrayListNotify[0], false)
+                }
+            }
+        }
+        autoTextViewBasecampNotify.setOnTouchListener { v, event ->
+            autoTextViewBasecampNotify.showDropDown()
+            false
+        }
+        autoTextViewBasecampNotify.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewBasecamp)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeBasecampRecyclerView(filePathMedia: File) {
+        arrayListBasecampFileName.clear()
+        recyclerViewBasecampAttachmentList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        basecampAdapter = RecyclerViewBasecampAdapter(
+            addBasecampFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewBasecampAttachmentList.adapter = basecampAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addBasecampFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListBasecampFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListBasecampFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListBasecampFileName
+    }
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeBasecampAssigneeRecyclerView() {
+        arrayListBasecampAssigneeName.clear()
+        recyclerViewBasecampAssigneeList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        basecampAssigneeAdapter = RecyclerViewBasecampAssigneeAdapter(
+            arrayListBasecampAssigneeName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewBasecampAssigneeList.adapter = basecampAssigneeAdapter
+    }
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeBasecampNotifyRecyclerView() {
+        arrayListBasecampNotifyName.clear()
+        recyclerViewBasecampNotifyList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        basecampNotifyAdapter = RecyclerViewBasecampNotifyAdapter(
+            arrayListBasecampNotifyName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewBasecampNotifyList.adapter = basecampNotifyAdapter
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
