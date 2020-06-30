@@ -1,4 +1,4 @@
-package models.github
+package models.api.github
 
 
 

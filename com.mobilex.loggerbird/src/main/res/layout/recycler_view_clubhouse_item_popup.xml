@@ -28,7 +28,7 @@
                 android:layout_gravity="center"
                 android:textSize="20sp"
                 android:textColor="@color/black"
-                android:text="Delete Attachment" />
+                android:text="@string/textView_recyclerView_popup_header" />
 
         </LinearLayout>
 
@@ -39,15 +39,13 @@
             android:layout_gravity="center">
 
             <TextView
-                android:id="@+id/textView_recycler_view_gitlab_title"
+                android:id="@+id/textView_recycler_view_clubhouse_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:textSize="16sp"
                 android:textColor="@color/black"
-                android:text="@string/textView_recyclerView_gitlab_popup_title">
-            </TextView>
-
+                android:text="@string/textView_recyclerView_clubhouse_popup_title" />
         </LinearLayout>
 
         <LinearLayout
@@ -58,23 +56,22 @@
             android:layout_margin="5dp">
 
             <Button
-                android:id="@+id/button_recycler_view_gitlab_yes"
+                android:id="@+id/button_recycler_view_clubhouse_yes"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
                 android:textSize="15sp"
                 android:textColor="@color/colorFab"
                 android:background="@drawable/pop_up_button_shape"
-                android:text="@string/button_recyclerView_gitlab_yes" />
+                android:text="@string/button_recyclerView_yes" />
 
             <Button
-                android:id="@+id/button_recycler_view_gitlab_no"
+                android:id="@+id/button_recycler_view_clubhouse_no"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
                 android:textColor="@color/colorBlack"
                 android:background="@color/colorFab"
-                android:text="@string/button_recyclerView_gitlab_no" />
+                android:text="@string/button_recyclerView_no" />
         </LinearLayout>
 
     </LinearLayout>

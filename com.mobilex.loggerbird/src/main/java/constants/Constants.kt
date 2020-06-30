@@ -88,5 +88,8 @@ internal class Constants {
         const val gitlabTag: String = "GitLab"
         const val gitlabDatePopupTag:String = "Gitlab Date Popup"
         const val pivotalTag:String = "Pivotal"
+        const val recyclerViewClubhouseAdapterTag:String = "RecyclerView Clubhouse Adapter"
+        const val clubhouseTag:String = "Clubhouse"
+        const val clubhouseDatePopupTag = "Clubhouse Date Popup"
     }
 }

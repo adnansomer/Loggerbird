@@ -1,4 +1,4 @@
-package models.jira
+package models.api.jira
 
 
 

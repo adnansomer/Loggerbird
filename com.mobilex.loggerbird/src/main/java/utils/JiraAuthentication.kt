@@ -9,6 +9,7 @@ import android.util.Log
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
+import utils.*
 //import com.atlassian.jira.rest.client.api.JiraRestClient
 //import com.atlassian.jira.rest.client.api.JiraRestClientFactory
 //import com.atlassian.jira.rest.client.api.domain.*
@@ -24,7 +25,7 @@ import exception.LoggerBirdException
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import models.*
-import models.jira.*
+import models.api.jira.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody

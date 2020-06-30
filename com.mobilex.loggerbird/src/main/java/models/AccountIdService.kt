@@ -3,12 +3,10 @@ package models
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import models.github.*
-import models.gitlab.GitlabLabelsModel
-import models.gitlab.GitlabMilestonesModel
-import models.gitlab.GitlabProjectModel
-import models.gitlab.GitlabUsersModel
-import models.jira.*
+import models.api.clubhouse.*
+import models.api.github.*
+import models.api.jira.*
+import models.api.gitlab.*
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -131,4 +129,19 @@ interface AccountIdService {
     fun getTrelloLabels(@Query("key") key:String,@Query("token") token:String):Call<JsonArray>
     @POST("idLabels?")
     fun setTrelloLabels(@Body jsonArray: JsonArray,@Query("key") key:String,@Query("token") token:String): Call<JsonObject>
+
+    //clubhouse
+    @GET("projects?")
+    fun getClubhouseProjects(@Query("token") token: String):Call<List<ClubhouseProjectModel>>
+    @GET("members")
+    fun getClubhouseMembers(@Query("token") token: String):Call<JsonArray>
+    @POST("stories")
+    fun createClubhouseStory(@Query("token") token:String,
+                             @Query("project_id") project_id:String,
+                             @Query("name") name:String,
+                             @Query("description") description: String,
+                             @Query("story_type") storyType: String,
+                             @Query("deadline") deadline: String,
+                             @Query("requested_by_id" requestedBy: String)): Call<JsonObject>
+
 }

@@ -135,6 +135,9 @@
     <string name="pivotal_issue_time_out">An error happened while trying to open pivotal issue , system has been timed out!</string>
     <string name="pivotal_issue_preferences_save">Issue preferences are saved!</string>
     <string name="pivotal_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="freshdesk_issue_success">Issue opened successfully!</string>
+    <string name="freshdesk_issue_failure">An error happened while trying to open pivotal issue!</string>
+    <string name="freshdesk_issue_time_out">An error happened while trying to open pivotal issue , system has been timed out!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -157,6 +160,11 @@
     <string name="textView_loggerbird_github_title">Send to Github</string>
     <string name="textView_loggerbird_trello_title">Share with Trello</string>
     <string name="textView_loggerbird_pivotal_title">Share with Pivotal-tracker</string>
+    <string name="textView_loggerbird_clubhouse_title">Share with Clubhouse</string>
+    <!-- recycler_view_freshdesk_item_popup-->
+    <string name="textView_recyclerView_freshdesk_popup_title">Are you sure to remove attachment from your Freshdesk ticket?</string>
+    <string name="button_recyclerView_freshdesk_yes">Delete Attachment</string>
+    <string name="button_recyclerView_freshdesk_no">Keep File</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>
     <!-- activity_paint_save_dialog-->
@@ -332,6 +340,22 @@
     <string name="textView_gitlab_due_date">Due Date</string>
     <string name="textView_gitlab_confidentiality">Confidentiality</string>
     <string name="textView_gitlab_enter_due_date">Set a due date for issue!</string>
+    <!-- recycler_view_gitlab_item_popup-->
+    <string name="textView_recyclerView_gitlab_popup_title">Are you sure to remove attachment from your Gitlab Issue?</string>
+    <string name="button_recyclerView_gitlab_yes">Delete Attachment</string>
+    <string name="button_recyclerView_gitlab_no">Keep File</string>
+    <!-- loggerbird_freshdesk_popup-->
+    <string name="textView_freshdesk_toolbar_title">Create Freshdesk Ticket</string>
+    <string name="textView_freshdesk_contact">Contact</string>
+    <string name="textView_freshdesk_subject">Subject</string>
+    <string name="editText_gitlab_subject">Write your ticket subject here!</string>
+    <string name="textView_freshdesk_type">Type</string>
+    <string name="textView_freshdesk_status">Status</string>
+    <string name="textView_freshdesk_priority">Priority</string>
+    <string name="textView_freshdesk_group">Group</string>
+    <string name="textView_freshdesk_description">Description</string>
+    <string name="editText_freshdesk_description">Write your ticket description here!</string>
+    <string name="textView_freshdesk_attachment">Attachments</string>
     <!-- loggerbird_trello_popup-->
     <string name="textView_trello_project">Project</string>
     <string name="textView_trello_board">Board</string>

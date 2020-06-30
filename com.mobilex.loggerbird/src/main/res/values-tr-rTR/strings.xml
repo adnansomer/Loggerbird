@@ -111,6 +111,9 @@
     <string name="github_label_exist">Bu etiket zaten listeye eklendi!</string>
     <string name="github_label_doesnt_exist">Bu etiket bulunamadı!</string>
     <string name="github_mile_stone_doesnt_exist">Bu kilometre taşı bulunamadı!</string>
+    <string name="gitlab_sent">Gitlab gorevi olusturuldu!</string>
+    <string name="gitlab_sent_error">Gitlab görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="gitlab_sent_error_time_out">Gitlab görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
     <string name="trello_issue_success">Görev başarılı bir şekilde açıldı!</string>
     <string name="trello_issue_failure">Trello görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
     <string name="trello_issue_time_out">Trello görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
@@ -132,6 +135,9 @@
     <string name="pivotal_issue_time_out">Pivotal görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
     <string name="pivotal_issue_preferences_save">Konu tercihleri kaydedildi!</string>
     <string name="pivotal_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="freshdesk_issue_success">Freshdesk bileti basarili bir sekilde acildi!</string>
+    <string name="freshdesk_issue_failure">Freshdesk bileti açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="freshdesk_issue_time_out">Freshdesk bileti açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
@@ -154,6 +160,7 @@
     <string name="textView_loggerbird_github_title">Github ile paylaş</string>
     <string name="textView_loggerbird_trello_title">Trello ile paylaş</string>
     <string name="textView_loggerbird_pivotal_title">Pivotal-tracker ile paylaş</string>
+    <string name="textView_loggerbird_clubhouse_title">Clubhouse ile paylaş</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça boyutu ayarla</string>
     <!-- activity_paint_save_dialog-->
@@ -330,6 +337,25 @@
     <string name="textView_gitlab_due_date">Bitis tarihi</string>
     <string name="textView_gitlab_confidentiality">Gizlilik</string>
     <string name="textView_gitlab_enter_due_date">Konunuz icin bitis tarihi giriniz!</string>
+    <!-- loggerbird_clubhouse_popup-->
+    <string name="textView_clubhouse_toolbar_title">Freshdesk Bileti Olustur</string>
+    <string name="textView_freshdesk_contact">Kisi</string>
+    <string name="textView_freshdesk_subject">Konu</string>
+    <string name="textView_freshdesk_type">Tip</string>
+    <string name="textView_freshdesk_status">Durum</string>
+    <string name="textView_freshdesk_priority">Oncelik</string>
+    <string name="textView_freshdesk_group">Grup</string>
+    <string name="textView_freshdesk_description">Aciklama</string>
+    <string name="editText_clubhouse_description">Bilet aciklamasini buraya yaziniz!</string>
+    <string name="textView_clubhouse_attachment">Eklentiler</string>
+    <string name="button_freshdesk_create">Olustur</string>
+    <string name="button_freshdesk_cancel">Iptal</string>
+    <string name="editText_freshdesk_subject_empty">Konuyu bos birakamazsiniz!</string>
+    <string name="editText_freshdesk_description_empty">Aciklamayi bos birakamazsiniz!</string>
+    <!-- recycler_view_clubhouse_item_popup-->
+    <string name="textView_recyclerView_clubhouse_popup_title">Clubhouse gorevlendirmenizden dosyayi silmek istediginize emin misiniz?</string>
+    <string name="button_recyclerView_clubhouse_yes">Eki Sil</string>
+    <string name="button_recyclerView_clubhouse_no">Dosyayi tut</string>
     <!-- loggerbird_trello_popup-->
     <string name="textView_trello_project">Proje</string>
     <string name="textView_trello_board">Pano</string>

@@ -17,7 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
-import models.gitlab.*
+import models.api.gitlab.*
 import models.*
 import okhttp3.*
 import services.LoggerBirdService
@@ -28,6 +28,10 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import models.api.gitlab.GitlabLabelsModel
+import models.api.gitlab.GitlabMilestonesModel
+import models.api.gitlab.GitlabProjectModel
+import models.api.gitlab.GitlabUsersModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 

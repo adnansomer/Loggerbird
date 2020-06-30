@@ -1,6 +1,6 @@
-package models.jira
+package models.api.jira
 
-data class JiraFieldModel(
+data class JiraPriorityModel(
     var name: String? = null,
     var id:String? = null
 )
