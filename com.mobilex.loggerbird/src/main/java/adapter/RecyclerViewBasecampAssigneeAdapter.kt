@@ -67,7 +67,7 @@ class RecyclerViewBasecampAssigneeAdapter(
         private lateinit var buttonNo: Button
 
         companion object{
-             internal lateinit var arrayListAssignee:ArrayList<RecyclerViewModelAssignee>
+             internal  var arrayListAssignee:ArrayList<RecyclerViewModelAssignee> = ArrayList()
         }
 
 
@@ -144,7 +144,7 @@ class RecyclerViewBasecampAssigneeAdapter(
                         textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_basecamp_title)
                         buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_basecamp_yes)
                         buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_basecamp_no)
-                        buttonClicksBasecampNotifyPopup(adapter = adapter , assigneeList = assigneeList , position = position)
+                        buttonClicksBasecampAssigneePopup(adapter = adapter , assigneeList = assigneeList , position = position)
                     }
                 }
             } catch (e: Exception) {
@@ -171,7 +171,7 @@ class RecyclerViewBasecampAssigneeAdapter(
 //            alertDialogItemDelete.show()
         }
 
-        private fun buttonClicksBasecampNotifyPopup(assigneeList: ArrayList<RecyclerViewModelAssignee>, position: Int, adapter: RecyclerViewBasecampAssigneeAdapter) {
+        private fun buttonClicksBasecampAssigneePopup(assigneeList: ArrayList<RecyclerViewModelAssignee>, position: Int, adapter: RecyclerViewBasecampAssigneeAdapter) {
             buttonYes.setSafeOnClickListener {
                 assigneeList.removeAt(position)
                 arrayListAssignee = assigneeList

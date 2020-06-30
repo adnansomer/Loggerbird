@@ -158,6 +158,12 @@
     <string name="basecamp_assignee_doesnt_exist">This assignee doesn\'t exist!</string>
     <string name="basecamp_notify_exist">This notify already added to list!</string>
     <string name="basecamp_notify_doesnt_exist">This notify doesn\'t exist!</string>
+    <string name="basecamp_project_empty">Project cannot be empty!</string>
+    <string name="basecamp_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="basecamp_title_empty">Title cannot be empty!</string>
+    <string name="basecamp_category_doesnt_exist">This category doesn\'t exist!</string>
+    <string name="basecamp_name_empty">Name cannot be empty!</string>
+    <string name="basecamp_content_empty">Content cannot be empty!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -448,6 +454,10 @@
     <string name="textView_basecamp_category">Category</string>
     <string name="textView_basecamp_description_message">Description message</string>
     <string name="editText_basecamp_description_message">Enter a description for this message…</string>
+    <string name="textView_basecamp_name">Name</string>
+    <string name="editText_basecamp_name_hint">Enter a name for this message…</string>
+    <string name="textView_basecamp_content">Content</string>
+    <string name="editText_basecamp_content_hint">Enter a content for this message…</string>
     <string name="textView_basecamp_description_todo">Description to-dos</string>
     <string name="editText_basecamp_description_todo">Enter a description for this to-dos…</string>
     <string name="textView_basecamp_todo_board">To-dos</string>
@@ -460,6 +470,7 @@
     <string name="button_basecamp_cancel">Cancel</string>
     <string name="textView_basecamp_attachment">Attachments</string>
     <string name="textView_basecamp_attachments_board">Docs&amp;Files</string>
+    <string name="textView_basecamp_start_date">Start date</string>
     <!-- recycler_view_basecamp_item_popup-->
     <string name="textView_recyclerView_basecamp_popup_title">Are you sure to remove attachment from your basecamp issue?</string>
     <!-- recycler_view_basecamp_assignee_popup-->

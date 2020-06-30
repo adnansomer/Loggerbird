@@ -67,7 +67,7 @@ class RecyclerViewBasecampNotifyAdapter(
         private lateinit var buttonNo: Button
 
         companion object{
-             internal lateinit var arrayListNotify:ArrayList<RecyclerViewModelNotify>
+             internal  var arrayListNotify:ArrayList<RecyclerViewModelNotify> = ArrayList()
         }
 
 
