@@ -343,6 +343,7 @@
     <!-- loggerbird_clubhouse_popup-->
     <string name="textView_clubhouse_toolbar_title">Create Clubhouse Story</string>
     <string name="textView_clubhouse_projects">Projects</string>
+    <string name="textView_clubhouse_epic">Epic</string>
     <string name="textView_clubhouse_requester">Story Requester</string>
     <string name="textView_clubhouse_story_name">Story Name</string>
     <string name="textView_clubhouse_story_description">Story Description</string>
@@ -356,6 +357,8 @@
     <string name="editText_clubhouse_story_empty">Your story name cannot be empty!</string>
     <string name="textView_clubhouse_due_date">Due date</string>
     <string name="textView_clubhouse_enter_due_date">Set a due date for story!</string>
+    <string name="textView_clubhouse_estimate_point">Estimate Point</string>
+    <string name="editText_clubhouse_estimate_point">Write your estimate point here!</string>
     <!-- recycler_view_clubhouse_item_popup-->
     <string name="textView_recyclerView_clubhouse_popup_title">Are you sure to remove attachment from your Clubhouse story?</string>
     <string name="button_recyclerView_clubhouse_yes">Delete Attachment</string>

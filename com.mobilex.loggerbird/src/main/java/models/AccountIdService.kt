@@ -133,6 +133,8 @@ interface AccountIdService {
     //clubhouse
     @GET("projects?")
     fun getClubhouseProjects(@Query("token") token: String):Call<List<ClubhouseProjectModel>>
+    @GET("epics")
+    fun getClubhouseEpics(@Query("token") token: String):Call<List<ClubHouseEpicModel>>
     @GET("members")
     fun getClubhouseMembers(@Query("token") token: String):Call<JsonArray>
     @POST("stories")
@@ -142,6 +144,8 @@ interface AccountIdService {
                              @Query("description") description: String,
                              @Query("story_type") storyType: String,
                              @Query("deadline") deadline: String,
-                             @Query("requested_by_id" requestedBy: String)): Call<JsonObject>
+                             @Query("requested_by_id") requestedBy: String,
+                             @Query("epic_id") epicId: String,
+                             @Query("estimate") estimate: String): Call<JsonObject>
 
 }

@@ -561,8 +561,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var textViewClubhouseDueDate: TextView
     private lateinit var autoTextViewClubhouseProject: AutoCompleteTextView
     private lateinit var autoTextViewClubhouseProjectAdapter: ArrayAdapter<String>
+    private lateinit var spinnerClubhouseEpic: Spinner
+    private lateinit var spinnerClubhouseEpicAdapter: ArrayAdapter<String>
     private lateinit var editTextClubhouseStoryName: EditText
     private lateinit var editTextClubhouseStoryDescription: EditText
+    private lateinit var editTextClubhouseEstimate: EditText
     private lateinit var spinnerClubhouseStoryType: Spinner
     private lateinit var spinnerClubhouseStoryTypeAdapter: ArrayAdapter<String>
     private lateinit var spinnerClubhouseRequester: Spinner
@@ -7579,7 +7582,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 spinnerClubhouseStoryType = viewClubhouse.findViewById(R.id.spinner_clubhouse_story_type)
                 recyclerViewClubhouseAttachment = viewClubhouse.findViewById(R.id.recycler_view_clubhouse_attachment)
                 autoTextViewClubhouseProject = viewClubhouse.findViewById(R.id.auto_textview_clubhouse_project)
+                spinnerClubhouseEpic = viewClubhouse.findViewById(R.id.spinner_clubhouse_epic)
                 textViewClubhouseDueDate = viewClubhouse.findViewById(R.id.textView_clubhouse_due_date)
+                editTextClubhouseEstimate = viewClubhouse.findViewById(R.id.editText_clubhouse_estimate_point)
                 progressBarClubhouse = viewClubhouse.findViewById(R.id.clubhouse_progressbar)
                 progressBarClubhouseLayout = viewClubhouse.findViewById(R.id.clubhouse_progressbar_background)
 
@@ -7635,16 +7640,43 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeClubhouseEpic(
+        arrayListClubhouseEpic: ArrayList<String>){
+
+        spinnerClubhouseEpicAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseEpic)
+        spinnerClubhouseEpicAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerClubhouseEpic.adapter = spinnerClubhouseEpicAdapter
+        spinnerClubhouseEpicAdapter.notifyDataSetChanged()
+
+        spinnerClubhouseEpic.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
+            }
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun initializeClubhouseSpinner(
         arrayListClubhouseRequester: ArrayList<String>,
         arrayListClubhouseProjects: ArrayList<String>,
-        arrayListClubhouseStoryType: ArrayList<String>
+        arrayListClubhouseStoryType: ArrayList<String>,
+        arrayListClubhouseEpic: ArrayList<String>
 
     ) {
         initializeClubhouseProject(arrayListClubhouseProjects)
         initializeClubhouseRequester(arrayListClubhouseRequester)
         initializeClubhouseStoryType(arrayListClubhouseStoryType)
+        initializeClubhouseEpic(arrayListClubhouseEpic)
         progressBarClubhouse.visibility = View.GONE
         progressBarClubhouseLayout.visibility = View.GONE
     }
@@ -7750,8 +7782,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
             detachClubhouseDatePicker()
         }
-
-
     }
 
     private fun detachClubhouseDatePicker() {
@@ -7794,7 +7824,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
                 clubhouseAuthentication.gatherClubhouseSpinnerDetails(
                     spinnerUser = spinnerClubhouseRequester,
-                    spinnerStoryType = spinnerClubhouseStoryType
+                    spinnerStoryType = spinnerClubhouseStoryType,
+                    spinnerEpic = spinnerClubhouseEpic
                 )
 
                 clubhouseAuthentication.gatherClubhouseProjectAutoTextDetails(
@@ -7803,7 +7834,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
                 clubhouseAuthentication.gatherClubhouseEditTextDetails(
                     editTextStoryName = editTextClubhouseStoryName,
-                    editTextStoryDescription = editTextClubhouseStoryDescription
+                    editTextStoryDescription = editTextClubhouseStoryDescription,
+                    editTextEstimate = editTextClubhouseEstimate
                 )
 
                 clubhouseAuthentication.callClubhouse(

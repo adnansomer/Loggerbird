@@ -40,28 +40,32 @@ class ClubhouseAuthentication {
     private val coroutineCallClubhouse = CoroutineScope(Dispatchers.IO)
     private val internetConnectionUtil = InternetConnectionUtil()
     private lateinit var timerTaskQueue: TimerTask
-
     private var spinnerPositionUser: Int = 0
     private var userPosition = 0
-    private var user: String? = null
-    private val arrayListUsers: ArrayList<String> = ArrayList()
+    private var userId: String = ""
+    private var userName: String = ""
+    private var arrayListUsers: ArrayList<String> = ArrayList()
     private val arrayListUsersId: ArrayList<String> = ArrayList()
     private var hashMapUsers: HashMap<String, String> = HashMap()
-
     private val arrayListStoryType: ArrayList<String> = arrayListOf("Bug","Chore","Feature")
     private var spinnerPositionStoryType: Int = 0
     private var storyTypePosition = 0
     private var storyType: String? = null
-
+    private var spinnerPositionEpic: Int = 0
     private var projectPosition = 0
     private var project: String? = null
     private val arrayListProjectId: ArrayList<String> = ArrayList()
     private val arrayListProjectName: ArrayList<String> = ArrayList()
     private var hashMapProjects: HashMap<String, String> = HashMap()
-
-    private var storyName: String?=null
-    private var storyDescription: String?=null
-    internal var dueDate: String = ""
+    private var epicPosition = 0
+    private var epic: String? = null
+    private val arrayListEpicId: ArrayList<String> = ArrayList()
+    private val arrayListEpicName: ArrayList<String> = ArrayList()
+    private var hashMapEpic: HashMap<String, String> = HashMap()
+    private var storyName: String?=""
+    private var storyDescription: String?=""
+    private var estimate: String? = ""
+    internal var dueDate: String? = ""
 
 
     internal fun callClubhouse(
@@ -185,8 +189,12 @@ class ClubhouseAuthentication {
                 arrayListUsers.clear()
                 arrayListUsersId.clear()
                 hashMapUsers.clear()
+                arrayListEpicId.clear()
+                arrayListEpicName.clear()
+                hashMapEpic.clear()
                 gatherClubhouseProjectDetails()
                 gatherClubhouseUserDetails()
+                gatherClubhouseEpicDetails()
 
             } catch (e: Exception) {
                 LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error")
@@ -210,6 +218,7 @@ class ClubhouseAuthentication {
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
                     }
+
                     override fun onResponse(
                         call: retrofit2.Call<List<ClubhouseProjectModel>>,
                         response: retrofit2.Response<List<ClubhouseProjectModel>>
@@ -260,11 +269,53 @@ class ClubhouseAuthentication {
                             val response = response.body()
                             Log.d("clubhouseUsers", response.toString())
                             response?.getAsJsonArray()?.forEach {
-                                val id = it.asJsonObject["id"].asString
-                                val name = it.asJsonObject["profile"].asJsonObject["name"].asString
-                                arrayListUsersId.add(id)
-                                arrayListUsers.add(name)
-                                hashMapUsers[name!!] = id!!
+                                userId = it.asJsonObject["id"].asString
+                                userName = it.asJsonObject["profile"].asJsonObject["name"].asString
+                                arrayListUsersId.add(userId)
+                                arrayListUsers.add(userName)
+                                hashMapUsers[userName!!] = userId!!
+
+                            }
+                            updateFields()
+                        }
+                    }
+                })
+
+        } catch (e: Exception) {
+            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error")
+            clubhouseExceptionHandler(e = e, filePathName = filePathMedia)
+        }
+    }
+
+    private suspend fun gatherClubhouseEpicDetails(){
+        try {
+            RetrofitUserClubhouseClient.getClubhouseUserClient(url = "https://api.clubhouse.io/api/v3/")
+                .create(AccountIdService::class.java)
+                .getClubhouseEpics(token = LoggerBird.clubhouseApiToken)
+                .enqueue(object : retrofit2.Callback<List<ClubHouseEpicModel>> {
+                    override fun onFailure(
+                        call: retrofit2.Call<List<ClubHouseEpicModel>>,
+                        t: Throwable
+                    ) {
+                        t.printStackTrace()
+                        LoggerBird.callEnqueue()
+                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
+                    }
+                    override fun onResponse(
+                        call: retrofit2.Call<List<ClubHouseEpicModel>> ,
+                        response: retrofit2.Response<List<ClubHouseEpicModel>>
+                    ) {
+                        val coroutineCallClubhouseDetails = CoroutineScope(Dispatchers.IO)
+                        coroutineCallClubhouseDetails.async {
+                            Log.d("clubhouseEpics", response.code().toString())
+                            val clubhouse = response.body()
+                            Log.d("clubhouseEpics", response.toString())
+                            clubhouse?.forEach {
+                                if (it.name != null) {
+                                    arrayListEpicId.add(it.id!!)
+                                    arrayListEpicName.add(it.name!!)
+                                    hashMapEpic[it.name!!] = it.id!!
+                                }
                             }
                             updateFields()
                         }
@@ -293,7 +344,10 @@ class ClubhouseAuthentication {
                     name = storyName!!,
                     description = storyDescription!!,
                     storyType = storyType!!.toLowerCase(),
-                    deadline = dueDate!!)
+                    deadline = dueDate!!,
+                    requestedBy = hashMapUsers[userName]!!,
+                    epicId = hashMapEpic[epic]!!,
+                    estimate = estimate!!)
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     override fun onFailure(call: retrofit2.Call<JsonObject>, t: Throwable) {
                         t.printStackTrace()
@@ -326,28 +380,35 @@ class ClubhouseAuthentication {
             LoggerBirdService.loggerBirdService.initializeClubhouseSpinner(
                 arrayListClubhouseRequester = arrayListUsers,
                 arrayListClubhouseProjects = arrayListProjectName,
-                arrayListClubhouseStoryType = arrayListStoryType
+                arrayListClubhouseStoryType = arrayListStoryType,
+                arrayListClubhouseEpic = arrayListEpicName
             )
         }
     }
 
     internal fun gatherClubhouseSpinnerDetails(
         spinnerUser: Spinner,
-        spinnerStoryType: Spinner
+        spinnerStoryType: Spinner,
+        spinnerEpic: Spinner
     ) {
         spinnerPositionUser = spinnerUser.selectedItemPosition
-        user = spinnerUser.selectedItem.toString()
+        userName = spinnerUser.selectedItem.toString()
         spinnerPositionStoryType = spinnerStoryType.selectedItemPosition
         storyType = spinnerStoryType.selectedItem.toString()
+        spinnerPositionEpic = spinnerEpic.selectedItemPosition
+        epic = spinnerEpic.selectedItem.toString()
+
 
     }
 
     internal fun gatherClubhouseEditTextDetails(
         editTextStoryName: EditText,
-        editTextStoryDescription: EditText
+        editTextStoryDescription: EditText,
+        editTextEstimate: EditText
     ) {
         storyName = editTextStoryName.text.toString()
         storyDescription = editTextStoryDescription.text.toString()
+        estimate = editTextEstimate.text.toString()
     }
 
     internal fun gatherClubhouseProjectAutoTextDetails(
@@ -358,6 +419,10 @@ class ClubhouseAuthentication {
 
     internal fun clubhouseProjectPosition(projectPosition: Int) {
         this.projectPosition = projectPosition
+    }
+
+    internal fun clubhouseEpicPosition(epicPosition: Int) {
+        this.epicPosition = epicPosition
     }
 
     internal fun clubhouseUserPosition(userPosition: Int) {
@@ -377,7 +442,7 @@ class ClubhouseAuthentication {
                 }
             }
         }
-        timerQueue.schedule(timerTaskQueue, 180000)
+        timerQueue.schedule(timerTaskQueue, 100000)
     }
 
     private fun clubhouseExceptionHandler(
