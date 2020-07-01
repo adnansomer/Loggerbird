@@ -144,6 +144,23 @@
     <string name="pivotal_project_doesnt_exist">Bu proje boş olamaz!</string>
     <string name="pivotal_requester_doesnt_exist">Bu isteyen bulunamadı!</string>
     <string name="pivotal_title_empty">Başlık boş olamaz!</string>
+    <string name="pivotal_story_type_doesnt_exist">Bu hikaye tipi bulunamadı!</string>
+    <string name="pivotal_points_doesnt_exist">Bu puan bulunamadı!</string>
+    <string name="basecamp_issue_success">Görev başarılı bir şekilde açıldı!</string>
+    <string name="basecamp_issue_failure">Basecamp görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="basecamp_issue_time_out">Basecamp görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="basecamp_issue_preferences_save">Konu tercihleri kaydedildi!</string>
+    <string name="basecamp_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="basecamp_assignee_exist">Bu sorumlu zaten listeye eklendi!</string>
+    <string name="basecamp_assignee_doesnt_exist">Bu sorumlu bulunamadı!</string>
+    <string name="basecamp_notify_exist">Bu bildiri zaten listeye eklendi</string>
+    <string name="basecamp_notify_doesnt_exist">Bu bildiri bulunamadı!</string>
+    <string name="basecamp_project_empty">Proje boş olamaz!</string>
+    <string name="basecamp_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="basecamp_title_empty">Başlık boş olamaz!</string>
+    <string name="basecamp_category_doesnt_exist">Bu kategori bulunamadı!</string>
+    <string name="basecamp_name_empty">İsim boş olamaz!</string>
+    <string name="basecamp_content_empty">İçerik boş olamaz!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
@@ -166,6 +183,7 @@
     <string name="textView_loggerbird_github_title">Github ile paylaş</string>
     <string name="textView_loggerbird_trello_title">Trello ile paylaş</string>
     <string name="textView_loggerbird_pivotal_title">Pivotal-tracker ile paylaş</string>
+    <string name="textView_loggerbird_basecamp_title">Basecamp ile paylaş</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça boyutu ayarla</string>
     <!-- activity_paint_save_dialog-->
@@ -423,4 +441,44 @@
     <string name="textView_recyclerView_pivotal_owner_popup_title">Pivotal görevlendirmenizden bu sahibi çıkarmaktan eminmisiniz?</string>
     <string name="button_recyclerView_pivotal_owner_delete">Sahibi sil</string>
     <string name="button_recyclerView_pivotal_owner_keep">Sahibi tut</string>
+    <!-- loggerbird_basecamp_menu-->
+    <string name="textView_basecamp_menu_save">Görev detayı kaydet</string>
+    <string name="textView_basecamp_menu_clear">Görev detayı temizle</string>
+    <!-- loggerbird_basecamp_popup-->
+    <string name="textView_basecamp_message_board">Message board</string>
+    <string name="textView_basecamp_project">Proje</string>
+    <string name="textView_basecamp_title">Başlık</string>
+    <string name="editText_basecamp_title_hint">Bu mesaj için bir başlık giriniz…</string>
+    <string name="textView_basecamp_category">Kategori</string>
+    <string name="textView_basecamp_description_message">Mesaj açıklaması</string>
+    <string name="editText_basecamp_description_message">Bu mesaj için bir açıklama giriniz…</string>
+    <string name="textView_basecamp_name">İsim</string>
+    <string name="editText_basecamp_name_hint">Bu yapılacaklar için bir isim giriniz…</string>
+    <string name="textView_basecamp_content">İçerik</string>
+    <string name="editText_basecamp_content_hint">Bu yapılacaklar için bir içerik giriniz…</string>
+    <string name="textView_basecamp_description_todo">Yapılacaklar açıklaması</string>
+    <string name="editText_basecamp_description_todo">Bu yapılacaklar için bir açıklama giriniz…</string>
+    <string name="textView_basecamp_todo_board">yapılacaklar</string>
+    <string name="textView_basecamp_assignee">Sorumlu</string>
+    <string name="textView_basecamp_assignee_list">Sorumlu listesi</string>
+    <string name="textView_basecamp_notify">Bildir</string>
+    <string name="textView_basecamp_notify_list">Bildir listesi</string>
+    <string name="textView_basecamp_due_date">Bitis tarihi</string>
+    <string name="button_basecamp_create">Oluştur</string>
+    <string name="button_basecamp_cancel">İptal</string>
+    <string name="textView_basecamp_attachment">Eklentiler</string>
+    <string name="textView_basecamp_attachments_board">Dokümanlar&amp;Dosyalar</string>
+    <string name="textView_basecamp_start_date">Başlangıç tarihi</string>
+    <!-- recycler_view_basecamp_item_popup-->
+    <string name="textView_recyclerView_basecamp_popup_title">Basecamp görevlendirmenizden bu eklentiyi çıkarmaktan eminmisiniz?</string>
+    <!-- recycler_view_basecamp_assignee_popup-->
+    <string name="textView_recyclerView_basecamp_assignee_header">Sorumluyu sil</string>
+    <string name="textView_recyclerView_basecamp_assignee_title">Basecamp görevlendirmenizden bu sorumluyu kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_basecamp_assignee_delete">Sorumluyu sil</string>
+    <string name="button_recyclerView_basecamp_assignee_keep">Sorumluyu tut</string>
+    <!-- recycler_view_basecamp_notify_popup-->
+    <string name="textView_recyclerView_basecamp_notify_header">Bildiriyi sil</string>
+    <string name="textView_recyclerView_basecamp_notify_title">Basecamp görevlendirmenizden bu bildiriyi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_basecamp_notify_delete">Bildiriyi sil</string>
+    <string name="button_recyclerView_basecamp_notify_keep">Bildiriyi tut</string>
 </resources>

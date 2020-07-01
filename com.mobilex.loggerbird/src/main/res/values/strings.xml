@@ -149,6 +149,21 @@
     <string name="pivotal_title_empty">Title cannot be empty!</string>
     <string name="pivotal_story_type_doesnt_exist">This story type doesn\'t exist!</string>
     <string name="pivotal_points_doesnt_exist">This point value doesn\'t exist!</string>
+    <string name="basecamp_issue_success">Issue opened successfully!</string>
+    <string name="basecamp_issue_failure">An error happened while trying to open basecamp issue!</string>
+    <string name="basecamp_issue_time_out">An error happened while trying to open basecamp issue , system has been timed out!</string>
+    <string name="basecamp_issue_preferences_save">Issue preferences are saved!</string>
+    <string name="basecamp_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="basecamp_assignee_exist">This assignee already added to list!</string>
+    <string name="basecamp_assignee_doesnt_exist">This assignee doesn\'t exist!</string>
+    <string name="basecamp_notify_exist">This notify already added to list!</string>
+    <string name="basecamp_notify_doesnt_exist">This notify doesn\'t exist!</string>
+    <string name="basecamp_project_empty">Project cannot be empty!</string>
+    <string name="basecamp_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="basecamp_title_empty">Title cannot be empty!</string>
+    <string name="basecamp_category_doesnt_exist">This category doesn\'t exist!</string>
+    <string name="basecamp_name_empty">Name cannot be empty!</string>
+    <string name="basecamp_content_empty">Content cannot be empty!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -171,6 +186,7 @@
     <string name="textView_loggerbird_gitlab_title">Send to Gitlab</string>
     <string name="textView_loggerbird_trello_title">Share with Trello</string>
     <string name="textView_loggerbird_pivotal_title">Share with Pivotal-tracker</string>
+    <string name="textView_loggerbird_basecamp_title">Share with Basecamp</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>
     <!-- activity_paint_save_dialog-->
@@ -427,4 +443,44 @@
     <string name="textView_recyclerView_pivotal_owner_popup_title">Are you sure to remove owner from your Pivotal issue?</string>
     <string name="button_recyclerView_pivotal_owner_delete">Delete owner</string>
     <string name="button_recyclerView_pivotal_owner_keep">Keep owner</string>
+    <!-- loggerbird_basecamp_menu-->
+    <string name="textView_basecamp_menu_save">Save Issue Info</string>
+    <string name="textView_basecamp_menu_clear">Clear Issue Info</string>
+    <!-- loggerbird_basecamp_popup-->
+    <string name="textView_basecamp_message_board">Message board</string>
+    <string name="textView_basecamp_project">Project</string>
+    <string name="textView_basecamp_title">Title</string>
+    <string name="editText_basecamp_title_hint">Enter a title for this message…</string>
+    <string name="textView_basecamp_category">Category</string>
+    <string name="textView_basecamp_description_message">Description message</string>
+    <string name="editText_basecamp_description_message">Enter a description for this message…</string>
+    <string name="textView_basecamp_name">Name</string>
+    <string name="editText_basecamp_name_hint">Enter a name for this message…</string>
+    <string name="textView_basecamp_content">Content</string>
+    <string name="editText_basecamp_content_hint">Enter a content for this message…</string>
+    <string name="textView_basecamp_description_todo">Description to-dos</string>
+    <string name="editText_basecamp_description_todo">Enter a description for this to-dos…</string>
+    <string name="textView_basecamp_todo_board">To-dos</string>
+    <string name="textView_basecamp_assignee">Assignee</string>
+    <string name="textView_basecamp_assignee_list">Assignee list</string>
+    <string name="textView_basecamp_notify">Notify</string>
+    <string name="textView_basecamp_notify_list">Notify list</string>
+    <string name="textView_basecamp_due_date">Due date</string>
+    <string name="button_basecamp_create">Create</string>
+    <string name="button_basecamp_cancel">Cancel</string>
+    <string name="textView_basecamp_attachment">Attachments</string>
+    <string name="textView_basecamp_attachments_board">Docs&amp;Files</string>
+    <string name="textView_basecamp_start_date">Start date</string>
+    <!-- recycler_view_basecamp_item_popup-->
+    <string name="textView_recyclerView_basecamp_popup_title">Are you sure to remove attachment from your basecamp issue?</string>
+    <!-- recycler_view_basecamp_assignee_popup-->
+    <string name="textView_recyclerView_basecamp_assignee_header">Delete assignee</string>
+    <string name="textView_recyclerView_basecamp_assignee_title">Are you sure to remove assignee from your basecamp issue?</string>
+    <string name="button_recyclerView_basecamp_assignee_delete">Delete assignee</string>
+    <string name="button_recyclerView_basecamp_assignee_keep">Keep assignee</string>
+    <!-- recycler_view_basecamp_notify_popup-->
+    <string name="textView_recyclerView_basecamp_notify_header">Delete notify</string>
+    <string name="textView_recyclerView_basecamp_notify_title">Are you sure to remove notify from your basecamp issue?</string>
+    <string name="button_recyclerView_basecamp_notify_delete">Delete notify</string>
+    <string name="button_recyclerView_basecamp_notify_keep">Keep notify</string>
 </resources>

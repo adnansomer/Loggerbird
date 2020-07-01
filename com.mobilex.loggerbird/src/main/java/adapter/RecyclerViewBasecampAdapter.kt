@@ -14,27 +14,26 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
+import models.RecyclerViewModel
 import java.util.concurrent.TimeUnit
 import android.provider.Settings
 import android.widget.Button
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
-import models.RecyclerViewModelBlocker
-import services.LoggerBirdService
 
-class RecyclerViewPivotalBlockerAdapter(
-    private val blockerList: ArrayList<RecyclerViewModelBlocker>,
+class RecyclerViewBasecampAdapter(
+    private val fileList: ArrayList<RecyclerViewModel>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View
 ) :
-    RecyclerView.Adapter<RecyclerViewPivotalBlockerAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerViewBasecampAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_pivotal_blocker_item,
+                R.layout.recycler_view_basecamp_item,
                 parent,
                 false
             )
@@ -42,15 +41,15 @@ class RecyclerViewPivotalBlockerAdapter(
     }
 
     override fun getItemCount(): Int {
-        return blockerList.size
+        return fileList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindItems(
-            item = blockerList[position],
+            item = fileList[position],
             adapter = this,
             position = position,
-            pivotalList = blockerList,
+            fileList = fileList,
             context = context,
             activity = activity,
             rootView = rootView
@@ -67,29 +66,29 @@ class RecyclerViewPivotalBlockerAdapter(
         private lateinit var buttonNo: Button
 
         companion object{
-             internal var arrayListBlocker:ArrayList<RecyclerViewModelBlocker> = ArrayList()
+             internal lateinit var arrayListFilePaths:ArrayList<RecyclerViewModel>
         }
 
 
         fun bindItems(
-            item:RecyclerViewModelBlocker,
-            adapter: RecyclerViewPivotalBlockerAdapter,
+            item: RecyclerViewModel,
+            adapter: RecyclerViewBasecampAdapter,
             position: Int,
-            pivotalList: ArrayList<RecyclerViewModelBlocker>,
+            fileList: ArrayList<RecyclerViewModel>,
             context: Context,
             activity: Activity,
             rootView: View
         ) {
-            arrayListBlocker = pivotalList
+            arrayListFilePaths = fileList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
-            textViewFileName.text = item.blockerName
+            textViewFileName.text = item.file.name
             imageButtonCross.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
-                        pivotalList = pivotalList,
+                        fileList = fileList,
                         position = position,
                         adapter = adapter
                     )
@@ -102,14 +101,14 @@ class RecyclerViewPivotalBlockerAdapter(
         private fun removeItemPopup(
             activity: Activity,
             rootView: View,
-            pivotalList: ArrayList<RecyclerViewModelBlocker>,
+            fileList: ArrayList<RecyclerViewModel>,
             position: Int,
-            adapter: RecyclerViewPivotalBlockerAdapter
+            adapter: RecyclerViewBasecampAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_pivotal_blocker_item_popup,
+                        R.layout.recycler_view_basecamp_item_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -141,10 +140,10 @@ class RecyclerViewPivotalBlockerAdapter(
                             viewRecyclerViewItems,
                             windowManagerParamsRecyclerViewItemPopup
                         )
-                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_pivotal_title)
-                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_pivotal_yes)
-                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_pivotal_no)
-                        buttonClicksPivotalBlockerPopup(adapter = adapter , pivotalList = pivotalList , position = position)
+                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_basecamp_title)
+                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_basecamp_yes)
+                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_basecamp_no)
+                        buttonClicksBasecampPopup(adapter = adapter , fileList = fileList , position = position)
                     }
                 }
             } catch (e: Exception) {
@@ -152,7 +151,7 @@ class RecyclerViewPivotalBlockerAdapter(
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
-                    tag = Constants.recyclerViewPivotalAdapterTag
+                    tag = Constants.recyclerViewBasecampAdapterTag
                 )
             }
 
@@ -171,14 +170,11 @@ class RecyclerViewPivotalBlockerAdapter(
 //            alertDialogItemDelete.show()
         }
 
-        private fun buttonClicksPivotalBlockerPopup(pivotalList: ArrayList<RecyclerViewModelBlocker>, position: Int, adapter: RecyclerViewPivotalBlockerAdapter) {
+        private fun buttonClicksBasecampPopup(fileList: ArrayList<RecyclerViewModel>, position: Int, adapter: RecyclerViewBasecampAdapter) {
             buttonYes.setSafeOnClickListener {
-                pivotalList.removeAt(position)
-                arrayListBlocker = pivotalList
+                fileList.removeAt(position)
+                arrayListFilePaths = fileList
                 adapter.notifyDataSetChanged()
-                if(pivotalList.size <=0){
-                    LoggerBirdService.loggerBirdService.cardViewPivotalBlockersList.visibility = View.GONE
-                }
                 removePopupLayout()
             }
             buttonNo.setSafeOnClickListener {

@@ -20,21 +20,21 @@ import android.widget.Button
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
-import models.RecyclerViewModelBlocker
+import models.RecyclerViewModelNotify
 import services.LoggerBirdService
 
-class RecyclerViewPivotalBlockerAdapter(
-    private val blockerList: ArrayList<RecyclerViewModelBlocker>,
+class RecyclerViewBasecampNotifyAdapter(
+    private val notifyList: ArrayList<RecyclerViewModelNotify>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View
 ) :
-    RecyclerView.Adapter<RecyclerViewPivotalBlockerAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerViewBasecampNotifyAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_pivotal_blocker_item,
+                R.layout.recycler_view_basecamp_notify_item,
                 parent,
                 false
             )
@@ -42,15 +42,15 @@ class RecyclerViewPivotalBlockerAdapter(
     }
 
     override fun getItemCount(): Int {
-        return blockerList.size
+        return notifyList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindItems(
-            item = blockerList[position],
+            item = notifyList[position],
             adapter = this,
             position = position,
-            pivotalList = blockerList,
+            notifyList = notifyList,
             context = context,
             activity = activity,
             rootView = rootView
@@ -67,29 +67,29 @@ class RecyclerViewPivotalBlockerAdapter(
         private lateinit var buttonNo: Button
 
         companion object{
-             internal var arrayListBlocker:ArrayList<RecyclerViewModelBlocker> = ArrayList()
+             internal  var arrayListNotify:ArrayList<RecyclerViewModelNotify> = ArrayList()
         }
 
 
         fun bindItems(
-            item:RecyclerViewModelBlocker,
-            adapter: RecyclerViewPivotalBlockerAdapter,
+            item: RecyclerViewModelNotify,
+            adapter: RecyclerViewBasecampNotifyAdapter,
             position: Int,
-            pivotalList: ArrayList<RecyclerViewModelBlocker>,
+            notifyList: ArrayList<RecyclerViewModelNotify>,
             context: Context,
             activity: Activity,
             rootView: View
         ) {
-            arrayListBlocker = pivotalList
+            arrayListNotify = notifyList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
-            textViewFileName.text = item.blockerName
+            textViewFileName.text = item.notifyName
             imageButtonCross.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
-                        pivotalList = pivotalList,
+                        notifyList = notifyList,
                         position = position,
                         adapter = adapter
                     )
@@ -102,14 +102,14 @@ class RecyclerViewPivotalBlockerAdapter(
         private fun removeItemPopup(
             activity: Activity,
             rootView: View,
-            pivotalList: ArrayList<RecyclerViewModelBlocker>,
+            notifyList: ArrayList<RecyclerViewModelNotify>,
             position: Int,
-            adapter: RecyclerViewPivotalBlockerAdapter
+            adapter: RecyclerViewBasecampNotifyAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_pivotal_blocker_item_popup,
+                        R.layout.recycler_view_basecamp_notify_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -141,10 +141,10 @@ class RecyclerViewPivotalBlockerAdapter(
                             viewRecyclerViewItems,
                             windowManagerParamsRecyclerViewItemPopup
                         )
-                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_pivotal_title)
-                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_pivotal_yes)
-                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_pivotal_no)
-                        buttonClicksPivotalBlockerPopup(adapter = adapter , pivotalList = pivotalList , position = position)
+                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_basecamp_title)
+                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_basecamp_yes)
+                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_basecamp_no)
+                        buttonClicksBasecampNotifyPopup(adapter = adapter , notifyList = notifyList , position = position)
                     }
                 }
             } catch (e: Exception) {
@@ -152,7 +152,7 @@ class RecyclerViewPivotalBlockerAdapter(
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
-                    tag = Constants.recyclerViewPivotalAdapterTag
+                    tag = Constants.recyclerViewBasecampAdapterTag
                 )
             }
 
@@ -171,15 +171,15 @@ class RecyclerViewPivotalBlockerAdapter(
 //            alertDialogItemDelete.show()
         }
 
-        private fun buttonClicksPivotalBlockerPopup(pivotalList: ArrayList<RecyclerViewModelBlocker>, position: Int, adapter: RecyclerViewPivotalBlockerAdapter) {
+        private fun buttonClicksBasecampNotifyPopup(notifyList: ArrayList<RecyclerViewModelNotify>, position: Int, adapter: RecyclerViewBasecampNotifyAdapter) {
             buttonYes.setSafeOnClickListener {
-                pivotalList.removeAt(position)
-                arrayListBlocker = pivotalList
+                notifyList.removeAt(position)
+                arrayListNotify = notifyList
                 adapter.notifyDataSetChanged()
-                if(pivotalList.size <=0){
-                    LoggerBirdService.loggerBirdService.cardViewPivotalBlockersList.visibility = View.GONE
-                }
                 removePopupLayout()
+                if(notifyList.size <=0){
+                    LoggerBirdService.loggerBirdService.cardViewBasecampNotifyList.visibility = View.GONE
+                }
             }
             buttonNo.setSafeOnClickListener {
                 removePopupLayout()

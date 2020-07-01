@@ -136,4 +136,34 @@ interface AccountIdService {
     fun getPivotalMembers():Call<JsonArray>
     @POST("stories")
     fun createPivotalStory(@Body  jsonObject: JsonObject):Call<JsonObject>
+    @Multipart
+    @POST("uploads")
+    fun setPivotalAttachments(@Part file:MultipartBody.Part): Call<JsonObject>
+    @POST("comments")
+    fun addPivotalAttachments(@Body jsonObject: JsonObject): Call<JsonObject>
+    @POST("blockers")
+    fun setPivotalBlockers(@Body jsonObject: JsonObject): Call<JsonObject>
+    @POST("tasks")
+    fun setPivotalTasks(@Body jsonObject: JsonObject): Call<JsonObject>
+
+    //Basecamp
+    @GET("authorization?")
+    fun getBasecampProjectId(@Query("access_token") accessToken:String):Call<JsonObject>
+    @GET("projects?")
+    fun getBasecampProjects(@Query("access_token") accessToken:String):Call<JsonArray>
+    @GET("people?")
+    fun getBasecampAssignee(@Query("access_token") accessToken:String):Call<JsonArray>
+    @GET("categories?")
+    fun getBasecampCategories(@Query("access_token") accessToken:String):Call<JsonArray>
+    @POST("messages?")
+    fun createBasecampMessage(@Body jsonObject: JsonObject,@Query("access_token") accessToken:String):Call<JsonObject>
+    @Multipart
+    @POST("attachments")
+    fun setBasecampAttachments(@Part file:MultipartBody.Part, @Header("Content-Length")contentLength:Long, @Query("name")name:String, @Query("access_token") accessToken:String): Call<JsonObject>
+    @POST("uploads")
+    fun addBaseAttachments(@Body jsonObject: JsonObject,@Query("access_token") accessToken:String): Call<JsonObject>
+    @POST("todolists")
+    fun createBasecampTodo(@Body jsonObject: JsonObject,@Query("access_token") accessToken:String):Call<JsonObject>
+    @POST("todos")
+    fun addBasecampTodo(@Body jsonObject: JsonObject,@Query("access_token") accessToken:String):Call<JsonObject>
 }

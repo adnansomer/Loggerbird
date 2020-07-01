@@ -67,7 +67,7 @@ class RecyclerViewPivotalTaskAdapter(
         private lateinit var buttonNo: Button
 
         companion object{
-             internal lateinit var arrayListTasks:ArrayList<RecyclerViewModelTask>
+             internal var arrayListTasks:ArrayList<RecyclerViewModelTask> = ArrayList()
         }
 
 
