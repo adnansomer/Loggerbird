@@ -130,8 +130,8 @@ interface AccountIdService {
     @POST("idLabels?")
     fun setTrelloLabels(@Body jsonArray: JsonArray,@Query("key") key:String,@Query("token") token:String): Call<JsonObject>
 
-    //clubhouse
-    @GET("projects?")
+    /**Clubhouse**/
+    @GET("projects")
     fun getClubhouseProjects(@Query("token") token: String):Call<List<ClubhouseProjectModel>>
     @GET("epics")
     fun getClubhouseEpics(@Query("token") token: String):Call<List<ClubHouseEpicModel>>
@@ -147,5 +147,11 @@ interface AccountIdService {
                              @Query("requested_by_id") requestedBy: String,
                              @Query("epic_id") epicId: String,
                              @Query("estimate") estimate: String): Call<JsonObject>
+
+    @Multipart
+    @POST("files")
+    fun sendClubhouseAttachments(@Query("token") token: String,@Part file:MultipartBody.Part):Call<JsonArray>
+    @PUT("stories/{id}")
+    fun setClubhouseStory(@Path("id")id:String,@Query("token") token: String,@Query("description") description:String):Call<JsonObject>
 
 }

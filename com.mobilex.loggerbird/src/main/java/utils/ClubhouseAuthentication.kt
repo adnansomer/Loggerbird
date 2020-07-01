@@ -1,7 +1,7 @@
 package utils
 
 import android.app.Activity
-import adapter.RecyclerViewGitlabAdapter
+import adapter.RecyclerViewClubhouseAdapter
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -66,8 +66,14 @@ class ClubhouseAuthentication {
     private var storyDescription: String?=""
     private var estimate: String? = ""
     internal var dueDate: String? = ""
+    private lateinit var storyId: String
+    private val arrayListAttachments: ArrayList<String> = ArrayList()
+    private var descriptionString = StringBuilder()
 
-
+    companion object{
+        const val BASE_URL = "https://api.clubhouse.io/api/v3/"
+    }
+    
     internal fun callClubhouse(
         activity: Activity,
         context: Context,
@@ -206,7 +212,7 @@ class ClubhouseAuthentication {
 
     private suspend fun gatherClubhouseProjectDetails(){
         try {
-            RetrofitUserClubhouseClient.getClubhouseUserClient(url = "https://api.clubhouse.io/api/v3/")
+            RetrofitUserClubhouseClient.getClubhouseUserClient(url = BASE_URL)
                 .create(AccountIdService::class.java)
                 .getClubhouseProjects(token = LoggerBird.clubhouseApiToken)
                 .enqueue(object : retrofit2.Callback<List<ClubhouseProjectModel>> {
@@ -247,7 +253,7 @@ class ClubhouseAuthentication {
 
     private suspend fun gatherClubhouseUserDetails(){
         try {
-            RetrofitUserClubhouseClient.getClubhouseUserClient(url = "https://api.clubhouse.io/api/v3/")
+            RetrofitUserClubhouseClient.getClubhouseUserClient(url = BASE_URL)
                 .create(AccountIdService::class.java)
                 .getClubhouseMembers(token = LoggerBird.clubhouseApiToken)
                 .enqueue(object : retrofit2.Callback<JsonArray>{
@@ -289,7 +295,7 @@ class ClubhouseAuthentication {
 
     private suspend fun gatherClubhouseEpicDetails(){
         try {
-            RetrofitUserClubhouseClient.getClubhouseUserClient(url = "https://api.clubhouse.io/api/v3/")
+            RetrofitUserClubhouseClient.getClubhouseUserClient(url = BASE_URL)
                 .create(AccountIdService::class.java)
                 .getClubhouseEpics(token = LoggerBird.clubhouseApiToken)
                 .enqueue(object : retrofit2.Callback<List<ClubHouseEpicModel>> {
@@ -336,7 +342,7 @@ class ClubhouseAuthentication {
         try {
             this.activity = activity
             val coroutineCallClubhouseIssue = CoroutineScope(Dispatchers.IO)
-            RetrofitUserClubhouseClient.getClubhouseUserClient(url = "https://api.clubhouse.io/api/v3/")
+            RetrofitUserClubhouseClient.getClubhouseUserClient(url = BASE_URL)
                 .create(AccountIdService::class.java)
                 .createClubhouseStory(
                     token = LoggerBird.clubhouseApiToken,
@@ -354,23 +360,126 @@ class ClubhouseAuthentication {
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
                     }
-
                     override fun onResponse(call: retrofit2.Call<JsonObject>, response: retrofit2.Response<JsonObject>) {
-                        coroutineCallClubhouseIssue.async {
-                            activity.runOnUiThread {
-                                LoggerBirdService.loggerBirdService.buttonClubhouseCancel.performClick()
-                            }
-                            if (response.code() in 400..499) {
-                                LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error")
-                            }
+                        if (response.code() in 400..499) {
+                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error") }
                             Log.d("clubhousecreate", response.code().toString())
-                            val freshdesk = response.body()
-                            Log.d("clubhousecreate", freshdesk.toString())
+                            val clubhouse = response.body()
+                            Log.d("clubhousecreate", clubhouse.toString())
+
+                        coroutineCallClubhouseIssue.async {
+                            storyId = response.body()!!["id"].asString
+                            RecyclerViewClubhouseAdapter.ViewHolder.arrayListFilePaths.forEach {
+                                val file = it.file
+                                if (file.exists()) {
+                                    createAttachments(
+                                        storyId = storyId,
+                                        filePathMedia = filePathMedia
+                                    )
+                                }
+                            }
                         }
                     }
                 })
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createAttachments(filePathMedia: File?, storyId: String) {
+        try {
+            val requestFile = filePathMedia!!.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+            val filePathMediaName = filePathMedia!!.name
+            val body = MultipartBody.Part.createFormData("file", filePathMediaName, requestFile)
+
+            RetrofitUserClubhouseClient.getClubhouseUserClient(url = BASE_URL)
+                .create(AccountIdService::class.java)
+                .sendClubhouseAttachments(token = LoggerBird.clubhouseApiToken, file = body)
+                .enqueue(object : retrofit2.Callback<JsonArray> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<JsonArray>,
+                        t: Throwable
+                    ) {
+                        t.printStackTrace()
+                        LoggerBird.callEnqueue()
+                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
+                    }
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonArray>,
+                        response: retrofit2.Response<JsonArray>
+                    ) {
+                        if (response.code() in 400..499) {
+                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error") }
+
+                        val coroutineCallClubhouseAttachments = CoroutineScope(Dispatchers.IO)
+                        coroutineCallClubhouseAttachments.async {
+                            Log.d("clubhouse_attachment", response.code().toString())
+                            Log.d("clubhouse_attachment", response.body().toString())
+                            response.body()?.getAsJsonArray()?.forEach {
+                                arrayListAttachments.add(it.asJsonObject["url"].asString)
+                            }
+
+                            val stringBuilder = StringBuilder()
+                            var attachmentCounter = 1
+                            arrayListAttachments.forEach {
+                                stringBuilder.append("\nattachment_$attachmentCounter:$it\n")
+                                attachmentCounter++
+                            }
+                            val stringDescription = "$storyDescription\n" + stringBuilder.toString()
+
+                            uploadAttachments(storyId = storyId, description = stringDescription)
+                        }
+                    }
+                })
+
+        } catch (e: Exception) {
+            clubhouseExceptionHandler(e = e)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun uploadAttachments(storyId: String,description: String) {
+        try {
+            RetrofitUserClubhouseClient.getClubhouseUserClient(url = BASE_URL)
+                .create(AccountIdService::class.java)
+                .setClubhouseStory(id = storyId,token = LoggerBird.clubhouseApiToken, description = description)
+                .enqueue(object : retrofit2.Callback<JsonObject> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<JsonObject>,
+                        t: Throwable
+                    ) {
+                        t.printStackTrace()
+                        LoggerBird.callEnqueue()
+                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
+                    }
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
+                    ) {
+                        if (response.code() in 400..499) {
+                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error") }
+                        else{
+                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse")
+                        }
+                        val coroutineCallClubhouseAttachments = CoroutineScope(Dispatchers.IO)
+                        coroutineCallClubhouseAttachments.async {
+                            val clubhouseAttachments = response.body()
+                            Log.d("clubhouse_attachment_result", response.code().toString())
+                            Log.d("clubhouse_attachment_result", response.body().toString())
+                            if (filePathMedia!!.name != "logger_bird_details.txt") {
+                                if (filePathMedia!!.exists()) {
+                                    filePathMedia!!.delete()
+                                }
+                            }
+                        }
+                    }
+                })
+
+        } catch (e: Exception) {
+            clubhouseExceptionHandler(e = e)
         }
     }
 
@@ -397,8 +506,6 @@ class ClubhouseAuthentication {
         storyType = spinnerStoryType.selectedItem.toString()
         spinnerPositionEpic = spinnerEpic.selectedItemPosition
         epic = spinnerEpic.selectedItem.toString()
-
-
     }
 
     internal fun gatherClubhouseEditTextDetails(

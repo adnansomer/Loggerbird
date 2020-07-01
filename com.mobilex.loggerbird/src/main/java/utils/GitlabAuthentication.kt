@@ -246,7 +246,6 @@ class GitlabAuthentication {
                                     )
                                 }
                             }
-
                             activity.runOnUiThread {
                                 LoggerBirdService.loggerBirdService.buttonGitlabCancel.performClick()
                             }

@@ -2777,21 +2777,24 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         .show()
                 }
                 "clubhouse" -> {
-                    detachProgressBar()
-                    removePivotalLayout()
+                    progressBarClubhouseLayout.visibility = View.GONE
+                    progressBarClubhouse.visibility = View.GONE
+                    removeClubhouseLayout()
                     Toast.makeText(context, R.string.clubhouse_issue_success, Toast.LENGTH_SHORT)
                         .show()
                     finishSuccessFab()
                 }
                 "clubhouse_error" -> {
-                    detachProgressBar()
-                    removeTrelloLayout()
+                    progressBarClubhouseLayout.visibility = View.GONE
+                    progressBarClubhouse.visibility = View.GONE
+                    removeClubhouseLayout()
                     Toast.makeText(context, R.string.clubhouse_issue_failure, Toast.LENGTH_SHORT)
                         .show()
                 }
                 "clubhouse_error_time_out" -> {
-                    detachProgressBar()
-                    removeTrelloLayout()
+                    progressBarClubhouseLayout.visibility = View.GONE
+                    progressBarClubhouse.visibility = View.GONE
+                    removeClubhouseLayout()
                     Toast.makeText(context, R.string.clubhouse_issue_time_out, Toast.LENGTH_SHORT)
                         .show()
                 }
@@ -7838,6 +7841,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     editTextEstimate = editTextClubhouseEstimate
                 )
 
+                progressBarClubhouse.visibility=View.VISIBLE
+                progressBarClubhouseLayout.visibility=View.VISIBLE
                 clubhouseAuthentication.callClubhouse(
                     activity = activity,
                     context = context,
