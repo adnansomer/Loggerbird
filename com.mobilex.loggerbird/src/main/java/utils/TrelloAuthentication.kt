@@ -223,21 +223,6 @@ internal class TrelloAuthentication {
                                     cardId = trelloList!!["id"].asString
                                 )
                             }
-//                            repoId = githubList!!["url"].asString.substringAfterLast("/").toInt()
-//                            RecyclerViewGithubAdapter.ViewHolder.arrayListFilePaths.forEach {
-//                                val file = it.file
-//                                if (file.exists()) {
-//                                    callGithubAttachments(
-//                                        repo = repos!!,
-//                                        filePathMedia = file
-//                                    )
-//                                }
-//                            }
-//                            if (RecyclerViewGithubAdapter.ViewHolder.arrayListFilePaths.isEmpty()) {
-//                                activity.runOnUiThread {
-//                                    LoggerBirdService.loggerBirdService.finishShareLayout("github")
-//                                }
-//                            }
                         }
                         resetTrelloValues()
                     }

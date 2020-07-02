@@ -86,7 +86,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerSlack: Any? = null
     private var windowManagerJiraDatePicker: Any? = null
     private var windowManagerGitlabDatePicker: Any? = null
-    private var windowManagerClubhouseDatePicker: Any? = null
     private var windowManagerUnhandledDuplication: Any? = null
     private var windowManagerEmail: Any? = null
     private var windowManagerFutureTask: Any? = null
@@ -99,15 +98,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerTrelloTime: Any? = null
     private var windowManagerTrelloDate: Any? = null
     private var windowManagerPivotal: Any? = null
-    private var windowManagerClubhouse: Any? = null
+    private var windowManagerBasecamp: Any? = null
+    private var windowManagerBasecampDate: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
     private lateinit var windowManagerParamsJira: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsJiraAuth: WindowManager.LayoutParams
     private lateinit var windowManagerParamsSlack: WindowManager.LayoutParams
     private lateinit var windowManagerParamsJiraDatePicker: WindowManager.LayoutParams
     private lateinit var windowManagerParamsGitlabDatePicker: WindowManager.LayoutParams
-    private lateinit var windowManagerParamsClubhouseDatePicker: WindowManager.LayoutParams
     private lateinit var windowManagerParamsUnhandledDuplication: WindowManager.LayoutParams
     private lateinit var windowManagerParamsEmail: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFutureTask: WindowManager.LayoutParams
@@ -120,7 +120,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsTrelloDate: WindowManager.LayoutParams
     private lateinit var windowManagerParamsTrelloTime: WindowManager.LayoutParams
     private lateinit var windowManagerParamsPivotal: WindowManager.LayoutParams
-    private lateinit var windowManagerParamsClubhouse: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsBaseCamp: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsBaseCampDate: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -179,7 +180,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewTrelloDate: View
     private lateinit var viewTrelloTime: View
     private lateinit var viewPivotal: View
-    private lateinit var viewClubhouse: View
+    private lateinit var viewBasecamp: View
+    private lateinit var viewBasecampDate: View
     private lateinit var wrapper: FrameLayout
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
@@ -413,7 +415,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonCalendarViewGitlabCancel: Button
     private lateinit var buttonCalendarViewGitlabOk: Button
     private lateinit var recyclerViewGitlabAttachment: RecyclerView
-    private lateinit var gitlabAdapter:RecyclerViewGitlabAdapter
+    private lateinit var gitlabAdapter: RecyclerViewGitlabAdapter
     private lateinit var progressBarGitlab: ProgressBar
     private lateinit var progressBarGitlabLayout: FrameLayout
     private lateinit var autoTextViewGitlabProjectAdapter: ArrayAdapter<String>
@@ -502,7 +504,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonTrelloTimelineProceed: Button
     private lateinit var buttonTrelloTimelineCancel: Button
     private var calendarTrello: Calendar? = null
-    //
     //trello_date:
     private var trelloStartDate: Long? = null
     private lateinit var frameLayoutTrelloDate: FrameLayout
@@ -518,64 +519,96 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonTrelloTimeCancel: Button
 
     //Pivotal Tracker
+    internal val pivotalAuthentication = PivotalTrackerAuthentication()
     private lateinit var buttonPivotalCreate: Button
     private lateinit var buttonPivotalCancel: Button
     private lateinit var toolbarPivotal: Toolbar
     private lateinit var scrollViewPivotal: ScrollView
     private lateinit var autoTextViewPivotalProject: AutoCompleteTextView
     private lateinit var editTextPivotalTitle: EditText
+    private lateinit var editTextPivotalBlockers: EditText
+    private lateinit var editTextPivotalDescription: EditText
+    private lateinit var editTextPivotalTasks: EditText
     private lateinit var autoTextViewPivotalStoryType: AutoCompleteTextView
     private lateinit var autoTextViewPivotalPoints: AutoCompleteTextView
     private lateinit var autoTextViewPivotalOwners: AutoCompleteTextView
+    private lateinit var autoTextViewPivotalLabel: AutoCompleteTextView
     private lateinit var autoTextViewPivotalRequester: AutoCompleteTextView
+    private lateinit var autoTextViewPivotalProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalLabelAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalStoryTypeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalPointsAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalOwnersAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalRequesterAdapter: ArrayAdapter<String>
     private lateinit var imageViewPivotalOwners: ImageView
     internal lateinit var cardViewPivotalOwnersList: CardView
     private lateinit var recyclerViewPivotalOwnerList: RecyclerView
-    private lateinit var editTextPivotalBlockers: EditText
     private lateinit var imageViewPivotalBlockers: ImageView
     internal lateinit var cardViewPivotalBlockersList: CardView
     private lateinit var recyclerViewPivotalBlockersList: RecyclerView
-    private lateinit var editTextPivotalDescription: EditText
-    private lateinit var autoTextViewPivotalLabel: AutoCompleteTextView
     private lateinit var imageViewPivotalLabel: ImageView
     internal lateinit var cardViewPivotalLabelList: CardView
     private lateinit var recyclerViewPivotalLabelList: RecyclerView
-    private lateinit var editTextPivotalTasks: EditText
     private lateinit var imageViewPivotalTask: ImageView
     internal lateinit var cardViewPivotalTasksList: CardView
     private lateinit var recyclerViewPivotalTaskList: RecyclerView
     internal lateinit var cardViewPivotalAttachments: CardView
     private lateinit var recyclerViewPivotalAttachmentList: RecyclerView
+    private val arrayListPivotalFileName: ArrayList<RecyclerViewModel> = ArrayList()
+    private lateinit var pivotalAdapter: RecyclerViewPivotalAdapter
+    private val arrayListPivotalTaskName: ArrayList<RecyclerViewModelTask> = ArrayList()
+    private lateinit var pivotalTaskAdapter: RecyclerViewPivotalTaskAdapter
+    private val arrayListPivotalBlockerName: ArrayList<RecyclerViewModelBlocker> = ArrayList()
+    private lateinit var pivotalBlockerAdapter: RecyclerViewPivotalBlockerAdapter
+    private val arrayListPivotalLabelName: ArrayList<RecyclerViewModelLabel> = ArrayList()
+    private lateinit var pivotalLabelAdapter: RecyclerViewPivotalLabelAdapter
+    private lateinit var arrayListPivotalLabel: ArrayList<String>
+    private val arrayListPivotalOwnerName: ArrayList<RecyclerViewModelOwner> = ArrayList()
+    private lateinit var pivotalOwnerAdapter: RecyclerViewPivotalOwnerAdapter
+    private lateinit var arrayListPivotalOwner: ArrayList<String>
 
-    //Clubhouse
-    internal val clubhouseAuthentication = ClubhouseAuthentication()
-    internal lateinit var buttonClubhouseCancel: Button
-    private lateinit var buttonClubhouseCreate: Button
-    private lateinit var toolbarClubhouse: Toolbar
-    private lateinit var calendarViewClubhouseView: View
-    private lateinit var calendarViewClubhouseLayout: FrameLayout
-    private lateinit var calendarViewClubhouseDueDate: CalendarView
-    private var calendarViewClubhouseDate: Long? = null
-    private lateinit var buttonCalendarViewClubhouseCancel: Button
-    private lateinit var buttonCalendarViewClubhouseOk: Button
-    private lateinit var textViewClubhouseDueDate: TextView
-    private lateinit var autoTextViewClubhouseProject: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseProjectAdapter: ArrayAdapter<String>
-    private lateinit var spinnerClubhouseEpic: Spinner
-    private lateinit var spinnerClubhouseEpicAdapter: ArrayAdapter<String>
-    private lateinit var editTextClubhouseStoryName: EditText
-    private lateinit var editTextClubhouseStoryDescription: EditText
-    private lateinit var editTextClubhouseEstimate: EditText
-    private lateinit var spinnerClubhouseStoryType: Spinner
-    private lateinit var spinnerClubhouseStoryTypeAdapter: ArrayAdapter<String>
-    private lateinit var spinnerClubhouseRequester: Spinner
-    private lateinit var spinnerClubhouseRequesterAdapter: ArrayAdapter<String>
-    private val arrayListClubhouseFileName: ArrayList<RecyclerViewModel> = ArrayList()
-    private lateinit var clubhouseAdapter:RecyclerViewClubhouseAdapter
-    private lateinit var recyclerViewClubhouseAttachment: RecyclerView
-    private lateinit var progressBarClubhouse: ProgressBar
-    private lateinit var progressBarClubhouseLayout: FrameLayout
-
+    //Basecamp
+    internal val basecampAuthentication = BasecampAuthentication()
+    private lateinit var buttonBasecampCancel: Button
+    private lateinit var buttonBasecampCreate: Button
+    private lateinit var toolbarBasecamp: Toolbar
+    private lateinit var scrollViewBasecamp: ScrollView
+    private lateinit var autoTextViewBasecampProject: AutoCompleteTextView
+    private lateinit var autoTextViewBasecampCategory: AutoCompleteTextView
+    private lateinit var autoTextViewBasecampAssignee: AutoCompleteTextView
+    private lateinit var autoTextViewBasecampNotify: AutoCompleteTextView
+    private lateinit var autoTextViewBasecampProjectAdapter: ArrayAdapter<String>
+    //    private lateinit var autoTextViewBasecampCategoryAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBasecampCategoryAdapter: AutoCompleteTextViewBasecampAdapter
+    private lateinit var autoTextViewBasecampAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBasecampNotifyAdapter: ArrayAdapter<String>
+    private lateinit var editTextBasecampDescriptionMessage: EditText
+    private lateinit var editTextBasecampDescriptionTodo: EditText
+    private lateinit var editTextBasecampTitle: EditText
+    private lateinit var editTextBasecampName: EditText
+    private lateinit var editTextBasecampContent: EditText
+    private lateinit var imageViewBasecampAssignee: ImageView
+    private lateinit var imageViewBasecampNotify: ImageView
+    internal lateinit var cardViewBasecampAssigneeList: CardView
+    internal lateinit var cardViewBasecampNotifyList: CardView
+    private lateinit var recyclerViewBasecampAttachmentList: RecyclerView
+    private lateinit var recyclerViewBasecampNotifyList: RecyclerView
+    private lateinit var recyclerViewBasecampAssigneeList: RecyclerView
+    private lateinit var basecampAdapter: RecyclerViewBasecampAdapter
+    private val arrayListBasecampFileName: ArrayList<RecyclerViewModel> = ArrayList()
+    private lateinit var basecampAssigneeAdapter: RecyclerViewBasecampAssigneeAdapter
+    private val arrayListBasecampAssigneeName: ArrayList<RecyclerViewModelAssignee> = ArrayList()
+    private lateinit var arrayListBasecampAssignee: ArrayList<String>
+    private lateinit var basecampNotifyAdapter: RecyclerViewBasecampNotifyAdapter
+    private val arrayListBasecampNotifyName: ArrayList<RecyclerViewModelNotify> = ArrayList()
+    private lateinit var arrayListBasecampNotify: ArrayList<String>
+    private lateinit var imageViewBasecampDate: ImageView
+    private lateinit var imageButtonBasecampRemoveDate: ImageButton
+    //basecamp_date:
+    private lateinit var frameLayoutBasecampDate: FrameLayout
+    private lateinit var calendarViewBasecamp: CalendarView
+    private lateinit var buttonBasecampDateCreate: Button
+    private lateinit var buttonBasecampDateCancel: Button
 
     //Static global variables:
     internal companion object {
@@ -593,7 +626,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var textView_share_github: TextView
         private lateinit var textView_share_trello: TextView
         private lateinit var textView_share_pivotal: TextView
-        private lateinit var textView_share_clubhouse: TextView
+        private lateinit var textView_share_basecamp: TextView
         private lateinit var textView_discard: TextView
         //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
@@ -942,7 +975,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_share_github = view.findViewById(R.id.textView_share_github)
                     textView_share_trello = view.findViewById(R.id.textView_share_trello)
                     textView_share_pivotal = view.findViewById(R.id.textView_share_pivotal)
-                    textView_share_clubhouse = view.findViewById(R.id.textView_share_clubhouse)
+                    textView_share_basecamp = view.findViewById(R.id.textView_share_basecamp)
                     textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
                     textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
@@ -1236,11 +1269,22 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             textView_send_email.setSafeOnClickListener {
+                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    attachProgressBar()
+//                }
+//                sendSingleMediaFile(filePathMedia = filePathMedia)
                 initializeEmailLayout(filePathMedia = filePathMedia)
             }
 
             textView_share_jira.setSafeOnClickListener {
-
+                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    attachProgressBar()
+//                }
+//                jiraAuthentication.callJiraIssue(
+//                    filePathName = filePathMedia,
+//                    context = context,
+//                    activity = activity
+//                )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
@@ -1294,15 +1338,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     initializePivotalLayout(filePathMedia = filePathMedia)
                 }
             }
-
-            textView_share_clubhouse.setSafeOnClickListener {
+            textView_share_basecamp.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    initializeClubhouseLayout(filePathMedia = filePathMedia)
+                    initializeBasecampLayout(filePathMedia = filePathMedia)
                 }
-
             }
 
 
@@ -2694,6 +2736,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     progressBarSlackLayout.visibility = View.GONE
                     progressBarSlack.visibility = View.GONE
                 }
+
                 "slack_error_time_out" -> {
                     removeSlackLayout()
                     Toast.makeText(context, R.string.slack_sent_error_time_out, Toast.LENGTH_SHORT)
@@ -2701,24 +2744,30 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     progressBarSlackLayout.visibility = View.GONE
                     progressBarSlack.visibility = View.GONE
                 }
+
                 "gitlab" -> {
                     Toast.makeText(context, R.string.gitlab_sent, Toast.LENGTH_SHORT).show()
                     finishSuccessFab()
                     progressBarGitlabLayout.visibility = View.GONE
                     progressBarGitlab.visibility = View.GONE
                 }
+
                 "gitlab_error" -> {
                     removeGitlabLayout()
                     Toast.makeText(context, R.string.gitlab_sent_error, Toast.LENGTH_SHORT).show()
                     progressBarGitlabLayout.visibility = View.GONE
                     progressBarGitlab.visibility = View.GONE
+
                 }
+
                 "gitlab_error_time_out" -> {
                     removeSlackLayout()
-                    Toast.makeText(context, R.string.gitlab_sent_error_time_out, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.gitlab_sent_error_time_out, Toast.LENGTH_SHORT)
+                        .show()
                     progressBarGitlabLayout.visibility = View.GONE
                     progressBarGitlab.visibility = View.GONE
                 }
+
                 "github" -> {
                     detachProgressBar()
                     removeGithubLayout()
@@ -2766,36 +2815,33 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
                 "pivotal_error" -> {
                     detachProgressBar()
-                    removeTrelloLayout()
+                    removePivotalLayout()
                     Toast.makeText(context, R.string.pivotal_issue_failure, Toast.LENGTH_SHORT)
                         .show()
                 }
                 "pivotal_error_time_out" -> {
                     detachProgressBar()
-                    removeTrelloLayout()
+                    removePivotalLayout()
                     Toast.makeText(context, R.string.pivotal_issue_time_out, Toast.LENGTH_SHORT)
                         .show()
                 }
-                "clubhouse" -> {
-                    progressBarClubhouseLayout.visibility = View.GONE
-                    progressBarClubhouse.visibility = View.GONE
-                    removeClubhouseLayout()
-                    Toast.makeText(context, R.string.clubhouse_issue_success, Toast.LENGTH_SHORT)
+                "basecamp" -> {
+                    detachProgressBar()
+                    removeBasecampLayout()
+                    Toast.makeText(context, R.string.basecamp_issue_success, Toast.LENGTH_SHORT)
                         .show()
                     finishSuccessFab()
                 }
-                "clubhouse_error" -> {
-                    progressBarClubhouseLayout.visibility = View.GONE
-                    progressBarClubhouse.visibility = View.GONE
-                    removeClubhouseLayout()
-                    Toast.makeText(context, R.string.clubhouse_issue_failure, Toast.LENGTH_SHORT)
+                "basecamp_error" -> {
+                    detachProgressBar()
+                    removeBasecampLayout()
+                    Toast.makeText(context, R.string.basecamp_issue_failure, Toast.LENGTH_SHORT)
                         .show()
                 }
-                "clubhouse_error_time_out" -> {
-                    progressBarClubhouseLayout.visibility = View.GONE
-                    progressBarClubhouse.visibility = View.GONE
-                    removeClubhouseLayout()
-                    Toast.makeText(context, R.string.clubhouse_issue_time_out, Toast.LENGTH_SHORT)
+                "basecamp_error_time_out" -> {
+                    detachProgressBar()
+                    removeBasecampLayout()
+                    Toast.makeText(context, R.string.basecamp_issue_time_out, Toast.LENGTH_SHORT)
                         .show()
                 }
             }
@@ -2896,6 +2942,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             filePathMedia.delete()
         }
+
         finishShareLayout("single_email")
         LoggerBird.callEnqueue()
     }
@@ -4570,6 +4617,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
+
     private fun initializeStartDatePicker() {
         val calendar = Calendar.getInstance()
         val mYear = calendar.get(Calendar.YEAR)
@@ -6024,8 +6072,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewGithubAssignee.setText(arrayListAssignee[0], false)
                 }
-            } else {
-                autoTextViewGithubAssignee.setText(arrayListAssignee[0], false)
             }
         }
         autoTextViewGithubAssignee.setOnTouchListener { v, event ->
@@ -6095,8 +6141,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewGithubMileStone.setText(arrayListMileStones[0], false)
                 }
-            } else {
-                autoTextViewGithubMileStone.setText(arrayListMileStones[0], false)
             }
         }
         autoTextViewGithubMileStone.setOnTouchListener { v, event ->
@@ -6153,8 +6197,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewGithubProject.setText(arrayListProject[0], false)
                 }
-            } else {
-                autoTextViewGithubProject.setText(arrayListProject[0], false)
             }
         }
         autoTextViewGithubProject.setOnTouchListener { v, event ->
@@ -6205,8 +6247,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewGithubLabels.setText(arrayListLabels[0], false)
                 }
-            } else {
-                autoTextViewGithubLabels.setText(arrayListLabels[0], false)
             }
         }
         autoTextViewGithubLabels.setOnTouchListener { v, event ->
@@ -6276,8 +6316,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewGithubLinkedRequests.setText(arrayListLinkedRequests[0], false)
                 }
-            } else {
-                autoTextViewGithubLinkedRequests.setText(arrayListLinkedRequests[0], false)
             }
         }
         autoTextViewGithubLinkedRequests.setOnTouchListener { v, event ->
@@ -6742,8 +6780,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewTrelloMember.setText(arrayListMember[0], false)
                 }
-            } else {
-                autoTextViewTrelloMember.setText(arrayListMember[0], false)
             }
         }
         autoTextViewTrelloMember.setOnTouchListener { v, event ->
@@ -6799,8 +6835,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     autoTextViewTrelloLabel.setText(arrayListLabel[0], false)
                 }
-            } else {
-                autoTextViewTrelloLabel.setText(arrayListLabel[0], false)
             }
         }
         autoTextViewTrelloLabel.setOnTouchListener { v, event ->
@@ -7127,7 +7161,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun initializeGitlabLayout(filePathMedia: File){
+    private fun initializeGitlabLayout(filePathMedia: File) {
         try {
             removeGitlabLayout()
             viewGitlab = LayoutInflater.from(activity)
@@ -7175,20 +7209,25 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
 
                 toolbarGitlab = viewGitlab.findViewById(R.id.toolbar_gitlab)
-                autoTextViewGitlabProject = viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
+                autoTextViewGitlabProject =
+                    viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
                 editTextGitlabTitle = viewGitlab.findViewById(R.id.editText_gitlab_title)
-                editTextGitlabDescription = viewGitlab.findViewById(R.id.editText_gitlab_description)
+                editTextGitlabDescription =
+                    viewGitlab.findViewById(R.id.editText_gitlab_description)
                 editTextGitlabWeight = viewGitlab.findViewById(R.id.editText_gitlab_weight)
                 spinnerGitlabMilestone = viewGitlab.findViewById(R.id.spinner_gitlab_milestone)
                 spinnerGitlabAssignee = viewGitlab.findViewById(R.id.spinner_gitlab_assignee)
                 spinnerGitlabLabels = viewGitlab.findViewById(R.id.spinner_gitlab_labels)
-                spinnerGitlabConfidentiality = viewGitlab.findViewById(R.id.spinner_gitlab_confidentiality)
+                spinnerGitlabConfidentiality =
+                    viewGitlab.findViewById(R.id.spinner_gitlab_confidentiality)
                 textViewGitlabDueDate = viewGitlab.findViewById(R.id.textView_gitlab_due_date)
                 buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
                 buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
                 progressBarGitlab = viewGitlab.findViewById(R.id.gitlab_progressbar)
-                progressBarGitlabLayout = viewGitlab.findViewById(R.id.gitlab_progressbar_background)
-                recyclerViewGitlabAttachment = viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
+                progressBarGitlabLayout =
+                    viewGitlab.findViewById(R.id.gitlab_progressbar_background)
+                recyclerViewGitlabAttachment =
+                    viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
                 editTextGitlabWeight.filters = arrayOf<InputFilter>(InputTypeFilter("0", "100"))
 
                 gitlabAuthentication.callGitlab(
@@ -7202,7 +7241,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 initializeGitlabRecyclerView(filePathMedia = filePathMedia)
                 buttonClicksGitlab(filePathMedia = filePathMedia)
             }
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
@@ -7217,10 +7256,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         var mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         var dueDate: String = ""
         val simpleDateFormat = SimpleDateFormat("MM/dd/yyyy")
-        calendarViewGitlabLayout = calendarViewGitlabView.findViewById(R.id.gitlab_calendar_view_layout)
-        calendarViewGitlabDueDate = calendarViewGitlabView.findViewById(R.id.calendarView_gitlab_due_date)
-        buttonCalendarViewGitlabCancel = calendarViewGitlabView.findViewById(R.id.button_gitlab_calendar_cancel)
-        buttonCalendarViewGitlabOk = calendarViewGitlabView.findViewById(R.id.button_gitlab_calendar_ok)
+        calendarViewGitlabLayout =
+            calendarViewGitlabView.findViewById(R.id.gitlab_calendar_view_layout)
+        calendarViewGitlabDueDate =
+            calendarViewGitlabView.findViewById(R.id.calendarView_gitlab_due_date)
+        buttonCalendarViewGitlabCancel =
+            calendarViewGitlabView.findViewById(R.id.button_gitlab_calendar_cancel)
+        buttonCalendarViewGitlabOk =
+            calendarViewGitlabView.findViewById(R.id.button_gitlab_calendar_ok)
 
         calendarViewGitlabDueDate.minDate = System.currentTimeMillis()
         if (calendarViewGitlabDate != null) {
@@ -7232,7 +7275,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
 
         buttonCalendarViewGitlabOk.setOnClickListener {
-            if(dueDate != null){
+            if (dueDate != null) {
                 gitlabAuthentication.dueDate = dueDate
             }
             detachGitlabDatePicker()
@@ -7240,7 +7283,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
         calendarViewGitlabDueDate.setOnDateChangeListener { viewStartDate, year, month, dayOfMonth ->
             mYear = year
-            mMonth = month+1
+            mMonth = month + 1
             mDayOfMonth = dayOfMonth
             calendarViewGitlabDate = viewStartDate.date
             dueDate = "$mYear-$mMonth-$mDayOfMonth"
@@ -7298,7 +7341,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-    private fun removeGitlabLayout(){
+    private fun removeGitlabLayout() {
         if (windowManagerGitlab != null && this::viewGitlab.isInitialized) {
             (windowManagerGitlab as WindowManager).removeViewImmediate(viewGitlab)
             windowManagerGitlab = null
@@ -7307,12 +7350,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun buttonClicksGitlab(filePathMedia: File){
+    private fun buttonClicksGitlab(filePathMedia: File) {
 
         buttonGitlabCreate.setSafeOnClickListener {
-            if(checkGitlabTitleEmpty()){
+            if (checkGitlabTitleEmpty()) {
                 progressBarGitlabLayout.visibility = View.VISIBLE
                 progressBarGitlab.visibility = View.VISIBLE
+                attachProgressBar()
                 gitlabAuthentication.gatherGitlabEditTextDetails(
                     editTextTitle = editTextGitlabTitle,
                     editTextDescription = editTextGitlabDescription,
@@ -7394,9 +7438,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     @SuppressLint("ClickableViewAccessibility")
     internal fun initializeGitlabProject(
-        arrayListGitlabProjects: ArrayList<String>){
+        arrayListGitlabProjects: ArrayList<String>
+    ) {
 
-        autoTextViewGitlabProjectAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabProjects)
+        autoTextViewGitlabProjectAdapter =
+            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabProjects)
         autoTextViewGitlabProject.setAdapter(autoTextViewGitlabProjectAdapter)
 
         if (arrayListGitlabProjects.isNotEmpty() && autoTextViewGitlabProject.text.isEmpty()) {
@@ -7426,12 +7472,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     internal fun initializeGitLabAssignee(
         arrayListGitlabUsers: ArrayList<String>
-    ){
-        spinnerGitlabAssigneeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabUsers)
+    ) {
+        spinnerGitlabAssigneeAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabUsers)
         spinnerGitlabAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabAssignee.adapter = spinnerGitlabAssigneeAdapter
 
-        spinnerGitlabAssignee.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+        spinnerGitlabAssignee.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 TODO("Not yet implemented")
             }
@@ -7449,12 +7496,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     internal fun initializeGitLabLabels(
         arrayListGitlabLabels: ArrayList<String>
-    ){
-        spinnerGitlabLabelsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabLabels)
+    ) {
+        spinnerGitlabLabelsAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabLabels)
         spinnerGitlabLabelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabLabels.adapter = spinnerGitlabLabelsAdapter
 
-        spinnerGitlabLabels.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+        spinnerGitlabLabels.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 TODO("Not yet implemented")
             }
@@ -7472,51 +7520,56 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     internal fun initializeGitLabConfidentiality(
         arrayListGitlabConfidentiality: ArrayList<String>
-    ){
-        spinnerGitlabConfidentialityAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabConfidentiality)
+    ) {
+        spinnerGitlabConfidentialityAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabConfidentiality)
         spinnerGitlabConfidentialityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabConfidentiality.adapter = spinnerGitlabConfidentialityAdapter
 
-        spinnerGitlabConfidentiality.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
+        spinnerGitlabConfidentiality.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    TODO("Not yet implemented")
+                }
 
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                gitlabAuthentication.gitlabConfidentialityPosition(confidentialityPosition = position)
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    gitlabAuthentication.gitlabConfidentialityPosition(confidentialityPosition = position)
+                }
             }
-        }
     }
 
     internal fun initializeGitLabMilestones(
         arrayListGitlabMilestones: ArrayList<String>
-    ){
-        spinnerGitlabMilestoneAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabMilestones)
+    ) {
+        spinnerGitlabMilestoneAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabMilestones)
         spinnerGitlabMilestoneAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerGitlabMilestone.adapter = spinnerGitlabMilestoneAdapter
 
         spinnerGitlabMilestoneAdapter.notifyDataSetChanged()
 
-        spinnerGitlabMilestone.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
+        spinnerGitlabMilestone.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    TODO("Not yet implemented")
+                }
 
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = position)
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = position)
+                }
             }
-        }
     }
+
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun addGitlabFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
@@ -7542,379 +7595,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         return false
     }
 
-
-
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun initializeClubhouseLayout(filePathMedia: File) {
-        try {
-            removeClubhouseLayout()
-            viewClubhouse = LayoutInflater.from(activity).inflate(R.layout.loggerbird_clubhouse_popup, (this.rootView as ViewGroup), false)
-
-            if (Settings.canDrawOverlays(activity)) {
-                windowManagerParamsClubhouse = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerClubhouse = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerClubhouse as WindowManager).addView(viewClubhouse, windowManagerParamsClubhouse)
-
-                activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                toolbarClubhouse = viewClubhouse.findViewById(R.id.toolbar_clubhouse)
-                buttonClubhouseCancel = viewClubhouse.findViewById(R.id.button_clubhouse_cancel)
-                buttonClubhouseCreate = viewClubhouse.findViewById(R.id.button_clubhouse_create)
-                editTextClubhouseStoryName = viewClubhouse.findViewById(R.id.editText_clubhouse_story_name)
-                editTextClubhouseStoryDescription = viewClubhouse.findViewById(R.id.editText_clubhouse_description)
-                spinnerClubhouseRequester = viewClubhouse.findViewById(R.id.spinner_clubhouse_requester)
-                spinnerClubhouseStoryType = viewClubhouse.findViewById(R.id.spinner_clubhouse_story_type)
-                recyclerViewClubhouseAttachment = viewClubhouse.findViewById(R.id.recycler_view_clubhouse_attachment)
-                autoTextViewClubhouseProject = viewClubhouse.findViewById(R.id.auto_textview_clubhouse_project)
-                spinnerClubhouseEpic = viewClubhouse.findViewById(R.id.spinner_clubhouse_epic)
-                textViewClubhouseDueDate = viewClubhouse.findViewById(R.id.textView_clubhouse_due_date)
-                editTextClubhouseEstimate = viewClubhouse.findViewById(R.id.editText_clubhouse_estimate_point)
-                progressBarClubhouse = viewClubhouse.findViewById(R.id.clubhouse_progressbar)
-                progressBarClubhouseLayout = viewClubhouse.findViewById(R.id.clubhouse_progressbar_background)
-
-                clubhouseAuthentication.callClubhouse(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
-                )
-                progressBarClubhouse.visibility = View.VISIBLE
-                progressBarClubhouseLayout.visibility = View.VISIBLE
-                initializeClubhouseRecyclerView(filePathMedia = filePathMedia)
-                buttonClicksClubhouse(filePathMedia = filePathMedia)
-
-            }
-        }catch (e: Exception) {
-            finishShareLayout("clubhouse_error")
-            e.printStackTrace()
-            LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e, tag = Constants.clubhouseTag)
-        }
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    internal fun initializeClubhouseProject(
-        arrayListClubhouseProjects: ArrayList<String>){
-
-        autoTextViewClubhouseProjectAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseProjects)
-        autoTextViewClubhouseProject.setAdapter(autoTextViewClubhouseProjectAdapter)
-
-        if (arrayListClubhouseProjects.isNotEmpty() && autoTextViewClubhouseProject.text.isEmpty()) {
-            autoTextViewClubhouseProject.setText(arrayListClubhouseProjects[0], false)
-        }
-
-        autoTextViewClubhouseProject.setOnTouchListener { v, event ->
-            autoTextViewClubhouseProject.showDropDown()
-            false
-        }
-
-        autoTextViewClubhouseProject.setOnItemClickListener { parent, view, position, id ->
-            clubhouseAuthentication.clubhouseProjectPosition(projectPosition = position)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                progressBarClubhouse.visibility = View.VISIBLE
-                progressBarClubhouseLayout.visibility = View.VISIBLE
-
-            }
-            clubhouseAuthentication.callClubhouse(
-                activity = activity,
-                context = context,
-                task = "get"
-            )
-        }
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    internal fun initializeClubhouseEpic(
-        arrayListClubhouseEpic: ArrayList<String>){
-
-        spinnerClubhouseEpicAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseEpic)
-        spinnerClubhouseEpicAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerClubhouseEpic.adapter = spinnerClubhouseEpicAdapter
-        spinnerClubhouseEpicAdapter.notifyDataSetChanged()
-
-        spinnerClubhouseEpic.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
-            }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun initializeClubhouseSpinner(
-        arrayListClubhouseRequester: ArrayList<String>,
-        arrayListClubhouseProjects: ArrayList<String>,
-        arrayListClubhouseStoryType: ArrayList<String>,
-        arrayListClubhouseEpic: ArrayList<String>
-
-    ) {
-        initializeClubhouseProject(arrayListClubhouseProjects)
-        initializeClubhouseRequester(arrayListClubhouseRequester)
-        initializeClubhouseStoryType(arrayListClubhouseStoryType)
-        initializeClubhouseEpic(arrayListClubhouseEpic)
-        progressBarClubhouse.visibility = View.GONE
-        progressBarClubhouseLayout.visibility = View.GONE
-    }
-
-    internal fun initializeClubhouseStoryType(
-        arrayListClubhouseStoryType: ArrayList<String>
-    ){
-        spinnerClubhouseStoryTypeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseStoryType)
-        spinnerClubhouseStoryTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerClubhouseStoryType.adapter = spinnerClubhouseStoryTypeAdapter
-        spinnerClubhouseStoryTypeAdapter.notifyDataSetChanged()
-
-        spinnerClubhouseStoryType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                clubhouseAuthentication.clubhouseStoryTypePosition(storyTypePosition = position)
-            }
-        }
-    }
-
-    private fun attachClubhouseDatePicker() {
-        try {
-            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
-            calendarViewClubhouseView =
-                LayoutInflater.from(activity)
-                    .inflate(R.layout.clubhouse_calendar_view, rootView, false)
-            windowManagerParamsClubhouseDatePicker =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-            windowManagerClubhouseDatePicker = activity.getSystemService(Context.WINDOW_SERVICE)!!
-            (windowManagerClubhouseDatePicker as WindowManager).addView(
-                calendarViewClubhouseView,
-                windowManagerParamsClubhouseDatePicker
-            )
-            initializeClubhouseDatePicker()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e, tag = Constants.clubhouseDatePopupTag)
-        }
-    }
-
-    private fun initializeClubhouseDatePicker() {
-        val calendar = Calendar.getInstance()
-        var mYear = calendar.get(Calendar.YEAR)
-        var mMonth = calendar.get(Calendar.MONTH)
-        var mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
-        var dueDate: String = ""
-        var dueDateFormat: String = ""
-        calendarViewClubhouseLayout = calendarViewClubhouseView.findViewById(R.id.clubhouse_calendar_view_layout)
-        calendarViewClubhouseDueDate = calendarViewClubhouseView.findViewById(R.id.calendarView_clubhouse_due_date)
-        buttonCalendarViewClubhouseCancel = calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_cancel)
-        buttonCalendarViewClubhouseOk = calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_ok)
-
-        calendarViewClubhouseDueDate.minDate = System.currentTimeMillis()
-        if (calendarViewClubhouseDate != null) {
-            calendarViewClubhouseDueDate.date = calendarViewClubhouseDate!!
-        }
-
-        calendarViewClubhouseDueDate.setOnDateChangeListener { viewStartDate, year, month, dayOfMonth ->
-            mYear = year
-            mMonth = month+1
-            mDayOfMonth = dayOfMonth
-            calendarViewClubhouseDate = viewStartDate.date
-            dueDate = "$mMonth/$mDayOfMonth/$mYear"
-            dueDateFormat = "$mYear-$mMonth-$mDayOfMonth"
-            activity.runOnUiThread {
-                textViewClubhouseDueDate.text = dueDate
-                textViewClubhouseDueDate.setTextColor(resources.getColor(R.color.black))
-            }
-        }
-
-        buttonCalendarViewClubhouseCancel.setOnClickListener {
-            detachClubhouseDatePicker()
-        }
-
-        buttonCalendarViewClubhouseOk.setOnClickListener {
-            if(dueDate != null){
-                clubhouseAuthentication.dueDate = dueDateFormat
-            }
-            detachClubhouseDatePicker()
-        }
-    }
-
-    private fun detachClubhouseDatePicker() {
-        if (this::calendarViewClubhouseView.isInitialized) {
-            (windowManagerClubhouseDatePicker as WindowManager).removeViewImmediate(
-                calendarViewClubhouseView
-            )
-        }
-    }
-
-    internal fun initializeClubhouseRequester(
-        arrayListClubhouseRequester: ArrayList<String>
-    ){
-        spinnerClubhouseRequesterAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseRequester)
-        spinnerClubhouseRequesterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerClubhouseRequester.adapter = spinnerClubhouseRequesterAdapter
-        spinnerClubhouseRequesterAdapter.notifyDataSetChanged()
-
-        spinnerClubhouseRequester.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                clubhouseAuthentication.clubhouseUserPosition(userPosition = position)
-            }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun buttonClicksClubhouse(filePathMedia: File){
-
-        buttonClubhouseCreate.setSafeOnClickListener {
-            if(checkClubhouseStoryNameEmpty()){
-
-                clubhouseAuthentication.gatherClubhouseSpinnerDetails(
-                    spinnerUser = spinnerClubhouseRequester,
-                    spinnerStoryType = spinnerClubhouseStoryType,
-                    spinnerEpic = spinnerClubhouseEpic
-                )
-
-                clubhouseAuthentication.gatherClubhouseProjectAutoTextDetails(
-                    autoTextViewProject = autoTextViewClubhouseProject
-                )
-
-                clubhouseAuthentication.gatherClubhouseEditTextDetails(
-                    editTextStoryName = editTextClubhouseStoryName,
-                    editTextStoryDescription = editTextClubhouseStoryDescription,
-                    editTextEstimate = editTextClubhouseEstimate
-                )
-
-                progressBarClubhouse.visibility=View.VISIBLE
-                progressBarClubhouseLayout.visibility=View.VISIBLE
-                clubhouseAuthentication.callClubhouse(
-                    activity = activity,
-                    context = context,
-                    task = "create",
-                    filePathMedia = filePathMedia
-                )
-            }
-        }
-
-        textViewClubhouseDueDate.setSafeOnClickListener {
-            attachClubhouseDatePicker()
-        }
-
-        toolbarClubhouse.setNavigationOnClickListener {
-            removeClubhouseLayout()
-            if (controlFloatingActionButtonView()) {
-                floatingActionButtonView.visibility = View.VISIBLE
-            }
-        }
-
-        buttonClubhouseCancel.setSafeOnClickListener {
-            removeClubhouseLayout()
-            if (controlFloatingActionButtonView()) {
-                floatingActionButtonView.visibility = View.VISIBLE
-            }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun checkClubhouseStoryNameEmpty(): Boolean {
-        if (editTextClubhouseStoryName.text.toString().isNotEmpty()) {
-            return true
-        } else {
-            defaultToast.attachToast(
-                activity = activity,
-                toastMessage = activity.resources.getString(R.string.editText_clubhouse_story_empty)
-            )
-        }
-        return false
-    }
-
-    internal fun removeClubhouseLayout(){
-        if (windowManagerClubhouse != null && this::viewClubhouse.isInitialized) {
-            (windowManagerClubhouse as WindowManager).removeViewImmediate(viewClubhouse)
-            windowManagerClubhouse = null
-            arrayListClubhouseFileName.clear()
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun initializeClubhouseRecyclerView(filePathMedia: File) {
-        arrayListClubhouseFileName.clear()
-        recyclerViewClubhouseAttachment.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        clubhouseAdapter = RecyclerViewClubhouseAdapter(
-            addClubhouseFileNames(filePathMedia = filePathMedia),
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
-        recyclerViewClubhouseAttachment.adapter = clubhouseAdapter
-    }
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun addClubhouseFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
-        if (filePathMedia.exists()) {
-            arrayListClubhouseFileName.add(RecyclerViewModel(file = filePathMedia))
-        }
-        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
-            arrayListClubhouseFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
-        }
-        return arrayListClubhouseFileName
-    }
 
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.M)
@@ -8036,8 +7716,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                     autoTextViewPivotalStoryType.editableText.toString()
                                 )
                                 putString("pivotal_title", editTextPivotalTitle.text.toString())
-                                putString("pivotal_blockers", editTextPivotalBlockers.text.toString())
-                                putString("pivotal_description", editTextPivotalDescription.text.toString())
+                                putString(
+                                    "pivotal_blockers",
+                                    editTextPivotalBlockers.text.toString()
+                                )
+                                putString(
+                                    "pivotal_description",
+                                    editTextPivotalDescription.text.toString()
+                                )
                                 putString("pivotal_tasks", editTextPivotalTasks.text.toString())
                                 commit()
                             }
@@ -8061,7 +7747,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             editor.remove("pivotal_description")
                             editor.remove("pivotal_tasks")
                             editor.apply()
-                            clearTrelloComponents()
+                            clearPivotalComponents()
                             defaultToast.attachToast(
                                 activity = activity,
                                 toastMessage = context.resources.getString(R.string.pivotal_issue_preferences_delete)
@@ -8077,17 +7763,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         floatingActionButtonView.visibility = View.VISIBLE
                     }
                 }
-//                initializeTrelloRecyclerView(filePathMedia = filePathMedia)
-//                initializeTrelloLabelRecyclerView()
-//                initializeTrelloMemberRecyclerView()
+                initializePivotalRecyclerView(filePathMedia = filePathMedia)
+                initializePivotalTaskRecyclerView()
+                initializePivotalBlockerRecyclerView()
+                initializePivotalLabelRecyclerView()
+                initializePivotalOwnerRecyclerView()
                 buttonClicksPivotal()
-//                trelloAuthentication.callTrello(
-//                    activity = activity,
-//                    context = context,
-//                    task = "get",
-//                    filePathMedia = filePathMedia
-//                )
-//                attachProgressBar()
+                pivotalAuthentication.callPivotal(
+                    activity = activity,
+                    context = context,
+                    task = "get",
+                    filePathMedia = filePathMedia
+                )
+                attachProgressBar()
             }
         } catch (e: Exception) {
             finishShareLayout("pivotal_error")
@@ -8106,9 +7794,59 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-    private fun buttonClicksPivotal(){
+    private fun buttonClicksPivotal() {
         buttonPivotalCreate.setSafeOnClickListener {
-            removePivotalLayout()
+            pivotalAuthentication.gatherAutoTextDetails(
+                autoTextViewProject = autoTextViewPivotalProject,
+                autoTextViewStoryType = autoTextViewPivotalStoryType,
+                autoTextViewLabel = autoTextViewPivotalLabel,
+                autoTextViewPoints = autoTextViewPivotalPoints,
+                autoTextViewOwners = autoTextViewPivotalOwners,
+                autoTextViewRequester = autoTextViewPivotalRequester
+            )
+            pivotalAuthentication.gatherEditTextDetails(
+                editTextTitle = editTextPivotalTitle,
+                editTextTasks = editTextPivotalTasks,
+                editTextDescription = editTextPivotalDescription,
+                editTextBlockers = editTextPivotalBlockers
+            )
+            if (pivotalAuthentication.checkPivotalProject(
+                    activity = activity,
+                    autoTextViewPivotalProject = autoTextViewPivotalProject
+                )
+                && pivotalAuthentication.checkPivotalStoryType(
+                    activity = activity,
+                    autoTextViewPivotalStoryType = autoTextViewPivotalStoryType
+                )
+                && pivotalAuthentication.checkPivotalTitle(
+                    activity = activity,
+                    editTextTitle = editTextPivotalTitle
+                )
+                && pivotalAuthentication.checkPivotalLabel(
+                    activity = activity,
+                    autoTextViewPivotalLabel = autoTextViewPivotalLabel
+                )
+                && pivotalAuthentication.checkPivotalPoint(
+                    activity = activity,
+                    autoTextViewPivotalPoint = autoTextViewPivotalPoints
+                )
+                && pivotalAuthentication.checkPivotalOwner(
+                    activity = activity,
+                    autoTextViewPivotalOwner = autoTextViewPivotalOwners
+                )
+                && pivotalAuthentication.checkPivotalRequester(
+                    activity = activity,
+                    autoTextViewPivotaRequester = autoTextViewPivotalRequester
+                )
+            ) {
+                attachProgressBar()
+                pivotalAuthentication.callPivotal(
+                    activity = activity,
+                    context = context,
+                    task = "create"
+                )
+            }
+
         }
         buttonPivotalCancel.setSafeOnClickListener {
             removePivotalLayout()
@@ -8116,7 +7854,1331 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 floatingActionButtonView.visibility = View.VISIBLE
             }
         }
+        imageViewPivotalTask.setSafeOnClickListener {
+            hideKeyboard(activity = activity, view = viewPivotal)
+            if (!arrayListPivotalTaskName.contains(
+                    RecyclerViewModelTask(
+                        editTextPivotalTasks.text.toString()
+                    )
+                ) && editTextPivotalTasks.text.isNotEmpty()
+            ) {
+                arrayListPivotalTaskName.add(RecyclerViewModelTask(editTextPivotalTasks.text.toString()))
+                pivotalTaskAdapter.notifyDataSetChanged()
+                cardViewPivotalTasksList.visibility = View.VISIBLE
+            } else if (arrayListPivotalTaskName.contains(
+                    RecyclerViewModelTask(editTextPivotalTasks.text.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_task_exist)
+                )
+            } else if (editTextPivotalTasks.text.isEmpty()) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_task_empty)
+                )
+            }
+        }
+        imageViewPivotalBlockers.setSafeOnClickListener {
+            hideKeyboard(activity = activity, view = viewPivotal)
+            if (!arrayListPivotalBlockerName.contains(
+                    RecyclerViewModelBlocker(
+                        editTextPivotalBlockers.text.toString()
+                    )
+                ) && editTextPivotalBlockers.text.isNotEmpty()
+            ) {
+                arrayListPivotalBlockerName.add(RecyclerViewModelBlocker(editTextPivotalBlockers.text.toString()))
+                pivotalBlockerAdapter.notifyDataSetChanged()
+                cardViewPivotalBlockersList.visibility = View.VISIBLE
+            } else if (arrayListPivotalBlockerName.contains(
+                    RecyclerViewModelBlocker(editTextPivotalBlockers.text.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_blocker_exist)
+                )
+            } else if (editTextPivotalBlockers.text.isEmpty()) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_blocker_empty)
+                )
+            }
+        }
+        imageViewPivotalLabel.setSafeOnClickListener {
+            if (!arrayListPivotalLabelName.contains(
+                    RecyclerViewModelLabel(
+                        autoTextViewPivotalLabel.editableText.toString()
+                    )
+                ) && arrayListPivotalLabel.contains(
+                    autoTextViewPivotalLabel.editableText.toString()
+                )
+            ) {
+                arrayListPivotalLabelName.add(RecyclerViewModelLabel(autoTextViewPivotalLabel.editableText.toString()))
+                pivotalLabelAdapter.notifyDataSetChanged()
+                cardViewPivotalLabelList.visibility = View.VISIBLE
+            } else if (arrayListPivotalLabelName.contains(
+                    RecyclerViewModelLabel(autoTextViewPivotalLabel.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_label_exist)
+                )
+            } else if (!arrayListPivotalLabel.contains(autoTextViewPivotalLabel.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_label_doesnt_exist)
+                )
+            }
+
+        }
+        imageViewPivotalOwners.setSafeOnClickListener {
+            if (!arrayListPivotalOwnerName.contains(
+                    RecyclerViewModelOwner(
+                        autoTextViewPivotalOwners.editableText.toString()
+                    )
+                ) && arrayListPivotalOwner.contains(
+                    autoTextViewPivotalOwners.editableText.toString()
+                )
+            ) {
+                arrayListPivotalOwnerName.add(RecyclerViewModelOwner(autoTextViewPivotalOwners.editableText.toString()))
+                pivotalOwnerAdapter.notifyDataSetChanged()
+                cardViewPivotalOwnersList.visibility = View.VISIBLE
+            } else if (arrayListPivotalOwnerName.contains(
+                    RecyclerViewModelOwner(autoTextViewPivotalOwners.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_owner_exist)
+                )
+            } else if (!arrayListPivotalOwner.contains(autoTextViewPivotalOwners.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.pivotal_owner_doesnt_exist)
+                )
+            }
+
+        }
     }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    internal fun initializePivotalAutoTextViews(
+        arrayListProject: ArrayList<String>,
+        arrayListStoryType: ArrayList<String>,
+        arrayListPoints: ArrayList<String>,
+        arrayListRequester: ArrayList<String>,
+        arrayListOwners: ArrayList<String>,
+        arrayListLabels: ArrayList<String>
+    ) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        editTextPivotalTitle.setText(sharedPref.getString("pivotal_title", null))
+        editTextPivotalTasks.setText(sharedPref.getString("pivotal_tasks", null))
+        editTextPivotalDescription.setText(sharedPref.getString("pivotal_description", null))
+        editTextPivotalBlockers.setText(sharedPref.getString("pivotal_blockers", null))
+        initializePivotalProject(arrayListProject = arrayListProject, sharedPref = sharedPref)
+        initializePivotalStoryType(arrayListStoryType = arrayListStoryType, sharedPref = sharedPref)
+        initializePivotalPoints(arrayListPoints = arrayListPoints, sharedPref = sharedPref)
+        initializePivotalRequester(arrayListRequester = arrayListRequester, sharedPref = sharedPref)
+        initializePivotalOwners(arrayListOwners = arrayListOwners, sharedPref = sharedPref)
+        initializePivotalLabel(arrayListLabel = arrayListLabels, sharedPref = sharedPref)
+        detachProgressBar()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializePivotalProject(
+        arrayListProject: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPivotalProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListProject
+        )
+        autoTextViewPivotalProject.setAdapter(autoTextViewPivotalProjectAdapter)
+        if (arrayListProject.isNotEmpty() && autoTextViewPivotalProject.editableText.isEmpty()) {
+            if (sharedPref.getString("pivotal_project", null) != null) {
+                if (arrayListProject.contains(
+                        sharedPref.getString(
+                            "pivotal_project",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewPivotalProject.setText(
+                        sharedPref.getString("pivotal_project", null),
+                        false
+                    )
+                } else {
+                    autoTextViewPivotalProject.setText(arrayListProject[0], false)
+                }
+            } else {
+                autoTextViewPivotalProject.setText(arrayListProject[0], false)
+            }
+        }
+        autoTextViewPivotalProject.setOnTouchListener { v, event ->
+            autoTextViewPivotalProject.showDropDown()
+            false
+        }
+        autoTextViewPivotalProject.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewPivotal)
+            clearPivotalComponents()
+            pivotalAuthentication.setProjectPosition(projectPosition = position)
+            pivotalAuthentication.callPivotal(
+                activity = activity,
+                context = context,
+                task = "get"
+            )
+            attachProgressBar()
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializePivotalStoryType(
+        arrayListStoryType: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPivotalStoryTypeAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListStoryType
+        )
+        autoTextViewPivotalStoryType.setAdapter(autoTextViewPivotalStoryTypeAdapter)
+        if (arrayListStoryType.isNotEmpty() && autoTextViewPivotalStoryType.editableText.isEmpty()) {
+            if (sharedPref.getString("pivotal_story_type", null) != null) {
+                if (arrayListStoryType.contains(
+                        sharedPref.getString(
+                            "pivotal_story_type",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewPivotalStoryType.setText(
+                        sharedPref.getString("pivotal_story_type", null),
+                        false
+                    )
+                } else {
+                    autoTextViewPivotalStoryType.setText(arrayListStoryType[0], false)
+                }
+            }
+        }
+        autoTextViewPivotalStoryType.setOnTouchListener { v, event ->
+            autoTextViewPivotalStoryType.showDropDown()
+            false
+        }
+        autoTextViewPivotalStoryType.setOnItemClickListener { parent, view, position, id ->
+            //            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewPivotal)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializePivotalPoints(
+        arrayListPoints: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPivotalPointsAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListPoints
+        )
+        autoTextViewPivotalPoints.setAdapter(autoTextViewPivotalPointsAdapter)
+        if (arrayListPoints.isNotEmpty() && autoTextViewPivotalPoints.editableText.isEmpty()) {
+            if (sharedPref.getString("pivotal_points", null) != null) {
+                if (arrayListPoints.contains(
+                        sharedPref.getString(
+                            "pivotal_points",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewPivotalPoints.setText(
+                        sharedPref.getString("pivotal_points", null),
+                        false
+                    )
+                } else {
+                    autoTextViewPivotalPoints.setText(arrayListPoints[0], false)
+                }
+            }
+        }
+        autoTextViewPivotalPoints.setOnTouchListener { v, event ->
+            autoTextViewPivotalPoints.showDropDown()
+            false
+        }
+        autoTextViewPivotalPoints.setOnItemClickListener { parent, view, position, id ->
+            //            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewPivotal)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializePivotalRequester(
+        arrayListRequester: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPivotalRequesterAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListRequester
+        )
+        autoTextViewPivotalRequester.setAdapter(autoTextViewPivotalRequesterAdapter)
+        if (arrayListRequester.isNotEmpty() && autoTextViewPivotalRequester.editableText.isEmpty()) {
+            if (sharedPref.getString("pivotal_requester", null) != null) {
+                if (arrayListRequester.contains(
+                        sharedPref.getString(
+                            "pivotal_requester",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewPivotalRequester.setText(
+                        sharedPref.getString("pivotal_requester", null),
+                        false
+                    )
+                } else {
+                    autoTextViewPivotalRequester.setText(arrayListRequester[0], false)
+                }
+            }
+        }
+        autoTextViewPivotalRequester.setOnTouchListener { v, event ->
+            autoTextViewPivotalRequester.showDropDown()
+            false
+        }
+        autoTextViewPivotalRequester.setOnItemClickListener { parent, view, position, id ->
+            //            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewPivotal)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializePivotalOwners(
+        arrayListOwners: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPivotalOwnersAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListOwners
+        )
+        autoTextViewPivotalOwners.setAdapter(autoTextViewPivotalOwnersAdapter)
+        if (arrayListOwners.isNotEmpty() && autoTextViewPivotalOwners.editableText.isEmpty()) {
+            if (sharedPref.getString("pivotal_owner", null) != null) {
+                if (arrayListOwners.contains(
+                        sharedPref.getString(
+                            "pivotal_owner",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewPivotalOwners.setText(
+                        sharedPref.getString("pivotal_owner", null),
+                        false
+                    )
+                } else {
+                    autoTextViewPivotalOwners.setText(arrayListOwners[0], false)
+                }
+            }
+        }
+        autoTextViewPivotalOwners.setOnTouchListener { v, event ->
+            autoTextViewPivotalOwners.showDropDown()
+            false
+        }
+        autoTextViewPivotalOwners.setOnItemClickListener { parent, view, position, id ->
+            //            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewPivotal)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        this.arrayListPivotalOwner = arrayListOwners
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializePivotalLabel(
+        arrayListLabel: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewPivotalLabelAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListLabel
+        )
+        autoTextViewPivotalLabel.setAdapter(autoTextViewPivotalLabelAdapter)
+        if (arrayListLabel.isNotEmpty() && autoTextViewPivotalLabel.editableText.isEmpty()) {
+            if (sharedPref.getString("pivotal_label", null) != null) {
+                if (arrayListLabel.contains(
+                        sharedPref.getString(
+                            "pivotal_label",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewPivotalLabel.setText(
+                        sharedPref.getString("pivotal_label", null),
+                        false
+                    )
+                } else {
+                    autoTextViewPivotalLabel.setText(arrayListLabel[0], false)
+                }
+            }
+        }
+        autoTextViewPivotalLabel.setOnTouchListener { v, event ->
+            autoTextViewPivotalLabel.showDropDown()
+            false
+        }
+        autoTextViewPivotalLabel.setOnItemClickListener { parent, view, position, id ->
+            //            trelloAuthentication.setBoardPosition(boardPosition = position)
+            hideKeyboard(activity = activity, view = viewPivotal)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        this.arrayListPivotalLabel = arrayListLabel
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializePivotalRecyclerView(filePathMedia: File) {
+        arrayListPivotalFileName.clear()
+        recyclerViewPivotalAttachmentList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        pivotalAdapter = RecyclerViewPivotalAdapter(
+            addPivotalFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewPivotalAttachmentList.adapter = pivotalAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addPivotalFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListPivotalFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListPivotalFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListPivotalFileName
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializePivotalTaskRecyclerView() {
+        arrayListPivotalTaskName.clear()
+        recyclerViewPivotalTaskList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        pivotalTaskAdapter = RecyclerViewPivotalTaskAdapter(
+            arrayListPivotalTaskName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewPivotalTaskList.adapter = pivotalTaskAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializePivotalBlockerRecyclerView() {
+        arrayListPivotalBlockerName.clear()
+        recyclerViewPivotalBlockersList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        pivotalBlockerAdapter = RecyclerViewPivotalBlockerAdapter(
+            arrayListPivotalBlockerName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewPivotalBlockersList.adapter = pivotalBlockerAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializePivotalLabelRecyclerView() {
+        arrayListPivotalLabelName.clear()
+        recyclerViewPivotalLabelList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        pivotalLabelAdapter = RecyclerViewPivotalLabelAdapter(
+            arrayListPivotalLabelName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewPivotalLabelList.adapter = pivotalLabelAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializePivotalOwnerRecyclerView() {
+        arrayListPivotalOwnerName.clear()
+        recyclerViewPivotalOwnerList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        pivotalOwnerAdapter = RecyclerViewPivotalOwnerAdapter(
+            arrayListPivotalOwnerName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewPivotalOwnerList.adapter = pivotalOwnerAdapter
+    }
+
+    private fun clearPivotalComponents() {
+        cardViewPivotalBlockersList.visibility = View.GONE
+        cardViewPivotalTasksList.visibility = View.GONE
+        cardViewPivotalLabelList.visibility = View.GONE
+        cardViewPivotalOwnersList.visibility = View.GONE
+        arrayListPivotalOwnerName.clear()
+        arrayListPivotalLabelName.clear()
+        arrayListPivotalTaskName.clear()
+        arrayListPivotalBlockerName.clear()
+        pivotalOwnerAdapter.notifyDataSetChanged()
+        pivotalLabelAdapter.notifyDataSetChanged()
+        pivotalBlockerAdapter.notifyDataSetChanged()
+        pivotalTaskAdapter.notifyDataSetChanged()
+        editTextPivotalBlockers.text = null
+        editTextPivotalDescription.text = null
+        editTextPivotalTasks.text = null
+        editTextPivotalTitle.text = null
+        autoTextViewPivotalOwners.setText("", false)
+        autoTextViewPivotalLabel.setText("", false)
+        autoTextViewPivotalRequester.setText("", false)
+        autoTextViewPivotalPoints.setText("", false)
+        autoTextViewPivotalStoryType.setText("", false)
+//        autoTextViewPivotalProject.setText("",false)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeBasecampLayout(filePathMedia: File) {
+        try {
+            removeBasecampLayout()
+            viewBasecamp = LayoutInflater.from(activity)
+                .inflate(
+                    R.layout.loggerbird_basecamp_popup,
+                    (this.rootView as ViewGroup),
+                    false
+                )
+
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsBaseCamp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerBasecamp = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                (windowManagerBasecamp as WindowManager).addView(
+                    viewBasecamp,
+                    windowManagerParamsBaseCamp
+                )
+
+                activity.window.navigationBarColor =
+                    ContextCompat.getColor(this, R.color.black)
+                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+                buttonBasecampCancel = viewBasecamp.findViewById(R.id.button_basecamp_cancel)
+                buttonBasecampCreate = viewBasecamp.findViewById(R.id.button_basecamp_create)
+                toolbarBasecamp = viewBasecamp.findViewById(R.id.toolbar_basecamp)
+                autoTextViewBasecampProject =
+                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_project)
+                autoTextViewBasecampAssignee =
+                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_assignee)
+                autoTextViewBasecampCategory =
+                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_category)
+                autoTextViewBasecampNotify =
+                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_notify)
+                editTextBasecampDescriptionMessage =
+                    viewBasecamp.findViewById(R.id.editText_basecamp_description_messsage)
+                editTextBasecampDescriptionTodo =
+                    viewBasecamp.findViewById(R.id.editText_basecamp_description_todo)
+                editTextBasecampTitle =
+                    viewBasecamp.findViewById(R.id.editText_basecamp_title)
+                editTextBasecampContent = viewBasecamp.findViewById(R.id.editText_basecamp_content)
+                editTextBasecampName = viewBasecamp.findViewById(R.id.editText_basecamp_name)
+                imageViewBasecampAssignee = viewBasecamp.findViewById(R.id.imageView_assignee_add)
+                imageViewBasecampNotify = viewBasecamp.findViewById(R.id.imageView_notify_add)
+                cardViewBasecampAssigneeList =
+                    viewBasecamp.findViewById(R.id.cardView_assignee_list)
+                cardViewBasecampNotifyList = viewBasecamp.findViewById(R.id.cardView_notify_list)
+                recyclerViewBasecampAssigneeList =
+                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_assignee_list)
+                recyclerViewBasecampNotifyList =
+                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_notify_list)
+                recyclerViewBasecampAttachmentList =
+                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_attachment)
+                imageButtonBasecampRemoveDate =
+                    viewBasecamp.findViewById(R.id.image_button_basecamp_remove_date)
+                imageViewBasecampDate = viewBasecamp.findViewById(R.id.imageView_start_date)
+                scrollViewBasecamp = viewBasecamp.findViewById(R.id.scrollView_basecamp)
+                scrollViewBasecamp.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        hideKeyboard(activity = activity, view = viewBasecamp)
+                    }
+                    return@setOnTouchListener false
+                }
+
+                toolbarBasecamp.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.basecamp_menu_save -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            with(sharedPref.edit()) {
+                                putString(
+                                    "basecamp_project",
+                                    autoTextViewBasecampProject.editableText.toString()
+                                )
+                                putString(
+                                    "basecamp_assignee",
+                                    autoTextViewBasecampAssignee.editableText.toString()
+                                )
+                                putString(
+                                    "basecamp_category",
+                                    autoTextViewBasecampCategory.editableText.toString()
+                                )
+                                putString(
+                                    "basecamp_notify",
+                                    autoTextViewBasecampNotify.editableText.toString()
+                                )
+                                putString(
+                                    "basecamp_description_message",
+                                    editTextBasecampDescriptionMessage.text.toString()
+                                )
+                                putString(
+                                    "basecamp_description_todo",
+                                    editTextBasecampDescriptionTodo.text.toString()
+                                )
+                                putString(
+                                    "basecamp_title",
+                                    editTextBasecampTitle.text.toString()
+                                )
+                                putString(
+                                    "basecamp_content",
+                                    editTextBasecampContent.text.toString()
+                                )
+                                putString("basecamp_name", editTextBasecampName.text.toString())
+                                commit()
+                            }
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.basecamp_issue_preferences_save)
+                            )
+                        }
+                        R.id.basecamp_menu_clear -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            val editor: SharedPreferences.Editor = sharedPref.edit()
+                            editor.remove("basecamp_project")
+                            editor.remove("basecamp_assignee")
+                            editor.remove("basecamp_category")
+                            editor.remove("basecamp_notify")
+                            editor.remove("basecamp_description_message")
+                            editor.remove("basecamp_description_todo")
+                            editor.remove("basecamp_title")
+                            editor.remove("basecamp_content")
+                            editor.remove("basecamp_name")
+                            editor.apply()
+                            clearBasecampComponents()
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.basecamp_issue_preferences_delete)
+                            )
+                        }
+                    }
+                    return@setOnMenuItemClickListener true
+                }
+
+                toolbarBasecamp.setNavigationOnClickListener {
+                    removeBasecampLayout()
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.VISIBLE
+                    }
+                }
+                initializeBasecampRecyclerView(filePathMedia = filePathMedia)
+                initializeBasecampAssigneeRecyclerView()
+                initializeBasecampNotifyRecyclerView()
+                buttonClicksBaseacamp()
+                basecampAuthentication.callBasecamp(
+                    activity = activity,
+                    context = context,
+                    task = "get",
+                    filePathMedia = filePathMedia
+                )
+                attachProgressBar()
+            }
+        } catch (e: Exception) {
+            finishShareLayout("basecamp_error")
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.basecampTag)
+        }
+    }
+
+    internal fun removeBasecampLayout() {
+        if (this::viewBasecamp.isInitialized && windowManagerBasecamp != null) {
+            (windowManagerBasecamp as WindowManager).removeViewImmediate(
+                viewBasecamp
+            )
+            windowManagerBasecamp = null
+        }
+    }
+
+    private fun buttonClicksBaseacamp() {
+        buttonBasecampCreate.setSafeOnClickListener {
+            basecampAuthentication.gatherAutoTextDetails(
+                autoTextViewProject = autoTextViewBasecampProject,
+                autoTextViewAssignee = autoTextViewBasecampAssignee,
+                autoTextViewCategory = autoTextViewBasecampCategory,
+                autoTextViewNotify = autoTextViewBasecampNotify
+            )
+            basecampAuthentication.gatherEditTextDetails(
+                editTextTitle = editTextBasecampTitle,
+                editTextDescriptionMessage = editTextBasecampDescriptionMessage,
+                editTextDescriptionTodo = editTextBasecampDescriptionTodo,
+                editTextContent = editTextBasecampContent,
+                editTextName = editTextBasecampName
+            )
+            if (basecampAuthentication.checkBasecampProject(
+                    activity = activity,
+                    autoTextViewBasecampProject = autoTextViewBasecampProject
+                )
+                && basecampAuthentication.checkBasecampTitle(
+                    activity = activity,
+                    editTextTitle = editTextBasecampTitle,
+                    autoTextViewCategory = autoTextViewBasecampCategory,
+                    editTextDescriptionMessage = editTextBasecampDescriptionMessage
+                )
+                && basecampAuthentication.checkBasecampTodo(
+                    activity = activity,
+                    editTextName = editTefxtBasecampName,
+                    editTextDescriptionTodo = editTextBasecampDescriptionTodo,
+                    editTextContent = editTextBasecampContent,
+                    autoTextViewNotify = autoTextViewBasecampNotify,
+                    autoTextViewAssignee = autoTextViewBasecampAssignee
+                )
+            ) {
+                basecampAuthentication.callBasecamp(
+                    activity = activity,
+                    context = context,
+                    task = "create"
+                )
+                attachProgressBar()
+            }
+        }
+        buttonBasecampCancel.setSafeOnClickListener {
+            removeBasecampLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+        imageViewBasecampAssignee.setSafeOnClickListener {
+            if (!arrayListBasecampAssigneeName.contains(
+                    RecyclerViewModelAssignee(
+                        autoTextViewBasecampAssignee.editableText.toString()
+                    )
+                ) && arrayListBasecampAssignee.contains(
+                    autoTextViewBasecampAssignee.editableText.toString()
+                )
+            ) {
+                arrayListBasecampAssigneeName.add(
+                    RecyclerViewModelAssignee(
+                        autoTextViewBasecampAssignee.editableText.toString()
+                    )
+                )
+                basecampAssigneeAdapter.notifyDataSetChanged()
+                cardViewBasecampAssigneeList.visibility = View.VISIBLE
+            } else if (arrayListBasecampAssigneeName.contains(
+                    RecyclerViewModelAssignee(autoTextViewBasecampAssignee.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.basecamp_assignee_exist)
+                )
+            } else if (!arrayListBasecampAssignee.contains(autoTextViewBasecampAssignee.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.basecamp_assignee_doesnt_exist)
+                )
+            }
+
+        }
+        imageViewBasecampNotify.setSafeOnClickListener {
+            if (!arrayListBasecampNotifyName.contains(
+                    RecyclerViewModelNotify(
+                        autoTextViewBasecampNotify.editableText.toString()
+                    )
+                ) && arrayListBasecampNotify.contains(
+                    autoTextViewBasecampNotify.editableText.toString()
+                )
+            ) {
+                arrayListBasecampNotifyName.add(RecyclerViewModelNotify(autoTextViewBasecampNotify.editableText.toString()))
+                basecampNotifyAdapter.notifyDataSetChanged()
+                cardViewBasecampNotifyList.visibility = View.VISIBLE
+            } else if (arrayListBasecampNotifyName.contains(
+                    RecyclerViewModelNotify(autoTextViewBasecampNotify.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.basecamp_notify_exist)
+                )
+            } else if (!arrayListBasecampNotify.contains(autoTextViewBasecampNotify.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.basecamp_notify_doesnt_exist)
+                )
+            }
+
+        }
+        imageButtonBasecampRemoveDate.setSafeOnClickListener {
+            imageButtonBasecampRemoveDate.visibility = View.GONE
+            basecampAuthentication.setStartDate(startDate = null)
+        }
+        imageViewBasecampDate.setSafeOnClickListener {
+            initializeBasecampDateLayout()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    internal fun initializeBasecampAutoTextViews(
+        arrayListProject: ArrayList<String>,
+        arrayListCategory: ArrayList<String>,
+        arrayListCategoryIcon: ArrayList<String>,
+        arrayListAssignee: ArrayList<String>,
+        arrayListNotify: ArrayList<String>
+    ) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        editTextBasecampDescriptionMessage.setText(
+            sharedPref.getString(
+                "basecamp_description_message",
+                null
+            )
+        )
+        editTextBasecampDescriptionTodo.setText(
+            sharedPref.getString(
+                "basecamp_description_todo",
+                null
+            )
+        )
+        editTextBasecampTitle.setText(
+            sharedPref.getString(
+                "basecamp_title",
+                null
+            )
+        )
+        editTextBasecampContent.setText(
+            sharedPref.getString(
+                "basecamp_content",
+                null
+            )
+        )
+        editTextBasecampName.setText(
+            sharedPref.getString(
+                "basecamp_name",
+                null
+            )
+        )
+        initializeBasecampProject(arrayListProject = arrayListProject, sharedPref = sharedPref)
+        initializeBasecampCategory(
+            arrayListCategory = arrayListCategory,
+            arrayListCategoryIcon = arrayListCategoryIcon,
+            sharedPref = sharedPref
+        )
+        initializeBasecampAssignee(arrayListAssignee = arrayListAssignee, sharedPref = sharedPref)
+        initializeBasecampNotify(arrayListNotify = arrayListNotify, sharedPref = sharedPref)
+        detachProgressBar()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeBasecampProject(
+        arrayListProject: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewBasecampProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListProject
+        )
+        autoTextViewBasecampProject.setAdapter(autoTextViewBasecampProjectAdapter)
+        if (arrayListProject.isNotEmpty() && autoTextViewBasecampProject.editableText.isEmpty()) {
+            if (sharedPref.getString("basecamp_project", null) != null) {
+                if (arrayListProject.contains(
+                        sharedPref.getString(
+                            "basecamp_project",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewBasecampProject.setText(
+                        sharedPref.getString("basecamp_project", null),
+                        false
+                    )
+                } else {
+                    autoTextViewBasecampProject.setText(arrayListProject[0], false)
+                }
+            } else {
+                autoTextViewBasecampProject.setText(arrayListProject[0], false)
+            }
+        }
+        autoTextViewBasecampProject.setOnTouchListener { v, event ->
+            autoTextViewBasecampProject.showDropDown()
+            false
+        }
+        autoTextViewBasecampProject.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewBasecamp)
+            clearBasecampComponents()
+            basecampAuthentication.setProjectPosition(projectPosition = position)
+            basecampAuthentication.callBasecamp(
+                activity = activity,
+                context = context,
+                task = "get"
+            )
+            attachProgressBar()
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeBasecampCategory(
+        arrayListCategory: ArrayList<String>,
+        arrayListCategoryIcon: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+//        autoTextViewBasecampCategoryAdapter = ArrayAdapter(
+//            this,
+//            android.R.layout.simple_dropdown_item_1line,
+//            arrayListCategory
+//        )
+        autoTextViewBasecampCategoryAdapter = AutoCompleteTextViewBasecampAdapter(
+            this,
+            R.layout.auto_text_view_basecamp_icon_item,
+            arrayListCategory,
+            arrayListCategoryIcon
+        )
+        autoTextViewBasecampCategory.setAdapter(autoTextViewBasecampCategoryAdapter)
+        if (arrayListCategory.isNotEmpty() && autoTextViewBasecampCategory.editableText.isEmpty()) {
+            if (sharedPref.getString("basecamp_category", null) != null) {
+                if (arrayListCategory.contains(
+                        sharedPref.getString(
+                            "basecamp_category",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewBasecampCategory.setText(
+                        sharedPref.getString("basecamp_category", null),
+                        false
+                    )
+                } else {
+                    autoTextViewBasecampCategory.setText(arrayListCategory[0], false)
+                }
+            }
+        }
+        autoTextViewBasecampCategory.setOnTouchListener { v, event ->
+            autoTextViewBasecampCategory.showDropDown()
+            false
+        }
+        autoTextViewBasecampCategory.setOnItemClickListener { parent, view, position, id ->
+            basecampAuthentication.setCategoryPosition(categoryPosition = position)
+            hideKeyboard(activity = activity, view = viewBasecamp)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeBasecampAssignee(
+        arrayListAssignee: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewBasecampAssigneeAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListAssignee
+        )
+        autoTextViewBasecampAssignee.setAdapter(autoTextViewBasecampAssigneeAdapter)
+        if (arrayListAssignee.isNotEmpty() && autoTextViewBasecampAssignee.editableText.isEmpty()) {
+            if (sharedPref.getString("basecamp_assignee", null) != null) {
+                if (arrayListAssignee.contains(
+                        sharedPref.getString(
+                            "basecamp_assignee",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewBasecampAssignee.setText(
+                        sharedPref.getString("basecamp_assignee", null),
+                        false
+                    )
+                } else {
+                    autoTextViewBasecampAssignee.setText(arrayListAssignee[0], false)
+                }
+            }
+        }
+        autoTextViewBasecampAssignee.setOnTouchListener { v, event ->
+            autoTextViewBasecampAssignee.showDropDown()
+            false
+        }
+        autoTextViewBasecampAssignee.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewBasecamp)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        this.arrayListBasecampAssignee = arrayListAssignee
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeBasecampNotify(
+        arrayListNotify: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewBasecampNotifyAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListNotify
+        )
+        autoTextViewBasecampNotify.setAdapter(autoTextViewBasecampNotifyAdapter)
+        if (arrayListNotify.isNotEmpty() && autoTextViewBasecampNotify.editableText.isEmpty()) {
+            if (sharedPref.getString("basecamp_notify", null) != null) {
+                if (arrayListNotify.contains(
+                        sharedPref.getString(
+                            "basecamp_notify",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewBasecampNotify.setText(
+                        sharedPref.getString("basecamp_notify", null),
+                        false
+                    )
+                } else {
+                    autoTextViewBasecampNotify.setText(arrayListNotify[0], false)
+                }
+            }
+        }
+        autoTextViewBasecampNotify.setOnTouchListener { v, event ->
+            autoTextViewBasecampNotify.showDropDown()
+            false
+        }
+        autoTextViewBasecampNotify.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewBasecamp)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        this.arrayListBasecampNotify = arrayListNotify
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeBasecampRecyclerView(filePathMedia: File) {
+        arrayListBasecampFileName.clear()
+        recyclerViewBasecampAttachmentList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        basecampAdapter = RecyclerViewBasecampAdapter(
+            addBasecampFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewBasecampAttachmentList.adapter = basecampAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addBasecampFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListBasecampFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListBasecampFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListBasecampFileName
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeBasecampAssigneeRecyclerView() {
+        arrayListBasecampAssigneeName.clear()
+        recyclerViewBasecampAssigneeList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        basecampAssigneeAdapter = RecyclerViewBasecampAssigneeAdapter(
+            arrayListBasecampAssigneeName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewBasecampAssigneeList.adapter = basecampAssigneeAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeBasecampNotifyRecyclerView() {
+        arrayListBasecampNotifyName.clear()
+        recyclerViewBasecampNotifyList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        basecampNotifyAdapter = RecyclerViewBasecampNotifyAdapter(
+            arrayListBasecampNotifyName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewBasecampNotifyList.adapter = basecampNotifyAdapter
+    }
+
+    private fun clearBasecampComponents() {
+        cardViewBasecampAssigneeList.visibility = View.GONE
+        cardViewBasecampNotifyList.visibility = View.GONE
+        arrayListBasecampNotifyName.clear()
+        arrayListBasecampAssigneeName.clear()
+        arrayListBasecampAssignee.clear()
+        arrayListBasecampNotify.clear()
+        basecampAssigneeAdapter.notifyDataSetChanged()
+        basecampNotifyAdapter.notifyDataSetChanged()
+        editTextBasecampDescriptionTodo.text = null
+        editTextBasecampDescriptionMessage.text = null
+        editTextBasecampTitle.text = null
+        editTextBasecampContent.text = null
+        editTextBasecampName.text = null
+        autoTextViewBasecampCategory.setText("", false)
+        autoTextViewBasecampNotify.setText("", false)
+        autoTextViewBasecampAssignee.setText("", false)
+//        autoTextViewPivotalProject.setText("",false)
+    }
+
+    private fun initializeBasecampDateLayout() {
+        removeBasecampDateLayout()
+//        calendarTrello = Calendar.getInstance()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewBasecampDate =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.basecamp_calendar_view, rootView, false)
+        windowManagerParamsBaseCampDate =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerBasecampDate = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerBasecampDate as WindowManager).addView(
+            viewBasecampDate,
+            windowManagerParamsBaseCampDate
+        )
+        frameLayoutBasecampDate = viewBasecampDate.findViewById(R.id.basecamp_calendar_view_layout)
+        calendarViewBasecamp = viewBasecampDate.findViewById(R.id.calendarView_start_date)
+        buttonBasecampDateCancel =
+            viewBasecampDate.findViewById(R.id.button_basecamp_calendar_cancel)
+        buttonBasecampDateCreate = viewBasecampDate.findViewById(R.id.button_basecamp_calendar_ok)
+        buttonClicksBasecampDateLayout()
+    }
+
+    private fun removeBasecampDateLayout() {
+        if (this::viewBasecampDate.isInitialized && windowManagerBasecampDate != null) {
+            (windowManagerBasecampDate as WindowManager).removeViewImmediate(
+                viewBasecampDate
+            )
+            windowManagerBasecampDate = null
+        }
+    }
+
+    private fun buttonClicksBasecampDateLayout() {
+        val calendar = Calendar.getInstance()
+        val mYear = calendar.get(Calendar.YEAR)
+        val mMonth = calendar.get(Calendar.MONTH)
+        val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        var startDate = "$mYear-$mMonth-$mDayOfMonth"
+        calendarViewBasecamp.minDate = System.currentTimeMillis()
+        frameLayoutBasecampDate.setOnClickListener {
+            removeBasecampDateLayout()
+        }
+        calendarViewBasecamp.setOnDateChangeListener { view, year, month, dayOfMonth ->
+            startDate = "$year-$month-$dayOfMonth"
+        }
+        buttonBasecampDateCreate.setSafeOnClickListener {
+            imageButtonBasecampRemoveDate.visibility = View.VISIBLE
+            basecampAuthentication.setStartDate(startDate = startDate)
+            removeBasecampDateLayout()
+        }
+        buttonBasecampDateCancel.setSafeOnClickListener {
+            removeBasecampDateLayout()
+        }
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {

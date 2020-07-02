@@ -28,7 +28,7 @@
                 android:layout_gravity="center"
                 android:textSize="20sp"
                 android:textColor="@color/black"
-                android:text="Delete Attachment" />
+                android:text="@string/textView_recyclerView_basecamp_assignee_header" />
 
         </LinearLayout>
 
@@ -39,42 +39,39 @@
             android:layout_gravity="center">
 
             <TextView
-                android:id="@+id/textView_recycler_view_gitlab_title"
+                android:id="@+id/textView_recycler_view_basecamp_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:textSize="16sp"
                 android:textColor="@color/black"
-                android:text="@string/textView_recyclerView_slack_popup_title">
-            </TextView>
-
+                android:text="@string/textView_recyclerView_basecamp_assignee_title" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:layout_margin="5dp">
+
+        <Button
+            android:id="@+id/button_recycler_view_basecamp_yes"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="center"
-            android:layout_margin="5dp">
+            android:textSize="15sp"
+            android:textColor="@color/colorFab"
+            android:background="@drawable/pop_up_button_shape"
+            android:text="@string/button_recyclerView_basecamp_assignee_delete" />
 
-            <Button
-                android:id="@+id/button_recycler_view_gitlab_yes"
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:textSize="15sp"
-                android:textColor="@color/colorFab"
-                android:background="@drawable/pop_up_button_shape"
-                android:text="@string/button_recyclerView_slack_yes" />
-
-            <Button
-                android:id="@+id/button_recycler_view_gitlab_no"
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:textColor="@color/colorBlack"
-                android:background="@color/colorFab"
-                android:text="@string/button_recyclerView_slack_no" />
+        <Button
+            android:id="@+id/button_recycler_view_basecamp_no"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:textColor="@color/colorBlack"
+            android:background="@color/colorFab"
+            android:text="@string/button_recyclerView_basecamp_assignee_keep" />
         </LinearLayout>
 
     </LinearLayout>

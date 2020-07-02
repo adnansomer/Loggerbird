@@ -3,13 +3,11 @@ package models
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import models.api.clubhouse.*
-import models.api.github.*
-import models.api.jira.*
-import models.api.gitlab.*
+import com.google.gson.JsonPrimitive
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.*
+import java.io.InputStream
 
 interface AccountIdService {
     // jira
@@ -129,29 +127,43 @@ interface AccountIdService {
     fun getTrelloLabels(@Query("key") key:String,@Query("token") token:String):Call<JsonArray>
     @POST("idLabels?")
     fun setTrelloLabels(@Body jsonArray: JsonArray,@Query("key") key:String,@Query("token") token:String): Call<JsonObject>
-
-    /**Clubhouse**/
+    //pivotal
     @GET("projects")
-    fun getClubhouseProjects(@Query("token") token: String):Call<List<ClubhouseProjectModel>>
-    @GET("epics")
-    fun getClubhouseEpics(@Query("token") token: String):Call<List<ClubHouseEpicModel>>
-    @GET("members")
-    fun getClubhouseMembers(@Query("token") token: String):Call<JsonArray>
+    fun getPivotalProjects():Call<JsonArray>
+    @GET("labels")
+    fun getPivotalLabels():Call<JsonArray>
+    @GET("memberships")
+    fun getPivotalMembers():Call<JsonArray>
     @POST("stories")
-    fun createClubhouseStory(@Query("token") token:String,
-                             @Query("project_id") project_id:String,
-                             @Query("name") name:String,
-                             @Query("description") description: String,
-                             @Query("story_type") storyType: String,
-                             @Query("deadline") deadline: String,
-                             @Query("requested_by_id") requestedBy: String,
-                             @Query("epic_id") epicId: String,
-                             @Query("estimate") estimate: String): Call<JsonObject>
-
+    fun createPivotalStory(@Body  jsonObject: JsonObject):Call<JsonObject>
     @Multipart
-    @POST("files")
-    fun sendClubhouseAttachments(@Query("token") token: String,@Part file:MultipartBody.Part):Call<JsonArray>
-    @PUT("stories/{id}")
-    fun setClubhouseStory(@Path("id")id:String,@Query("token") token: String,@Query("description") description:String):Call<JsonObject>
+    @POST("uploads")
+    fun setPivotalAttachments(@Part file:MultipartBody.Part): Call<JsonObject>
+    @POST("comments")
+    fun addPivotalAttachments(@Body jsonObject: JsonObject): Call<JsonObject>
+    @POST("blockers")
+    fun setPivotalBlockers(@Body jsonObject: JsonObject): Call<JsonObject>
+    @POST("tasks")
+    fun setPivotalTasks(@Body jsonObject: JsonObject): Call<JsonObject>
 
+    //Basecamp
+    @GET("authorization?")
+    fun getBasecampProjectId(@Query("access_token") accessToken:String):Call<JsonObject>
+    @GET("projects?")
+    fun getBasecampProjects(@Query("access_token") accessToken:String):Call<JsonArray>
+    @GET("people?")
+    fun getBasecampAssignee(@Query("access_token") accessToken:String):Call<JsonArray>
+    @GET("categories?")
+    fun getBasecampCategories(@Query("access_token") accessToken:String):Call<JsonArray>
+    @POST("messages?")
+    fun createBasecampMessage(@Body jsonObject: JsonObject,@Query("access_token") accessToken:String):Call<JsonObject>
+    @Multipart
+    @POST("attachments")
+    fun setBasecampAttachments(@Part file:MultipartBody.Part, @Header("Content-Length")contentLength:Long, @Query("name")name:String, @Query("access_token") accessToken:String): Call<JsonObject>
+    @POST("uploads")
+    fun addBaseAttachments(@Body jsonObject: JsonObject,@Query("access_token") accessToken:String): Call<JsonObject>
+    @POST("todolists")
+    fun createBasecampTodo(@Body jsonObject: JsonObject,@Query("access_token") accessToken:String):Call<JsonObject>
+    @POST("todos")
+    fun addBasecampTodo(@Body jsonObject: JsonObject,@Query("access_token") accessToken:String):Call<JsonObject>
 }

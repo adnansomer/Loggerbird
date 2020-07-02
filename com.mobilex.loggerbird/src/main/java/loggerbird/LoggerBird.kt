@@ -155,8 +155,9 @@ class LoggerBird : LifecycleObserver {
         internal lateinit var trelloKey:String
         internal lateinit var trelloToken:String
         internal lateinit var gitlabApiToken: String
-        internal lateinit var clubhouseApiToken: String
-
+        internal lateinit var pivotalUserName: String
+        internal lateinit var pivotalApiToken: String
+        internal lateinit var basecampApiToken:String
 //        private val loggerBirdService: LoggerBirdService = LoggerBirdService()
 
 
@@ -193,7 +194,8 @@ class LoggerBird : LifecycleObserver {
             trelloPassword:String,
             trelloKey:String,
             trelloToken:String,
-            clubhouseApiToken: String,
+            pivotalApiToken:String,
+            basecampApiToken:String,
             filePathName: String? = null
         ): Boolean {
             this.context = context
@@ -211,7 +213,8 @@ class LoggerBird : LifecycleObserver {
                     Companion.trelloKey = trelloKey
                     Companion.trelloToken = trelloToken
                     Companion.gitlabApiToken = gitlabApiToken
-                    Companion.clubhouseApiToken = clubhouseApiToken
+                    Companion.pivotalApiToken = pivotalApiToken
+                    Companion.basecampApiToken = basecampApiToken
                     logAttachLifeCycleObservers(context = context)
                     fileDirectory = context.filesDir
                     if (filePathName != null) {

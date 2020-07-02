@@ -139,9 +139,8 @@
             android:text="@string/textView_loggerbird_pivotal_title"
             android:drawableStart="@drawable/ic_pivotal_logo_24dp"
             android:drawableLeft="@drawable/ic_pivotal_logo_24dp" />
-
         <TextView
-            android:id="@+id/textView_share_clubhouse"
+            android:id="@+id/textView_share_basecamp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawablePadding="16dp"
@@ -150,10 +149,9 @@
             android:gravity="center_vertical"
             android:textSize="12sp"
             android:padding="8dp"
-            android:text="@string/textView_loggerbird_clubhouse_title"
-            android:drawableStart="@drawable/ic_clubhouse_logo_24dp"
-            android:drawableLeft="@drawable/ic_clubhouse_logo_24dp" />
-
+            android:text="@string/textView_loggerbird_basecamp_title"
+            android:drawableStart="@drawable/ic_basecamp_seeklogo"
+            android:drawableLeft="@drawable/ic_basecamp_seeklogo" />
         <TextView
             android:id="@+id/textView_discard"
             android:layout_width="match_parent"
@@ -167,7 +165,6 @@
             android:text="@string/textView_loggerbird_discard_title"
             android:drawableStart="@drawable/ic_delete_sweep_black_24dp"
             android:drawableLeft="@drawable/ic_delete_sweep_black_24dp" />
-
 
 
 
