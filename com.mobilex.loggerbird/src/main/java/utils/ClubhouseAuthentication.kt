@@ -63,9 +63,9 @@ class ClubhouseAuthentication {
     private val arrayListEpicName: ArrayList<String> = ArrayList()
     private var hashMapEpic: HashMap<String, String> = HashMap()
     private var storyName: String?=""
-    private var storyDescription: String?=""
-    private var estimate: String? = ""
-    internal var dueDate: String? = ""
+    private var storyDescription: String?=null
+    private var estimate: String? = null
+    internal var dueDate: String? = null
     private lateinit var storyId: String
     private val arrayListAttachments: ArrayList<String> = ArrayList()
     private var descriptionString = StringBuilder()
@@ -447,6 +447,7 @@ class ClubhouseAuthentication {
         }
     }
 
+
     private fun callEnqueueClubhouseAttachments(storyId: String) {
         workQueueLinkedClubhouseAttachments.controlRunnable = false
         if (runnableListClubhouseAttachments.size > 0) {
@@ -461,7 +462,7 @@ class ClubhouseAuthentication {
                         stringBuilder.append("\nattachment_$attachmentCounter:$it")
                         attachmentCounter++
                     }
-                    val updatedDescription = "$storyDescription/n" + stringBuilder.toString()
+                    val updatedDescription = "$storyDescription\n" + stringBuilder.toString()
                     uploadAttachments(storyId =  storyId, description = updatedDescription.toString())
 
                 } else {
@@ -473,6 +474,7 @@ class ClubhouseAuthentication {
             LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse")
         }
     }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun uploadAttachments(storyId: String,description: String) {

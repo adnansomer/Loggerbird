@@ -270,7 +270,7 @@
                                 android:textCursorDrawable="@color/colorBlack"
                                 android:layout_marginBottom="10dp"
                                 android:textSize="16sp"
-                                android:text="@string/textView_clubhouse_enter_due_date"
+                                android:hint="@string/textView_clubhouse_enter_due_date"
                                 android:layout_marginEnd="5dp" />
 
                         </LinearLayout>
