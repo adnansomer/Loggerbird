@@ -166,4 +166,21 @@ interface AccountIdService {
     fun createBasecampTodo(@Body jsonObject: JsonObject,@Query("access_token") accessToken:String):Call<JsonObject>
     @POST("todos")
     fun addBasecampTodo(@Body jsonObject: JsonObject,@Query("access_token") accessToken:String):Call<JsonObject>
+
+    //Asana
+    @GET("projects")
+    fun getAsanaProject():Call<JsonObject>
+    @GET("project_memberships")
+    fun getAsanaAssignee():Call<JsonObject>
+    @GET("sections")
+    fun getAsanaSections():Call<JsonObject>
+    @POST("tasks")
+    fun createAsanaTask(@Body jsonObject: JsonObject):Call<JsonObject>
+    @Multipart
+    @POST("attachments")
+    fun setAsanaAttachments(@Part file:MultipartBody.Part): Call<JsonObject>
+    @POST("addTask")
+    fun addAsanaSection(@Body jsonObject: JsonObject):Call<JsonObject>
+    @POST("subtasks")
+    fun addAsanaSubtask(@Body jsonObject: JsonObject):Call<JsonObject>
 }

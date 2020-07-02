@@ -100,6 +100,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerPivotal: Any? = null
     private var windowManagerBasecamp: Any? = null
     private var windowManagerBasecampDate: Any? = null
+    private var windowManagerAsana: Any? = null
+    private var windowManagerAsanaDate: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -122,6 +124,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsPivotal: WindowManager.LayoutParams
     private lateinit var windowManagerParamsBaseCamp: WindowManager.LayoutParams
     private lateinit var windowManagerParamsBaseCampDate: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsAsana: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsAsanaDate: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -182,6 +186,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewPivotal: View
     private lateinit var viewBasecamp: View
     private lateinit var viewBasecampDate: View
+    private lateinit var viewAsana: View
+    private lateinit var viewAsanaDate: View
     private lateinit var wrapper: FrameLayout
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
@@ -199,7 +205,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     //Jira:
     internal val jiraAuthentication = JiraAuthentication()
-    private val slackAuthentication = SlackAuthentication()
     //    private lateinit var spinnerProject: Spinner
     private lateinit var autoTextViewProject: AutoCompleteTextView
     //    private lateinit var spinnerIssueType: Spinner
@@ -329,6 +334,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var progressBarFeedbackLayout: FrameLayout
 
     //Slack:
+    private val slackAuthentication = SlackAuthentication()
     private lateinit var buttonSlackCreate: Button
     internal lateinit var buttonSlackCancel: Button
     private lateinit var buttonSlackCreateUser: Button
@@ -609,6 +615,38 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var calendarViewBasecamp: CalendarView
     private lateinit var buttonBasecampDateCreate: Button
     private lateinit var buttonBasecampDateCancel: Button
+    //Asana
+    internal val asanaAuthentication = AsanaAuthentication()
+    private lateinit var toolbarAsana: Toolbar
+    private lateinit var scrollViewAsana: ScrollView
+    private lateinit var autoTextViewAsanaProject: AutoCompleteTextView
+    private lateinit var autoTextViewAsanaProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaAssignee: AutoCompleteTextView
+    private lateinit var autoTextViewAsanaAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaSector: AutoCompleteTextView
+    private lateinit var autoTextViewAsanaCategoryAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaPriority: AutoCompleteTextView
+    private lateinit var autoTextViewAsanaPriorityAdapter: ArrayAdapter<String>
+    private lateinit var editTextAsanaDescription: EditText
+    private lateinit var editTextAsanaSubTask: EditText
+    private lateinit var editTextAsanaTaskName: EditText
+    private lateinit var imageViewAsanaTaskAdd: ImageView
+    private lateinit var recyclerViewAsanaAttachmentList: RecyclerView
+    private val arrayListAsanaFileName: ArrayList<RecyclerViewModel> = ArrayList()
+    private lateinit var recyclerViewAsanaSubTasksList: RecyclerView
+    private val arrayListAsanaSubtaskName: ArrayList<RecyclerViewModelSubtask> = ArrayList()
+    internal lateinit var cardViewAsanaSubTasksList: CardView
+    private lateinit var asanaAdapter: RecyclerViewAsanaAdapter
+    private lateinit var asanaSubTasksAdapter: RecyclerViewAsanaSubTaskAdapter
+    private lateinit var imageViewAsanaStartDate: ImageView
+    private lateinit var imageButtonAsanaRemoveDate: ImageButton
+    private lateinit var buttonAsanaCancel: Button
+    private lateinit var buttonAsanaCreate: Button
+    //asana_date:
+    private lateinit var frameLayoutAsanaDate: FrameLayout
+    private lateinit var calendarViewAsana: CalendarView
+    private lateinit var buttonAsanaDateCreate: Button
+    private lateinit var buttonAsanaDateCancel: Button
 
     //Static global variables:
     internal companion object {
@@ -627,6 +665,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var textView_share_trello: TextView
         private lateinit var textView_share_pivotal: TextView
         private lateinit var textView_share_basecamp: TextView
+        private lateinit var textView_share_asana: TextView
         private lateinit var textView_discard: TextView
         //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
@@ -976,6 +1015,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_share_trello = view.findViewById(R.id.textView_share_trello)
                     textView_share_pivotal = view.findViewById(R.id.textView_share_pivotal)
                     textView_share_basecamp = view.findViewById(R.id.textView_share_basecamp)
+                    textView_share_asana = view.findViewById(R.id.textView_share_asana)
                     textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
                     textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
@@ -1344,6 +1384,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         floatingActionButtonView.visibility = View.GONE
                     }
                     initializeBasecampLayout(filePathMedia = filePathMedia)
+                }
+            }
+            textView_share_asana.setSafeOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
+                    }
+                    initializeAsanaLayout(filePathMedia = filePathMedia)
                 }
             }
 
@@ -2842,6 +2890,25 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     detachProgressBar()
                     removeBasecampLayout()
                     Toast.makeText(context, R.string.basecamp_issue_time_out, Toast.LENGTH_SHORT)
+                        .show()
+                }
+                "asana" -> {
+                    detachProgressBar()
+                    removeAsanaLayout()
+                    Toast.makeText(context, R.string.asana_issue_success, Toast.LENGTH_SHORT)
+                        .show()
+                    finishSuccessFab()
+                }
+                "asana_error" -> {
+                    detachProgressBar()
+                    removeAsanaLayout()
+                    Toast.makeText(context, R.string.asana_issue_failure, Toast.LENGTH_SHORT)
+                        .show()
+                }
+                "asana_error_time_out" -> {
+                    detachProgressBar()
+                    removeAsanaLayout()
+                    Toast.makeText(context, R.string.asana_issue_time_out, Toast.LENGTH_SHORT)
                         .show()
                 }
             }
@@ -8602,7 +8669,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 initializeBasecampRecyclerView(filePathMedia = filePathMedia)
                 initializeBasecampAssigneeRecyclerView()
                 initializeBasecampNotifyRecyclerView()
-                buttonClicksBaseacamp()
+                buttonClicksBasecamp()
                 basecampAuthentication.callBasecamp(
                     activity = activity,
                     context = context,
@@ -8628,7 +8695,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-    private fun buttonClicksBaseacamp() {
+    private fun buttonClicksBasecamp() {
         buttonBasecampCreate.setSafeOnClickListener {
             basecampAuthentication.gatherAutoTextDetails(
                 autoTextViewProject = autoTextViewBasecampProject,
@@ -8655,7 +8722,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 )
                 && basecampAuthentication.checkBasecampTodo(
                     activity = activity,
-                    editTextName = editTefxtBasecampName,
+                    editTextName = editTextBasecampName,
                     editTextDescriptionTodo = editTextBasecampDescriptionTodo,
                     editTextContent = editTextBasecampContent,
                     autoTextViewNotify = autoTextViewBasecampNotify,
@@ -9176,6 +9243,675 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         buttonBasecampDateCancel.setSafeOnClickListener {
             removeBasecampDateLayout()
+        }
+    }
+
+    private fun clearAsanaComponents() {
+        cardViewAsanaSubTasksList.visibility = View.GONE
+        arrayListAsanaSubtaskName.clear()
+        arrayListAsanaFileName
+        asanaSubTasksAdapter.notifyDataSetChanged()
+        asanaAdapter.notifyDataSetChanged()
+        editTextAsanaSubTask.text = null
+        editTextAsanaDescription.text = null
+        editTextAsanaTaskName.text = null
+        autoTextViewAsanaPriority.setText("", false)
+        autoTextViewAsanaSector.setText("", false)
+        autoTextViewAsanaAssignee.setText("", false)
+//        autoTextViewPivotalProject.setText("",false)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeAsanaLayout(filePathMedia: File) {
+        try {
+            removeAsanaLayout()
+            viewAsana = LayoutInflater.from(activity)
+                .inflate(
+                    R.layout.loggerbird_asana_popup,
+                    (this.rootView as ViewGroup),
+                    false
+                )
+
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsAsana = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerAsana = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                (windowManagerAsana as WindowManager).addView(
+                    viewAsana,
+                    windowManagerParamsAsana
+                )
+
+                activity.window.navigationBarColor =
+                    ContextCompat.getColor(this, R.color.black)
+                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+                buttonAsanaCancel = viewAsana.findViewById(R.id.button_asana_cancel)
+                buttonAsanaCreate = viewAsana.findViewById(R.id.button_asana_create)
+                toolbarAsana = viewAsana.findViewById(R.id.toolbar_asana)
+                autoTextViewAsanaProject = viewAsana.findViewById(R.id.auto_textView_asana_project)
+                autoTextViewAsanaAssignee =
+                    viewAsana.findViewById(R.id.auto_textView_asana_assignee)
+                autoTextViewAsanaSector =
+                    viewAsana.findViewById(R.id.auto_textView_asana_section)
+                autoTextViewAsanaPriority =
+                    viewAsana.findViewById(R.id.auto_textView_asana_priority)
+                editTextAsanaDescription = viewAsana.findViewById(R.id.editText_asana_description)
+                editTextAsanaSubTask = viewAsana.findViewById(R.id.editText_asana_sub_tasks)
+                editTextAsanaTaskName = viewAsana.findViewById(R.id.editText_asana_task_name)
+                imageViewAsanaStartDate = viewAsana.findViewById(R.id.imageView_start_date)
+                imageViewAsanaTaskAdd = viewAsana.findViewById(R.id.imageView_task_add)
+                imageButtonAsanaRemoveDate =
+                    viewAsana.findViewById(R.id.image_button_asana_remove_date)
+                recyclerViewAsanaAttachmentList =
+                    viewAsana.findViewById(R.id.recycler_view_asana_attachment)
+                recyclerViewAsanaSubTasksList =
+                    viewAsana.findViewById(R.id.recycler_view_asana_sub_tasks_list)
+                cardViewAsanaSubTasksList = viewAsana.findViewById(R.id.cardView_sub_tasks_list)
+                scrollViewAsana = viewAsana.findViewById(R.id.scrollView_asana)
+                scrollViewAsana.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        hideKeyboard(activity = activity, view = viewAsana)
+                    }
+                    return@setOnTouchListener false
+                }
+
+                toolbarAsana.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.asana_menu_save -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            with(sharedPref.edit()) {
+                                putString(
+                                    "asana_project",
+                                    autoTextViewAsanaProject.editableText.toString()
+                                )
+                                putString(
+                                    "asana_assignee",
+                                    autoTextViewAsanaAssignee.editableText.toString()
+                                )
+                                putString(
+                                    "asana_section",
+                                    autoTextViewAsanaSector.editableText.toString()
+                                )
+                                putString(
+                                    "asana_priority",
+                                    autoTextViewAsanaPriority.editableText.toString()
+                                )
+                                putString(
+                                    "asana_description",
+                                    editTextAsanaDescription.text.toString()
+                                )
+                                putString(
+                                    "asana_subtask",
+                                    editTextAsanaSubTask.text.toString()
+                                )
+                                putString(
+                                    "asana_task_name",
+                                    editTextAsanaTaskName.text.toString()
+                                )
+                                commit()
+                            }
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.asana_issue_preferences_save)
+                            )
+                        }
+                        R.id.asana_menu_clear -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            val editor: SharedPreferences.Editor = sharedPref.edit()
+                            editor.remove("asana_project")
+                            editor.remove("asana_assignee")
+                            editor.remove("asana_section")
+                            editor.remove("asana_priority")
+                            editor.remove("asana_description")
+                            editor.remove("asana_subtask")
+                            editor.remove("asana_task_name")
+                            editor.apply()
+                            clearAsanaComponents()
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.asana_issue_preferences_delete)
+                            )
+                        }
+                    }
+                    return@setOnMenuItemClickListener true
+                }
+
+                toolbarAsana.setNavigationOnClickListener {
+                    removeAsanaLayout()
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.VISIBLE
+                    }
+                }
+                initializeAsanaRecyclerView(filePathMedia = filePathMedia)
+                initializeAsanaSubtaskRecyclerView()
+                buttonClicksAsana()
+                asanaAuthentication.callAsana(
+                    activity = activity,
+                    context = context,
+                    task = "get",
+                    filePathMedia = filePathMedia
+                )
+                attachProgressBar()
+            }
+        } catch (e: Exception) {
+            finishShareLayout("asana_error")
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.asanaTag)
+        }
+    }
+
+    internal fun removeAsanaLayout() {
+        if (this::viewAsana.isInitialized && windowManagerAsana != null) {
+            (windowManagerAsana as WindowManager).removeViewImmediate(
+                viewAsana
+            )
+            windowManagerAsana = null
+        }
+    }
+
+    private fun buttonClicksAsana() {
+        buttonAsanaCreate.setSafeOnClickListener {
+            asanaAuthentication.gatherAutoTextDetails(
+                autoTextViewProject = autoTextViewAsanaProject,
+                autoTextViewSection = autoTextViewAsanaSector,
+                autoTextViewAssignee = autoTextViewAsanaAssignee,
+                autoTextViewPriority = autoTextViewAsanaPriority
+            )
+            asanaAuthentication.gatherEditTextDetails(
+                editTextDescription = editTextAsanaDescription,
+                editTextSubtasks = editTextAsanaSubTask,
+                editTextTaskName = editTextAsanaTaskName
+            )
+            if (asanaAuthentication.checkAsanaProject(
+                    activity = activity,
+                    autoTextViewAsanaProject = autoTextViewAsanaProject
+                )
+                && asanaAuthentication.checkAsanaTask(
+                    activity = activity,
+                    editTextTask = editTextAsanaTaskName
+                )
+                && asanaAuthentication.checkAsanaSection(
+                    activity = activity,
+                    autoTextViewAsanaSection = autoTextViewAsanaSector
+                )
+                && asanaAuthentication.checkAsanaAssignee(
+                    activity = activity,
+                    autoTextViewAsanaAssignee = autoTextViewAsanaAssignee
+                )
+            ) {
+                asanaAuthentication.callAsana(
+                    activity = activity,
+                    context = context,
+                    task = "create"
+                )
+                attachProgressBar()
+            }
+        }
+        buttonAsanaCancel.setSafeOnClickListener {
+            removeAsanaLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+        imageViewAsanaTaskAdd.setSafeOnClickListener {
+            hideKeyboard(activity = activity, view = viewAsana)
+            if (!arrayListAsanaSubtaskName.contains(
+                    RecyclerViewModelSubtask(
+                        editTextAsanaSubTask.text.toString()
+                    )
+                ) && editTextAsanaSubTask.text.isNotEmpty()
+            ) {
+                arrayListAsanaSubtaskName.add(RecyclerViewModelSubtask(editTextAsanaSubTask.text.toString()))
+                asanaSubTasksAdapter.notifyDataSetChanged()
+                cardViewAsanaSubTasksList.visibility = View.VISIBLE
+            } else if (arrayListAsanaSubtaskName.contains(
+                    RecyclerViewModelSubtask(editTextAsanaSubTask.text.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.asana_sub_task_exist)
+                )
+            } else if (editTextAsanaSubTask.text.isEmpty()) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.asana_sub_task_empty)
+                )
+            }
+        }
+        imageButtonAsanaRemoveDate.setSafeOnClickListener {
+            imageButtonAsanaRemoveDate.visibility = View.GONE
+            asanaAuthentication.setStartDate(startDate = null)
+        }
+        imageViewAsanaStartDate.setSafeOnClickListener {
+            initializeAsanaDateLayout()
+        }
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeAsanaRecyclerView(filePathMedia: File) {
+        arrayListAsanaFileName.clear()
+        recyclerViewAsanaAttachmentList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        asanaAdapter = RecyclerViewAsanaAdapter(
+            addAsanaFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewAsanaAttachmentList.adapter = asanaAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addAsanaFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListAsanaFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListAsanaFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListAsanaFileName
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeAsanaSubtaskRecyclerView() {
+        arrayListAsanaSubtaskName.clear()
+        recyclerViewAsanaSubTasksList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        asanaSubTasksAdapter = RecyclerViewAsanaSubTaskAdapter(
+            arrayListAsanaSubtaskName,
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewAsanaSubTasksList.adapter = asanaSubTasksAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    internal fun initializeAsanaAutoTextViews(
+        arrayListProject: ArrayList<String>,
+        arrayListAssignee: ArrayList<String>,
+        arrayListSection: ArrayList<String>,
+        arrayListPriority: ArrayList<String>
+    ) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        editTextAsanaDescription.setText(
+            sharedPref.getString(
+                "asana_description",
+                null
+            )
+        )
+        editTextAsanaSubTask.setText(
+            sharedPref.getString(
+                "asana_subtask",
+                null
+            )
+        )
+        editTextAsanaTaskName.setText(
+            sharedPref.getString(
+                "asana_task_name",
+                null
+            )
+        )
+        initializeAsanaProject(arrayListProject = arrayListProject, sharedPref = sharedPref)
+        initializeAsanaSection(
+            arrayListSection = arrayListSection,
+            sharedPref = sharedPref
+        )
+        initializeAsanaAssignee(
+            arrayListAssignee = arrayListAssignee,
+            sharedPref = sharedPref
+        )
+        initializeAsanaPriority(
+            arrayListPriority = arrayListPriority,
+            sharedPref = sharedPref
+        )
+        detachProgressBar()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeAsanaProject(
+        arrayListProject: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewAsanaProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListProject
+        )
+        autoTextViewAsanaProject.setAdapter(autoTextViewAsanaProjectAdapter)
+        if (arrayListProject.isNotEmpty() && autoTextViewAsanaProject.editableText.isEmpty()) {
+            if (sharedPref.getString("asana_project", null) != null) {
+                if (arrayListProject.contains(
+                        sharedPref.getString(
+                            "asana_project",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewAsanaProject.setText(
+                        sharedPref.getString("asana_project", null),
+                        false
+                    )
+                } else {
+                    autoTextViewAsanaProject.setText(arrayListProject[0], false)
+                }
+            } else {
+                autoTextViewAsanaProject.setText(arrayListProject[0], false)
+            }
+        }
+        autoTextViewAsanaProject.setOnTouchListener { v, event ->
+            autoTextViewAsanaProject.showDropDown()
+            false
+        }
+        autoTextViewAsanaProject.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewAsana)
+            clearAsanaComponents()
+            asanaAuthentication.setProjectPosition(projectPosition = position)
+            asanaAuthentication.callAsana(
+                activity = activity,
+                context = context,
+                task = "get"
+            )
+            attachProgressBar()
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeAsanaSection(
+        arrayListSection: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewAsanaCategoryAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListSection
+        )
+        autoTextViewAsanaSector.setAdapter(autoTextViewAsanaCategoryAdapter)
+        if (arrayListSection.isNotEmpty() && autoTextViewAsanaSector.editableText.isEmpty()) {
+            if (sharedPref.getString("asana_section", null) != null) {
+                if (arrayListSection.contains(
+                        sharedPref.getString(
+                            "asana_section",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewAsanaSector.setText(
+                        sharedPref.getString("asana_section", null),
+                        false
+                    )
+                } else {
+                    autoTextViewAsanaSector.setText(arrayListSection[0], false)
+                }
+            }
+        }
+        autoTextViewAsanaSector.setOnTouchListener { v, event ->
+            autoTextViewAsanaSector.showDropDown()
+            false
+        }
+        autoTextViewAsanaSector.setOnItemClickListener { parent, view, position, id ->
+            asanaAuthentication.setSectionPosition(sectionPosition = position)
+            hideKeyboard(activity = activity, view = viewAsana)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeAsanaPriority(
+        arrayListPriority: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewAsanaPriorityAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListPriority
+        )
+        autoTextViewAsanaPriority.setAdapter(autoTextViewAsanaPriorityAdapter)
+        if (arrayListPriority.isNotEmpty() && autoTextViewAsanaPriority.editableText.isEmpty()) {
+            if (sharedPref.getString("asana_priority", null) != null) {
+                if (arrayListPriority.contains(
+                        sharedPref.getString(
+                            "asana_priority",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewAsanaPriority.setText(
+                        sharedPref.getString("asana_priority", null),
+                        false
+                    )
+                } else {
+                    autoTextViewAsanaPriority.setText(arrayListPriority[0], false)
+                }
+            }
+        }
+        autoTextViewAsanaPriority.setOnTouchListener { v, event ->
+            autoTextViewAsanaPriority.showDropDown()
+            false
+        }
+        autoTextViewAsanaPriority.setOnItemClickListener { parent, view, position, id ->
+            //            basecampAuthentication.setCategoryPosition(categoryPosition = position)
+            hideKeyboard(activity = activity, view = viewAsana)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeAsanaAssignee(
+        arrayListAssignee: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewAsanaAssigneeAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListAssignee
+        )
+        autoTextViewAsanaAssignee.setAdapter(autoTextViewAsanaAssigneeAdapter)
+        if (arrayListAssignee.isNotEmpty() && autoTextViewAsanaAssignee.editableText.isEmpty()) {
+            if (sharedPref.getString("asana_assignee", null) != null) {
+                if (arrayListAssignee.contains(
+                        sharedPref.getString(
+                            "asana_assignee",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewAsanaAssignee.setText(
+                        sharedPref.getString("asana_assignee", null),
+                        false
+                    )
+                } else {
+                    autoTextViewAsanaAssignee.setText(arrayListAssignee[0], false)
+                }
+            }
+        }
+        autoTextViewAsanaAssignee.setOnTouchListener { v, event ->
+            autoTextViewAsanaAssignee.showDropDown()
+            false
+        }
+        autoTextViewAsanaAssignee.setOnItemClickListener { parent, view, position, id ->
+            asanaAuthentication.setAssignee(assigneePosition = position)
+            hideKeyboard(activity = activity, view = viewAsana)
+        }
+//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
+//            if (!hasFocus) {
+//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
+//                    if (arrayListProjectNames.isNotEmpty()) {
+//                        if (sharedPref.getString("jira_project", null) != null) {
+//                            autoTextViewProject.setText(
+//                                sharedPref.getString("jira_project", null),
+//                                false
+//                            )
+//                        } else {
+//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    private fun initializeAsanaDateLayout() {
+        removeAsanaDateLayout()
+        val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+        viewAsanaDate =
+            LayoutInflater.from(activity)
+                .inflate(R.layout.asana_calendar_view, rootView, false)
+        windowManagerParamsAsanaDate =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+        windowManagerAsanaDate = activity.getSystemService(Context.WINDOW_SERVICE)!!
+        (windowManagerAsanaDate as WindowManager).addView(
+            viewAsanaDate,
+            windowManagerParamsAsanaDate
+        )
+        frameLayoutAsanaDate = viewAsanaDate.findViewById(R.id.asana_calendar_view_layout)
+        calendarViewAsana = viewAsanaDate.findViewById(R.id.calendarView_start_date)
+        buttonAsanaDateCancel =
+            viewAsanaDate.findViewById(R.id.button_asana_calendar_cancel)
+        buttonAsanaDateCreate = viewAsanaDate.findViewById(R.id.button_asana_calendar_ok)
+        buttonClicksAsanaDateLayout()
+    }
+
+    private fun removeAsanaDateLayout() {
+        if (this::viewAsanaDate.isInitialized && windowManagerAsanaDate != null) {
+            (windowManagerAsanaDate as WindowManager).removeViewImmediate(
+                viewAsanaDate
+            )
+            windowManagerAsanaDate = null
+        }
+    }
+
+    private fun buttonClicksAsanaDateLayout() {
+        val calendar = Calendar.getInstance()
+        val mYear = calendar.get(Calendar.YEAR)
+        val mMonth = calendar.get(Calendar.MONTH)
+        val mTempMonth: String
+        mTempMonth = if (mMonth in 1..9) {
+            "0$mMonth"
+        } else {
+            mMonth.toString()
+        }
+        val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        val mTempDay: String
+        mTempDay = if (mDayOfMonth in 1..9) {
+            "0$mDayOfMonth"
+        } else {
+            mDayOfMonth.toString()
+        }
+        var startDate = "$mYear-$mTempMonth-$mTempDay"
+        calendarViewAsana.minDate = System.currentTimeMillis() + 86400000
+        frameLayoutAsanaDate.setOnClickListener {
+            removeAsanaDateLayout()
+        }
+        calendarViewAsana.setOnDateChangeListener { view, year, month, dayOfMonth ->
+            val tempMonth: String = if (month in 1..9) {
+                "0$month"
+            } else {
+                month.toString()
+            }
+            val tempDay: String = if (dayOfMonth in 1..9) {
+                "0$dayOfMonth"
+            } else {
+                dayOfMonth.toString()
+            }
+            startDate = "$year-$tempMonth-$tempDay"
+        }
+        buttonAsanaDateCreate.setSafeOnClickListener {
+            imageButtonAsanaRemoveDate.visibility = View.VISIBLE
+            asanaAuthentication.setStartDate(startDate = startDate)
+            removeAsanaDateLayout()
+        }
+        buttonAsanaDateCancel.setSafeOnClickListener {
+            removeAsanaDateLayout()
         }
     }
 

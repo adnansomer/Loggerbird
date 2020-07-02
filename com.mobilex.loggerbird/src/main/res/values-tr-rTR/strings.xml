@@ -161,6 +161,18 @@
     <string name="basecamp_category_doesnt_exist">Bu kategori bulunamadı!</string>
     <string name="basecamp_name_empty">İsim boş olamaz!</string>
     <string name="basecamp_content_empty">İçerik boş olamaz!</string>
+    <string name="asana_issue_success">Görev başarılı bir şekilde açıldı!</string>
+    <string name="asana_issue_failure">Asana görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="asana_issue_time_out">Asana görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="asana_issue_preferences_save">Konu tercihleri kaydedildi!</string>
+    <string name="asana_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="asana_sub_task_exist">Bu yan iş zaten listeye eklendi!</string>
+    <string name="asana_sub_task_empty">Yan iş boş olamaz!</string>
+    <string name="asana_project_empty">Proje boş olamaz!</string>
+    <string name="asana_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="asana_task_empty">Görev boş olamaz</string>
+    <string name="asana_section_doesnt_exist">Bu kategori bulunamadı!</string>
+    <string name="asana_assignee_doesnt_exist">Bu kullanıcı bulunamadı!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
@@ -184,6 +196,7 @@
     <string name="textView_loggerbird_trello_title">Trello ile paylaş</string>
     <string name="textView_loggerbird_pivotal_title">Pivotal-tracker ile paylaş</string>
     <string name="textView_loggerbird_basecamp_title">Basecamp ile paylaş</string>
+    <string name="textView_loggerbird_asana_title">Asana ile paylaş</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça boyutu ayarla</string>
     <!-- activity_paint_save_dialog-->
@@ -481,4 +494,30 @@
     <string name="textView_recyclerView_basecamp_notify_title">Basecamp görevlendirmenizden bu bildiriyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_basecamp_notify_delete">Bildiriyi sil</string>
     <string name="button_recyclerView_basecamp_notify_keep">Bildiriyi tut</string>
+    <!-- loggerbird_asana_menu-->
+    <string name="textView_asana_menu_save">Görev detayı kaydet</string>
+    <string name="textView_asana_menu_clear">Görev detayı temizle</string>
+    <!-- loggerbird_asana_popup-->
+    <string name="textView_asana_project">Proje</string>
+    <string name="textView_asana_task_name">Görev ismi</string>
+    <string name="editText_asana_task_name">Bu görev için bir görev ismi giriniz…</string>
+    <string name="textView_asana_assignee">Sorumlu</string>
+    <string name="textView_asana_section">Kategori</string>
+    <string name="textView_asana_priority">Öncelik</string>
+    <string name="textView_asana_description">Açıklama</string>
+    <string name="editText_asana_description">Bu görev için bir açıklama giriniz…</string>
+    <string name="textView_asana_sub_tasks">Yan işler</string>
+    <string name="editText_asana_sub_tasks">Bu yan iş için daha fazla detay ekleyiniz…</string>
+    <string name="textView_asana_sub_tasks_list">Yan işler listesi</string>
+    <string name="textView_asana_attachment">Eklentiler</string>
+    <string name="textView_asana_start_date">Başlangıç tarihi</string>
+    <string name="button_asana_create">Oluştur</string>
+    <string name="button_asana_cancel">İptal</string>
+    <!-- recycler_view_asana_item_popup-->
+    <string name="textView_recyclerView_asana_popup_title">Asana görevlendirmenizden bu eklentiyi çıkarmaktan eminmisiniz?</string>
+    <!-- recycler_view_asana_subtask_popup-->
+    <string name="textView_recyclerView_asana_subtask_header">Yan işi sil</string>
+    <string name="textView_recyclerView_asana_subtask_title">Asana görevlendirmenizden bu yan işi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_asana_subtask_delete">Yan işi sil</string>
+    <string name="button_recyclerView_asana_subtask_keep">Yan işi tut</string>
 </resources>

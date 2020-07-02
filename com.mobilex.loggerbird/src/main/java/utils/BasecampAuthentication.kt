@@ -80,7 +80,7 @@ internal class BasecampAuthentication {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
                     checkQueueTime(activity = activity)
-                    okHttpPivotalAuthentication(
+                    okHttpBasecampAuthentication(
                         activity = activity,
                         context = context,
                         task = task,
@@ -105,7 +105,7 @@ internal class BasecampAuthentication {
         }
     }
 
-    private fun okHttpPivotalAuthentication(
+    private fun okHttpBasecampAuthentication(
         context: Context,
         activity: Activity,
         task: String,
@@ -445,8 +445,8 @@ internal class BasecampAuthentication {
                     call: retrofit2.Call<JsonArray>,
                     response: retrofit2.Response<JsonArray>
                 ) {
-                    val coroutineCallBasecampProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallBasecampProject.async {
+                    val coroutineCallBasecampAssignee = CoroutineScope(Dispatchers.IO)
+                    coroutineCallBasecampAssignee.async {
                         Log.d("base_assignee_success", response.code().toString())
                         val basecampList = response.body()
                         basecampList?.forEach {
@@ -483,8 +483,8 @@ internal class BasecampAuthentication {
                     call: retrofit2.Call<JsonArray>,
                     response: retrofit2.Response<JsonArray>
                 ) {
-                    val coroutineCallBasecampProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallBasecampProject.async {
+                    val coroutineCallBasecampCategory = CoroutineScope(Dispatchers.IO)
+                    coroutineCallBasecampCategory.async {
                         Log.d("base_category_success", response.code().toString())
                         val basecampList = response.body()
                         basecampList?.forEach {
@@ -654,7 +654,7 @@ internal class BasecampAuthentication {
     ) {
         try {
             val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
-            val body = MultipartBody.Part.createFormData("file", file.name.substringBeforeLast("."), requestFile)
+            val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
             RetrofitUserBasecampClient.getBasecampUserClient(url = "https://3.basecampapi.com/$accountId/")
                 .create(AccountIdService::class.java)
                 .setBasecampAttachments(
@@ -689,7 +689,7 @@ internal class BasecampAuthentication {
                             Log.d("attachment_put_success", response.message())
                             addAttachments(
                                 activity = activity,
-                                fileName = file.name,
+                                fileName = file.name.substringBeforeLast("."),
                                 accountId = accountId,
                                 projectId = projectId!!,
                                 attachmentId = basecampResponse!!.getAsJsonPrimitive("attachable_sgid").asString
