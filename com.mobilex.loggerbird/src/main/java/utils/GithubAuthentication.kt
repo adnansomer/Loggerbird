@@ -68,8 +68,7 @@ internal class GithubAuthentication {
     private var projectPosition = 0
     private val defaultToast = DefaultToast()
     private var repoId: Int? = null
-    private var workQueueLinkedGithubAttachments: LinkedBlockingQueueUtil =
-        LinkedBlockingQueueUtil()
+    private var workQueueLinkedGithubAttachments: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
     private var runnableListGithubAttachments: ArrayList<Runnable> = ArrayList()
     private val arrayListAttachmentsUrl: ArrayList<String> = ArrayList()
      private val stringBuilderGithub = StringBuilder()

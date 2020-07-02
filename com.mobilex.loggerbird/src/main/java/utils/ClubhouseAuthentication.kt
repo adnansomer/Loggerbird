@@ -69,11 +69,13 @@ class ClubhouseAuthentication {
     private lateinit var storyId: String
     private val arrayListAttachments: ArrayList<String> = ArrayList()
     private var descriptionString = StringBuilder()
+    private var workQueueLinkedClubhouseAttachments: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
+    private var runnableListClubhouseAttachments: ArrayList<Runnable> = ArrayList()
 
     companion object{
         const val BASE_URL = "https://api.clubhouse.io/api/v3/"
     }
-    
+
     internal fun callClubhouse(
         activity: Activity,
         context: Context,
@@ -95,11 +97,7 @@ class ClubhouseAuthentication {
                     )
                 } else {
                     activity.runOnUiThread {
-                        Toast.makeText(
-                            context,
-                            R.string.network_check_failure,
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, R.string.network_check_failure, Toast.LENGTH_SHORT).show()
                     }
                     throw LoggerBirdException(
                         Constants.networkErrorMessage
@@ -198,6 +196,7 @@ class ClubhouseAuthentication {
                 arrayListEpicId.clear()
                 arrayListEpicName.clear()
                 hashMapEpic.clear()
+                arrayListAttachments.clear()
                 gatherClubhouseProjectDetails()
                 gatherClubhouseUserDetails()
                 gatherClubhouseEpicDetails()
@@ -372,9 +371,9 @@ class ClubhouseAuthentication {
                             RecyclerViewClubhouseAdapter.ViewHolder.arrayListFilePaths.forEach {
                                 val file = it.file
                                 if (file.exists()) {
-                                    createAttachments(
+                                    callClubhouseAttachments(
                                         storyId = storyId,
-                                        filePathMedia = filePathMedia
+                                        filePathMedia = file
                                     )
                                 }
                             }
@@ -383,6 +382,21 @@ class ClubhouseAuthentication {
                 })
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun callClubhouseAttachments(filePathMedia: File, storyId: String) {
+        if (LoggerBird.isLogInitAttached()) {
+            if (runnableListClubhouseAttachments.isEmpty()) {
+                workQueueLinkedClubhouseAttachments.put {
+                    createAttachments(storyId = storyId,filePathMedia  = filePathMedia)
+                }
+            }
+            runnableListClubhouseAttachments.add(Runnable {
+                createAttachments(storyId = storyId, filePathMedia = filePathMedia)
+            })
+        } else {
+            throw LoggerBirdException(Constants.logInitErrorMessage)
         }
     }
 
@@ -398,44 +412,65 @@ class ClubhouseAuthentication {
                 .sendClubhouseAttachments(token = LoggerBird.clubhouseApiToken, file = body)
                 .enqueue(object : retrofit2.Callback<JsonArray> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                    override fun onFailure(
-                        call: retrofit2.Call<JsonArray>,
-                        t: Throwable
-                    ) {
+                    override fun onFailure(call: retrofit2.Call<JsonArray>, t: Throwable) {
                         t.printStackTrace()
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
                     }
-                    override fun onResponse(
-                        call: retrofit2.Call<JsonArray>,
-                        response: retrofit2.Response<JsonArray>
-                    ) {
+                    override fun onResponse(call: retrofit2.Call<JsonArray>, response: retrofit2.Response<JsonArray>) {
                         if (response.code() in 400..499) {
-                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error") }
+                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error")
+                        }
 
                         val coroutineCallClubhouseAttachments = CoroutineScope(Dispatchers.IO)
                         coroutineCallClubhouseAttachments.async {
                             Log.d("clubhouse_attachment", response.code().toString())
                             Log.d("clubhouse_attachment", response.body().toString())
-                            response.body()?.getAsJsonArray()?.forEach {
-                                arrayListAttachments.add(it.asJsonObject["url"].asString)
+
+                            if (filePathMedia.name != "logger_bird_details.txt") {
+                                if (filePathMedia.exists()) {
+                                    filePathMedia.delete()
+                                }
                             }
 
-                            val stringBuilder = StringBuilder()
-                            var attachmentCounter = 1
-                            arrayListAttachments.forEach {
-                                stringBuilder.append("\nattachment_$attachmentCounter:$it\n")
-                                attachmentCounter++
+                            if (response.body() != null) {
+                                response.body()?.getAsJsonArray()?.forEach {
+                                    arrayListAttachments.add(it.asJsonObject["url"].asString)
+                                }
+                                callEnqueueClubhouseAttachments(storyId = storyId)
                             }
-                            val stringDescription = "$storyDescription\n" + stringBuilder.toString()
-
-                            uploadAttachments(storyId = storyId, description = stringDescription)
                         }
                     }
                 })
-
-        } catch (e: Exception) {
+        }catch (e: Exception) {
             clubhouseExceptionHandler(e = e)
+        }
+    }
+
+    private fun callEnqueueClubhouseAttachments(storyId: String) {
+        workQueueLinkedClubhouseAttachments.controlRunnable = false
+        if (runnableListClubhouseAttachments.size > 0) {
+            runnableListClubhouseAttachments.removeAt(0)
+            if (runnableListClubhouseAttachments.size > 0) {
+                workQueueLinkedClubhouseAttachments.put(runnableListClubhouseAttachments[0])
+            } else {
+                if (arrayListAttachments.isNotEmpty()) {
+                    var attachmentCounter = 1
+                    val stringBuilder = StringBuilder()
+                    arrayListAttachments.forEach {
+                        stringBuilder.append("\nattachment_$attachmentCounter:$it")
+                        attachmentCounter++
+                    }
+                    val updatedDescription = "$storyDescription/n" + stringBuilder.toString()
+                    uploadAttachments(storyId =  storyId, description = updatedDescription.toString())
+
+                } else {
+                    LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse")
+                }
+
+            }
+        } else {
+            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse")
         }
     }
 
@@ -469,11 +504,7 @@ class ClubhouseAuthentication {
                             val clubhouseAttachments = response.body()
                             Log.d("clubhouse_attachment_result", response.code().toString())
                             Log.d("clubhouse_attachment_result", response.body().toString())
-                            if (filePathMedia!!.name != "logger_bird_details.txt") {
-                                if (filePathMedia!!.exists()) {
-                                    filePathMedia!!.delete()
-                                }
-                            }
+
                         }
                     }
                 })
