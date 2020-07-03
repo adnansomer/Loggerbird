@@ -146,7 +146,7 @@ interface AccountIdService {
     fun sendGitlabAttachments(@Part file: MultipartBody.Part): Call<JsonObject>
 
     @PUT("{iid}")
-    fun setGitlabIssue(@Path("iid") iid: String, @Query("description") description: String): Call<JsonArray>
+    fun setGitlabIssue(@Path("iid") iid: String, @Query("description") description: String): Call<JsonObject>
 
     //query soru isareinden sonra
 

@@ -446,7 +446,6 @@ class ClubhouseAuthentication {
         }
     }
 
-
     private fun callEnqueueClubhouseAttachments(storyId: String) {
         workQueueLinkedClubhouseAttachments.controlRunnable = false
         if (runnableListClubhouseAttachments.size > 0) {
@@ -473,7 +472,6 @@ class ClubhouseAuthentication {
             LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse")
         }
     }
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun uploadAttachments(storyId: String,description: String) {

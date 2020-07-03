@@ -247,7 +247,7 @@ class GitlabAuthentication {
                                 if (file.exists()) {
                                     callGitlabAttachments(
                                         issueId = issueId,
-                                        filePathMedia = filePathMedia!!,
+                                        file = file,
                                         projectId = arrayListProjectsId[projectPosition]
                                     )
                                 }
@@ -260,15 +260,15 @@ class GitlabAuthentication {
         }
     }
 
-    private fun callGitlabAttachments(filePathMedia: File, issueId: String, projectId: String) {
+    private fun callGitlabAttachments(file: File, issueId: String, projectId: String) {
         if (LoggerBird.isLogInitAttached()) {
             if (runnableListGitlabAttachments.isEmpty()) {
                 workQueueLinkedGitlabAttachments.put {
-                    createAttachments(projectId = projectId,filePathMedia  = filePathMedia, issueId = issueId)
+                    createAttachments(projectId = projectId,filePathMedia  = file, issueId = issueId)
                 }
             }
             runnableListGitlabAttachments.add(Runnable {
-                createAttachments(projectId = projectId, filePathMedia = filePathMedia, issueId = issueId)
+                createAttachments(projectId = projectId, filePathMedia = file, issueId = issueId)
             })
         } else {
             throw LoggerBirdException(Constants.logInitErrorMessage)
@@ -519,24 +519,25 @@ class GitlabAuthentication {
                             LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error")
                         }
 
+                        if (filePathMedia!!.name != "logger_bird_details.txt") {
+                            if (filePathMedia!!.exists()) {
+                                filePathMedia!!.delete()
+                            }
+                        }
                         val coroutineCallGitlanAttachments = CoroutineScope(Dispatchers.IO)
                         coroutineCallGitlanAttachments.async {
                             Log.d("gitlab_attachment", response.code().toString())
                             Log.d("gitlab_attachment", response.body().toString())
-
 
                             if (response.body() != null) {
                                 arrayListAttachments.add("https://gitlab.com" + response.body()!!.asJsonObject["full_path"].asString)
 
                                 callEnqueueGitlabAttachments(issueId = issueId, projectId = projectId)
                             }
-
-
                         }
                     }
                 })
-            
-        } catch (e: Exception) {
+        }catch (e: Exception) {
             gitlabExceptionHandler(e = e)
         }
     }
@@ -569,27 +570,22 @@ class GitlabAuthentication {
     }
 
     private fun addAttachmentsToIssue(projectId: String, issueId: String, description: String) {
-
         try {
             RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/" + hashMapProjects[arrayListProjects[projectPosition]] + "/issues/")
                 .create(AccountIdService::class.java)
                 .setGitlabIssue(description = description, iid = issueId)
-                .enqueue(object : retrofit2.Callback<JsonArray> {
+                .enqueue(object : retrofit2.Callback<JsonObject> {
                     override fun onFailure(
-                        call: retrofit2.Call<JsonArray>,
+                        call: retrofit2.Call<JsonObject>,
                         t: Throwable
                     ) {
                         gitlabExceptionHandler(throwable = t)
                     }
                     override fun onResponse(
-                        call: retrofit2.Call<JsonArray>,
-                        response: retrofit2.Response<JsonArray>
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
                     ) {
-                        if (filePathMedia!!.name != "logger_bird_details.txt") {
-                            if (filePathMedia!!.exists()) {
-                                filePathMedia!!.delete()
-                            }
-                        }
+
                         if (response.code() in 400..499) {
                             LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error") }
                         else{
@@ -600,11 +596,10 @@ class GitlabAuthentication {
                             val gitlabAttachments = response.body()
                             Log.d("gitlab_attachment_result", response.code().toString())
                             Log.d("gitlab_attachment_result", response.body().toString())
-
                         }
                     }
                 })
-            }catch (e: Exception) {
+        } catch (e: Exception) {
             gitlabExceptionHandler(e = e)
         }
     }
