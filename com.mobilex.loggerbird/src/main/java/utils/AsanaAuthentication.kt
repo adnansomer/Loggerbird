@@ -171,8 +171,8 @@ internal class AsanaAuthentication {
             if (!description.isNullOrEmpty()) {
                 jsonObjectData.addProperty("notes", description)
             }
-            if(!startDate.isNullOrEmpty()){
-                jsonObjectData.addProperty("due_on",startDate)
+            if (!startDate.isNullOrEmpty()) {
+                jsonObjectData.addProperty("due_on", startDate)
             }
             jsonObject.add("data", jsonObjectData)
             RetrofitUserAsanaClient.getAsanaUserClient(url = "https://app.asana.com/api/1.0/")
@@ -216,7 +216,7 @@ internal class AsanaAuthentication {
                                     )
                                 }
                             }
-                            if(RecyclerViewAsanaSubTaskAdapter.ViewHolder.arrayListSubtask.isNotEmpty()){
+                            if (RecyclerViewAsanaSubTaskAdapter.ViewHolder.arrayListSubtask.isNotEmpty()) {
                                 RecyclerViewAsanaSubTaskAdapter.ViewHolder.arrayListSubtask.forEach {
                                     queueCounter++
                                     coroutineCallAsanSubtasks.async {
@@ -227,8 +227,8 @@ internal class AsanaAuthentication {
                                         )
                                     }
                                 }
-                            }else{
-                                if(!subtask.isNullOrEmpty()){
+                            } else {
+                                if (!subtask.isNullOrEmpty()) {
                                     queueCounter++
                                     coroutineCallAsanSubtasks.async {
                                         asanaAddSubtask(
@@ -282,7 +282,8 @@ internal class AsanaAuthentication {
             asanaExceptionHandler(e = e)
         }
     }
-    private fun asanaAddSubtask(activity: Activity, taskId: String,subtask:String) {
+
+    private fun asanaAddSubtask(activity: Activity, taskId: String, subtask: String) {
         try {
             this.activity = activity
             val jsonObject = JsonObject()
@@ -297,8 +298,8 @@ internal class AsanaAuthentication {
             if (!description.isNullOrEmpty()) {
                 jsonObjectData.addProperty("notes", description)
             }
-            if(!startDate.isNullOrEmpty()){
-                jsonObjectData.addProperty("due_on",startDate)
+            if (!startDate.isNullOrEmpty()) {
+                jsonObjectData.addProperty("due_on", startDate)
             }
             jsonObject.add("data", jsonObjectData)
             RetrofitUserAsanaClient.getAsanaUserClient(url = "https://app.asana.com/api/1.0/tasks/$taskId/")
@@ -636,14 +637,14 @@ internal class AsanaAuthentication {
         activity: Activity,
         editTextTask: EditText
     ): Boolean {
-       if(editTextTask.text.toString().isNotEmpty()){
-           return true
-       }else{
-           defaultToast.attachToast(
-               activity = activity,
-               toastMessage = activity.resources.getString(R.string.asana_task_empty)
-           )
-       }
+        if (editTextTask.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.asana_task_empty)
+            )
+        }
         return false
     }
 
@@ -661,6 +662,7 @@ internal class AsanaAuthentication {
         }
         return false
     }
+
     internal fun checkAsanaAssignee(
         activity: Activity,
         autoTextViewAsanaAssignee: AutoCompleteTextView

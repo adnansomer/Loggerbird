@@ -83,9 +83,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerProgressBar: Any? = null
     private var windowManagerFeedback: Any? = null
     private var windowManagerJira: Any? = null
-    private var windowManagerSlack: Any? = null
     private var windowManagerJiraDatePicker: Any? = null
-    private var windowManagerGitlabDatePicker: Any? = null
+    private var windowManagerSlack: Any? = null
     private var windowManagerUnhandledDuplication: Any? = null
     private var windowManagerEmail: Any? = null
     private var windowManagerFutureTask: Any? = null
@@ -93,6 +92,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerFutureTime: Any? = null
     private var windowManagerGithub: Any? = null
     private var windowManagerGitlab: Any? = null
+    private var windowManagerGitlabDatePicker: Any? = null
     private var windowManagerTrello: Any? = null
     private var windowManagerTrelloTimeline: Any? = null
     private var windowManagerTrelloTime: Any? = null
@@ -102,6 +102,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerBasecampDate: Any? = null
     private var windowManagerAsana: Any? = null
     private var windowManagerAsanaDate: Any? = null
+    private var windowManagerClubhouse: Any? = null
+    private var windowManagerClubhouseDatePicker: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -126,6 +128,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsBaseCampDate: WindowManager.LayoutParams
     private lateinit var windowManagerParamsAsana: WindowManager.LayoutParams
     private lateinit var windowManagerParamsAsanaDate: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsClubhouse: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsClubhouseDatePicker: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAnimation: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -188,6 +192,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewBasecampDate: View
     private lateinit var viewAsana: View
     private lateinit var viewAsanaDate: View
+    private lateinit var viewClubhouse: View
     private lateinit var wrapper: FrameLayout
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
@@ -647,6 +652,35 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var calendarViewAsana: CalendarView
     private lateinit var buttonAsanaDateCreate: Button
     private lateinit var buttonAsanaDateCancel: Button
+    //Clubhouse
+    internal val clubhouseAuthentication = ClubhouseAuthentication()
+    internal lateinit var buttonClubhouseCancel: Button
+    private lateinit var buttonClubhouseCreate: Button
+    private lateinit var toolbarClubhouse: Toolbar
+    private lateinit var calendarViewClubhouseView: View
+    private lateinit var calendarViewClubhouseLayout: FrameLayout
+    private lateinit var calendarViewClubhouseDueDate: CalendarView
+    private var calendarViewClubhouseDate: Long? = null
+    private lateinit var buttonCalendarViewClubhouseCancel: Button
+    private lateinit var buttonCalendarViewClubhouseOk: Button
+    private lateinit var textViewClubhouseDueDate: TextView
+    private lateinit var autoTextViewClubhouseProject: AutoCompleteTextView
+    private lateinit var autoTextViewClubhouseProjectAdapter: ArrayAdapter<String>
+    private lateinit var spinnerClubhouseEpic: Spinner
+    private lateinit var spinnerClubhouseEpicAdapter: ArrayAdapter<String>
+    private lateinit var editTextClubhouseStoryName: EditText
+    private lateinit var editTextClubhouseStoryDescription: EditText
+    private lateinit var editTextClubhouseEstimate: EditText
+    private lateinit var spinnerClubhouseStoryType: Spinner
+    private lateinit var spinnerClubhouseStoryTypeAdapter: ArrayAdapter<String>
+    private lateinit var spinnerClubhouseRequester: Spinner
+    private lateinit var spinnerClubhouseRequesterAdapter: ArrayAdapter<String>
+    private val arrayListClubhouseFileName: ArrayList<RecyclerViewModel> = ArrayList()
+    private lateinit var clubhouseAdapter: RecyclerViewClubhouseAdapter
+    private lateinit var recyclerViewClubhouseAttachment: RecyclerView
+    private lateinit var progressBarClubhouse: ProgressBar
+    private lateinit var progressBarClubhouseLayout: FrameLayout
+
 
     //Static global variables:
     internal companion object {
@@ -666,6 +700,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var textView_share_pivotal: TextView
         private lateinit var textView_share_basecamp: TextView
         private lateinit var textView_share_asana: TextView
+        private lateinit var textView_share_clubhouse: TextView
         private lateinit var textView_discard: TextView
         //private lateinit var textView_dismiss : TextView
         private lateinit var textView_counter_video: TextView
@@ -1016,6 +1051,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_share_pivotal = view.findViewById(R.id.textView_share_pivotal)
                     textView_share_basecamp = view.findViewById(R.id.textView_share_basecamp)
                     textView_share_asana = view.findViewById(R.id.textView_share_asana)
+                    textView_share_clubhouse = view.findViewById(R.id.textView_share_clubhouse)
                     textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
                     textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
@@ -1317,20 +1353,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_jira.setSafeOnClickListener {
-                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    attachProgressBar()
-//                }
-//                jiraAuthentication.callJiraIssue(
-//                    filePathName = filePathMedia,
-//                    context = context,
-//                    activity = activity
-//                )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
                     initializeJiraLayout(filePathMedia = filePathMedia)
-//                    initializeJiraAuthLayout(filePathMedia = filePathMedia)
                 }
             }
 
@@ -1394,6 +1421,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     initializeAsanaLayout(filePathMedia = filePathMedia)
                 }
             }
+            textView_share_clubhouse.setSafeOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
+                    }
+                    initializeClubhouseLayout(filePathMedia = filePathMedia)
+                }
+            }
+
 
 
             textView_discard.setSafeOnClickListener {
@@ -2796,6 +2832,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 "gitlab" -> {
                     Toast.makeText(context, R.string.gitlab_sent, Toast.LENGTH_SHORT).show()
                     finishSuccessFab()
+                    removeGitlabLayout()
                     progressBarGitlabLayout.visibility = View.GONE
                     progressBarGitlab.visibility = View.GONE
                 }
@@ -2809,7 +2846,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
 
                 "gitlab_error_time_out" -> {
-                    removeSlackLayout()
+                    removeGitlabLayout()
                     Toast.makeText(context, R.string.gitlab_sent_error_time_out, Toast.LENGTH_SHORT)
                         .show()
                     progressBarGitlabLayout.visibility = View.GONE
@@ -2911,6 +2948,29 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     Toast.makeText(context, R.string.asana_issue_time_out, Toast.LENGTH_SHORT)
                         .show()
                 }
+                "clubhouse" -> {
+                    progressBarClubhouseLayout.visibility = View.GONE
+                    progressBarClubhouse.visibility = View.GONE
+                    removeClubhouseLayout()
+                    Toast.makeText(context, R.string.clubhouse_issue_success, Toast.LENGTH_SHORT)
+                        .show()
+                    finishSuccessFab()
+                }
+                "clubhouse_error" -> {
+                    progressBarClubhouseLayout.visibility = View.GONE
+                    progressBarClubhouse.visibility = View.GONE
+                    removeClubhouseLayout()
+                    Toast.makeText(context, R.string.clubhouse_issue_failure, Toast.LENGTH_SHORT)
+                        .show()
+                }
+                "clubhouse_error_time_out" -> {
+                    progressBarClubhouseLayout.visibility = View.GONE
+                    progressBarClubhouse.visibility = View.GONE
+                    removeClubhouseLayout()
+                    Toast.makeText(context, R.string.clubhouse_issue_time_out, Toast.LENGTH_SHORT)
+                        .show()
+                }
+
             }
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
@@ -7423,7 +7483,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (checkGitlabTitleEmpty()) {
                 progressBarGitlabLayout.visibility = View.VISIBLE
                 progressBarGitlab.visibility = View.VISIBLE
-                attachProgressBar()
+//                attachProgressBar()
                 gitlabAuthentication.gatherGitlabEditTextDetails(
                     editTextTitle = editTextGitlabTitle,
                     editTextDescription = editTextGitlabDescription,
@@ -9913,6 +9973,449 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         buttonAsanaDateCancel.setSafeOnClickListener {
             removeAsanaDateLayout()
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeClubhouseLayout(filePathMedia: File) {
+        try {
+            removeClubhouseLayout()
+            viewClubhouse = LayoutInflater.from(activity)
+                .inflate(R.layout.loggerbird_clubhouse_popup, (this.rootView as ViewGroup), false)
+
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsClubhouse = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerClubhouse = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                (windowManagerClubhouse as WindowManager).addView(
+                    viewClubhouse,
+                    windowManagerParamsClubhouse
+                )
+
+                activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
+                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+                toolbarClubhouse = viewClubhouse.findViewById(R.id.toolbar_clubhouse)
+                buttonClubhouseCancel = viewClubhouse.findViewById(R.id.button_clubhouse_cancel)
+                buttonClubhouseCreate = viewClubhouse.findViewById(R.id.button_clubhouse_create)
+                editTextClubhouseStoryName =
+                    viewClubhouse.findViewById(R.id.editText_clubhouse_story_name)
+                editTextClubhouseStoryDescription =
+                    viewClubhouse.findViewById(R.id.editText_clubhouse_description)
+                spinnerClubhouseRequester =
+                    viewClubhouse.findViewById(R.id.spinner_clubhouse_requester)
+                spinnerClubhouseStoryType =
+                    viewClubhouse.findViewById(R.id.spinner_clubhouse_story_type)
+                recyclerViewClubhouseAttachment =
+                    viewClubhouse.findViewById(R.id.recycler_view_clubhouse_attachment)
+                autoTextViewClubhouseProject =
+                    viewClubhouse.findViewById(R.id.auto_textview_clubhouse_project)
+                spinnerClubhouseEpic = viewClubhouse.findViewById(R.id.spinner_clubhouse_epic)
+                textViewClubhouseDueDate =
+                    viewClubhouse.findViewById(R.id.textView_clubhouse_due_date)
+                editTextClubhouseEstimate =
+                    viewClubhouse.findViewById(R.id.editText_clubhouse_estimate_point)
+                progressBarClubhouse = viewClubhouse.findViewById(R.id.clubhouse_progressbar)
+                progressBarClubhouseLayout =
+                    viewClubhouse.findViewById(R.id.clubhouse_progressbar_background)
+
+                clubhouseAuthentication.callClubhouse(
+                    activity = activity,
+                    context = context,
+                    task = "get",
+                    filePathMedia = filePathMedia
+                )
+                progressBarClubhouse.visibility = View.VISIBLE
+                progressBarClubhouseLayout.visibility = View.VISIBLE
+                initializeClubhouseRecyclerView(filePathMedia = filePathMedia)
+                buttonClicksClubhouse(filePathMedia = filePathMedia)
+
+            }
+        } catch (e: Exception) {
+            finishShareLayout("clubhouse_error")
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.clubhouseTag)
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeClubhouseProject(
+        arrayListClubhouseProjects: ArrayList<String>
+    ) {
+
+        autoTextViewClubhouseProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListClubhouseProjects
+        )
+        autoTextViewClubhouseProject.setAdapter(autoTextViewClubhouseProjectAdapter)
+
+        if (arrayListClubhouseProjects.isNotEmpty() && autoTextViewClubhouseProject.text.isEmpty()) {
+            autoTextViewClubhouseProject.setText(arrayListClubhouseProjects[0], false)
+        }
+
+        autoTextViewClubhouseProject.setOnTouchListener { v, event ->
+            autoTextViewClubhouseProject.showDropDown()
+            false
+        }
+
+        autoTextViewClubhouseProject.setOnItemClickListener { parent, view, position, id ->
+            clubhouseAuthentication.clubhouseProjectPosition(projectPosition = position)
+
+            hideKeyboard(activity = activity, view = viewClubhouse)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                progressBarClubhouse.visibility = View.VISIBLE
+                progressBarClubhouseLayout.visibility = View.VISIBLE
+
+            }
+            clubhouseAuthentication.callClubhouse(
+                activity = activity,
+                context = context,
+                task = "get"
+            )
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeClubhouseEpic(
+        arrayListClubhouseEpic: ArrayList<String>
+    ) {
+
+        spinnerClubhouseEpicAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseEpic)
+        spinnerClubhouseEpicAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerClubhouseEpic.adapter = spinnerClubhouseEpicAdapter
+        spinnerClubhouseEpicAdapter.notifyDataSetChanged()
+
+        spinnerClubhouseEpic.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun initializeClubhouseSpinner(
+        arrayListClubhouseRequester: ArrayList<String>,
+        arrayListClubhouseProjects: ArrayList<String>,
+        arrayListClubhouseStoryType: ArrayList<String>,
+        arrayListClubhouseEpic: ArrayList<String>
+
+    ) {
+        initializeClubhouseProject(arrayListClubhouseProjects)
+        initializeClubhouseRequester(arrayListClubhouseRequester)
+        initializeClubhouseStoryType(arrayListClubhouseStoryType)
+        initializeClubhouseEpic(arrayListClubhouseEpic)
+        progressBarClubhouse.visibility = View.GONE
+        progressBarClubhouseLayout.visibility = View.GONE
+    }
+
+    internal fun initializeClubhouseStoryType(
+        arrayListClubhouseStoryType: ArrayList<String>
+    ) {
+        spinnerClubhouseStoryTypeAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseStoryType)
+        spinnerClubhouseStoryTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerClubhouseStoryType.adapter = spinnerClubhouseStoryTypeAdapter
+        spinnerClubhouseStoryTypeAdapter.notifyDataSetChanged()
+
+        spinnerClubhouseStoryType.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    clubhouseAuthentication.clubhouseStoryTypePosition(storyTypePosition = position)
+                }
+            }
+    }
+
+    private fun attachClubhouseDatePicker() {
+        try {
+            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+            calendarViewClubhouseView =
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.clubhouse_calendar_view, rootView, false)
+            windowManagerParamsClubhouseDatePicker =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+            windowManagerClubhouseDatePicker = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerClubhouseDatePicker as WindowManager).addView(
+                calendarViewClubhouseView,
+                windowManagerParamsClubhouseDatePicker
+            )
+            initializeClubhouseDatePicker()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.clubhouseDatePopupTag)
+        }
+    }
+
+    private fun initializeClubhouseDatePicker() {
+        val calendar = Calendar.getInstance()
+        var mYear = calendar.get(Calendar.YEAR)
+        var mMonth = calendar.get(Calendar.MONTH)
+        var mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        var dueDate: String = ""
+        var dueDateFormat: String = ""
+        calendarViewClubhouseLayout =
+            calendarViewClubhouseView.findViewById(R.id.clubhouse_calendar_view_layout)
+        calendarViewClubhouseDueDate =
+            calendarViewClubhouseView.findViewById(R.id.calendarView_clubhouse_due_date)
+        buttonCalendarViewClubhouseCancel =
+            calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_cancel)
+        buttonCalendarViewClubhouseOk =
+            calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_ok)
+
+        calendarViewClubhouseDueDate.minDate = System.currentTimeMillis()
+        if (calendarViewClubhouseDate != null) {
+            calendarViewClubhouseDueDate.date = calendarViewClubhouseDate!!
+        }
+
+        calendarViewClubhouseDueDate.setOnDateChangeListener { viewStartDate, year, month, dayOfMonth ->
+            mYear = year
+            mMonth = month + 1
+            mDayOfMonth = dayOfMonth
+            calendarViewClubhouseDate = viewStartDate.date
+            dueDate = "$mMonth/$mDayOfMonth/$mYear"
+            dueDateFormat = "$mYear-$mMonth-$mDayOfMonth"
+            activity.runOnUiThread {
+                textViewClubhouseDueDate.text = dueDate
+                textViewClubhouseDueDate.setTextColor(resources.getColor(R.color.black))
+            }
+        }
+
+        buttonCalendarViewClubhouseCancel.setOnClickListener {
+            detachClubhouseDatePicker()
+        }
+
+        buttonCalendarViewClubhouseOk.setOnClickListener {
+            if (dueDate != null) {
+                clubhouseAuthentication.dueDate = dueDateFormat
+            }
+            detachClubhouseDatePicker()
+        }
+    }
+
+    private fun detachClubhouseDatePicker() {
+        if (this::calendarViewClubhouseView.isInitialized) {
+            (windowManagerClubhouseDatePicker as WindowManager).removeViewImmediate(
+                calendarViewClubhouseView
+            )
+        }
+    }
+
+    internal fun initializeClubhouseRequester(
+        arrayListClubhouseRequester: ArrayList<String>
+    ) {
+        spinnerClubhouseRequesterAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseRequester)
+        spinnerClubhouseRequesterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerClubhouseRequester.adapter = spinnerClubhouseRequesterAdapter
+        spinnerClubhouseRequesterAdapter.notifyDataSetChanged()
+
+        spinnerClubhouseRequester.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    clubhouseAuthentication.clubhouseUserPosition(userPosition = position)
+                }
+            }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun buttonClicksClubhouse(filePathMedia: File) {
+
+        buttonClubhouseCreate.setSafeOnClickListener {
+            if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty() &&
+                checkClubhouseStoryDueDateEmpty() && checkClubhouseStoryEstimatePoint()
+            ) {
+
+                clubhouseAuthentication.gatherClubhouseSpinnerDetails(
+                    spinnerUser = spinnerClubhouseRequester,
+                    spinnerStoryType = spinnerClubhouseStoryType,
+                    spinnerEpic = spinnerClubhouseEpic
+                )
+
+                clubhouseAuthentication.gatherClubhouseProjectAutoTextDetails(
+                    autoTextViewProject = autoTextViewClubhouseProject
+                )
+
+                clubhouseAuthentication.gatherClubhouseEditTextDetails(
+                    editTextStoryName = editTextClubhouseStoryName,
+                    editTextStoryDescription = editTextClubhouseStoryDescription,
+                    editTextEstimate = editTextClubhouseEstimate
+                )
+
+                progressBarClubhouse.visibility = View.VISIBLE
+                progressBarClubhouseLayout.visibility = View.VISIBLE
+                clubhouseAuthentication.callClubhouse(
+                    activity = activity,
+                    context = context,
+                    task = "create",
+                    filePathMedia = filePathMedia
+                )
+            }
+        }
+
+        textViewClubhouseDueDate.setSafeOnClickListener {
+            attachClubhouseDatePicker()
+        }
+
+        toolbarClubhouse.setNavigationOnClickListener {
+            removeClubhouseLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+
+        buttonClubhouseCancel.setSafeOnClickListener {
+            removeClubhouseLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun checkClubhouseStoryNameEmpty(): Boolean {
+        if (editTextClubhouseStoryName.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.editText_clubhouse_story_empty)
+            )
+        }
+        return false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun checkClubhouseStoryDescriptionEmpty(): Boolean {
+        if (editTextClubhouseStoryDescription.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.editText_clubhouse_story_description_empty)
+            )
+        }
+        return false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun checkClubhouseStoryDueDateEmpty(): Boolean {
+        if (textViewClubhouseDueDate.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.textView_clubhouse_story_duedate_empty)
+            )
+        }
+        return false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun checkClubhouseStoryEstimatePoint(): Boolean {
+        if (editTextClubhouseEstimate.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.textView_clubhouse_story_estimate_empty)
+            )
+        }
+        return false
+    }
+
+    internal fun removeClubhouseLayout() {
+        if (windowManagerClubhouse != null && this::viewClubhouse.isInitialized) {
+            (windowManagerClubhouse as WindowManager).removeViewImmediate(viewClubhouse)
+            windowManagerClubhouse = null
+            arrayListClubhouseFileName.clear()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeClubhouseRecyclerView(filePathMedia: File) {
+        arrayListClubhouseFileName.clear()
+        recyclerViewClubhouseAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        clubhouseAdapter = RecyclerViewClubhouseAdapter(
+            addClubhouseFileNames(filePathMedia = filePathMedia),
+            context = context,
+            activity = activity,
+            rootView = rootView
+        )
+        recyclerViewClubhouseAttachment.adapter = clubhouseAdapter
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addClubhouseFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListClubhouseFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+            arrayListClubhouseFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListClubhouseFileName
     }
 
 

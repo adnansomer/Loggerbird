@@ -782,7 +782,7 @@ internal class BasecampAuthentication {
                             autoTextViewBasecampCategory = autoTextViewCategory
                         )
                     ) {
-                    return false
+                        return false
                     }
                 }
                 true
@@ -836,8 +836,8 @@ internal class BasecampAuthentication {
                 false
             }
         }
-        if(editTextName.text.toString().isEmpty()){
-            if(editTextContent.text.toString().isNotEmpty() || autoTextViewAssignee.editableText.toString().isNotEmpty() || autoTextViewNotify.editableText.isNotEmpty()){
+        if (editTextName.text.toString().isEmpty()) {
+            if (editTextContent.text.toString().isNotEmpty() || autoTextViewAssignee.editableText.toString().isNotEmpty() || autoTextViewNotify.editableText.isNotEmpty()) {
                 defaultToast.attachToast(
                     activity = activity,
                     toastMessage = activity.resources.getString(R.string.basecamp_name_empty)
@@ -848,7 +848,7 @@ internal class BasecampAuthentication {
         return true
     }
 
-   private fun checkBasecampTodoList(
+    private fun checkBasecampTodoList(
         activity: Activity,
         editTextContent: EditText,
         autoTextViewAssignee: AutoCompleteTextView,
