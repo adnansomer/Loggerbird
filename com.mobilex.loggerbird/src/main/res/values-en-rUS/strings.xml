@@ -164,6 +164,18 @@
     <string name="basecamp_category_doesnt_exist">This category doesn\'t exist!</string>
     <string name="basecamp_name_empty">Name cannot be empty!</string>
     <string name="basecamp_content_empty">Content cannot be empty!</string>
+    <string name="asana_issue_success">Issue opened successfully!</string>
+    <string name="asana_issue_failure">An error happened while trying to open asana issue!</string>
+    <string name="asana_issue_time_out">An error happened while trying to open asana issue , system has been timed out!</string>
+    <string name="asana_issue_preferences_save">Issue preferences are saved!</string>
+    <string name="asana_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="asana_sub_task_exist">This sub-task already added to list!</string>
+    <string name="asana_sub_task_empty">Sub-task cannot be empty!</string>
+    <string name="asana_project_empty">Project cannot be empty!</string>
+    <string name="asana_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="asana_task_empty">Task cannot be empty!</string>
+    <string name="asana_section_doesnt_exist">This section doesn\'t exist!</string>
+    <string name="asana_assignee_doesnt_exist">This assignee doesn\'t exist!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -187,6 +199,7 @@
     <string name="textView_loggerbird_trello_title">Share with Trello</string>
     <string name="textView_loggerbird_pivotal_title">Share with Pivotal-tracker</string>
     <string name="textView_loggerbird_basecamp_title">Share with Basecamp</string>
+    <string name="textView_loggerbird_asana_title">Share with Asana</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>
     <!-- activity_paint_save_dialog-->
@@ -362,6 +375,10 @@
     <string name="textView_gitlab_due_date">Due Date</string>
     <string name="textView_gitlab_confidentiality">Confidentiality</string>
     <string name="textView_gitlab_enter_due_date">Set a due date for issue!</string>
+    <!-- recycler_view_gitlab_item_popup-->
+    <string name="textView_recyclerView_gitlab_popup_title">Are you sure to remove attachment from your Gitlab Issue?</string>
+    <string name="button_recyclerView_gitlab_yes">Delete Attachment</string>
+    <string name="button_recyclerView_gitlab_no">Keep File</string>
     <!-- loggerbird_trello_popup-->
     <string name="textView_trello_project">Project</string>
     <string name="textView_trello_board">Board</string>
@@ -483,4 +500,52 @@
     <string name="textView_recyclerView_basecamp_notify_title">Are you sure to remove notify from your basecamp issue?</string>
     <string name="button_recyclerView_basecamp_notify_delete">Delete notify</string>
     <string name="button_recyclerView_basecamp_notify_keep">Keep notify</string>
+    <!-- loggerbird_asana_menu-->
+    <string name="textView_asana_menu_save">Save Issue Info</string>
+    <string name="textView_asana_menu_clear">Clear Issue Info</string>
+    <!-- loggerbird_asana_popup-->
+    <string name="textView_asana_project">Project</string>
+    <string name="textView_asana_task_name">Task name</string>
+    <string name="editText_asana_task_name">Enter a task name for this task…</string>
+    <string name="textView_asana_assignee">Assignee</string>
+    <string name="textView_asana_section">Category</string>
+    <string name="textView_asana_priority">Priority</string>
+    <string name="textView_asana_description">Description</string>
+    <string name="editText_asana_description">Enter a description for this task…</string>
+    <string name="textView_asana_sub_tasks">Subtasks</string>
+    <string name="editText_asana_sub_tasks">Add more detail to this task…</string>
+    <string name="textView_asana_sub_tasks_list">Subtasks list</string>
+    <string name="textView_asana_attachment">Attachments</string>
+    <string name="textView_asana_start_date">Start date</string>
+    <string name="button_asana_create">Create</string>
+    <string name="button_asana_cancel">Cancel</string>
+    <!-- recycler_view_asana_item_popup-->
+    <string name="textView_recyclerView_asana_popup_title">Are you sure to remove attachment from your asana issue?</string>
+    <!-- recycler_view_asana_subtask_popup-->
+    <string name="textView_recyclerView_asana_subtask_header">Delete subtask</string>
+    <string name="textView_recyclerView_asana_subtask_title">Are you sure to remove subtask from your asana issue?</string>
+    <string name="button_recyclerView_asana_subtask_delete">Delete subtask</string>
+    <string name="button_recyclerView_asana_subtask_keep">Keep subtask</string>
+    <!-- loggerbird_clubhouse_popup-->
+    <string name="textView_clubhouse_toolbar_title">Create Clubhouse Story</string>
+    <string name="textView_clubhouse_projects">Projects</string>
+    <string name="textView_clubhouse_epic">Epic</string>
+    <string name="textView_clubhouse_requester">Story Requester</string>
+    <string name="textView_clubhouse_story_name">Story Name</string>
+    <string name="textView_clubhouse_story_description">Story Description</string>
+    <string name="editText_clubhouse_subject">Write your story name here!</string>
+    <string name="editText_clubhouse_story_description">Write your story description here!</string>
+    <string name="textView_clubhouse_story_type">Story Type</string>
+    <string name="textView_clubhouse_attachment">Attachments</string>
+    <string name="textView_clubhouse_no_attachment">There is no attachment.</string>
+    <string name="button_clubhouse_create">Create</string>
+    <string name="button_clubhouse_cancel">Cancel</string>
+    <string name="editText_clubhouse_story_empty">Your story name cannot be empty!</string>
+    <string name="editText_clubhouse_story_description_empty">Your story description cannot be empty!</string>
+    <string name="textView_clubhouse_story_duedate_empty">Your story due date cannot be empty!</string>
+    <string name="textView_clubhouse_story_estimate_empty">Your story estimate cannot be empty!</string>
+    <string name="textView_clubhouse_due_date">Due date</string>
+    <string name="textView_clubhouse_enter_due_date">Set a due date for story!</string>
+    <string name="textView_clubhouse_estimate_point">Estimate Point</string>
+    <string name="editText_clubhouse_estimate_point">Write your estimate point here!</string>
 </resources>

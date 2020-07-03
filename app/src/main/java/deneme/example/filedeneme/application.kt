@@ -21,6 +21,7 @@ class application : Application() {
             gitlabApiToken = "wLD4tf4jyKRmCM27S27d",
             pivotalApiToken = "fb4f04edbdeaeed3758839f75c1939b1",
             basecampApiToken = "BAhbB0kiAbB7ImNsaWVudF9pZCI6ImMzYzMxZmVhMTFmZDRkNjUxMjRkZmRkNjFkYmE4Y2FhM2UxOGZlYTIiLCJleHBpcmVzX2F0IjoiMjAyMC0wNy0xM1QwNjo1ODoyNVoiLCJ1c2VyX2lkcyI6WzQyMzI4NzkwXSwidmVyc2lvbiI6MSwiYXBpX2RlYWRib2x0IjoiZGQ4NDExNDYyOGQ5OTIyOTEzNGRmNmIzMDY5MmY1YTkifQY6BkVUSXU6CVRpbWUNphkewEDolekJOg1uYW5vX251bWkB/ToNbmFub19kZW5pBjoNc3VibWljcm8iByUwOgl6b25lSSIIVVRDBjsARg==--de534e30ac4000d1d2421b991ec38dea834fa522",
+            asanaApiToken = "1/1182746606250186:defab27f657ce740cf05ba7f5180cc6e",
             clubhouseApiToken = "5ef8dbb1-aad1-4d9d-8ea0-1bfd13826aff"
         )
     }

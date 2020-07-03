@@ -148,16 +148,17 @@ class LoggerBird : LifecycleObserver {
         internal lateinit var jiraApiToken: String
         private val defaultToast = DefaultToast()
         internal lateinit var slackApiToken: String
-        internal lateinit var githubUserName:String
-        internal lateinit var githubPassword:String
-        internal lateinit var trelloUserName:String
-        internal lateinit var trelloPassword:String
-        internal lateinit var trelloKey:String
-        internal lateinit var trelloToken:String
+        internal lateinit var githubUserName: String
+        internal lateinit var githubPassword: String
+        internal lateinit var trelloUserName: String
+        internal lateinit var trelloPassword: String
+        internal lateinit var trelloKey: String
+        internal lateinit var trelloToken: String
         internal lateinit var gitlabApiToken: String
         internal lateinit var pivotalUserName: String
         internal lateinit var pivotalApiToken: String
-        internal lateinit var basecampApiToken:String
+        internal lateinit var basecampApiToken: String
+        internal lateinit var asanaApiToken: String
         internal lateinit var clubhouseApiToken: String
 //        private val loggerBirdService: LoggerBirdService = LoggerBirdService()
 
@@ -187,16 +188,17 @@ class LoggerBird : LifecycleObserver {
             jiraDomainName: String,
             jiraUserName: String,
             jiraApiToken: String,
-            slackApiToken:String,
-            githubUserName:String,
-            githubPassword:String,
+            slackApiToken: String,
+            githubUserName: String,
+            githubPassword: String,
             gitlabApiToken: String,
-            trelloUserName:String,
-            trelloPassword:String,
-            trelloKey:String,
-            trelloToken:String,
-            pivotalApiToken:String,
-            basecampApiToken:String,
+            trelloUserName: String,
+            trelloPassword: String,
+            trelloKey: String,
+            trelloToken: String,
+            pivotalApiToken: String,
+            basecampApiToken: String,
+            asanaApiToken: String,
             clubhouseApiToken: String,
             filePathName: String? = null
         ): Boolean {
@@ -218,6 +220,7 @@ class LoggerBird : LifecycleObserver {
                     Companion.pivotalApiToken = pivotalApiToken
                     Companion.basecampApiToken = basecampApiToken
                     Companion.clubhouseApiToken = clubhouseApiToken
+                    Companion.asanaApiToken = asanaApiToken
                     logAttachLifeCycleObservers(context = context)
                     fileDirectory = context.filesDir
                     if (filePathName != null) {
