@@ -4,6 +4,10 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import models.api.github.*
+import models.api.jira.*
+import models.api.gitlab.*
+import models.api.clubhouse.*
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -101,11 +105,12 @@ interface AccountIdService {
     fun getGitlabLabels(): Call<List<GitlabLabelsModel>>
     @GET("users")
     fun getGitlabUsers(): Call<List<GitlabUsersModel>>
+
     @Multipart
     @POST("uploads")
     fun sendGitlabAttachments(@Part file:MultipartBody.Part):Call<JsonObject>
     @PUT("{iid}")
-    fun setGitlabIssue(@Path("iid")iid:String,@Query("description") description:String):Call<JsonObject>
+    fun setGitlabIssue(@Path("iid")iid:String,@Query("description") description:String):Call<JsonArray>
     //query soru isareinden sonra
 
 
@@ -166,4 +171,29 @@ interface AccountIdService {
     fun createBasecampTodo(@Body jsonObject: JsonObject,@Query("access_token") accessToken:String):Call<JsonObject>
     @POST("todos")
     fun addBasecampTodo(@Body jsonObject: JsonObject,@Query("access_token") accessToken:String):Call<JsonObject>
+
+    /**Clubhouse**/
+    @GET("projects")
+    fun getClubhouseProjects(@Query("token") token: String):Call<List<ClubhouseProjectModel>>
+    @GET("epics")
+    fun getClubhouseEpics(@Query("token") token: String):Call<List<ClubHouseEpicModel>>
+    @GET("members")
+    fun getClubhouseMembers(@Query("token") token: String):Call<JsonArray>
+    @POST("stories")
+    fun createClubhouseStory(@Query("token") token:String,
+                             @Query("project_id") project_id:String,
+                             @Query("name") name:String,
+                             @Query("description") description: String,
+                             @Query("story_type") storyType: String,
+                             @Query("deadline") deadline: String,
+                             @Query("requested_by_id") requestedBy: String,
+                             @Query("epic_id") epicId: String,
+                             @Query("estimate") estimate: String): Call<JsonObject>
+
+    @Multipart
+    @POST("files")
+    fun sendClubhouseAttachments(@Query("token") token: String,@Part file:MultipartBody.Part):Call<JsonArray>
+    @PUT("stories/{id}")
+    fun setClubhouseStory(@Path("id")id:String,@Query("token") token: String,@Query("description") description:String):Call<JsonObject>
+
 }

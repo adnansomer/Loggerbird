@@ -164,6 +164,10 @@
     <string name="basecamp_category_doesnt_exist">This category doesn\'t exist!</string>
     <string name="basecamp_name_empty">Name cannot be empty!</string>
     <string name="basecamp_content_empty">Content cannot be empty!</string>
+    <string name="clubhouse_issue_success">Clubhouse Story opened successfully!</string>
+    <string name="clubhouse_issue_failure">An error happened while trying to open Clubhouse Story!</string>
+    <string name="clubhouse_issue_time_out">An error happened while trying to open Clubhouse Story , system has been timed out!</string>
+
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -187,6 +191,7 @@
     <string name="textView_loggerbird_trello_title">Share with Trello</string>
     <string name="textView_loggerbird_pivotal_title">Share with Pivotal-tracker</string>
     <string name="textView_loggerbird_basecamp_title">Share with Basecamp</string>
+    <string name="textView_loggerbird_clubhouse_title">Share with Clubhouse</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>
     <!-- activity_paint_save_dialog-->
@@ -362,6 +367,36 @@
     <string name="textView_gitlab_due_date">Due Date</string>
     <string name="textView_gitlab_confidentiality">Confidentiality</string>
     <string name="textView_gitlab_enter_due_date">Set a due date for issue!</string>
+    <!-- recycler_view_gitlab_item_popup-->
+    <string name="textView_recyclerView_gitlab_popup_title">Are you sure to remove attachment from your Gitlab Issue?</string>
+    <string name="button_recyclerView_gitlab_yes">Delete Attachment</string>
+    <string name="button_recyclerView_gitlab_no">Keep File</string>
+    <!-- loggerbird_clubhouse_popup-->
+    <string name="textView_clubhouse_toolbar_title">Create Clubhouse Story</string>
+    <string name="textView_clubhouse_projects">Projects</string>
+    <string name="textView_clubhouse_epic">Epic</string>
+    <string name="textView_clubhouse_requester">Story Requester</string>
+    <string name="textView_clubhouse_story_name">Story Name</string>
+    <string name="textView_clubhouse_story_description">Story Description</string>
+    <string name="editText_clubhouse_subject">Write your story name here!</string>
+    <string name="editText_clubhouse_story_description">Write your story description here!</string>
+    <string name="textView_clubhouse_story_type">Story Type</string>
+    <string name="textView_clubhouse_attachment">Attachments</string>
+    <string name="textView_clubhouse_no_attachment">There is no attachment.</string>
+    <string name="button_clubhouse_create">Create</string>
+    <string name="button_clubhouse_cancel">Cancel</string>
+    <string name="editText_clubhouse_story_empty">Your story name cannot be empty!</string>
+    <string name="editText_clubhouse_story_description_empty">Your story description cannot be empty!</string>
+    <string name="textView_clubhouse_story_duedate_empty">Your story due date cannot be empty!</string>
+    <string name="textView_clubhouse_story_estimate_empty">Your story estimate cannot be empty!</string>
+    <string name="textView_clubhouse_due_date">Due date</string>
+    <string name="textView_clubhouse_enter_due_date">Set a due date for story!</string>
+    <string name="textView_clubhouse_estimate_point">Estimate Point</string>
+    <string name="editText_clubhouse_estimate_point">Write your estimate point here!</string>
+    <!-- recycler_view_clubhouse_item_popup-->
+    <string name="textView_recyclerView_clubhouse_popup_title">Are you sure to remove attachment from your Clubhouse story?</string>
+    <string name="button_recyclerView_clubhouse_yes">Delete Attachment</string>
+    <string name="button_recyclerView_clubhouse_no">Keep File</string>
     <!-- loggerbird_trello_popup-->
     <string name="textView_trello_project">Project</string>
     <string name="textView_trello_board">Board</string>
