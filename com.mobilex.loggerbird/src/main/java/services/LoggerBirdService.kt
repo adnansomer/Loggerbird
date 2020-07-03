@@ -102,6 +102,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerBasecampDate: Any? = null
     private var windowManagerAsana: Any? = null
     private var windowManagerAsanaDate: Any? = null
+    private var windowManagerAsanaSub: Any? = null
     private var windowManagerClubhouse: Any? = null
     private var windowManagerClubhouseDatePicker: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
@@ -128,6 +129,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsBaseCampDate: WindowManager.LayoutParams
     private lateinit var windowManagerParamsAsana: WindowManager.LayoutParams
     private lateinit var windowManagerParamsAsanaDate: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsAsanaSub:WindowManager.LayoutParams
     private lateinit var windowManagerParamsClubhouse: WindowManager.LayoutParams
     private lateinit var windowManagerParamsClubhouseDatePicker: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -192,6 +194,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewBasecampDate: View
     private lateinit var viewAsana: View
     private lateinit var viewAsanaDate: View
+    private lateinit var viewAsanaSub:View
     private lateinit var viewClubhouse: View
     private lateinit var wrapper: FrameLayout
     private val fileLimit: Long = 10485760
@@ -9974,7 +9977,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeAsanaDateLayout()
         }
     }
-
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeClubhouseLayout(filePathMedia: File) {
         try {

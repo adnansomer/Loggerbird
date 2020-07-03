@@ -517,6 +517,17 @@
     <string name="textView_asana_start_date">Başlangıç tarihi</string>
     <string name="button_asana_create">Oluştur</string>
     <string name="button_asana_cancel">İptal</string>
+    <!-- loggerbird_asana_sub_popup-->
+    <string name="textView_asana_sub_task_name">Yan iş ismi</string>
+    <string name="editText_asana_sub_task_name">Bu yan iş için bir yan görev ismi giriniz…</string>
+    <string name="textView_asana_sub_assignee">Yan iş sorumlusu</string>
+    <string name="textView_asana_sub_section">Yan iş kategorisi</string>
+    <string name="textView_asana_sub_description">Yan iş açıklaması</string>
+    <string name="editText_asana_sub_description">Bu yan iş için bir yan iş ismi giriniz…</string>
+    <string name="textView_asana_sub_attachment">Yan iş eklentisi</string>
+    <string name="textView_asana_sub_start_date">Yan iş başlangıç tarihi</string>
+    <string name="button_asana_sub_create">Yan iş oluştur</string>
+    <string name="button_asana_sub_cancel">Yan iş iptal</string>
     <!-- recycler_view_asana_item_popup-->
     <string name="textView_recyclerView_asana_popup_title">Asana görevlendirmenizden bu eklentiyi çıkarmaktan eminmisiniz?</string>
     <!-- recycler_view_asana_subtask_popup-->
