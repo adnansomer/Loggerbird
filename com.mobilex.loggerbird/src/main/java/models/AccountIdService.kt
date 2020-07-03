@@ -195,5 +195,4 @@ interface AccountIdService {
     fun sendClubhouseAttachments(@Query("token") token: String,@Part file:MultipartBody.Part):Call<JsonArray>
     @PUT("stories/{id}")
     fun setClubhouseStory(@Path("id")id:String,@Query("token") token: String,@Query("description") description:String):Call<JsonObject>
-
 }

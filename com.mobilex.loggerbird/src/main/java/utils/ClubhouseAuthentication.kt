@@ -432,7 +432,6 @@ class ClubhouseAuthentication {
                                     filePathMedia.delete()
                                 }
                             }
-
                             if (response.body() != null) {
                                 response.body()?.getAsJsonArray()?.forEach {
                                     arrayListAttachments.add(it.asJsonObject["url"].asString)
