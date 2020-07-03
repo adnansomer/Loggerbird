@@ -1,10 +1,11 @@
 package utils
 
 import com.google.gson.GsonBuilder
-import loggerbird.LoggerBird
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import utils.OauthInterceptor
+import utils.SlackAuthentication
 
 class RetrofitUserSlackClient {
     companion object {
