@@ -166,6 +166,19 @@
             android:drawableStart="@drawable/ic_clubhouse_logo_24dp"
             android:drawableLeft="@drawable/ic_clubhouse_logo_24dp" />
         <TextView
+            android:id="@+id/textView_share_asana"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="16dp"
+            android:textColor="@color/black"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+            android:gravity="center_vertical"
+            android:textSize="12sp"
+            android:padding="8dp"
+            android:text="@string/textView_loggerbird_asana_title"
+            android:drawableStart="@drawable/ic_asana_seeklogo"
+            android:drawableLeft="@drawable/ic_asana_seeklogo" />
+        <TextView
             android:id="@+id/textView_discard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
