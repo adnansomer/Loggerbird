@@ -21,6 +21,7 @@ import loggerbird.LoggerBird
 import models.RecyclerViewModel
 import models.RecyclerViewModelSubtask
 import services.LoggerBirdService
+import utils.DefaultToast
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -102,11 +103,15 @@ class RecyclerViewAsanaSubTaskAdapter(
         private var subSectionPosition: Int? = null
         private var subDescription: String? = null
         private var subFile: String? = null
+        private var arrayListSubAssigneeNames: ArrayList<String> = ArrayList()
+        private var arrayListSubSectorNames: ArrayList<String> = ArrayList()
         //asana-sub date
         private lateinit var frameLayoutAsanaSubDate: FrameLayout
         private lateinit var calendarViewAsanaSub: CalendarView
         private lateinit var buttonAsanaDateSubCancel: Button
         private lateinit var buttonAsanaDateSubCreate: Button
+
+        private val defaultToast = DefaultToast()
 
         companion object {
             internal var arrayListSubtask: ArrayList<RecyclerViewModelSubtask> = ArrayList()
@@ -396,14 +401,23 @@ class RecyclerViewAsanaSubTaskAdapter(
                 removeSubLayout()
             }
             buttonAsanaSubCreate.setSafeOnClickListener {
-                hashMapSubAssignee[subtaskName] =
-                    subAssigneePosition
-                hashMapSubDate[subtaskName] = this.subStartDate
-                hashMapSubDescription[subtaskName] = editTextAsanaSubDescription.text.toString()
-                hashmapSubSection[subtaskName] = subSectionPosition
-                hashMapSubFile[subtaskName] =
-                    RecyclerViewAsanaSubAdapter.ViewHolder.arrayListFilePaths
-                removeSubLayout()
+                if (checkSubAssignee(
+                        activity = activity,
+                        autoCompleteTextViewSubAssignee = autoTextViewAsanaSubAssignee
+                    ) && checkSubSection(
+                        activity = activity,
+                        autoCompleteTextViewSubSector = autoTextViewAsanaSubSection
+                    )
+                ) {
+                    hashMapSubAssignee[subtaskName] =
+                        subAssigneePosition
+                    hashMapSubDate[subtaskName] = this.subStartDate
+                    hashMapSubDescription[subtaskName] = editTextAsanaSubDescription.text.toString()
+                    hashmapSubSection[subtaskName] = subSectionPosition
+                    hashMapSubFile[subtaskName] =
+                        RecyclerViewAsanaSubAdapter.ViewHolder.arrayListFilePaths
+                    removeSubLayout()
+                }
             }
             buttonAsanaSubCancel.setSafeOnClickListener {
                 removeSubLayout()
@@ -485,6 +499,7 @@ class RecyclerViewAsanaSubTaskAdapter(
                 subAssigneePosition = position
                 hideKeyboard(activity = activity, view = viewAsanaSub)
             }
+            this.arrayListSubAssigneeNames = arrayListAssignee
         }
 
         @SuppressLint("ClickableViewAccessibility")
@@ -507,6 +522,7 @@ class RecyclerViewAsanaSubTaskAdapter(
                 subSectionPosition = position
                 hideKeyboard(activity = activity, view = viewAsanaSub)
             }
+            this.arrayListSubSectorNames = arrayListSector
         }
 
 
@@ -600,6 +616,34 @@ class RecyclerViewAsanaSubTaskAdapter(
             buttonAsanaDateSubCancel.setSafeOnClickListener {
                 removeAsanaSubDateLayout()
             }
+        }
+
+        private fun checkSubAssignee(
+            activity: Activity,
+            autoCompleteTextViewSubAssignee: AutoCompleteTextView
+        ): Boolean {
+            if (!arrayListSubAssigneeNames.contains(autoCompleteTextViewSubAssignee.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.asana_assignee_doesnt_exist)
+                )
+                return false
+            }
+            return true
+        }
+
+        private fun checkSubSection(
+            activity: Activity,
+            autoCompleteTextViewSubSector: AutoCompleteTextView
+        ): Boolean {
+            if (!arrayListSubSectorNames.contains(autoCompleteTextViewSubSector.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.asana_section_doesnt_exist)
+                )
+                return false
+            }
+            return true
         }
 
 

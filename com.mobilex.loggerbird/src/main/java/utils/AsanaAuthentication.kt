@@ -28,7 +28,6 @@ import java.util.*
 import kotlin.collections.ArrayList
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
-import kotlin.collections.HashMap
 
 internal class AsanaAuthentication {
     private lateinit var activity: Activity
@@ -319,7 +318,32 @@ internal class AsanaAuthentication {
                         response: retrofit2.Response<JsonObject>
                     ) {
                         Log.d("asana_subtask_details", response.code().toString())
+                        val coroutineCallAsanaSubAttachments = CoroutineScope(Dispatchers.IO)
+                        val coroutineCallAsanaSubSection = CoroutineScope(Dispatchers.IO)
                         val asanaList = response.body()
+                        if (asanaList != null) {
+                            RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubFile[subtask]?.forEach {
+                                queueCounter++
+                                coroutineCallAsanaSubAttachments.async {
+                                    createAttachments(
+                                        activity = activity,
+                                        file = it.file,
+                                        taskId = asanaList.asJsonObject["data"].asJsonObject["gid"].asString
+                                    )
+                                }
+                            }
+                            if (!RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashmapSubSection.isNullOrEmpty()) {
+                                    queueCounter++
+                                    coroutineCallAsanaSubSection.async {
+                                        asanaAddSection(
+                                            activity = activity,
+                                            sectionId = arrayListSectionsId[RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashmapSubSection[subtask]!!],
+                                            taskId = asanaList.asJsonObject["data"].asJsonObject["gid"].asString
+                                        )
+                                    }
+
+                            }
+                        }
                         resetasanaValues(shareLayoutMessage = "asana")
                     }
                 })
@@ -539,6 +563,13 @@ internal class AsanaAuthentication {
         queueCounter--
         Log.d("queue_counter", queueCounter.toString())
         if (queueCounter == 0) {
+            RecyclerViewAsanaAdapter.ViewHolder.arrayListFilePaths.forEach {
+                if (it.file.name != "logger_bird_details.txt") {
+                    if (it.file.exists()) {
+                        it.file.delete()
+                    }
+                }
+            }
             timerTaskQueue.cancel()
             arrayListProjectNames.clear()
             arrayListProjectId.clear()
@@ -593,11 +624,6 @@ internal class AsanaAuthentication {
                     ) {
                         val coroutineCallAsanaAttachments = CoroutineScope(Dispatchers.IO)
                         coroutineCallAsanaAttachments.async {
-                            if (file.name != "logger_bird_details.txt") {
-                                if (file.exists()) {
-                                    file.delete()
-                                }
-                            }
                             val asanaResponse = response.body()
                             Log.d("attachment_put_success", response.code().toString())
                             Log.d("attachment_put_success", response.message())
