@@ -10,7 +10,7 @@
     <LinearLayout
         style="@style/Dialog"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_margin="50dp"
         android:background="@color/colorFab"
         android:orientation="vertical">
@@ -29,299 +29,299 @@
                 android:background="#f5f5f5"
                 android:orientation="vertical">
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_task_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
+                <!--     <androidx.cardview.widget.CardView
+                  android:id="@+id/cardView_task_name"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="7dp"
+                  app:cardElevation="5dp">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_margin="5dp"
+                      android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_asana_sub_task_name"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"></TextView>
+                      <TextView
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_marginBottom="10dp"
+                          android:text="@string/textView_asana_sub_task_name"
+                          android:textColor="@color/black"
+                          android:textSize="16sp"></TextView>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editText_asana_task_name"
-                            android:layout_width="match_parent"
-                            android:layout_height="30dp"
-                            android:layout_marginEnd="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@null"
-                            android:cursorVisible="true"
-                            android:gravity="top"
-                            android:hint="@string/editText_asana_sub_task_name"
-                            android:lines="5"
-                            android:maxLines="5"
-                            android:textCursorDrawable="@color/colorBlack"
-                            android:textSize="16sp">
+                      <com.google.android.material.textfield.TextInputEditText
+                          android:id="@+id/editText_asana_task_name"
+                          android:layout_width="match_parent"
+                          android:layout_height="50dp"
+                          android:layout_marginEnd="5dp"
+                          android:layout_marginRight="5dp"
+                          android:layout_marginBottom="10dp"
+                          android:background="@null"
+                          android:cursorVisible="true"
+                          android:gravity="top"
+                          android:hint="@string/editText_asana_sub_task_name"
+                          android:lines="5"
+                          android:maxLines="5"
+                          android:textCursorDrawable="@color/colorBlack"
+                          android:textSize="16sp">
 
-                        </com.google.android.material.textfield.TextInputEditText>
+                      </com.google.android.material.textfield.TextInputEditText>
 
-                    </LinearLayout>
+                  </LinearLayout>
 
-                </androidx.cardview.widget.CardView>
+              </androidx.cardview.widget.CardView>
+        -->
+              <androidx.cardview.widget.CardView
+                  android:id="@+id/cardView_assignee"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="7dp"
+                  app:cardElevation="5dp">
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_assignee"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_margin="5dp"
+                      android:orientation="vertical">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
+                      <TextView
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_marginBottom="10dp"
+                          android:text="@string/textView_asana_sub_assignee"
+                          android:textColor="@color/black"
+                          android:textSize="16sp"></TextView>
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_asana_sub_assignee"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"></TextView>
+                      <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                          android:id="@+id/auto_textView_asana_sub_assignee"
+                          android:layout_width="match_parent"
+                          android:layout_height="match_parent"
+                          android:background="@null"
+                          android:dropDownHeight="100dp"
+                          android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                  </LinearLayout>
+              </androidx.cardview.widget.CardView>
 
-                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                            android:id="@+id/auto_textView_asana_sub_assignee"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@null"
-                            android:dropDownHeight="100dp"
-                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
+              <androidx.cardview.widget.CardView
+                  android:id="@+id/cardView_start_date"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="7dp"
+                  app:cardElevation="5dp">
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_start_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_margin="5dp"
+                      android:gravity="center"
+                      android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/textView_asana_sub_start_date"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="@string/textView_asana_sub_start_date"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-
-                        <ImageView
-                            android:id="@+id/imageView_start_date"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="5dp"
-                            android:layout_marginLeft="5dp"
-                            app:srcCompat="@drawable/ic_date_range_black_24dp">
-
-                        </ImageView>
-
-                        <ImageButton
-                            android:id="@+id/image_button_asana_sub_remove_date"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="5dp"
-                            android:layout_marginLeft="5dp"
-                            android:background="@color/white"
-                            android:visibility="gone"
-                            app:srcCompat="@drawable/ic_close_black_24dp"></ImageButton>
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_section"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView_asana_sub_section"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/textView_asana_sub_section"
-                            android:textColor="@color/black"
-                            android:textSize="17sp"></TextView>
-
-                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                            android:id="@+id/auto_textView_asana_sub_section"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@null"
-                            android:dropDownHeight="100dp"
-                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-
-                    </LinearLayout>
+                      <TextView
+                          android:id="@+id/textView_asana_sub_start_date"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_gravity="center"
+                          android:text="@string/textView_asana_sub_start_date"
+                          android:textColor="@color/black"
+                          android:textSize="16sp" />
 
 
-                </androidx.cardview.widget.CardView>
+                      <ImageView
+                          android:id="@+id/imageView_start_date"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_gravity="center"
+                          android:layout_marginStart="5dp"
+                          android:layout_marginLeft="5dp"
+                          app:srcCompat="@drawable/ic_date_range_black_24dp">
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
+                      </ImageView>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
+                      <ImageButton
+                          android:id="@+id/image_button_asana_sub_remove_date"
+                          android:layout_width="16dp"
+                          android:layout_height="16dp"
+                          android:layout_gravity="center"
+                          android:layout_marginStart="5dp"
+                          android:layout_marginLeft="5dp"
+                          android:background="@color/white"
+                          android:visibility="gone"
+                          app:srcCompat="@drawable/ic_close_black_24dp"></ImageButton>
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_asana_sub_description"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"></TextView>
+                  </LinearLayout>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editText_asana_sub_description"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@null"
-                            android:cursorVisible="true"
-                            android:gravity="top"
-                            android:hint="@string/editText_asana_sub_description"
-                            android:lines="5"
-                            android:maxLines="5"
-                            android:textCursorDrawable="@color/colorBlack"
-                            android:textSize="16sp">
+              </androidx.cardview.widget.CardView>
 
-                        </com.google.android.material.textfield.TextInputEditText>
+              <androidx.cardview.widget.CardView
+                  android:id="@+id/cardView_section"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="7dp"
+                  app:cardElevation="5dp">
 
-                    </LinearLayout>
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_margin="5dp"
+                      android:orientation="vertical">
 
-                </androidx.cardview.widget.CardView>
+                      <TextView
+                          android:id="@+id/textView_asana_sub_section"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginBottom="5dp"
+                          android:text="@string/textView_asana_sub_section"
+                          android:textColor="@color/black"
+                          android:textSize="17sp"></TextView>
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_attachment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
+                      <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                          android:id="@+id/auto_textView_asana_sub_section"
+                          android:layout_width="match_parent"
+                          android:layout_height="match_parent"
+                          android:background="@null"
+                          android:dropDownHeight="100dp"
+                          android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView_asana_sub_attachments"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/textView_asana_sub_attachment"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:gravity="center"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                app:srcCompat="@drawable/ic_attach_file_black_24dp">
-
-                            </ImageView>
-
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/recycler_view_asana_sub_attachment"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
+                  </LinearLayout>
 
 
-                </androidx.cardview.widget.CardView>
+              </androidx.cardview.widget.CardView>
+
+              <androidx.cardview.widget.CardView
+                  android:id="@+id/cardView_description"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="7dp"
+                  app:cardElevation="5dp">
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_margin="5dp"
+                      android:orientation="vertical">
+
+                      <TextView
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_marginBottom="10dp"
+                          android:text="@string/textView_asana_sub_description"
+                          android:textColor="@color/black"
+                          android:textSize="16sp"></TextView>
+
+                      <com.google.android.material.textfield.TextInputEditText
+                          android:id="@+id/editText_asana_sub_description"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="5dp"
+                          android:layout_marginRight="5dp"
+                          android:layout_marginBottom="10dp"
+                          android:background="@null"
+                          android:cursorVisible="true"
+                          android:gravity="top"
+                          android:hint="@string/editText_asana_sub_description"
+                          android:lines="5"
+                          android:maxLines="5"
+                          android:textCursorDrawable="@color/colorBlack"
+                          android:textSize="16sp">
+
+                      </com.google.android.material.textfield.TextInputEditText>
+
+                  </LinearLayout>
+
+              </androidx.cardview.widget.CardView>
+
+              <androidx.cardview.widget.CardView
+                  android:id="@+id/cardView_attachment"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="7dp"
+                  app:cardElevation="5dp">
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_margin="5dp"
+                      android:orientation="vertical">
+
+                      <TextView
+                          android:id="@+id/textView_asana_sub_attachments"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_marginBottom="5dp"
+                          android:text="@string/textView_asana_sub_attachment"
+                          android:textColor="@color/black"
+                          android:textSize="16sp" />
+
+                      <LinearLayout
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_marginBottom="10dp"
+                          android:gravity="center"
+                          android:orientation="horizontal">
+
+                          <ImageView
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              app:srcCompat="@drawable/ic_attach_file_black_24dp">
+
+                          </ImageView>
+
+                          <androidx.recyclerview.widget.RecyclerView
+                              android:id="@+id/recycler_view_asana_sub_attachment"
+                              android:layout_width="match_parent"
+                              android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
+
+                      </LinearLayout>
+
+                  </LinearLayout>
 
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="10dp"
-                    android:orientation="horizontal"
-                    android:weightSum="2">
+              </androidx.cardview.widget.CardView>
 
-                    <Button
-                        android:id="@+id/button_asana_sub_cancel"
-                        style="@style/Widget.AppCompat.Button.Borderless"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="start"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp"
-                        android:layout_weight="1"
-                        android:background="@color/colorFab"
-                        android:text="@string/button_asana_cancel"
-                        android:textAllCaps="false"
-                        android:textColor="@color/secondaryColor"
-                        android:textSize="18sp"
-                        app:elevation="5dp" />
 
-                    <Button
-                        android:id="@+id/button_asana_sub_create"
-                        style="@style/Widget.AppCompat.Button.Borderless"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:background="@color/colorFab"
-                        android:text="@string/button_asana_create"
-                        android:textAllCaps="false"
-                        android:textColor="@color/black"
-                        android:textSize="18sp"
-                        app:elevation="5dp" />
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:layout_margin="10dp"
+                  android:orientation="horizontal"
+                  android:weightSum="2">
 
-                </LinearLayout>
-            </LinearLayout>
+                  <Button
+                      android:id="@+id/button_asana_sub_cancel"
+                      style="@style/Widget.AppCompat.Button.Borderless"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="start"
+                      android:layout_marginLeft="5dp"
+                      android:layout_marginRight="5dp"
+                      android:layout_weight="1"
+                      android:background="@color/colorFab"
+                      android:text="@string/button_asana_cancel"
+                      android:textAllCaps="false"
+                      android:textColor="@color/secondaryColor"
+                      android:textSize="18sp"
+                      app:elevation="5dp" />
 
-        </ScrollView>
+                  <Button
+                      android:id="@+id/button_asana_sub_create"
+                      style="@style/Widget.AppCompat.Button.Borderless"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:background="@color/colorFab"
+                      android:text="@string/button_asana_create"
+                      android:textAllCaps="false"
+                      android:textColor="@color/black"
+                      android:textSize="18sp"
+                      app:elevation="5dp" />
 
-    </LinearLayout>
+              </LinearLayout>
+          </LinearLayout>
+
+      </ScrollView>
+
+  </LinearLayout>
 
 </FrameLayout>
 

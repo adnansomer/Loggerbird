@@ -5,22 +5,21 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.PixelFormat
 import android.os.Build
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.ImageButton
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import models.RecyclerViewModel
 import java.util.concurrent.TimeUnit
 import android.provider.Settings
-import android.widget.Button
+import android.view.*
+import android.view.inputmethod.InputMethodManager
+import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.LinearLayoutManager
 import constants.Constants
 import loggerbird.LoggerBird
+import java.io.File
 
 class RecyclerViewAsanaSubAdapter(
     private val fileList: ArrayList<RecyclerViewModel>,

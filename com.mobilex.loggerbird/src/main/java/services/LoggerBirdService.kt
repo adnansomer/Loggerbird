@@ -102,7 +102,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerBasecampDate: Any? = null
     private var windowManagerAsana: Any? = null
     private var windowManagerAsanaDate: Any? = null
-    private var windowManagerAsanaSub: Any? = null
     private var windowManagerClubhouse: Any? = null
     private var windowManagerClubhouseDatePicker: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
@@ -129,7 +128,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsBaseCampDate: WindowManager.LayoutParams
     private lateinit var windowManagerParamsAsana: WindowManager.LayoutParams
     private lateinit var windowManagerParamsAsanaDate: WindowManager.LayoutParams
-    private lateinit var windowManagerParamsAsanaSub:WindowManager.LayoutParams
     private lateinit var windowManagerParamsClubhouse: WindowManager.LayoutParams
     private lateinit var windowManagerParamsClubhouseDatePicker: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -194,7 +192,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewBasecampDate: View
     private lateinit var viewAsana: View
     private lateinit var viewAsanaDate: View
-    private lateinit var viewAsanaSub:View
     private lateinit var viewClubhouse: View
     private lateinit var wrapper: FrameLayout
     private val fileLimit: Long = 10485760
@@ -650,6 +647,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var imageButtonAsanaRemoveDate: ImageButton
     private lateinit var buttonAsanaCancel: Button
     private lateinit var buttonAsanaCreate: Button
+    private var arrayListAsanaSubtaskAssignee:ArrayList<String> = ArrayList()
+    private var arrayListAsanaSubtaskSection:ArrayList<String> = ArrayList()
     //asana_date:
     private lateinit var frameLayoutAsanaDate: FrameLayout
     private lateinit var calendarViewAsana: CalendarView
@@ -9465,7 +9464,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     }
                 }
                 initializeAsanaRecyclerView(filePathMedia = filePathMedia)
-                initializeAsanaSubtaskRecyclerView()
                 buttonClicksAsana()
                 asanaAuthentication.callAsana(
                     activity = activity,
@@ -9598,7 +9596,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun initializeAsanaSubtaskRecyclerView() {
+    private fun initializeAsanaSubtaskRecyclerView(filePathMedia: File) {
         arrayListAsanaSubtaskName.clear()
         recyclerViewAsanaSubTasksList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -9606,7 +9604,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             arrayListAsanaSubtaskName,
             context = context,
             activity = activity,
-            rootView = rootView
+            rootView = rootView,
+            filePathMedia = filePathMedia,
+            arrayListAssignee = arrayListAsanaSubtaskAssignee,
+            arrayListSection = arrayListAsanaSubtaskSection
         )
         recyclerViewAsanaSubTasksList.adapter = asanaSubTasksAdapter
     }
@@ -9616,7 +9617,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListProject: ArrayList<String>,
         arrayListAssignee: ArrayList<String>,
         arrayListSection: ArrayList<String>,
-        arrayListPriority: ArrayList<String>
+        arrayListPriority: ArrayList<String>,
+        filePathMedia: File
     ) {
         val sharedPref =
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
@@ -9651,6 +9653,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             arrayListPriority = arrayListPriority,
             sharedPref = sharedPref
         )
+        initializeAsanaSubtaskRecyclerView(filePathMedia = filePathMedia)
         detachProgressBar()
     }
 
@@ -9773,6 +9776,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                }
 //            }
 //        }
+        this.arrayListAsanaSubtaskSection = arrayListSection
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -9885,6 +9889,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                }
 //            }
 //        }
+        this.arrayListAsanaSubtaskAssignee = arrayListAssignee
     }
 
     private fun initializeAsanaDateLayout() {

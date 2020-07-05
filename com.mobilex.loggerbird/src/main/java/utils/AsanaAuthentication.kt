@@ -292,14 +292,15 @@ internal class AsanaAuthentication {
             jsonArrayProjects.add(projectId)
             jsonObjectData.add("projects", jsonArrayProjects)
             jsonObjectData.addProperty("name", subtask)
-            if (!assignee.isNullOrEmpty()) {
-                jsonObjectData.addProperty("assignee", arrayListAssigneeId[assigneePosition])
+            if(!RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubAssignee.isNullOrEmpty()){
+                jsonObjectData.addProperty("assignee",arrayListAssigneeId[RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubAssignee[subtask]!!] )
+
             }
-            if (!description.isNullOrEmpty()) {
-                jsonObjectData.addProperty("notes", description)
+            if (!RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDescription.isNullOrEmpty()) {
+                jsonObjectData.addProperty("notes", RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDescription[subtask])
             }
-            if (!startDate.isNullOrEmpty()) {
-                jsonObjectData.addProperty("due_on", startDate)
+            if (!RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDate.isNullOrEmpty()) {
+                jsonObjectData.addProperty("due_on",RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDate[subtask])
             }
             jsonObject.add("data", jsonObjectData)
             RetrofitUserAsanaClient.getAsanaUserClient(url = "https://app.asana.com/api/1.0/tasks/$taskId/")
@@ -477,7 +478,8 @@ internal class AsanaAuthentication {
                     arrayListProject = arrayListProjectNames,
                     arrayListAssignee = arrayListAssigneeNames,
                     arrayListSection = arrayListSectionsNames,
-                    arrayListPriority = arrayListPriorityNames
+                    arrayListPriority = arrayListPriorityNames,
+                    filePathMedia = filePathMedia!!
                 )
             }
         }
