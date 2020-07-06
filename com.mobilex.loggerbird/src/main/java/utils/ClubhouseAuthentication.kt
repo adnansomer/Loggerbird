@@ -432,7 +432,6 @@ class ClubhouseAuthentication {
                                     filePathMedia.delete()
                                 }
                             }
-
                             if (response.body() != null) {
                                 response.body()?.getAsJsonArray()?.forEach {
                                     arrayListAttachments.add(it.asJsonObject["url"].asString)
@@ -446,7 +445,6 @@ class ClubhouseAuthentication {
             clubhouseExceptionHandler(e = e)
         }
     }
-
 
     private fun callEnqueueClubhouseAttachments(storyId: String) {
         workQueueLinkedClubhouseAttachments.controlRunnable = false
@@ -474,7 +472,6 @@ class ClubhouseAuthentication {
             LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse")
         }
     }
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun uploadAttachments(storyId: String,description: String) {
