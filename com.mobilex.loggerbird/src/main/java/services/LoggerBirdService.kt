@@ -488,7 +488,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewTrelloProjectAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewTrelloBoardAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewTrelloMemberAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewTrelloLabelAdapter: AutoCompleteTextViewTrelloAdapter
+    private lateinit var autoTextViewTrelloLabelLabelAdapter: AutoCompleteTextViewTrelloLabelAdapter
     private lateinit var recyclerViewTrelloLabel: RecyclerView
     private lateinit var trelloLabelAdapter: RecyclerViewTrelloLabelAdapter
     private val arrayListTrelloFileName: ArrayList<RecyclerViewModel> = ArrayList()
@@ -590,7 +590,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewBasecampNotify: AutoCompleteTextView
     private lateinit var autoTextViewBasecampProjectAdapter: ArrayAdapter<String>
     //    private lateinit var autoTextViewBasecampCategoryAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewBasecampCategoryAdapter: AutoCompleteTextViewBasecampAdapter
+    private lateinit var autoTextViewBasecampCategoryCategoryAdapter: AutoCompleteTextViewBasecampCategoryAdapter
     private lateinit var autoTextViewBasecampAssigneeAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewBasecampNotifyAdapter: ArrayAdapter<String>
     private lateinit var editTextBasecampDescriptionMessage: EditText
@@ -6944,10 +6944,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListLabelColor: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewTrelloLabelAdapter = AutoCompleteTextViewTrelloAdapter(
+        autoTextViewTrelloLabelLabelAdapter = AutoCompleteTextViewTrelloLabelAdapter(
             this, R.layout.auto_text_view_trello_label_item, arrayListLabel, arrayListLabelColor
         )
-        autoTextViewTrelloLabel.setAdapter(autoTextViewTrelloLabelAdapter)
+        autoTextViewTrelloLabel.setAdapter(autoTextViewTrelloLabelLabelAdapter)
         if (arrayListLabel.isNotEmpty() && autoTextViewTrelloLabel.editableText.isEmpty()) {
             if (sharedPref.getString("trello_label", null) != null) {
                 if (arrayListLabel.contains(
@@ -9002,13 +9002,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //            android.R.layout.simple_dropdown_item_1line,
 //            arrayListCategory
 //        )
-        autoTextViewBasecampCategoryAdapter = AutoCompleteTextViewBasecampAdapter(
+        autoTextViewBasecampCategoryCategoryAdapter = AutoCompleteTextViewBasecampCategoryAdapter(
             this,
             R.layout.auto_text_view_basecamp_icon_item,
             arrayListCategory,
             arrayListCategoryIcon
         )
-        autoTextViewBasecampCategory.setAdapter(autoTextViewBasecampCategoryAdapter)
+        autoTextViewBasecampCategory.setAdapter(autoTextViewBasecampCategoryCategoryAdapter)
         if (arrayListCategory.isNotEmpty() && autoTextViewBasecampCategory.editableText.isEmpty()) {
             if (sharedPref.getString("basecamp_category", null) != null) {
                 if (arrayListCategory.contains(

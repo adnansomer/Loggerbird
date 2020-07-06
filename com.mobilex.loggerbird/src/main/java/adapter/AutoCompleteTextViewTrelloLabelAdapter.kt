@@ -9,7 +9,8 @@ import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
 import com.mobilex.loggerbird.R
 
-class AutoCompleteTextViewTrelloAdapter(
+//Custom autoCompleteTextView class for basecamp category.
+class AutoCompleteTextViewTrelloLabelAdapter(
     context: Context,
     @LayoutRes private val resource: Int,
     private val arrayListLabel: ArrayList<String>,
