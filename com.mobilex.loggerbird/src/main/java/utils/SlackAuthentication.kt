@@ -1,36 +1,24 @@
 package utils
 
-import adapter.RecyclerViewSlackAdapter
+import adapter.recyclerView.api.slack.RecyclerViewSlackAttachmentAdapter
 import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import android.view.View
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import com.mobilex.loggerbird.R
-import com.slack.api.RequestConfigurator
 import com.slack.api.Slack
-import com.slack.api.methods.request.admin.usergroups.AdminUsergroupsListChannelsRequest
-import com.slack.api.methods.request.conversations.ConversationsInviteRequest
 import com.slack.api.methods.request.conversations.ConversationsListRequest
-import com.slack.api.methods.request.usergroups.UsergroupsListRequest
-import com.slack.api.methods.request.users.UsersInfoRequest
 import com.slack.api.methods.request.users.UsersListRequest
-import com.slack.api.model.Conversation
 import com.slack.api.model.ConversationType
-import com.slack.api.model.Usergroup
 import constants.Constants
 import exception.LoggerBirdException
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
-import models.AccountIdService
 import models.RecyclerViewModel
 import okhttp3.*
 import services.LoggerBirdService
@@ -410,9 +398,9 @@ class SlackAuthentication {
                             do {
                                 val list = ArrayList<String>()
                                 list.add(hashMapUser[arrayListUsersName[spinnerPosition]].toString())
-                                if (RecyclerViewSlackAdapter.ViewHolder.arrayListFilePaths.size > fileCounter) {
+                                if (RecyclerViewSlackAttachmentAdapter.ViewHolder.arrayListFilePaths.size > fileCounter) {
                                     val file =
-                                        RecyclerViewSlackAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
+                                        RecyclerViewSlackAttachmentAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
                                     slack.methods(token).filesUpload {
                                         it.file(file)
                                         it.filename(file.name)
@@ -428,7 +416,7 @@ class SlackAuthentication {
                                 }
                                 fileCounter++
 
-                            } while (RecyclerViewSlackAdapter.ViewHolder.arrayListFilePaths.iterator()
+                            } while (RecyclerViewSlackAttachmentAdapter.ViewHolder.arrayListFilePaths.iterator()
                                     .hasNext()
                             )
 
@@ -464,9 +452,9 @@ class SlackAuthentication {
                             do {
                                 val list = ArrayList<String>()
                                 list.add(channel)
-                                if (RecyclerViewSlackAdapter.ViewHolder.arrayListFilePaths.size > fileCounter) {
+                                if (RecyclerViewSlackAttachmentAdapter.ViewHolder.arrayListFilePaths.size > fileCounter) {
                                     val file =
-                                        RecyclerViewSlackAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
+                                        RecyclerViewSlackAttachmentAdapter.ViewHolder.arrayListFilePaths[fileCounter].file
                                     slack.methods(token).filesUpload {
                                         it.file(file)
                                         it.filename(file.name)
@@ -481,7 +469,7 @@ class SlackAuthentication {
                                     break
                                 }
                                 fileCounter++
-                            } while (RecyclerViewSlackAdapter.ViewHolder.arrayListFilePaths.iterator()
+                            } while (RecyclerViewSlackAttachmentAdapter.ViewHolder.arrayListFilePaths.iterator()
                                     .hasNext()
                             )
 

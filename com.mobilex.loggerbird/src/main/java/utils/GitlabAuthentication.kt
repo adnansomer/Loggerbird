@@ -1,7 +1,7 @@
 package utils
 
 import android.app.Activity
-import adapter.RecyclerViewGitlabAdapter
+import adapter.recyclerView.api.gitlab.RecyclerViewGitlabAttachmentAdapter
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -17,7 +17,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
-import models.api.gitlab.*
 import models.*
 import okhttp3.*
 import services.LoggerBirdService
@@ -26,7 +25,6 @@ import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import models.api.gitlab.GitlabLabelsModel
 import models.api.gitlab.GitlabMilestonesModel
@@ -242,7 +240,7 @@ class GitlabAuthentication {
 
                         coroutineCallGitlabIssue.async {
                             issueId = response.body()!!["iid"].asString
-                            RecyclerViewGitlabAdapter.ViewHolder.arrayListFilePaths.forEach {
+                            RecyclerViewGitlabAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
                                 val file = it.file
                                 if (file.exists()) {
                                     callGitlabAttachments(

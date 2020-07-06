@@ -1,8 +1,8 @@
 package utils
 
-import adapter.RecyclerViewBasecampAdapter
-import adapter.RecyclerViewBasecampAssigneeAdapter
-import adapter.RecyclerViewBasecampNotifyAdapter
+import adapter.recyclerView.api.basecamp.RecyclerViewBasecampAttachmentAdapter
+import adapter.recyclerView.api.basecamp.RecyclerViewBasecampAssigneeAdapter
+import adapter.recyclerView.api.basecamp.RecyclerViewBasecampNotifyAdapter
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -208,7 +208,7 @@ internal class BasecampAuthentication {
                         val coroutineCallBasecampAttachments = CoroutineScope(Dispatchers.IO)
                         Log.d("basecamp_details", response.code().toString())
                         val basecampList = response.body()
-                        RecyclerViewBasecampAdapter.ViewHolder.arrayListFilePaths.forEach {
+                        RecyclerViewBasecampAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
                             queueCounter++
                             coroutineCallBasecampAttachments.async {
                                 createAttachments(

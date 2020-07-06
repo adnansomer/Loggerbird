@@ -1,6 +1,6 @@
 package utils
 
-import adapter.RecyclerViewEmailAdapter
+import adapter.recyclerView.email.RecyclerViewEmailAttachmentAdapter
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -442,9 +442,9 @@ internal class EmailUtil {
                     mimeBodyPart.setContent(message, "text/plain")
                 }
                 multiPart.addBodyPart(mimeBodyPart)
-                if (RecyclerViewEmailAdapter.ViewHolder.controlArrayListFilePaths()) {
-                    if (RecyclerViewEmailAdapter.ViewHolder.arrayListFilePaths.isNotEmpty()) {
-                        RecyclerViewEmailAdapter.ViewHolder.arrayListFilePaths.forEach {
+                if (RecyclerViewEmailAttachmentAdapter.ViewHolder.controlArrayListFilePaths()) {
+                    if (RecyclerViewEmailAttachmentAdapter.ViewHolder.arrayListFilePaths.isNotEmpty()) {
+                        RecyclerViewEmailAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
                             createFileMultiPart(file = it.file)
                         }
                     }

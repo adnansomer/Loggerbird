@@ -1,8 +1,8 @@
 package utils
 
-import adapter.RecyclerViewGithubAdapter
-import adapter.RecyclerViewGithubAssigneeAdapter
-import adapter.RecyclerViewGithubLabelAdapter
+import adapter.recyclerView.api.github.RecyclerViewGithubAttachmentAdapter
+import adapter.recyclerView.api.github.RecyclerViewGithubAssigneeAdapter
+import adapter.recyclerView.api.github.RecyclerViewGithubLabelAdapter
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -24,7 +24,6 @@ import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
 import models.*
 import models.api.github.*
-import utils.*
 import okhttp3.*
 import services.LoggerBirdService
 import java.io.File
@@ -240,7 +239,7 @@ internal class GithubAuthentication {
                             Log.d("github_details", response.code().toString())
                             val githubList = response.body()
                             repoId = githubList!!["url"].asString.substringAfterLast("/").toInt()
-                            RecyclerViewGithubAdapter.ViewHolder.arrayListFilePaths.forEach {
+                            RecyclerViewGithubAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
                                 val file = it.file
                                 if (file.exists()) {
                                     callGithubAttachments(
@@ -249,7 +248,7 @@ internal class GithubAuthentication {
                                     )
                                 }
                             }
-                            if (RecyclerViewGithubAdapter.ViewHolder.arrayListFilePaths.isEmpty()) {
+                            if (RecyclerViewGithubAttachmentAdapter.ViewHolder.arrayListFilePaths.isEmpty()) {
                                 activity.runOnUiThread {
                                     LoggerBirdService.loggerBirdService.finishShareLayout("github")
                                 }

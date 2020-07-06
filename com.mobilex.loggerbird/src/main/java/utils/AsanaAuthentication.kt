@@ -1,7 +1,7 @@
 package utils
 
-import adapter.RecyclerViewAsanaAdapter
-import adapter.RecyclerViewAsanaSubTaskAdapter
+import adapter.recyclerView.api.asana.RecyclerViewAsanaAttachmentAdapter
+import adapter.recyclerView.api.asana.RecyclerViewAsanaSubTaskAdapter
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -194,7 +194,7 @@ internal class AsanaAuthentication {
                         Log.d("asana_details", response.code().toString())
                         val asanaList = response.body()
                         if (asanaList != null) {
-                            RecyclerViewAsanaAdapter.ViewHolder.arrayListFilePaths.forEach {
+                            RecyclerViewAsanaAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
                                 queueCounter++
                                 coroutineCallAsanaAttachments.async {
                                     createAttachments(
@@ -299,7 +299,8 @@ internal class AsanaAuthentication {
                 jsonObjectData.addProperty("notes", RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDescription[subtask])
             }
             if (!RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDate.isNullOrEmpty()) {
-                jsonObjectData.addProperty("due_on",RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDate[subtask])
+                jsonObjectData.addProperty("due_on",
+                    RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDate[subtask])
             }
             jsonObject.add("data", jsonObjectData)
             RetrofitUserAsanaClient.getAsanaUserClient(url = "https://app.asana.com/api/1.0/tasks/$taskId/")
@@ -563,7 +564,7 @@ internal class AsanaAuthentication {
         queueCounter--
         Log.d("queue_counter", queueCounter.toString())
         if (queueCounter == 0) {
-            RecyclerViewAsanaAdapter.ViewHolder.arrayListFilePaths.forEach {
+            RecyclerViewAsanaAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
                 if (it.file.name != "logger_bird_details.txt") {
                     if (it.file.exists()) {
                         it.file.delete()
