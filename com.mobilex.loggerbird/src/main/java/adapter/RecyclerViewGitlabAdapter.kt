@@ -132,21 +132,11 @@ class RecyclerViewGitlabAdapter(
                     windowManagerRecyclerViewItemPopup =
                         activity.getSystemService(Context.WINDOW_SERVICE)!!
                     if (windowManagerRecyclerViewItemPopup != null) {
-                        (windowManagerRecyclerViewItemPopup as WindowManager).addView(
-                            viewRecyclerViewItems,
-                            windowManagerParamsRecyclerViewItemPopup
-                        )
-                        textViewTitle =
-                            viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_gitlab_title)
-                        buttonYes =
-                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_gitlab_yes)
-                        buttonNo =
-                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_gitlab_no)
-                        buttonClicksGithubPopup(
-                            adapter = adapter,
-                            fileList = fileList,
-                            position = position
-                        )
+                        (windowManagerRecyclerViewItemPopup as WindowManager).addView(viewRecyclerViewItems, windowManagerParamsRecyclerViewItemPopup)
+                        textViewTitle = viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_gitlab_title)
+                        buttonYes = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_gitlab_yes)
+                        buttonNo = viewRecyclerViewItems.findViewById(R.id.button_recycler_view_gitlab_no)
+                        buttonClicksGitlabPopup(adapter = adapter, fileList = fileList, position = position)
                     }
                 }
             } catch (e: Exception) {
@@ -154,12 +144,12 @@ class RecyclerViewGitlabAdapter(
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
-                    tag = Constants.recyclerViewJiraAdapterTag
+                    tag = Constants.recyclerViewGitlabAdapterTag
                 )
             }
         }
 
-        private fun buttonClicksGithubPopup(
+        private fun buttonClicksGitlabPopup(
             fileList: ArrayList<RecyclerViewModel>,
             position: Int,
             adapter: RecyclerViewGitlabAdapter
