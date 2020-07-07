@@ -94,6 +94,7 @@ internal class Constants {
         const val recyclerViewBasecampAdapterTag:String = "RecyclerView Basecamp Adapter"
         const val asanaTag:String = "Asana"
         const val recyclerViewAsanaAdapterTag:String = "RecyclerView Asana Adapter"
+        const val recyclerViewAsanaSubAdapterTag:String = "RecyclerView Asana Sub Adapter"
         const val recyclerViewClubhouseAdapterTag:String = "RecyclerView Clubhouse Adapter"
         const val clubhouseTag:String = "Clubhouse"
         const val clubhouseDatePopupTag = "Clubhouse Date Popup"

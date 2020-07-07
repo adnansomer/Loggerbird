@@ -1,7 +1,7 @@
 package utils
 
 import android.app.Activity
-import adapter.RecyclerViewClubhouseAdapter
+import adapter.recyclerView.api.clubhouse.RecyclerViewClubhouseAttachmentAdapter
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -17,7 +17,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
-import models.api.*
 import models.*
 import models.api.clubhouse.*
 import okhttp3.*
@@ -368,7 +367,7 @@ class ClubhouseAuthentication {
 
                         coroutineCallClubhouseIssue.async {
                             storyId = response.body()!!["id"].asString
-                            RecyclerViewClubhouseAdapter.ViewHolder.arrayListFilePaths.forEach {
+                            RecyclerViewClubhouseAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
                                 val file = it.file
                                 if (file.exists()) {
                                     callClubhouseAttachments(

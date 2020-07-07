@@ -1,6 +1,10 @@
 package utils
 
-import adapter.*
+import adapter.recyclerView.api.pivotal.*
+import adapter.recyclerView.api.pivotal.RecyclerViewPivotalAttachmentAdapter
+import adapter.recyclerView.api.pivotal.RecyclerViewPivotalBlockerAdapter
+import adapter.recyclerView.api.pivotal.RecyclerViewPivotalLabelAdapter
+import adapter.recyclerView.api.pivotal.RecyclerViewPivotalOwnerAdapter
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -9,7 +13,6 @@ import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.mobilex.loggerbird.R
@@ -244,7 +247,7 @@ internal class PivotalTrackerAuthentication {
                         val coroutineCallPivotalTasks = CoroutineScope(Dispatchers.IO)
                         Log.d("pivotal_details", response.code().toString())
                         val pivotalList = response.body()
-                        RecyclerViewPivotalAdapter.ViewHolder.arrayListFilePaths.forEach {
+                        RecyclerViewPivotalAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
                             queueCounter++
                             coroutineCallPivotalAttachments.async {
                                 createAttachments(

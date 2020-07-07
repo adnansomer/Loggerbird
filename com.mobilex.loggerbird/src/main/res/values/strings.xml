@@ -524,6 +524,17 @@
     <string name="textView_asana_start_date">Start date</string>
     <string name="button_asana_create">Create</string>
     <string name="button_asana_cancel">Cancel</string>
+    <!-- loggerbird_asana_sub_popup-->
+    <string name="textView_asana_sub_task_name">Subtask name</string>
+    <string name="editText_asana_sub_task_name">Enter a subtask name for this subtask…</string>
+    <string name="textView_asana_sub_assignee">Subtask assignee</string>
+    <string name="textView_asana_sub_section">Subtask section</string>
+    <string name="textView_asana_sub_description">Subtask description</string>
+    <string name="editText_asana_sub_description">Enter a description for this subtask…</string>
+    <string name="textView_asana_sub_attachment">Subtask attachments</string>
+    <string name="textView_asana_sub_start_date">Subtask start date</string>
+    <string name="button_asana_sub_create">Subtask create</string>
+    <string name="button_asana_sub_cancel">Subtask cancel</string>
     <!-- recycler_view_asana_item_popup-->
     <string name="textView_recyclerView_asana_popup_title">Are you sure to remove attachment from your asana issue?</string>
     <!-- recycler_view_asana_subtask_popup-->

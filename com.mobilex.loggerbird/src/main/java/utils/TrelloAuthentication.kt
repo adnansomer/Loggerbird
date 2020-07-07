@@ -1,8 +1,8 @@
 package utils
 
-import adapter.RecyclerViewTrelloAdapter
-import adapter.RecyclerViewTrelloLabelAdapter
-import adapter.RecyclerViewTrelloMemberAdapter
+import adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
+import adapter.recyclerView.api.trello.RecyclerViewTrelloLabelAdapter
+import adapter.recyclerView.api.trello.RecyclerViewTrelloMemberAdapter
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -21,7 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
 import models.AccountIdService
-import utils.*
 import models.TrelloProjectModel
 import okhttp3.*
 import services.LoggerBirdService
@@ -31,7 +30,6 @@ import java.util.*
 import kotlin.collections.ArrayList
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
-import java.text.SimpleDateFormat
 import kotlin.collections.HashMap
 
 internal class TrelloAuthentication {
@@ -214,7 +212,7 @@ internal class TrelloAuthentication {
                         val coroutineCallTrelloAttachments = CoroutineScope(Dispatchers.IO)
                         Log.d("trello_details", response.code().toString())
                         val trelloList = response.body()
-                        RecyclerViewTrelloAdapter.ViewHolder.arrayListFilePaths.forEach {
+                        RecyclerViewTrelloAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
                             queueCounter++
                             coroutineCallTrelloAttachments.async {
                                 createAttachments(

@@ -1,6 +1,33 @@
 package services
 
-import adapter.*
+import adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampCategoryAdapter
+import adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloLabelAdapter
+import adapter.recyclerView.api.asana.RecyclerViewAsanaAttachmentAdapter
+import adapter.recyclerView.api.asana.RecyclerViewAsanaSubTaskAdapter
+import adapter.recyclerView.api.basecamp.RecyclerViewBasecampAssigneeAdapter
+import adapter.recyclerView.api.basecamp.RecyclerViewBasecampAttachmentAdapter
+import adapter.recyclerView.api.basecamp.RecyclerViewBasecampNotifyAdapter
+import adapter.recyclerView.api.clubhouse.RecyclerViewClubhouseAttachmentAdapter
+import adapter.recyclerView.api.github.RecyclerViewGithubAssigneeAdapter
+import adapter.recyclerView.api.github.RecyclerViewGithubAttachmentAdapter
+import adapter.recyclerView.api.github.RecyclerViewGithubLabelAdapter
+import adapter.recyclerView.api.gitlab.RecyclerViewGitlabAttachmentAdapter
+import adapter.recyclerView.api.jira.RecyclerViewJiraAttachmentAdapter
+import adapter.recyclerView.api.jira.RecyclerViewJiraComponentAdapter
+import adapter.recyclerView.api.jira.RecyclerViewJiraFixVersionsAdapter
+import adapter.recyclerView.api.jira.RecyclerViewJiraIssueAdapter
+import adapter.recyclerView.api.jira.RecyclerViewJiraLabelAdapter
+import adapter.recyclerView.api.pivotal.*
+import adapter.recyclerView.api.pivotal.RecyclerViewPivotalAttachmentAdapter
+import adapter.recyclerView.api.pivotal.RecyclerViewPivotalBlockerAdapter
+import adapter.recyclerView.api.pivotal.RecyclerViewPivotalLabelAdapter
+import adapter.recyclerView.api.pivotal.RecyclerViewPivotalOwnerAdapter
+import adapter.recyclerView.api.slack.RecyclerViewSlackAttachmentAdapter
+import adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
+import adapter.recyclerView.api.trello.RecyclerViewTrelloLabelAdapter
+import adapter.recyclerView.api.trello.RecyclerViewTrelloMemberAdapter
+import adapter.recyclerView.email.RecyclerViewEmaiToListAttachmentAdapter
+import adapter.recyclerView.email.RecyclerViewEmailAttachmentAdapter
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -278,7 +305,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //    private val arrayListJiraLinkedIssue: ArrayList<String> = ArrayList()
 //    private val arrayListJiraAssignee: ArrayList<String> = ArrayList()
 //    private val arrayListJiraPriority: ArrayList<String> = ArrayList()
-    private lateinit var jiraAdapter: RecyclerViewJiraAdapter
+    private lateinit var jiraAttachmentAdapter: RecyclerViewJiraAttachmentAdapter
     //    private lateinit var spinnerProjectAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewProjectAdapter: ArrayAdapter<String>
     //    private lateinit var spinnerIssueTypeAdapter: ArrayAdapter<String>
@@ -350,7 +377,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var editTextMessageUser: EditText
     private lateinit var spinnerChannelsAdapter: ArrayAdapter<String>
     private lateinit var spinnerUsersAdapter: ArrayAdapter<String>
-    private lateinit var slackAdapter: RecyclerViewSlackAdapter
+    private lateinit var slackAttachmentAdapter: RecyclerViewSlackAttachmentAdapter
     private lateinit var recyclerViewSlackAttachment: RecyclerView
     private lateinit var recyclerViewSlackAttachmentUser: RecyclerView
     private val arrayListSlackFileName: ArrayList<RecyclerViewModel> = ArrayList()
@@ -372,8 +399,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var toolbarEmail: Toolbar
     private lateinit var recyclerViewEmailAttachment: RecyclerView
     private lateinit var recyclerViewEmailToList: RecyclerView
-    private lateinit var emailAdapter: RecyclerViewEmailAdapter
-    private lateinit var emailToListAdapter: RecyclerViewEmaiToListAdapter
+    private lateinit var emailAttachmentAdapter: RecyclerViewEmailAttachmentAdapter
+    private lateinit var emailToListAttachmentAdapter: RecyclerViewEmaiToListAttachmentAdapter
     private val arrayListEmailFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private val arraylistEmailToUsername: ArrayList<RecyclerViewModelTo> = ArrayList()
 
@@ -426,7 +453,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonCalendarViewGitlabCancel: Button
     private lateinit var buttonCalendarViewGitlabOk: Button
     private lateinit var recyclerViewGitlabAttachment: RecyclerView
-    private lateinit var gitlabAdapter: RecyclerViewGitlabAdapter
+    private lateinit var gitlabAttachmentAdapter: RecyclerViewGitlabAttachmentAdapter
     private lateinit var progressBarGitlab: ProgressBar
     private lateinit var progressBarGitlabLayout: FrameLayout
     private lateinit var autoTextViewGitlabProjectAdapter: ArrayAdapter<String>
@@ -445,7 +472,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var editTextGithubComment: EditText
     private lateinit var toolbarGithub: Toolbar
     private lateinit var recyclerViewGithubAttachment: RecyclerView
-    private lateinit var githubAdapter: RecyclerViewGithubAdapter
+    private lateinit var githubAttachmentAdapter: RecyclerViewGithubAttachmentAdapter
     private lateinit var autoTextViewGithubAssignee: AutoCompleteTextView
     private lateinit var autoTextViewGithubLabels: AutoCompleteTextView
     private lateinit var autoTextViewGithubRepo: AutoCompleteTextView
@@ -480,7 +507,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var editTextTrelloTitle: EditText
     private lateinit var toolbarTrello: Toolbar
     private lateinit var recyclerViewTrelloAttachment: RecyclerView
-    private lateinit var trelloAdapter: RecyclerViewTrelloAdapter
+    private lateinit var trelloAttachmentAdapter: RecyclerViewTrelloAttachmentAdapter
     private lateinit var autoTextViewTrelloProject: AutoCompleteTextView
     private lateinit var autoTextViewTrelloBoard: AutoCompleteTextView
     private lateinit var autoTextViewTrelloMember: AutoCompleteTextView
@@ -488,7 +515,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewTrelloProjectAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewTrelloBoardAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewTrelloMemberAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewTrelloLabelAdapter: AutoCompleteTextViewTrelloAdapter
+    private lateinit var autoTextViewTrelloLabelLabelAdapter: AutoCompleteTextViewTrelloLabelAdapter
     private lateinit var recyclerViewTrelloLabel: RecyclerView
     private lateinit var trelloLabelAdapter: RecyclerViewTrelloLabelAdapter
     private val arrayListTrelloFileName: ArrayList<RecyclerViewModel> = ArrayList()
@@ -566,7 +593,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal lateinit var cardViewPivotalAttachments: CardView
     private lateinit var recyclerViewPivotalAttachmentList: RecyclerView
     private val arrayListPivotalFileName: ArrayList<RecyclerViewModel> = ArrayList()
-    private lateinit var pivotalAdapter: RecyclerViewPivotalAdapter
+    private lateinit var pivotalAttachmentAdapter: RecyclerViewPivotalAttachmentAdapter
     private val arrayListPivotalTaskName: ArrayList<RecyclerViewModelTask> = ArrayList()
     private lateinit var pivotalTaskAdapter: RecyclerViewPivotalTaskAdapter
     private val arrayListPivotalBlockerName: ArrayList<RecyclerViewModelBlocker> = ArrayList()
@@ -590,7 +617,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewBasecampNotify: AutoCompleteTextView
     private lateinit var autoTextViewBasecampProjectAdapter: ArrayAdapter<String>
     //    private lateinit var autoTextViewBasecampCategoryAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewBasecampCategoryAdapter: AutoCompleteTextViewBasecampAdapter
+    private lateinit var autoTextViewBasecampCategoryCategoryAdapter: AutoCompleteTextViewBasecampCategoryAdapter
     private lateinit var autoTextViewBasecampAssigneeAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewBasecampNotifyAdapter: ArrayAdapter<String>
     private lateinit var editTextBasecampDescriptionMessage: EditText
@@ -605,7 +632,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var recyclerViewBasecampAttachmentList: RecyclerView
     private lateinit var recyclerViewBasecampNotifyList: RecyclerView
     private lateinit var recyclerViewBasecampAssigneeList: RecyclerView
-    private lateinit var basecampAdapter: RecyclerViewBasecampAdapter
+    private lateinit var basecampAttachmentAdapter: RecyclerViewBasecampAttachmentAdapter
     private val arrayListBasecampFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var basecampAssigneeAdapter: RecyclerViewBasecampAssigneeAdapter
     private val arrayListBasecampAssigneeName: ArrayList<RecyclerViewModelAssignee> = ArrayList()
@@ -641,12 +668,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var recyclerViewAsanaSubTasksList: RecyclerView
     private val arrayListAsanaSubtaskName: ArrayList<RecyclerViewModelSubtask> = ArrayList()
     internal lateinit var cardViewAsanaSubTasksList: CardView
-    private lateinit var asanaAdapter: RecyclerViewAsanaAdapter
+    private lateinit var asanaAttachmentAdapter: RecyclerViewAsanaAttachmentAdapter
     private lateinit var asanaSubTasksAdapter: RecyclerViewAsanaSubTaskAdapter
     private lateinit var imageViewAsanaStartDate: ImageView
     private lateinit var imageButtonAsanaRemoveDate: ImageButton
     private lateinit var buttonAsanaCancel: Button
     private lateinit var buttonAsanaCreate: Button
+    private var arrayListAsanaSubtaskAssignee:ArrayList<String> = ArrayList()
+    private var arrayListAsanaSubtaskSection:ArrayList<String> = ArrayList()
     //asana_date:
     private lateinit var frameLayoutAsanaDate: FrameLayout
     private lateinit var calendarViewAsana: CalendarView
@@ -676,7 +705,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var spinnerClubhouseRequester: Spinner
     private lateinit var spinnerClubhouseRequesterAdapter: ArrayAdapter<String>
     private val arrayListClubhouseFileName: ArrayList<RecyclerViewModel> = ArrayList()
-    private lateinit var clubhouseAdapter: RecyclerViewClubhouseAdapter
+    private lateinit var clubhouseAttachmentAdapter: RecyclerViewClubhouseAttachmentAdapter
     private lateinit var recyclerViewClubhouseAttachment: RecyclerView
     private lateinit var progressBarClubhouse: ProgressBar
     private lateinit var progressBarClubhouseLayout: FrameLayout
@@ -3695,12 +3724,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraIssueName.clear()
         recyclerViewJiraIssueList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        jiraAdapterIssueList = RecyclerViewJiraIssueAdapter(
-            arrayListJiraIssueName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        jiraAdapterIssueList =
+            RecyclerViewJiraIssueAdapter(
+                arrayListJiraIssueName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewJiraIssueList.adapter = jiraAdapterIssueList
     }
 
@@ -3708,12 +3738,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraLabelName.clear()
         recyclerViewJiraLabelList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        jiraAdapterLabelList = RecyclerViewJiraLabelAdapter(
-            arrayListJiraLabelName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        jiraAdapterLabelList =
+            RecyclerViewJiraLabelAdapter(
+                arrayListJiraLabelName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewJiraLabelList.adapter = jiraAdapterLabelList
     }
 
@@ -3721,12 +3752,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraComponentName.clear()
         recyclerViewJiraComponentList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        jiraAdapterComponentList = RecyclerViewJiraComponentAdapter(
-            arrayListJiraComponentName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        jiraAdapterComponentList =
+            RecyclerViewJiraComponentAdapter(
+                arrayListJiraComponentName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewJiraComponentList.adapter = jiraAdapterComponentList
     }
 
@@ -3734,12 +3766,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraFixVersionsName.clear()
         recyclerViewJiraFixVersionsList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        jiraAdapterFixVersionsList = RecyclerViewJiraFixVersionsAdapter(
-            arrayListJiraFixVersionsName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        jiraAdapterFixVersionsList =
+            RecyclerViewJiraFixVersionsAdapter(
+                arrayListJiraFixVersionsName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewJiraFixVersionsList.adapter = jiraAdapterFixVersionsList
     }
 
@@ -3793,18 +3826,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun initializeJiraRecyclerView(filePathMedia: File) {
         recyclerViewJiraAttachment.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        jiraAdapter = RecyclerViewJiraAdapter(
-            addJiraFileNames(filePathMedia = filePathMedia),
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
-        recyclerViewJiraAttachment.adapter = jiraAdapter
+        jiraAttachmentAdapter =
+            RecyclerViewJiraAttachmentAdapter(
+                addJiraFileNames(filePathMedia = filePathMedia),
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewJiraAttachment.adapter = jiraAttachmentAdapter
     }
 
     private fun removeJiraFileNames(): ArrayList<RecyclerViewModel> {
         arrayListJiraFileName.clear()
-        jiraAdapter.notifyDataSetChanged()
+        jiraAttachmentAdapter.notifyDataSetChanged()
         arrayListJiraFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         return arrayListJiraFileName
     }
@@ -4697,16 +4731,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
         if (filePathMedia.exists()) {
-            slackAdapter = RecyclerViewSlackAdapter(
-                addSlackFileNames(filePathMedia = filePathMedia),
-                context = context,
-                activity = activity,
-                rootView = rootView
-            )
+            slackAttachmentAdapter =
+                RecyclerViewSlackAttachmentAdapter(
+                    addSlackFileNames(filePathMedia = filePathMedia),
+                    context = context,
+                    activity = activity,
+                    rootView = rootView
+                )
         }
 
-        recyclerViewSlackAttachment.adapter = slackAdapter
-        recyclerViewSlackAttachmentUser.adapter = slackAdapter
+        recyclerViewSlackAttachment.adapter = slackAttachmentAdapter
+        recyclerViewSlackAttachmentUser.adapter = slackAttachmentAdapter
 
     }
 
@@ -5355,33 +5390,35 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun initializeEmailRecyclerView(filePathMedia: File) {
         recyclerViewEmailAttachment.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        emailAdapter = RecyclerViewEmailAdapter(
-            addEmailFileNames(filePathMedia = filePathMedia),
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
-        recyclerViewEmailAttachment.adapter = emailAdapter
+        emailAttachmentAdapter =
+            RecyclerViewEmailAttachmentAdapter(
+                addEmailFileNames(filePathMedia = filePathMedia),
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewEmailAttachment.adapter = emailAttachmentAdapter
     }
 
     private fun initializeEmailToRecyclerView() {
         recyclerViewEmailToList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        emailToListAdapter = RecyclerViewEmaiToListAdapter(
-            arraylistEmailToUsername,
-            cardView = cardViewToList,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
-        recyclerViewEmailToList.adapter = emailToListAdapter
+        emailToListAttachmentAdapter =
+            RecyclerViewEmaiToListAttachmentAdapter(
+                arraylistEmailToUsername,
+                cardView = cardViewToList,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewEmailToList.adapter = emailToListAttachmentAdapter
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun addEmailToUser(email: String) {
         if (!arraylistEmailToUsername.contains(RecyclerViewModelTo(email = email))) {
             arraylistEmailToUsername.add(RecyclerViewModelTo(email = email))
-            emailToListAdapter.notifyDataSetChanged()
+            emailToListAttachmentAdapter.notifyDataSetChanged()
         } else {
             defaultToast.attachToast(
                 activity = activity,
@@ -5674,7 +5711,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     private fun addFutureFileList() {
         val arrayListFileNames: ArrayList<String> = ArrayList()
-        RecyclerViewEmailAdapter.ViewHolder.arrayListFilePaths.forEach {
+        RecyclerViewEmailAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
             if (it.file.name == "logger_bird_details.txt") {
                 val futureLoggerBirdFile = File(context.filesDir, "logger_bird_details_future.txt")
                 if (!futureLoggerBirdFile.exists()) {
@@ -6016,13 +6053,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubFileName.clear()
         recyclerViewGithubAttachment.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        githubAdapter = RecyclerViewGithubAdapter(
-            addGithubFileNames(filePathMedia = filePathMedia),
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
-        recyclerViewGithubAttachment.adapter = githubAdapter
+        githubAttachmentAdapter =
+            RecyclerViewGithubAttachmentAdapter(
+                addGithubFileNames(filePathMedia = filePathMedia),
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewGithubAttachment.adapter = githubAttachmentAdapter
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -6041,12 +6079,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubAssigneeName.clear()
         recyclerViewGithubAssignee.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        githubAssigneeAdapter = RecyclerViewGithubAssigneeAdapter(
-            arrayListGithubAssigneeName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        githubAssigneeAdapter =
+            RecyclerViewGithubAssigneeAdapter(
+                arrayListGithubAssigneeName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewGithubAssignee.adapter = githubAssigneeAdapter
     }
 
@@ -6055,12 +6094,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubLabelName.clear()
         recyclerViewGithubLabel.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        githubLabelAdapter = RecyclerViewGithubLabelAdapter(
-            arrayListGithubLabelName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        githubLabelAdapter =
+            RecyclerViewGithubLabelAdapter(
+                arrayListGithubLabelName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewGithubLabel.adapter = githubLabelAdapter
     }
 
@@ -6942,10 +6982,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListLabelColor: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewTrelloLabelAdapter = AutoCompleteTextViewTrelloAdapter(
-            this, R.layout.auto_text_view_trello_label_item, arrayListLabel, arrayListLabelColor
-        )
-        autoTextViewTrelloLabel.setAdapter(autoTextViewTrelloLabelAdapter)
+        autoTextViewTrelloLabelLabelAdapter =
+            AutoCompleteTextViewTrelloLabelAdapter(
+                this, R.layout.auto_text_view_trello_label_item, arrayListLabel, arrayListLabelColor
+            )
+        autoTextViewTrelloLabel.setAdapter(autoTextViewTrelloLabelLabelAdapter)
         if (arrayListLabel.isNotEmpty() && autoTextViewTrelloLabel.editableText.isEmpty()) {
             if (sharedPref.getString("trello_label", null) != null) {
                 if (arrayListLabel.contains(
@@ -6995,13 +7036,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListTrelloFileName.clear()
         recyclerViewTrelloAttachment.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        trelloAdapter = RecyclerViewTrelloAdapter(
-            addTrelloFileNames(filePathMedia = filePathMedia),
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
-        recyclerViewTrelloAttachment.adapter = trelloAdapter
+        trelloAttachmentAdapter =
+            RecyclerViewTrelloAttachmentAdapter(
+                addTrelloFileNames(filePathMedia = filePathMedia),
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewTrelloAttachment.adapter = trelloAttachmentAdapter
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -7020,12 +7062,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListTrelloLabelName.clear()
         recyclerViewTrelloLabel.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        trelloLabelAdapter = RecyclerViewTrelloLabelAdapter(
-            arrayListTrelloLabelName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        trelloLabelAdapter =
+            RecyclerViewTrelloLabelAdapter(
+                arrayListTrelloLabelName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewTrelloLabel.adapter = trelloLabelAdapter
     }
 
@@ -7034,12 +7077,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListTrelloMemberName.clear()
         recyclerViewTrelloMember.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        trelloMemberAdapter = RecyclerViewTrelloMemberAdapter(
-            arrayListTrelloMemberName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        trelloMemberAdapter =
+            RecyclerViewTrelloMemberAdapter(
+                arrayListTrelloMemberName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewTrelloMember.adapter = trelloMemberAdapter
     }
 
@@ -7531,13 +7575,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGitlabFileName.clear()
         recyclerViewGitlabAttachment.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        gitlabAdapter = RecyclerViewGitlabAdapter(
-            addGitlabFileNames(filePathMedia = filePathMedia),
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
-        recyclerViewGitlabAttachment.adapter = gitlabAdapter
+        gitlabAttachmentAdapter =
+            RecyclerViewGitlabAttachmentAdapter(
+                addGitlabFileNames(filePathMedia = filePathMedia),
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewGitlabAttachment.adapter = gitlabAttachmentAdapter
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -8467,13 +8512,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalFileName.clear()
         recyclerViewPivotalAttachmentList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        pivotalAdapter = RecyclerViewPivotalAdapter(
-            addPivotalFileNames(filePathMedia = filePathMedia),
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
-        recyclerViewPivotalAttachmentList.adapter = pivotalAdapter
+        pivotalAttachmentAdapter =
+            RecyclerViewPivotalAttachmentAdapter(
+                addPivotalFileNames(filePathMedia = filePathMedia),
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewPivotalAttachmentList.adapter = pivotalAttachmentAdapter
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -8492,12 +8538,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalTaskName.clear()
         recyclerViewPivotalTaskList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        pivotalTaskAdapter = RecyclerViewPivotalTaskAdapter(
-            arrayListPivotalTaskName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        pivotalTaskAdapter =
+            RecyclerViewPivotalTaskAdapter(
+                arrayListPivotalTaskName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewPivotalTaskList.adapter = pivotalTaskAdapter
     }
 
@@ -8506,12 +8553,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalBlockerName.clear()
         recyclerViewPivotalBlockersList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        pivotalBlockerAdapter = RecyclerViewPivotalBlockerAdapter(
-            arrayListPivotalBlockerName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        pivotalBlockerAdapter =
+            RecyclerViewPivotalBlockerAdapter(
+                arrayListPivotalBlockerName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewPivotalBlockersList.adapter = pivotalBlockerAdapter
     }
 
@@ -8520,12 +8568,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalLabelName.clear()
         recyclerViewPivotalLabelList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        pivotalLabelAdapter = RecyclerViewPivotalLabelAdapter(
-            arrayListPivotalLabelName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        pivotalLabelAdapter =
+            RecyclerViewPivotalLabelAdapter(
+                arrayListPivotalLabelName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewPivotalLabelList.adapter = pivotalLabelAdapter
     }
 
@@ -8534,12 +8583,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalOwnerName.clear()
         recyclerViewPivotalOwnerList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        pivotalOwnerAdapter = RecyclerViewPivotalOwnerAdapter(
-            arrayListPivotalOwnerName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        pivotalOwnerAdapter =
+            RecyclerViewPivotalOwnerAdapter(
+                arrayListPivotalOwnerName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewPivotalOwnerList.adapter = pivotalOwnerAdapter
     }
 
@@ -9000,13 +9050,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //            android.R.layout.simple_dropdown_item_1line,
 //            arrayListCategory
 //        )
-        autoTextViewBasecampCategoryAdapter = AutoCompleteTextViewBasecampAdapter(
-            this,
-            R.layout.auto_text_view_basecamp_icon_item,
-            arrayListCategory,
-            arrayListCategoryIcon
-        )
-        autoTextViewBasecampCategory.setAdapter(autoTextViewBasecampCategoryAdapter)
+        autoTextViewBasecampCategoryCategoryAdapter =
+            AutoCompleteTextViewBasecampCategoryAdapter(
+                this,
+                R.layout.auto_text_view_basecamp_icon_item,
+                arrayListCategory,
+                arrayListCategoryIcon
+            )
+        autoTextViewBasecampCategory.setAdapter(autoTextViewBasecampCategoryCategoryAdapter)
         if (arrayListCategory.isNotEmpty() && autoTextViewBasecampCategory.editableText.isEmpty()) {
             if (sharedPref.getString("basecamp_category", null) != null) {
                 if (arrayListCategory.contains(
@@ -9168,13 +9219,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBasecampFileName.clear()
         recyclerViewBasecampAttachmentList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        basecampAdapter = RecyclerViewBasecampAdapter(
-            addBasecampFileNames(filePathMedia = filePathMedia),
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
-        recyclerViewBasecampAttachmentList.adapter = basecampAdapter
+        basecampAttachmentAdapter =
+            RecyclerViewBasecampAttachmentAdapter(
+                addBasecampFileNames(filePathMedia = filePathMedia),
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewBasecampAttachmentList.adapter = basecampAttachmentAdapter
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -9193,12 +9245,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBasecampAssigneeName.clear()
         recyclerViewBasecampAssigneeList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        basecampAssigneeAdapter = RecyclerViewBasecampAssigneeAdapter(
-            arrayListBasecampAssigneeName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        basecampAssigneeAdapter =
+            RecyclerViewBasecampAssigneeAdapter(
+                arrayListBasecampAssigneeName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewBasecampAssigneeList.adapter = basecampAssigneeAdapter
     }
 
@@ -9207,12 +9260,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBasecampNotifyName.clear()
         recyclerViewBasecampNotifyList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        basecampNotifyAdapter = RecyclerViewBasecampNotifyAdapter(
-            arrayListBasecampNotifyName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        basecampNotifyAdapter =
+            RecyclerViewBasecampNotifyAdapter(
+                arrayListBasecampNotifyName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
         recyclerViewBasecampNotifyList.adapter = basecampNotifyAdapter
     }
 
@@ -9311,7 +9365,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaSubtaskName.clear()
         arrayListAsanaFileName
         asanaSubTasksAdapter.notifyDataSetChanged()
-        asanaAdapter.notifyDataSetChanged()
+        asanaAttachmentAdapter.notifyDataSetChanged()
         editTextAsanaSubTask.text = null
         editTextAsanaDescription.text = null
         editTextAsanaTaskName.text = null
@@ -9462,7 +9516,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     }
                 }
                 initializeAsanaRecyclerView(filePathMedia = filePathMedia)
-                initializeAsanaSubtaskRecyclerView()
                 buttonClicksAsana()
                 asanaAuthentication.callAsana(
                     activity = activity,
@@ -9574,13 +9627,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaFileName.clear()
         recyclerViewAsanaAttachmentList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        asanaAdapter = RecyclerViewAsanaAdapter(
-            addAsanaFileNames(filePathMedia = filePathMedia),
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
-        recyclerViewAsanaAttachmentList.adapter = asanaAdapter
+        asanaAttachmentAdapter =
+            RecyclerViewAsanaAttachmentAdapter(
+                addAsanaFileNames(filePathMedia = filePathMedia),
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewAsanaAttachmentList.adapter = asanaAttachmentAdapter
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -9595,16 +9649,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun initializeAsanaSubtaskRecyclerView() {
+    private fun initializeAsanaSubtaskRecyclerView(filePathMedia: File) {
         arrayListAsanaSubtaskName.clear()
         recyclerViewAsanaSubTasksList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        asanaSubTasksAdapter = RecyclerViewAsanaSubTaskAdapter(
-            arrayListAsanaSubtaskName,
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
+        asanaSubTasksAdapter =
+            RecyclerViewAsanaSubTaskAdapter(
+                arrayListAsanaSubtaskName,
+                context = context,
+                activity = activity,
+                rootView = rootView,
+                filePathMedia = filePathMedia,
+                arrayListAssignee = arrayListAsanaSubtaskAssignee,
+                arrayListSection = arrayListAsanaSubtaskSection
+            )
         recyclerViewAsanaSubTasksList.adapter = asanaSubTasksAdapter
     }
 
@@ -9613,7 +9671,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListProject: ArrayList<String>,
         arrayListAssignee: ArrayList<String>,
         arrayListSection: ArrayList<String>,
-        arrayListPriority: ArrayList<String>
+        arrayListPriority: ArrayList<String>,
+        filePathMedia: File
     ) {
         val sharedPref =
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
@@ -9648,6 +9707,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             arrayListPriority = arrayListPriority,
             sharedPref = sharedPref
         )
+        initializeAsanaSubtaskRecyclerView(filePathMedia = filePathMedia)
         detachProgressBar()
     }
 
@@ -9770,6 +9830,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                }
 //            }
 //        }
+        this.arrayListAsanaSubtaskSection = arrayListSection
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -9882,6 +9943,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                }
 //            }
 //        }
+        this.arrayListAsanaSubtaskAssignee = arrayListAssignee
     }
 
     private fun initializeAsanaDateLayout() {
@@ -9974,7 +10036,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeAsanaDateLayout()
         }
     }
-
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeClubhouseLayout(filePathMedia: File) {
         try {
@@ -10398,13 +10459,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListClubhouseFileName.clear()
         recyclerViewClubhouseAttachment.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        clubhouseAdapter = RecyclerViewClubhouseAdapter(
-            addClubhouseFileNames(filePathMedia = filePathMedia),
-            context = context,
-            activity = activity,
-            rootView = rootView
-        )
-        recyclerViewClubhouseAttachment.adapter = clubhouseAdapter
+        clubhouseAttachmentAdapter =
+            RecyclerViewClubhouseAttachmentAdapter(
+                addClubhouseFileNames(filePathMedia = filePathMedia),
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewClubhouseAttachment.adapter = clubhouseAttachmentAdapter
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)

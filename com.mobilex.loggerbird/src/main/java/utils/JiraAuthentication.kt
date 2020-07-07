@@ -1,6 +1,10 @@
 package utils
 
-import adapter.*
+import adapter.recyclerView.api.jira.RecyclerViewJiraAttachmentAdapter
+import adapter.recyclerView.api.jira.RecyclerViewJiraComponentAdapter
+import adapter.recyclerView.api.jira.RecyclerViewJiraFixVersionsAdapter
+import adapter.recyclerView.api.jira.RecyclerViewJiraIssueAdapter
+import adapter.recyclerView.api.jira.RecyclerViewJiraLabelAdapter
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
@@ -9,7 +13,6 @@ import android.util.Log
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
-import utils.*
 //import com.atlassian.jira.rest.client.api.JiraRestClient
 //import com.atlassian.jira.rest.client.api.JiraRestClientFactory
 //import com.atlassian.jira.rest.client.api.domain.*
@@ -24,6 +27,7 @@ import exception.LoggerBirdException
 //import io.atlassian.util.concurrent.Promise
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
+import loggerbird.LoggerBird.Companion.jiraDomainName
 import models.*
 import models.api.jira.*
 import okhttp3.*
@@ -99,9 +103,6 @@ class JiraAuthentication {
     private val arrayListEmailAdresses: ArrayList<String> = ArrayList()
     private val arrayListAvatarUrls: ArrayList<String> = ArrayList()
     private val arrayListBoardId: ArrayList<String> = ArrayList()
-    private val jiraDomainName = LoggerBird.jiraDomainName
-    private val jiraUserName = LoggerBird.jiraUserName
-    private val jiraApiToken = LoggerBird.jiraApiToken
     private val defaultToast: DefaultToast = DefaultToast()
     private var sprintField: String? = null
     private var queueCounter = 0
@@ -555,7 +556,7 @@ class JiraAuthentication {
                                             createReporter(issueKey = issueKey)
                                             createSprint(issueKey = issueKey)
                                             createDate(issueKey = issueKey)
-                                            RecyclerViewJiraAdapter.ViewHolder.arrayListFilePaths.forEach {
+                                            RecyclerViewJiraAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
                                                 val file = it.file
                                                 if (file.exists()) {
                                                     createAttachments(
