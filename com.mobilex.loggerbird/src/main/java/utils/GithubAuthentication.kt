@@ -516,12 +516,12 @@ internal class GithubAuthentication {
             timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeGithubAutoTextViews(
-                    arrayListRepos = arrayListRepo,
-                    arrayListProject = arrayListProject,
-                    arrayListAssignee = arrayListAssignee,
-                    arrayListMileStones = arrayListMileStones,
-                    arrayListLinkedRequests = arrayListLinkedRequests,
-                    arrayListLabels = arrayListLabels
+                    arrayListGithubRepos = arrayListRepo,
+                    arrayListGithubProject = arrayListProject,
+                    arrayListGithubAssignee = arrayListAssignee,
+                    arrayListGithubMileStones = arrayListMileStones,
+                    arrayListGithubLinkedRequests = arrayListLinkedRequests,
+                    arrayListGithubLabels = arrayListLabels
                 )
             }
         }

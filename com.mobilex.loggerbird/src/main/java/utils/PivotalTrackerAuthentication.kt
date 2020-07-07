@@ -512,12 +512,12 @@ internal class PivotalTrackerAuthentication {
             timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializePivotalAutoTextViews(
-                    arrayListProject = arrayListProjectNames,
-                    arrayListStoryType = arrayListStoryTypeNames,
-                    arrayListRequester = arrayListRequesterNames,
-                    arrayListOwners = arrayListOwnersNames,
-                    arrayListLabels = arrayListLabelNames,
-                    arrayListPoints = arrayListPoints
+                    arrayListPivotalProject = arrayListProjectNames,
+                    arrayListPivotalStoryType = arrayListStoryTypeNames,
+                    arrayListPivotalRequester = arrayListRequesterNames,
+                    arrayListPivotalOwners = arrayListOwnersNames,
+                    arrayListPivotalLabels = arrayListLabelNames,
+                    arrayListPivotalPoints = arrayListPoints
                 )
             }
         }

@@ -500,10 +500,10 @@ internal class AsanaAuthentication {
             timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeAsanaAutoTextViews(
-                    arrayListProject = arrayListProjectNames,
-                    arrayListAssignee = arrayListAssigneeNames,
-                    arrayListSection = arrayListSectionsNames,
-                    arrayListPriority = arrayListPriorityNames,
+                    arrayListAsanaProject = arrayListProjectNames,
+                    arrayListAsanaAssignee = arrayListAssigneeNames,
+                    arrayListAsanaSection = arrayListSectionsNames,
+                    arrayListAsanaPriority = arrayListPriorityNames,
                     filePathMedia = filePathMedia!!
                 )
             }

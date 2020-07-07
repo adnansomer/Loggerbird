@@ -71,9 +71,9 @@ class JiraAuthentication {
     private var component: String? = null
     private var fixVersion: String? = null
     private val hashMapComponent: HashMap<String, String> = HashMap()
-    private val hashMapComponentPosition:HashMap<String,Int> = HashMap()
+    private val hashMapComponentPosition: HashMap<String, Int> = HashMap()
     private val hashMapFixVersions: HashMap<String, String> = HashMap()
-    private val hashMapFixVersionsPosition:HashMap<String,Int> = HashMap()
+    private val hashMapFixVersionsPosition: HashMap<String, Int> = HashMap()
     private val hashMapLinkedIssues: HashMap<String, String> = HashMap()
     private val hashMapSprint: HashMap<String, String> = HashMap()
     private val hashMapBoard: HashMap<String, String> = HashMap()
@@ -84,8 +84,8 @@ class JiraAuthentication {
     private val arrayListIssueTypesId: ArrayList<Int> = ArrayList()
     private val arrayListAssignee: ArrayList<String> = ArrayList()
     private val arrayListIssueLinkedTypes: ArrayList<String> = ArrayList()
-    private val arrayListOutwardLinkedTypes:ArrayList<String> = ArrayList()
-    private val arrayListInwardLinkedTypes:ArrayList<String> = ArrayList()
+    private val arrayListOutwardLinkedTypes: ArrayList<String> = ArrayList()
+    private val arrayListInwardLinkedTypes: ArrayList<String> = ArrayList()
     private val arrayListIssues: ArrayList<String> = ArrayList()
     private val arrayListReporter: ArrayList<String> = ArrayList()
     private val arrayListPriorities: ArrayList<String> = ArrayList()
@@ -113,7 +113,7 @@ class JiraAuthentication {
     private var epicLinkField: String? = null
     private var queueCreateTask = 0
     private lateinit var timerTaskQueue: TimerTask
-    private  var controlDuplication = false
+    private var controlDuplication = false
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun callJiraIssue(
@@ -380,21 +380,25 @@ class JiraAuthentication {
                                 stringBuilderDescription.append("Description:$description")
                                 var counter = 0
                                 RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.forEach {
-                                    stringBuilderDescription.append("\n" + "Linked Issue_"+counter+":" + LoggerBird.jiraDomainName+"/browse/"+it.issueName )
+                                    stringBuilderDescription.append("\n" + "Linked Issue_" + counter + ":" + LoggerBird.jiraDomainName + "/browse/" + it.issueName)
                                     counter++
                                 }
-                                jsonObjectContent.addProperty("description", stringBuilderDescription.toString())
+                                jsonObjectContent.addProperty(
+                                    "description",
+                                    stringBuilderDescription.toString()
+                                )
                             }
                         }
-                        if(RecyclerViewJiraLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()){
+                        if (RecyclerViewJiraLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()) {
                             val jsonArrayLabels = JsonArray()
                             RecyclerViewJiraLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
                                 jsonArrayLabels.add(it.labelName)
                             }
                             jsonObjectContent.add("labels", jsonArrayLabels)
-                        }else{
+                        } else {
                             if (arrayListChoosenLabel.isNotEmpty()) {
-                                val jsonArrayLabels = gson.toJsonTree(arrayListChoosenLabel).asJsonArray
+                                val jsonArrayLabels =
+                                    gson.toJsonTree(arrayListChoosenLabel).asJsonArray
                                 jsonObjectContent.add("labels", jsonArrayLabels)
                             }
                         }
@@ -404,16 +408,19 @@ class JiraAuthentication {
                             }
                         }
 
-                        if(RecyclerViewJiraComponentAdapter.ViewHolder.arrayListComponentNames.isNotEmpty()){
+                        if (RecyclerViewJiraComponentAdapter.ViewHolder.arrayListComponentNames.isNotEmpty()) {
                             val jsonArrayComponent = JsonArray()
-                            var jsonObjectComponentId:JsonObject
+                            var jsonObjectComponentId: JsonObject
                             RecyclerViewJiraComponentAdapter.ViewHolder.arrayListComponentNames.forEach {
                                 jsonObjectComponentId = JsonObject()
-                                jsonObjectComponentId.addProperty("id",hashMapComponent[arrayListComponents[hashMapComponentPosition[it.componentName]!!]])
+                                jsonObjectComponentId.addProperty(
+                                    "id",
+                                    hashMapComponent[arrayListComponents[hashMapComponentPosition[it.componentName]!!]]
+                                )
                                 jsonArrayComponent.add(jsonObjectComponentId)
                             }
-                            jsonObjectContent.add("components",jsonArrayComponent)
-                        }else{
+                            jsonObjectContent.add("components", jsonArrayComponent)
+                        } else {
                             if (arrayListComponents.size > componentPosition) {
                                 if (arrayListComponents[componentPosition].isNotEmpty() && component != null) {
                                     if (component!!.isNotEmpty()) {
@@ -430,16 +437,19 @@ class JiraAuthentication {
                                 }
                             }
                         }
-                        if(RecyclerViewJiraFixVersionsAdapter.ViewHolder.arrayListFixVersionsNames.isNotEmpty()){
+                        if (RecyclerViewJiraFixVersionsAdapter.ViewHolder.arrayListFixVersionsNames.isNotEmpty()) {
                             val jsonArrayFixVersions = JsonArray()
-                            var jsonObjectFixVersionsId :JsonObject
+                            var jsonObjectFixVersionsId: JsonObject
                             RecyclerViewJiraFixVersionsAdapter.ViewHolder.arrayListFixVersionsNames.forEach {
                                 jsonObjectFixVersionsId = JsonObject()
-                                jsonObjectFixVersionsId.addProperty("id",hashMapFixVersions[arrayListFixVersions[hashMapFixVersionsPosition[it.fixVersionsName]!!]])
+                                jsonObjectFixVersionsId.addProperty(
+                                    "id",
+                                    hashMapFixVersions[arrayListFixVersions[hashMapFixVersionsPosition[it.fixVersionsName]!!]]
+                                )
                                 jsonArrayFixVersions.add(jsonObjectFixVersionsId)
                             }
                             jsonObjectContent.add("fixVersions", jsonArrayFixVersions)
-                        }else{
+                        } else {
                             if (arrayListFixVersions.size > fixVersionPosition) {
                                 if (arrayListFixVersions[fixVersionPosition].isNotEmpty() && fixVersion != null) {
                                     if (fixVersion!!.isNotEmpty()) {
@@ -457,7 +467,10 @@ class JiraAuthentication {
                         }
                         if (epicLink != null) {
                             if (epicLink!!.isNotEmpty()) {
-                                jsonObjectContent.addProperty(epicLinkField, epicLink!!.substringAfter("(").substringBefore(")"))
+                                jsonObjectContent.addProperty(
+                                    epicLinkField,
+                                    epicLink!!.substringAfter("(").substringBefore(")")
+                                )
                             }
                         }
 
@@ -469,29 +482,41 @@ class JiraAuthentication {
                             var jsonObjectIssueLinkType = JsonObject()
                             var jsonObjectOutwardIssueKey = JsonObject()
                             val jsonObjectUpdate = JsonObject()
-                            if(RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.isNotEmpty()){
+                            if (RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.isNotEmpty()) {
 //                                RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.forEach {
-                                    jsonObjectOutwardIssueKey = JsonObject()
-                                    jsonObjectIssueAdd = JsonObject()
-                                    jsonObjectIssueLink = JsonObject()
-                                    jsonObjectIssueLinkType = JsonObject()
-                                    jsonObjectIssueLinkType.addProperty(
-                                        "name",
-                                        hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
+                                jsonObjectOutwardIssueKey = JsonObject()
+                                jsonObjectIssueAdd = JsonObject()
+                                jsonObjectIssueLink = JsonObject()
+                                jsonObjectIssueLinkType = JsonObject()
+                                jsonObjectIssueLinkType.addProperty(
+                                    "name",
+                                    hashMapLinkedIssues[arrayListIssueLinkedTypes[linkedIssueTypePosition]]
+                                )
+                                jsonObjectOutwardIssueKey.addProperty(
+                                    "key",
+                                    RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames[0].issueName
+                                )
+                                jsonObjectIssueLink.add("type", jsonObjectIssueLinkType)
+
+                                if (arrayListInwardLinkedTypes.contains(arrayListIssueLinkedTypes[linkedIssueTypePosition])) {
+                                    jsonObjectIssueLink.add(
+                                        "inwardIssue",
+                                        jsonObjectOutwardIssueKey
                                     )
-                                    jsonObjectOutwardIssueKey.addProperty("key", RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames[0].issueName)
-                                    jsonObjectIssueLink.add("type", jsonObjectIssueLinkType)
 
-                                    if(arrayListInwardLinkedTypes.contains(arrayListIssueLinkedTypes[linkedIssueTypePosition])){
-                                        jsonObjectIssueLink.add("inwardIssue", jsonObjectOutwardIssueKey)
-
-                                    }else if(arrayListOutwardLinkedTypes.contains(arrayListIssueLinkedTypes[linkedIssueTypePosition])){
-                                        jsonObjectIssueLink.add("outwardIssue", jsonObjectOutwardIssueKey)
-                                    }
-                                    jsonObjectIssueAdd.add("add", jsonObjectIssueLink)
-                                    jsonArrayIssue.add(jsonObjectIssueAdd)
+                                } else if (arrayListOutwardLinkedTypes.contains(
+                                        arrayListIssueLinkedTypes[linkedIssueTypePosition]
+                                    )
+                                ) {
+                                    jsonObjectIssueLink.add(
+                                        "outwardIssue",
+                                        jsonObjectOutwardIssueKey
+                                    )
+                                }
+                                jsonObjectIssueAdd.add("add", jsonObjectIssueLink)
+                                jsonArrayIssue.add(jsonObjectIssueAdd)
 //                                }
-                            }else{
+                            } else {
                                 if (issue!!.isNotEmpty()) {
                                     jsonObjectIssueLinkType.addProperty(
                                         "name",
@@ -500,11 +525,23 @@ class JiraAuthentication {
                                     jsonObjectOutwardIssueKey.addProperty("key", issue)
                                     jsonObjectIssueLink.add("type", jsonObjectIssueLinkType)
 
-                                    if(arrayListInwardLinkedTypes.contains(arrayListIssueLinkedTypes[linkedIssueTypePosition])){
-                                        jsonObjectIssueLink.add("inwardIssue", jsonObjectOutwardIssueKey)
+                                    if (arrayListInwardLinkedTypes.contains(
+                                            arrayListIssueLinkedTypes[linkedIssueTypePosition]
+                                        )
+                                    ) {
+                                        jsonObjectIssueLink.add(
+                                            "inwardIssue",
+                                            jsonObjectOutwardIssueKey
+                                        )
 
-                                    }else if(arrayListOutwardLinkedTypes.contains(arrayListIssueLinkedTypes[linkedIssueTypePosition])){
-                                        jsonObjectIssueLink.add("outwardIssue", jsonObjectOutwardIssueKey)
+                                    } else if (arrayListOutwardLinkedTypes.contains(
+                                            arrayListIssueLinkedTypes[linkedIssueTypePosition]
+                                        )
+                                    ) {
+                                        jsonObjectIssueLink.add(
+                                            "outwardIssue",
+                                            jsonObjectOutwardIssueKey
+                                        )
                                     }
                                     jsonObjectIssueAdd.add("add", jsonObjectIssueLink)
                                     jsonArrayIssue.add(jsonObjectIssueAdd)
@@ -722,8 +759,14 @@ class JiraAuthentication {
 //            jsonObjectContent.add("priority", jsonObjectPriorityId)
             jsonObjectContent.add("project", jsonObjectProjectId)
             jsonObjectContent.add("issuetype", jsonObjectIssueType)
-            jsonObjectContent.addProperty("summary",context.resources.getString(R.string.jira_summary_unhandled_exception))
-            jsonObjectContent.addProperty("description", sharedPref.getString("unhandled_exception_message", null))
+            jsonObjectContent.addProperty(
+                "summary",
+                context.resources.getString(R.string.jira_summary_unhandled_exception)
+            )
+            jsonObjectContent.addProperty(
+                "description",
+                sharedPref.getString("unhandled_exception_message", null)
+            )
             jsonObjectIssue.add("fields", jsonObjectContent)
             RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
                 .create(AccountIdService::class.java)
@@ -756,14 +799,14 @@ class JiraAuthentication {
                                 }
                                 val createdIssue = response.body()
                                 val issueKey = createdIssue!!["key"].asString
-                                    if (filePathName.exists()) {
-                                        createAttachments(
-                                            issueKey = issueKey,
-                                            file = filePathName,
-                                            activity = activity,
-                                            task = "unhandled"
-                                        )
-                                    }
+                                if (filePathName.exists()) {
+                                    createAttachments(
+                                        issueKey = issueKey,
+                                        file = filePathName,
+                                        activity = activity,
+                                        task = "unhandled"
+                                    )
+                                }
                                 val editor: SharedPreferences.Editor = sharedPref.edit()
                                 editor.remove("unhandled_file_path")
                                 editor.apply()
@@ -783,7 +826,6 @@ class JiraAuthentication {
                     }
                 })
         }
-
 
 
 //        val issueClient = restClient.issueClient
@@ -873,22 +915,22 @@ class JiraAuthentication {
         if (queueCounter == 0) {
             timerTaskQueue.cancel()
             activity.runOnUiThread {
-                LoggerBirdService.loggerBirdService.initializeJiraSpinner(
-                    arrayListProjectNames = arrayListProjects,
-                    arrayListProjectKeys = arrayListProjectKeys,
-                    arrayListIssueTypes = arrayListIssueTypes,
-                    arrayListAssignee = arrayListAssignee,
-                    arrayListReporterNames = arrayListReporter,
-                    arrayListLinkedIssues = arrayListIssueLinkedTypes,
-                    arrayListIssues = arrayListIssues,
-                    arrayListPriority = arrayListPriorities,
-                    arrayListComponent = arrayListComponents,
-                    arrayListFixVersions = arrayListFixVersions,
-                    arrayListLabel = arrayListLabel,
-                    arrayListEpicLink = arrayListEpicLink,
-                    arrayListSprint = arrayListSprintName,
-                    arrayListEpicName = arrayListEpicName,
-                    hashMapBoardList = hashMapBoard
+                LoggerBirdService.loggerBirdService.initializeJiraAutoTextViews(
+                    arrayListJiraProjectNames = arrayListProjects,
+                    arrayListJiraProjectKeys = arrayListProjectKeys,
+                    arrayListJiraIssueTypes = arrayListIssueTypes,
+                    arrayListJiraAssignee = arrayListAssignee,
+                    arrayListJiraReporterNames = arrayListReporter,
+                    arrayListJiraLinkedIssues = arrayListIssueLinkedTypes,
+                    arrayListJiraIssues = arrayListIssues,
+                    arrayListJiraPriority = arrayListPriorities,
+                    arrayListJiraComponent = arrayListComponents,
+                    arrayListJiraFixVersions = arrayListFixVersions,
+                    arrayListJiraLabel = arrayListLabel,
+                    arrayListJiraEpicLink = arrayListEpicLink,
+                    arrayListJiraSprint = arrayListSprintName,
+                    arrayListJiraEpicName = arrayListEpicName,
+                    hashMapJiraBoardList = hashMapBoard
                 )
             }
         }
@@ -1121,8 +1163,8 @@ class JiraAuthentication {
         }
     }
 
-    private fun jiraTaskGatherIssues(task:String,exceptionMessage:String? = null) {
-        if(task != "duplication"){
+    private fun jiraTaskGatherIssues(task: String, exceptionMessage: String? = null) {
+        if (task != "duplication") {
             queueCounter++
         }
 
@@ -1148,15 +1190,15 @@ class JiraAuthentication {
                             Log.d("issue_details", response.code().toString())
                             val issueList = response.body()
                             issueList?.getAsJsonArray("issues")?.forEach {
-                                if(task != "duplication" && exceptionMessage == null){
+                                if (task != "duplication" && exceptionMessage == null) {
                                     arrayListIssues.add(it.asJsonObject["key"].asString)
-                                }else{
-                                    if(exceptionMessage!! == it.asJsonObject["fields"].asJsonObject["description"].asString){
+                                } else {
+                                    if (exceptionMessage!! == it.asJsonObject["fields"].asJsonObject["description"].asString) {
                                         controlDuplication = true
                                     }
                                 }
                             }
-                            if(task != "duplication"){
+                            if (task != "duplication") {
                                 updateFields()
                             }
                         }
@@ -1242,8 +1284,8 @@ class JiraAuthentication {
                             val epicList = response.body()
                             epicList?.getAsJsonArray("issues")?.forEach {
 
-                                if (!arrayListEpicLink.contains(it.asJsonObject["fields"].asJsonObject[epicNameField].asString+" "+"-"+" "+"("+it.asJsonObject["key"].asString+")")) {
-                                    arrayListEpicLink.add(it.asJsonObject["fields"].asJsonObject[epicNameField].asString+" "+"-"+" "+"("+it.asJsonObject["key"].asString+")")
+                                if (!arrayListEpicLink.contains(it.asJsonObject["fields"].asJsonObject[epicNameField].asString + " " + "-" + " " + "(" + it.asJsonObject["key"].asString + ")")) {
+                                    arrayListEpicLink.add(it.asJsonObject["fields"].asJsonObject[epicNameField].asString + " " + "-" + " " + "(" + it.asJsonObject["key"].asString + ")")
                                 }
                                 if (!arrayListEpicName.contains(it.asJsonObject["fields"].asJsonObject[epicNameField].asString)) {
                                     arrayListEpicName.add(it.asJsonObject["fields"].asJsonObject[epicNameField].asString)
@@ -1327,23 +1369,25 @@ class JiraAuthentication {
                         coroutineCallGatherfixComp.async {
                             Log.d("fix_comp_details", response.code().toString())
                             val fixCompList = response.body()
-                            var compPositionCounter =0
+                            var compPositionCounter = 0
                             fixCompList?.getAsJsonArray("components")?.forEach {
                                 if (!arrayListComponents.contains(it.asJsonObject["name"].asString)) {
                                     arrayListComponents.add(it.asJsonObject["name"].asString)
                                     hashMapComponent[it.asJsonObject["name"].asString] =
                                         it.asJsonObject["id"].asString
-                                    hashMapComponentPosition[it.asJsonObject["name"].asString] = compPositionCounter
+                                    hashMapComponentPosition[it.asJsonObject["name"].asString] =
+                                        compPositionCounter
                                 }
                                 compPositionCounter++
                             }
-                            var fixPositionCounter =0
+                            var fixPositionCounter = 0
                             fixCompList?.getAsJsonArray("versions")?.forEach {
                                 if (!arrayListFixVersions.contains(it.asJsonObject["name"].asString)) {
                                     arrayListFixVersions.add(it.asJsonObject["name"].asString)
                                     hashMapFixVersions[it.asJsonObject["name"].asString] =
                                         it.asJsonObject["id"].asString
-                                    hashMapFixVersionsPosition[it.asJsonObject["name"].asString] = fixPositionCounter
+                                    hashMapFixVersionsPosition[it.asJsonObject["name"].asString] =
+                                        fixPositionCounter
                                 }
                                 fixPositionCounter++
                             }
@@ -1795,16 +1839,8 @@ class JiraAuthentication {
     private fun resetJiraValues(activity: Activity) {
         queueCreateTask--
         if (queueCreateTask == 0) {
-            activity.runOnUiThread {
-                if(LoggerBirdService.loggerBirdService.controlButtonJiraCancel()){
-                    LoggerBirdService.loggerBirdService.buttonJiraCancel.performClick()
-                }
-            }
-            if (!LoggerBirdService.loggerBirdService.checkUnhandledFilePath()) {
-                LoggerBirdService.loggerBirdService.finishShareLayout("jira")
-            } else {
-                LoggerBirdService.loggerBirdService.unhandledExceptionCustomizeIssueSent()
-            }
+            LoggerBirdService.loggerBirdService.unhandledExceptionCustomizeJiraIssueSent()
+            LoggerBirdService.loggerBirdService.finishShareLayout("jira")
             timerTaskQueue.cancel()
             summary = ""
             project = null
@@ -1943,7 +1979,7 @@ class JiraAuthentication {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         if (sharedPref.getString("unhandled_exception_message", null) != null) {
             val exceptionMessage = sharedPref.getString("unhandled_exception_message", null)
-            jiraTaskGatherIssues(task = "duplication",exceptionMessage = exceptionMessage)
+            jiraTaskGatherIssues(task = "duplication", exceptionMessage = exceptionMessage)
             Thread.sleep(10000)
 //            val searchClient = restClient.searchClient
 //            val projectClient = restClient.projectClient
@@ -2119,42 +2155,42 @@ class JiraAuthentication {
         }
     }
 
-        private fun createAttachments(issueKey: String, file:File,activity: Activity,task:String) {
-            if(task != "unhandled"){
-                queueCreateTask++
-            }
-
-            val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
-            val body = MultipartBody.Part.createFormData("file",file.name,requestFile)
-            RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
-                .create(AccountIdService::class.java)
-                .setAttachments(file= body)
-                .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
-                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                    override fun onFailure(
-                        call: retrofit2.Call<List<JiraSprintModel>>,
-                        t: Throwable
-                    ) {
-                        if(task != "unhandled"){
-                            resetJiraValues(activity = activity)
-                        }
-                        jiraExceptionHandler(throwable = t)
-                    }
-
-                    override fun onResponse(
-                        call: retrofit2.Call<List<JiraSprintModel>>,
-                        response: retrofit2.Response<List<JiraSprintModel>>
-                    ) {
-                        if(task != "unhandled"){
-                            resetJiraValues(activity = activity)
-                        }
-                        if (file.name != "logger_bird_details.txt") {
-                            if (file.exists()) {
-                                file.delete()
-                            }
-                        }
-                        Log.d("attachment_put_success", response.code().toString())
-                    }
-                })
+    private fun createAttachments(issueKey: String, file: File, activity: Activity, task: String) {
+        if (task != "unhandled") {
+            queueCreateTask++
         }
+
+        val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+        val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+        RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
+            .create(AccountIdService::class.java)
+            .setAttachments(file = body)
+            .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
+                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                override fun onFailure(
+                    call: retrofit2.Call<List<JiraSprintModel>>,
+                    t: Throwable
+                ) {
+                    if (task != "unhandled") {
+                        resetJiraValues(activity = activity)
+                    }
+                    jiraExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<List<JiraSprintModel>>,
+                    response: retrofit2.Response<List<JiraSprintModel>>
+                ) {
+                    if (task != "unhandled") {
+                        resetJiraValues(activity = activity)
+                    }
+                    if (file.name != "logger_bird_details.txt") {
+                        if (file.exists()) {
+                            file.delete()
+                        }
+                    }
+                    Log.d("attachment_put_success", response.code().toString())
+                }
+            })
+    }
 }

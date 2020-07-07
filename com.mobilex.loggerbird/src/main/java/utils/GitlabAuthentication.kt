@@ -607,7 +607,7 @@ class GitlabAuthentication {
         activity.runOnUiThread {
             LoggerBirdService.loggerBirdService.initializeGitlabSpinner(
                 arrayListGitlabProjects = arrayListProjects,
-                arrayListGitlabUsers = arrayListUsers,
+                arrayListGitlabAssignee = arrayListUsers,
                 arrayListGitlabMilestones = arrayListMilestones,
                 arrayListGitlabLabels = arrayListLabels,
                 arrayListGitlabConfidentiality = arrayListConfidentiality

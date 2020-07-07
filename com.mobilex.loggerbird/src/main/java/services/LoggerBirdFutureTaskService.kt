@@ -152,10 +152,10 @@ class LoggerBirdFutureTaskService : Service() {
                 .setSmallIcon(R.drawable.loggerbird)
                 .build()
             startForeground(5, notification)
-            LoggerBirdService.callEnqueue()
+            LoggerBirdService.callEnqueueVideo()
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBirdService.callEnqueue()
+            LoggerBirdService.callEnqueueVideo()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.futureTaskTag)
         }

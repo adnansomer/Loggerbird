@@ -184,7 +184,7 @@ internal class EmailUtil {
                 LoggerBirdService.loggerBirdService.returnActivity().runOnUiThread {
                     LoggerBirdService.loggerBirdService.removeEmailLayout()
                     LoggerBirdService.loggerBirdService.detachProgressBar()
-                    LoggerBirdService.resetEnqueueMail()
+                    LoggerBirdService.resetEnqueueEmail()
                 }
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
@@ -570,7 +570,7 @@ internal class EmailUtil {
                     }
                 }
                 e.printStackTrace()
-                LoggerBirdService.resetEnqueueMail()
+                LoggerBirdService.resetEnqueueEmail()
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(exception = e, tag = Constants.emailTag)
             }
@@ -585,7 +585,7 @@ internal class EmailUtil {
                 )
                 LoggerBirdService.loggerBirdService.removeEmailLayout()
                 LoggerBirdService.loggerBirdService.detachProgressBar()
-                LoggerBirdService.resetEnqueueMail()
+                LoggerBirdService.resetEnqueueEmail()
             }
         }
 

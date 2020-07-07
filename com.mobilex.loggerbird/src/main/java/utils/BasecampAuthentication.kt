@@ -554,11 +554,11 @@ internal class BasecampAuthentication {
             timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeBasecampAutoTextViews(
-                    arrayListProject = arrayListProjectNames,
-                    arrayListAssignee = arrayListAssigneeNames,
-                    arrayListCategory = arrayListCategoryNames,
-                    arrayListCategoryIcon = arrayListCategoryIcon,
-                    arrayListNotify = arrayListNotifyNames
+                    arrayListBasecampProject = arrayListProjectNames,
+                    arrayListBasecampAssignee = arrayListAssigneeNames,
+                    arrayListBasecampCategory = arrayListCategoryNames,
+                    arrayListBasecampCategoryIcon = arrayListCategoryIcon,
+                    arrayListBasecampNotify = arrayListNotifyNames
                 )
             }
         }
