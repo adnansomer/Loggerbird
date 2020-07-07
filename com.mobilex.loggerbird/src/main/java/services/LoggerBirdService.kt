@@ -674,8 +674,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var imageButtonAsanaRemoveDate: ImageButton
     private lateinit var buttonAsanaCancel: Button
     private lateinit var buttonAsanaCreate: Button
-    private var arrayListAsanaSubtaskAssignee:ArrayList<String> = ArrayList()
-    private var arrayListAsanaSubtaskSection:ArrayList<String> = ArrayList()
+    private var arrayListAsanaSubtaskAssignee: ArrayList<String> = ArrayList()
+    private var arrayListAsanaSubtaskSection: ArrayList<String> = ArrayList()
     //asana_date:
     private lateinit var frameLayoutAsanaDate: FrameLayout
     private lateinit var calendarViewAsana: CalendarView
@@ -9666,6 +9666,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         recyclerViewAsanaSubTasksList.adapter = asanaSubTasksAdapter
     }
 
+
+    /**
+     * This method is used for initializing  autoCompleteTextViews in the loggerbird_asana_popup.
+     * @param arrayListProject is used for getting the project list for project autoCompleteTextView.
+     * @param arrayListAssignee is used for getting the assignee list for assignee autoCompleteTextView.
+     * @param arrayListSection is used for getting the section list for section autoCompleteTextView.
+     * @param arrayListPriority is used for getting the priority list for priority autoCompleteTextView.
+     * @param filePathMedia is used for getting the reference of current media file.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     internal fun initializeAsanaAutoTextViews(
         arrayListProject: ArrayList<String>,
@@ -9711,6 +9720,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         detachProgressBar()
     }
 
+    /**
+     * This method is used for initializing project autoCompleteTextView in the loggerbird_asana_popup.
+     * @param arrayListProject is used for getting the project list for project autoCompleteTextView.
+     * @param sharedPref is used for getting the reference of SharedPreferences of current activity.
+     */
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializeAsanaProject(
@@ -9758,24 +9772,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
             attachProgressBar()
         }
-//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
-//            if (!hasFocus) {
-//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
-//                    if (arrayListProjectNames.isNotEmpty()) {
-//                        if (sharedPref.getString("jira_project", null) != null) {
-//                            autoTextViewProject.setText(
-//                                sharedPref.getString("jira_project", null),
-//                                false
-//                            )
-//                        } else {
-//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
-//                        }
-//                    }
-//                }
-//            }
-//        }
     }
 
+    /**
+     * This method is used for initializing section autoCompleteTextView in the loggerbird_asana_popup.
+     * @param arrayListSection is used for getting the section list for section autoCompleteTextView.
+     * @param sharedPref is used for getting the reference of SharedPreferences of current activity.
+     */
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializeAsanaSection(
@@ -9814,25 +9817,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             asanaAuthentication.setSectionPosition(sectionPosition = position)
             hideKeyboard(activity = activity, view = viewAsana)
         }
-//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
-//            if (!hasFocus) {
-//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
-//                    if (arrayListProjectNames.isNotEmpty()) {
-//                        if (sharedPref.getString("jira_project", null) != null) {
-//                            autoTextViewProject.setText(
-//                                sharedPref.getString("jira_project", null),
-//                                false
-//                            )
-//                        } else {
-//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
-//                        }
-//                    }
-//                }
-//            }
-//        }
         this.arrayListAsanaSubtaskSection = arrayListSection
     }
 
+    /**
+     * This method is used for initializing priority autoCompleteTextView in the loggerbird_asana_popup.
+     * @param arrayListPriority is used for getting the priority list for priority autoCompleteTextView.
+     * @param sharedPref is used for getting the reference of SharedPreferences of current activity.
+     */
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializeAsanaPriority(
@@ -9871,24 +9863,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             //            basecampAuthentication.setCategoryPosition(categoryPosition = position)
             hideKeyboard(activity = activity, view = viewAsana)
         }
-//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
-//            if (!hasFocus) {
-//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
-//                    if (arrayListProjectNames.isNotEmpty()) {
-//                        if (sharedPref.getString("jira_project", null) != null) {
-//                            autoTextViewProject.setText(
-//                                sharedPref.getString("jira_project", null),
-//                                false
-//                            )
-//                        } else {
-//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
-//                        }
-//                    }
-//                }
-//            }
-//        }
     }
 
+    /**
+     * This method is used for initializing assignee autoCompleteTextView in the loggerbird_asana_popup.
+     * @param arrayListAssignee is used for getting the assignee list for assignee autoCompleteTextView.
+     * @param sharedPref is used for getting the reference of SharedPreferences of current activity.
+     */
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializeAsanaAssignee(
@@ -9927,25 +9908,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             asanaAuthentication.setAssignee(assigneePosition = position)
             hideKeyboard(activity = activity, view = viewAsana)
         }
-//        autoTextViewProject.setOnFocusChangeListener { v, hasFocus ->
-//            if (!hasFocus) {
-//                if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
-//                    if (arrayListProjectNames.isNotEmpty()) {
-//                        if (sharedPref.getString("jira_project", null) != null) {
-//                            autoTextViewProject.setText(
-//                                sharedPref.getString("jira_project", null),
-//                                false
-//                            )
-//                        } else {
-//                            autoTextViewProject.setText(arrayListProjectNames[0], false)
-//                        }
-//                    }
-//                }
-//            }
-//        }
         this.arrayListAsanaSubtaskAssignee = arrayListAssignee
     }
-
+    /**
+     * This method is used for creating asana-date layout which is attached to application overlay.
+     */
     private fun initializeAsanaDateLayout() {
         removeAsanaDateLayout()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
@@ -9992,6 +9959,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing button clicks of buttons that are inside in the asana_calendar_view.
+     */
     private fun buttonClicksAsanaDateLayout() {
         val calendar = Calendar.getInstance()
         val mYear = calendar.get(Calendar.YEAR)
@@ -10036,6 +10006,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeAsanaDateLayout()
         }
     }
+
+
+    //Clubhouse
+    /**
+     * This method is used for creating clubhouse layout which is attached to application overlay.
+     */
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeClubhouseLayout(filePathMedia: File) {
         try {
@@ -10115,6 +10091,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing project autoCompleteTextView in the loggerbird_clubhouse_popup.
+     * @param arrayListClubhouseProjects is used for getting the project list for project autoCompleteTextView.
+     */
     @SuppressLint("ClickableViewAccessibility")
     internal fun initializeClubhouseProject(
         arrayListClubhouseProjects: ArrayList<String>
@@ -10154,6 +10134,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing epic autoCompleteTextView in the loggerbird_clubhouse_popup.
+     * @param arrayListClubhouseEpic is used for getting the epic list for epic autoCompleteTextView.
+     */
     @SuppressLint("ClickableViewAccessibility")
     internal fun initializeClubhouseEpic(
         arrayListClubhouseEpic: ArrayList<String>
@@ -10180,7 +10164,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
         }
     }
-
+    /**
+     * This method is used for initializing  autoCompleteTextViews in the loggerbird_clubhouse_popup.
+     * @param arrayListClubhouseRequester is used for getting the requester list for requester autoCompleteTextView.
+     * @param arrayListClubhouseProjects is used for getting the project list for project autoCompleteTextView.
+     * @param arrayListClubhouseStoryType is used for getting the story type list for story type autoCompleteTextView.
+     * @param arrayListClubhouseEpic is used for getting the epic list for epic autoCompleteTextView.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun initializeClubhouseSpinner(
         arrayListClubhouseRequester: ArrayList<String>,
@@ -10197,6 +10187,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         progressBarClubhouseLayout.visibility = View.GONE
     }
 
+    /**
+     * This method is used for initializing story type autoCompleteTextView in the loggerbird_clubhouse_popup.
+     * @param arrayListClubhouseStoryType is used for getting the story type list for story type autoCompleteTextView.
+     */
     internal fun initializeClubhouseStoryType(
         arrayListClubhouseStoryType: ArrayList<String>
     ) {
@@ -10222,7 +10216,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
     }
-
+    /**
+     * This method is used for creating custom clubhouse date-picker layout which is attached to application overlay.
+     */
     private fun attachClubhouseDatePicker() {
         try {
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
@@ -10259,6 +10255,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.clubhouseDatePopupTag)
         }
     }
+    /**
+     * This method is used for initializing clubhouse date-picker.
+     */
 
     private fun initializeClubhouseDatePicker() {
         val calendar = Calendar.getInstance()
@@ -10306,6 +10305,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for removing clubhouse_calendar_view from window.
+     */
     private fun detachClubhouseDatePicker() {
         if (this::calendarViewClubhouseView.isInitialized) {
             (windowManagerClubhouseDatePicker as WindowManager).removeViewImmediate(
@@ -10314,6 +10316,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing requester autoCompleteTextView in the loggerbird_clubhouse_popup.
+     * @param arrayListClubhouseRequester is used for getting the requester list for requester autoCompleteTextView.
+     */
     internal fun initializeClubhouseRequester(
         arrayListClubhouseRequester: ArrayList<String>
     ) {
@@ -10339,10 +10345,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
     }
-
+    /**
+     * This method is used for initializing button clicks of buttons that are inside in the loggerbird_clubhouse_popup.
+     * @param filePathMedia is used for getting the reference of current media file.
+     */
     @RequiresApi(Build.VERSION_CODES.M)
     private fun buttonClicksClubhouse(filePathMedia: File) {
-
         buttonClubhouseCreate.setSafeOnClickListener {
             if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty() &&
                 checkClubhouseStoryDueDateEmpty() && checkClubhouseStoryEstimatePoint()
@@ -10394,6 +10402,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for story field is not empty in clubhouse layout.
+     * @return Boolean value.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun checkClubhouseStoryNameEmpty(): Boolean {
         if (editTextClubhouseStoryName.text.toString().isNotEmpty()) {
@@ -10407,6 +10419,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         return false
     }
 
+    /**
+     * This method is used for description field is not empty in clubhouse layout.
+     * @return Boolean value.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun checkClubhouseStoryDescriptionEmpty(): Boolean {
         if (editTextClubhouseStoryDescription.text.toString().isNotEmpty()) {
@@ -10420,6 +10436,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         return false
     }
 
+    /**
+     * This method is used for date field is not empty in clubhouse layout.
+     * @return Boolean value.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun checkClubhouseStoryDueDateEmpty(): Boolean {
         if (textViewClubhouseDueDate.text.toString().isNotEmpty()) {
@@ -10433,6 +10453,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         return false
     }
 
+    /**
+     * This method used for estimate point field is not empty in clubhouse layout.
+     * @return Boolean value.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun checkClubhouseStoryEstimatePoint(): Boolean {
         if (editTextClubhouseEstimate.text.toString().isNotEmpty()) {
@@ -10446,6 +10470,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         return false
     }
 
+    /**
+     * This method is used for removing loggerbird_clubhouse_popup from window.
+     */
     internal fun removeClubhouseLayout() {
         if (windowManagerClubhouse != null && this::viewClubhouse.isInitialized) {
             (windowManagerClubhouse as WindowManager).removeViewImmediate(viewClubhouse)
@@ -10454,6 +10481,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing clubhouse attachment recyclerView.
+     * @param filePathMedia is used for getting the reference of current media file.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeClubhouseRecyclerView(filePathMedia: File) {
         arrayListClubhouseFileName.clear()
@@ -10469,6 +10500,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         recyclerViewClubhouseAttachment.adapter = clubhouseAttachmentAdapter
     }
 
+    /**
+     * This method is used for adding files to clubhouse file list.
+     * @param filePathMedia is used for getting the reference of current media file.
+     * @return ArrayList<RecyclerViewModel> value.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun addClubhouseFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
