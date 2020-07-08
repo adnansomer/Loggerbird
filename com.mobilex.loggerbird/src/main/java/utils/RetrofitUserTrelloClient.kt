@@ -4,9 +4,14 @@ import loggerbird.LoggerBird
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-
-class RetrofitUserTrelloClient {
+/**
+ * This class is used for creating retrofit client for trello.
+ */
+internal class RetrofitUserTrelloClient {
     companion object {
+        /**
+         * This method is used for creating client in order to use in retrofit builder.
+         */
        internal fun getTrelloUserClient(url:String): Retrofit {
             val client = OkHttpClient.Builder()
                 .addInterceptor(

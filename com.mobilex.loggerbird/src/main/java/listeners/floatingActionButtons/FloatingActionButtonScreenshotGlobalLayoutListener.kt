@@ -1,16 +1,15 @@
-package listeners
+package listeners.floatingActionButtons
 
 import android.os.Build
 import android.view.ViewTreeObserver
-import android.widget.Button
-import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import constants.Constants
 import loggerbird.LoggerBird
 import services.LoggerBirdService
 
-class FloatingActionButtonScreenshotGlobalLayoutListener(private val floatingActionButtonScreenshot: FloatingActionButton? = null) :
+//This class is not used at the moment.
+internal class FloatingActionButtonScreenshotGlobalLayoutListener(private val floatingActionButtonScreenshot: FloatingActionButton? = null) :
     ViewTreeObserver.OnGlobalLayoutListener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onGlobalLayout() {

@@ -1,4 +1,4 @@
-package listeners
+package listeners.layouts
 
 import android.content.res.Resources
 import android.os.Build
@@ -16,8 +16,8 @@ import constants.Constants
 import loggerbird.LoggerBird
 
 
-
-class LayoutJiraOnTouchListener(
+//This class is used for making jira layout movable.
+internal class LayoutJiraOnTouchListener(
     private val windowManager: WindowManager,
     private val windowManagerView: View,
     private val windowManagerParams: WindowManager.LayoutParams

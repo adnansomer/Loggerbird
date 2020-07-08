@@ -1,4 +1,4 @@
-package listeners
+package listeners.floatingActionButtons
 
 import android.os.Build
 import android.view.ViewTreeObserver
@@ -8,8 +8,8 @@ import constants.Constants
 import loggerbird.LoggerBird
 import services.LoggerBirdService
 
-
-class FloatingActionButtonGlobalLayoutListener(
+//This class is not used at the moment.
+internal class FloatingActionButtonGlobalLayoutListener(
         private val floatingActionButton: FloatingActionButton? = null
 ) : ViewTreeObserver.OnGlobalLayoutListener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)

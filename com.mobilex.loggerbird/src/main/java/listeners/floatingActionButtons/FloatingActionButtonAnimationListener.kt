@@ -1,10 +1,10 @@
-package listeners
+package listeners.floatingActionButtons
 
 import android.content.Context
 import android.view.animation.Animation
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-
+//Dummy class might be useful in future.
 class FloatingActionButtonAnimationListener(
     private val floatingActionButtonAudio: FloatingActionButton,
     private val context: Context

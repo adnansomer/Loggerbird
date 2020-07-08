@@ -5,8 +5,14 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class RetrofitUserGithubClient {
+/**
+ * This class is used for creating retrofit client for github.
+ */
+internal class RetrofitUserGithubClient {
     companion object {
+        /**
+         * This method is used for creating client in order to use in retrofit builder.
+         */
        internal fun getGithubUserClient(url:String): Retrofit {
             val client = OkHttpClient.Builder()
                 .addInterceptor(

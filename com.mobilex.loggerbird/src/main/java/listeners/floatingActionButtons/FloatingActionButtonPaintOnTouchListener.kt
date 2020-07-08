@@ -1,19 +1,18 @@
-package listeners
+package listeners.floatingActionButtons
 
 import android.content.res.Resources
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mobilex.loggerbird.R
 import constants.Constants
 import loggerbird.LoggerBird
 
-
-class FloatingActionButtonPaintOnTouchListener(
+//This class is used for making paint floating action buttons movable.
+internal class FloatingActionButtonPaintOnTouchListener(
     private val floatingActionButtonPaint: FloatingActionButton,
     private val floatingActionButtonPaintSave: FloatingActionButton,
     private val floatingActionButtonPaintBack: FloatingActionButton,

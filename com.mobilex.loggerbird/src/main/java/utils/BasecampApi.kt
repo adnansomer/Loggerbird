@@ -30,7 +30,7 @@ import kotlin.collections.ArrayList
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import kotlin.collections.HashMap
-
+//Jira api class.
 internal class BasecampApi {
     //Global variables.
     private lateinit var activity: Activity

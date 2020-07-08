@@ -34,6 +34,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
+//Jira api class.
 internal class JiraApi {
     //Global variables.
     private val coroutineCallJira: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -552,13 +553,6 @@ internal class JiraApi {
                                                 "create_issue_details",
                                                 response.code().toString()
                                             )
-                                            if (response.errorBody()?.string() != null) {
-                                                Log.d(
-                                                    "create_issue_details",
-                                                    response.errorBody()?.string()
-                                                )
-                                            }
-
                                             val createdIssue = response.body()
                                             val issueKey = createdIssue!!["key"].asString
                                             createAssignee(issueKey = issueKey)

@@ -80,7 +80,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import listeners.*
 import loggerbird.LoggerBird
 import models.*
 import observers.LogActivityLifeCycleObserver
@@ -97,6 +96,9 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import java.text.SimpleDateFormat
 import android.text.InputFilter
+import listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
+import listeners.layouts.LayoutFeedbackOnTouchListener
+import listeners.layouts.LayoutJiraOnTouchListener
 
 internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
@@ -1490,27 +1492,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
         }
-    }
-
-    /**
-     * not used!
-     */
-    private fun attachFloatingActionButtonLayoutListener() {
-        floating_action_button.viewTreeObserver.addOnGlobalLayoutListener(
-            FloatingActionButtonGlobalLayoutListener(
-                floatingActionButton = floating_action_button
-            )
-        )
-        floating_action_button_screenshot.viewTreeObserver.addOnGlobalLayoutListener(
-            FloatingActionButtonScreenshotGlobalLayoutListener(floatingActionButtonScreenshot = floating_action_button_screenshot)
-        )
-        floating_action_button_video.viewTreeObserver.addOnGlobalLayoutListener(
-            FloatingActionButtonVideoGlobalLayoutListener(floatingActionButtonVideo = floating_action_button_video)
-        )
-
-        floating_action_button_audio.viewTreeObserver.addOnGlobalLayoutListener(
-            FloatingActionButtonAudioGlobalLayoutListener(floatingActionButtonAudio = floating_action_button_audio)
-        )
     }
 
     /**

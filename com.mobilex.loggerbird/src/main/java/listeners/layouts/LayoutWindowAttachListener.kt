@@ -1,9 +1,10 @@
-package listeners
+package listeners.layouts
 
 import android.os.Build
 import android.view.ViewTreeObserver
 import androidx.annotation.RequiresApi
 
+//Dummy class might be useful in future.
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 class LayoutWindowAttachListener(private val runnable: Runnable) :ViewTreeObserver.OnWindowAttachListener {
     companion object{
