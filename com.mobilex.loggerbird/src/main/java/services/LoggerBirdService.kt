@@ -227,7 +227,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private val defaultToast: DefaultToast = DefaultToast()
 
     //Jira:
-    internal val jiraAuthentication = JiraAuthentication()
+    internal val jiraAuthentication = JiraApi()
     private lateinit var autoTextViewJiraProject: AutoCompleteTextView
     private lateinit var autoTextViewJiraIssueType: AutoCompleteTextView
     private lateinit var recyclerViewJiraAttachment: RecyclerView
@@ -3459,10 +3459,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     recyclerViewJiraFixVersionsList =
                         viewJira.findViewById(R.id.recycler_view_fix_versions_list)
 
-                    jiraAuthentication.callJiraIssue(
+                    jiraAuthentication.callJira(
                         context = context,
                         activity = activity,
-                        jiraTask = "get",
+                        Task = "get",
                         createMethod = "normal"
                     )
 
@@ -3530,7 +3530,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 editTextSummary = editTextJiraSummary,
                 editTextDescription = editTextJiraDescription
             )
-            jiraAuthentication.gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems = arrayListJiraFileName)
             if (autoTextViewJiraIssueType.editableText.toString() != "Epic") {
                 callJiraTask(filePathMedia = filePathMedia)
             } else {
@@ -3870,11 +3869,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                    attachProgressBar()
             }
 //                hideKeyboard(activity = activity)
-            jiraAuthentication.callJiraIssue(
-                filePathName = filePathMedia,
+            jiraAuthentication.callJira(
+                filePathMedia = filePathMedia,
                 context = context,
                 activity = activity,
-                jiraTask = "create",
+                task = "create",
                 createMethod = "normal"
             )
         }
@@ -4548,10 +4547,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                    attachProgressBar()
             }
             hideKeyboard(activity = activity, view = viewJira)
-            jiraAuthentication.callJiraIssue(
+            jiraAuthentication.callJira(
                 context = context,
                 activity = activity,
-                jiraTask = "get",
+                task = "get",
                 createMethod = "normal"
             )
         }
@@ -5064,11 +5063,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textViewShareWithJira.setSafeOnClickListener {
                         if (checkBoxDuplication.isChecked) {
                             attachProgressBar()
-                            jiraAuthentication.callJiraIssue(
-                                filePathName = filePath,
+                            jiraAuthentication.callJira(
+                                filePathMedia = filePath,
                                 context = context,
                                 activity = activity,
-                                jiraTask = "unhandled_duplication",
+                                task = "unhandled_duplication",
                                 createMethod = "default"
                             )
                         } else {
@@ -5078,11 +5077,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textViewCustomizeJira.setSafeOnClickListener {
                         if (checkBoxDuplication.isChecked) {
                             attachProgressBar()
-                            jiraAuthentication.callJiraIssue(
-                                filePathName = filePath,
+                            jiraAuthentication.callJira(
+                                filePathMedia = filePath,
                                 context = context,
                                 activity = activity,
-                                jiraTask = "unhandled_duplication",
+                                task = "unhandled_duplication",
                                 createMethod = "customize"
                             )
                         } else {

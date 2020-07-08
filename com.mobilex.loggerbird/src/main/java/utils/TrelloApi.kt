@@ -63,6 +63,7 @@ internal class TrelloApi {
     private var label: String? = null
     private val defaultToast = DefaultToast()
     private var calendar: Calendar? = null
+
     /**
      * This method is used for calling an trello action with network connection check.
      * @param activity is used for getting reference of current activity.
@@ -560,7 +561,6 @@ internal class TrelloApi {
             })
     }
 
-
     /**
      * This method is used for getting details of autoCompleteTextViews in the trello layout.
      * @param autoTextViewProject is used for getting project details from project autoCompleteTextView in the trello layout.
@@ -681,7 +681,6 @@ internal class TrelloApi {
     internal fun setLabelPosition(labelPosition: Int) {
         this.labelPosition = labelPosition
     }
-
 
     /**
      * This method is used for resetting the values in trello action.
