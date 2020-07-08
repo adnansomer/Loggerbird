@@ -11,7 +11,6 @@ import android.content.res.Resources
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Looper
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.LayoutInflater
@@ -58,11 +57,9 @@ import utils.EmailUtil
 import utils.InternetConnectionUtil
 import utils.LinkedBlockingQueueUtil
 import java.io.File
-import java.lang.NullPointerException
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.security.auth.Subject
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 
@@ -3065,7 +3062,7 @@ class LoggerBird : LifecycleObserver {
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    LoggerBirdService.callEnqueue()
+                    LoggerBirdService.callEnqueueVideo()
                     callEnqueue()
                     callExceptionDetails(exception = e, tag = Constants.onActivityResultTag)
                 }
@@ -3106,7 +3103,7 @@ class LoggerBird : LifecycleObserver {
                     } while (permissions.iterator().hasNext())
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    LoggerBirdService.callEnqueue()
+                    LoggerBirdService.callEnqueueVideo()
                     callEnqueue()
                     callExceptionDetails(exception = e, tag = Constants.onPermissionResultTag)
                 }

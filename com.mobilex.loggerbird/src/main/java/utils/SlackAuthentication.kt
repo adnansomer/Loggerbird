@@ -297,8 +297,8 @@ class SlackAuthentication {
         if (queueCounter == 0) {
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeSlackSpinner(
-                    arrayListChannels = arrayListChannels,
-                    arrayListUsers = arrayListUsersName
+                    arrayListSlackChannels = arrayListChannels,
+                    arrayListSlackUsers = arrayListUsersName
                 )
             }
         }

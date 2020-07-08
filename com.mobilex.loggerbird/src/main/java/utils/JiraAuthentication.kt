@@ -873,22 +873,22 @@ class JiraAuthentication {
         if (queueCounter == 0) {
             timerTaskQueue.cancel()
             activity.runOnUiThread {
-                LoggerBirdService.loggerBirdService.initializeJiraSpinner(
-                    arrayListProjectNames = arrayListProjects,
-                    arrayListProjectKeys = arrayListProjectKeys,
-                    arrayListIssueTypes = arrayListIssueTypes,
-                    arrayListAssignee = arrayListAssignee,
-                    arrayListReporterNames = arrayListReporter,
-                    arrayListLinkedIssues = arrayListIssueLinkedTypes,
-                    arrayListIssues = arrayListIssues,
-                    arrayListPriority = arrayListPriorities,
-                    arrayListComponent = arrayListComponents,
-                    arrayListFixVersions = arrayListFixVersions,
-                    arrayListLabel = arrayListLabel,
-                    arrayListEpicLink = arrayListEpicLink,
-                    arrayListSprint = arrayListSprintName,
-                    arrayListEpicName = arrayListEpicName,
-                    hashMapBoardList = hashMapBoard
+                LoggerBirdService.loggerBirdService.initializeJiraAutoTextViews(
+                    arrayListJiraProjectNames = arrayListProjects,
+                    arrayListJiraProjectKeys = arrayListProjectKeys,
+                    arrayListJiraIssueTypes = arrayListIssueTypes,
+                    arrayListJiraAssignee = arrayListAssignee,
+                    arrayListJiraReporterNames = arrayListReporter,
+                    arrayListJiraLinkedIssues = arrayListIssueLinkedTypes,
+                    arrayListJiraIssues = arrayListIssues,
+                    arrayListJiraPriority = arrayListPriorities,
+                    arrayListJiraComponent = arrayListComponents,
+                    arrayListJiraFixVersions = arrayListFixVersions,
+                    arrayListJiraLabel = arrayListLabel,
+                    arrayListJiraEpicLink = arrayListEpicLink,
+                    arrayListJiraSprint = arrayListSprintName,
+                    arrayListJiraEpicName = arrayListEpicName,
+                    hashMapJiraBoardList = hashMapBoard
                 )
             }
         }
@@ -1795,15 +1795,9 @@ class JiraAuthentication {
     private fun resetJiraValues(activity: Activity) {
         queueCreateTask--
         if (queueCreateTask == 0) {
-            activity.runOnUiThread {
-                if(LoggerBirdService.loggerBirdService.controlButtonJiraCancel()){
-                    LoggerBirdService.loggerBirdService.buttonJiraCancel.performClick()
-                }
-            }
-            if (!LoggerBirdService.loggerBirdService.checkUnhandledFilePath()) {
-                LoggerBirdService.loggerBirdService.finishShareLayout("jira")
-            } else {
-                LoggerBirdService.loggerBirdService.unhandledExceptionCustomizeIssueSent()
+            LoggerBirdService.loggerBirdService.finishShareLayout("jira")
+            if (LoggerBirdService.loggerBirdService.checkUnhandledFilePath()) {
+                LoggerBirdService.loggerBirdService.unhandledExceptionCustomizeJiraIssueSent()
             }
             timerTaskQueue.cancel()
             summary = ""

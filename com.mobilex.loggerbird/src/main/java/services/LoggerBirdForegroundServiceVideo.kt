@@ -1,23 +1,15 @@
 package services
 
-import android.Manifest
-import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Build
 import android.os.IBinder
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import com.mobilex.loggerbird.R
 import constants.Constants
 import loggerbird.LoggerBird
-import observers.LogActivityLifeCycleObserver
 
 class LoggerBirdForegroundServiceVideo : Service() {
     internal companion object {
@@ -36,7 +28,7 @@ class LoggerBirdForegroundServiceVideo : Service() {
 
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBirdService.callEnqueue()
+            LoggerBirdService.callEnqueueVideo()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.foregroundServiceVideo)
         }
@@ -52,10 +44,10 @@ class LoggerBirdForegroundServiceVideo : Service() {
                 .setSmallIcon(R.drawable.loggerbird)
                 .build()
             startForeground(5, notification)
-            LoggerBirdService.callEnqueue()
+            LoggerBirdService.callEnqueueVideo()
         } catch (e: Exception) {
             e.printStackTrace()
-            LoggerBirdService.callEnqueue()
+            LoggerBirdService.callEnqueueVideo()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e , tag = Constants.foregroundServiceVideo)
         }

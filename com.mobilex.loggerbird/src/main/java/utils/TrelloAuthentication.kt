@@ -485,11 +485,11 @@ internal class TrelloAuthentication {
             timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeTrelloAutoTextViews(
-                    arrayListProject = arrayListProjectNames,
-                    arrayListBoards = arrayListBoardNames,
-                    arrayListMember = arrayListMemberNames,
-                    arrayListLabel = arrayListLabelNames,
-                    arrayListLabelColor = arrayListLabelColor
+                    arrayListTrelloProject = arrayListProjectNames,
+                    arrayListTrelloBoards = arrayListBoardNames,
+                    arrayListTrelloMember = arrayListMemberNames,
+                    arrayListTrelloLabel = arrayListLabelNames,
+                    arrayListTrelloLabelColor = arrayListLabelColor
                 )
             }
         }
