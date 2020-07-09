@@ -33,7 +33,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-//Github api class.
+/** Loggerbird Gitlab api configration class **/
 internal class GithubApi {
     //Global variables.
     private lateinit var activity: Activity

@@ -1,6 +1,8 @@
 package models
 
-
+/**
+ * This class is a model for Trello Api request
+ */
 
 data class TrelloProjectModel(
     var name:String? = null,

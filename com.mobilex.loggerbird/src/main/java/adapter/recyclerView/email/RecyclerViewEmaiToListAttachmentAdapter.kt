@@ -21,7 +21,7 @@ import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import constants.Constants
 import loggerbird.LoggerBird
-import models.RecyclerViewModelTo
+import models.recyclerView.RecyclerViewModelTo
 
 //Custom recyclerView adapter class for email attachment.
 /**

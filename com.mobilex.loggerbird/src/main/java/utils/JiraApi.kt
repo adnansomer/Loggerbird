@@ -34,7 +34,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-//Jira api class.
+/** Loggerbird Jira api configration class **/
 internal class JiraApi {
     //Global variables.
     private val coroutineCallJira: CoroutineScope = CoroutineScope(Dispatchers.IO)

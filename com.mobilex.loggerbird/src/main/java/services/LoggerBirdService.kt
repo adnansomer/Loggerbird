@@ -82,6 +82,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
 import models.*
+import models.recyclerView.*
 import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
@@ -315,7 +316,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var progressBarFeedbackLayout: FrameLayout
 
     //Slack:
-    private val slackAuthentication = SlackAuthentication()
+    private val slackAuthentication = SlackApi()
     private lateinit var buttonSlackCreate: Button
     internal lateinit var buttonSlackCancel: Button
     private lateinit var buttonSlackCreateUser: Button
@@ -377,7 +378,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonFutureTaskTimeCancel: Button
 
     //Gitlab:
-    private val gitlabAuthentication = GitlabAuthentication()
+    private val gitlabAuthentication = GitlabApi()
     private lateinit var autoTextViewGitlabProject: AutoCompleteTextView
     private lateinit var editTextGitlabTitle: EditText
     private lateinit var editTextGitlabDescription: EditText
@@ -628,7 +629,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonAsanaDateCancel: Button
 
     //Clubhouse
-    internal val clubhouseAuthentication = ClubhouseAuthentication()
+    internal val clubhouseAuthentication = ClubhouseApi()
     internal lateinit var buttonClubhouseCancel: Button
     private lateinit var buttonClubhouseCreate: Button
     private lateinit var toolbarClubhouse: Toolbar
@@ -1347,6 +1348,51 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         textView_counter_audio.visibility = View.GONE
         textView_counter_video.visibility = View.GONE
         revealLinearLayoutShare.visibility = View.VISIBLE
+        textView_share_clubhouse.visibility = View.GONE
+        textView_share_asana.visibility = View.GONE
+        textView_share_basecamp.visibility = View.GONE
+        textView_share_github.visibility = View.GONE
+        textView_share_gitlab.visibility = View.GONE
+        textView_share_pivotal.visibility = View.GONE
+        textView_share_slack.visibility = View.GONE
+        textView_share_trello.visibility = View.GONE
+
+        if(LoggerBird.clubhouseIsInitialized()){
+            textView_share_clubhouse.visibility = View.VISIBLE
+        }
+
+        if(LoggerBird.asanaIsInitialized()){
+            textView_share_asana.visibility = View.VISIBLE
+        }
+
+        if(LoggerBird.basecampIsInitialized()){
+            textView_share_basecamp.visibility = View.VISIBLE
+        }
+
+        if(LoggerBird.githubIsInitialized()){
+            textView_share_github.visibility = View.VISIBLE
+        }
+
+        if(LoggerBird.gitlabIsInitialized()){
+            textView_share_gitlab.visibility = View.VISIBLE
+        }
+
+        if(LoggerBird.pivotalIsInitialized()){
+            textView_share_pivotal.visibility = View.VISIBLE
+        }
+
+        if(LoggerBird.slackIsInitialized()){
+            textView_share_slack.visibility = View.VISIBLE
+        }
+
+        if(LoggerBird.jiraIsInitialized()){
+            textView_share_jira.visibility = View.VISIBLE
+        }
+
+        if(LoggerBird.trelloIsInitialized()){
+            textView_share_trello.visibility = View.VISIBLE
+        }
+
         shareViewClicks(filePathMedia = filePathMedia)
     }
 

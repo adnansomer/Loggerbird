@@ -4,6 +4,9 @@ import okhttp3.Credentials
 import okhttp3.Interceptor
 import okhttp3.Response
 
+/**
+ * This class is used for authentication interceptor of Pivotal
+ */
 class BasicAuthPivotalTrackerInterceptor(apiToken:String) : Interceptor {
     private var credentials: String = apiToken
 

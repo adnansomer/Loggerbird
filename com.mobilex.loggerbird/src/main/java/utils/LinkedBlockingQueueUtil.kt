@@ -4,9 +4,10 @@ import constants.Constants
 import loggerbird.LoggerBird
 import java.util.concurrent.LinkedBlockingQueue
 
-//LinkedBlockingQueue class that allows managing the threads for file operations.
+/**
+ * This class is used to allow managing the threads for file operations.
+ */
 internal class LinkedBlockingQueueUtil : LinkedBlockingQueue<Runnable>() {
-    //Global variables.
     var controlRunnable: Boolean = false
     override fun put(e: Runnable) {
         try {
