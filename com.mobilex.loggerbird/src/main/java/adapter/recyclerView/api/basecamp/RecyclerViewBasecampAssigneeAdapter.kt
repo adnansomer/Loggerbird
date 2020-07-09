@@ -20,7 +20,7 @@ import android.widget.Button
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
-import models.RecyclerViewModelAssignee
+import models.recyclerView.RecyclerViewModelAssignee
 import services.LoggerBirdService
 
 

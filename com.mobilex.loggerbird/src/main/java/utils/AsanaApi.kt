@@ -28,7 +28,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
-//Asana api class.
+/** Loggerbird Asana api configration class **/
 internal class AsanaApi {
     //Global variables.
     private lateinit var activity: Activity

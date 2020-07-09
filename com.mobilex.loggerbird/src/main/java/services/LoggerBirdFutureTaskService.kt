@@ -23,6 +23,9 @@ import java.lang.Runnable
 import java.util.*
 import kotlin.collections.ArrayList
 
+/**
+ * This class is a service for handling future task operations.
+ */
 class LoggerBirdFutureTaskService : Service() {
     private lateinit var timerTask: TimerTask
     private val timer = Timer()
@@ -43,10 +46,27 @@ class LoggerBirdFutureTaskService : Service() {
         }
     }
 
+
+    /**
+     * This method called when service in onBind state.
+     */
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
+    /**
+     * This Method Called When Service In onStartCommand state.
+     * @return START_STICKY to stick into device as a service
+     */
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        createNotificationChannel()
+        Log.d("timer_future", "im created!!")
+        return START_STICKY
+    }
+
+    /**
+     * This method called when service in onCreate state of lifecycle.
+     */
     override fun onCreate() {
         super.onCreate()
         timerTask = object : TimerTask() {
@@ -54,30 +74,32 @@ class LoggerBirdFutureTaskService : Service() {
                 Log.d("timer_executed", "timer_executed!")
                 calculateFutureTime()
             }
-
         }
         timer.schedule(timerTask, 0, 60000)
     }
 
+    /**
+     * This method called when service in onDestroy state of lifecycle.
+     */
     override fun onDestroy() {
         super.onDestroy()
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        createNotificationChannel()
-        Log.d("timer_future", "im created!!")
-        return START_STICKY
-    }
-
+    /**
+     * This method called when service in onTaskRemoved state.
+     */
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
     }
 
+    /**
+     * This method is used for calculating the time that user selected as a future task.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun calculateFutureTime() {
-
         coroutineCallFutureTask.async {
-            val sharedPref =
-                PreferenceManager.getDefaultSharedPreferences(this@LoggerBirdFutureTaskService.applicationContext)
+            val sharedPref = PreferenceManager.getDefaultSharedPreferences(this@LoggerBirdFutureTaskService.applicationContext)
             if (System.currentTimeMillis() >= sharedPref.getLong("future_task_time", 0)) {
                 try {
                     val arrayListFilePath: ArrayList<File> = ArrayList()
@@ -144,6 +166,11 @@ class LoggerBirdFutureTaskService : Service() {
         }
     }
 
+    /**
+     * This method is used for building notification while service is running.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun startLoggerBirdForegroundServiceFuture() {
         try {
             val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
@@ -161,6 +188,9 @@ class LoggerBirdFutureTaskService : Service() {
         }
     }
 
+    /**
+     * This method is used for creating notification channel for foreground service.
+     */
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
@@ -174,6 +204,11 @@ class LoggerBirdFutureTaskService : Service() {
         }
     }
 
+    /**
+     * This method is used for getting files list of future task.
+     * @param context is for getting reference from the application context.
+     * @return list of future task attachments.
+     */
     private fun getFileList(context: Context): ArrayList<String>? {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         val gson = Gson()
@@ -184,6 +219,11 @@ class LoggerBirdFutureTaskService : Service() {
         return null
     }
 
+    /**
+     * This method is used for getting user list of future task.
+     * @param context is for getting reference from the application context.
+     * @return list of future task attachments.
+     */
     private fun getUserList(context: Context): ArrayList<String>? {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         val gson = Gson()
@@ -194,6 +234,14 @@ class LoggerBirdFutureTaskService : Service() {
         return null
     }
 
+    /**
+     * This method is used for calling email sender method.
+     * @param to is used for getting the reference of email address that email action will send.
+     * @param arrayListFilePath is used for getting list of media files that email action will send.
+     * @param messsage is used for getting the reference of message that email action will send.
+     * @param subject is used for getting the reference of subject that email action will send.
+     * @return list of future task attachments.
+     */
     private fun callEmail(
         to: String,
 //        context: Context,
@@ -216,6 +264,14 @@ class LoggerBirdFutureTaskService : Service() {
 
     }
 
+    /**
+     * This method is used for adding future tasks into queue.
+     * @param to is used for getting the reference of email address that email action will send.
+     * @param arrayListFilePath is used for getting list of media files that email action will send.
+     * @param messsage is used for getting the reference of message that email action will send.
+     * @param subject is used for getting the reference of subject that email action will send.
+     * @return list of future task attachments.
+     */
     private fun addQueue(
         to: String,
 //        context: Context,

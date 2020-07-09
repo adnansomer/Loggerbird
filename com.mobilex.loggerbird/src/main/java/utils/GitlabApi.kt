@@ -33,7 +33,8 @@ import models.api.gitlab.GitlabUsersModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 
-class GitlabAuthentication {
+/** Loggerbird Gitlab api configration class **/
+class GitlabApi {
     private lateinit var activity: Activity
     private lateinit var context: Context
     private var filePathMedia: File? = null
@@ -77,7 +78,15 @@ class GitlabAuthentication {
     internal var dueDate: String? = null
     private var workQueueLinkedGitlabAttachments: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
     private var runnableListGitlabAttachments: ArrayList<Runnable> = ArrayList()
-
+    /**
+     * This method is used for calling Slack Api in order to determine operation.
+     * @param activity is used for getting reference of current activity.
+     * @param context is for getting reference from the application context.
+     * @param filePathMedia is used getting filepath of the recorded media.
+     * @param task is used for determining the task.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     internal fun callGitlab(
         activity: Activity,
         context: Context,
@@ -117,6 +126,15 @@ class GitlabAuthentication {
         }
     }
 
+    /**
+     * This method is used for checking OkHttp connection.
+     * @param activity is used for getting reference of current activity.
+     * @param context is for getting reference from the application context.
+     * @param filePathMedia is used getting filepath of the recorded media.
+     * @param task is used for determining the task.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun okHttpGitlabAuthentication(
         context: Context,
         activity: Activity,
@@ -185,6 +203,14 @@ class GitlabAuthentication {
         })
     }
 
+    /**
+     * This method is used for creating issue for Gitlab with using Api.
+     * @param activity is used for getting reference of current activity.
+     * @param context is for getting reference from the application context.
+     * @param filePathMedia is used getting filepath of the recorded media.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun gitlabCreateIssue(
         activity: Activity,
         context: Context,
@@ -258,6 +284,14 @@ class GitlabAuthentication {
         }
     }
 
+    /**
+     * This method is used for creating queue to send more than one file consecutively.
+     * @param file is used getting filepath of the recorded media.
+     * @param issueId is for getting issueId to update already opened issue.
+     * @param projectId is for getting projectId to update already opened issue.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun callGitlabAttachments(file: File, issueId: String, projectId: String) {
         if (LoggerBird.isLogInitAttached()) {
             if (runnableListGitlabAttachments.isEmpty()) {
@@ -273,6 +307,11 @@ class GitlabAuthentication {
         }
     }
 
+    /**
+     * This method is used for gathering all details to be send to Gitlab.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun gatherGitlabProjectDetails() {
         try {
             RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/")
@@ -320,6 +359,12 @@ class GitlabAuthentication {
         }
     }
 
+    /**
+     * This method is used for gathering Gitlab milestone data.
+     * @param projectId is for getting projectId to gather relevant milestones of the project.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun gatherGitlabMilestonesDetails(projectId: String) {
         try {
             RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/$projectId/")
@@ -365,6 +410,12 @@ class GitlabAuthentication {
         }
     }
 
+    /**
+     * This method is used for gathering Gitlab labels data.
+     * @param projectId is for getting projectId to gather relevant labels of the project.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun gatherGitlabLabelsDetails(projectId: String) {
         try {
             RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/$projectId/")
@@ -410,6 +461,12 @@ class GitlabAuthentication {
         }
     }
 
+    /**
+     * This method is used for gathering Gitlab users.
+     * @param projectId is for getting projectId to gather relevant users of project.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun gatherGitlabUsersDetails(projectId: String) {
         try {
             RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/$projectId/")
@@ -454,6 +511,14 @@ class GitlabAuthentication {
         }
     }
 
+    /**
+     * This method is used for gathering all details to be send to Gitlab.
+     * @param activity is used for getting reference of current activity.
+     * @param context is for getting reference from the application context.
+     * @param filePathMedia is used getting filepath of the recorded media.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private suspend fun gatherGitlabDetails(
         activity: Activity,
         context: Context,
@@ -488,6 +553,14 @@ class GitlabAuthentication {
         }
     }
 
+    /**
+     * This method is used for creating attachments and their URL to be send as an attachment.
+     * @param projectId is for getting projectId to update project with attachment URL.
+     * @param filePathMedia is used getting filepath of the recorded media.
+     * @param issueId is for getting projectId to update issue with attachment URL.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createAttachments(projectId: String, filePathMedia: File?, issueId: String) {
         try {
@@ -540,6 +613,11 @@ class GitlabAuthentication {
         }
     }
 
+    /**
+     * This method is used for calling attachments consecutively from queue.
+     * @param issueId is for getting issueId to update issue with attachment URL.
+     * @param projectId is for getting projectId to update issue with attachment URL.
+     */
     private fun callEnqueueGitlabAttachments(issueId: String, projectId: String) {
         workQueueLinkedGitlabAttachments.controlRunnable = false
         if (runnableListGitlabAttachments.size > 0) {
@@ -567,6 +645,14 @@ class GitlabAuthentication {
         }
     }
 
+    /**
+     * This method is used for sending attachments to the issue.
+     * @param projectId is for getting projectId to update project with attachment URL.
+     * @param description is used for mergeing description of user and attachments URL.
+     * @param issueId is for getting projectId to update issue with attachment URL.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun addAttachmentsToIssue(projectId: String, issueId: String, description: String) {
         try {
             RetrofitUserGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/" + hashMapProjects[arrayListProjects[projectPosition]] + "/issues/")
@@ -602,6 +688,9 @@ class GitlabAuthentication {
         }
     }
 
+    /**
+     * This method is used for updating data fields of Gitlab.
+     */
     private fun updateFields() {
         timerTaskQueue.cancel()
         activity.runOnUiThread {
@@ -615,6 +704,10 @@ class GitlabAuthentication {
         }
     }
 
+    /**
+     * This method is used for checking time for time out situation.
+     * @param activity is used for getting reference of current activity.
+     */
     private fun checkQueueTime(activity: Activity) {
         val timerQueue = Timer()
         timerTaskQueue = object : TimerTask() {
@@ -627,6 +720,13 @@ class GitlabAuthentication {
         timerQueue.schedule(timerTaskQueue, 180000)
     }
 
+
+    /**
+     * This method is used for gathering issue details to be send to Gitlab.
+     * @param editTextTitle for getting reference of issue title.
+     * @param editTextDescription for getting reference of issue description.
+     * @param editTextWeight for getting reference of issue weight.
+     */
     internal fun gatherGitlabEditTextDetails(
         editTextTitle: EditText,
         editTextDescription: EditText,
@@ -637,6 +737,13 @@ class GitlabAuthentication {
         weight = editTextWeight.text.toString()
     }
 
+    /**
+     * This method is used for gathering issue details to be send to Gitlab.
+     * @param spinnerAssignee for getting reference of assignee.
+     * @param spinnerMilestone for getting reference of milestone.
+     * @param spinnerLabels for getting reference of labels.
+     * @param spinnerConfidentiality for getting reference of confidentiality
+     */
     internal fun gatherGitlabProjectSpinnerDetails(
         spinnerAssignee: Spinner,
         spinnerMilestone: Spinner,
@@ -658,6 +765,10 @@ class GitlabAuthentication {
         milestones = spinnerLabels.selectedItem.toString()
     }
 
+    /**
+     * This method is used for gathering project details to be send to Gitlab.
+     * @param autoTextViewProject for getting reference of project.
+     */
     internal fun gatherGitlabProjectAutoTextDetails(
         autoTextViewProject: AutoCompleteTextView
     ) {
@@ -665,31 +776,59 @@ class GitlabAuthentication {
         project = autoTextViewProject.editableText.toString()
     }
 
+    /**
+     * This method is used for gathering project details to be send to Gitlab.
+     * @param autoTextViewProject for getting position of project from spinner.
+     */
     internal fun gitlabProjectPosition(projectPosition: Int) {
 
         this.projectPosition = projectPosition
     }
 
+    /**
+     * This method is used for gathering project details to be send to Gitlab.
+     * @param autoTextViewProject for getting position of assignee from spinner.
+     */
     internal fun gitlabAssigneePosition(assigneePosition: Int) {
 
         this.spinnerPositionAssignee = assigneePosition
     }
 
+    /**
+     * This method is used for gathering project details to be send to Gitlab.
+     * @param autoTextViewProject for getting position of label.
+     */
     internal fun gitlabLabelPosition(labelPosition: Int) {
 
         this.spinnerPositionLabels = labelPosition
     }
 
+    /**
+     * This method is used for issue milestones details to be send to Gitlab.
+     * @param milestonePosition for getting position of milestone from spinner.
+     */
     internal fun gitlabMilestonesPosition(milestonePosition: Int) {
 
         this.spinnerPositionMilestones = milestonePosition
     }
 
+    /**
+     * This method is used for gathering issue confidentiality details to be send to Gitlab.
+     * @param confidentialityPosition for getting position of confidentiality from spinner.
+     */
     internal fun gitlabConfidentialityPosition(confidentialityPosition: Int) {
 
         this.spinnerPositionConfidentiality = confidentialityPosition
     }
 
+    /**
+     * This method is used for handling exceptions of Slack Api.
+     * @param e is used for defining exception.
+     * @param filePathName is used getting filepath of the recorded media.
+     * @param throwable is used for defining throwable
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun gitlabExceptionHandler(
         e: Exception? = null,
         filePathName: File? = null,

@@ -64,10 +64,12 @@ import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 
 
-//LoggerBird class is the general logging class for this library.
+/**
+ * Loggerbird class is the general logging class for this library.
+ */
 class LoggerBird : LifecycleObserver {
+
     companion object {
-        //Static global variables.
         private var controlLogInit: Boolean = false
         internal lateinit var context: Context
         private var filePathName: String? = null
@@ -112,14 +114,10 @@ class LoggerBird : LifecycleObserver {
         private var fileLimit: Long = 2097152
         private lateinit var lifeCycleObserver: LogLifeCycleObserver
         internal lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
-        private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver =
-            LogRecyclerViewAdapterDataObserver()
-        private var recyclerViewScrollListener: LogRecyclerViewScrollListener =
-            LogRecyclerViewScrollListener()
-        private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener =
-            LogRecyclerViewChildAttachStateChangeListener()
-        private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener =
-            LogRecyclerViewItemTouchListener()
+        private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver = LogRecyclerViewAdapterDataObserver()
+        private var recyclerViewScrollListener: LogRecyclerViewScrollListener = LogRecyclerViewScrollListener()
+        private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener = LogRecyclerViewChildAttachStateChangeListener()
+        private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener = LogRecyclerViewItemTouchListener()
         private lateinit var workQueueLinked: LinkedBlockingQueueUtil
         private lateinit var recyclerViewItemObserver: LogDataSetObserver
         private lateinit var textViewFileReader: TextView
@@ -157,7 +155,7 @@ class LoggerBird : LifecycleObserver {
         internal lateinit var basecampApiToken: String
         internal lateinit var asanaApiToken: String
         internal lateinit var clubhouseApiToken: String
-//        private val loggerBirdService: LoggerBirdService = LoggerBirdService()
+//      private val loggerBirdService: LoggerBirdService = LoggerBirdService()
 
 
         //---------------Public Methods:---------------//
@@ -178,46 +176,44 @@ class LoggerBird : LifecycleObserver {
          * @var logcatObserver is used for adding and initializing unhandled exception observer into application.
          * @return Boolean value.
          */
-
-
         fun logInit(
             context: Context,
-            jiraDomainName: String,
-            jiraUserName: String,
-            jiraApiToken: String,
-            slackApiToken: String,
-            githubUserName: String,
-            githubPassword: String,
-            gitlabApiToken: String,
-            trelloUserName: String,
-            trelloPassword: String,
-            trelloKey: String,
-            trelloToken: String,
-            pivotalApiToken: String,
-            basecampApiToken: String,
-            asanaApiToken: String,
-            clubhouseApiToken: String,
+            //jiraDomainName: String,
+            //jiraUserName: String,
+            //jiraApiToken: String,
+            //slackApiToken: String,
+            //githubUserName: String,
+            //githubPassword: String,
+            //gitlabApiToken: String,
+            //trelloUserName: String,
+            //trelloPassword: String,
+            //trelloKey: String,
+            //trelloToken: String,
+            //pivotalApiToken: String,
+            //basecampApiToken: String,
+            //asanaApiToken: String,
+            //clubhouseApiToken: String,
             filePathName: String? = null
         ): Boolean {
             this.context = context
             this.filePathName = filePathName
             if (!controlLogInit) {
                 try {
-                    Companion.jiraDomainName = jiraDomainName
-                    Companion.jiraUserName = jiraUserName
-                    Companion.jiraApiToken = jiraApiToken
-                    Companion.slackApiToken = slackApiToken
-                    Companion.githubUserName = githubUserName
-                    Companion.githubPassword = githubPassword
-                    Companion.trelloUserName = trelloUserName
-                    Companion.trelloPassword = trelloPassword
-                    Companion.trelloKey = trelloKey
-                    Companion.trelloToken = trelloToken
-                    Companion.gitlabApiToken = gitlabApiToken
-                    Companion.pivotalApiToken = pivotalApiToken
-                    Companion.basecampApiToken = basecampApiToken
-                    Companion.clubhouseApiToken = clubhouseApiToken
-                    Companion.asanaApiToken = asanaApiToken
+                    //Companion.jiraDomainName = jiraDomainName
+                    //Companion.jiraUserName = jiraUserName
+                    //Companion.jiraApiToken = jiraApiToken
+                    //Companion.slackApiToken = slackApiToken
+                    //Companion.githubUserName = githubUserName
+                    //Companion.githubPassword = githubPassword
+                    //Companion.trelloUserName = trelloUserName
+                    //Companion.trelloPassword = trelloPassword
+                    //Companion.trelloKey = trelloKey
+                    //Companion.trelloToken = trelloToken
+                    //Companion.gitlabApiToken = gitlabApiToken
+                    //Companion.pivotalApiToken = pivotalApiToken
+                    //Companion.basecampApiToken = basecampApiToken
+                    //Companion.clubhouseApiToken = clubhouseApiToken
+                    //Companion.asanaApiToken = asanaApiToken
                     logAttachLifeCycleObservers(context = context)
                     fileDirectory = context.filesDir
                     if (filePathName != null) {
@@ -235,7 +231,6 @@ class LoggerBird : LifecycleObserver {
                     workQueueLinked = LinkedBlockingQueueUtil()
                     val logcatObserver = UnhandledExceptionObserver()
                     Thread.setDefaultUncaughtExceptionHandler(logcatObserver)
-//                    throw  NullPointerException("Parameter Type cannot be null");
                     coroutineCallMemoryService.async {
                         intentServiceMemory = Intent(context, LoggerBirdMemoryService::class.java)
                         context.startService(intentServiceMemory)
@@ -891,6 +886,9 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+        /**
+         * This
+         */
         internal fun deleteOldFiles(loggerBirdService: LoggerBirdService) {
             if (controlLogInit) {
                 val controlEmailAction: Boolean = true
@@ -1559,7 +1557,21 @@ class LoggerBird : LifecycleObserver {
                                     "Failure to consume since item is not owned"
                             }
                         }
-                        stringBuilderInAPurchase.append("\n" + formattedTime + ":" + Constants.inAPurchaseTag + "\n" + "Billing Flow Item Consumed:" + billingFlowParams?.skuDetails?.isRewarded + "\n" + "Billing Response Code:" + billingResult?.responseCode + "\n" + "Billing Response Message:" + responseMessage + "\n" + "Billing Client Is Ready:" + billingClient?.isReady + "\n" + "Sku Type:" + skuDetailsParams?.skuType + "\n" + "Sku List:" + stringBuilderSkuDetailList.toString() + "\n" + "Billing Flow Sku Details:" + prettyJson + "\n" + "Billing Flow Sku:" + billingFlowParams?.sku + "\n" + "Billing Flow Account Id:" + billingFlowParams?.accountId + "\n" + "Billing Flow Developer Id:" + billingFlowParams?.developerId + "\n" + "Billing flow Old Sku:" + billingFlowParams?.oldSku + "\n" + "Billing Flow Old Sku Purchase Token:" + billingFlowParams?.oldSkuPurchaseToken + "\n" + "Acknowledge Params:" + acknowledgePurchaseParams?.developerPayload + "\n" + "Acknowledge Purchase Token:" + acknowledgePurchaseParams?.purchaseToken)
+                        stringBuilderInAPurchase.append("\n" + formattedTime + ":" + Constants.inAPurchaseTag +
+                                "\n" + "Billing Flow Item Consumed:" + billingFlowParams?.skuDetails?.isRewarded +
+                                "\n" + "Billing Response Code:" + billingResult?.responseCode +
+                                "\n" + "Billing Response Message:" + responseMessage +
+                                "\n" + "Billing Client Is Ready:" + billingClient?.isReady +
+                                "\n" + "Sku Type:" + skuDetailsParams?.skuType +
+                                "\n" + "Sku List:" + stringBuilderSkuDetailList.toString() +
+                                "\n" + "Billing Flow Sku Details:" + prettyJson +
+                                "\n" + "Billing Flow Sku:" + billingFlowParams?.sku +
+                                "\n" + "Billing Flow Account Id:" + billingFlowParams?.accountId +
+                                "\n" + "Billing Flow Developer Id:" + billingFlowParams?.developerId +
+                                "\n" + "Billing flow Old Sku:" + billingFlowParams?.oldSku +
+                                "\n" + "Billing Flow Old Sku Purchase Token:" + billingFlowParams?.oldSkuPurchaseToken +
+                                "\n" + "Acknowledge Params:" + acknowledgePurchaseParams?.developerPayload +
+                                "\n" + "Acknowledge Purchase Token:" + acknowledgePurchaseParams?.purchaseToken)
                         saveInAPurchaseDetails()
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -2125,7 +2137,10 @@ class LoggerBird : LifecycleObserver {
             stringBuilderExceedFileWriterLimit = StringBuilder()
         }
 
-
+        /**
+         * This method saves default file details into the file.
+         *  @param filePath takes absolute path of given file.
+         */
         private fun saveDefaultFileDetails(filePath: File) {
             if (!filePath.exists()) {
                 filePath.createNewFile()
@@ -3034,6 +3049,14 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+        /**
+         * This method returns activity result in order to given permission.
+         * @param requestCode takes request code from relevant permission.
+         * @param resultCode takes result code from relevant permission.
+         * @param data takes permission intent.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails ,
+         * which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         */
         @RequiresApi(Build.VERSION_CODES.M)
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             if (controlLogInit) {
@@ -3071,6 +3094,14 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+        /**
+         * This method is used for taking given permission result.
+         * @param requestCode is used for taking request code from relevant permission.
+         * @param permissions is used for taking permissions that are wanted from user
+         * @param grantResults is used for granted permission results.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails ,
+         * which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         */
         fun onRequestPermissionResult(
             requestCode: Int,
             permissions: Array<out String>,
@@ -3170,6 +3201,158 @@ class LoggerBird : LifecycleObserver {
         //dummy method might be useful for future implementation and changes for taking stringBuilderAll instance.
         internal fun returnStringBuilderAll(): StringBuilder {
             return stringBuilderAll
+        }
+
+
+        /**
+         * This method is used for returning whether Clubhouse token is initialized.
+         * @return true if it initialized.
+         */
+        internal fun clubhouseIsInitialized(): Boolean {
+            if (this::clubhouseApiToken.isInitialized) {
+                return true
+            }
+            return false
+        }
+
+        /**
+         * This method is used for returning whether Gitlab token is initialized.
+         * @return true if it initialized.
+         */
+        internal fun gitlabIsInitialized(): Boolean {
+            if (this::gitlabApiToken.isInitialized) {
+                return true
+            }
+            return false
+        }
+
+        /**
+         * This method is used for returning whether Slack token is initialized.
+         * @return true if it initialized.
+         */
+        internal fun slackIsInitialized(): Boolean {
+            if (this::slackApiToken.isInitialized) {
+                return true
+            }
+            return false
+        }
+
+        /**
+         * This method is used for returning whether Pivotal token is initialized.
+         * @return true if it initialized.
+         */
+        internal fun pivotalIsInitialized(): Boolean {
+            if (this::pivotalApiToken.isInitialized) {
+                return true
+            }
+            return false
+        }
+
+        /**
+         * This method is used for returning whether Github token is initialized.
+         * @return true if it initialized.
+         */
+        internal fun githubIsInitialized(): Boolean {
+            if (this::githubUserName.isInitialized && this::githubPassword.isInitialized) {
+                return true
+            }
+            return false
+        }
+
+        /**
+         * This method is used for returning whether Asana token is initialized.
+         * @return true if it initialized.
+         */
+        internal fun asanaIsInitialized(): Boolean {
+            if (this::asanaApiToken.isInitialized) {
+                return true
+            }
+            return false
+        }
+
+        /**
+         * This method is used for returning whether Jira token is initialized.
+         * @return true if it initialized.
+         */
+        internal fun jiraIsInitialized(): Boolean {
+            if (this::jiraApiToken.isInitialized && this::jiraDomainName.isInitialized && this::jiraUserName.isInitialized) {
+                return true
+            }
+            return false
+        }
+
+        /**
+         * This method is used for returning whether Basecamp token is initialized.
+         * @return true if it initialized.
+         */
+        internal fun basecampIsInitialized(): Boolean {
+            if (this::basecampApiToken.isInitialized) {
+                return true
+            }
+            return false
+        }
+
+        /**
+         * This method is used for returning whether Trello token is initialized.
+         * @return true if it initialized.
+         */
+        internal fun trelloIsInitialized(): Boolean {
+            if (this::trelloUserName.isInitialized && this::trelloPassword.isInitialized) {
+                return true
+            }
+            return false
+        }
+
+    }
+
+    /**
+     * LoggerbirdIntegration class is a builder class for calling third party integrations in this pattern.
+     */
+    class LoggerBirdIntegration(
+
+        val clubhouseApiToken: String?,
+        val slackApiToken: String?,
+        val gitlabApiToken: String?,
+        val githubUserName: String?,
+        val githubPassword: String?,
+        val asanaApiToken: String?,
+        val basecampApiToken: String?,
+        val pivotalApiToken: String?,
+        val trelloUserName: String?,
+        val trelloPassword: String?,
+        val trelloKey: String?,
+        val trelloToken: String?,
+        val jiraDomainName: String?,
+        val jiraUserName: String?,
+        val jiraApiToken: String?) {
+
+        data class Builder(
+            private var clubhouseApiToken: String? = null,
+            private var slackApiToken: String? = null,
+            private var gitlabApiToken: String? = null,
+            private var githubUserName: String? = null,
+            private var githubPassword: String? = null,
+            private var asanaApiToken: String? = null,
+            private var basecampApiToken: String? = null,
+            private var pivotalApiToken: String? = null,
+            private var trelloUserName: String? = null,
+            private var trelloPassword: String? = null,
+            private var trelloKey: String? = null,
+            private var trelloToken: String? = null,
+            private var jiraDomainName: String? = null,
+            private var jiraUserName: String? = null,
+            private var jiraApiToken: String? = null) {
+
+            fun setClubhouseIntegration(clubhouseApiToken: String) = apply { LoggerBird.clubhouseApiToken = clubhouseApiToken }
+            fun setSlackIntegration(slackApiToken: String) = apply { LoggerBird.slackApiToken = slackApiToken }
+            fun setGitlabIntegration(gitlabApiToken: String) = apply { LoggerBird.gitlabApiToken = gitlabApiToken}
+            fun setGithubIntegration(githubUserName: String, githubPassword: String) = apply { LoggerBird.githubUserName = githubUserName;LoggerBird.githubPassword = githubPassword}
+            fun setAsanaIntegration(asanaApiToken: String) = apply { LoggerBird.asanaApiToken = asanaApiToken }
+            fun setBasecampIntegration(basecampApiToken: String) = apply { LoggerBird.basecampApiToken = basecampApiToken }
+            fun setPivotalIntegraton(pivotalApiToken: String) = apply { LoggerBird.pivotalApiToken = pivotalApiToken}
+            fun setTrelloIntegration(trelloUserName: String,trelloPassword:String,trelloKey:String,trelloToken:String) = apply {LoggerBird.trelloUserName = trelloUserName;LoggerBird.trelloPassword = trelloPassword; LoggerBird.trelloKey = trelloKey; LoggerBird.trelloToken = trelloToken}
+            fun setJiraIntegration(jiraDomainName: String, jiraUserName: String, jiraApiToken: String) = apply{LoggerBird.jiraDomainName = jiraDomainName;LoggerBird.jiraUserName = jiraUserName; LoggerBird.jiraApiToken = jiraApiToken}
+            fun build() = LoggerBirdIntegration(clubhouseApiToken,slackApiToken,gitlabApiToken,githubUserName,githubPassword,asanaApiToken,basecampApiToken, pivotalApiToken,trelloUserName,trelloPassword,trelloKey,trelloToken,jiraDomainName,jiraUserName,jiraApiToken)
         }
     }
 }

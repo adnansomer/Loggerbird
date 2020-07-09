@@ -23,7 +23,11 @@ import models.paint.*
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 
-
+/**
+ * This class is used for defining parameter and functions of canvas and drawing activity.
+ * @param context is for getting reference from the application context.
+ * @param attrs is for getting reference of current activity in the application.
+ */
 class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     View(context, attrs) {
     private var mX: Float = 0.toFloat()
@@ -32,15 +36,15 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val mPaint: Paint = Paint()
     private val undonePaths = ArrayList<FingerPath>()
     private val paths = ArrayList<FingerPath>()
-    internal var brushColor: Int = 0
     private var brushWidth: Int = 0
     private var mBitmap: Bitmap? = null
     private var mCanvas: Canvas? = null
     private val mBitMapPaint = Paint(Paint.DITHER_FLAG)
     private var lastBrushColor: Int = 0
-    internal var eraserEnabled = false
-    private lateinit var paintView:View
     private val coroutineCallPaint: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private lateinit var paintView:View
+    internal var brushColor: Int = 0
+    internal var eraserEnabled = false
 
     init {
         mPaint.isAntiAlias = true
@@ -67,6 +71,11 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
+    /**
+     * This method is used for handling x and y axis for touch event while moving drawing.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     internal fun init(metrics: DisplayMetrics) {
         try {
             undonePaths.clear()
@@ -83,6 +92,11 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
+    /**
+     * This method is used for clearing all draw paths and invalidate canvas.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     internal fun clearAllPaths() {
         try {
             paths.removeAll(paths)
@@ -98,6 +112,11 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
+    /**
+     * This method is used for clearing current draw paths and invalidate canvas.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     internal fun clear() {
         try {
             paths.clear()
@@ -109,6 +128,11 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
+    /**
+     * This method an override method to draw a canvas.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     override fun onDraw(canvas: Canvas) {
         try {
             canvas.save()
@@ -127,6 +151,11 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
+    /**
+     * This method is used for handling x and y axis for touch event while starting drawing.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun touchStart(x: Float, y: Float) {
         try {
             mPath = Path()
@@ -143,6 +172,11 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
+    /**
+     * This method is used for handling x and y axis for touch event while moving drawing.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun touchMove(x: Float, y: Float) {
         try {
             val dx = abs(x - mX)
@@ -159,6 +193,11 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
+    /**
+     * This method is used for handling x and y axis for touch up event while drawing.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun touchUp() {
         try {
             mPath!!.lineTo(mX, mY)
@@ -169,6 +208,11 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
+    /**
+     * This method is used to save image into local storage of device.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun saveImage(filename: String) {
         paintView = this
@@ -197,6 +241,10 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
+    /**
+     * This method is used for defining parameters of motion event.
+     * @return boolean value of motion event
+     */
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val x = event.x
@@ -219,22 +267,41 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         return true
     }
 
+    /**
+     * This method is a getter method that returns current brush color.
+     * @return value of current brush color
+     */
     fun getBrushColor(): Int {
         return brushColor
     }
 
+    /**
+     * This method is a setter method to set brush color.
+     */
     fun setBrushColor(color: Int) {
         this.brushColor = color
     }
 
+    /**
+     * This method is a setter method to set brush color.
+     * @return value of current brush width
+     */
     internal fun getBrushWidth(): Int {
         return brushWidth
     }
 
+    /**
+     * This method is used for enabling eraser mode in order to erase drawings in Paint Activity.
+     */
     internal fun setBrushWidth(width: Int) {
         this.brushWidth = width
     }
 
+    /**
+     * This method is used for enabling eraser mode in order to erase drawings in Paint Activity.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     internal fun enableEraser() {
         try {
             eraserEnabled = true
@@ -248,6 +315,11 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
+    /**
+     * This method is used for stopping eraser in order to draw in Paint Activity.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     internal fun disableEraser() {
         try {
             eraserEnabled = false
@@ -260,4 +332,3 @@ class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 }
-

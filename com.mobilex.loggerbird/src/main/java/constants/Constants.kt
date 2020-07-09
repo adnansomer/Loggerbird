@@ -2,10 +2,11 @@ package constants
 
 import java.lang.StringBuilder
 
-//Constant class.
+/**
+ * This class defines all constants of Loggerbird.
+ */
 internal class Constants {
     companion object {
-        //Static global constant variables.
         const val componentTag = "component"
         const val recyclerViewTag = "recyclerView"
         const val activityTag = "activity"
@@ -38,6 +39,7 @@ internal class Constants {
         const val serviceTag: String = "Service"
         const val performanceTag: String = "Performance"
         const val memoryUsageTag = "Memory Usage"
+        const val memoryServiceTag = "Memory Service"
         const val cpuTag: String = "Cpu"
         const val screenShotTag:String = "Screenshot"
         const val floatingActionButtonTag:String="Floating Action Button"
@@ -98,6 +100,5 @@ internal class Constants {
         const val recyclerViewClubhouseAdapterTag:String = "RecyclerView Clubhouse Adapter"
         const val clubhouseTag:String = "Clubhouse"
         const val clubhouseDatePopupTag = "Clubhouse Date Popup"
-
     }
 }
