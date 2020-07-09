@@ -6,7 +6,7 @@ import androidx.annotation.RequiresApi
 
 //Dummy class might be useful in future.
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-class LayoutWindowAttachListener(private val runnable: Runnable) :ViewTreeObserver.OnWindowAttachListener {
+internal class LayoutWindowAttachListener(private val runnable: Runnable) :ViewTreeObserver.OnWindowAttachListener {
     companion object{
         internal var controlAttachListener:Boolean = false
     }

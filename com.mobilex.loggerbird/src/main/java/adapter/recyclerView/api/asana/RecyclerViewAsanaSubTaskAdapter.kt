@@ -22,7 +22,7 @@ import loggerbird.LoggerBird
 import models.RecyclerViewModel
 import models.recyclerView.RecyclerViewModelSubtask
 import services.LoggerBirdService
-import utils.DefaultToast
+import utils.other.DefaultToast
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList

@@ -28,7 +28,7 @@ import kotlin.math.abs
  * @param context is for getting reference from the application context.
  * @param attrs is for getting reference of current activity in the application.
  */
-class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+internal class PaintView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     View(context, attrs) {
     private var mX: Float = 0.toFloat()
     private var mY: Float = 0.toFloat()

@@ -21,10 +21,9 @@ import java.io.InputStream
  * This interface is used for defining methods for Retrofit to turn HTTP Api into methods
  */
 
-interface AccountIdService {
+internal interface AccountIdService {
 
     /**Jira Methods**/
-
     @POST("issue")
     fun createIssue(@Body jsonObject: JsonObject): Call<JsonObject>
     @GET("search?query")
@@ -65,9 +64,7 @@ interface AccountIdService {
     @GET("issueLinkType")
     fun getLinkedIssueList(): Call<JsonObject>
 
-
     /**Github Methods**/
-
     @POST("issues")
     fun createGithubIssue(@Body jsonObject: JsonObject): Call<JsonObject>
     @GET("repos")
@@ -89,7 +86,6 @@ interface AccountIdService {
     fun setGithubIssue(@Body jsonObject: JsonObject, @Path("id") id: Int): Call<JsonObject>
 
     /**Gitlab Methods**/
-
     @POST("issues")
     fun createGitlabIssue(@Body jsonObject: JsonObject): Call<JsonObject>
     @GET("projects/?membership=true")
@@ -106,9 +102,7 @@ interface AccountIdService {
     @PUT("{iid}")
     fun setGitlabIssue(@Path("iid") iid: String, @Query("description") description: String): Call<JsonObject>
 
-
     /**Trello Methods**/
-
     @GET("boards?")
     fun getTrelloProjects(@Query("key") key: String, @Query("token") token: String): Call<List<TrelloProjectModel>>
     @GET("actions?")
@@ -128,7 +122,6 @@ interface AccountIdService {
     fun setTrelloLabels(@Body jsonArray: JsonArray, @Query("key") key: String, @Query("token") token: String): Call<JsonObject>
 
     /**Pivotal Methods**/
-
     @GET("projects")
     fun getPivotalProjects(): Call<JsonArray>
     @GET("labels")
@@ -148,7 +141,6 @@ interface AccountIdService {
     fun setPivotalTasks(@Body jsonObject: JsonObject): Call<JsonObject>
 
     /**Basecamp Methods**/
-
     @GET("authorization?")
     fun getBasecampProjectId(@Query("access_token") accessToken: String): Call<JsonObject>
     @GET("projects?")
@@ -170,7 +162,6 @@ interface AccountIdService {
     fun addBasecampTodo(@Body jsonObject: JsonObject, @Query("access_token") accessToken: String): Call<JsonObject>
 
     /**Asana Methods**/
-
     @GET("projects")
     fun getAsanaProject(): Call<JsonObject>
     @GET("project_memberships")
@@ -188,7 +179,6 @@ interface AccountIdService {
     fun addAsanaSubtask(@Body jsonObject: JsonObject): Call<JsonObject>
 
     /**Clubhouse Methods**/
-
     @GET("projects")
     fun getClubhouseProjects(@Query("token") token: String): Call<List<ClubhouseProjectModel>>
     @GET("epics")

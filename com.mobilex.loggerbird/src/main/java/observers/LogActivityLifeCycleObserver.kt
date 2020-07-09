@@ -45,11 +45,14 @@ internal class LogActivityLifeCycleObserver() :
         internal var returnActivityLifeCycleClassName: String? = null
         internal lateinit var logActivityLifeCycleObserverInstance: LogActivityLifeCycleObserver
     }
-
+    //Constructor.
     init {
         LoggerBird.stringBuilderActivityLifeCycleObserver.append("\n" + "Life Cycle Details:" + "\n")
     }
 
+    /**
+     * This method is called when activity is in onSaveInstance state.
+     */
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
         try {
             stringBuilderBundle = StringBuilder()
@@ -75,6 +78,9 @@ internal class LogActivityLifeCycleObserver() :
         }
     }
 
+    /**
+     * This method is called when activity is in onCreate state.
+     */
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         try {
@@ -122,6 +128,9 @@ internal class LogActivityLifeCycleObserver() :
         }
     }
 
+    /**
+     * This method is called when activity is in onStart state.
+     */
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityStarted(activity: Activity) {
         try {
@@ -144,6 +153,9 @@ internal class LogActivityLifeCycleObserver() :
         }
     }
 
+    /**
+     * This method is called when activity is in onResume state.
+     */
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityResumed(activity: Activity) {
         try {
@@ -157,7 +169,6 @@ internal class LogActivityLifeCycleObserver() :
                     }
                     LoggerBirdService.controlDrawableSettingsPermission -> {
                         checkDrawOtherAppPermissionResult(activity = activity)
-//                        LoggerBirdService.sd.start(sensorManager = LoggerBirdService.sensorManager)
                     }
                 }
             }
@@ -182,6 +193,9 @@ internal class LogActivityLifeCycleObserver() :
         }
     }
 
+    /**
+     * This method is called when activity is in onPause state.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onActivityPaused(activity: Activity) {
         try {
@@ -209,6 +223,9 @@ internal class LogActivityLifeCycleObserver() :
         }
     }
 
+    /**
+     * This method is called when activity is in onStop state.
+     */
     override fun onActivityStopped(activity: Activity) {
         try {
             val date = Calendar.getInstance().time
@@ -226,14 +243,11 @@ internal class LogActivityLifeCycleObserver() :
         }
     }
 
+    /**
+     * This method is called when activity is in onDestroy state.
+     */
     override fun onActivityDestroyed(activity: Activity) {
         try {
-//            if(coroutineCallService.isActive){
-//                coroutineCallService.cancel()
-//            }
-//            if (!this::intentService.isInitialized) {
-//                stopService(intentService)
-//            }
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -259,8 +273,6 @@ internal class LogActivityLifeCycleObserver() :
 
     /**
      * This Method Is Used For Getting Activity List.
-     * Variables:
-     * @var classList takes list of activities that are called with this observer.
      * @return ArrayList<String>.
      */
     internal fun returnClassList(): ArrayList<String> {
@@ -269,14 +281,15 @@ internal class LogActivityLifeCycleObserver() :
 
     /**
      * This Method Is Used For Printing Observer Outcome.
-     * Variables:
-     * @var stringBuilderLifeCycleObserver will print activity details.
      * @return String value.
      */
     internal fun returnActivityLifeCycleState(): String {
         return LoggerBird.stringBuilderActivityLifeCycleObserver.toString()
     }
 
+    /**
+     * This method is used for checking for audio permission result.
+     */
     private fun checkAudioPermissionResult() {
         if (PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(
                 context,
@@ -289,6 +302,9 @@ internal class LogActivityLifeCycleObserver() :
         }
     }
 
+    /**
+     * This method is used for checking for write-external storage permission result.
+     */
     private fun checkWriteExternalStoragePermissionResult() {
         if (PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(
                 context,
@@ -310,6 +326,10 @@ internal class LogActivityLifeCycleObserver() :
         }
     }
 
+    /**
+     * This method is used for checking for draw other application permission result.
+     * @param activity is used for getting reference of current activity.
+     */
     @RequiresApi(Build.VERSION_CODES.M)
     private fun checkDrawOtherAppPermissionResult(activity: Activity) {
         LoggerBirdService.sd.start(sensorManager = LoggerBirdService.sensorManager)
@@ -326,9 +346,18 @@ internal class LogActivityLifeCycleObserver() :
         }
     }
 
+    /**
+     * This method is used for getting current activity.
+     */
     internal fun activityInstance(): Activity {
         return this.activity
     }
+
+    /**
+     * This method is used for formatting certain time value in day/hour/second/millisecond format.
+     * @param remainingSeconds is for getting reference of time value.
+     * @return String value.
+     */
     private fun timeString(remainingSeconds: Long): String {
         return String.format(
             Locale.getDefault(), "%02d:%02d:%02d:%02d", TimeUnit.MILLISECONDS.toDays(remainingSeconds),

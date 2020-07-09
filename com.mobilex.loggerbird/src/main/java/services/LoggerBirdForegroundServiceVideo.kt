@@ -14,7 +14,7 @@ import loggerbird.LoggerBird
 /**
  * This class is used for supporting a foreground service for screen recording.
  */
-class LoggerBirdForegroundServiceVideo : Service() {
+internal class LoggerBirdForegroundServiceVideo : Service() {
     internal companion object {
         private val NOTIFICATION_CHANNEL_ID = "LoggerBirdForegroundService"
     }

@@ -27,16 +27,10 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnViewCreate State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
      * @param v takes view of current Fragment.
      * @param savedInstanceState takes saved instances of current fragment.
-     * Variables:
-     * @var currentLifeCycleState takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * @var classList will take fragment's in the FragmentManager.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentViewCreated(
@@ -76,14 +70,9 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnAttach State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
      * @param context takes Context of the current Fragment.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentAttached(fm: FragmentManager, f: Fragment, context: Context) {
@@ -106,14 +95,9 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnPreAttach State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
      * @param context takes Context of the current Fragment.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentPreAttached(fm: FragmentManager, f: Fragment, context: Context) {
@@ -138,14 +122,9 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnSaveInstance State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
      * @param outState takes saved instance of the current fragmemt.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentSaveInstanceState(fm: FragmentManager, f: Fragment, outState: Bundle) {
@@ -170,13 +149,8 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack onViewDestroy State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentViewDestroyed(fm: FragmentManager, f: Fragment) {
@@ -201,14 +175,9 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnPreCreate State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
      * @param savedInstanceState takes saved instance of the current fragmemt.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentPreCreated(
@@ -237,14 +206,9 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnActivityCreate State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
      * @param savedInstanceState takes saved instance of the current fragmemt.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentActivityCreated(
@@ -274,14 +238,9 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnCreate State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
      * @param savedInstanceState takes saved instance of the current fragmemt.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentCreated(fm: FragmentManager, f: Fragment, savedInstanceState: Bundle?) {
@@ -306,13 +265,8 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnStart State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
@@ -338,13 +292,8 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnResume State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
@@ -369,13 +318,8 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnPause State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentPaused(fm: FragmentManager, f: Fragment) {
@@ -400,13 +344,8 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnStop State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentStopped(fm: FragmentManager, f: Fragment) {
@@ -432,13 +371,8 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnDestroy State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment) {
@@ -463,13 +397,8 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Called When LifeCycle Observer Detect's An FragmentCallBack OnDetach State In The Current Fragment.
-     * Parameters:
      * @param fm takes FragmentManager Instance.
      * @param f takes current Fragment from FragmentManager.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var stringBuilderFragmentLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onFragmentDetached(fm: FragmentManager, f: Fragment) {
@@ -494,8 +423,6 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Is Used For Printing Observer Outcome.
-     * Variables:
-     * @var stringBuilderFragmentLifeCycleObserver will print fragment detail's.
      * @return String value.
      */
     internal fun returnFragmentLifeCycleState(): String {
@@ -511,8 +438,6 @@ internal class LogFragmentLifeCycleObserver(
 
     /**
      * This Method Is Used For Getting Fragment List.
-     * Variables:
-     * @var classList takes list of fragment's that are called with this observer.
      * @return ArrayList<String>.
      */
     internal fun returnClassList(): ArrayList<String> {

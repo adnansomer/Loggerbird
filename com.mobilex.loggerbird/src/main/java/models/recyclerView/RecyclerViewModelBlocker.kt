@@ -3,5 +3,5 @@ package models.recyclerView
 /**
  * This class is a model for Recycler View
  */
-data class RecyclerViewModelBlocker(var blockerName:String) {
+internal data class RecyclerViewModelBlocker(var blockerName:String) {
 }

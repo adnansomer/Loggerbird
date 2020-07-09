@@ -8,7 +8,7 @@ import java.util.*
 /**
  * This class is used for detecting shake while phone is shaking.
  */
-class LoggerBirdShakeDetector(private val listener: Listener) : SensorEventListener {
+internal class LoggerBirdShakeDetector(private val listener: Listener) : SensorEventListener {
 
     private var accelerationThreshold = DEFAULT_ACCELERATION_THRESHOLD
     private var lastTime: Long = 0

@@ -87,9 +87,8 @@ import observers.LogActivityLifeCycleObserver
 import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
 import paint.PaintView
-import utils.*
-import utils.EmailUtil
-import utils.LinkedBlockingQueueUtil
+import utils.email.EmailUtil
+import utils.other.LinkedBlockingQueueUtil
 import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -100,6 +99,17 @@ import android.text.InputFilter
 import listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
 import listeners.layouts.LayoutFeedbackOnTouchListener
 import listeners.layouts.LayoutJiraOnTouchListener
+import utils.api.asana.AsanaApi
+import utils.api.basecamp.BasecampApi
+import utils.api.clubhouse.ClubhouseApi
+import utils.api.github.GithubApi
+import utils.api.gitlab.GitlabApi
+import utils.api.jira.JiraApi
+import utils.api.pivotal.PivotalTrackerApi
+import utils.api.slack.SlackApi
+import utils.api.trello.TrelloApi
+import utils.other.DefaultToast
+import utils.other.InputTypeFilter
 
 internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
@@ -227,7 +237,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private val coroutineCallFilesAction: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlFileAction: Boolean = false
     private lateinit var progressBarView: View
-    private val defaultToast: DefaultToast = DefaultToast()
+    private val defaultToast: DefaultToast =
+        DefaultToast()
 
     //Jira:
     internal val jiraAuthentication = JiraApi()
@@ -701,8 +712,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         internal var controlPermissionRequest: Boolean = false
         private var runnableList: ArrayList<Runnable> = ArrayList()
         private var runnableListEmail: ArrayList<Runnable> = ArrayList()
-        private var workQueueLinkedVideo: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
-        private var workQueueLinkedEmail: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
+        private var workQueueLinkedVideo: LinkedBlockingQueueUtil =
+            LinkedBlockingQueueUtil()
+        private var workQueueLinkedEmail: LinkedBlockingQueueUtil =
+            LinkedBlockingQueueUtil()
         internal var controlVideoPermission: Boolean = false
         internal var controlAudioPermission: Boolean = false
         internal var controlDrawableSettingsPermission: Boolean = false
@@ -1348,6 +1361,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         textView_counter_audio.visibility = View.GONE
         textView_counter_video.visibility = View.GONE
         revealLinearLayoutShare.visibility = View.VISIBLE
+        textView_share_jira.visibility = View.GONE
         textView_share_clubhouse.visibility = View.GONE
         textView_share_asana.visibility = View.GONE
         textView_share_basecamp.visibility = View.GONE
@@ -7701,7 +7715,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     viewGitlab.findViewById(R.id.gitlab_progressbar_background)
                 recyclerViewGitlabAttachment =
                     viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
-                editTextGitlabWeight.filters = arrayOf<InputFilter>(InputTypeFilter("0", "100"))
+                editTextGitlabWeight.filters = arrayOf<InputFilter>(
+                    InputTypeFilter(
+                        "0",
+                        "100"
+                    )
+                )
 
                 gitlabAuthentication.callGitlab(
                     activity = activity,
