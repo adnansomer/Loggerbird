@@ -33,7 +33,8 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import kotlin.collections.HashMap
 
-internal class PivotalTrackerAuthentication {
+internal class PivotalTrackerApi {
+    //Global variables.
     private lateinit var activity: Activity
     private lateinit var context: Context
     private var filePathMedia: File? = null
@@ -67,6 +68,16 @@ internal class PivotalTrackerAuthentication {
     private var label: String? = null
     private var owners: String? = null
     private val defaultToast = DefaultToast()
+    /**
+     * This method is used for calling an pivotal action with network connection check.
+     * @param activity is used for getting reference of current activity.
+     * @param context is for getting reference from the application context.
+     * @param task is for getting reference of which pivotal action will be executed.
+     * @param filePathMedia is used for getting the reference of current media file.
+     * @throws LoggerBirdException if network connection error occurs.
+     * @throws exception if error occurs.
+     * @see pivotalExceptionHandler method.
+     */
     internal fun callPivotal(
         activity: Activity,
         context: Context,
@@ -105,6 +116,16 @@ internal class PivotalTrackerAuthentication {
         }
     }
 
+    /**
+     * This method is used for calling an pivotal action with internet connection check.
+     * @param context is for getting reference from the application context.
+     * @param activity is used for getting reference of current activity.
+     * @param task is for getting reference of which pivotal action will be executed.
+     * @param filePathMediaName is used for getting the reference of current media file.
+     * @throws LoggerBirdException if internet connection error occurs.
+     * @throws exception if error occurs.
+     * @see pivotalExceptionHandler method.
+     */
     private fun okHttpPivotalAuthentication(
         context: Context,
         activity: Activity,
@@ -128,7 +149,7 @@ internal class PivotalTrackerAuthentication {
                         coroutineCallPivotal.async {
                             try {
                                 when (task) {
-                                    "create" -> pivotalCreateIssue(activity = activity)
+                                    "create" -> pivotalCreateStory(activity = activity)
                                     "get" -> gatherPivotalDetails()
                                 }
 
@@ -160,36 +181,19 @@ internal class PivotalTrackerAuthentication {
         })
     }
 
-    private fun pivotalCreateIssue(activity: Activity) {
+    /**
+     * This method is used for creating pivotal story.
+     * @param activity is used for getting reference of current activity.
+     * @throws exception if error occurs.
+     * @see pivotalExceptionHandler method.
+     */
+    private fun pivotalCreateStory(activity: Activity) {
         try {
             projectId = arrayListProjectId[projectPosition]
             queueCounter = 0
             queueCounter++
             this.activity = activity
             val jsonObject = JsonObject()
-//            val jsonArrayLabels = JsonArray()
-//            if (RecyclerViewTrelloLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()) {
-//                RecyclerViewTrelloLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
-//                    jsonArrayLabels.add(hashMapLabel[it.labelName])
-//                }
-//            } else {
-//                if (!label.isNullOrEmpty()) {
-//                    jsonArrayLabels.add(hashMapLabel[label!!])
-//                }
-//            }
-//            val jsonArrayMembers = JsonArray()
-//            if(RecyclerViewTrelloMemberAdapter.ViewHolder.arrayListMemberNames.isNotEmpty()){
-//                RecyclerViewTrelloMemberAdapter.ViewHolder.arrayListMemberNames.forEach {
-//                    jsonArrayMembers.add(hashMapMember[it.memberName])
-//                }
-//            }else{
-//                if(!member.isNullOrEmpty())
-//                {
-//                jsonArrayMembers.add(hashMapMember[member!!])
-//                }
-//            }
-//            jsonObject.add("idMembers",jsonArrayMembers)
-//            jsonObject.add("idLabels",jsonArrayLabels)
             val jsonArrayLabels = JsonArray()
             if (RecyclerViewPivotalLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()) {
                 RecyclerViewPivotalLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
@@ -258,7 +262,7 @@ internal class PivotalTrackerAuthentication {
                                 )
                             }
                         }
-                        if(RecyclerViewPivotalBlockerAdapter.ViewHolder.arrayListBlocker.isNotEmpty()){
+                        if (RecyclerViewPivotalBlockerAdapter.ViewHolder.arrayListBlocker.isNotEmpty()) {
                             RecyclerViewPivotalBlockerAdapter.ViewHolder.arrayListBlocker.forEach {
                                 queueCounter++
                                 coroutineCallPivotalBlockers.async {
@@ -270,8 +274,8 @@ internal class PivotalTrackerAuthentication {
                                     )
                                 }
                             }
-                        }else{
-                            if(!blockers.isNullOrEmpty()){
+                        } else {
+                            if (!blockers.isNullOrEmpty()) {
                                 queueCounter++
                                 coroutineCallPivotalBlockers.async {
                                     createBlockers(
@@ -284,7 +288,7 @@ internal class PivotalTrackerAuthentication {
                             }
                         }
 
-                        if(RecyclerViewPivotalTaskAdapter.ViewHolder.arrayListTasks.isNotEmpty()){
+                        if (RecyclerViewPivotalTaskAdapter.ViewHolder.arrayListTasks.isNotEmpty()) {
                             RecyclerViewPivotalTaskAdapter.ViewHolder.arrayListTasks.forEach {
                                 queueCounter++
                                 coroutineCallPivotalTasks.async {
@@ -296,8 +300,8 @@ internal class PivotalTrackerAuthentication {
                                     )
                                 }
                             }
-                        }else{
-                            if(!tasks.isNullOrEmpty()){
+                        } else {
+                            if (!tasks.isNullOrEmpty()) {
                                 queueCounter++
                                 coroutineCallPivotalTasks.async {
                                     createTasks(
@@ -319,277 +323,115 @@ internal class PivotalTrackerAuthentication {
         }
     }
 
-    private fun gatherTaskProject() {
-        queueCounter++
-        RetrofitUserPivotalClient.getPivotalUserClient(url = "https://pivotaltracker.com/services/v5/")
-            .create(AccountIdService::class.java)
-            .getPivotalProjects()
-            .enqueue(object : retrofit2.Callback<JsonArray> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonArray>,
-                    t: Throwable
-                ) {
-                    pivotalExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<JsonArray>,
-                    response: retrofit2.Response<JsonArray>
-                ) {
-                    val coroutineCallPivotalProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallPivotalProject.async {
-                        Log.d("pivotal_project_success", response.code().toString())
-                        val pivotalList = response.body()
-                        pivotalList?.forEach {
-                            if (it.asJsonObject["name"] != null) {
-                                arrayListProjectNames.add(it.asJsonObject["name"].asString)
-                                arrayListProjectId.add(it.asJsonObject["id"].asString)
-                            }
-                        }
-                        if (arrayListProjectId.size > projectPosition) {
-                            gatherTaskLabel(projectId = arrayListProjectId[projectPosition])
-                            gatherTaskMembers(projectId = arrayListProjectId[projectPosition])
-                        }
-                        updateFields()
-
-                    }
-                }
-            })
-    }
-
-    private fun gatherTaskStoryType() {
-        arrayListStoryTypeNames.add("feature")
-        arrayListStoryTypeNames.add("bug")
-        arrayListStoryTypeNames.add("chore")
-        arrayListStoryTypeNames.add("release")
-    }
-
-    private fun gatherTaskPoints() {
-        arrayListPoints.add("0")
-        arrayListPoints.add("1")
-        arrayListPoints.add("2")
-        arrayListPoints.add("3")
-    }
-
-    private fun gatherTaskLabel(projectId: String) {
-        queueCounter++
-        RetrofitUserPivotalClient.getPivotalUserClient(url = "https://pivotaltracker.com/services/v5/projects/$projectId/")
-            .create(AccountIdService::class.java)
-            .getPivotalLabels()
-            .enqueue(object : retrofit2.Callback<JsonArray> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonArray>,
-                    t: Throwable
-                ) {
-                    pivotalExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<JsonArray>,
-                    response: retrofit2.Response<JsonArray>
-                ) {
-                    val coroutineCallLabel = CoroutineScope(Dispatchers.IO)
-                    coroutineCallLabel.async {
-                        try {
-                            Log.d("pivotal_label_success", response.code().toString())
-                            val labelList = response.body()
-                            labelList?.forEach {
-                                //                                if (it.asJsonObject["name"].asString.isNotEmpty() && it.asJsonObject["name"].asString != null ) {
-//                                    arrayListOwnersNames.add(it.asJsonObject["name"].asString)
-//                                    hashMapLabel[it.asJsonObject["name"].asString] = it.asJsonObject["id"].asString
-//                                } else {
-//                                    arrayListOwnersNames.add(it.asJsonObject["id"].asString)
-//                                    hashMapLabel[it.asJsonObject["id"].asString] = it.asJsonObject["id"].asString
-//                                }
-                                arrayListLabelId.add(it.asJsonObject["id"].asString)
-                                arrayListLabelNames.add(it.asJsonObject["name"].asString)
-                                hashMapLabel[it.asJsonObject["name"].asString] =
-                                    it.asJsonObject["id"].asString
-                            }
-                            updateFields()
-                        } catch (e: Exception) {
-                            pivotalExceptionHandler(e = e)
-                        }
-                    }
-                }
-            })
-    }
-
-    private fun gatherTaskMembers(projectId: String) {
-        queueCounter++
-        RetrofitUserPivotalClient.getPivotalUserClient(url = "https://pivotaltracker.com/services/v5/projects/$projectId/")
-            .create(AccountIdService::class.java)
-            .getPivotalMembers()
-            .enqueue(object : retrofit2.Callback<JsonArray> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonArray>,
-                    t: Throwable
-                ) {
-                    pivotalExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<JsonArray>,
-                    response: retrofit2.Response<JsonArray>
-                ) {
-                    val coroutineCallLabel = CoroutineScope(Dispatchers.IO)
-                    coroutineCallLabel.async {
-                        try {
-                            Log.d("pivotal_member_success", response.code().toString())
-                            val memberList = response.body()
-                            memberList?.forEach {
-                                arrayListMemberId.add(it.asJsonObject["person"].asJsonObject["id"].asString)
-                                arrayListRequesterNames.add(it.asJsonObject["person"].asJsonObject["name"].asString)
-                                arrayListOwnersNames.add(it.asJsonObject["person"].asJsonObject["name"].asString)
-                                hashMapOwner[it.asJsonObject["person"].asJsonObject["name"].asString] =
-                                    it.asJsonObject["person"].asJsonObject["id"].asString
-                            }
-                            updateFields()
-                        } catch (e: Exception) {
-                            pivotalExceptionHandler(e = e)
-                        }
-                    }
-                }
-            })
-    }
-
-
-    internal fun gatherAutoTextDetails(
-        autoTextViewProject: AutoCompleteTextView,
-        autoTextViewStoryType: AutoCompleteTextView,
-        autoTextViewPoints: AutoCompleteTextView,
-        autoTextViewRequester: AutoCompleteTextView,
-        autoTextViewLabel: AutoCompleteTextView,
-        autoTextViewOwners: AutoCompleteTextView
+    /**
+     * This method is used for creating pivotal blockers when pivotal story created.
+     * @param projectId is used for getting reference of current chosen project id.
+     * @param storyId is used for getting reference of created story id.
+     * @param description is used for getting reference of the description.
+     * @param activity is used for getting reference of current activity.
+     * @throws exception if error occurs.
+     * @see pivotalExceptionHandler method.
+     */
+    private fun createBlockers(
+        projectId: String,
+        storyId: String,
+        description: String,
+        activity: Activity
     ) {
-        project = autoTextViewProject.editableText.toString()
-        storyType = autoTextViewStoryType.editableText.toString()
-        points = autoTextViewPoints.editableText.toString()
-        requester = autoTextViewRequester.editableText.toString()
-        label = autoTextViewLabel.editableText.toString()
-        owners = autoTextViewOwners.editableText.toString()
-    }
-
-    internal fun gatherEditTextDetails(
-        editTextTitle: EditText,
-        editTextTasks: EditText,
-        editTextDescription: EditText,
-        editTextBlockers: EditText
-    ) {
-        title = editTextTitle.text.toString()
-        tasks = editTextTasks.text.toString()
-        description = editTextDescription.text.toString()
-        blockers = editTextBlockers.text.toString()
-    }
-
-    private fun gatherPivotalDetails() {
         try {
-            queueCounter = 0
-            arrayListProjectNames.clear()
-            arrayListProjectId.clear()
-            arrayListStoryTypeNames.clear()
-            arrayListRequesterNames.clear()
-            arrayListMemberId.clear()
-            arrayListOwnersNames.clear()
-            arrayListLabelId.clear()
-            arrayListLabelNames.clear()
-            hashMapLabel.clear()
-            hashMapOwner.clear()
-            arrayListPoints.clear()
-            gatherTaskProject()
-            gatherTaskStoryType()
-            gatherTaskPoints()
+            val jsonObject = JsonObject()
+            jsonObject.addProperty("description", description)
+            RetrofitUserPivotalClient.getPivotalUserClient(url = "https://www.pivotaltracker.com/services/v5/projects/$projectId/stories/$storyId/")
+                .create(AccountIdService::class.java)
+                .setPivotalBlockers(jsonObject = jsonObject)
+                .enqueue(object : retrofit2.Callback<JsonObject> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<JsonObject>,
+                        t: Throwable
+                    ) {
+                        pivotalExceptionHandler(throwable = t)
+                    }
+
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
+                    ) {
+                        val pivotalResponse = response.body()
+                        Log.d("blockers_put_success", response.code().toString())
+                        Log.d("blockers_put_success", response.message())
+                        if (pivotalResponse != null) {
+                            resetPivotalValues(shareLayoutMessage = "pivotal")
+                        } else {
+                            resetPivotalValues(shareLayoutMessage = "pivotal_error")
+                        }
+
+                    }
+                })
         } catch (e: Exception) {
             pivotalExceptionHandler(e = e)
         }
     }
 
-
-    private fun updateFields() {
-        queueCounter--
-        Log.d("que_counter", queueCounter.toString())
-        if (queueCounter == 0) {
-            timerTaskQueue.cancel()
-            activity.runOnUiThread {
-                LoggerBirdService.loggerBirdService.initializePivotalAutoTextViews(
-                    arrayListPivotalProject = arrayListProjectNames,
-                    arrayListPivotalStoryType = arrayListStoryTypeNames,
-                    arrayListPivotalRequester = arrayListRequesterNames,
-                    arrayListPivotalOwners = arrayListOwnersNames,
-                    arrayListPivotalLabels = arrayListLabelNames,
-                    arrayListPivotalPoints = arrayListPoints
-                )
-            }
-        }
-
-    }
-
-
-    private fun checkQueueTime(activity: Activity) {
-        val timerQueue = Timer()
-        timerTaskQueue = object : TimerTask() {
-            override fun run() {
-                activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("pivotal_error_time_out")
-                }
-            }
-        }
-        timerQueue.schedule(timerTaskQueue, 180000)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun pivotalExceptionHandler(
-        e: Exception? = null,
-        throwable: Throwable? = null
+    /**
+     * This method is used for creating pivotal task when pivotal story created.
+     * @param projectId is used for getting reference of current chosen project id.
+     * @param storyId is used for getting reference of created story id.
+     * @param description is used for getting reference of the description.
+     * @param activity is used for getting reference of current activity.
+     * @throws exception if error occurs.
+     * @see pivotalExceptionHandler method.
+     */
+    private fun createTasks(
+        projectId: String,
+        storyId: String,
+        description: String,
+        activity: Activity
     ) {
-        resetPivotalValues(shareLayoutMessage = "pivotal_error")
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
-        }
-        LoggerBirdService.loggerBirdService.finishShareLayout("pivotal_error")
-        throwable?.printStackTrace()
-        e?.printStackTrace()
-        LoggerBird.callEnqueue()
-        LoggerBird.callExceptionDetails(
-            exception = e,
-            tag = Constants.pivotalTag,
-            throwable = throwable
-        )
-    }
+        try {
+            val jsonObject = JsonObject()
+            jsonObject.addProperty("description", description)
+            RetrofitUserPivotalClient.getPivotalUserClient(url = "https://www.pivotaltracker.com/services/v5/projects/$projectId/stories/$storyId/")
+                .create(AccountIdService::class.java)
+                .setPivotalTasks(jsonObject = jsonObject)
+                .enqueue(object : retrofit2.Callback<JsonObject> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<JsonObject>,
+                        t: Throwable
+                    ) {
+                        pivotalExceptionHandler(throwable = t)
+                    }
 
-    internal fun setProjectPosition(projectPosition: Int) {
-        this.projectPosition = projectPosition
-    }
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
+                    ) {
+                        val pivotalResponse = response.body()
+                        Log.d("tasks_put_success", response.code().toString())
+                        Log.d("tasks_put_success", response.message())
+                        if (pivotalResponse != null) {
+                            resetPivotalValues(shareLayoutMessage = "pivotal")
+                        } else {
+                            resetPivotalValues(shareLayoutMessage = "pivotal_error")
+                        }
 
-    internal fun setLabelPosition(labelPosition: Int) {
-        this.labelPosition = labelPosition
-    }
-
-
-    private fun resetPivotalValues(shareLayoutMessage: String) {
-        queueCounter--
-        Log.d("queue_counter", queueCounter.toString())
-        if (queueCounter == 0) {
-            timerTaskQueue.cancel()
-            arrayListProjectNames.clear()
-            arrayListProjectId.clear()
-            arrayListStoryTypeNames.clear()
-            arrayListOwnersNames.clear()
-            hashMapLabel.clear()
-            hashMapOwner.clear()
-            arrayListLabelId.clear()
-            arrayListLabelNames.clear()
-            projectPosition = 0
-            project = null
-            title = ""
-            label = null
-            labelPosition = 0
-            activity.runOnUiThread {
-                LoggerBirdService.loggerBirdService.finishShareLayout(shareLayoutMessage)
-            }
+                    }
+                })
+        } catch (e: Exception) {
+            pivotalExceptionHandler(e = e)
         }
     }
 
+    /**
+     * This method is used for creating pivotal attachment when pivotal story created.
+     * @param projectId is used for getting reference of current chosen project id.
+     * @param storyId is used for getting reference of created story id.
+     * @param file is used for getting reference of the current file.
+     * @param activity is used for getting reference of current activity.
+     * @throws exception if error occurs.
+     * @see pivotalExceptionHandler method.
+     */
     private fun createAttachments(
         projectId: String,
         storyId: String,
@@ -650,6 +492,15 @@ internal class PivotalTrackerAuthentication {
         }
     }
 
+    /**
+     * This method is used for adding pivotal attachment when pivotal attachment created.
+     * @param activity is used for getting reference of current activity.
+     * @param projectId is used for getting reference of current chosen project id.
+     * @param storyId is used for getting reference of created story id.
+     * @param attachmentId is used for getting reference of created attachment id.
+     * @throws exception if error occurs.
+     * @see pivotalExceptionHandler method.
+     */
     private fun addAttachments(
         activity: Activity,
         projectId: String,
@@ -690,105 +541,360 @@ internal class PivotalTrackerAuthentication {
         }
     }
 
-    private fun createBlockers(
-        projectId: String,
-        storyId: String,
-        description:String,
-        activity: Activity
-    ) {
+    /**
+     * This method is used for initializing the gathering action of pivotal.
+     * @throws exception if error occurs.
+     * @see pivotalExceptionHandler method.
+     */
+    private fun gatherPivotalDetails() {
         try {
-            val jsonObject = JsonObject()
-            jsonObject.addProperty("description",description)
-            RetrofitUserPivotalClient.getPivotalUserClient(url = "https://www.pivotaltracker.com/services/v5/projects/$projectId/stories/$storyId/")
-                .create(AccountIdService::class.java)
-                .setPivotalBlockers(jsonObject = jsonObject)
-                .enqueue(object : retrofit2.Callback<JsonObject> {
-                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                    override fun onFailure(
-                        call: retrofit2.Call<JsonObject>,
-                        t: Throwable
-                    ) {
-                        pivotalExceptionHandler(throwable = t)
-                    }
-
-                    override fun onResponse(
-                        call: retrofit2.Call<JsonObject>,
-                        response: retrofit2.Response<JsonObject>
-                    ) {
-                        val pivotalResponse = response.body()
-                        Log.d("blockers_put_success", response.code().toString())
-                        Log.d("blockers_put_success", response.message())
-                        if (pivotalResponse != null) {
-                            resetPivotalValues(shareLayoutMessage = "pivotal")
-                        } else {
-                            resetPivotalValues(shareLayoutMessage = "pivotal_error")
-                        }
-
-                    }
-                })
+            queueCounter = 0
+            arrayListProjectNames.clear()
+            arrayListProjectId.clear()
+            arrayListStoryTypeNames.clear()
+            arrayListRequesterNames.clear()
+            arrayListMemberId.clear()
+            arrayListOwnersNames.clear()
+            arrayListLabelId.clear()
+            arrayListLabelNames.clear()
+            hashMapLabel.clear()
+            hashMapOwner.clear()
+            arrayListPoints.clear()
+            gatherTaskProject()
+            gatherTaskStoryType()
+            gatherTaskPoints()
         } catch (e: Exception) {
             pivotalExceptionHandler(e = e)
         }
     }
 
-    private fun createTasks(
-        projectId: String,
-        storyId: String,
-        description:String,
-        activity: Activity
-    ) {
-        try {
-            val jsonObject = JsonObject()
-            jsonObject.addProperty("description",description)
-            RetrofitUserPivotalClient.getPivotalUserClient(url = "https://www.pivotaltracker.com/services/v5/projects/$projectId/stories/$storyId/")
-                .create(AccountIdService::class.java)
-                .setPivotalTasks(jsonObject = jsonObject)
-                .enqueue(object : retrofit2.Callback<JsonObject> {
-                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                    override fun onFailure(
-                        call: retrofit2.Call<JsonObject>,
-                        t: Throwable
-                    ) {
-                        pivotalExceptionHandler(throwable = t)
-                    }
+    /**
+     * This method is used for getting project details for pivotal.
+     * @throws exception if error occurs.
+     * @see pivotalExceptionHandler method.
+     */
+    private fun gatherTaskProject() {
+        queueCounter++
+        RetrofitUserPivotalClient.getPivotalUserClient(url = "https://pivotaltracker.com/services/v5/")
+            .create(AccountIdService::class.java)
+            .getPivotalProjects()
+            .enqueue(object : retrofit2.Callback<JsonArray> {
+                override fun onFailure(
+                    call: retrofit2.Call<JsonArray>,
+                    t: Throwable
+                ) {
+                    pivotalExceptionHandler(throwable = t)
+                }
 
-                    override fun onResponse(
-                        call: retrofit2.Call<JsonObject>,
-                        response: retrofit2.Response<JsonObject>
-                    ) {
-                        val pivotalResponse = response.body()
-                        Log.d("tasks_put_success", response.code().toString())
-                        Log.d("tasks_put_success", response.message())
-                        if (pivotalResponse != null) {
-                            resetPivotalValues(shareLayoutMessage = "pivotal")
-                        } else {
-                            resetPivotalValues(shareLayoutMessage = "pivotal_error")
+                override fun onResponse(
+                    call: retrofit2.Call<JsonArray>,
+                    response: retrofit2.Response<JsonArray>
+                ) {
+                    val coroutineCallPivotalProject = CoroutineScope(Dispatchers.IO)
+                    coroutineCallPivotalProject.async {
+                        Log.d("pivotal_project_success", response.code().toString())
+                        val pivotalList = response.body()
+                        pivotalList?.forEach {
+                            if (it.asJsonObject["name"] != null) {
+                                arrayListProjectNames.add(it.asJsonObject["name"].asString)
+                                arrayListProjectId.add(it.asJsonObject["id"].asString)
+                            }
                         }
+                        if (arrayListProjectId.size > projectPosition) {
+                            gatherTaskLabel(projectId = arrayListProjectId[projectPosition])
+                            gatherTaskMembers(projectId = arrayListProjectId[projectPosition])
+                        }
+                        updateFields()
 
                     }
-                })
-        } catch (e: Exception) {
-            pivotalExceptionHandler(e = e)
-        }
+                }
+            })
+    }
+
+    /**
+     * This method is used for getting story type details for github.
+     */
+    private fun gatherTaskStoryType() {
+        arrayListStoryTypeNames.add("feature")
+        arrayListStoryTypeNames.add("bug")
+        arrayListStoryTypeNames.add("chore")
+        arrayListStoryTypeNames.add("release")
+    }
+
+    /**
+     * This method is used for getting point details for github.
+     */
+    private fun gatherTaskPoints() {
+        arrayListPoints.add("0")
+        arrayListPoints.add("1")
+        arrayListPoints.add("2")
+        arrayListPoints.add("3")
     }
 
 
+    /**
+     * This method is used for getting label details for pivotal.
+     * @param projectId is used for getting reference of current chosen project id.
+     * @throws exception if error occurs.
+     * @see pivotalExceptionHandler method.
+     */
+    private fun gatherTaskLabel(projectId: String) {
+        queueCounter++
+        RetrofitUserPivotalClient.getPivotalUserClient(url = "https://pivotaltracker.com/services/v5/projects/$projectId/")
+            .create(AccountIdService::class.java)
+            .getPivotalLabels()
+            .enqueue(object : retrofit2.Callback<JsonArray> {
+                override fun onFailure(
+                    call: retrofit2.Call<JsonArray>,
+                    t: Throwable
+                ) {
+                    pivotalExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonArray>,
+                    response: retrofit2.Response<JsonArray>
+                ) {
+                    val coroutineCallLabel = CoroutineScope(Dispatchers.IO)
+                    coroutineCallLabel.async {
+                        try {
+                            Log.d("pivotal_label_success", response.code().toString())
+                            val labelList = response.body()
+                            labelList?.forEach {
+                                arrayListLabelId.add(it.asJsonObject["id"].asString)
+                                arrayListLabelNames.add(it.asJsonObject["name"].asString)
+                                hashMapLabel[it.asJsonObject["name"].asString] =
+                                    it.asJsonObject["id"].asString
+                            }
+                            updateFields()
+                        } catch (e: Exception) {
+                            pivotalExceptionHandler(e = e)
+                        }
+                    }
+                }
+            })
+    }
+
+    /**
+     * This method is used for getting member details for pivotal.
+     * @param projectId is used for getting reference of current chosen project id.
+     * @throws exception if error occurs.
+     * @see pivotalExceptionHandler method.
+     */
+    private fun gatherTaskMembers(projectId: String) {
+        queueCounter++
+        RetrofitUserPivotalClient.getPivotalUserClient(url = "https://pivotaltracker.com/services/v5/projects/$projectId/")
+            .create(AccountIdService::class.java)
+            .getPivotalMembers()
+            .enqueue(object : retrofit2.Callback<JsonArray> {
+                override fun onFailure(
+                    call: retrofit2.Call<JsonArray>,
+                    t: Throwable
+                ) {
+                    pivotalExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonArray>,
+                    response: retrofit2.Response<JsonArray>
+                ) {
+                    val coroutineCallLabel = CoroutineScope(Dispatchers.IO)
+                    coroutineCallLabel.async {
+                        try {
+                            Log.d("pivotal_member_success", response.code().toString())
+                            val memberList = response.body()
+                            memberList?.forEach {
+                                arrayListMemberId.add(it.asJsonObject["person"].asJsonObject["id"].asString)
+                                arrayListRequesterNames.add(it.asJsonObject["person"].asJsonObject["name"].asString)
+                                arrayListOwnersNames.add(it.asJsonObject["person"].asJsonObject["name"].asString)
+                                hashMapOwner[it.asJsonObject["person"].asJsonObject["name"].asString] =
+                                    it.asJsonObject["person"].asJsonObject["id"].asString
+                            }
+                            updateFields()
+                        } catch (e: Exception) {
+                            pivotalExceptionHandler(e = e)
+                        }
+                    }
+                }
+            })
+    }
+
+
+    /**
+     * This method is used for getting details of autoCompleteTextViews in the pivotal layout.
+     * @param autoTextViewProject is used for getting project details from project autoCompleteTextView in the pivotal layout.
+     * @param autoTextViewStoryType is used for getting story type details from story type autoCompleteTextView in the pivotal layout.
+     * @param autoTextViewPoints is used for getting point details from point autoCompleteTextView in the pivotal layout.
+     * @param autoTextViewRequester is used for getting requester details from requester autoCompleteTextView in the pivotal layout.
+     * @param autoTextViewLabel is used for getting label details from label autoCompleteTextView in the pivotal layout.
+     * @param autoTextViewOwners is used for getting owner details from owner autoCompleteTextView in the pivotal layout.
+     */
+    internal fun gatherAutoTextDetails(
+        autoTextViewProject: AutoCompleteTextView,
+        autoTextViewStoryType: AutoCompleteTextView,
+        autoTextViewPoints: AutoCompleteTextView,
+        autoTextViewRequester: AutoCompleteTextView,
+        autoTextViewLabel: AutoCompleteTextView,
+        autoTextViewOwners: AutoCompleteTextView
+    ) {
+        project = autoTextViewProject.editableText.toString()
+        storyType = autoTextViewStoryType.editableText.toString()
+        points = autoTextViewPoints.editableText.toString()
+        requester = autoTextViewRequester.editableText.toString()
+        label = autoTextViewLabel.editableText.toString()
+        owners = autoTextViewOwners.editableText.toString()
+    }
+
+    /**
+     * This method is used for getting details of editTexts in the pivotal layout.
+     * @param editTextTitle is used for getting title details from title editText in the pivotal layout.
+     * @param editTextTasks is used for getting task details from task editText in the pivotal layout.
+     * @param editTextDescription is used for getting description details from description editText in the pivotal layout.
+     * @param editTextBlockers is used for getting blocker details from blocker editText in the pivotal layout.
+     */
+    internal fun gatherEditTextDetails(
+        editTextTitle: EditText,
+        editTextTasks: EditText,
+        editTextDescription: EditText,
+        editTextBlockers: EditText
+    ) {
+        title = editTextTitle.text.toString()
+        tasks = editTextTasks.text.toString()
+        description = editTextDescription.text.toString()
+        blockers = editTextBlockers.text.toString()
+    }
+
+
+    /**
+     * This method is used for updating and controlling the queue of background tasks in the pivotal actions.
+     */
+    private fun updateFields() {
+        queueCounter--
+        Log.d("que_counter", queueCounter.toString())
+        if (queueCounter == 0) {
+            timerTaskQueue.cancel()
+            activity.runOnUiThread {
+                LoggerBirdService.loggerBirdService.initializePivotalAutoTextViews(
+                    arrayListPivotalProject = arrayListProjectNames,
+                    arrayListPivotalStoryType = arrayListStoryTypeNames,
+                    arrayListPivotalRequester = arrayListRequesterNames,
+                    arrayListPivotalOwners = arrayListOwnersNames,
+                    arrayListPivotalLabels = arrayListLabelNames,
+                    arrayListPivotalPoints = arrayListPoints
+                )
+            }
+        }
+
+    }
+
+    /**
+     * This method is used for controlling the time of background tasks in the pivotal actions.
+    If tasks will last longer than three minutes then pivotal layout will be removed.
+     */
+    private fun checkQueueTime(activity: Activity) {
+        val timerQueue = Timer()
+        timerTaskQueue = object : TimerTask() {
+            override fun run() {
+                activity.runOnUiThread {
+                    LoggerBirdService.loggerBirdService.finishShareLayout("pivotal_error_time_out")
+                }
+            }
+        }
+        timerQueue.schedule(timerTaskQueue, 180000)
+    }
+
+    /**
+     * This method is used for default exception handling of pivotal class.
+     * @param e is used for getting reference of exception.
+     * @param throwable is used for getting reference of throwable.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun pivotalExceptionHandler(
+        e: Exception? = null,
+        throwable: Throwable? = null
+    ) {
+        resetPivotalValues(shareLayoutMessage = "pivotal_error")
+        if (this::timerTaskQueue.isInitialized) {
+            timerTaskQueue.cancel()
+        }
+        LoggerBirdService.loggerBirdService.finishShareLayout("pivotal_error")
+        throwable?.printStackTrace()
+        e?.printStackTrace()
+        LoggerBird.callEnqueue()
+        LoggerBird.callExceptionDetails(
+            exception = e,
+            tag = Constants.pivotalTag,
+            throwable = throwable
+        )
+    }
+
+    /**
+     * This method is used for getting reference of current project position in the project autoCompleteTextView in the pivotal layout.
+     * @param projectPosition is used for getting reference of project position.
+     */
+    internal fun setProjectPosition(projectPosition: Int) {
+        this.projectPosition = projectPosition
+    }
+
+    /**
+     * This method is used for getting reference of current label position in the label autoCompleteTextView in the pivotal layout.
+     * @param labelPosition is used for getting reference of label position.
+     */
+    internal fun setLabelPosition(labelPosition: Int) {
+        this.labelPosition = labelPosition
+    }
+
+
+    /**
+     * This method is used for resetting the values in pivotal action.
+     * @param shareLayoutMessage is used for getting reference of the pivotal action message.
+     */
+    private fun resetPivotalValues(shareLayoutMessage: String) {
+        queueCounter--
+        Log.d("queue_counter", queueCounter.toString())
+        if (queueCounter == 0) {
+            timerTaskQueue.cancel()
+            arrayListProjectNames.clear()
+            arrayListProjectId.clear()
+            arrayListStoryTypeNames.clear()
+            arrayListOwnersNames.clear()
+            hashMapLabel.clear()
+            hashMapOwner.clear()
+            arrayListLabelId.clear()
+            arrayListLabelNames.clear()
+            projectPosition = 0
+            project = null
+            title = ""
+            label = null
+            labelPosition = 0
+            activity.runOnUiThread {
+                LoggerBirdService.loggerBirdService.finishShareLayout(shareLayoutMessage)
+            }
+        }
+    }
+
+    /**
+     * This method is used for checking project reference exist in the project list or not empty in the project AutoCompleteTextView field in the pivotal layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewProject is used for getting reference of project autoCompleteTextView in the pivotal layout.
+     * @return Boolean value.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun checkPivotalProject(
         activity: Activity,
-        autoTextViewPivotalProject: AutoCompleteTextView
+        autoTextViewProject: AutoCompleteTextView
     ): Boolean {
-        if (autoTextViewPivotalProject.editableText.toString().isNotEmpty() && arrayListProjectNames.contains(
-                autoTextViewPivotalProject.editableText.toString()
+        if (autoTextViewProject.editableText.toString().isNotEmpty() && arrayListProjectNames.contains(
+                autoTextViewProject.editableText.toString()
             )
         ) {
             return true
-        } else if (autoTextViewPivotalProject.editableText.toString().isEmpty()) {
+        } else if (autoTextViewProject.editableText.toString().isEmpty()) {
             defaultToast.attachToast(
                 activity = activity,
                 toastMessage = activity.resources.getString(R.string.pivotal_project_empty)
             )
-        } else if (!arrayListProjectNames.contains(autoTextViewPivotalProject.editableText.toString())) {
+        } else if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
             defaultToast.attachToast(
                 activity = activity,
                 toastMessage = activity.resources.getString(R.string.pivotal_project_doesnt_exist)
@@ -797,11 +903,17 @@ internal class PivotalTrackerAuthentication {
         return false
     }
 
+    /**
+     * This method is used for checking label reference exist in the label list or not empty in the label AutoCompleteTextView field in the pivotal layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewLabel is used for getting reference of label autoCompleteTextView in the pivotal layout.
+     * @return Boolean value.
+     */
     internal fun checkPivotalLabel(
         activity: Activity,
-        autoTextViewPivotalLabel: AutoCompleteTextView
+        autoTextViewLabel: AutoCompleteTextView
     ): Boolean {
-        if (arrayListLabelNames.contains(autoTextViewPivotalLabel.editableText.toString()) || autoTextViewPivotalLabel.editableText.toString().isEmpty()) {
+        if (arrayListLabelNames.contains(autoTextViewLabel.editableText.toString()) || autoTextViewLabel.editableText.toString().isEmpty()) {
             return true
         } else {
             defaultToast.attachToast(
@@ -812,11 +924,17 @@ internal class PivotalTrackerAuthentication {
         return false
     }
 
+    /**
+     * This method is used for checking requester reference exist in the requester list or not empty in the requester AutoCompleteTextView field in the pivotal layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewRequester is used for getting reference of requester autoCompleteTextView in the pivotal layout.
+     * @return Boolean value.
+     */
     internal fun checkPivotalRequester(
         activity: Activity,
-        autoTextViewPivotaRequester: AutoCompleteTextView
+        autoTextViewRequester: AutoCompleteTextView
     ): Boolean {
-        if (arrayListRequesterNames.contains(autoTextViewPivotaRequester.editableText.toString()) || autoTextViewPivotaRequester.editableText.toString().isEmpty()) {
+        if (arrayListRequesterNames.contains(autoTextViewRequester.editableText.toString()) || autoTextViewRequester.editableText.toString().isEmpty()) {
             return true
         } else {
             defaultToast.attachToast(
@@ -827,11 +945,17 @@ internal class PivotalTrackerAuthentication {
         return false
     }
 
+    /**
+     * This method is used for checking owner reference exist in the owner list or not empty in the owner AutoCompleteTextView field in the pivotal layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewOwner is used for getting reference of owner autoCompleteTextView in the pivotal layout.
+     * @return Boolean value.
+     */
     internal fun checkPivotalOwner(
         activity: Activity,
-        autoTextViewPivotalOwner: AutoCompleteTextView
+        autoTextViewOwner: AutoCompleteTextView
     ): Boolean {
-        if (arrayListOwnersNames.contains(autoTextViewPivotalOwner.editableText.toString()) || autoTextViewPivotalOwner.editableText.toString().isEmpty()) {
+        if (arrayListOwnersNames.contains(autoTextViewOwner.editableText.toString()) || autoTextViewOwner.editableText.toString().isEmpty()) {
             return true
         } else {
             defaultToast.attachToast(
@@ -842,11 +966,17 @@ internal class PivotalTrackerAuthentication {
         return false
     }
 
+    /**
+     * This method is used for checking story type reference exist in the story type list or not empty in the story type AutoCompleteTextView field in the pivotal layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewStoryType is used for getting reference of story type autoCompleteTextView in the pivotal layout.
+     * @return Boolean value.
+     */
     internal fun checkPivotalStoryType(
         activity: Activity,
-        autoTextViewPivotalStoryType: AutoCompleteTextView
+        autoTextViewStoryType: AutoCompleteTextView
     ): Boolean {
-        if (arrayListStoryTypeNames.contains(autoTextViewPivotalStoryType.editableText.toString()) || autoTextViewPivotalStoryType.editableText.toString().isEmpty()) {
+        if (arrayListStoryTypeNames.contains(autoTextViewStoryType.editableText.toString()) || autoTextViewStoryType.editableText.toString().isEmpty()) {
             return true
         } else {
             defaultToast.attachToast(
@@ -857,11 +987,17 @@ internal class PivotalTrackerAuthentication {
         return false
     }
 
+    /**
+     * This method is used for checking point reference exist in the point list or not empty in the point AutoCompleteTextView field in the pivotal layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewPoint is used for getting reference of point autoCompleteTextView in the pivotal layout.
+     * @return Boolean value.
+     */
     internal fun checkPivotalPoint(
         activity: Activity,
-        autoTextViewPivotalPoint: AutoCompleteTextView
+        autoTextViewPoint: AutoCompleteTextView
     ): Boolean {
-        if (arrayListPoints.contains(autoTextViewPivotalPoint.editableText.toString()) || autoTextViewPivotalPoint.editableText.toString().isEmpty()) {
+        if (arrayListPoints.contains(autoTextViewPoint.editableText.toString()) || autoTextViewPoint.editableText.toString().isEmpty()) {
             return true
         } else {
             defaultToast.attachToast(
@@ -872,6 +1008,12 @@ internal class PivotalTrackerAuthentication {
         return false
     }
 
+    /**
+     * This method is used for checking title reference is not empty in the task editText field in the pivotal layout.
+     * @param activity is used for getting reference of current activity.
+     * @param editTextTitle is used for getting reference of task editText in the pivotal layout.
+     * @return Boolean value.
+     */
     internal fun checkPivotalTitle(activity: Activity, editTextTitle: EditText): Boolean {
         if (editTextTitle.text.toString().isNotEmpty()) {
             return true

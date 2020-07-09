@@ -1,4 +1,4 @@
-package listeners
+package listeners.recyclerViews
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
@@ -6,7 +6,7 @@ import constants.Constants
 import loggerbird.LoggerBird
 import java.text.SimpleDateFormat
 import java.util.*
-
+//This class is used for listening child attach state in recyclerView.
 internal class LogRecyclerViewChildAttachStateChangeListener :
     RecyclerView.OnChildAttachStateChangeListener {
     //Global variables.
@@ -21,12 +21,7 @@ internal class LogRecyclerViewChildAttachStateChangeListener :
 
     /**
      * This Method Called When RecyclerView OnChildAttachStateChangeListener Detect's An  OnChildViewDetachedToWindow  State In The Current RecyclerView.
-     * Parameters:
      * @param view takes reference of scrolled recyclerView from listener.
-     * Variables:
-     * @var currentRecyclerViewChildAttachStateChangeListenerObserverState states takes current state as a String in the recyclerView listener.
-     * @var stringBuilderRecyclerViewScrollListenerObserver used for printing recyclerView listener detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onChildViewDetachedFromWindow(view: View) {
@@ -50,12 +45,7 @@ internal class LogRecyclerViewChildAttachStateChangeListener :
 
     /**
      * This Method Called When RecyclerView OnChildAttachStateChangeListener Detect's An  OnChildViewAttachedToWindow  State In The Current RecyclerView.
-     * Parameters:
      * @param view takes reference of scrolled recyclerView from listener.
-     * Variables:
-     * @var currentRecyclerViewChildAttachStateChangeListenerObserverState states takes current state as a String in the recyclerView listener.
-     * @var stringBuilderRecyclerViewScrollListenerObserver used for printing recyclerView listener detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onChildViewAttachedToWindow(view: View) {
@@ -80,8 +70,6 @@ internal class LogRecyclerViewChildAttachStateChangeListener :
 
     /**
      * This Method Is Used For Printing Listener Outcome.
-     * Variables:
-     * @var stringBuilderRecyclerViewChildAttachStateChangeListener will print recyclerView scroll listener state detail's.
      * @return String value.
      */
     internal fun returnRecyclerViewState(): String {

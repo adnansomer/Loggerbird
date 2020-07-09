@@ -30,8 +30,9 @@ import kotlin.collections.ArrayList
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import kotlin.collections.HashMap
-
-internal class BasecampAuthentication {
+//Jira api class.
+internal class BasecampApi {
+    //Global variables.
     private lateinit var activity: Activity
     private lateinit var context: Context
     private var filePathMedia: File? = null
@@ -67,6 +68,16 @@ internal class BasecampAuthentication {
     private var descriptionMessage: String? = null
     private var descriptionTodo: String? = null
     private val defaultToast = DefaultToast()
+    /**
+     * This method is used for calling an basecamp action with network connection check.
+     * @param activity is used for getting reference of current activity.
+     * @param context is for getting reference from the application context.
+     * @param task is for getting reference of which basecamp action will be executed.
+     * @param filePathMedia is used for getting the reference of current media file.
+     * @throws LoggerBirdException if network connection error occurs.
+     * @throws exception if error occurs.
+     * @see basecampExceptionHandler method.
+     */
     internal fun callBasecamp(
         activity: Activity,
         context: Context,
@@ -105,6 +116,16 @@ internal class BasecampAuthentication {
         }
     }
 
+    /**
+     * This method is used for calling an basecamp action with internet connection check.
+     * @param context is for getting reference from the application context.
+     * @param activity is used for getting reference of current activity.
+     * @param task is for getting reference of which basecamp action will be executed.
+     * @param filePathMediaName is used for getting the reference of current media file.
+     * @throws LoggerBirdException if internet connection error occurs.
+     * @throws exception if error occurs.
+     * @see basecampExceptionHandler method.
+     */
     private fun okHttpBasecampAuthentication(
         context: Context,
         activity: Activity,
@@ -160,6 +181,12 @@ internal class BasecampAuthentication {
         })
     }
 
+    /**
+     * This method is used for creating basecamp message.
+     * @param activity is used for getting reference of current activity.
+     * @throws exception if error occurs.
+     * @see basecampExceptionHandler method.
+     */
     private fun basecampCreateMessage(activity: Activity) {
         try {
             projectId = arrayListProjectId[projectPosition]
@@ -227,7 +254,15 @@ internal class BasecampAuthentication {
         }
     }
 
-    private fun basecampCreateTodoIssue(activity: Activity, projectId: String, accountId: String) =
+    /**
+     * This method is used for creating basecamp to-do.
+     * @param activity is used for getting reference of current activity.
+     * @param projectId is used for getting reference of id of selected project in project field which contained in project layout.
+     * @param accountId is used for getting reference of id of authenticated user.
+     * @throws exception if error occurs.
+     * @see basecampExceptionHandler method.
+     */
+    private fun basecampCreateTodoIssue(activity: Activity, projectId: String, accountId: String) {
         try {
             queueCounter++
             this.activity = activity
@@ -277,7 +312,18 @@ internal class BasecampAuthentication {
         } catch (e: Exception) {
             basecampExceptionHandler(e = e)
         }
+    }
 
+
+    /**
+     * This method is used for adding basecamp to-do.
+     * @param activity is used for getting reference of current activity.
+     * @param projectId is used for getting reference of id of selected project in project field which contained in project layout.
+     * @param accountId is used for getting reference of id of authenticated user.
+     * @param todoListId is used for getting reference of id of created basecamp to-do.
+     * @throws exception if error occurs.
+     * @see basecampExceptionHandler method.
+     */
     private fun basecampAddTodo(
         activity: Activity,
         projectId: String,
@@ -348,305 +394,15 @@ internal class BasecampAuthentication {
         }
     }
 
-    private fun gatherTaskAccountId() {
-        queueCounter++
-        RetrofitUserBasecampClient.getBasecampUserClient(url = "https://launchpad.37signals.com/")
-            .create(AccountIdService::class.java)
-            .getBasecampProjectId(accessToken = LoggerBird.basecampApiToken)
-            .enqueue(object : retrofit2.Callback<JsonObject> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonObject>,
-                    t: Throwable
-                ) {
-                    basecampExceptionHandler(throwable = t)
-                }
 
-                override fun onResponse(
-                    call: retrofit2.Call<JsonObject>,
-                    response: retrofit2.Response<JsonObject>
-                ) {
-                    Log.d("base_account_id_success", response.code().toString())
-                    val basecampList = response.body()
-                    val coroutineCallBasecampProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallBasecampProject.async {
-                        gatherTaskProject(accountId = basecampList!!.getAsJsonArray("accounts").asJsonArray[0].asJsonObject["id"].asString)
-                        updateFields()
-                    }
-                }
-            })
-    }
-
-    private fun gatherTaskProject(accountId: String) {
-        queueCounter++
-        RetrofitUserBasecampClient.getBasecampUserClient(url = "https://3.basecampapi.com/$accountId/")
-            .create(AccountIdService::class.java)
-            .getBasecampProjects(accessToken = LoggerBird.basecampApiToken)
-            .enqueue(object : retrofit2.Callback<JsonArray> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonArray>,
-                    t: Throwable
-                ) {
-                    basecampExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<JsonArray>,
-                    response: retrofit2.Response<JsonArray>
-                ) {
-                    val coroutineCallBasecampProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallBasecampProject.async {
-                        Log.d("base_project_success", response.code().toString())
-                        val basecampList = response.body()
-                        basecampList?.forEach {
-                            if (it.asJsonObject["name"] != null) {
-                                arrayListProjectNames.add(it.asJsonObject["name"].asString)
-                                arrayListProjectId.add(it.asJsonObject["id"].asString)
-                            }
-                        }
-                        if (arrayListProjectId.size > projectPosition) {
-                            this@BasecampAuthentication.accountId = accountId
-//                            basecampList!!.getAsJsonArray("accounts").asJsonArray[0].asJsonObject["id"].asString
-                            this@BasecampAuthentication.messageBoardId =
-                                basecampList!!.asJsonArray[projectPosition].asJsonObject["dock"].asJsonArray[0].asJsonObject["id"].asString
-                            this@BasecampAuthentication.todoId =
-                                basecampList!!.asJsonArray[projectPosition].asJsonObject["dock"].asJsonArray[1].asJsonObject["id"].asString
-                            this@BasecampAuthentication.vaultId =
-                                basecampList!!.asJsonArray[projectPosition].asJsonObject["dock"].asJsonArray[2].asJsonObject["id"].asString
-                            gatherTaskAssignee(
-                                accountId = accountId,
-                                projectId = arrayListProjectId[projectPosition]
-                            )
-                            gatherTaskCategory(
-                                accountId = accountId,
-                                projectId = arrayListProjectId[projectPosition]
-                            )
-                        }
-                        updateFields()
-
-                    }
-                }
-            })
-    }
-
-    private fun gatherTaskAssignee(accountId: String, projectId: String) {
-        queueCounter++
-        RetrofitUserBasecampClient.getBasecampUserClient(url = "https://3.basecampapi.com/$accountId/projects/$projectId/")
-            .create(AccountIdService::class.java)
-            .getBasecampAssignee(accessToken = LoggerBird.basecampApiToken)
-            .enqueue(object : retrofit2.Callback<JsonArray> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonArray>,
-                    t: Throwable
-                ) {
-                    basecampExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<JsonArray>,
-                    response: retrofit2.Response<JsonArray>
-                ) {
-                    val coroutineCallBasecampAssignee = CoroutineScope(Dispatchers.IO)
-                    coroutineCallBasecampAssignee.async {
-                        Log.d("base_assignee_success", response.code().toString())
-                        val basecampList = response.body()
-                        basecampList?.forEach {
-                            if (it.asJsonObject["name"] != null) {
-                                arrayListAssigneeNames.add(it.asJsonObject["name"].asString)
-                                arrayListNotifyNames.add(it.asJsonObject["name"].asString)
-                                hashMapAssignee[it.asJsonObject["name"].asString] =
-                                    it.asJsonObject["id"].asString
-                                hashMapNotify[it.asJsonObject["name"].asString] =
-                                    it.asJsonObject["id"].asString
-                            }
-                        }
-                        updateFields()
-
-                    }
-                }
-            })
-    }
-
-    private fun gatherTaskCategory(accountId: String, projectId: String) {
-        queueCounter++
-        RetrofitUserBasecampClient.getBasecampUserClient(url = "https://3.basecampapi.com/$accountId/buckets/$projectId/")
-            .create(AccountIdService::class.java)
-            .getBasecampCategories(accessToken = LoggerBird.basecampApiToken)
-            .enqueue(object : retrofit2.Callback<JsonArray> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonArray>,
-                    t: Throwable
-                ) {
-                    basecampExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<JsonArray>,
-                    response: retrofit2.Response<JsonArray>
-                ) {
-                    val coroutineCallBasecampCategory = CoroutineScope(Dispatchers.IO)
-                    coroutineCallBasecampCategory.async {
-                        Log.d("base_category_success", response.code().toString())
-                        val basecampList = response.body()
-                        basecampList?.forEach {
-                            if (it.asJsonObject["name"] != null) {
-                                arrayListCategoryNames.add(it.asJsonObject["name"].asString)
-                                arrayListCategoryIcon.add(it.asJsonObject["icon"].asString)
-                                hashMapCategory[it.asJsonObject["name"].asString] =
-                                    it.asJsonObject["id"].asString
-                            }
-                        }
-                        updateFields()
-
-                    }
-                }
-            })
-    }
-
-    internal fun gatherAutoTextDetails(
-        autoTextViewProject: AutoCompleteTextView,
-        autoTextViewAssignee: AutoCompleteTextView,
-        autoTextViewNotify: AutoCompleteTextView,
-        autoTextViewCategory: AutoCompleteTextView
-    ) {
-        project = autoTextViewProject.editableText.toString()
-        assignee = autoTextViewAssignee.editableText.toString()
-        notify = autoTextViewNotify.editableText.toString()
-        category = autoTextViewCategory.editableText.toString()
-    }
-
-    internal fun gatherEditTextDetails(
-        editTextTitle: EditText,
-        editTextDescriptionMessage: EditText,
-        editTextDescriptionTodo: EditText,
-        editTextContent: EditText,
-        editTextName: EditText
-    ) {
-        title = editTextTitle.text.toString()
-        descriptionMessage = editTextDescriptionMessage.text.toString()
-        descriptionTodo = editTextDescriptionTodo.text.toString()
-        content = editTextContent.text.toString()
-        name = editTextName.text.toString()
-    }
-
-    private fun gatherBasecampDetails() {
-        try {
-            queueCounter = 0
-            arrayListCategoryNames.clear()
-            arrayListCategoryIcon.clear()
-            arrayListNotifyNames.clear()
-            arrayListAssigneeNames.clear()
-            arrayListProjectNames.clear()
-            arrayListProjectId.clear()
-            hashMapCategory.clear()
-            hashMapAssignee.clear()
-            hashMapNotify.clear()
-            gatherTaskAccountId()
-        } catch (e: Exception) {
-            basecampExceptionHandler(e = e)
-        }
-    }
-
-
-    private fun updateFields() {
-        queueCounter--
-        Log.d("que_counter", queueCounter.toString())
-        if (queueCounter == 0) {
-            timerTaskQueue.cancel()
-            activity.runOnUiThread {
-                LoggerBirdService.loggerBirdService.initializeBasecampAutoTextViews(
-                    arrayListBasecampProject = arrayListProjectNames,
-                    arrayListBasecampAssignee = arrayListAssigneeNames,
-                    arrayListBasecampCategory = arrayListCategoryNames,
-                    arrayListBasecampCategoryIcon = arrayListCategoryIcon,
-                    arrayListBasecampNotify = arrayListNotifyNames
-                )
-            }
-        }
-
-    }
-
-
-    private fun checkQueueTime(activity: Activity) {
-        val timerQueue = Timer()
-        timerTaskQueue = object : TimerTask() {
-            override fun run() {
-                activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("basecamp_error_time_out")
-                }
-            }
-        }
-        timerQueue.schedule(timerTaskQueue, 180000)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun basecampExceptionHandler(
-        e: Exception? = null,
-        throwable: Throwable? = null
-    ) {
-        resetBasecampValues(shareLayoutMessage = "basecamp_error")
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
-        }
-        LoggerBirdService.loggerBirdService.finishShareLayout("basecamp_error")
-        throwable?.printStackTrace()
-        e?.printStackTrace()
-        LoggerBird.callEnqueue()
-        LoggerBird.callExceptionDetails(
-            exception = e,
-            tag = Constants.basecampTag,
-            throwable = throwable
-        )
-    }
-
-    internal fun setProjectPosition(projectPosition: Int) {
-        this.projectPosition = projectPosition
-    }
-
-    internal fun setCategoryPosition(categoryPosition: Int) {
-        this.categoryPosition = categoryPosition
-    }
-
-    internal fun setStartDate(startDate: String?) {
-        this.startDate = startDate
-    }
-
-    private fun resetBasecampValues(shareLayoutMessage: String) {
-        queueCounter--
-        Log.d("queue_counter", queueCounter.toString())
-        if (queueCounter == 0) {
-            timerTaskQueue.cancel()
-            arrayListProjectNames.clear()
-            arrayListProjectId.clear()
-            arrayListAssigneeNames.clear()
-            hashMapNotify.clear()
-            hashMapCategory.clear()
-            hashMapAssignee.clear()
-            arrayListNotifyNames.clear()
-            arrayListCategoryNames.clear()
-            arrayListCategoryIcon.clear()
-            projectPosition = 0
-            categoryPosition = 0
-            project = null
-            projectId = null
-            startDate = null
-            accountId = null
-            vaultId = null
-            messageBoardId = null
-            todoId = null
-            assignee = null
-            notify = null
-            category = null
-            title = null
-            descriptionMessage = null
-            descriptionTodo = null
-            content = null
-            name = null
-            activity.runOnUiThread {
-                LoggerBirdService.loggerBirdService.finishShareLayout(shareLayoutMessage)
-            }
-        }
-    }
-
+    /**
+     * This method is used for creating basecamp attachment when basecamp message created.
+     * @param accountId is used for getting reference of id of authenticated user.
+     * @param file is used for getting reference of the current file.
+     * @param activity is used for getting reference of current activity.
+     * @throws exception if error occurs.
+     * @see basecampExceptionHandler method.
+     */
     private fun createAttachments(
         accountId: String,
         file: File,
@@ -703,6 +459,16 @@ internal class BasecampAuthentication {
         }
     }
 
+    /**
+     * This method is used for adding basecamp attachment when basecamp attachment created.
+     * @param activity is used for getting reference of current activity.
+     * @param fileName is used for getting reference of the current file name.
+     * @param accountId is used for getting reference of id of authenticated user.
+     * @param projectId is used for getting reference of id of selected project in project field which contained in project layout.
+     * @param attachmentId is used for getting reference of id of created attachment.
+     * @throws exception if error occurs.
+     * @see basecampExceptionHandler method.
+     */
     private fun addAttachments(
         activity: Activity,
         fileName: String,
@@ -744,22 +510,399 @@ internal class BasecampAuthentication {
         }
     }
 
+    /**
+     * This method is used for initializing the gathering action of basecamp.
+     * @throws exception if error occurs.
+     * @see basecampExceptionHandler method.
+     */
+    private fun gatherBasecampDetails() {
+        try {
+            queueCounter = 0
+            arrayListCategoryNames.clear()
+            arrayListCategoryIcon.clear()
+            arrayListNotifyNames.clear()
+            arrayListAssigneeNames.clear()
+            arrayListProjectNames.clear()
+            arrayListProjectId.clear()
+            hashMapCategory.clear()
+            hashMapAssignee.clear()
+            hashMapNotify.clear()
+            gatherTaskAccountId()
+        } catch (e: Exception) {
+            basecampExceptionHandler(e = e)
+        }
+    }
+
+    /**
+     * This method is used for getting authenticated user account details for basecamp.
+     * @throws exception if error occurs.
+     * @see basecampExceptionHandler method.
+     */
+    private fun gatherTaskAccountId() {
+        queueCounter++
+        RetrofitUserBasecampClient.getBasecampUserClient(url = "https://launchpad.37signals.com/")
+            .create(AccountIdService::class.java)
+            .getBasecampProjectId(accessToken = LoggerBird.basecampApiToken)
+            .enqueue(object : retrofit2.Callback<JsonObject> {
+                override fun onFailure(
+                    call: retrofit2.Call<JsonObject>,
+                    t: Throwable
+                ) {
+                    basecampExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonObject>,
+                    response: retrofit2.Response<JsonObject>
+                ) {
+                    Log.d("base_account_id_success", response.code().toString())
+                    val basecampList = response.body()
+                    val coroutineCallBasecampProject = CoroutineScope(Dispatchers.IO)
+                    coroutineCallBasecampProject.async {
+                        gatherTaskProject(accountId = basecampList!!.getAsJsonArray("accounts").asJsonArray[0].asJsonObject["id"].asString)
+                        updateFields()
+                    }
+                }
+            })
+    }
+
+    /**
+     * This method is used for getting project details for basecamp.
+     * @param accountId is used for getting reference of id of authenticated user.
+     * @throws exception if error occurs.
+     * @see basecampExceptionHandler method.
+     */
+    private fun gatherTaskProject(accountId: String) {
+        queueCounter++
+        RetrofitUserBasecampClient.getBasecampUserClient(url = "https://3.basecampapi.com/$accountId/")
+            .create(AccountIdService::class.java)
+            .getBasecampProjects(accessToken = LoggerBird.basecampApiToken)
+            .enqueue(object : retrofit2.Callback<JsonArray> {
+                override fun onFailure(
+                    call: retrofit2.Call<JsonArray>,
+                    t: Throwable
+                ) {
+                    basecampExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonArray>,
+                    response: retrofit2.Response<JsonArray>
+                ) {
+                    val coroutineCallBasecampProject = CoroutineScope(Dispatchers.IO)
+                    coroutineCallBasecampProject.async {
+                        Log.d("base_project_success", response.code().toString())
+                        val basecampList = response.body()
+                        basecampList?.forEach {
+                            if (it.asJsonObject["name"] != null) {
+                                arrayListProjectNames.add(it.asJsonObject["name"].asString)
+                                arrayListProjectId.add(it.asJsonObject["id"].asString)
+                            }
+                        }
+                        if (arrayListProjectId.size > projectPosition) {
+                            this@BasecampApi.accountId = accountId
+//                            basecampList!!.getAsJsonArray("accounts").asJsonArray[0].asJsonObject["id"].asString
+                            this@BasecampApi.messageBoardId =
+                                basecampList!!.asJsonArray[projectPosition].asJsonObject["dock"].asJsonArray[0].asJsonObject["id"].asString
+                            this@BasecampApi.todoId =
+                                basecampList!!.asJsonArray[projectPosition].asJsonObject["dock"].asJsonArray[1].asJsonObject["id"].asString
+                            this@BasecampApi.vaultId =
+                                basecampList!!.asJsonArray[projectPosition].asJsonObject["dock"].asJsonArray[2].asJsonObject["id"].asString
+                            gatherTaskAssignee(
+                                accountId = accountId,
+                                projectId = arrayListProjectId[projectPosition]
+                            )
+                            gatherTaskCategory(
+                                accountId = accountId,
+                                projectId = arrayListProjectId[projectPosition]
+                            )
+                        }
+                        updateFields()
+
+                    }
+                }
+            })
+    }
+
+    /**
+     * This method is used for getting assignee details for basecamp.
+     * @param accountId is used for getting reference of id of authenticated user.
+     * @param projectId is used for getting reference of current chosen project id.
+     * @throws exception if error occurs.
+     * @see basecampExceptionHandler method.
+     */
+    private fun gatherTaskAssignee(accountId: String, projectId: String) {
+        queueCounter++
+        RetrofitUserBasecampClient.getBasecampUserClient(url = "https://3.basecampapi.com/$accountId/projects/$projectId/")
+            .create(AccountIdService::class.java)
+            .getBasecampAssignee(accessToken = LoggerBird.basecampApiToken)
+            .enqueue(object : retrofit2.Callback<JsonArray> {
+                override fun onFailure(
+                    call: retrofit2.Call<JsonArray>,
+                    t: Throwable
+                ) {
+                    basecampExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonArray>,
+                    response: retrofit2.Response<JsonArray>
+                ) {
+                    val coroutineCallBasecampAssignee = CoroutineScope(Dispatchers.IO)
+                    coroutineCallBasecampAssignee.async {
+                        Log.d("base_assignee_success", response.code().toString())
+                        val basecampList = response.body()
+                        basecampList?.forEach {
+                            if (it.asJsonObject["name"] != null) {
+                                arrayListAssigneeNames.add(it.asJsonObject["name"].asString)
+                                arrayListNotifyNames.add(it.asJsonObject["name"].asString)
+                                hashMapAssignee[it.asJsonObject["name"].asString] =
+                                    it.asJsonObject["id"].asString
+                                hashMapNotify[it.asJsonObject["name"].asString] =
+                                    it.asJsonObject["id"].asString
+                            }
+                        }
+                        updateFields()
+
+                    }
+                }
+            })
+    }
+
+    /**
+     * This method is used for getting category details for basecamp.
+     * @param accountId is used for getting reference of id of authenticated user.
+     * @param projectId is used for getting reference of current chosen project id.
+     * @throws exception if error occurs.
+     * @see basecampExceptionHandler method.
+     */
+    private fun gatherTaskCategory(accountId: String, projectId: String) {
+        queueCounter++
+        RetrofitUserBasecampClient.getBasecampUserClient(url = "https://3.basecampapi.com/$accountId/buckets/$projectId/")
+            .create(AccountIdService::class.java)
+            .getBasecampCategories(accessToken = LoggerBird.basecampApiToken)
+            .enqueue(object : retrofit2.Callback<JsonArray> {
+                override fun onFailure(
+                    call: retrofit2.Call<JsonArray>,
+                    t: Throwable
+                ) {
+                    basecampExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonArray>,
+                    response: retrofit2.Response<JsonArray>
+                ) {
+                    val coroutineCallBasecampCategory = CoroutineScope(Dispatchers.IO)
+                    coroutineCallBasecampCategory.async {
+                        Log.d("base_category_success", response.code().toString())
+                        val basecampList = response.body()
+                        basecampList?.forEach {
+                            if (it.asJsonObject["name"] != null) {
+                                arrayListCategoryNames.add(it.asJsonObject["name"].asString)
+                                arrayListCategoryIcon.add(it.asJsonObject["icon"].asString)
+                                hashMapCategory[it.asJsonObject["name"].asString] =
+                                    it.asJsonObject["id"].asString
+                            }
+                        }
+                        updateFields()
+
+                    }
+                }
+            })
+    }
+
+    /**
+     * This method is used for getting details of autoCompleteTextViews in the basecamp layout.
+     * @param autoTextViewProject is used for getting project details from project autoCompleteTextView in the basecamp layout.
+     * @param autoTextViewAssignee is used for getting assignee details from assignee autoCompleteTextView in the basecamp layout.
+     * @param autoTextViewNotify is used for getting notify details from notify autoCompleteTextView in the basecamp layout.
+     * @param autoTextViewCategory is used for getting category details from section autoCompleteTextView in the basecamp layout.
+     */
+    internal fun gatherAutoTextDetails(
+        autoTextViewProject: AutoCompleteTextView,
+        autoTextViewAssignee: AutoCompleteTextView,
+        autoTextViewNotify: AutoCompleteTextView,
+        autoTextViewCategory: AutoCompleteTextView
+    ) {
+        project = autoTextViewProject.editableText.toString()
+        assignee = autoTextViewAssignee.editableText.toString()
+        notify = autoTextViewNotify.editableText.toString()
+        category = autoTextViewCategory.editableText.toString()
+    }
+
+    /**
+     * This method is used for getting details of editTexts in the basecamp layout.
+     * @param editTextTitle is used for getting title details from title editText in the basecamp layout.
+     * @param editTextDescriptionMessage is used for getting description message details from description message editText in the basecamp layout.
+     * @param editTextDescriptionTodo is used for getting description to-do details from to-do message editText in the basecamp layout.
+     * @param editTextContent is used for getting content details from content editText in the basecamp layout.
+     * @param editTextName is used for getting name details from name editText in the basecamp layout.
+     */
+    internal fun gatherEditTextDetails(
+        editTextTitle: EditText,
+        editTextDescriptionMessage: EditText,
+        editTextDescriptionTodo: EditText,
+        editTextContent: EditText,
+        editTextName: EditText
+    ) {
+        title = editTextTitle.text.toString()
+        descriptionMessage = editTextDescriptionMessage.text.toString()
+        descriptionTodo = editTextDescriptionTodo.text.toString()
+        content = editTextContent.text.toString()
+        name = editTextName.text.toString()
+    }
+
+    /**
+     * This method is used for updating and controlling the queue of background tasks in the basecamp actions.
+     */
+    private fun updateFields() {
+        queueCounter--
+        Log.d("que_counter", queueCounter.toString())
+        if (queueCounter == 0) {
+            timerTaskQueue.cancel()
+            activity.runOnUiThread {
+                LoggerBirdService.loggerBirdService.initializeBasecampAutoTextViews(
+                    arrayListBasecampProject = arrayListProjectNames,
+                    arrayListBasecampAssignee = arrayListAssigneeNames,
+                    arrayListBasecampCategory = arrayListCategoryNames,
+                    arrayListBasecampCategoryIcon = arrayListCategoryIcon,
+                    arrayListBasecampNotify = arrayListNotifyNames
+                )
+            }
+        }
+
+    }
+
+
+    /**
+     * This method is used for controlling the time of background tasks in the basecamp actions.
+     If tasks will last longer than three minutes then basecamp layout will be removed.
+     */
+    private fun checkQueueTime(activity: Activity) {
+        val timerQueue = Timer()
+        timerTaskQueue = object : TimerTask() {
+            override fun run() {
+                activity.runOnUiThread {
+                    LoggerBirdService.loggerBirdService.finishShareLayout("basecamp_error_time_out")
+                }
+            }
+        }
+        timerQueue.schedule(timerTaskQueue, 180000)
+    }
+
+    /**
+     * This method is used for default exception handling of basecamp class.
+     * @param e is used for getting reference of exception.
+     * @param throwable is used for getting reference of throwable.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun basecampExceptionHandler(
+        e: Exception? = null,
+        throwable: Throwable? = null
+    ) {
+        resetBasecampValues(shareLayoutMessage = "basecamp_error")
+        if (this::timerTaskQueue.isInitialized) {
+            timerTaskQueue.cancel()
+        }
+        LoggerBirdService.loggerBirdService.finishShareLayout("basecamp_error")
+        throwable?.printStackTrace()
+        e?.printStackTrace()
+        LoggerBird.callEnqueue()
+        LoggerBird.callExceptionDetails(
+            exception = e,
+            tag = Constants.basecampTag,
+            throwable = throwable
+        )
+    }
+
+    /**
+     * This method is used for getting reference of current project position in the project autoCompleteTextView in the basecamp layout.
+     * @param projectPosition is used for getting reference of project position.
+     */
+    internal fun setProjectPosition(projectPosition: Int) {
+        this.projectPosition = projectPosition
+    }
+
+    /**
+     * This method is used for getting reference of current category position in the category autoCompleteTextView in the category layout.
+     * @param categoryPosition is used for getting reference of category position.
+     */
+    internal fun setCategoryPosition(categoryPosition: Int) {
+        this.categoryPosition = categoryPosition
+    }
+
+    /**
+     * This method is used for getting reference of current date time in the basecamp date layout.
+     * @param startDate is used for getting reference of start date.
+     */
+    internal fun setStartDate(startDate: String?) {
+        this.startDate = startDate
+    }
+
+    /**
+     * This method is used for resetting the values in basecamp action.
+     * @param shareLayoutMessage is used for getting reference of the basecamp action message.
+     */
+    private fun resetBasecampValues(shareLayoutMessage: String) {
+        queueCounter--
+        Log.d("queue_counter", queueCounter.toString())
+        if (queueCounter == 0) {
+            timerTaskQueue.cancel()
+            arrayListProjectNames.clear()
+            arrayListProjectId.clear()
+            arrayListAssigneeNames.clear()
+            hashMapNotify.clear()
+            hashMapCategory.clear()
+            hashMapAssignee.clear()
+            arrayListNotifyNames.clear()
+            arrayListCategoryNames.clear()
+            arrayListCategoryIcon.clear()
+            projectPosition = 0
+            categoryPosition = 0
+            project = null
+            projectId = null
+            startDate = null
+            accountId = null
+            vaultId = null
+            messageBoardId = null
+            todoId = null
+            assignee = null
+            notify = null
+            category = null
+            title = null
+            descriptionMessage = null
+            descriptionTodo = null
+            content = null
+            name = null
+            activity.runOnUiThread {
+                LoggerBirdService.loggerBirdService.finishShareLayout(shareLayoutMessage)
+            }
+        }
+    }
+
+    /**
+     * This method is used for checking project reference exist in the project list or not empty in the project AutoCompleteTextView field in the basecamp layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewProject is used for getting reference of project autoCompleteTextView in the basecamp layout.
+     * @return Boolean value.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun checkBasecampProject(
         activity: Activity,
-        autoTextViewBasecampProject: AutoCompleteTextView
+        autoTextViewProject: AutoCompleteTextView
     ): Boolean {
-        if (autoTextViewBasecampProject.editableText.toString().isNotEmpty() && arrayListProjectNames.contains(
-                autoTextViewBasecampProject.editableText.toString()
+        if (autoTextViewProject.editableText.toString().isNotEmpty() && arrayListProjectNames.contains(
+                autoTextViewProject.editableText.toString()
             )
         ) {
             return true
-        } else if (autoTextViewBasecampProject.editableText.toString().isEmpty()) {
+        } else if (autoTextViewProject.editableText.toString().isEmpty()) {
             defaultToast.attachToast(
                 activity = activity,
                 toastMessage = activity.resources.getString(R.string.basecamp_project_empty)
             )
-        } else if (!arrayListProjectNames.contains(autoTextViewBasecampProject.editableText.toString())) {
+        } else if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
             defaultToast.attachToast(
                 activity = activity,
                 toastMessage = activity.resources.getString(R.string.basecamp_project_doesnt_exist)
@@ -768,6 +911,14 @@ internal class BasecampAuthentication {
         return false
     }
 
+    /**
+     * This method is used for checking editTextTitle is not empty if title editText,category autoCompleteTexView or description message editText is not empty in the basecamp layout.
+     * @param activity is used for getting reference of current activity.
+     * @param editTextTitle is used for getting reference of title editText in the basecamp layout.
+     * @param autoTextViewCategory is used for getting reference of category autoCompleteTextView in the basecamp layout.
+     * @param editTextDescriptionMessage is used for getting reference of description message editText in the basecamp layout.
+     * @return Boolean value.
+     */
     internal fun checkBasecampTitle(
         activity: Activity,
         editTextTitle: EditText,
@@ -779,7 +930,7 @@ internal class BasecampAuthentication {
                 if (autoTextViewCategory.editableText.toString().isNotEmpty()) {
                     if (!checkBasecampCategory(
                             activity = activity,
-                            autoTextViewBasecampCategory = autoTextViewCategory
+                            autoTextViewCategory = autoTextViewCategory
                         )
                     ) {
                         return false
@@ -797,11 +948,17 @@ internal class BasecampAuthentication {
         return true
     }
 
+    /**
+     * This method is used for checking category reference exist in the category list or not empty in the category AutoCompleteTextView field in the basecamp layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewCategory is used for getting reference of category autoCompleteTextView in the basecamp layout.
+     * @return Boolean value.
+     */
     private fun checkBasecampCategory(
         activity: Activity,
-        autoTextViewBasecampCategory: AutoCompleteTextView
+        autoTextViewCategory: AutoCompleteTextView
     ): Boolean {
-        if (arrayListCategoryNames.contains(autoTextViewBasecampCategory.editableText.toString()) || autoTextViewBasecampCategory.editableText.toString().isEmpty()) {
+        if (arrayListCategoryNames.contains(autoTextViewCategory.editableText.toString()) || autoTextViewCategory.editableText.toString().isEmpty()) {
             return true
         } else {
             defaultToast.attachToast(
@@ -812,6 +969,16 @@ internal class BasecampAuthentication {
         return false
     }
 
+    /**
+     * This method is used for checking editTextName or editTextDescriptionTodo is not empty if name editText,description to-do editText,content editText is not empty in the basecamp layout.
+     * @param activity is used for getting reference of current activity.
+     * @param editTextName is used for getting reference of name editText in the basecamp layout.
+     * @param editTextDescriptionTodo is used for getting reference of description to-do editText in the basecamp layout.
+     * @param editTextContent is used for getting reference of content editText in the basecamp layout.
+     * @param autoTextViewAssignee is used for getting reference of assignee autoCompleteTextView in the basecamp layout.
+     * @param autoTextViewNotify is used for getting reference of notify autoCompleteTextView in the basecamp layout.
+     * @return Boolean value.
+     */
     internal fun checkBasecampTodo(
         activity: Activity,
         editTextName: EditText,
@@ -848,6 +1015,14 @@ internal class BasecampAuthentication {
         return true
     }
 
+    /**
+     * This method is used for checking editTextContent,autoTextViewAssignee or autoTextViewNotify is not empty in the basecamp layout.
+     * @param activity is used for getting reference of current activity.
+     * @param editTextContent is used for getting reference of content editText in the basecamp layout.
+     * @param autoTextViewAssignee is used for getting reference of assignee autoCompleteTextView in the basecamp layout.
+     * @param autoTextViewNotify is used for getting reference of notify autoCompleteTextView in the basecamp layout.
+     * @return Boolean value.
+     */
     private fun checkBasecampTodoList(
         activity: Activity,
         editTextContent: EditText,

@@ -1,4 +1,4 @@
-package listeners
+package listeners.layouts
 
 import android.os.Build
 import android.view.View
@@ -7,6 +7,7 @@ import android.view.ViewTreeObserver
 import androidx.annotation.RequiresApi
 
 
+//Dummy class might be useful in future.
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 class LayoutWindowFocusChangeListener(private val view: View, private val initializeFloatingActionButton: Runnable) :
     ViewTreeObserver.OnWindowFocusChangeListener {

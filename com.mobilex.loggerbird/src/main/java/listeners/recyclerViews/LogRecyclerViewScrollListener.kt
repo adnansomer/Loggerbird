@@ -1,4 +1,4 @@
-package listeners
+package listeners.recyclerViews
 
 import androidx.recyclerview.widget.RecyclerView
 import constants.Constants
@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
+//This class is used for listening scroll in recyclerView.
 internal class LogRecyclerViewScrollListener : RecyclerView.OnScrollListener() {
     //Global variables.
     private var stringBuilderRecyclerViewScrollListener: StringBuilder = StringBuilder()

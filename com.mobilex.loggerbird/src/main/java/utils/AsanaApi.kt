@@ -28,8 +28,9 @@ import java.util.*
 import kotlin.collections.ArrayList
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
-
-internal class AsanaAuthentication {
+//Asana api class.
+internal class AsanaApi {
+    //Global variables.
     private lateinit var activity: Activity
     private lateinit var context: Context
     private var filePathMedia: File? = null
@@ -59,6 +60,16 @@ internal class AsanaAuthentication {
     private var taskName: String? = null
     private var subtask: String? = null
     private val defaultToast = DefaultToast()
+    /**
+     * This method is used for calling an asana action with network connection check.
+     * @param activity is used for getting reference of current activity.
+     * @param context is for getting reference from the application context.
+     * @param task is for getting reference of which asana action will be executed.
+     * @param filePathMedia is used for getting the reference of current media file.
+     * @throws LoggerBirdException if network connection error occurs.
+     * @throws exception if error occurs.
+     * @see asanaExceptionHandler method.
+     */
     internal fun callAsana(
         activity: Activity,
         context: Context,
@@ -97,6 +108,17 @@ internal class AsanaAuthentication {
         }
     }
 
+
+    /**
+     * This method is used for calling an asana action with internet connection check.
+     * @param context is for getting reference from the application context.
+     * @param activity is used for getting reference of current activity.
+     * @param task is for getting reference of which asana action will be executed.
+     * @param filePathMediaName is used for getting the reference of current media file.
+     * @throws LoggerBirdException if internet connection error occurs.
+     * @throws exception if error occurs.
+     * @see asanaExceptionHandler method.
+     */
     private fun okHttpAsanaAuthentication(
         context: Context,
         activity: Activity,
@@ -152,6 +174,12 @@ internal class AsanaAuthentication {
         })
     }
 
+    /**
+     * This method is used for creating asana message.
+     * @param activity is used for getting reference of current activity.
+     * @throws exception if error occurs.
+     * @see asanaExceptionHandler method.
+     */
     private fun asanaCreateMessage(activity: Activity) {
         try {
             projectId = arrayListProjectId[projectPosition]
@@ -249,6 +277,14 @@ internal class AsanaAuthentication {
         }
     }
 
+    /**
+     * This method is used for adding asana section when asana message created.
+     * @param activity is used for getting reference of current activity.
+     * @param sectionId is used for getting reference of id of selected section in section field which contained in asana layout.
+     * @param taskId is used for getting reference of id of created asana message.
+     * @throws exception if error occurs.
+     * @see asanaExceptionHandler method.
+     */
     private fun asanaAddSection(activity: Activity, sectionId: String, taskId: String) {
         try {
             this.activity = activity
@@ -282,6 +318,14 @@ internal class AsanaAuthentication {
         }
     }
 
+    /**
+     * This method is used for adding asana subtask when asana message created.
+     * @param activity is used for getting reference of current activity.
+     * @param taskId is used for getting reference of id of created asana message.
+     * @param subtask is used for getting the reference of subtask name in subtask field which contained in asana layout.
+     * @throws exception if error occurs.
+     * @see asanaExceptionHandler method.
+     */
     private fun asanaAddSubtask(activity: Activity, taskId: String, subtask: String) {
         try {
             this.activity = activity
@@ -291,16 +335,24 @@ internal class AsanaAuthentication {
             jsonArrayProjects.add(projectId)
             jsonObjectData.add("projects", jsonArrayProjects)
             jsonObjectData.addProperty("name", subtask)
-            if(!RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubAssignee.isNullOrEmpty()){
-                jsonObjectData.addProperty("assignee",arrayListAssigneeId[RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubAssignee[subtask]!!] )
+            if (!RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubAssignee.isNullOrEmpty()) {
+                jsonObjectData.addProperty(
+                    "assignee",
+                    arrayListAssigneeId[RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubAssignee[subtask]!!]
+                )
 
             }
             if (!RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDescription.isNullOrEmpty()) {
-                jsonObjectData.addProperty("notes", RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDescription[subtask])
+                jsonObjectData.addProperty(
+                    "notes",
+                    RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDescription[subtask]
+                )
             }
             if (!RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDate.isNullOrEmpty()) {
-                jsonObjectData.addProperty("due_on",
-                    RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDate[subtask])
+                jsonObjectData.addProperty(
+                    "due_on",
+                    RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashMapSubDate[subtask]
+                )
             }
             jsonObject.add("data", jsonObjectData)
             RetrofitUserAsanaClient.getAsanaUserClient(url = "https://app.asana.com/api/1.0/tasks/$taskId/")
@@ -334,14 +386,14 @@ internal class AsanaAuthentication {
                                 }
                             }
                             if (!RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashmapSubSection.isNullOrEmpty()) {
-                                    queueCounter++
-                                    coroutineCallAsanaSubSection.async {
-                                        asanaAddSection(
-                                            activity = activity,
-                                            sectionId = arrayListSectionsId[RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashmapSubSection[subtask]!!],
-                                            taskId = asanaList.asJsonObject["data"].asJsonObject["gid"].asString
-                                        )
-                                    }
+                                queueCounter++
+                                coroutineCallAsanaSubSection.async {
+                                    asanaAddSection(
+                                        activity = activity,
+                                        sectionId = arrayListSectionsId[RecyclerViewAsanaSubTaskAdapter.ViewHolder.hashmapSubSection[subtask]!!],
+                                        taskId = asanaList.asJsonObject["data"].asJsonObject["gid"].asString
+                                    )
+                                }
 
                             }
                         }
@@ -354,249 +406,15 @@ internal class AsanaAuthentication {
         }
     }
 
-    private fun gatherTaskProject() {
-        queueCounter++
-        RetrofitUserAsanaClient.getAsanaUserClient(url = "https://app.asana.com/api/1.0/")
-            .create(AccountIdService::class.java)
-            .getAsanaProject()
-            .enqueue(object : retrofit2.Callback<JsonObject> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonObject>,
-                    t: Throwable
-                ) {
-                    asanaExceptionHandler(throwable = t)
-                }
 
-                override fun onResponse(
-                    call: retrofit2.Call<JsonObject>,
-                    response: retrofit2.Response<JsonObject>
-                ) {
-                    Log.d("asana_project_success", response.code().toString())
-                    val asanaList = response.body()
-                    val coroutineCallAsanaProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallAsanaProject.async {
-                        asanaList?.getAsJsonArray("data")?.forEach {
-                            arrayListProjectNames.add(it.asJsonObject["name"].asString)
-                            arrayListProjectId.add(it.asJsonObject["gid"].asString)
-                        }
-                        if (arrayListProjectId.size > projectPosition) {
-                            gatherTaskAssignee(projectId = arrayListProjectId[projectPosition])
-                            gatherTaskSections(projectId = arrayListProjectId[projectPosition])
-                        }
-                        updateFields()
-                    }
-                }
-            })
-    }
-
-
-    private fun gatherTaskAssignee(projectId: String) {
-        queueCounter++
-        RetrofitUserAsanaClient.getAsanaUserClient(url = "https://app.asana.com/api/1.0/projects/$projectId/")
-            .create(AccountIdService::class.java)
-            .getAsanaAssignee()
-            .enqueue(object : retrofit2.Callback<JsonObject> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonObject>,
-                    t: Throwable
-                ) {
-                    asanaExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<JsonObject>,
-                    response: retrofit2.Response<JsonObject>
-                ) {
-                    val coroutineCallAsanaAssignee = CoroutineScope(Dispatchers.IO)
-                    coroutineCallAsanaAssignee.async {
-                        Log.d("asana_assignee_success", response.code().toString())
-                        val asanaList = response.body()
-                        asanaList?.getAsJsonArray("data")?.forEach {
-                            arrayListAssigneeNames.add(it.asJsonObject["user"].asJsonObject["name"].asString)
-                            arrayListAssigneeId.add(it.asJsonObject["user"].asJsonObject["gid"].asString)
-                        }
-                        updateFields()
-
-                    }
-                }
-            })
-    }
-
-    private fun gatherTaskSections(projectId: String) {
-        queueCounter++
-        RetrofitUserAsanaClient.getAsanaUserClient(url = "https://app.asana.com/api/1.0/projects/$projectId/")
-            .create(AccountIdService::class.java)
-            .getAsanaSections()
-            .enqueue(object : retrofit2.Callback<JsonObject> {
-                override fun onFailure(
-                    call: retrofit2.Call<JsonObject>,
-                    t: Throwable
-                ) {
-                    asanaExceptionHandler(throwable = t)
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<JsonObject>,
-                    response: retrofit2.Response<JsonObject>
-                ) {
-                    val coroutineCallAsanaSections = CoroutineScope(Dispatchers.IO)
-                    coroutineCallAsanaSections.async {
-                        Log.d("asana_sections_success", response.code().toString())
-                        val asanaList = response.body()
-                        asanaList?.getAsJsonArray("data")?.forEach {
-                            arrayListSectionsNames.add(it.asJsonObject["name"].asString)
-                            arrayListSectionsId.add(it.asJsonObject["gid"].asString)
-                        }
-                        updateFields()
-
-                    }
-                }
-            })
-    }
-
-    internal fun gatherAutoTextDetails(
-        autoTextViewProject: AutoCompleteTextView,
-        autoTextViewAssignee: AutoCompleteTextView,
-        autoTextViewPriority: AutoCompleteTextView,
-        autoTextViewSection: AutoCompleteTextView
-    ) {
-        project = autoTextViewProject.editableText.toString()
-        assignee = autoTextViewAssignee.editableText.toString()
-        priority = autoTextViewPriority.editableText.toString()
-        section = autoTextViewSection.editableText.toString()
-    }
-
-    internal fun gatherEditTextDetails(
-        editTextDescription: EditText,
-        editTextSubtasks: EditText,
-        editTextTaskName: EditText
-    ) {
-        description = editTextDescription.text.toString()
-        subtask = editTextSubtasks.text.toString()
-        taskName = editTextTaskName.text.toString()
-    }
-
-    private fun gatherAsanaDetails() {
-        try {
-            queueCounter = 0
-            arrayListSectionsNames.clear()
-            arrayListSectionsId.clear()
-            arrayListPriorityNames.clear()
-            arrayListAssigneeNames.clear()
-            arrayListAssigneeId.clear()
-            arrayListProjectNames.clear()
-            arrayListProjectId.clear()
-            gatherTaskProject()
-        } catch (e: Exception) {
-            asanaExceptionHandler(e = e)
-        }
-    }
-
-
-    private fun updateFields() {
-        queueCounter--
-        Log.d("que_counter", queueCounter.toString())
-        if (queueCounter == 0) {
-            timerTaskQueue.cancel()
-            activity.runOnUiThread {
-                LoggerBirdService.loggerBirdService.initializeAsanaAutoTextViews(
-                    arrayListAsanaProject = arrayListProjectNames,
-                    arrayListAsanaAssignee = arrayListAssigneeNames,
-                    arrayListAsanaSection = arrayListSectionsNames,
-                    arrayListAsanaPriority = arrayListPriorityNames,
-                    filePathMedia = filePathMedia!!
-                )
-            }
-        }
-
-    }
-
-
-    private fun checkQueueTime(activity: Activity) {
-        val timerQueue = Timer()
-        timerTaskQueue = object : TimerTask() {
-            override fun run() {
-                activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("asana_error_time_out")
-                }
-            }
-        }
-        timerQueue.schedule(timerTaskQueue, 180000)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun asanaExceptionHandler(
-        e: Exception? = null,
-        throwable: Throwable? = null
-    ) {
-        resetasanaValues(shareLayoutMessage = "asana_error")
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
-        }
-        LoggerBirdService.loggerBirdService.finishShareLayout("asana_error")
-        throwable?.printStackTrace()
-        e?.printStackTrace()
-        LoggerBird.callEnqueue()
-        LoggerBird.callExceptionDetails(
-            exception = e,
-            tag = Constants.asanaTag,
-            throwable = throwable
-        )
-    }
-
-    internal fun setProjectPosition(projectPosition: Int) {
-        this.projectPosition = projectPosition
-    }
-
-    internal fun setAssignee(assigneePosition: Int) {
-        this.assigneePosition = assigneePosition
-    }
-
-    internal fun setSectionPosition(sectionPosition: Int) {
-        this.sectionPosition = sectionPosition
-    }
-
-    internal fun setStartDate(startDate: String?) {
-        this.startDate = startDate
-    }
-
-    private fun resetasanaValues(shareLayoutMessage: String) {
-        queueCounter--
-        Log.d("queue_counter", queueCounter.toString())
-        if (queueCounter == 0) {
-            RecyclerViewAsanaAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
-                if (it.file.name != "logger_bird_details.txt") {
-                    if (it.file.exists()) {
-                        it.file.delete()
-                    }
-                }
-            }
-            timerTaskQueue.cancel()
-            arrayListProjectNames.clear()
-            arrayListProjectId.clear()
-            arrayListAssigneeNames.clear()
-            arrayListAssigneeId.clear()
-            arrayListPriorityNames.clear()
-            arrayListSectionsNames.clear()
-            arrayListSectionsId.clear()
-            projectPosition = 0
-            sectionPosition = 0
-            project = null
-            projectId = null
-            startDate = null
-            assignee = null
-            priority = null
-            section = null
-            description = null
-            subtask = null
-            content = null
-            taskName = null
-            activity.runOnUiThread {
-                LoggerBirdService.loggerBirdService.finishShareLayout(shareLayoutMessage)
-            }
-        }
-    }
-
+    /**
+     * This method is used for adding creating attachment when asana message created.
+     * @param taskId is used for getting reference of id of created asana message.
+     * @param file is used for getting reference of the current file.
+     * @param activity is used for getting reference of current activity.
+     * @throws exception if error occurs.
+     * @see asanaExceptionHandler method.
+     */
     private fun createAttachments(
         taskId: String,
         file: File,
@@ -637,23 +455,336 @@ internal class AsanaAuthentication {
         }
     }
 
+    /**
+     * This method is used for initializing the gathering action of asana.
+     * @throws exception if error occurs.
+     * @see asanaExceptionHandler method.
+     */
+    private fun gatherAsanaDetails() {
+        try {
+            queueCounter = 0
+            arrayListSectionsNames.clear()
+            arrayListSectionsId.clear()
+            arrayListPriorityNames.clear()
+            arrayListAssigneeNames.clear()
+            arrayListAssigneeId.clear()
+            arrayListProjectNames.clear()
+            arrayListProjectId.clear()
+            gatherTaskProject()
+        } catch (e: Exception) {
+            asanaExceptionHandler(e = e)
+        }
+    }
 
+    /**
+     * This method is used for getting project details for asana.
+     * @throws exception if error occurs.
+     * @see asanaExceptionHandler method.
+     */
+    private fun gatherTaskProject() {
+        queueCounter++
+        RetrofitUserAsanaClient.getAsanaUserClient(url = "https://app.asana.com/api/1.0/")
+            .create(AccountIdService::class.java)
+            .getAsanaProject()
+            .enqueue(object : retrofit2.Callback<JsonObject> {
+                override fun onFailure(
+                    call: retrofit2.Call<JsonObject>,
+                    t: Throwable
+                ) {
+                    asanaExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonObject>,
+                    response: retrofit2.Response<JsonObject>
+                ) {
+                    Log.d("asana_project_success", response.code().toString())
+                    val asanaList = response.body()
+                    val coroutineCallAsanaProject = CoroutineScope(Dispatchers.IO)
+                    coroutineCallAsanaProject.async {
+                        asanaList?.getAsJsonArray("data")?.forEach {
+                            arrayListProjectNames.add(it.asJsonObject["name"].asString)
+                            arrayListProjectId.add(it.asJsonObject["gid"].asString)
+                        }
+                        if (arrayListProjectId.size > projectPosition) {
+                            gatherTaskAssignee(projectId = arrayListProjectId[projectPosition])
+                            gatherTaskSections(projectId = arrayListProjectId[projectPosition])
+                        }
+                        updateFields()
+                    }
+                }
+            })
+    }
+
+    /**
+     * This method is used for getting assignee details for asana.
+     * @param projectId is used for getting reference of current chosen project id.
+     * @throws exception if error occurs.
+     * @see asanaExceptionHandler method.
+     */
+    private fun gatherTaskAssignee(projectId: String) {
+        queueCounter++
+        RetrofitUserAsanaClient.getAsanaUserClient(url = "https://app.asana.com/api/1.0/projects/$projectId/")
+            .create(AccountIdService::class.java)
+            .getAsanaAssignee()
+            .enqueue(object : retrofit2.Callback<JsonObject> {
+                override fun onFailure(
+                    call: retrofit2.Call<JsonObject>,
+                    t: Throwable
+                ) {
+                    asanaExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonObject>,
+                    response: retrofit2.Response<JsonObject>
+                ) {
+                    val coroutineCallAsanaAssignee = CoroutineScope(Dispatchers.IO)
+                    coroutineCallAsanaAssignee.async {
+                        Log.d("asana_assignee_success", response.code().toString())
+                        val asanaList = response.body()
+                        asanaList?.getAsJsonArray("data")?.forEach {
+                            arrayListAssigneeNames.add(it.asJsonObject["user"].asJsonObject["name"].asString)
+                            arrayListAssigneeId.add(it.asJsonObject["user"].asJsonObject["gid"].asString)
+                        }
+                        updateFields()
+
+                    }
+                }
+            })
+    }
+
+    /**
+     * This method is used for getting section details for asana.
+     * @param projectId is used for getting reference of current chosen project id.
+     * @throws exception if error occurs.
+     * @see asanaExceptionHandler method.
+     */
+    private fun gatherTaskSections(projectId: String) {
+        queueCounter++
+        RetrofitUserAsanaClient.getAsanaUserClient(url = "https://app.asana.com/api/1.0/projects/$projectId/")
+            .create(AccountIdService::class.java)
+            .getAsanaSections()
+            .enqueue(object : retrofit2.Callback<JsonObject> {
+                override fun onFailure(
+                    call: retrofit2.Call<JsonObject>,
+                    t: Throwable
+                ) {
+                    asanaExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonObject>,
+                    response: retrofit2.Response<JsonObject>
+                ) {
+                    val coroutineCallAsanaSections = CoroutineScope(Dispatchers.IO)
+                    coroutineCallAsanaSections.async {
+                        Log.d("asana_sections_success", response.code().toString())
+                        val asanaList = response.body()
+                        asanaList?.getAsJsonArray("data")?.forEach {
+                            arrayListSectionsNames.add(it.asJsonObject["name"].asString)
+                            arrayListSectionsId.add(it.asJsonObject["gid"].asString)
+                        }
+                        updateFields()
+
+                    }
+                }
+            })
+    }
+
+    /**
+     * This method is used for getting details of autoCompleteTextViews in the asana layout.
+     * @param autoTextViewProject is used for getting project details from project autoCompleteTextView in the asana layout.
+     * @param autoTextViewAssignee is used for getting assignee details from assignee autoCompleteTextView in the asana layout.
+     * @param autoTextViewPriority is used for getting priority details from priority autoCompleteTextView in the asana layout.
+     * @param autoTextViewSection is used for getting section details from section autoCompleteTextView in the asana layout.
+     */
+    internal fun gatherAutoTextDetails(
+        autoTextViewProject: AutoCompleteTextView,
+        autoTextViewAssignee: AutoCompleteTextView,
+        autoTextViewPriority: AutoCompleteTextView,
+        autoTextViewSection: AutoCompleteTextView
+    ) {
+        project = autoTextViewProject.editableText.toString()
+        assignee = autoTextViewAssignee.editableText.toString()
+        priority = autoTextViewPriority.editableText.toString()
+        section = autoTextViewSection.editableText.toString()
+    }
+
+    /**
+     * This method is used for getting details of editTexts in the asana layout.
+     * @param editTextDescription is used for getting description details from description editText in the asana layout.
+     * @param editTextSubtasks is used for getting subtask details from subtask editText in the asana layout.
+     * @param editTextTaskName is used for getting task details from task editText in the asana layout.
+     */
+    internal fun gatherEditTextDetails(
+        editTextDescription: EditText,
+        editTextSubtasks: EditText,
+        editTextTaskName: EditText
+    ) {
+        description = editTextDescription.text.toString()
+        subtask = editTextSubtasks.text.toString()
+        taskName = editTextTaskName.text.toString()
+    }
+
+    /**
+     * This method is used for updating and controlling the queue of background tasks in the asana actions.
+     */
+    private fun updateFields() {
+        queueCounter--
+        Log.d("que_counter", queueCounter.toString())
+        if (queueCounter == 0) {
+            timerTaskQueue.cancel()
+            activity.runOnUiThread {
+                LoggerBirdService.loggerBirdService.initializeAsanaAutoTextViews(
+                    arrayListAsanaProject = arrayListProjectNames,
+                    arrayListAsanaAssignee = arrayListAssigneeNames,
+                    arrayListAsanaSection = arrayListSectionsNames,
+                    arrayListAsanaPriority = arrayListPriorityNames,
+                    filePathMedia = filePathMedia!!
+                )
+            }
+        }
+
+    }
+
+
+    /**
+     * This method is used for controlling the time of background tasks in the asana actions.
+    If tasks will last longer than three minutes then asana layout will be removed.
+     */
+    private fun checkQueueTime(activity: Activity) {
+        val timerQueue = Timer()
+        timerTaskQueue = object : TimerTask() {
+            override fun run() {
+                activity.runOnUiThread {
+                    LoggerBirdService.loggerBirdService.finishShareLayout("asana_error_time_out")
+                }
+            }
+        }
+        timerQueue.schedule(timerTaskQueue, 180000)
+    }
+
+    /**
+     * This method is used for default exception handling of asana class.
+     * @param e is used for getting reference of exception.
+     * @param throwable is used for getting reference of throwable.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun asanaExceptionHandler(
+        e: Exception? = null,
+        throwable: Throwable? = null
+    ) {
+        resetasanaValues(shareLayoutMessage = "asana_error")
+        if (this::timerTaskQueue.isInitialized) {
+            timerTaskQueue.cancel()
+        }
+        LoggerBirdService.loggerBirdService.finishShareLayout("asana_error")
+        throwable?.printStackTrace()
+        e?.printStackTrace()
+        LoggerBird.callEnqueue()
+        LoggerBird.callExceptionDetails(
+            exception = e,
+            tag = Constants.asanaTag,
+            throwable = throwable
+        )
+    }
+
+    /**
+     * This method is used for getting reference of current project position in the project autoCompleteTextView in the asana layout.
+     * @param projectPosition is used for getting reference of project position.
+     */
+    internal fun setProjectPosition(projectPosition: Int) {
+        this.projectPosition = projectPosition
+    }
+
+    /**
+     * This method is used for getting reference of current assignee position in the assignee autoCompleteTextView in the asana layout.
+     * @param assigneePosition is used for getting reference of assignee position.
+     */
+    internal fun setAssignee(assigneePosition: Int) {
+        this.assigneePosition = assigneePosition
+    }
+
+    /**
+     * This method is used for getting reference of current section position in the section autoCompleteTextView in the asana layout.
+     * @param sectionPosition is used for getting reference of section position.
+     */
+    internal fun setSectionPosition(sectionPosition: Int) {
+        this.sectionPosition = sectionPosition
+    }
+
+    /**
+     * This method is used for getting reference of current date time in the asana date layout.
+     * @param startDate is used for getting reference of start date.
+     */
+    internal fun setStartDate(startDate: String?) {
+        this.startDate = startDate
+    }
+
+    /**
+     * This method is used for resetting the values in asana action.
+     * @param shareLayoutMessage is used for getting reference of the asana action message.
+     */
+    private fun resetasanaValues(shareLayoutMessage: String) {
+        queueCounter--
+        Log.d("queue_counter", queueCounter.toString())
+        if (queueCounter == 0) {
+            RecyclerViewAsanaAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
+                if (it.file.name != "logger_bird_details.txt") {
+                    if (it.file.exists()) {
+                        it.file.delete()
+                    }
+                }
+            }
+            timerTaskQueue.cancel()
+            arrayListProjectNames.clear()
+            arrayListProjectId.clear()
+            arrayListAssigneeNames.clear()
+            arrayListAssigneeId.clear()
+            arrayListPriorityNames.clear()
+            arrayListSectionsNames.clear()
+            arrayListSectionsId.clear()
+            projectPosition = 0
+            sectionPosition = 0
+            project = null
+            projectId = null
+            startDate = null
+            assignee = null
+            priority = null
+            section = null
+            description = null
+            subtask = null
+            content = null
+            taskName = null
+            activity.runOnUiThread {
+                LoggerBirdService.loggerBirdService.finishShareLayout(shareLayoutMessage)
+            }
+        }
+    }
+
+    /**
+     * This method is used for checking project reference exist in the project list or not empty in the project AutoCompleteTextView field in the asana layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewProject is used for getting reference of project autoCompleteTextView in the asana layout.
+     * @return Boolean value.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun checkAsanaProject(
         activity: Activity,
-        autoTextViewAsanaProject: AutoCompleteTextView
+        autoTextViewProject: AutoCompleteTextView
     ): Boolean {
-        if (autoTextViewAsanaProject.editableText.toString().isNotEmpty() && arrayListProjectNames.contains(
-                autoTextViewAsanaProject.editableText.toString()
+        if (autoTextViewProject.editableText.toString().isNotEmpty() && arrayListProjectNames.contains(
+                autoTextViewProject.editableText.toString()
             )
         ) {
             return true
-        } else if (autoTextViewAsanaProject.editableText.toString().isEmpty()) {
+        } else if (autoTextViewProject.editableText.toString().isEmpty()) {
             defaultToast.attachToast(
                 activity = activity,
                 toastMessage = activity.resources.getString(R.string.asana_project_empty)
             )
-        } else if (!arrayListProjectNames.contains(autoTextViewAsanaProject.editableText.toString())) {
+        } else if (!arrayListProjectNames.contains(autoTextViewProject.editableText.toString())) {
             defaultToast.attachToast(
                 activity = activity,
                 toastMessage = activity.resources.getString(R.string.asana_project_doesnt_exist)
@@ -662,6 +793,12 @@ internal class AsanaAuthentication {
         return false
     }
 
+    /**
+     * This method is used for checking task reference is not empty in the task editText field in the asana layout.
+     * @param activity is used for getting reference of current activity.
+     * @param editTextTask is used for getting reference of task editText in the asana layout.
+     * @return Boolean value.
+     */
     internal fun checkAsanaTask(
         activity: Activity,
         editTextTask: EditText
@@ -677,11 +814,17 @@ internal class AsanaAuthentication {
         return false
     }
 
+    /**
+     * This method is used for checking section reference exist in the section list in the section AutoCompleteTextView field in the asana layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewSection is used for getting reference of section autoCompleteTextView in the asana layout.
+     * @return Boolean value.
+     */
     internal fun checkAsanaSection(
         activity: Activity,
-        autoTextViewAsanaSection: AutoCompleteTextView
+        autoTextViewSection: AutoCompleteTextView
     ): Boolean {
-        if (arrayListSectionsNames.contains(autoTextViewAsanaSection.editableText.toString()) || autoTextViewAsanaSection.editableText.toString().isEmpty()) {
+        if (arrayListSectionsNames.contains(autoTextViewSection.editableText.toString()) || autoTextViewSection.editableText.toString().isEmpty()) {
             return true
         } else {
             defaultToast.attachToast(
@@ -692,11 +835,17 @@ internal class AsanaAuthentication {
         return false
     }
 
+    /**
+     * This method is used for checking assignee reference exist in the assignee list in the assignee AutoCompleteTextView field in the asana layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewAssignee is used for getting reference of assignee autoCompleteTextView in the asana layout.
+     * @return Boolean value.
+     */
     internal fun checkAsanaAssignee(
         activity: Activity,
-        autoTextViewAsanaAssignee: AutoCompleteTextView
+        autoTextViewAssignee: AutoCompleteTextView
     ): Boolean {
-        if (arrayListAssigneeNames.contains(autoTextViewAsanaAssignee.editableText.toString()) || autoTextViewAsanaAssignee.editableText.toString().isEmpty()) {
+        if (arrayListAssigneeNames.contains(autoTextViewAssignee.editableText.toString()) || autoTextViewAssignee.editableText.toString().isEmpty()) {
             return true
         } else {
             defaultToast.attachToast(

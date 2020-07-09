@@ -80,7 +80,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import listeners.*
 import loggerbird.LoggerBird
 import models.*
 import observers.LogActivityLifeCycleObserver
@@ -97,6 +96,9 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import java.text.SimpleDateFormat
 import android.text.InputFilter
+import listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
+import listeners.layouts.LayoutFeedbackOnTouchListener
+import listeners.layouts.LayoutJiraOnTouchListener
 
 internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
@@ -227,7 +229,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private val defaultToast: DefaultToast = DefaultToast()
 
     //Jira:
-    internal val jiraAuthentication = JiraAuthentication()
+    internal val jiraAuthentication = JiraApi()
     private lateinit var autoTextViewJiraProject: AutoCompleteTextView
     private lateinit var autoTextViewJiraIssueType: AutoCompleteTextView
     private lateinit var recyclerViewJiraAttachment: RecyclerView
@@ -406,7 +408,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private val arrayListGitlabFileName: ArrayList<RecyclerViewModel> = ArrayList()
 
     //Github
-    internal val githubAuthentication = GithubAuthentication()
+    internal val githubAuthentication = GithubApi()
     private lateinit var buttonGithubCreate: Button
     private lateinit var buttonGithubCancel: Button
     private lateinit var editTextGithubTitle: EditText
@@ -442,7 +444,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var arrayListGithubLabel: ArrayList<String>
 
     //Trello
-    internal val trelloAuthentication = TrelloAuthentication()
+    internal val trelloAuthentication = TrelloApi()
     private lateinit var buttonTrelloCreate: Button
     private lateinit var buttonTrelloCancel: Button
     private lateinit var editTextTrelloTitle: EditText
@@ -498,7 +500,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonTrelloTimeCancel: Button
 
     //Pivotal Tracker
-    internal val pivotalAuthentication = PivotalTrackerAuthentication()
+    internal val pivotalAuthentication = PivotalTrackerApi()
     private lateinit var buttonPivotalCreate: Button
     private lateinit var buttonPivotalCancel: Button
     private lateinit var toolbarPivotal: Toolbar
@@ -547,7 +549,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var arrayListPivotalOwner: ArrayList<String>
 
     //Basecamp
-    internal val basecampAuthentication = BasecampAuthentication()
+    internal val basecampAuthentication = BasecampApi()
     private lateinit var buttonBasecampCancel: Button
     private lateinit var buttonBasecampCreate: Button
     private lateinit var toolbarBasecamp: Toolbar
@@ -590,7 +592,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonBasecampDateCancel: Button
 
     //Asana
-    internal val asanaAuthentication = AsanaAuthentication()
+    internal val asanaAuthentication = AsanaApi()
     private lateinit var toolbarAsana: Toolbar
     private lateinit var scrollViewAsana: ScrollView
     private lateinit var autoTextViewAsanaProject: AutoCompleteTextView
@@ -1490,27 +1492,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
         }
-    }
-
-    /**
-     * not used!
-     */
-    private fun attachFloatingActionButtonLayoutListener() {
-        floating_action_button.viewTreeObserver.addOnGlobalLayoutListener(
-            FloatingActionButtonGlobalLayoutListener(
-                floatingActionButton = floating_action_button
-            )
-        )
-        floating_action_button_screenshot.viewTreeObserver.addOnGlobalLayoutListener(
-            FloatingActionButtonScreenshotGlobalLayoutListener(floatingActionButtonScreenshot = floating_action_button_screenshot)
-        )
-        floating_action_button_video.viewTreeObserver.addOnGlobalLayoutListener(
-            FloatingActionButtonVideoGlobalLayoutListener(floatingActionButtonVideo = floating_action_button_video)
-        )
-
-        floating_action_button_audio.viewTreeObserver.addOnGlobalLayoutListener(
-            FloatingActionButtonAudioGlobalLayoutListener(floatingActionButtonAudio = floating_action_button_audio)
-        )
     }
 
     /**
@@ -3459,10 +3440,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     recyclerViewJiraFixVersionsList =
                         viewJira.findViewById(R.id.recycler_view_fix_versions_list)
 
-                    jiraAuthentication.callJiraIssue(
+                    jiraAuthentication.callJira(
                         context = context,
                         activity = activity,
-                        jiraTask = "get",
+                        Task = "get",
                         createMethod = "normal"
                     )
 
@@ -3530,7 +3511,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 editTextSummary = editTextJiraSummary,
                 editTextDescription = editTextJiraDescription
             )
-            jiraAuthentication.gatherJiraRecyclerViewDetails(arrayListRecyclerViewItems = arrayListJiraFileName)
             if (autoTextViewJiraIssueType.editableText.toString() != "Epic") {
                 callJiraTask(filePathMedia = filePathMedia)
             } else {
@@ -3870,11 +3850,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                    attachProgressBar()
             }
 //                hideKeyboard(activity = activity)
-            jiraAuthentication.callJiraIssue(
-                filePathName = filePathMedia,
+            jiraAuthentication.callJira(
+                filePathMedia = filePathMedia,
                 context = context,
                 activity = activity,
-                jiraTask = "create",
+                task = "create",
                 createMethod = "normal"
             )
         }
@@ -4548,10 +4528,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                    attachProgressBar()
             }
             hideKeyboard(activity = activity, view = viewJira)
-            jiraAuthentication.callJiraIssue(
+            jiraAuthentication.callJira(
                 context = context,
                 activity = activity,
-                jiraTask = "get",
+                task = "get",
                 createMethod = "normal"
             )
         }
@@ -5064,11 +5044,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textViewShareWithJira.setSafeOnClickListener {
                         if (checkBoxDuplication.isChecked) {
                             attachProgressBar()
-                            jiraAuthentication.callJiraIssue(
-                                filePathName = filePath,
+                            jiraAuthentication.callJira(
+                                filePathMedia = filePath,
                                 context = context,
                                 activity = activity,
-                                jiraTask = "unhandled_duplication",
+                                task = "unhandled_duplication",
                                 createMethod = "default"
                             )
                         } else {
@@ -5078,11 +5058,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textViewCustomizeJira.setSafeOnClickListener {
                         if (checkBoxDuplication.isChecked) {
                             attachProgressBar()
-                            jiraAuthentication.callJiraIssue(
-                                filePathName = filePath,
+                            jiraAuthentication.callJira(
+                                filePathMedia = filePath,
                                 context = context,
                                 activity = activity,
-                                jiraTask = "unhandled_duplication",
+                                task = "unhandled_duplication",
                                 createMethod = "customize"
                             )
                         } else {
@@ -6217,13 +6197,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         buttonGithubCreate.setSafeOnClickListener {
             if (checkGithubTitleEmpty() && githubAuthentication.checkGithubRepoEmpty(
                     activity = activity,
-                    autoTextViewGithubRepo = autoTextViewGithubRepo
+                    autoTextViewRepo = autoTextViewGithubRepo
                 ) && githubAuthentication.checkGithubAssignee(
                     activity = activity,
                     autoTextViewAssignee = autoTextViewGithubAssignee
                 ) && githubAuthentication.checkGithubLabel(
                     activity = activity,
-                    autoTextViewGithubLabels = autoTextViewGithubLabels
+                    autoTextViewLabels = autoTextViewGithubLabels
                 ) && githubAuthentication.checkGithubMileStone(
                     activity = activity,
                     autoTextViewMileStone = autoTextViewGithubMileStone
@@ -6914,19 +6894,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             trelloAuthentication.gatherCalendarDetails(calendar = calendarTrello)
             if (trelloAuthentication.checkTitle(
                     activity = activity,
-                    context = context
+                    editTextTitle = editTextTrelloTitle
                 ) && trelloAuthentication.checkTrelloBoardEmpty(
                     activity = activity,
-                    autoTextViewTrelloBoard = autoTextViewTrelloBoard
+                    autoTextViewBoard = autoTextViewTrelloBoard
                 ) && trelloAuthentication.checkTrelloLabel(
                     activity = activity,
-                    autoTextViewTrelloLabel = autoTextViewTrelloLabel
+                    autoTextViewLabel = autoTextViewTrelloLabel
                 ) && trelloAuthentication.checkTrelloMember(
                     activity = activity,
-                    autoTextViewTrelloMember = autoTextViewTrelloMember
+                    autoTextViewMember = autoTextViewTrelloMember
                 ) && trelloAuthentication.checkTrelloProjectEmpty(
                     activity = activity,
-                    autoTextViewTrelloProject = autoTextViewTrelloProject
+                    autoTextViewProject = autoTextViewTrelloProject
                 )
             ) {
                 attachProgressBar()
@@ -8315,11 +8295,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
             if (pivotalAuthentication.checkPivotalProject(
                     activity = activity,
-                    autoTextViewPivotalProject = autoTextViewPivotalProject
+                    autoTextViewProject = autoTextViewPivotalProject
                 )
                 && pivotalAuthentication.checkPivotalStoryType(
                     activity = activity,
-                    autoTextViewPivotalStoryType = autoTextViewPivotalStoryType
+                    autoTextViewStoryType = autoTextViewPivotalStoryType
                 )
                 && pivotalAuthentication.checkPivotalTitle(
                     activity = activity,
@@ -8327,19 +8307,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 )
                 && pivotalAuthentication.checkPivotalLabel(
                     activity = activity,
-                    autoTextViewPivotalLabel = autoTextViewPivotalLabel
+                    autoTextViewLabel = autoTextViewPivotalLabel
                 )
                 && pivotalAuthentication.checkPivotalPoint(
                     activity = activity,
-                    autoTextViewPivotalPoint = autoTextViewPivotalPoints
+                    autoTextViewPoint = autoTextViewPivotalPoints
                 )
                 && pivotalAuthentication.checkPivotalOwner(
                     activity = activity,
-                    autoTextViewPivotalOwner = autoTextViewPivotalOwners
+                    autoTextViewOwner = autoTextViewPivotalOwners
                 )
                 && pivotalAuthentication.checkPivotalRequester(
                     activity = activity,
-                    autoTextViewPivotaRequester = autoTextViewPivotalRequester
+                    autoTextViewRequester = autoTextViewPivotalRequester
                 )
             ) {
                 attachProgressBar()
@@ -9135,7 +9115,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
             if (basecampAuthentication.checkBasecampProject(
                     activity = activity,
-                    autoTextViewBasecampProject = autoTextViewBasecampProject
+                    autoTextViewProject = autoTextViewBasecampProject
                 )
                 && basecampAuthentication.checkBasecampTitle(
                     activity = activity,
@@ -9866,7 +9846,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
             if (asanaAuthentication.checkAsanaProject(
                     activity = activity,
-                    autoTextViewAsanaProject = autoTextViewAsanaProject
+                    autoTextViewProject = autoTextViewAsanaProject
                 )
                 && asanaAuthentication.checkAsanaTask(
                     activity = activity,
@@ -9874,11 +9854,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 )
                 && asanaAuthentication.checkAsanaSection(
                     activity = activity,
-                    autoTextViewAsanaSection = autoTextViewAsanaSector
+                    autoTextViewSection = autoTextViewAsanaSector
                 )
                 && asanaAuthentication.checkAsanaAssignee(
                     activity = activity,
-                    autoTextViewAsanaAssignee = autoTextViewAsanaAssignee
+                    autoTextViewAssignee = autoTextViewAsanaAssignee
                 )
             ) {
                 asanaAuthentication.callAsana(

@@ -40,9 +40,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import listeners.LogRecyclerViewChildAttachStateChangeListener
-import listeners.LogRecyclerViewItemTouchListener
-import listeners.LogRecyclerViewScrollListener
+import listeners.recyclerViews.LogRecyclerViewChildAttachStateChangeListener
+import listeners.recyclerViews.LogRecyclerViewItemTouchListener
+import listeners.recyclerViews.LogRecyclerViewScrollListener
 import observers.*
 import okhttp3.FormBody
 import okhttp3.OkHttpClient

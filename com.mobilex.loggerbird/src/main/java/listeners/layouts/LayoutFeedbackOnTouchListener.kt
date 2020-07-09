@@ -1,14 +1,23 @@
-package listeners
+package listeners.layouts
 
+import android.content.res.Resources
 import android.os.Build
-import android.view.MotionEvent
-import android.view.View
-import android.view.WindowManager
+import android.util.Log
+import android.view.*
+import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.annotation.RequiresApi
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.mobilex.loggerbird.R
 import constants.Constants
 import loggerbird.LoggerBird
 
-class LayoutJiraAuthOnTouchListener(
+
+//This class is used for making feed-back layout movable.
+internal class LayoutFeedbackOnTouchListener(
     private val windowManager: WindowManager,
     private val windowManagerView: View,
     private val windowManagerParams: WindowManager.LayoutParams
@@ -16,7 +25,7 @@ class LayoutJiraAuthOnTouchListener(
     private var windowManagerDx: Float = 0F
     private var windowManagerDy: Float = 0F
     private var lastAction: Int = 0
-    //    private val deviceWidth = Resources.getSystem().displayMetrics.widthPixels
+//    private val deviceWidth = Resources.getSystem().displayMetrics.widthPixels
 //    private val deviceHeight = Resources.getSystem().displayMetrics.heightPixels
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onTouch(view: View, event: MotionEvent): Boolean {
