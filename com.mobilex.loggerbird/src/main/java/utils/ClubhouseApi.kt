@@ -31,7 +31,8 @@ import com.google.gson.JsonObject
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 
-class ClubhouseAuthentication {
+/** Loggerbird Clubhouse api configration class **/
+class ClubhouseApi {
     private lateinit var activity: Activity
     private lateinit var context: Context
     private var filePathMedia: File? = null
@@ -74,7 +75,15 @@ class ClubhouseAuthentication {
     companion object{
         const val BASE_URL = "https://api.clubhouse.io/api/v3/"
     }
-
+    /**
+     * This method is used for calling Clubhouse Api in order to determine operation.
+     * @param activity is used for getting reference of current activity.
+     * @param context is for getting reference from the application context.
+     * @param filePathMedia is used getting filepath of the recorded media.
+     * @param task is used for determining the task.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     internal fun callClubhouse(
         activity: Activity,
         context: Context,
@@ -110,6 +119,15 @@ class ClubhouseAuthentication {
         }
     }
 
+    /**
+     * This method is used for checking OkHttp connection.
+     * @param activity is used for getting reference of current activity.
+     * @param context is for getting reference from the application context.
+     * @param filePathMedia is used getting filepath of the recorded media.
+     * @param task is used for determining the task.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun okHttpClubhouseAuthentication(
         context: Context,
         activity: Activity,
@@ -178,6 +196,14 @@ class ClubhouseAuthentication {
         })
     }
 
+    /**
+     * This method is used for gathering all details to be send to Clubhouse.
+     * @param activity is used for getting reference of current activity.
+     * @param context is for getting reference from the application context.
+     * @param filePathMedia is used getting filepath of the recorded media.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private suspend fun gatherClubhouseDetails(
         activity: Activity,
         context: Context,
@@ -208,6 +234,11 @@ class ClubhouseAuthentication {
         }
     }
 
+    /**
+     * This method is used for gathering all details to be send to Clubhouse.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private suspend fun gatherClubhouseProjectDetails(){
         try {
             RetrofitUserClubhouseClient.getClubhouseUserClient(url = BASE_URL)
@@ -249,6 +280,11 @@ class ClubhouseAuthentication {
         }
     }
 
+    /**
+     * This method is used for gathering Clubhouse users.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private suspend fun gatherClubhouseUserDetails(){
         try {
             RetrofitUserClubhouseClient.getClubhouseUserClient(url = BASE_URL)
@@ -291,6 +327,11 @@ class ClubhouseAuthentication {
         }
     }
 
+    /**
+     * This method is used for gathering Clubhouse epic date.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private suspend fun gatherClubhouseEpicDetails(){
         try {
             RetrofitUserClubhouseClient.getClubhouseUserClient(url = BASE_URL)
@@ -332,6 +373,14 @@ class ClubhouseAuthentication {
         }
     }
 
+    /**
+     * This method is used for creating issue for Clubhouse with using Api.
+     * @param activity is used for getting reference of current activity.
+     * @param context is for getting reference from the application context.
+     * @param filePathMedia is used getting filepath of the recorded media.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun createClubhouseStory(
         activity: Activity,
         context: Context,
@@ -384,6 +433,13 @@ class ClubhouseAuthentication {
         }
     }
 
+    /**
+     * This method is used for creating queue to send more than one file consecutively.
+     * @param filePathMedia is used getting filepath of the recorded media.
+     * @param storyId is for getting storyId to update already opened issue.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun callClubhouseAttachments(filePathMedia: File, storyId: String) {
         if (LoggerBird.isLogInitAttached()) {
             if (runnableListClubhouseAttachments.isEmpty()) {
@@ -399,6 +455,13 @@ class ClubhouseAuthentication {
         }
     }
 
+    /**
+     * This method is used for creating attachments and their URL to be send as an attachment.
+     * @param storyId is for getting storyId to update project with attachment URL.
+     * @param filePathMedia is used getting filepath of the recorded media.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createAttachments(filePathMedia: File?, storyId: String) {
         try {
@@ -445,6 +508,10 @@ class ClubhouseAuthentication {
         }
     }
 
+    /**
+     * This method is used for calling attachments consecutively from queue.
+     * @param storyId is for getting issueId to update issue with attachment URL.
+     */
     private fun callEnqueueClubhouseAttachments(storyId: String) {
         workQueueLinkedClubhouseAttachments.controlRunnable = false
         if (runnableListClubhouseAttachments.size > 0) {
@@ -472,6 +539,13 @@ class ClubhouseAuthentication {
         }
     }
 
+    /**
+     * This method is used for sending attachments to the issue.
+     * @param storyId is for getting projectId to update story with attachment URL.
+     * @param description is used for mergeing description of user and attachments URL.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun uploadAttachments(storyId: String,description: String) {
         try {
@@ -512,6 +586,9 @@ class ClubhouseAuthentication {
         }
     }
 
+    /**
+     * This method is used for updating data fields of Clubhouse.
+     */
     private fun updateFields() {
         timerTaskQueue.cancel()
         activity.runOnUiThread {
@@ -524,6 +601,13 @@ class ClubhouseAuthentication {
         }
     }
 
+    /**
+     * This method is used for gathering issue details to be send to Clubhouse.
+     * @param spinnerUser for getting reference of user.
+     * @param spinnerStoryType for getting reference of story type.
+     * @param spinnerEpic for getting reference of epics.
+     * @param spinnerConfidentiality for getting reference of confidentiality
+     */
     internal fun gatherClubhouseSpinnerDetails(
         spinnerUser: Spinner,
         spinnerStoryType: Spinner,
@@ -537,6 +621,12 @@ class ClubhouseAuthentication {
         epic = spinnerEpic.selectedItem.toString()
     }
 
+    /**
+     * This method is used for gathering issue details to be send to Clubhouse.
+     * @param editTextStoryName for getting reference of story name.
+     * @param editTextStoryDescription for getting reference of story description.
+     * @param editTextEstimate for getting reference of story estimate.
+     */
     internal fun gatherClubhouseEditTextDetails(
         editTextStoryName: EditText,
         editTextStoryDescription: EditText,
@@ -547,28 +637,52 @@ class ClubhouseAuthentication {
         estimate = editTextEstimate.text.toString()
     }
 
+    /**
+     * This method is used for gathering project details to be send to Clubhouse.
+     * @param autoTextViewProject for getting reference of project.
+     */
     internal fun gatherClubhouseProjectAutoTextDetails(
         autoTextViewProject: AutoCompleteTextView
     ) {
         project = autoTextViewProject.editableText.toString()
     }
 
+    /**
+     * This method is used for gathering project details to be send to Clubhouse.
+     * @param projectPosition for getting position of project from spinner.
+     */
     internal fun clubhouseProjectPosition(projectPosition: Int) {
         this.projectPosition = projectPosition
     }
 
+    /**
+     * This method is used for gathering project details to be send to Clubhouse.
+     * @param epicPosition for getting position of epic position from spinner.
+     */
     internal fun clubhouseEpicPosition(epicPosition: Int) {
         this.epicPosition = epicPosition
     }
 
+    /**
+     * This method is used for gathering project details to be send to Clubhouse.
+     * @param userPosition for getting position of user position from spinner.
+     */
     internal fun clubhouseUserPosition(userPosition: Int) {
         this.spinnerPositionUser = userPosition
     }
 
+    /**
+     * This method is used for gathering story type details to be send to Clubhouse.
+     * @param storyTypePosition for getting position of story type from spinner.
+     */
     internal fun clubhouseStoryTypePosition(storyTypePosition: Int){
         this.spinnerPositionStoryType = storyTypePosition
     }
 
+    /**
+     * This method is used for checking time for time out situation.
+     * @param activity is used for getting reference of current activity.
+     */
     private fun checkQueueTime(activity: Activity) {
         val timerQueue = Timer()
         timerTaskQueue = object : TimerTask() {
@@ -581,6 +695,14 @@ class ClubhouseAuthentication {
         timerQueue.schedule(timerTaskQueue, 100000)
     }
 
+    /**
+     * This method is used for handling exceptions of Slack Api.
+     * @param e is used for defining exception.
+     * @param filePathName is used getting filepath of the recorded media.
+     * @param throwable is used for defining throwable
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun clubhouseExceptionHandler(
         e: Exception? = null,
         filePathName: File? = null,

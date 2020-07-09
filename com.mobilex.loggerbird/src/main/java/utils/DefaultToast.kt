@@ -19,6 +19,9 @@ import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
 import java.util.*
 
+/**
+ * This class is used for create custom toast.
+ */
 class DefaultToast {
     private lateinit var windowManagerParamsToast: WindowManager.LayoutParams
     private var windowManagerToast: Any? = null
@@ -26,6 +29,13 @@ class DefaultToast {
     private var textViewToast: TextView? = null
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
 
+    /**
+     * This method is used for attach custom toast
+     * @param activity is used for getting reference of current activity.
+     * @param toastMessage is used for getting text that used entered.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     internal fun attachToast(activity: Activity, toastMessage: String) {
         try {
             detachToast()
@@ -57,8 +67,6 @@ class DefaultToast {
             )
             if (toastView != null) {
                 var controlGlobalLayoutListener = false
-//                val frameLayoutToast =
-//                    toastView!!.findViewById<FrameLayout>(R.id.default_toast_layout)
                 textViewToast = toastView!!.findViewById(R.id.textView_default_toast)
                 textViewToast!!.viewTreeObserver.addOnGlobalLayoutListener {
                     if (!controlGlobalLayoutListener) {
@@ -69,17 +77,10 @@ class DefaultToast {
                         )
                         textViewLayout.setMargins(0, 0, 0, 100)
                         textViewToast!!.layoutParams = textViewLayout
-//                        (windowManagerToast as WindowManager).updateViewLayout(
-//                            toastView,
-//                            windowManagerParamsToast
-//                        )
                         textViewToast!!.text = toastMessage
                         toastTimer(activity = activity)
                     }
                 }
-//                Handler().postDelayed({
-//                    detachToast()
-//                }, 2000)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -89,6 +90,9 @@ class DefaultToast {
         }
     }
 
+    /**
+     * This method is used for detach custom toast.
+     */
     private  fun detachToast() {
         if (this.textViewToast != null && this.toastView != null) {
                     (windowManagerToast as WindowManager).removeViewImmediate(toastView)
@@ -97,6 +101,10 @@ class DefaultToast {
         }
     }
 
+    /**
+     * This method is used for arrange the time that toast will shown.
+     * @param activity is used for getting reference of current activity.
+     */
     private fun  toastTimer(activity: Activity) {
         val timerToast = Timer()
         val timerTaskToast = object : TimerTask() {

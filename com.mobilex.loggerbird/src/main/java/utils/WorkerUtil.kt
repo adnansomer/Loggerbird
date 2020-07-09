@@ -10,7 +10,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
 
-//worker class might be useful in future.
+/**
+ * This class is used for applying Worker
+ * @param context is for getting reference from the application context.
+ * @param workerParameters is used for getting worker job parameters.
+ */
 class WorkerUtil(context: Context, workerParameters: WorkerParameters) :
     CoroutineWorker(context, workerParameters) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {

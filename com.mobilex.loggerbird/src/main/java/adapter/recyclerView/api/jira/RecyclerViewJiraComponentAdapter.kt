@@ -20,7 +20,7 @@ import android.widget.Button
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
-import models.RecyclerViewModelComponent
+import models.recyclerView.RecyclerViewModelComponent
 import services.LoggerBirdService
 
 //Custom recyclerView adapter class for jira component.

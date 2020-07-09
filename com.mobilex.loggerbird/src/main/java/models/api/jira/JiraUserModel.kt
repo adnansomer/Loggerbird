@@ -1,5 +1,8 @@
 package models.api.jira
 
+/**
+ * This class is a model for Jira Api request
+ */
 data class JiraUserModel(
     var displayName: String? = null,
     var accountId: String? = null,

@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit
  * @var request gets interceptor request.
  * @var response gets interceptor response returned from server.
  * @var stringBuilderInterceptor used for printing the details.
+ * @return response of request
  */
 internal class LogOkHttpInterceptor() : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -46,6 +47,7 @@ internal class LogOkHttpInterceptor() : Interceptor {
  * @var request gets interceptor request.
  * @var response gets interceptor response returned from server.
  * @var stringBuilderInterceptor used for printing the details.
+ * @return response of request
  */
 internal class LogOkHttpErrorInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -109,6 +111,7 @@ internal class LogOkHttpErrorInterceptor : Interceptor {
  * @var request gets interceptor request.
  * @var response gets interceptor response returned from server.
  * @var stringBuilderInterceptor used for printing the details.
+ * @return response of cache interceptor
  */
 internal class LogOkHttpCacheInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -131,6 +134,7 @@ internal class LogOkHttpCacheInterceptor : Interceptor {
  * Variables:
  * @var originalRequest is a variable that is created request with using interceptor chain.
  * @var request returns a built request with having header name and value to intercept request and token.
+ * @return response of chain
  */
 internal class LogOkHttpAuthenticationInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {

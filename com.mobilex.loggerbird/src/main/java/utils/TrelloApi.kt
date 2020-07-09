@@ -32,7 +32,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import kotlin.collections.HashMap
 
-//Trello api class.
+/** Loggerbird Trello api configration class **/
 internal class TrelloApi {
     //Global variables.
     private lateinit var activity: Activity

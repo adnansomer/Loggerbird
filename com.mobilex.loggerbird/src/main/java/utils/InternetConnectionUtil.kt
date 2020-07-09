@@ -10,6 +10,7 @@ import java.net.URL
 
 //InternetConnectionUtil class used for making network and internet connection check.
 internal class InternetConnectionUtil {
+
     /**
      * This Method makes http request and pings "https://accounts.google.com" url for checking current internet connection state.
      * Variables:

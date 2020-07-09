@@ -33,6 +33,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import kotlin.collections.HashMap
 
+/** Loggerbird PivotalTracker api configration class **/
 internal class PivotalTrackerApi {
     //Global variables.
     private lateinit var activity: Activity

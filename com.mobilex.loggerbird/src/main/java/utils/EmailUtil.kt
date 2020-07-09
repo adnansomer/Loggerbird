@@ -41,8 +41,9 @@ import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 import kotlin.collections.ArrayList
 
-
-//EmailUtil class is used for sending desired logfile as email.
+/**
+ * EmailUtil class is used for sending desired logfile as email.
+ */
 internal class EmailUtil {
     private var conversation = ArrayList<FirebaseTextMessage>()
     private var coroutineCallSmartReply: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -272,6 +273,14 @@ internal class EmailUtil {
         }
 
 
+        /**
+         * This Method Takes Log File With Unhandled Exception And Send As Email.
+         * Parameters:
+         * @param message parameter used for getting text message for sending as email.
+         * @param context parameter used for getting context of the current activity or fragment.
+         * @param to parameter used for getting e-mail address to be send as an email.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         */
         internal suspend fun sendFeedbackEmail(context: Context, message: String, to: String) {
             try {
                 val internetConnectionUtil = InternetConnectionUtil()
@@ -336,7 +345,9 @@ internal class EmailUtil {
 
         }
 
-        //dummy method probably deleted in the future
+        /**
+         * This method is used for returning system time.
+         */
         private fun systemTime(): String {
             val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
             val currentTime: LocalDateTime = LocalDateTime.now()

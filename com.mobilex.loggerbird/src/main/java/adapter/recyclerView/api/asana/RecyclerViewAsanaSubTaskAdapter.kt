@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import constants.Constants
 import loggerbird.LoggerBird
 import models.RecyclerViewModel
-import models.RecyclerViewModelSubtask
+import models.recyclerView.RecyclerViewModelSubtask
 import services.LoggerBirdService
 import utils.DefaultToast
 import java.io.File

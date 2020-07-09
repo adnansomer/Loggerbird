@@ -39,7 +39,9 @@ import loggerbird.LoggerBird
 import services.LoggerBirdService
 import java.util.concurrent.TimeUnit
 
-
+/**
+ * This class is used for defining Paint Activity life-cycle and its methods.
+ */
 class PaintActivity : Activity() {
     private val REQUEST_WRITE_EXTERNAL = 1
     private lateinit var screenShot: Drawable
@@ -55,78 +57,23 @@ class PaintActivity : Activity() {
         internal var controlPaintInPictureState:Boolean = false
         internal fun closeActivitySession() {
             if (Companion::activity.isInitialized) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    if(activity.isInPictureInPictureMode){
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                            reversePictureInPictureMode()
-                        }
-                    }
-                }
                 activity.finish()
                 activity.overridePendingTransition(R.anim.no_animation,R.anim.slide_in_bottom)
             }
         }
     }
 
-
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_paint)
-        activity = this
-        coroutineCallPaintActivity.async {
-            try {
-                val metrics = DisplayMetrics()
-                windowManager.defaultDisplay.getMetrics(metrics)
-                paintView.init(metrics)
-                screenShot = convertBitmapToDrawable()
-                paintView.background = screenShot
-//        paintView.setBackgroundResource(R.drawable.screenshot_1586760803)
-                if (Build.VERSION.SDK_INT >= 23) {
-                    window.navigationBarColor = resources.getColor(R.color.black, theme)
-                    window.statusBarColor = resources.getColor(R.color.black, theme)
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        window.navigationBarColor = resources.getColor(R.color.black)
-                        window.statusBarColor = resources.getColor(R.color.black)
-                    }
-                }
-                window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-//                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-//                        or View.SYSTEM_UI_FLAG_FULLSCREEN
-                        //or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        )
-
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                LoggerBird.callEnqueue()
-                LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
-            }
-        }
-    }
-
+    /**
+     * This method converts bitmap to drawable.
+     * @return BitmapDrawable is for obtaining Bitmap value of drawable
+     */
     private fun convertBitmapToDrawable(): Drawable {
         return BitmapDrawable(resources, LoggerBirdService.screenshotBitmap)
     }
 
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    override fun onStart() {
-        super.onStart()
-        try {
-            LoggerBirdService.floatingActionButtonView.visibility = View.GONE
-            setButtonDefaultMargins()
-            buttonClicks()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
-        }
-    }
-
+    /**
+     * This method is used for defining margins of floating action button in Paint Activity..
+     */
     private fun setButtonDefaultMargins() {
         (paint_floating_action_button.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
             0,
@@ -172,6 +119,9 @@ class PaintActivity : Activity() {
         )
     }
 
+    /**
+     * This method is used for defining button click methods.
+     */
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicks() {
@@ -221,24 +171,20 @@ class PaintActivity : Activity() {
                 paintView.enableEraser()
                 paintView.clear()
             }
-
         }
     }
 
+    /**
+     * This method creates custom snackbar for showing a dialog to user whether delete drawing.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun showDeleteSnackBar() {
         try {
-            val objLayoutParams: LinearLayout.LayoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            val snackBarDelete = Snackbar.make(
-                this.findViewById(android.R.id.content),
-                R.string.snackbar_delete,
-                Snackbar.LENGTH_INDEFINITE
-            )
+            val objLayoutParams: LinearLayout.LayoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            val snackBarDelete = Snackbar.make(this.findViewById(android.R.id.content), R.string.snackbar_delete, Snackbar.LENGTH_INDEFINITE)
             val layout: Snackbar.SnackbarLayout = snackBarDelete.view as Snackbar.SnackbarLayout
-            val parentParams: FrameLayout.LayoutParams =
-                layout.layoutParams as FrameLayout.LayoutParams
+            val parentParams: FrameLayout.LayoutParams = layout.layoutParams as FrameLayout.LayoutParams
             parentParams.setMargins(0, 0, 0, -50)
             layout.layoutParams = parentParams
             layout.setPadding(0, 0, 0, -50)
@@ -251,20 +197,14 @@ class PaintActivity : Activity() {
             val textViewYes: TextView = snackView.findViewById(R.id.snackbar_yes)
             textViewYes.text = resources.getString(R.string.snackbar_yes)
             textViewYes.setSafeOnClickListener {
-
                 val snackbarYes: Snackbar = Snackbar.make(it, resources.getString(R.string.snackbar_delete_success), Snackbar.LENGTH_SHORT)
-                snackbarYes.setAction(resources.getString(R.string.snackbar_dismiss)) {
-                    snackbarYes.dismiss()
-                }.show()
-
-
+                snackbarYes.setAction(resources.getString(R.string.snackbar_dismiss)) { snackbarYes.dismiss() }.show()
                 paintView.clearAllPaths()
                 if (paintView.eraserEnabled) {
                     paintView.disableEraser()
                     paintView.eraserEnabled = false
                     paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
                 }
-
             }
 
             val textViewNo: TextView = snackView.findViewById(R.id.snackbar_no)
@@ -286,6 +226,9 @@ class PaintActivity : Activity() {
         }
     }
 
+    /**
+     * This method is used for blocking consecutive clicks in order to prevent spam.
+     */
     @SuppressLint("CheckResult")
     fun View.setSafeOnClickListener(onClick: (View) -> Unit) {
         RxView.clicks(this).throttleFirst(2000, TimeUnit.MILLISECONDS).subscribe {
@@ -293,6 +236,10 @@ class PaintActivity : Activity() {
         }
     }
 
+    /**
+     * This method is used for requesting permission to save drawing into local storage of device.
+     * @return permission granted or deny
+     */
     private fun requestPermission(): Boolean {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED
@@ -305,6 +252,11 @@ class PaintActivity : Activity() {
         return true
     }
 
+    /**
+     * This method is used for changing brush color in order to draw with different colors.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun showColorChooseDialog() {
         try {
             val colorPickerDialog =
@@ -315,8 +267,7 @@ class PaintActivity : Activity() {
                 }
             val inflater = LayoutInflater.from(this@PaintActivity)
             val rootView: ViewGroup = window.decorView.findViewById(android.R.id.content)
-            val paintSeekView =
-                inflater.inflate(R.layout.activity_paint_seek_view_color, rootView, false)
+            val paintSeekView = inflater.inflate(R.layout.activity_paint_seek_view_color, rootView, false)
             val colorSeekBar = paintSeekView.color_seek_bar
             var selectedColor = 0
 
@@ -351,6 +302,11 @@ class PaintActivity : Activity() {
         }
     }
 
+    /**
+     * This method is used for changing width of brush in order to draw thicker or thinner.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     private fun showBrushWidthSetterDialog() {
         try {
             val lineWidthDialog =
@@ -406,6 +362,11 @@ class PaintActivity : Activity() {
         }
     }
 
+    /**
+     * This method is used for saving drawing of user to share third party tools.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun showFileSavingDialog() {
         try {
@@ -417,16 +378,13 @@ class PaintActivity : Activity() {
             saveDialog.setPositiveButton(resources.getText(R.string.snackbar_ok)) { _, _ ->
                 fileName = saveView.paint_save_issue.text.toString()
                 paintView.saveImage(fileName)
-                val snackBarFileSaving: Snackbar =
-                    Snackbar.make(paintView, "Successfully saved!", Snackbar.LENGTH_SHORT)
+                val snackBarFileSaving: Snackbar = Snackbar.make(paintView, "Successfully saved!", Snackbar.LENGTH_SHORT)
                 snackBarFileSaving.setAction("Dismiss") {
                     snackBarFileSaving.dismiss()
                 }.show()
                 Toast.makeText(activity,  resources.getText(R.string.snackbar_successfully_saved), Toast.LENGTH_SHORT).show()
-                //fabScreenshotAnimation()
                 finish()
                 overridePendingTransition(R.anim.no_animation,R.anim.slide_in_bottom)
-
                 if(pipModeChange){
                     Toast.makeText(activity,  resources.getText(R.string.snackbar_successfully_saved), Toast.LENGTH_SHORT).show()
                     finish()
@@ -444,11 +402,9 @@ class PaintActivity : Activity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
-    }
-
+    /**
+     * This method controls all animation and image changes on floating action button and its child buttons of Paint Activity.
+     */
     private fun animationVisibility() {
         if (!controlButtonVisibility) {
             controlButtonVisibility = true
@@ -507,6 +463,11 @@ class PaintActivity : Activity() {
         }
     }
 
+    /**
+     * This method minimize Paint Activity to picture in picture mode.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun pictureInPictureMode() {
         controlPaintInPictureState = true
@@ -524,17 +485,18 @@ class PaintActivity : Activity() {
         }
     }
 
+    /**
+     * This method controls activity actions and floating action button behavior when user pushes the back button
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onBackPressed() {
         super.onBackPressed()
         LoggerBirdService.floating_action_button.clearAnimation()
-        LoggerBirdService.floating_action_button.backgroundTintList =
-            ColorStateList.valueOf(resources.getColor(R.color.black))
+        LoggerBirdService.floating_action_button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.black))
         Toast.makeText(activity, R.string.drawing_cancelled_message, Toast.LENGTH_SHORT).show()
         overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
         finish()
         fabScreenshotAnimation()
-
         if(pipModeChange){
             Toast.makeText(activity,  R.string.drawing_cancelled_message, Toast.LENGTH_SHORT).show()
             overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
@@ -543,48 +505,62 @@ class PaintActivity : Activity() {
         }
     }
 
+    /**
+     * This method gives animation and changes floating action button image in order to action of user in Paint Activity.
+     * @param isInPictureInPictureMode is for obtaining the determine whether activity is picture in picture mode.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onPictureInPictureModeChanged(
-        isInPictureInPictureMode: Boolean,
-        newConfig: Configuration?
+        isInPictureInPictureMode: Boolean
     ) {
 
-        if (isInPictureInPictureMode) {
-            LoggerBirdService.floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
-            pipModeChange = true
-            paint_floating_action_button.visibility = View.GONE
-            paint_floating_action_button_save.visibility = View.GONE
-            paint_floating_action_button_back.visibility = View.GONE
-            paint_floating_action_button_brush.visibility = View.GONE
-            paint_floating_action_button_delete.visibility = View.GONE
-            paint_floating_action_button_palette.visibility = View.GONE
-            paint_floating_action_button_erase.visibility = View.GONE
-        } else {
-            if (onStopCalled) {
-                val current = System.currentTimeMillis()
-                if ((current - lastTime) > 2500L) {
-                    finish()
-                    lastTime = current
+        try{
+            if (isInPictureInPictureMode) {
+                LoggerBirdService.floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
+                pipModeChange = true
+                paint_floating_action_button.visibility = View.GONE
+                paint_floating_action_button_save.visibility = View.GONE
+                paint_floating_action_button_back.visibility = View.GONE
+                paint_floating_action_button_brush.visibility = View.GONE
+                paint_floating_action_button_delete.visibility = View.GONE
+                paint_floating_action_button_palette.visibility = View.GONE
+                paint_floating_action_button_erase.visibility = View.GONE
+            } else {
+                if (onStopCalled) {
+                    val current = System.currentTimeMillis()
+                    if ((current - lastTime) > 2500L) {
+                        finish()
+                        lastTime = current
 
+                    }
+                    fabScreenshotAnimation()
                 }
-                fabScreenshotAnimation()
+                pipModeChange = true
+                paint_floating_action_button.visibility = View.VISIBLE
+                paint_floating_action_button_save.visibility = View.VISIBLE
+                paint_floating_action_button_back.visibility = View.VISIBLE
+                paint_floating_action_button_brush.visibility = View.VISIBLE
+                paint_floating_action_button_delete.visibility = View.VISIBLE
+                paint_floating_action_button_palette.visibility = View.VISIBLE
+                paint_floating_action_button_erase.visibility = View.VISIBLE
             }
-            pipModeChange = true
-            paint_floating_action_button.visibility = View.VISIBLE
-            paint_floating_action_button_save.visibility = View.VISIBLE
-            paint_floating_action_button_back.visibility = View.VISIBLE
-            paint_floating_action_button_brush.visibility = View.VISIBLE
-            paint_floating_action_button_delete.visibility = View.VISIBLE
-            paint_floating_action_button_palette.visibility = View.VISIBLE
-            paint_floating_action_button_erase.visibility = View.VISIBLE
+        }catch(e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
         }
     }
 
+
+    /**
+     * This method gives animation and changes floating action button image in order to action of user in Paint Activity.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun fabScreenshotAnimation(){
         LoggerBirdService.floating_action_button.clearAnimation()
-        LoggerBirdService.floating_action_button.backgroundTintList =
-            ColorStateList.valueOf(resources.getColor(R.color.black))
+        LoggerBirdService.floating_action_button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.black))
         LoggerBirdService.floating_action_button.animate()
             .rotationBy(360F)
             .setDuration(200)
@@ -602,7 +578,82 @@ class PaintActivity : Activity() {
             .start()
     }
 
+    /**
+     * This method creates custom snackbar for showing a dialog to user whether delete drawing.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
+     * method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_paint)
+        activity = this
+        coroutineCallPaintActivity.async {
+            try {
+                val metrics = DisplayMetrics()
+                windowManager.defaultDisplay.getMetrics(metrics)
+                paintView.init(metrics)
+                screenShot = convertBitmapToDrawable()
+                paintView.background = screenShot
+                if (Build.VERSION.SDK_INT >= 23) {
+                    window.navigationBarColor = resources.getColor(R.color.black, theme)
+                    window.statusBarColor = resources.getColor(R.color.black, theme)
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        window.navigationBarColor = resources.getColor(R.color.black)
+                        window.statusBarColor = resources.getColor(R.color.black)
+                    }
+                }
+                window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
+            }
+        }
+    }
 
+    /**
+     * This method is lifecycle onStart method of Paint Activity.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    override fun onStart() {
+        super.onStart()
+        try {
+            LoggerBirdService.floatingActionButtonView.visibility = View.GONE
+            setButtonDefaultMargins()
+            buttonClicks()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.paintActivityTag)
+        }
+    }
+
+    /**
+     * This method returns onResume state of activity lifecycle of Paint Activity.
+     */
+    override fun onResume() {
+        super.onResume()
+        if(LoggerBirdService.controlFloatingActionButtonView()){
+            LoggerBirdService.floatingActionButtonView.visibility = View.GONE
+        }
+    }
+
+    /**
+     * This method returns onPause state of activity lifecycle of Paint Activity.
+     */
+    override fun onPause() {
+        super.onPause()
+        LoggerBirdService.floatingActionButtonView.visibility = View.VISIBLE
+    }
+
+    /**
+     * This method returns onStop state of activity lifecycle of Paint Activity.
+     */
     override fun onStop() {
         super.onStop()
         onStopCalled = true
@@ -611,17 +662,12 @@ class PaintActivity : Activity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if(LoggerBirdService.controlFloatingActionButtonView()){
-            LoggerBirdService.floatingActionButtonView.visibility = View.GONE
-        }
-    }
-
+    /**
+     * This method returns onDestroy state of activity lifecycle of Paint Activity.
+     */
     override fun onDestroy() {
         super.onDestroy()
         LoggerBirdService.screenshotDrawing = false
         controlPaintInPictureState = false
-//        fabScreenshotAnimation()
     }
 }
