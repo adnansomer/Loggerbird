@@ -84,9 +84,9 @@
     <string name="slack_sent">Slack message sent!</string>
     <string name="slack_sent_error">An error happened while trying to send slack message!</string>
     <string name="slack_sent_error_time_out">An error happened while trying to open slack message , system has been timed out!</string>
-    <string name="unhandled_title">We have detected an error from your last session , do you want to share with jira?</string>
+    <string name="unhandled_title">We have detected an error from your last session , do you want to share this file?</string>
     <string name="unhandled_discard">Discard!</string>
-    <string name="unhandled_share_with_jira">Share with jira:</string>
+    <string name="unhandled_share">Share file</string>
     <string name="unhandled_customize_jira">*Customize and send!</string>
     <string name="unhandled_send">*Send!</string>
     <string name="unhandled_file_doesnt_exist">File path doesn\'t exist!</string>
@@ -179,7 +179,6 @@
     <string name="clubhouse_issue_success">Clubhouse Story opened successfully!</string>
     <string name="clubhouse_issue_failure">An error happened while trying to open Clubhouse Story!</string>
     <string name="clubhouse_issue_time_out">An error happened while trying to open Clubhouse Story , system has been timed out!</string>
-
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>

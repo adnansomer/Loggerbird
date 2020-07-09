@@ -1861,9 +1861,6 @@ internal class JiraApi {
         queueCreateTask--
         if (queueCreateTask == 0) {
             LoggerBirdService.loggerBirdService.finishShareLayout("jira")
-            if (LoggerBirdService.loggerBirdService.checkUnhandledFilePath()) {
-                LoggerBirdService.loggerBirdService.unhandledExceptionCustomizeJiraIssueSent()
-            }
             timerTaskQueue.cancel()
             summary = ""
             project = null

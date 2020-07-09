@@ -745,20 +745,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 if (runnableListEmail.size > 0) {
                     workQueueLinkedEmail.put(runnableListEmail[0])
                 } else {
-                    loggerBirdService.detachProgressBar()
-                    loggerBirdService.removeEmailLayout()
-                    loggerBirdService.defaultToast.attachToast(
-                        activity = loggerBirdService.returnActivity(),
-                        toastMessage = loggerBirdService.context.resources.getString(R.string.email_send_success)
-                    )
+                    loggerBirdService.finishShareLayout("single_email")
                 }
             } else {
-                loggerBirdService.detachProgressBar()
-                loggerBirdService.removeEmailLayout()
-                loggerBirdService.defaultToast.attachToast(
-                    activity = loggerBirdService.returnActivity(),
-                    toastMessage = loggerBirdService.context.resources.getString(R.string.email_send_success)
-                )
+                loggerBirdService.finishShareLayout("single_email")
             }
         }
 
@@ -1248,7 +1238,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (floating_action_button_screenshot.visibility == View.VISIBLE) {
                 if (!PaintActivity.controlPaintInPictureState) {
                     if (!audioRecording && !videoRecording) {
-
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
                     } else {
                         Toast.makeText(context, R.string.media_recording_error, Toast.LENGTH_SHORT)
@@ -2535,7 +2524,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         } catch (e: Exception) {
             e.printStackTrace()
             activity.runOnUiThread {
-                textView_counter_video.performClick()
+                textView_counter_audio.performClick()
             }
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(
@@ -2761,12 +2750,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun discardMediaFile() {
         coroutineCallDiscardFile.async {
             try {
-                if (controlMedialFile()) {
-                    finishShareLayout(message = "media")
-                } else {
-                    finishShareLayout(message = "media_error")
+                if(checkUnhandledFilePath()){
+                    finishShareLayout("unhandled")
+                }else{
+                    if (controlMedialFile()) {
+                        finishShareLayout(message = "media")
+                    } else {
+                        finishShareLayout(message = "media_error")
+                    }
                 }
-
             } catch (e: Exception) {
                 e.printStackTrace()
                 finishShareLayout(message = "media_error")
@@ -2834,9 +2826,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     //detachProgressBar()
                 }
                 "single_email" -> {
+                    detachProgressBar()
+                    removeEmailLayout()
                     Toast.makeText(context, R.string.share_file_sent, Toast.LENGTH_SHORT).show()
                     finishSuccessFab()
-                    detachProgressBar()
                 }
                 "single_email_error" -> {
                     Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT)
@@ -3031,6 +3024,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     Toast.makeText(context, R.string.clubhouse_issue_time_out, Toast.LENGTH_SHORT)
                         .show()
                 }
+                "unhandled" ->{
+                    Toast.makeText(context, R.string.unhandled_file_discard_success, Toast.LENGTH_SHORT)
+                        .show()
+                    finishSuccessFab()
+                }
 
             }
             if (controlFloatingActionButtonView()) {
@@ -3045,6 +3043,26 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun finishSuccessFab() {
         if (controlRevealShareLayout() && controlFloatingActionButtonView()) {
+            if(checkUnhandledFilePath()){
+                val sharedPref =
+                    PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                if (sharedPref.getString("unhandled_file_path", null) != null) {
+                    val filepath = File(sharedPref.getString("unhandled_file_path", null)!!)
+                    if (filepath.exists()) {
+                        filepath.delete()
+                    } else {
+                        activity.runOnUiThread {
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = activity.resources.getString(R.string.unhandled_file_doesnt_exist)
+                            )
+                        }
+                    }
+                }
+                val editor: SharedPreferences.Editor = sharedPref.edit()
+                editor.remove("unhandled_file_path")
+                editor.apply()
+            }
             revealLinearLayoutShare.visibility = View.GONE
             Handler().postDelayed({
                 floating_action_button.animate()
@@ -3443,7 +3461,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     jiraAuthentication.callJira(
                         context = context,
                         activity = activity,
-                        Task = "get",
+                        task = "get",
                         createMethod = "normal"
                     )
 
@@ -3870,7 +3888,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListJiraFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+        if (LoggerBird.filePathSecessionName.exists()) {
             arrayListJiraFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
         return arrayListJiraFileName
@@ -4998,12 +5016,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 .setCustomViewInitializer {
                     val textViewDiscard =
                         it.findViewById<TextView>(R.id.textView_unhandled_discard)
-                    val textViewShareWithJira =
-                        it.findViewById<TextView>(R.id.textView_unhandled_share_jira)
-                    val textViewCustomizeJira =
-                        it.findViewById<TextView>(R.id.textView_unhandled_jira_customize)
+                    val textViewShare =
+                        it.findViewById<TextView>(R.id.textView_unhandled_share_title)
+//                    val textViewCustomizeJira =
+//                        it.findViewById<TextView>(R.id.textView_unhandled_jira_customize)
                     val checkBoxDuplication =
-                        it.findViewById<CheckBox>(R.id.checkBox_unhandled_jira)
+                        it.findViewById<CheckBox>(R.id.checkBox_unhandled)
                     if (sharedPref.getBoolean("duplication_enabled", false)) {
                         checkBoxDuplication.isChecked = true
                     }
@@ -5041,45 +5059,40 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         )
                         CookieBar.dismiss(activity)
                     }
-                    textViewShareWithJira.setSafeOnClickListener {
-                        if (checkBoxDuplication.isChecked) {
-                            attachProgressBar()
-                            jiraAuthentication.callJira(
-                                filePathMedia = filePath,
-                                context = context,
-                                activity = activity,
-                                task = "unhandled_duplication",
-                                createMethod = "default"
-                            )
-                        } else {
-                            createDefaultUnhandledJiraIssue(filePath = filePath)
-                        }
+                    textViewShare.setSafeOnClickListener {
+                        initializeFloatingActionButton(activity = this.activity)
+                        shareView(filePathMedia = filePath)
+//                        if (checkBoxDuplication.isChecked) {
+//                            attachProgressBar()
+//                            jiraAuthentication.callJira(
+//                                filePathMedia = filePath,
+//                                context = context,
+//                                activity = activity,
+//                                task = "unhandled_duplication",
+//                                createMethod = "default"
+//                            )
+//                        } else {
+//                            createDefaultUnhandledJiraIssue(filePath = filePath)
+//                        }
                     }
-                    textViewCustomizeJira.setSafeOnClickListener {
-                        if (checkBoxDuplication.isChecked) {
-                            attachProgressBar()
-                            jiraAuthentication.callJira(
-                                filePathMedia = filePath,
-                                context = context,
-                                activity = activity,
-                                task = "unhandled_duplication",
-                                createMethod = "customize"
-                            )
-                        } else {
-                            createCustomizedUnhandledJiraIssue(filePath = filePath)
-                        }
-                    }
+//                    textViewCustomizeJira.setSafeOnClickListener {
+//                        if (checkBoxDuplication.isChecked) {
+//                            attachProgressBar()
+//                            jiraAuthentication.callJira(
+//                                filePathMedia = filePath,
+//                                context = context,
+//                                activity = activity,
+//                                task = "unhandled_duplication",
+//                                createMethod = "customize"
+//                            )
+//                        } else {
+//                            createCustomizedUnhandledJiraIssue(filePath = filePath)
+//                        }
+//                    }
                 }.setSwipeToDismiss(false)
                 .setEnableAutoDismiss(false)
                 .show()
 
-
-//            jiraAuthentication.callJiraIssue(
-//                context = context,
-//                activity = activity,
-//                jiraTask = "duplicate_file",
-//                createMethod = "duplicate_file"
-//            )
         } catch (e: Exception) {
             detachProgressBar()
             e.printStackTrace()
@@ -5634,7 +5647,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListEmailFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+        if (LoggerBird.filePathSecessionName.exists()) {
             arrayListEmailFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
         return arrayListEmailFileName
@@ -6325,7 +6338,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListGithubFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+        if (LoggerBird.filePathSecessionName.exists()) {
             arrayListGithubFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
         return arrayListGithubFileName
@@ -7259,7 +7272,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListTrelloFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+        if (LoggerBird.filePathSecessionName.exists()) {
             arrayListTrelloFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
         return arrayListTrelloFileName
@@ -8043,7 +8056,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListGitlabFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+        if (LoggerBird.filePathSecessionName.exists()) {
             arrayListGitlabFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
         return arrayListGitlabFileName
@@ -8793,7 +8806,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListPivotalFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+        if (LoggerBird.filePathSecessionName.exists()) {
             arrayListPivotalFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
         return arrayListPivotalFileName
@@ -9510,7 +9523,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListBasecampFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+        if (LoggerBird.filePathSecessionName.exists()) {
             arrayListBasecampFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
         return arrayListBasecampFileName
@@ -9940,7 +9953,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListAsanaFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+        if (LoggerBird.filePathSecessionName.exists()) {
             arrayListAsanaFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
         return arrayListAsanaFileName
@@ -10842,7 +10855,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListClubhouseFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if (!checkUnhandledFilePath() && LoggerBird.filePathSecessionName.exists()) {
+        if (LoggerBird.filePathSecessionName.exists()) {
             arrayListClubhouseFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
         return arrayListClubhouseFileName

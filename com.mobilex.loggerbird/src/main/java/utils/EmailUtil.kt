@@ -502,17 +502,6 @@ internal class EmailUtil {
 //                            }
 //                        }
 
-                        } else {
-                            coroutineCallMain.launch {
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(
-                                        context,
-                                        R.string.email_send_failure,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-
                         }
                         if (progressBar != null) {
                             coroutineCallMain.launch {
@@ -544,18 +533,14 @@ internal class EmailUtil {
                             context.stopService(Intent(context, LoggerBirdFutureTaskService::class.java))
                         }
                     }
+                    LoggerBirdService.loggerBirdService.finishShareLayout("single_email")
                     transport.close()
                 }
             } catch (e: Exception) {
                 if (activity != null) {
                     activity.runOnUiThread {
                         defaultConnectionQueueUtil.cancelTimer()
-                        LoggerBirdService.loggerBirdService.detachProgressBar()
-                        LoggerBirdService.loggerBirdService.removeEmailLayout()
-                        defaultToast.attachToast(
-                            activity = activity,
-                            toastMessage = activity.resources.getString(R.string.email_send_failure)
-                        )
+                        LoggerBirdService.loggerBirdService.finishShareLayout("single_email_error")
                     }
                 } else {
                     val coroutineCallMain = CoroutineScope(Dispatchers.Main)
