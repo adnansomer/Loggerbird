@@ -21,4 +21,5 @@
     <color name="green">#2ECC71 </color>
     <color name="yellow">#F7DC6F</color>
     <color name="purple">#8E44AD</color>
+    <color name="paintEraseColor">#7F0000</color>
 </resources>

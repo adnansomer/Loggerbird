@@ -21,6 +21,7 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.divyanshu.colorseekbar.ColorSeekBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding2.view.RxView
@@ -58,7 +59,7 @@ internal class PaintActivity : Activity() {
         internal fun closeActivitySession() {
             if (Companion::activity.isInitialized) {
                 activity.finish()
-                activity.overridePendingTransition(R.anim.no_animation,R.anim.slide_in_bottom)
+//                activity.overridePendingTransition(R.anim.no_animation,R.anim.slide_in_bottom)
             }
         }
     }
@@ -125,6 +126,8 @@ internal class PaintActivity : Activity() {
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicks() {
+        paint_floating_action_button.imageTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(this@PaintActivity, R.color.white))
         paint_floating_action_button.setOnTouchListener(
             FloatingActionButtonPaintOnTouchListener(
                 floatingActionButtonPaint = paint_floating_action_button,
@@ -165,9 +168,13 @@ internal class PaintActivity : Activity() {
         paint_floating_action_button_erase.setOnClickListener {
             if (paintView.eraserEnabled) {
                 paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_black_24dp)
+                paint_floating_action_button_erase.imageTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(this@PaintActivity, R.color.black))
                 paintView.disableEraser()
             } else {
                 paint_floating_action_button_erase.setImageResource(R.drawable.ic_backspace_red_24dp)
+                paint_floating_action_button_erase.imageTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(this@PaintActivity, R.color.secondaryColor))
                 paintView.enableEraser()
                 paintView.clear()
             }
@@ -384,11 +391,11 @@ internal class PaintActivity : Activity() {
                 }.show()
                 Toast.makeText(activity,  resources.getText(R.string.snackbar_successfully_saved), Toast.LENGTH_SHORT).show()
                 finish()
-                overridePendingTransition(R.anim.no_animation,R.anim.slide_in_bottom)
+//                overridePendingTransition(R.anim.no_animation,R.anim.slide_in_bottom)
                 if(pipModeChange){
                     Toast.makeText(activity,  resources.getText(R.string.snackbar_successfully_saved), Toast.LENGTH_SHORT).show()
                     finish()
-                    overridePendingTransition(R.anim.slide_in_bottom,R.anim.no_animation)
+//                    overridePendingTransition(R.anim.slide_in_bottom,R.anim.no_animation)
                 }
             }
             saveDialog.setNegativeButton(
@@ -494,12 +501,12 @@ internal class PaintActivity : Activity() {
         LoggerBirdService.floating_action_button.clearAnimation()
         LoggerBirdService.floating_action_button.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.black))
         Toast.makeText(activity, R.string.drawing_cancelled_message, Toast.LENGTH_SHORT).show()
-        overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
+//        overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
         finish()
         fabScreenshotAnimation()
         if(pipModeChange){
             Toast.makeText(activity,  R.string.drawing_cancelled_message, Toast.LENGTH_SHORT).show()
-            overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
+//            overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right)
             finish()
             fabScreenshotAnimation()
         }

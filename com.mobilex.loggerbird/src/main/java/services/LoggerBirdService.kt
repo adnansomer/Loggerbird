@@ -1720,10 +1720,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                     )
                                 )
                             context.startActivity(screenshotIntent)
-                            context.overridePendingTransition(
-                                R.anim.slide_in_right,
-                                R.anim.slide_out_left
-                            )
+//                            context.overridePendingTransition(
+//                                R.anim.slide_in_right,
+//                                R.anim.slide_out_left
+//                            )
 
                         }
 
@@ -3119,14 +3119,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     val filepath = File(sharedPref.getString("unhandled_file_path", null)!!)
                     if (filepath.exists()) {
                         filepath.delete()
-                    } else {
-                        activity.runOnUiThread {
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = activity.resources.getString(R.string.unhandled_file_doesnt_exist)
-                            )
-                        }
                     }
+//                    else {
+//                        activity.runOnUiThread {
+//                            defaultToast.attachToast(
+//                                activity = activity,
+//                                toastMessage = activity.resources.getString(R.string.unhandled_file_doesnt_exist)
+//                            )
+//                        }
+//                    }
                 }
                 val editor: SharedPreferences.Editor = sharedPref.edit()
                 editor.remove("unhandled_file_path")
@@ -5215,14 +5216,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val filepath = File(sharedPref.getString("unhandled_file_path", null)!!)
             if (filepath.exists()) {
                 return true
-            } else {
-                activity.runOnUiThread {
-                    defaultToast.attachToast(
-                        activity = activity,
-                        toastMessage = activity.resources.getString(R.string.unhandled_file_doesnt_exist)
-                    )
-                }
             }
+//            else {
+//                activity.runOnUiThread {
+//                    defaultToast.attachToast(
+//                        activity = activity,
+//                        toastMessage = activity.resources.getString(R.string.unhandled_file_doesnt_exist)
+//                    )
+//                }
+//            }
             return false
         }
         return false
