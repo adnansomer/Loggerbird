@@ -21,10 +21,6 @@ internal class LogRecyclerViewAdapterDataObserver() : RecyclerView.AdapterDataOb
 
     /**
      * This Method Called When RecyclerView Observer Detect's An  OnChanged  State In The Current RecyclerView.
-     * Variables:
-     * @var currentRecyclerViewAdapterDataObserverState states takes current state as a String in the recyclerView observer.
-     * @var stringBuilderRecyclerViewAdapterDataObserverState used for printing recyclerView observer detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
@@ -47,13 +43,8 @@ internal class LogRecyclerViewAdapterDataObserver() : RecyclerView.AdapterDataOb
 
     /**
      * This Method Called When RecyclerView Observer Detect's An  OnItemRemoved  State In The Current RecyclerView.
-     * Parameters:
      * @param positionStart takes removed item's start positions in recyclerView.
      * @param itemCount takes new item count after an item removed from recyclerView.
-     * Variables:
-     * @var currentRecyclerViewAdapterDataObserverState states takes current state as a String in the recyclerView observer.
-     * @var stringBuilderRecyclerViewAdapterDataObserverState used for printing recyclerView observer detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
@@ -79,14 +70,9 @@ internal class LogRecyclerViewAdapterDataObserver() : RecyclerView.AdapterDataOb
 
     /**
      * This Method Called When RecyclerView Observer Detect's An  OnItemRangeMoved  State In The Current RecyclerView.
-     * Parameters:
      * @param fromPosition takes original item's start positions in recyclerView.
      * @param toPosition takes new position of item after move transaction completed in recyclerView.
      * @param itemCount takes new item count after an item moved in recyclerView.
-     * Variables:
-     * @var currentRecyclerViewAdapterDataObserverState states takes current state as a String in the recyclerView observer.
-     * @var stringBuilderRecyclerViewAdapterDataObserverState used for printing recyclerView observer detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
@@ -112,13 +98,8 @@ internal class LogRecyclerViewAdapterDataObserver() : RecyclerView.AdapterDataOb
 
     /**
      * This Method Called When RecyclerView Observer Detect's An  OnItemRangeInserted  State In The Current RecyclerView.
-     * Parameters:
      * @param positionStart takes inserted item's start positions in recyclerView.
      * @param itemCount takes new item count after an item inserted to recyclerView.
-     * Variables:
-     * @var currentRecyclerViewAdapterDataObserverState states takes current state as a String in the recyclerView observer.
-     * @var stringBuilderRecyclerViewAdapterDataObserverState used for printing recyclerView observer detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
@@ -144,13 +125,8 @@ internal class LogRecyclerViewAdapterDataObserver() : RecyclerView.AdapterDataOb
 
     /**
      * This Method Called When RecyclerView Observer Detect's An  OnItemRangeChanged  State In The Current RecyclerView.
-     * Parameters:
      * @param positionStart takes changed item's start positions in recyclerView.
      * @param itemCount takes new item count after an item range changed in recyclerView.
-     * Variables:
-     * @var currentRecyclerViewAdapterDataObserverState states takes current state as a String in the recyclerView observer.
-     * @var stringBuilderRecyclerViewAdapterDataObserverState used for printing recyclerView observer detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
@@ -175,14 +151,9 @@ internal class LogRecyclerViewAdapterDataObserver() : RecyclerView.AdapterDataOb
 
     /**
      * This Method Called When RecyclerView Observer Detect's An  OnItemRangeChanged  State In The Current RecyclerView.
-     * Parameters:
      * @param positionStart takes changed item's start positions in recyclerView.
      * @param itemCount takes new item count after an item range changed in recyclerView.
      * @param payload takes list of item's in the recyclerView.
-     * Variables:
-     * @var currentRecyclerViewAdapterDataObserverState states takes current state as a String in the recyclerView observer.
-     * @var stringBuilderRecyclerViewAdapterDataObserverState used for printing recyclerView observer detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
@@ -209,8 +180,6 @@ internal class LogRecyclerViewAdapterDataObserver() : RecyclerView.AdapterDataOb
 
     /**
      * This Method Is Used For Getting RecyclerViewList.
-     * Variables:
-     * @var recyclerViewList print's recyclerViews that called in onItemRangeChanged method.
      * @return ArrayList<String>.
      */
     internal fun recyclerViewList(): ArrayList<Any?> {
@@ -219,8 +188,6 @@ internal class LogRecyclerViewAdapterDataObserver() : RecyclerView.AdapterDataOb
 
     /**
      * This Method Is Used For Printing Observer Outcome.
-     * Variables:
-     * @var stringBuilderRecyclerViewAdapterDataObserver will print recyclerView AdapterData state detail's.
      * @return String value.
      */
     internal fun returnRecyclerViewState(): String {

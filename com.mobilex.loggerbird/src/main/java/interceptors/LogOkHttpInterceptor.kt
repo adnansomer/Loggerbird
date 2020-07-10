@@ -7,15 +7,9 @@ import java.util.concurrent.TimeUnit
 
 /**
  * This interceptor class is used for getting actual time between sending request and received response.
- * Variables:
- * @var requestTime obtains the system time after doing request.
- * @var responseTime obtains the system time after getting response to calculate actual time between request.
- * @var request gets interceptor request.
- * @var response gets interceptor response returned from server.
- * @var stringBuilderInterceptor used for printing the details.
  * @return response of request
  */
-internal class LogOkHttpInterceptor() : Interceptor {
+internal class LogOkHttpInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val response = chain.proceed(request)
@@ -43,10 +37,6 @@ internal class LogOkHttpInterceptor() : Interceptor {
 
 /**
  * This interceptor class is used for catching response errors and gives message of corresponding error code.
- * Variables:
- * @var request gets interceptor request.
- * @var response gets interceptor response returned from server.
- * @var stringBuilderInterceptor used for printing the details.
  * @return response of request
  */
 internal class LogOkHttpErrorInterceptor : Interceptor {
@@ -107,10 +97,6 @@ internal class LogOkHttpErrorInterceptor : Interceptor {
  * This interceptor is required when if the Cache-Control is not enabled from the server case.With using this interceptor,
  * we still can cache the response from OkHttp Client using Interceptor.In this case we are using addNetworkInterceptor function,
  * This is because in this case, the operation is happening at the network layer.
- * Variables:
- * @var request gets interceptor request.
- * @var response gets interceptor response returned from server.
- * @var stringBuilderInterceptor used for printing the details.
  * @return response of cache interceptor
  */
 internal class LogOkHttpCacheInterceptor : Interceptor {
@@ -131,9 +117,6 @@ internal class LogOkHttpCacheInterceptor : Interceptor {
 
 /**
  * This interceptor class is used to intercept the actual request and to supply your API key in REST API calls with a custom header.
- * Variables:
- * @var originalRequest is a variable that is created request with using interceptor chain.
- * @var request returns a built request with having header name and value to intercept request and token.
  * @return response of chain
  */
 internal class LogOkHttpAuthenticationInterceptor : Interceptor {

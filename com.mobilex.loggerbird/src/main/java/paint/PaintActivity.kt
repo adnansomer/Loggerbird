@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit
 /**
  * This class is used for defining Paint Activity life-cycle and its methods.
  */
-class PaintActivity : Activity() {
+internal class PaintActivity : Activity() {
     private val REQUEST_WRITE_EXTERNAL = 1
     private lateinit var screenShot: Drawable
     private val coroutineCallPaintActivity: CoroutineScope = CoroutineScope(Dispatchers.IO)

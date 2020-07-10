@@ -24,8 +24,6 @@ internal class UnhandledExceptionObserver : Thread.UncaughtExceptionHandler {
     private val arrayListPackages :ArrayList<String> = ArrayList()
     /**
      * This Method Is Triggered When An Unhandled Exception Occurs And Execute callExceptionDetails Method For Saving Unhandled Exception Details.
-     * Variables:
-     * @var LoggerBird.uncaughtExceptionHandlerController is used for determining that there is an unhandled exception for callExceptionDetails method.
      */
     override fun uncaughtException(t: Thread, e: Throwable) {
         if(e.cause != null){

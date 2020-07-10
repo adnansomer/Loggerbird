@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-//LogLifeCycleObserver class is used for attaching lifecycle observer for your current activity.
+//This class is unused because of there is already fragment and activity life cycle listeners.Although there might be certain cases that this class might be useful.
 internal class LogLifeCycleObserver() :
     LifecycleObserver {
     //Global variables.
@@ -33,10 +33,7 @@ internal class LogLifeCycleObserver() :
 
     /**
      * This Method Register A LifeCycle Observer For The Current Activity.
-     * Parameters:
      * @param context is for getting reference from the application context , you must deploy this parameter.
-     * Variables:
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     fun registerLifeCycle(context: Context) {
@@ -57,8 +54,6 @@ internal class LogLifeCycleObserver() :
 
     /**
      * This Method DeRegister A LifeCycle Observer From The Current Activity.
-     * Variables:
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     fun deRegisterLifeCycle() {
@@ -76,11 +71,6 @@ internal class LogLifeCycleObserver() :
 
     /**
      * This Method Called When LifeCycle Observer Detect's OnCreate State In The Current Activity.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var classList will take list of activities.
-     * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
@@ -113,11 +103,6 @@ internal class LogLifeCycleObserver() :
 
     /**
      * This Method Called When LifeCycle Observer Detect's OnStart State In The Current Activity Or Fragment.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var classList will take list of activities.
-     * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
@@ -141,11 +126,6 @@ internal class LogLifeCycleObserver() :
 
     /**
      * This Method Called When LifeCycle Observer Detect's OnResume State In The Current Activity Or Fragment.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var classList will take list of activities.
-     * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
 
@@ -169,11 +149,6 @@ internal class LogLifeCycleObserver() :
 
     /**
      * This Method Called When LifeCycle Observer Detect's OnPause State In The Current Activity Or Fragment.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var classList will take list of activities.
-     * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -197,11 +172,6 @@ internal class LogLifeCycleObserver() :
 
     /**
      * This Method Called When LifeCycle Observer Detect's OnDestroy State In The Current Activity Or Fragment.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var classList will take list of activities.
-     * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -224,11 +194,6 @@ internal class LogLifeCycleObserver() :
 
     /**
      * This Method Called When LifeCycle Observer Detect's OnDestroy State In The Current Activity Or Fragment.
-     * Variables:
-     * @var currentLifeCycle states takes current state as a String in the life cycle.
-     * @var classList will take list of activities.
-     * @var stringBuilderLifeCycleObserver used for printing fragment detail's.
-     * Exceptions:
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -252,8 +217,6 @@ internal class LogLifeCycleObserver() :
 
     /**
      * This Method Is Used For Printing Observer Outcome.
-     * Variables:
-     * @var stringBuilderLifeCycleObserver will print activity details.
      * @return String value.
      */
     internal fun returnActivityLifeCycleState(): String {
@@ -269,8 +232,6 @@ internal class LogLifeCycleObserver() :
 
     /**
      * This Method Is Used For Getting Activity List.
-     * Variables:
-     * @var classList takes list of activities that are called with this observer.
      * @return ArrayList<String>.
      */
     internal fun returnClassList(): ArrayList<String> {

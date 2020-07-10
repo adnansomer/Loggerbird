@@ -287,10 +287,11 @@ class MainActivity : AppCompatActivity() {
 //            LoggerBird.takeLifeCycleDetails()
 
 
-            startActivity(Intent(this@MainActivity, Main3Activity::class.java))
+            startActivity(Intent(this@MainActivity, Main2Activity::class.java))
         })
 
         button_performance.setOnClickListener {
+            LoggerBird.callLifeCycleDetails()
 
             //            LoggerBird.takeDeviceInformationDetails()
 //            LoggerBird.takeDevicePerformanceDetails()

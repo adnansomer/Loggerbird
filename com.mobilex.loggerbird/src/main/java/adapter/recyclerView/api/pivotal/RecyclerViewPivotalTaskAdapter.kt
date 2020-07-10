@@ -30,7 +30,7 @@ import services.LoggerBirdService
  * @param activity is for getting reference of current activity in the application.
  * @param rootView is for getting reference of the view that is in the root of current activity.
  */
-class RecyclerViewPivotalTaskAdapter(
+internal class RecyclerViewPivotalTaskAdapter(
     private val taskList: ArrayList<RecyclerViewModelTask>,
     private val context: Context,
     private val activity: Activity,

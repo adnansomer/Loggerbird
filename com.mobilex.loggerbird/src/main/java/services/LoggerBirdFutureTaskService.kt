@@ -16,8 +16,8 @@ import com.mobilex.loggerbird.R
 import constants.Constants
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
-import utils.EmailUtil
-import utils.LinkedBlockingQueueUtil
+import utils.email.EmailUtil
+import utils.other.LinkedBlockingQueueUtil
 import java.io.File
 import java.lang.Runnable
 import java.util.*
@@ -26,14 +26,15 @@ import kotlin.collections.ArrayList
 /**
  * This class is a service for handling future task operations.
  */
-class LoggerBirdFutureTaskService : Service() {
+internal class LoggerBirdFutureTaskService : Service() {
     private lateinit var timerTask: TimerTask
     private val timer = Timer()
 
     internal companion object {
         private val NOTIFICATION_CHANNEL_ID = "LoggerBirdForegroundFutureService"
         internal var runnableListEmail: ArrayList<Runnable> = ArrayList()
-        private var workQueueLinkedEmail: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
+        private var workQueueLinkedEmail: LinkedBlockingQueueUtil =
+            LinkedBlockingQueueUtil()
         private val coroutineCallFutureTask = CoroutineScope(Dispatchers.IO)
         internal fun callEnqueueEmail() {
             workQueueLinkedEmail.controlRunnable = false

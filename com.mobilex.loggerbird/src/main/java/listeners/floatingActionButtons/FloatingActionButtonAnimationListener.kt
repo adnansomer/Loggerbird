@@ -5,7 +5,7 @@ import android.view.animation.Animation
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 //Dummy class might be useful in future.
-class FloatingActionButtonAnimationListener(
+internal class FloatingActionButtonAnimationListener(
     private val floatingActionButtonAudio: FloatingActionButton,
     private val context: Context
 ) : Animation.AnimationListener {

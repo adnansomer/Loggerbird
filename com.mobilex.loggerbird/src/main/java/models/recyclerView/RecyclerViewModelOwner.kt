@@ -3,5 +3,5 @@ package models.recyclerView
 /**
  * This class is a model for Recycler View
  */
-data class RecyclerViewModelOwner(var ownerName:String) {
+internal data class RecyclerViewModelOwner(var ownerName:String) {
 }
