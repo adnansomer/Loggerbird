@@ -388,6 +388,8 @@
     <string name="textView_trello_board">Board</string>
     <string name="textView_trello_title">Title</string>
     <string name="editText_trello_title_hint">Enter a title for this card…</string>
+    <string name="textView_trello_description">Description</string>
+    <string name="editText_trello_description_hint">Enter a description for this card…</string>
     <string name="textView_trello_member">Member</string>
     <string name="textView_trello_member_list">Member list</string>
     <string name="textView_trello_label">Label</string>

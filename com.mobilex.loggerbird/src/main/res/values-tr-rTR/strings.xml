@@ -389,6 +389,8 @@
     <string name="textView_trello_board">Pano</string>
     <string name="textView_trello_title">Başlık</string>
     <string name="editText_trello_title_hint">Bu kart için bir başlık giriniz…</string>
+    <string name="textView_trello_description">Açıklama</string>
+    <string name="editText_trello_description_hint">Bu kart için bir açıklama giriniz…</string>
     <string name="textView_trello_member">Üye</string>
     <string name="textView_trello_member_list">Üye listesi</string>
     <string name="textView_trello_label">Etiket</string>

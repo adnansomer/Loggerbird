@@ -62,6 +62,7 @@ internal class TrelloApi {
     private var board: String? = null
     private var project: String? = null
     private var title: String = ""
+    private var description:String? = null
     private var member: String? = null
     private var label: String? = null
     private val defaultToast = DefaultToast()
@@ -215,6 +216,9 @@ internal class TrelloApi {
             if (calendar != null) {
 //                val dateFormatter =SimpleDateFormat.getDateTimeInstance()
                 jsonObject.addProperty("due", Date(calendar!!.timeInMillis).toString())
+            }
+            if(!description.isNullOrEmpty()){
+                jsonObject.addProperty("desc",description)
             }
             jsonObject.add("idMembers", jsonArrayMembers)
             jsonObject.add("idLabels", jsonArrayLabels)
@@ -587,8 +591,9 @@ internal class TrelloApi {
      * This method is used for getting details of editText in the trello layout.
      * @param editTextTitle is used for getting title details from title editText in the trello layout.
      */
-    internal fun gatherEditTextDetails(editTextTitle: EditText) {
+    internal fun gatherEditTextDetails(editTextTitle: EditText,editTextDescription:EditText) {
         title = editTextTitle.text.toString()
+        description = editTextDescription.text.toString()
     }
 
     /**
@@ -707,6 +712,7 @@ internal class TrelloApi {
             project = null
             calendar = null
             title = ""
+            description = null
             member = null
             label = null
             labelPosition = 0

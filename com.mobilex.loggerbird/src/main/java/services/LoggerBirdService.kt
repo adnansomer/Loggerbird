@@ -460,6 +460,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonTrelloCreate: Button
     private lateinit var buttonTrelloCancel: Button
     private lateinit var editTextTrelloTitle: EditText
+    private lateinit var editTextTrelloDescription: EditText
     private lateinit var toolbarTrello: Toolbar
     private lateinit var recyclerViewTrelloAttachment: RecyclerView
     private lateinit var trelloAttachmentAdapter: RecyclerViewTrelloAttachmentAdapter
@@ -836,6 +837,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
             return false
         }
+
         /**
          * This method is used for calling share view.
          * @param filePathMedia is used for getting the reference of current media file.
@@ -868,6 +870,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
         }
     }
+
     //Constructor
     init {
         ORIENTATIONS.append(Surface.ROTATION_0, 90)
@@ -1183,6 +1186,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.floatingActionButtonTag)
         }
     }
+
     /**
      * This method formats a long time value into day format.
      */
@@ -1329,6 +1333,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
         )
     }
+
     /**
      * This method is used for controlling state of buttons that are inside in the fragment_logger_bird.
      * @param filePathMedia is used for getting the reference of current media file.
@@ -1371,39 +1376,39 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         textView_share_slack.visibility = View.GONE
         textView_share_trello.visibility = View.GONE
 
-        if(LoggerBird.clubhouseIsInitialized()){
+        if (LoggerBird.clubhouseIsInitialized()) {
             textView_share_clubhouse.visibility = View.VISIBLE
         }
 
-        if(LoggerBird.asanaIsInitialized()){
+        if (LoggerBird.asanaIsInitialized()) {
             textView_share_asana.visibility = View.VISIBLE
         }
 
-        if(LoggerBird.basecampIsInitialized()){
+        if (LoggerBird.basecampIsInitialized()) {
             textView_share_basecamp.visibility = View.VISIBLE
         }
 
-        if(LoggerBird.githubIsInitialized()){
+        if (LoggerBird.githubIsInitialized()) {
             textView_share_github.visibility = View.VISIBLE
         }
 
-        if(LoggerBird.gitlabIsInitialized()){
+        if (LoggerBird.gitlabIsInitialized()) {
             textView_share_gitlab.visibility = View.VISIBLE
         }
 
-        if(LoggerBird.pivotalIsInitialized()){
+        if (LoggerBird.pivotalIsInitialized()) {
             textView_share_pivotal.visibility = View.VISIBLE
         }
 
-        if(LoggerBird.slackIsInitialized()){
+        if (LoggerBird.slackIsInitialized()) {
             textView_share_slack.visibility = View.VISIBLE
         }
 
-        if(LoggerBird.jiraIsInitialized()){
+        if (LoggerBird.jiraIsInitialized()) {
             textView_share_jira.visibility = View.VISIBLE
         }
 
-        if(LoggerBird.trelloIsInitialized()){
+        if (LoggerBird.trelloIsInitialized()) {
             textView_share_trello.visibility = View.VISIBLE
         }
 
@@ -2810,9 +2815,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun discardMediaFile() {
         coroutineCallDiscardFile.async {
             try {
-                if(checkUnhandledFilePath()){
+                if (checkUnhandledFilePath()) {
                     finishShareLayout("unhandled")
-                }else{
+                } else {
                     if (controlMedialFile()) {
                         finishShareLayout(message = "media")
                     } else {
@@ -3084,8 +3089,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     Toast.makeText(context, R.string.clubhouse_issue_time_out, Toast.LENGTH_SHORT)
                         .show()
                 }
-                "unhandled" ->{
-                    Toast.makeText(context, R.string.unhandled_file_discard_success, Toast.LENGTH_SHORT)
+                "unhandled" -> {
+                    Toast.makeText(
+                        context,
+                        R.string.unhandled_file_discard_success,
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                     finishSuccessFab()
                 }
@@ -3103,7 +3112,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun finishSuccessFab() {
         if (controlRevealShareLayout() && controlFloatingActionButtonView()) {
-            if(checkUnhandledFilePath()){
+            if (checkUnhandledFilePath()) {
                 val sharedPref =
                     PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                 if (sharedPref.getString("unhandled_file_path", null) != null) {
@@ -6839,6 +6848,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 buttonTrelloCancel = viewTrello.findViewById(R.id.button_trello_cancel)
                 buttonTrelloCreate = viewTrello.findViewById(R.id.button_trello_create)
                 editTextTrelloTitle = viewTrello.findViewById(R.id.editText_trello_title)
+                editTextTrelloDescription =
+                    viewTrello.findViewById(R.id.editText_trello_description)
                 toolbarTrello = viewTrello.findViewById(R.id.toolbar_trello)
                 recyclerViewTrelloAttachment =
                     viewTrello.findViewById(R.id.recycler_view_trello_attachment)
@@ -6880,6 +6891,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                 )
                                 putString("trello_title", editTextTrelloTitle.text.toString())
                                 putString(
+                                    "trello_description",
+                                    editTextTrelloDescription.text.toString()
+                                )
+                                putString(
                                     "trello_member",
                                     autoTextViewTrelloMember.editableText.toString()
                                 )
@@ -6899,6 +6914,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                             val editor: SharedPreferences.Editor = sharedPref.edit()
                             editor.remove("trello_title")
+                            editor.remove("trello_description")
                             editor.remove("trello_project")
                             editor.remove("trello_board")
                             editor.remove("trello_member")
@@ -6963,7 +6979,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 autoTextViewMember = autoTextViewTrelloMember,
                 autoTextViewLabel = autoTextViewTrelloLabel
             )
-            trelloAuthentication.gatherEditTextDetails(editTextTitle = editTextTrelloTitle)
+            trelloAuthentication.gatherEditTextDetails(
+                editTextTitle = editTextTrelloTitle,
+                editTextDescription = editTextTrelloDescription
+            )
             trelloAuthentication.gatherCalendarDetails(calendar = calendarTrello)
             if (trelloAuthentication.checkTitle(
                     activity = activity,
@@ -7085,6 +7104,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val sharedPref =
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         editTextTrelloTitle.setText(sharedPref.getString("trello_title", null))
+        editTextTrelloDescription.setText(sharedPref.getString("trello_description", null))
         initializeTrelloProject(
             arrayListTrelloProject = arrayListTrelloProject,
             sharedPref = sharedPref
@@ -7385,6 +7405,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         trelloMemberAdapter.notifyDataSetChanged()
         trelloLabelAdapter.notifyDataSetChanged()
         editTextTrelloTitle.text = null
+        editTextTrelloDescription.text = null
         autoTextViewTrelloLabel.setText("", false)
         autoTextViewTrelloMember.setText("", false)
         autoTextViewTrelloBoard.setText("", false)
