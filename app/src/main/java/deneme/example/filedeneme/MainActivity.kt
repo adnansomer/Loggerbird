@@ -292,7 +292,7 @@ class MainActivity : AppCompatActivity() {
 
         button_performance.setOnClickListener {
             LoggerBird.callLifeCycleDetails()
-
+            LoggerBird.callComponentDetails(view=it,resources = it.resources)
             //            LoggerBird.takeDeviceInformationDetails()
 //            LoggerBird.takeDevicePerformanceDetails()
 //            LoggerBird.takeDeviceCpuDetails()
