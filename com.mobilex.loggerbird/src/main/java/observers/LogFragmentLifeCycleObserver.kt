@@ -45,17 +45,19 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentViewCreated"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
-            if (classList.isEmpty()) {
-                classList.add(f.tag!!)
-            }
-            while (classList.iterator().hasNext()) {
-                if (classList.contains(f.tag!!)) {
-                    break;
-                } else {
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+                if (classList.isEmpty()) {
                     classList.add(f.tag!!)
+                }
+                while (classList.iterator().hasNext()) {
+                    if (classList.contains(f.tag!!)) {
+                        break;
+                    } else {
+                        classList.add(f.tag!!)
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -82,7 +84,9 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentAttached"
-            stringBuilderFragmentLifeCycleObserver.append(Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n")
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n")
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -107,9 +111,11 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentPreAttached"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -134,9 +140,11 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onSaveInstanceState"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -160,9 +168,11 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentViewDestroyed"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -191,9 +201,11 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentPreCreated"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -223,9 +235,11 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentActivityCreated"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -250,9 +264,11 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentCreate"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -277,9 +293,11 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentStarted"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -303,9 +321,11 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentResumed"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -329,9 +349,11 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentPaused"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -355,9 +377,11 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentStopped"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -382,9 +406,11 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentDestroyed"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -408,9 +434,11 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentDetached"
-            stringBuilderFragmentLifeCycleObserver.append(
-                Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-            )
+            if(f.tag != null){
+                stringBuilderFragmentLifeCycleObserver.append(
+                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
