@@ -564,7 +564,8 @@ internal class EmailUtil {
                             context.stopService(Intent(context, LoggerBirdFutureTaskService::class.java))
                         }
                     }
-                    LoggerBirdService.loggerBirdService.finishShareLayout("single_email")
+//                    LoggerBirdService.loggerBirdService.finishShareLayout("single_email")
+//                        LoggerBirdService.callEnqueueEmail()
                     transport.close()
                 }
             } catch (e: Exception) {
