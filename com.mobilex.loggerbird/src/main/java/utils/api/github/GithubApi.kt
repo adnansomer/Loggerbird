@@ -23,6 +23,7 @@ import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
 import models.*
 import models.api.github.*
+import observers.LogFragmentLifeCycleObserver
 import okhttp3.*
 import services.LoggerBirdService
 import utils.other.DefaultToast
@@ -243,8 +244,9 @@ internal class GithubApi {
                 stringBuilderGithub.append("Project:" + arrayListProjectUrl[projectPosition] + "\n")
             }
             if (stringBuilderGithub.isNotEmpty()) {
-                jsonObject.addProperty("body", stringBuilderGithub.toString())
+                jsonObject.addProperty("body", stringBuilderGithub.toString() + "\n")
             }
+            stringBuilderGithub.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString() + "\n")
             jsonObject.addProperty("title", title)
             RetrofitGithubClient.getGithubUserClient(url = "https://api.github.com/repos/${LoggerBird.githubUserName}/$repos/")
                 .create(AccountIdService::class.java)
@@ -490,25 +492,29 @@ internal class GithubApi {
                     call: retrofit2.Call<List<GithubRepoModel>>,
                     response: retrofit2.Response<List<GithubRepoModel>>
                 ) {
-                    val coroutineCallGithubRepo = CoroutineScope(Dispatchers.IO)
-                    coroutineCallGithubRepo.async {
-                        Log.d("github_repo_success", response.code().toString())
-                        val githubList = response.body()
-                        githubList?.forEach {
-                            if (it.name != null) {
-                                arrayListRepo.add(it.name!!)
+                    if (response.code() !in 200..299) {
+                        githubExceptionHandler()
+                    } else {
+                        val coroutineCallGithubRepo = CoroutineScope(Dispatchers.IO)
+                        coroutineCallGithubRepo.async {
+                            Log.d("github_repo_success", response.code().toString())
+                            val githubList = response.body()
+                            githubList?.forEach {
+                                if (it.name != null) {
+                                    arrayListRepo.add(it.name!!)
+                                }
                             }
-                        }
-                        if (arrayListRepo.size > repoPosition) {
-                            gatherTaskProject(repo = arrayListRepo[repoPosition])
-                            gatherTaskAssignee(repo = arrayListRepo[repoPosition])
-                            gatherTaskLabels(repo = arrayListRepo[repoPosition])
-                            gatherTaskMileStone(repo = arrayListRepo[repoPosition])
-                            gatherTaskPullRequests(repo = arrayListRepo[repoPosition])
-                        }
+                            if (arrayListRepo.size > repoPosition) {
+                                gatherTaskProject(repo = arrayListRepo[repoPosition])
+                                gatherTaskAssignee(repo = arrayListRepo[repoPosition])
+                                gatherTaskLabels(repo = arrayListRepo[repoPosition])
+                                gatherTaskMileStone(repo = arrayListRepo[repoPosition])
+                                gatherTaskPullRequests(repo = arrayListRepo[repoPosition])
+                            }
 
-                        updateFields()
+                            updateFields()
 
+                        }
                     }
                 }
             })
@@ -537,18 +543,23 @@ internal class GithubApi {
                     call: retrofit2.Call<List<GithubAssigneeModel>>,
                     response: retrofit2.Response<List<GithubAssigneeModel>>
                 ) {
-                    val coroutineCallGithubAssignee = CoroutineScope(Dispatchers.IO)
-                    coroutineCallGithubAssignee.async {
-                        Log.d("github_assignee_success", response.code().toString())
-                        val githubList = response.body()
-                        githubList?.forEach {
-                            if (it.login != null) {
-                                if (!arrayListAssignee.contains(it.login!!)) {
-                                    arrayListAssignee.add(it.login!!)
+                    if (response.code() !in 200..299) {
+                        githubExceptionHandler()
+                    } else {
+                        val coroutineCallGithubAssignee = CoroutineScope(Dispatchers.IO)
+                        coroutineCallGithubAssignee.async {
+                            Log.d("github_assignee_success", response.code().toString())
+                            val githubList = response.body()
+                            githubList?.forEach {
+                                if (it.login != null) {
+                                    if (!arrayListAssignee.contains(it.login!!)) {
+                                        arrayListAssignee.add(it.login!!)
+                                    }
                                 }
                             }
+                            updateFields()
                         }
-                        updateFields()
+
                     }
                 }
             })
@@ -577,17 +588,21 @@ internal class GithubApi {
                     call: retrofit2.Call<List<GithubProjectModel>>,
                     response: retrofit2.Response<List<GithubProjectModel>>
                 ) {
-                    val coroutineCallGithubProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallGithubProject.async {
-                        Log.d("github_project_success", response.code().toString())
-                        val githubList = response.body()
-                        githubList?.forEach {
-                            if (it.html_url != null && it.name != null) {
-                                arrayListProject.add(it.name!!)
-                                arrayListProjectUrl.add(it.html_url!!)
+                    if (response.code() !in 200..299) {
+                        githubExceptionHandler()
+                    } else {
+                        val coroutineCallGithubProject = CoroutineScope(Dispatchers.IO)
+                        coroutineCallGithubProject.async {
+                            Log.d("github_project_success", response.code().toString())
+                            val githubList = response.body()
+                            githubList?.forEach {
+                                if (it.html_url != null && it.name != null) {
+                                    arrayListProject.add(it.name!!)
+                                    arrayListProjectUrl.add(it.html_url!!)
+                                }
                             }
+                            updateFields()
                         }
-                        updateFields()
                     }
                 }
             })
@@ -616,16 +631,20 @@ internal class GithubApi {
                     call: retrofit2.Call<List<GithubLabelsModel>>,
                     response: retrofit2.Response<List<GithubLabelsModel>>
                 ) {
-                    val coroutineCallGithubLabels = CoroutineScope(Dispatchers.IO)
-                    coroutineCallGithubLabels.async {
-                        Log.d("github_labels_success", response.code().toString())
-                        val githubList = response.body()
-                        githubList?.forEach {
-                            if (it.name != null) {
-                                arrayListLabels.add(it.name!!)
+                    if (response.code() !in 200..299) {
+                        githubExceptionHandler()
+                    } else {
+                        val coroutineCallGithubLabels = CoroutineScope(Dispatchers.IO)
+                        coroutineCallGithubLabels.async {
+                            Log.d("github_labels_success", response.code().toString())
+                            val githubList = response.body()
+                            githubList?.forEach {
+                                if (it.name != null) {
+                                    arrayListLabels.add(it.name!!)
+                                }
                             }
+                            updateFields()
                         }
-                        updateFields()
                     }
                 }
             })
@@ -654,17 +673,21 @@ internal class GithubApi {
                     call: retrofit2.Call<List<GithubMileStoneModel>>,
                     response: retrofit2.Response<List<GithubMileStoneModel>>
                 ) {
-                    val coroutineCallGithubMileStone = CoroutineScope(Dispatchers.IO)
-                    coroutineCallGithubMileStone.async {
-                        Log.d("github_milestone_list", response.code().toString())
-                        val githubList = response.body()
-                        githubList?.forEach {
-                            if (it.title != null && it.number != null) {
-                                arrayListMileStones.add(it.title!!)
-                                hashMapMileStones[it.title!!] = it.number!!
+                    if (response.code() !in 200..299) {
+                        githubExceptionHandler()
+                    } else {
+                        val coroutineCallGithubMileStone = CoroutineScope(Dispatchers.IO)
+                        coroutineCallGithubMileStone.async {
+                            Log.d("github_milestone_list", response.code().toString())
+                            val githubList = response.body()
+                            githubList?.forEach {
+                                if (it.title != null && it.number != null) {
+                                    arrayListMileStones.add(it.title!!)
+                                    hashMapMileStones[it.title!!] = it.number!!
+                                }
                             }
+                            updateFields()
                         }
-                        updateFields()
                     }
                 }
             })
@@ -693,18 +716,22 @@ internal class GithubApi {
                     call: retrofit2.Call<List<GithubPullRequestsModel>>,
                     response: retrofit2.Response<List<GithubPullRequestsModel>>
                 ) {
-                    val coroutineCallGithubPullRequests = CoroutineScope(Dispatchers.IO)
-                    coroutineCallGithubPullRequests.async {
-                        Log.d("github_pull_requests", response.code().toString())
-                        val githubList = response.body()
-                        githubList?.forEach {
-                            if (it.title != null && it.html_url != null) {
-                                arrayListLinkedRequests.add(it.title!!)
-                                arrayListLinkedRequestsUrl.add(it.html_url!!)
+                    if (response.code() !in 200..299) {
+                        githubExceptionHandler()
+                    } else {
+                        val coroutineCallGithubPullRequests = CoroutineScope(Dispatchers.IO)
+                        coroutineCallGithubPullRequests.async {
+                            Log.d("github_pull_requests", response.code().toString())
+                            val githubList = response.body()
+                            githubList?.forEach {
+                                if (it.title != null && it.html_url != null) {
+                                    arrayListLinkedRequests.add(it.title!!)
+                                    arrayListLinkedRequestsUrl.add(it.html_url!!)
 //                                hashMapLinkedRequests[it.title!!] = it.number!!
+                                }
                             }
+                            updateFields()
                         }
-                        updateFields()
                     }
                 }
             })

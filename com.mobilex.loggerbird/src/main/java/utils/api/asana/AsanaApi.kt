@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
 import models.AccountIdService
+import observers.LogFragmentLifeCycleObserver
 import okhttp3.*
 import services.LoggerBirdService
 import java.io.File
@@ -192,14 +193,17 @@ internal class AsanaApi {
             val jsonObject = JsonObject()
             val jsonObjectData = JsonObject()
             val jsonArrayProjects = JsonArray()
+            val stringBuilder = StringBuilder()
+            if (!description.isNullOrEmpty()) {
+                stringBuilder.append(description + "\n")
+            }
+            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+            jsonObjectData.addProperty("notes", stringBuilder.toString())
             jsonArrayProjects.add(projectId)
             jsonObjectData.add("projects", jsonArrayProjects)
             jsonObjectData.addProperty("name", taskName)
             if (!assignee.isNullOrEmpty()) {
                 jsonObjectData.addProperty("assignee", arrayListAssigneeId[assigneePosition])
-            }
-            if (!description.isNullOrEmpty()) {
-                jsonObjectData.addProperty("notes", description)
             }
             if (!startDate.isNullOrEmpty()) {
                 jsonObjectData.addProperty("due_on", startDate)
@@ -503,17 +507,21 @@ internal class AsanaApi {
                 ) {
                     Log.d("asana_project_success", response.code().toString())
                     val asanaList = response.body()
-                    val coroutineCallAsanaProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallAsanaProject.async {
-                        asanaList?.getAsJsonArray("data")?.forEach {
-                            arrayListProjectNames.add(it.asJsonObject["name"].asString)
-                            arrayListProjectId.add(it.asJsonObject["gid"].asString)
+                    if (response.code() !in 200..299) {
+                        resetasanaValues(shareLayoutMessage = "asana_error")
+                    } else {
+                        val coroutineCallAsanaProject = CoroutineScope(Dispatchers.IO)
+                        coroutineCallAsanaProject.async {
+                            asanaList?.getAsJsonArray("data")?.forEach {
+                                arrayListProjectNames.add(it.asJsonObject["name"].asString)
+                                arrayListProjectId.add(it.asJsonObject["gid"].asString)
+                            }
+                            if (arrayListProjectId.size > projectPosition) {
+                                gatherTaskAssignee(projectId = arrayListProjectId[projectPosition])
+                                gatherTaskSections(projectId = arrayListProjectId[projectPosition])
+                            }
+                            updateFields()
                         }
-                        if (arrayListProjectId.size > projectPosition) {
-                            gatherTaskAssignee(projectId = arrayListProjectId[projectPosition])
-                            gatherTaskSections(projectId = arrayListProjectId[projectPosition])
-                        }
-                        updateFields()
                     }
                 }
             })
@@ -542,16 +550,20 @@ internal class AsanaApi {
                     call: retrofit2.Call<JsonObject>,
                     response: retrofit2.Response<JsonObject>
                 ) {
-                    val coroutineCallAsanaAssignee = CoroutineScope(Dispatchers.IO)
-                    coroutineCallAsanaAssignee.async {
-                        Log.d("asana_assignee_success", response.code().toString())
-                        val asanaList = response.body()
-                        asanaList?.getAsJsonArray("data")?.forEach {
-                            arrayListAssigneeNames.add(it.asJsonObject["user"].asJsonObject["name"].asString)
-                            arrayListAssigneeId.add(it.asJsonObject["user"].asJsonObject["gid"].asString)
-                        }
-                        updateFields()
+                    if (response.code() !in 200..299) {
+                        resetasanaValues(shareLayoutMessage = "asana_error")
+                    } else {
+                        val coroutineCallAsanaAssignee = CoroutineScope(Dispatchers.IO)
+                        coroutineCallAsanaAssignee.async {
+                            Log.d("asana_assignee_success", response.code().toString())
+                            val asanaList = response.body()
+                            asanaList?.getAsJsonArray("data")?.forEach {
+                                arrayListAssigneeNames.add(it.asJsonObject["user"].asJsonObject["name"].asString)
+                                arrayListAssigneeId.add(it.asJsonObject["user"].asJsonObject["gid"].asString)
+                            }
+                            updateFields()
 
+                        }
                     }
                 }
             })
@@ -580,16 +592,20 @@ internal class AsanaApi {
                     call: retrofit2.Call<JsonObject>,
                     response: retrofit2.Response<JsonObject>
                 ) {
-                    val coroutineCallAsanaSections = CoroutineScope(Dispatchers.IO)
-                    coroutineCallAsanaSections.async {
-                        Log.d("asana_sections_success", response.code().toString())
-                        val asanaList = response.body()
-                        asanaList?.getAsJsonArray("data")?.forEach {
-                            arrayListSectionsNames.add(it.asJsonObject["name"].asString)
-                            arrayListSectionsId.add(it.asJsonObject["gid"].asString)
-                        }
-                        updateFields()
+                    if(response.code() !in 200..299){
+                        resetasanaValues(shareLayoutMessage = "asana_error")
+                    }else{
+                        val coroutineCallAsanaSections = CoroutineScope(Dispatchers.IO)
+                        coroutineCallAsanaSections.async {
+                            Log.d("asana_sections_success", response.code().toString())
+                            val asanaList = response.body()
+                            asanaList?.getAsJsonArray("data")?.forEach {
+                                arrayListSectionsNames.add(it.asJsonObject["name"].asString)
+                                arrayListSectionsId.add(it.asJsonObject["gid"].asString)
+                            }
+                            updateFields()
 
+                        }
                     }
                 }
             })

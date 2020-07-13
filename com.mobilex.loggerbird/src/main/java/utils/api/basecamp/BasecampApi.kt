@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
 import models.AccountIdService
+import observers.LogFragmentLifeCycleObserver
 import okhttp3.*
 import services.LoggerBirdService
 import java.io.File
@@ -196,6 +197,12 @@ internal class BasecampApi {
             queueCounter++
             this.activity = activity
             val jsonObject = JsonObject()
+            val stringBuilder = StringBuilder()
+            if (!descriptionMessage.isNullOrEmpty()) {
+                stringBuilder.append(descriptionMessage + "\n")
+            }
+            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString()  + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+            jsonObject.addProperty("content", stringBuilder.toString())
             if (!name.isNullOrEmpty()) {
                 basecampCreateTodoIssue(
                     activity = activity,
@@ -211,9 +218,6 @@ internal class BasecampApi {
             }
             if (!title.isNullOrEmpty()) {
                 jsonObject.addProperty("subject", title)
-            }
-            if (!descriptionMessage.isNullOrEmpty()) {
-                jsonObject.addProperty("content", descriptionMessage)
             }
             jsonObject.addProperty("status", "active")
             RetrofitBasecampClient.getBasecampUserClient(url = "https://3.basecampapi.com/$accountId/buckets/$projectId/message_boards/$messageBoardId/")
@@ -557,12 +561,16 @@ internal class BasecampApi {
                     call: retrofit2.Call<JsonObject>,
                     response: retrofit2.Response<JsonObject>
                 ) {
-                    Log.d("base_account_id_success", response.code().toString())
-                    val basecampList = response.body()
-                    val coroutineCallBasecampProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallBasecampProject.async {
-                        gatherTaskProject(accountId = basecampList!!.getAsJsonArray("accounts").asJsonArray[0].asJsonObject["id"].asString)
-                        updateFields()
+                    if(response.code() !in 200..299 ){
+                        resetBasecampValues(shareLayoutMessage = "basecamp_error")
+                    }else{
+                        Log.d("base_account_id_success", response.code().toString())
+                        val basecampList = response.body()
+                        val coroutineCallBasecampProject = CoroutineScope(Dispatchers.IO)
+                        coroutineCallBasecampProject.async {
+                            gatherTaskProject(accountId = basecampList!!.getAsJsonArray("accounts").asJsonArray[0].asJsonObject["id"].asString)
+                            updateFields()
+                        }
                     }
                 }
             })
@@ -591,36 +599,40 @@ internal class BasecampApi {
                     call: retrofit2.Call<JsonArray>,
                     response: retrofit2.Response<JsonArray>
                 ) {
-                    val coroutineCallBasecampProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallBasecampProject.async {
-                        Log.d("base_project_success", response.code().toString())
-                        val basecampList = response.body()
-                        basecampList?.forEach {
-                            if (it.asJsonObject["name"] != null) {
-                                arrayListProjectNames.add(it.asJsonObject["name"].asString)
-                                arrayListProjectId.add(it.asJsonObject["id"].asString)
+                    if(response.code() !in 200..299){
+                        resetBasecampValues(shareLayoutMessage = "basecamp_error")
+                    }else{
+                        val coroutineCallBasecampProject = CoroutineScope(Dispatchers.IO)
+                        coroutineCallBasecampProject.async {
+                            Log.d("base_project_success", response.code().toString())
+                            val basecampList = response.body()
+                            basecampList?.forEach {
+                                if (it.asJsonObject["name"] != null) {
+                                    arrayListProjectNames.add(it.asJsonObject["name"].asString)
+                                    arrayListProjectId.add(it.asJsonObject["id"].asString)
+                                }
                             }
-                        }
-                        if (arrayListProjectId.size > projectPosition) {
-                            this@BasecampApi.accountId = accountId
+                            if (arrayListProjectId.size > projectPosition) {
+                                this@BasecampApi.accountId = accountId
 //                            basecampList!!.getAsJsonArray("accounts").asJsonArray[0].asJsonObject["id"].asString
-                            this@BasecampApi.messageBoardId =
-                                basecampList!!.asJsonArray[projectPosition].asJsonObject["dock"].asJsonArray[0].asJsonObject["id"].asString
-                            this@BasecampApi.todoId =
-                                basecampList!!.asJsonArray[projectPosition].asJsonObject["dock"].asJsonArray[1].asJsonObject["id"].asString
-                            this@BasecampApi.vaultId =
-                                basecampList!!.asJsonArray[projectPosition].asJsonObject["dock"].asJsonArray[2].asJsonObject["id"].asString
-                            gatherTaskAssignee(
-                                accountId = accountId,
-                                projectId = arrayListProjectId[projectPosition]
-                            )
-                            gatherTaskCategory(
-                                accountId = accountId,
-                                projectId = arrayListProjectId[projectPosition]
-                            )
-                        }
-                        updateFields()
+                                this@BasecampApi.messageBoardId =
+                                    basecampList!!.asJsonArray[projectPosition].asJsonObject["dock"].asJsonArray[0].asJsonObject["id"].asString
+                                this@BasecampApi.todoId =
+                                    basecampList!!.asJsonArray[projectPosition].asJsonObject["dock"].asJsonArray[1].asJsonObject["id"].asString
+                                this@BasecampApi.vaultId =
+                                    basecampList!!.asJsonArray[projectPosition].asJsonObject["dock"].asJsonArray[2].asJsonObject["id"].asString
+                                gatherTaskAssignee(
+                                    accountId = accountId,
+                                    projectId = arrayListProjectId[projectPosition]
+                                )
+                                gatherTaskCategory(
+                                    accountId = accountId,
+                                    projectId = arrayListProjectId[projectPosition]
+                                )
+                            }
+                            updateFields()
 
+                        }
                     }
                 }
             })
@@ -650,22 +662,26 @@ internal class BasecampApi {
                     call: retrofit2.Call<JsonArray>,
                     response: retrofit2.Response<JsonArray>
                 ) {
-                    val coroutineCallBasecampAssignee = CoroutineScope(Dispatchers.IO)
-                    coroutineCallBasecampAssignee.async {
-                        Log.d("base_assignee_success", response.code().toString())
-                        val basecampList = response.body()
-                        basecampList?.forEach {
-                            if (it.asJsonObject["name"] != null) {
-                                arrayListAssigneeNames.add(it.asJsonObject["name"].asString)
-                                arrayListNotifyNames.add(it.asJsonObject["name"].asString)
-                                hashMapAssignee[it.asJsonObject["name"].asString] =
-                                    it.asJsonObject["id"].asString
-                                hashMapNotify[it.asJsonObject["name"].asString] =
-                                    it.asJsonObject["id"].asString
+                    if(response.code() !in 200..299){
+                        resetBasecampValues(shareLayoutMessage = "basecamp_error")
+                    }else{
+                        val coroutineCallBasecampAssignee = CoroutineScope(Dispatchers.IO)
+                        coroutineCallBasecampAssignee.async {
+                            Log.d("base_assignee_success", response.code().toString())
+                            val basecampList = response.body()
+                            basecampList?.forEach {
+                                if (it.asJsonObject["name"] != null) {
+                                    arrayListAssigneeNames.add(it.asJsonObject["name"].asString)
+                                    arrayListNotifyNames.add(it.asJsonObject["name"].asString)
+                                    hashMapAssignee[it.asJsonObject["name"].asString] =
+                                        it.asJsonObject["id"].asString
+                                    hashMapNotify[it.asJsonObject["name"].asString] =
+                                        it.asJsonObject["id"].asString
+                                }
                             }
-                        }
-                        updateFields()
+                            updateFields()
 
+                        }
                     }
                 }
             })
@@ -695,20 +711,24 @@ internal class BasecampApi {
                     call: retrofit2.Call<JsonArray>,
                     response: retrofit2.Response<JsonArray>
                 ) {
-                    val coroutineCallBasecampCategory = CoroutineScope(Dispatchers.IO)
-                    coroutineCallBasecampCategory.async {
-                        Log.d("base_category_success", response.code().toString())
-                        val basecampList = response.body()
-                        basecampList?.forEach {
-                            if (it.asJsonObject["name"] != null) {
-                                arrayListCategoryNames.add(it.asJsonObject["name"].asString)
-                                arrayListCategoryIcon.add(it.asJsonObject["icon"].asString)
-                                hashMapCategory[it.asJsonObject["name"].asString] =
-                                    it.asJsonObject["id"].asString
+                    if(response.code() !in 200..299){
+                        resetBasecampValues(shareLayoutMessage = "basecamp_error")
+                    }else{
+                        val coroutineCallBasecampCategory = CoroutineScope(Dispatchers.IO)
+                        coroutineCallBasecampCategory.async {
+                            Log.d("base_category_success", response.code().toString())
+                            val basecampList = response.body()
+                            basecampList?.forEach {
+                                if (it.asJsonObject["name"] != null) {
+                                    arrayListCategoryNames.add(it.asJsonObject["name"].asString)
+                                    arrayListCategoryIcon.add(it.asJsonObject["icon"].asString)
+                                    hashMapCategory[it.asJsonObject["name"].asString] =
+                                        it.asJsonObject["id"].asString
+                                }
                             }
-                        }
-                        updateFields()
+                            updateFields()
 
+                        }
                     }
                 }
             })

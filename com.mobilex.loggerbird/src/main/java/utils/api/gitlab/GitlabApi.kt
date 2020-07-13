@@ -30,6 +30,7 @@ import models.api.gitlab.GitlabLabelsModel
 import models.api.gitlab.GitlabMilestonesModel
 import models.api.gitlab.GitlabProjectModel
 import models.api.gitlab.GitlabUsersModel
+import observers.LogFragmentLifeCycleObserver
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import utils.other.InternetConnectionUtil
@@ -223,12 +224,15 @@ internal class GitlabApi {
             this.activity = activity
             val coroutineCallGitlabIssue = CoroutineScope(Dispatchers.IO)
             val jsonObject = JsonObject()
+            val stringBuilder = StringBuilder()
+            if (description != null) {
+                stringBuilder.append(description + "\n")
+            }
             if (title != null) {
                 jsonObject.addProperty("title", title)
             }
-            if (description != null) {
-                jsonObject.addProperty("description", description)
-            }
+            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+            jsonObject.addProperty("description", stringBuilder.toString())
             jsonObject.addProperty(
                 "milestone_id",
                 hashMapMilestones[arrayListMilestones[spinnerPositionMilestones]]
@@ -635,6 +639,7 @@ internal class GitlabApi {
                         stringBuilder.append("\nattachment_$attachmentCounter:$it")
                         attachmentCounter++
                     }
+                    stringBuilder.append("\n" + "Life Cycle Details" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
                     val updatedDescription = "$description\n" + stringBuilder.toString()
                     addAttachmentsToIssue(issueId =  issueId, projectId = projectId, description = updatedDescription.toString())
 

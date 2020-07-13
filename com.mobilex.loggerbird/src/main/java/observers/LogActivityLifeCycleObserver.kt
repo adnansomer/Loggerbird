@@ -47,7 +47,7 @@ internal class LogActivityLifeCycleObserver() :
     }
     //Constructor.
     init {
-        LoggerBird.stringBuilderActivityLifeCycleObserver.append("\n" + "Life Cycle Details:" + "\n")
+        LoggerBird.stringBuilderActivityLifeCycleObserver.append("\n" + "Activity Details:" + "\n")
     }
 
     /**
