@@ -28,6 +28,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import observers.LogFragmentLifeCycleObserver
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import utils.other.InternetConnectionUtil
@@ -49,7 +50,7 @@ internal class ClubhouseApi {
     private var arrayListUsers: ArrayList<String> = ArrayList()
     private val arrayListUsersId: ArrayList<String> = ArrayList()
     private var hashMapUsers: HashMap<String, String> = HashMap()
-    private val arrayListStoryType: ArrayList<String> = arrayListOf("Bug","Chore","Feature")
+    private val arrayListStoryType: ArrayList<String> = arrayListOf("Bug", "Chore", "Feature")
     private var spinnerPositionStoryType: Int = 0
     private var storyTypePosition = 0
     private var storyType: String? = null
@@ -64,8 +65,8 @@ internal class ClubhouseApi {
     private val arrayListEpicId: ArrayList<String> = ArrayList()
     private val arrayListEpicName: ArrayList<String> = ArrayList()
     private var hashMapEpic: HashMap<String, String> = HashMap()
-    private var storyName: String?=""
-    private var storyDescription: String?=null
+    private var storyName: String? = ""
+    private var storyDescription: String? = null
     private var estimate: String? = null
     internal var dueDate: String? = null
     private lateinit var storyId: String
@@ -75,9 +76,10 @@ internal class ClubhouseApi {
         LinkedBlockingQueueUtil()
     private var runnableListClubhouseAttachments: ArrayList<Runnable> = ArrayList()
 
-    companion object{
+    companion object {
         const val BASE_URL = "https://api.clubhouse.io/api/v3/"
     }
+
     /**
      * This method is used for calling Clubhouse Api in order to determine operation.
      * @param activity is used for getting reference of current activity.
@@ -108,7 +110,8 @@ internal class ClubhouseApi {
                     )
                 } else {
                     activity.runOnUiThread {
-                        Toast.makeText(context, R.string.network_check_failure, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, R.string.network_check_failure, Toast.LENGTH_SHORT)
+                            .show()
                     }
                     throw LoggerBirdException(
                         Constants.networkErrorMessage
@@ -242,7 +245,7 @@ internal class ClubhouseApi {
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
      * method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    private suspend fun gatherClubhouseProjectDetails(){
+    private suspend fun gatherClubhouseProjectDetails() {
         try {
             RetrofitClubhouseClient.getClubhouseUserClient(
                 url = BASE_URL
@@ -290,14 +293,14 @@ internal class ClubhouseApi {
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
      * method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    private suspend fun gatherClubhouseUserDetails(){
+    private suspend fun gatherClubhouseUserDetails() {
         try {
             RetrofitClubhouseClient.getClubhouseUserClient(
                 url = BASE_URL
             )
                 .create(AccountIdService::class.java)
                 .getClubhouseMembers(token = LoggerBird.clubhouseApiToken)
-                .enqueue(object : retrofit2.Callback<JsonArray>{
+                .enqueue(object : retrofit2.Callback<JsonArray> {
                     override fun onFailure(
                         call: retrofit2.Call<JsonArray>,
                         t: Throwable
@@ -306,6 +309,7 @@ internal class ClubhouseApi {
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
                     }
+
                     override fun onResponse(
                         call: retrofit2.Call<JsonArray>,
                         response: retrofit2.Response<JsonArray>
@@ -339,7 +343,7 @@ internal class ClubhouseApi {
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails
      * method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    private suspend fun gatherClubhouseEpicDetails(){
+    private suspend fun gatherClubhouseEpicDetails() {
         try {
             RetrofitClubhouseClient.getClubhouseUserClient(
                 url = BASE_URL
@@ -355,8 +359,9 @@ internal class ClubhouseApi {
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
                     }
+
                     override fun onResponse(
-                        call: retrofit2.Call<List<ClubHouseEpicModel>> ,
+                        call: retrofit2.Call<List<ClubHouseEpicModel>>,
                         response: retrofit2.Response<List<ClubHouseEpicModel>>
                     ) {
                         val coroutineCallClubhouseDetails = CoroutineScope(Dispatchers.IO)
@@ -411,19 +416,25 @@ internal class ClubhouseApi {
                     deadline = dueDate!!,
                     requestedBy = hashMapUsers[userName]!!,
                     epicId = hashMapEpic[epic]!!,
-                    estimate = estimate!!)
+                    estimate = estimate!!
+                )
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     override fun onFailure(call: retrofit2.Call<JsonObject>, t: Throwable) {
                         t.printStackTrace()
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
                     }
-                    override fun onResponse(call: retrofit2.Call<JsonObject>, response: retrofit2.Response<JsonObject>) {
+
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
+                    ) {
                         if (response.code() in 400..499) {
-                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error") }
-                            Log.d("clubhousecreate", response.code().toString())
-                            val clubhouse = response.body()
-                            Log.d("clubhousecreate", clubhouse.toString())
+                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error")
+                        }
+                        Log.d("clubhousecreate", response.code().toString())
+                        val clubhouse = response.body()
+                        Log.d("clubhousecreate", clubhouse.toString())
 
                         coroutineCallClubhouseIssue.async {
                             storyId = response.body()!!["id"].asString
@@ -455,7 +466,7 @@ internal class ClubhouseApi {
         if (LoggerBird.isLogInitAttached()) {
             if (runnableListClubhouseAttachments.isEmpty()) {
                 workQueueLinkedClubhouseAttachments.put {
-                    createAttachments(storyId = storyId,filePathMedia  = filePathMedia)
+                    createAttachments(storyId = storyId, filePathMedia = filePathMedia)
                 }
             }
             runnableListClubhouseAttachments.add(Runnable {
@@ -476,7 +487,8 @@ internal class ClubhouseApi {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createAttachments(filePathMedia: File?, storyId: String) {
         try {
-            val requestFile = filePathMedia!!.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+            val requestFile =
+                filePathMedia!!.asRequestBody("multipart/form-data".toMediaTypeOrNull())
             val filePathMediaName = filePathMedia!!.name
             val body = MultipartBody.Part.createFormData("file", filePathMediaName, requestFile)
 
@@ -492,7 +504,11 @@ internal class ClubhouseApi {
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
                     }
-                    override fun onResponse(call: retrofit2.Call<JsonArray>, response: retrofit2.Response<JsonArray>) {
+
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonArray>,
+                        response: retrofit2.Response<JsonArray>
+                    ) {
                         if (response.code() in 400..499) {
                             LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error")
                         }
@@ -516,7 +532,7 @@ internal class ClubhouseApi {
                         }
                     }
                 })
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             clubhouseExceptionHandler(e = e)
         }
     }
@@ -539,8 +555,12 @@ internal class ClubhouseApi {
                         stringBuilder.append("\nattachment_$attachmentCounter:$it")
                         attachmentCounter++
                     }
-                    val updatedDescription = "$storyDescription\n" + stringBuilder.toString()
-                    uploadAttachments(storyId =  storyId, description = updatedDescription.toString())
+                    val updatedDescription =
+                        "$storyDescription\n" + stringBuilder.toString() + "\n${"Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString()  + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString() + "\n"}"
+                    uploadAttachments(
+                        storyId = storyId,
+                        description = updatedDescription.toString()
+                    )
 
                 } else {
                     LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse")
@@ -560,13 +580,17 @@ internal class ClubhouseApi {
      * method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun uploadAttachments(storyId: String,description: String) {
+    private fun uploadAttachments(storyId: String, description: String) {
         try {
             RetrofitClubhouseClient.getClubhouseUserClient(
                 url = BASE_URL
             )
                 .create(AccountIdService::class.java)
-                .setClubhouseStory(id = storyId,token = LoggerBird.clubhouseApiToken, description = description)
+                .setClubhouseStory(
+                    id = storyId,
+                    token = LoggerBird.clubhouseApiToken,
+                    description = description
+                )
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
@@ -577,13 +601,14 @@ internal class ClubhouseApi {
                         LoggerBird.callEnqueue()
                         LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
                     }
+
                     override fun onResponse(
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
                         if (response.code() in 400..499) {
-                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error") }
-                        else{
+                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error")
+                        } else {
                             LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse")
                         }
                         val coroutineCallClubhouseAttachments = CoroutineScope(Dispatchers.IO)
@@ -690,7 +715,7 @@ internal class ClubhouseApi {
      * This method is used for gathering story type details to be send to Clubhouse.
      * @param storyTypePosition for getting position of story type from spinner.
      */
-    internal fun clubhouseStoryTypePosition(storyTypePosition: Int){
+    internal fun clubhouseStoryTypePosition(storyTypePosition: Int) {
         this.spinnerPositionStoryType = storyTypePosition
     }
 

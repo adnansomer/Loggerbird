@@ -22,6 +22,7 @@ import kotlinx.coroutines.async
 import loggerbird.LoggerBird
 import models.AccountIdService
 import models.TrelloProjectModel
+import observers.LogFragmentLifeCycleObserver
 import okhttp3.*
 import services.LoggerBirdService
 import java.io.File
@@ -62,12 +63,11 @@ internal class TrelloApi {
     private var board: String? = null
     private var project: String? = null
     private var title: String = ""
-    private var description:String? = null
+    private var description: String? = null
     private var member: String? = null
     private var label: String? = null
     private val defaultToast = DefaultToast()
     private var calendar: Calendar? = null
-
     /**
      * This method is used for calling an trello action with network connection check.
      * @param activity is used for getting reference of current activity.
@@ -194,6 +194,12 @@ internal class TrelloApi {
             this.activity = activity
             val jsonObject = JsonObject()
             val jsonArrayLabels = JsonArray()
+            val stringBuilder = StringBuilder()
+            if (!description.isNullOrEmpty()) {
+                stringBuilder.append(description + "\n")
+            }
+            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+            jsonObject.addProperty("desc", stringBuilder.toString())
             if (RecyclerViewTrelloLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()) {
                 RecyclerViewTrelloLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
                     jsonArrayLabels.add(hashMapLabel[it.labelName])
@@ -216,9 +222,6 @@ internal class TrelloApi {
             if (calendar != null) {
 //                val dateFormatter =SimpleDateFormat.getDateTimeInstance()
                 jsonObject.addProperty("due", Date(calendar!!.timeInMillis).toString())
-            }
-            if(!description.isNullOrEmpty()){
-                jsonObject.addProperty("desc",description)
             }
             jsonObject.add("idMembers", jsonArrayMembers)
             jsonObject.add("idLabels", jsonArrayLabels)
@@ -340,7 +343,7 @@ internal class TrelloApi {
     /**
      * This method is used for getting project details for trello.
      * @throws exception if error occurs.
-     * @see pivotalExceptionHandler method.
+     * @see trelloExceptionHandler method.
      */
     private fun gatherTaskProject() {
         queueCounter++
@@ -359,23 +362,27 @@ internal class TrelloApi {
                     call: retrofit2.Call<List<TrelloProjectModel>>,
                     response: retrofit2.Response<List<TrelloProjectModel>>
                 ) {
-                    val coroutineCallTrelloProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallTrelloProject.async {
-                        Log.d("trello_project_success", response.code().toString())
-                        val trelloList = response.body()
-                        trelloList?.forEach {
-                            if (it.name != null) {
-                                arrayListProjectNames.add(it.name!!)
-                                arrayListProjectId.add(it.id!!)
+                    if (response.code() !in 200..299) {
+                        trelloExceptionHandler()
+                    } else {
+                        val coroutineCallTrelloProject = CoroutineScope(Dispatchers.IO)
+                        coroutineCallTrelloProject.async {
+                            Log.d("trello_project_success", response.code().toString())
+                            val trelloList = response.body()
+                            trelloList?.forEach {
+                                if (it.name != null) {
+                                    arrayListProjectNames.add(it.name!!)
+                                    arrayListProjectId.add(it.id!!)
+                                }
                             }
-                        }
-                        if (arrayListProjectId.size > projectPosition) {
-                            gatherTaskBoard(projectId = arrayListProjectId[projectPosition])
-                            gatherTaskMember(projectId = arrayListProjectId[projectPosition])
-                            gatherTaskLabel(projectId = arrayListProjectId[projectPosition])
-                        }
-                        updateFields()
+                            if (arrayListProjectId.size > projectPosition) {
+                                gatherTaskBoard(projectId = arrayListProjectId[projectPosition])
+                                gatherTaskMember(projectId = arrayListProjectId[projectPosition])
+                                gatherTaskLabel(projectId = arrayListProjectId[projectPosition])
+                            }
+                            updateFields()
 
+                        }
                     }
                 }
             })
@@ -404,26 +411,31 @@ internal class TrelloApi {
                     call: retrofit2.Call<JsonArray>,
                     response: retrofit2.Response<JsonArray>
                 ) {
-                    val coroutineCallTrelloBoard = CoroutineScope(Dispatchers.IO)
-                    coroutineCallTrelloBoard.async {
-                        try {
-                            Log.d("trello_board_success", response.code().toString())
-                            val trelloList = response.body()?.asJsonArray
-                            trelloList?.forEach {
-                                if (it.asJsonObject["data"].asJsonObject["board"].asJsonObject["id"].asString == projectId) {
-                                    if (it.asJsonObject["data"].asJsonObject["list"] != null) {
-                                        if (!arrayListBoardNames.contains(it.asJsonObject["data"].asJsonObject["list"].asJsonObject["name"].asString)) {
-                                            arrayListBoardNames.add(it.asJsonObject["data"].asJsonObject["list"].asJsonObject["name"].asString)
-                                        }
-                                        if (!arrayListBoardId.contains(it.asJsonObject["data"].asJsonObject["list"].asJsonObject["id"].asString)) {
-                                            arrayListBoardId.add(it.asJsonObject["data"].asJsonObject["list"].asJsonObject["id"].asString)
+                    if (response.code() !in 200..299) {
+                        trelloExceptionHandler()
+                    } else {
+                        val coroutineCallTrelloBoard = CoroutineScope(Dispatchers.IO)
+                        coroutineCallTrelloBoard.async {
+                            try {
+
+                                Log.d("trello_board_success", response.code().toString())
+                                val trelloList = response.body()?.asJsonArray
+                                trelloList?.forEach {
+                                    if (it.asJsonObject["data"].asJsonObject["board"].asJsonObject["id"].asString == projectId) {
+                                        if (it.asJsonObject["data"].asJsonObject["list"] != null) {
+                                            if (!arrayListBoardNames.contains(it.asJsonObject["data"].asJsonObject["list"].asJsonObject["name"].asString)) {
+                                                arrayListBoardNames.add(it.asJsonObject["data"].asJsonObject["list"].asJsonObject["name"].asString)
+                                            }
+                                            if (!arrayListBoardId.contains(it.asJsonObject["data"].asJsonObject["list"].asJsonObject["id"].asString)) {
+                                                arrayListBoardId.add(it.asJsonObject["data"].asJsonObject["list"].asJsonObject["id"].asString)
+                                            }
                                         }
                                     }
                                 }
+                                updateFields()
+                            } catch (e: Exception) {
+                                trelloExceptionHandler(e = e)
                             }
-                            updateFields()
-                        } catch (e: Exception) {
-                            trelloExceptionHandler(e = e)
                         }
                     }
                 }
@@ -453,17 +465,21 @@ internal class TrelloApi {
                     call: retrofit2.Call<JsonArray>,
                     response: retrofit2.Response<JsonArray>
                 ) {
-                    val coroutineCallTrelloMember = CoroutineScope(Dispatchers.IO)
-                    coroutineCallTrelloMember.async {
-                        try {
-                            Log.d("trello_member_success", response.code().toString())
-                            val trelloList = response.body()
-                            trelloList?.forEach {
-                                gatherTaskMemberNames(idName = it.asJsonObject["idMember"].asString)
+                    if (response.code() !in 200..299) {
+                        trelloExceptionHandler()
+                    } else {
+                        val coroutineCallTrelloMember = CoroutineScope(Dispatchers.IO)
+                        coroutineCallTrelloMember.async {
+                            try {
+                                Log.d("trello_member_success", response.code().toString())
+                                val trelloList = response.body()
+                                trelloList?.forEach {
+                                    gatherTaskMemberNames(idName = it.asJsonObject["idMember"].asString)
+                                }
+                                updateFields()
+                            } catch (e: Exception) {
+                                trelloExceptionHandler(e = e)
                             }
-                            updateFields()
-                        } catch (e: Exception) {
-                            trelloExceptionHandler(e = e)
                         }
                     }
                 }
@@ -497,21 +513,25 @@ internal class TrelloApi {
                     call: retrofit2.Call<JsonObject>,
                     response: retrofit2.Response<JsonObject>
                 ) {
-                    val coroutineCallTrelloMemberName = CoroutineScope(Dispatchers.IO)
-                    coroutineCallTrelloMemberName.async {
-                        try {
-                            Log.d("trello_name_success", response.code().toString())
-                            val trelloList = response.body()
-                            if (trelloList != null) {
-                                arrayListMemberNames.add(trelloList.asJsonObject["username"].asString)
-                                arrayListMemberId.add(trelloList.asJsonObject["id"].asString)
-                                hashMapMember[trelloList.asJsonObject["username"].asString] =
-                                    trelloList.asJsonObject["id"].asString
-                            }
+                    if (response.code() !in 200..299) {
+                        trelloExceptionHandler()
+                    } else {
+                        val coroutineCallTrelloMemberName = CoroutineScope(Dispatchers.IO)
+                        coroutineCallTrelloMemberName.async {
+                            try {
+                                Log.d("trello_name_success", response.code().toString())
+                                val trelloList = response.body()
+                                if (trelloList != null) {
+                                    arrayListMemberNames.add(trelloList.asJsonObject["username"].asString)
+                                    arrayListMemberId.add(trelloList.asJsonObject["id"].asString)
+                                    hashMapMember[trelloList.asJsonObject["username"].asString] =
+                                        trelloList.asJsonObject["id"].asString
+                                }
 
-                            updateFields()
-                        } catch (e: Exception) {
-                            trelloExceptionHandler(e = e)
+                                updateFields()
+                            } catch (e: Exception) {
+                                trelloExceptionHandler(e = e)
+                            }
                         }
                     }
                 }
@@ -541,27 +561,31 @@ internal class TrelloApi {
                     call: retrofit2.Call<JsonArray>,
                     response: retrofit2.Response<JsonArray>
                 ) {
-                    val coroutineCallGithubProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallGithubProject.async {
-                        try {
-                            Log.d("trello_member_success", response.code().toString())
-                            val trelloList = response.body()
-                            trelloList?.forEach {
-                                if (it.asJsonObject["name"].asString.isNotEmpty() && it.asJsonObject["name"].asString != null) {
-                                    arrayListLabelNames.add(it.asJsonObject["name"].asString)
-                                    hashMapLabel[it.asJsonObject["name"].asString] =
-                                        it.asJsonObject["id"].asString
-                                } else {
-                                    arrayListLabelNames.add(it.asJsonObject["id"].asString)
-                                    hashMapLabel[it.asJsonObject["id"].asString] =
-                                        it.asJsonObject["id"].asString
+                    if (response.code() !in 200..299) {
+                        trelloExceptionHandler()
+                    } else {
+                        val coroutineCallGithubProject = CoroutineScope(Dispatchers.IO)
+                        coroutineCallGithubProject.async {
+                            try {
+                                Log.d("trello_member_success", response.code().toString())
+                                val trelloList = response.body()
+                                trelloList?.forEach {
+                                    if (it.asJsonObject["name"].asString.isNotEmpty() && it.asJsonObject["name"].asString != null) {
+                                        arrayListLabelNames.add(it.asJsonObject["name"].asString)
+                                        hashMapLabel[it.asJsonObject["name"].asString] =
+                                            it.asJsonObject["id"].asString
+                                    } else {
+                                        arrayListLabelNames.add(it.asJsonObject["id"].asString)
+                                        hashMapLabel[it.asJsonObject["id"].asString] =
+                                            it.asJsonObject["id"].asString
+                                    }
+                                    arrayListLabelId.add(it.asJsonObject["id"].asString)
+                                    arrayListLabelColor.add(it.asJsonObject["color"].asString)
                                 }
-                                arrayListLabelId.add(it.asJsonObject["id"].asString)
-                                arrayListLabelColor.add(it.asJsonObject["color"].asString)
+                                updateFields()
+                            } catch (e: Exception) {
+                                trelloExceptionHandler(e = e)
                             }
-                            updateFields()
-                        } catch (e: Exception) {
-                            trelloExceptionHandler(e = e)
                         }
                     }
                 }
@@ -591,7 +615,7 @@ internal class TrelloApi {
      * This method is used for getting details of editText in the trello layout.
      * @param editTextTitle is used for getting title details from title editText in the trello layout.
      */
-    internal fun gatherEditTextDetails(editTextTitle: EditText,editTextDescription:EditText) {
+    internal fun gatherEditTextDetails(editTextTitle: EditText, editTextDescription: EditText) {
         title = editTextTitle.text.toString()
         description = editTextDescription.text.toString()
     }

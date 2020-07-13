@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
 import models.AccountIdService
+import observers.LogFragmentLifeCycleObserver
 import okhttp3.*
 import services.LoggerBirdService
 import java.io.File
@@ -198,6 +199,12 @@ internal class PivotalTrackerApi {
             this.activity = activity
             val jsonObject = JsonObject()
             val jsonArrayLabels = JsonArray()
+            val stringBuilder = StringBuilder()
+            if (!description.isNullOrEmpty()) {
+                stringBuilder.append(description + "\n")
+            }
+            stringBuilder.append("Life Cycle Details:"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+            jsonObject.addProperty("description", stringBuilder.toString())
             if (RecyclerViewPivotalLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()) {
                 RecyclerViewPivotalLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
                     jsonArrayLabels.add(hashMapLabel[it.labelName]?.toInt())
@@ -229,9 +236,6 @@ internal class PivotalTrackerApi {
             }
             if (!storyType.isNullOrEmpty()) {
                 jsonObject.addProperty("story_type", storyType)
-            }
-            if (!description.isNullOrEmpty()) {
-                jsonObject.addProperty("description", description)
             }
             jsonObject.addProperty("name", title)
             RetrofitPivotalClient.getPivotalUserClient(url = "https://www.pivotaltracker.com/services/v5/projects/$projectId/")
@@ -593,22 +597,26 @@ internal class PivotalTrackerApi {
                     call: retrofit2.Call<JsonArray>,
                     response: retrofit2.Response<JsonArray>
                 ) {
-                    val coroutineCallPivotalProject = CoroutineScope(Dispatchers.IO)
-                    coroutineCallPivotalProject.async {
-                        Log.d("pivotal_project_success", response.code().toString())
-                        val pivotalList = response.body()
-                        pivotalList?.forEach {
-                            if (it.asJsonObject["name"] != null) {
-                                arrayListProjectNames.add(it.asJsonObject["name"].asString)
-                                arrayListProjectId.add(it.asJsonObject["id"].asString)
+                    if(response.code() !in 200..299){
+                        resetPivotalValues(shareLayoutMessage = "pivotal_error")
+                    }else{
+                        val coroutineCallPivotalProject = CoroutineScope(Dispatchers.IO)
+                        coroutineCallPivotalProject.async {
+                            Log.d("pivotal_project_success", response.code().toString())
+                            val pivotalList = response.body()
+                            pivotalList?.forEach {
+                                if (it.asJsonObject["name"] != null) {
+                                    arrayListProjectNames.add(it.asJsonObject["name"].asString)
+                                    arrayListProjectId.add(it.asJsonObject["id"].asString)
+                                }
                             }
-                        }
-                        if (arrayListProjectId.size > projectPosition) {
-                            gatherTaskLabel(projectId = arrayListProjectId[projectPosition])
-                            gatherTaskMembers(projectId = arrayListProjectId[projectPosition])
-                        }
-                        updateFields()
+                            if (arrayListProjectId.size > projectPosition) {
+                                gatherTaskLabel(projectId = arrayListProjectId[projectPosition])
+                                gatherTaskMembers(projectId = arrayListProjectId[projectPosition])
+                            }
+                            updateFields()
 
+                        }
                     }
                 }
             })
@@ -658,20 +666,24 @@ internal class PivotalTrackerApi {
                     call: retrofit2.Call<JsonArray>,
                     response: retrofit2.Response<JsonArray>
                 ) {
-                    val coroutineCallLabel = CoroutineScope(Dispatchers.IO)
-                    coroutineCallLabel.async {
-                        try {
-                            Log.d("pivotal_label_success", response.code().toString())
-                            val labelList = response.body()
-                            labelList?.forEach {
-                                arrayListLabelId.add(it.asJsonObject["id"].asString)
-                                arrayListLabelNames.add(it.asJsonObject["name"].asString)
-                                hashMapLabel[it.asJsonObject["name"].asString] =
-                                    it.asJsonObject["id"].asString
+                    if(response.code() !in 200..299){
+                        resetPivotalValues(shareLayoutMessage = "pivotal_error")
+                    }else{
+                        val coroutineCallLabel = CoroutineScope(Dispatchers.IO)
+                        coroutineCallLabel.async {
+                            try {
+                                Log.d("pivotal_label_success", response.code().toString())
+                                val labelList = response.body()
+                                labelList?.forEach {
+                                    arrayListLabelId.add(it.asJsonObject["id"].asString)
+                                    arrayListLabelNames.add(it.asJsonObject["name"].asString)
+                                    hashMapLabel[it.asJsonObject["name"].asString] =
+                                        it.asJsonObject["id"].asString
+                                }
+                                updateFields()
+                            } catch (e: Exception) {
+                                pivotalExceptionHandler(e = e)
                             }
-                            updateFields()
-                        } catch (e: Exception) {
-                            pivotalExceptionHandler(e = e)
                         }
                     }
                 }
@@ -701,21 +713,25 @@ internal class PivotalTrackerApi {
                     call: retrofit2.Call<JsonArray>,
                     response: retrofit2.Response<JsonArray>
                 ) {
-                    val coroutineCallLabel = CoroutineScope(Dispatchers.IO)
-                    coroutineCallLabel.async {
-                        try {
-                            Log.d("pivotal_member_success", response.code().toString())
-                            val memberList = response.body()
-                            memberList?.forEach {
-                                arrayListMemberId.add(it.asJsonObject["person"].asJsonObject["id"].asString)
-                                arrayListRequesterNames.add(it.asJsonObject["person"].asJsonObject["name"].asString)
-                                arrayListOwnersNames.add(it.asJsonObject["person"].asJsonObject["name"].asString)
-                                hashMapOwner[it.asJsonObject["person"].asJsonObject["name"].asString] =
-                                    it.asJsonObject["person"].asJsonObject["id"].asString
+                    if(response.code() !in 200..299){
+                        resetPivotalValues(shareLayoutMessage = "pivotal_error")
+                    }else{
+                        val coroutineCallLabel = CoroutineScope(Dispatchers.IO)
+                        coroutineCallLabel.async {
+                            try {
+                                Log.d("pivotal_member_success", response.code().toString())
+                                val memberList = response.body()
+                                memberList?.forEach {
+                                    arrayListMemberId.add(it.asJsonObject["person"].asJsonObject["id"].asString)
+                                    arrayListRequesterNames.add(it.asJsonObject["person"].asJsonObject["name"].asString)
+                                    arrayListOwnersNames.add(it.asJsonObject["person"].asJsonObject["name"].asString)
+                                    hashMapOwner[it.asJsonObject["person"].asJsonObject["name"].asString] =
+                                        it.asJsonObject["person"].asJsonObject["id"].asString
+                                }
+                                updateFields()
+                            } catch (e: Exception) {
+                                pivotalExceptionHandler(e = e)
                             }
-                            updateFields()
-                        } catch (e: Exception) {
-                            pivotalExceptionHandler(e = e)
                         }
                     }
                 }

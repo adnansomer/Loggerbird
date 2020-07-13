@@ -20,6 +20,7 @@ import exception.LoggerBirdException
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import models.RecyclerViewModel
+import observers.LogFragmentLifeCycleObserver
 import okhttp3.*
 import services.LoggerBirdService
 import utils.other.DefaultToast
@@ -458,7 +459,7 @@ internal class SlackApi {
                         if (messagePath != null) {
                             slack.methods(token).chatPostMessage {
                                 it.channel(hashMapUser[arrayListUsersName[spinnerPosition]].toString())
-                                it.text(messageUser)
+                                it.text(messageUser + "\n" + "Life Cycle Details"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
                                 it.asUser(true)
                             }
                         }
@@ -510,7 +511,7 @@ internal class SlackApi {
                             }
 
                             slack.methods(token).chatPostMessage {
-                                it.channel(channel)
+                                it.channel(channel + "\n" + "Life Cycle Details"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
                                 it.text(message)
                                 it.asUser(true)
                             }

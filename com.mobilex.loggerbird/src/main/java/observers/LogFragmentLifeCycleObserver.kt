@@ -16,13 +16,17 @@ internal class LogFragmentLifeCycleObserver(
 ) :
     FragmentManager.FragmentLifecycleCallbacks() {
     //Global variables.
-    private var stringBuilderFragmentLifeCycleObserver: StringBuilder = StringBuilder()
     private var classList: ArrayList<String> = ArrayList()
-
     //Static global variables.
     companion object {
+        internal var stringBuilderFragmentLifeCycleObserver: StringBuilder = StringBuilder()
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
+    }
+
+    //Constructor.
+    init {
+        stringBuilderFragmentLifeCycleObserver.append("\n" + "Fragment Details:" + "\n")
     }
 
     /**

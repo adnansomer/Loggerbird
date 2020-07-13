@@ -23,6 +23,7 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOption
 import com.mobilex.loggerbird.R
 import exception.LoggerBirdException
 import kotlinx.coroutines.*
+import observers.LogFragmentLifeCycleObserver
 import services.LoggerBirdFutureTaskService
 import services.LoggerBirdService
 import utils.other.DefaultConnectionQueueUtil
@@ -459,9 +460,12 @@ internal class EmailUtil {
                     subject = subject
                 )
                 mimeBodyPart = MimeBodyPart()
+                val stringBuilder = StringBuilder()
                 if (message != null) {
-                    mimeBodyPart.setContent(message, "text/plain")
+                    stringBuilder.append(message + "\n")
                 }
+                stringBuilder.append("Life Cycle Details:"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString()  + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+                mimeBodyPart.setContent(stringBuilder.toString(), "text/plain")
                 multiPart.addBodyPart(
                     mimeBodyPart
                 )

@@ -24,6 +24,7 @@ import loggerbird.LoggerBird
 import loggerbird.LoggerBird.Companion.jiraDomainName
 import models.*
 import models.api.jira.*
+import observers.LogFragmentLifeCycleObserver
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -111,7 +112,6 @@ internal class JiraApi {
     private var queueCreateTask = 0
     private lateinit var timerTaskQueue: TimerTask
     private var controlDuplication = false
-
     /**
      * This method is used for calling an jira action with network connection check.
      * @param filePathMedia is used for getting the reference of current media file.
@@ -333,6 +333,7 @@ internal class JiraApi {
                         val jsonObjectProjectId = JsonObject()
                         val jsonObjectIssueType = JsonObject()
                         val jsonObjectPriorityId = JsonObject()
+                        val stringBuilderDescription = StringBuilder()
                         val gson = GsonBuilder().create()
                         jsonObjectPriorityId.addProperty(
                             "id",
@@ -352,19 +353,19 @@ internal class JiraApi {
                         jsonObjectContent.addProperty("summary", summary)
                         if (description != null || RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.isNotEmpty()) {
                             if (description!!.isNotEmpty() || RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.isNotEmpty()) {
-                                val stringBuilderDescription = StringBuilder()
-                                stringBuilderDescription.append("Description:$description")
+                                stringBuilderDescription.append("Description:$description" + "\n")
                                 var counter = 0
                                 RecyclerViewJiraIssueAdapter.ViewHolder.arrayListIssueNames.forEach {
-                                    stringBuilderDescription.append("\n" + "Linked Issue_" + counter + ":" + LoggerBird.jiraDomainName + "/browse/" + it.issueName)
+                                    stringBuilderDescription.append("\n" + "Linked Issue_" + counter + ":" + jiraDomainName + "/browse/" + it.issueName)
                                     counter++
                                 }
-                                jsonObjectContent.addProperty(
-                                    "description",
-                                    stringBuilderDescription.toString()
-                                )
                             }
                         }
+                        stringBuilderDescription.append("\n" + "Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+                        jsonObjectContent.addProperty(
+                            "description",
+                            stringBuilderDescription.toString()
+                        )
                         if (RecyclerViewJiraLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()) {
                             val jsonArrayLabels = JsonArray()
                             RecyclerViewJiraLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
@@ -1115,20 +1116,24 @@ internal class JiraApi {
                         call: retrofit2.Call<List<JiraProjectModel>>,
                         response: retrofit2.Response<List<JiraProjectModel>>
                     ) {
-                        coroutineCallProjectKeys.async {
-                            Log.d("project_details", response.code().toString())
-                            val projectList = response.body()
-                            projectList?.forEach {
-                                if (it.name != null && it.key != null) {
-                                    arrayListProjects.add(it.name!!)
-                                    arrayListProjectKeys.add(it.key!!)
-                                    jiraTaskGatherFixComp(
-                                        projectKey = it.key!!
-                                    )
-                                }
+                        if (response.code() !in 200..299) {
+                            jiraExceptionHandler()
+                        } else {
+                            coroutineCallProjectKeys.async {
+                                Log.d("project_details", response.code().toString())
+                                val projectList = response.body()
+                                projectList?.forEach {
+                                    if (it.name != null && it.key != null) {
+                                        arrayListProjects.add(it.name!!)
+                                        arrayListProjectKeys.add(it.key!!)
+                                        jiraTaskGatherFixComp(
+                                            projectKey = it.key!!
+                                        )
+                                    }
 
+                                }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -1160,17 +1165,21 @@ internal class JiraApi {
                         call: retrofit2.Call<List<JiraIssueTypeModel>>,
                         response: retrofit2.Response<List<JiraIssueTypeModel>>
                     ) {
-                        coroutineCallIssueTypes.async {
-                            Log.d("issue_type_details", response.code().toString())
-                            val issueTypeList = response.body()
-                            issueTypeList?.forEach {
-                                if (it.name != null && it.id != null) {
-                                    arrayListIssueTypes.add(it.name!!)
-                                    arrayListIssueTypesId.add(it.id!!.toInt())
-                                }
+                        if (response.code() !in 200..299) {
+                            jiraExceptionHandler()
+                        } else {
+                            coroutineCallIssueTypes.async {
+                                Log.d("issue_type_details", response.code().toString())
+                                val issueTypeList = response.body()
+                                issueTypeList?.forEach {
+                                    if (it.name != null && it.id != null) {
+                                        arrayListIssueTypes.add(it.name!!)
+                                        arrayListIssueTypesId.add(it.id!!.toInt())
+                                    }
 
+                                }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -1201,20 +1210,24 @@ internal class JiraApi {
                         call: retrofit2.Call<List<JiraUserModel>>,
                         response: retrofit2.Response<List<JiraUserModel>>
                     ) {
-                        coroutineCallGatherAssignee.async {
-                            val displayNameList = response.body()
-                            displayNameList?.forEach {
-                                if (it.displayName != null) {
-                                    if (!arrayListAssignee.contains(it.displayName!!)) {
-                                        arrayListAssignee.add(it.displayName!!)
-                                        arrayListReporter.add(it.displayName!!)
-                                        arrayListAccountId.add(it.accountId!!)
-                                        arrayListSelf.add(it.self!!)
-                                        arrayListEmailAdresses.add(it.emailAddress!!)
+                        if (response.code() !in 200..299) {
+                            jiraExceptionHandler()
+                        } else {
+                            coroutineCallGatherAssignee.async {
+                                val displayNameList = response.body()
+                                displayNameList?.forEach {
+                                    if (it.displayName != null) {
+                                        if (!arrayListAssignee.contains(it.displayName!!)) {
+                                            arrayListAssignee.add(it.displayName!!)
+                                            arrayListReporter.add(it.displayName!!)
+                                            arrayListAccountId.add(it.accountId!!)
+                                            arrayListSelf.add(it.self!!)
+                                            arrayListEmailAdresses.add(it.emailAddress!!)
+                                        }
                                     }
                                 }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -1246,24 +1259,28 @@ internal class JiraApi {
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-                        coroutineCallLinkedIssues.async {
-                            Log.d("linked_issue_details", response.code().toString())
-                            val linkedIssueDetails = response.body()
-                            linkedIssueDetails?.getAsJsonArray("issueLinkTypes")?.forEach {
-                                if (!arrayListIssueLinkedTypes.contains(it.asJsonObject["inward"].asString)) {
-                                    arrayListIssueLinkedTypes.add(it.asJsonObject["inward"].asString)
-                                    arrayListInwardLinkedTypes.add(it.asJsonObject["inward"].asString)
-                                    hashMapLinkedIssues[it.asJsonObject["inward"].asString] =
-                                        it.asJsonObject["name"].asString
+                        if (response.code() !in 200..299) {
+                            jiraExceptionHandler()
+                        } else {
+                            coroutineCallLinkedIssues.async {
+                                Log.d("linked_issue_details", response.code().toString())
+                                val linkedIssueDetails = response.body()
+                                linkedIssueDetails?.getAsJsonArray("issueLinkTypes")?.forEach {
+                                    if (!arrayListIssueLinkedTypes.contains(it.asJsonObject["inward"].asString)) {
+                                        arrayListIssueLinkedTypes.add(it.asJsonObject["inward"].asString)
+                                        arrayListInwardLinkedTypes.add(it.asJsonObject["inward"].asString)
+                                        hashMapLinkedIssues[it.asJsonObject["inward"].asString] =
+                                            it.asJsonObject["name"].asString
+                                    }
+                                    if (!arrayListIssueLinkedTypes.contains(it.asJsonObject["outward"].asString)) {
+                                        arrayListIssueLinkedTypes.add(it.asJsonObject["outward"].asString)
+                                        arrayListOutwardLinkedTypes.add(it.asJsonObject["outward"].asString)
+                                        hashMapLinkedIssues[it.asJsonObject["outward"].asString] =
+                                            it.asJsonObject["name"].asString
+                                    }
                                 }
-                                if (!arrayListIssueLinkedTypes.contains(it.asJsonObject["outward"].asString)) {
-                                    arrayListIssueLinkedTypes.add(it.asJsonObject["outward"].asString)
-                                    arrayListOutwardLinkedTypes.add(it.asJsonObject["outward"].asString)
-                                    hashMapLinkedIssues[it.asJsonObject["outward"].asString] =
-                                        it.asJsonObject["name"].asString
-                                }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -1297,20 +1314,24 @@ internal class JiraApi {
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-                        coroutineCallGatherIssues.async {
-                            Log.d("issue_details", response.code().toString())
-                            val issueList = response.body()
-                            issueList?.getAsJsonArray("issues")?.forEach {
-                                if (task != "duplication" && exceptionMessage == null) {
-                                    arrayListIssues.add(it.asJsonObject["key"].asString)
-                                } else {
-                                    if (exceptionMessage!! == it.asJsonObject["fields"].asJsonObject["description"].asString) {
-                                        controlDuplication = true
+                        if (response.code() !in 200..299) {
+                            jiraExceptionHandler()
+                        } else {
+                            coroutineCallGatherIssues.async {
+                                Log.d("issue_details", response.code().toString())
+                                val issueList = response.body()
+                                issueList?.getAsJsonArray("issues")?.forEach {
+                                    if (task != "duplication" && exceptionMessage == null) {
+                                        arrayListIssues.add(it.asJsonObject["key"].asString)
+                                    } else {
+                                        if (exceptionMessage!! == it.asJsonObject["fields"].asJsonObject["description"].asString) {
+                                            controlDuplication = true
+                                        }
                                     }
                                 }
-                            }
-                            if (task != "duplication") {
-                                updateFields()
+                                if (task != "duplication") {
+                                    updateFields()
+                                }
                             }
                         }
                     }
@@ -1343,13 +1364,17 @@ internal class JiraApi {
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-                        coroutineCallGatherLabels.async {
-                            Log.d("label_details", response.code().toString())
-                            val labelList = response.body()
-                            labelList?.getAsJsonArray("values")?.forEach {
-                                arrayListLabel.add(it.asString)
+                        if (response.code() !in 200..299) {
+                            jiraExceptionHandler()
+                        } else {
+                            coroutineCallGatherLabels.async {
+                                Log.d("label_details", response.code().toString())
+                                val labelList = response.body()
+                                labelList?.getAsJsonArray("values")?.forEach {
+                                    arrayListLabel.add(it.asString)
+                                }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -1381,20 +1406,24 @@ internal class JiraApi {
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-                        coroutineCallEpic.async {
-                            Log.d("epic_details", response.code().toString())
-                            val epicList = response.body()
-                            epicList?.getAsJsonArray("issues")?.forEach {
+                        if (response.code() !in 200..299) {
+                            jiraExceptionHandler()
+                        } else {
+                            coroutineCallEpic.async {
+                                Log.d("epic_details", response.code().toString())
+                                val epicList = response.body()
+                                epicList?.getAsJsonArray("issues")?.forEach {
 
-                                if (!arrayListEpicLink.contains(it.asJsonObject["fields"].asJsonObject[epicNameField].asString + " " + "-" + " " + "(" + it.asJsonObject["key"].asString + ")")) {
-                                    arrayListEpicLink.add(it.asJsonObject["fields"].asJsonObject[epicNameField].asString + " " + "-" + " " + "(" + it.asJsonObject["key"].asString + ")")
-                                }
-                                if (!arrayListEpicName.contains(it.asJsonObject["fields"].asJsonObject[epicNameField].asString)) {
-                                    arrayListEpicName.add(it.asJsonObject["fields"].asJsonObject[epicNameField].asString)
-                                }
+                                    if (!arrayListEpicLink.contains(it.asJsonObject["fields"].asJsonObject[epicNameField].asString + " " + "-" + " " + "(" + it.asJsonObject["key"].asString + ")")) {
+                                        arrayListEpicLink.add(it.asJsonObject["fields"].asJsonObject[epicNameField].asString + " " + "-" + " " + "(" + it.asJsonObject["key"].asString + ")")
+                                    }
+                                    if (!arrayListEpicName.contains(it.asJsonObject["fields"].asJsonObject[epicNameField].asString)) {
+                                        arrayListEpicName.add(it.asJsonObject["fields"].asJsonObject[epicNameField].asString)
+                                    }
 //                                arrayListEpicLink.add(it.asJsonObject[epicNameField].asString)
+                                }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -1426,16 +1455,20 @@ internal class JiraApi {
                         call: retrofit2.Call<List<JiraPriorityModel>>,
                         response: retrofit2.Response<List<JiraPriorityModel>>
                     ) {
-                        coroutineCallPriorities.async {
-                            Log.d("priority_details", response.code().toString())
-                            val priorityList = response.body()
-                            priorityList?.forEach {
-                                if (it.name != null && it.id != null) {
-                                    arrayListPriorities.add(it.name!!)
-                                    arrayListPrioritiesId.add(it.id!!.toInt())
+                        if (response.code() !in 200..299) {
+                            jiraExceptionHandler()
+                        } else {
+                            coroutineCallPriorities.async {
+                                Log.d("priority_details", response.code().toString())
+                                val priorityList = response.body()
+                                priorityList?.forEach {
+                                    if (it.name != null && it.id != null) {
+                                        arrayListPriorities.add(it.name!!)
+                                        arrayListPrioritiesId.add(it.id!!.toInt())
+                                    }
                                 }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -1520,49 +1553,58 @@ internal class JiraApi {
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-                        coroutineCallSprint.async {
-                            Log.d("sprint_details", response.code().toString())
-                            val boardList = response.body()
-                            boardList?.getAsJsonArray("values")?.forEach {
-                                if (it.asJsonObject["type"].asString == "scrum") {
-                                    arrayListBoardId.add(it.asJsonObject["id"].asString)
+                        if (response.code() !in 200..299) {
+                            jiraExceptionHandler()
+                        } else {
+                            coroutineCallSprint.async {
+                                Log.d("sprint_details", response.code().toString())
+                                val boardList = response.body()
+                                boardList?.getAsJsonArray("values")?.forEach {
+                                    if (it.asJsonObject["type"].asString == "scrum") {
+                                        arrayListBoardId.add(it.asJsonObject["id"].asString)
+                                    }
                                 }
-                            }
-                            arrayListBoardId.forEach {
-                                RetrofitJiraClient.getJiraUserClient(
-                                    url = "$jiraDomainName/rest/agile/1.0/board/$it/"
-                                )
-                                    .create(AccountIdService::class.java)
-                                    .getSprintList()
-                                    .enqueue(object : retrofit2.Callback<JsonObject> {
-                                        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                                        override fun onFailure(
-                                            call: retrofit2.Call<JsonObject>,
-                                            t: Throwable
-                                        ) {
-                                            jiraExceptionHandler(throwable = t)
-                                        }
+                                arrayListBoardId.forEach {
+                                    RetrofitJiraClient.getJiraUserClient(
+                                        url = "$jiraDomainName/rest/agile/1.0/board/$it/"
+                                    )
+                                        .create(AccountIdService::class.java)
+                                        .getSprintList()
+                                        .enqueue(object : retrofit2.Callback<JsonObject> {
+                                            @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                                            override fun onFailure(
+                                                call: retrofit2.Call<JsonObject>,
+                                                t: Throwable
+                                            ) {
+                                                jiraExceptionHandler(throwable = t)
+                                            }
 
-                                        override fun onResponse(
-                                            call: retrofit2.Call<JsonObject>,
-                                            response: retrofit2.Response<JsonObject>
-                                        ) {
-
-                                            Log.d("sprint_details", response.code().toString())
-                                            val displaySprintList = response.body()
-                                            displaySprintList?.getAsJsonArray("values")
-                                                ?.forEach { sprint ->
-                                                    if (sprint.asJsonObject["state"].asString == "active") {
-                                                        arrayListSprintName.add(sprint.asJsonObject["name"].asString)
-                                                        hashMapSprint[sprint.asJsonObject["name"].asString] =
-                                                            sprint.asJsonObject["id"].asString
-                                                    }
+                                            override fun onResponse(
+                                                call: retrofit2.Call<JsonObject>,
+                                                response: retrofit2.Response<JsonObject>
+                                            ) {
+                                                if (response.code() !in 200..299) {
+                                                    jiraExceptionHandler()
+                                                } else {
+                                                    Log.d(
+                                                        "sprint_details",
+                                                        response.code().toString()
+                                                    )
+                                                    val displaySprintList = response.body()
+                                                    displaySprintList?.getAsJsonArray("values")
+                                                        ?.forEach { sprint ->
+                                                            if (sprint.asJsonObject["state"].asString == "active") {
+                                                                arrayListSprintName.add(sprint.asJsonObject["name"].asString)
+                                                                hashMapSprint[sprint.asJsonObject["name"].asString] =
+                                                                    sprint.asJsonObject["id"].asString
+                                                            }
+                                                        }
                                                 }
-
-                                        }
-                                    })
+                                            }
+                                        })
+                                }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -1594,14 +1636,18 @@ internal class JiraApi {
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-                        coroutineCallGatherBoards.async {
-                            Log.d("board_details", response.code().toString())
-                            val boardList = response.body()
-                            boardList?.getAsJsonArray("values")?.forEach {
-                                hashMapBoard[it.asJsonObject["location"].asJsonObject["projectKey"].asString] =
-                                    it.asJsonObject["type"].asString
+                        if(response.code() !in 200..299){
+                            jiraExceptionHandler()
+                        }else{
+                            coroutineCallGatherBoards.async {
+                                Log.d("board_details", response.code().toString())
+                                val boardList = response.body()
+                                boardList?.getAsJsonArray("values")?.forEach {
+                                    hashMapBoard[it.asJsonObject["location"].asJsonObject["projectKey"].asString] =
+                                        it.asJsonObject["type"].asString
+                                }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -1633,19 +1679,23 @@ internal class JiraApi {
                         call: retrofit2.Call<List<JiraFieldModel>>,
                         response: retrofit2.Response<List<JiraFieldModel>>
                     ) {
-                        coroutineCallGatherFields.async {
-                            Log.d("field_details", response.code().toString())
-                            val fieldList = response.body()
-                            fieldList?.forEach {
-                                when (it.name) {
-                                    "Sprint" -> sprintField = it.id
-                                    "Start date" -> startDateField = it.id
-                                    "Epic Name" -> epicNameField = it.id
-                                    "Epic Link" -> epicLinkField = it.id
+                        if (response.code() !in 200..299) {
+                            jiraExceptionHandler()
+                        } else {
+                            coroutineCallGatherFields.async {
+                                Log.d("field_details", response.code().toString())
+                                val fieldList = response.body()
+                                fieldList?.forEach {
+                                    when (it.name) {
+                                        "Sprint" -> sprintField = it.id
+                                        "Start date" -> startDateField = it.id
+                                        "Epic Name" -> epicNameField = it.id
+                                        "Epic Link" -> epicLinkField = it.id
+                                    }
                                 }
+                                updateFields()
+                                jiraTaskGatherEpics()
                             }
-                            updateFields()
-                            jiraTaskGatherEpics()
                         }
                     }
                 })
