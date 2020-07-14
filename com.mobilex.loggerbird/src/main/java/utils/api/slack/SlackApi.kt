@@ -27,7 +27,6 @@ import utils.other.DefaultToast
 import utils.other.InternetConnectionUtil
 import java.io.File
 import java.io.IOException
-import java.lang.StringBuilder
 import java.net.SocketTimeoutException
 import java.util.*
 import kotlin.collections.ArrayList
@@ -466,7 +465,7 @@ internal class SlackApi {
                                 it.channel(hashMapUser[arrayListUsersName[spinnerPosition]].toString())
                                 stringBuilder.append("Life Cycle Details:" + "\n")
                                 LoggerBird.classPathList.forEach { classPath ->
-                                    stringBuilder.append("$classPath\n          |\n         v\n")
+                                    stringBuilder.append("$classPath\n")
                                 }
                                 it.text(messageUser + "\n" + stringBuilder.toString())
 //                                it.text(messageUser + "\n" + "Life Cycle Details"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
@@ -523,7 +522,7 @@ internal class SlackApi {
                             slack.methods(token).chatPostMessage {
                                 stringBuilder.append("Life Cycle Details:" + "\n")
                                 LoggerBird.classPathList.forEach { classPath ->
-                                    stringBuilder.append("$classPath\n          |\n         v\n")
+                                    stringBuilder.append("$classPath\n")
                                 }
                                 it.channel(channel + "\n" + stringBuilder.toString())
 //                                it.channel(channel + "\n" + "Life Cycle Details" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())

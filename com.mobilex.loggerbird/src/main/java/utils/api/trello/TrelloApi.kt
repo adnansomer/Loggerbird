@@ -200,7 +200,7 @@ internal class TrelloApi {
             }
             stringBuilder.append("Life Cycle Details:" + "\n")
             LoggerBird.classPathList.forEach { classPath ->
-                stringBuilder.append("$classPath\n          |\n         v\n")
+                stringBuilder.append("$classPath\n")
             }
 //            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
             jsonObject.addProperty("desc", stringBuilder.toString())

@@ -232,7 +232,7 @@ internal class GitlabApi {
             }
             stringBuilder.append("Life Cycle Details:" + "\n")
             LoggerBird.classPathList.forEach {
-                stringBuilder.append("$it\n          |\n         v\n")
+                stringBuilder.append("$it\n")
             }
 //            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
             jsonObject.addProperty("description", stringBuilder.toString())

@@ -569,7 +569,7 @@ internal class ClubhouseApi {
                     }
                     stringBuilder.append("\n"+"Life Cycle Details:" + "\n")
                     LoggerBird.classPathList.forEach {
-                        stringBuilder.append("$it\n          |\n         v\n")
+                        stringBuilder.append("$it\n")
                     }
                     val updatedDescription =
                         "$storyDescription\n" + stringBuilder.toString()

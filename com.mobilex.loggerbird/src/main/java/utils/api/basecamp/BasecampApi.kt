@@ -204,7 +204,7 @@ internal class BasecampApi {
 //            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString()  + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
             stringBuilder.append("Life Cycle Details:" + "\n")
             LoggerBird.classPathList.forEach {
-                stringBuilder.append("$it\n          |\n         v\n")
+                stringBuilder.append("$it\n")
             }
             jsonObject.addProperty("content", stringBuilder.toString())
             if (!name.isNullOrEmpty()) {
