@@ -1826,6 +1826,10 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+        private fun saveLifeCycleDetails(filePath: File){
+
+        }
+
 
         /**
          * This Method Saves Component Details To Txt File.

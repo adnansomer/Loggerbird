@@ -266,19 +266,23 @@ internal class ClubhouseApi {
                         call: retrofit2.Call<List<ClubhouseProjectModel>>,
                         response: retrofit2.Response<List<ClubhouseProjectModel>>
                     ) {
-                        val coroutineCallClubhouseDetails = CoroutineScope(Dispatchers.IO)
-                        coroutineCallClubhouseDetails.async {
-                            Log.d("clubhouseProjects", response.code().toString())
-                            val clubhouse = response.body()
-                            Log.d("clubhouseProjects", clubhouse.toString())
-                            clubhouse?.forEach {
-                                if (it.name != null) {
-                                    arrayListProjectId.add(it.id!!)
-                                    arrayListProjectName.add(it.name!!)
-                                    hashMapProjects[it.name!!] = it.id!!
+                        if (response.code() !in 200..299) {
+                            clubhouseExceptionHandler()
+                        }else{
+                            val coroutineCallClubhouseDetails = CoroutineScope(Dispatchers.IO)
+                            coroutineCallClubhouseDetails.async {
+                                Log.d("clubhouseProjects", response.code().toString())
+                                val clubhouse = response.body()
+                                Log.d("clubhouseProjects", clubhouse.toString())
+                                clubhouse?.forEach {
+                                    if (it.name != null) {
+                                        arrayListProjectId.add(it.id!!)
+                                        arrayListProjectName.add(it.name!!)
+                                        hashMapProjects[it.name!!] = it.id!!
+                                    }
                                 }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -314,20 +318,24 @@ internal class ClubhouseApi {
                         call: retrofit2.Call<JsonArray>,
                         response: retrofit2.Response<JsonArray>
                     ) {
-                        val coroutineCallClubhouseDetails = CoroutineScope(Dispatchers.IO)
-                        coroutineCallClubhouseDetails.async {
-                            Log.d("clubhouseUsers", response.code().toString())
-                            val response = response.body()
-                            Log.d("clubhouseUsers", response.toString())
-                            response?.getAsJsonArray()?.forEach {
-                                userId = it.asJsonObject["id"].asString
-                                userName = it.asJsonObject["profile"].asJsonObject["name"].asString
-                                arrayListUsersId.add(userId)
-                                arrayListUsers.add(userName)
-                                hashMapUsers[userName!!] = userId!!
+                        if (response.code() !in 200..299) {
+                            clubhouseExceptionHandler()
+                        }else{
+                            val coroutineCallClubhouseDetails = CoroutineScope(Dispatchers.IO)
+                            coroutineCallClubhouseDetails.async {
+                                Log.d("clubhouseUsers", response.code().toString())
+                                val response = response.body()
+                                Log.d("clubhouseUsers", response.toString())
+                                response?.getAsJsonArray()?.forEach {
+                                    userId = it.asJsonObject["id"].asString
+                                    userName = it.asJsonObject["profile"].asJsonObject["name"].asString
+                                    arrayListUsersId.add(userId)
+                                    arrayListUsers.add(userName)
+                                    hashMapUsers[userName!!] = userId!!
 
+                                }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -364,19 +372,23 @@ internal class ClubhouseApi {
                         call: retrofit2.Call<List<ClubHouseEpicModel>>,
                         response: retrofit2.Response<List<ClubHouseEpicModel>>
                     ) {
-                        val coroutineCallClubhouseDetails = CoroutineScope(Dispatchers.IO)
-                        coroutineCallClubhouseDetails.async {
-                            Log.d("clubhouseEpics", response.code().toString())
-                            val clubhouse = response.body()
-                            Log.d("clubhouseEpics", response.toString())
-                            clubhouse?.forEach {
-                                if (it.name != null) {
-                                    arrayListEpicId.add(it.id!!)
-                                    arrayListEpicName.add(it.name!!)
-                                    hashMapEpic[it.name!!] = it.id!!
+                        if (response.code() !in 200..299) {
+                            clubhouseExceptionHandler()
+                        }else{
+                            val coroutineCallClubhouseDetails = CoroutineScope(Dispatchers.IO)
+                            coroutineCallClubhouseDetails.async {
+                                Log.d("clubhouseEpics", response.code().toString())
+                                val clubhouse = response.body()
+                                Log.d("clubhouseEpics", response.toString())
+                                clubhouse?.forEach {
+                                    if (it.name != null) {
+                                        arrayListEpicId.add(it.id!!)
+                                        arrayListEpicName.add(it.name!!)
+                                        hashMapEpic[it.name!!] = it.id!!
+                                    }
                                 }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -429,22 +441,22 @@ internal class ClubhouseApi {
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-                        if (response.code() in 400..499) {
-                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error")
-                        }
-                        Log.d("clubhousecreate", response.code().toString())
-                        val clubhouse = response.body()
-                        Log.d("clubhousecreate", clubhouse.toString())
-
-                        coroutineCallClubhouseIssue.async {
-                            storyId = response.body()!!["id"].asString
-                            RecyclerViewClubhouseAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
-                                val file = it.file
-                                if (file.exists()) {
-                                    callClubhouseAttachments(
-                                        storyId = storyId,
-                                        filePathMedia = file
-                                    )
+                        if (response.code() !in 200..299) {
+                            clubhouseExceptionHandler()
+                        }else{
+                            Log.d("clubhousecreate", response.code().toString())
+                            val clubhouse = response.body()
+                            Log.d("clubhousecreate", clubhouse.toString())
+                            coroutineCallClubhouseIssue.async {
+                                storyId = response.body()!!["id"].asString
+                                RecyclerViewClubhouseAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
+                                    val file = it.file
+                                    if (file.exists()) {
+                                        callClubhouseAttachments(
+                                            storyId = storyId,
+                                            filePathMedia = file
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -509,25 +521,25 @@ internal class ClubhouseApi {
                         call: retrofit2.Call<JsonArray>,
                         response: retrofit2.Response<JsonArray>
                     ) {
-                        if (response.code() in 400..499) {
-                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error")
-                        }
+                        if (response.code() !in 200..299) {
+                            clubhouseExceptionHandler()
+                        }else{
+                            val coroutineCallClubhouseAttachments = CoroutineScope(Dispatchers.IO)
+                            coroutineCallClubhouseAttachments.async {
+                                Log.d("clubhouse_attachment", response.code().toString())
+                                Log.d("clubhouse_attachment", response.body().toString())
 
-                        val coroutineCallClubhouseAttachments = CoroutineScope(Dispatchers.IO)
-                        coroutineCallClubhouseAttachments.async {
-                            Log.d("clubhouse_attachment", response.code().toString())
-                            Log.d("clubhouse_attachment", response.body().toString())
-
-                            if (filePathMedia.name != "logger_bird_details.txt") {
-                                if (filePathMedia.exists()) {
-                                    filePathMedia.delete()
+                                if (filePathMedia.name != "logger_bird_details.txt") {
+                                    if (filePathMedia.exists()) {
+                                        filePathMedia.delete()
+                                    }
                                 }
-                            }
-                            if (response.body() != null) {
-                                response.body()?.getAsJsonArray()?.forEach {
-                                    arrayListAttachments.add(it.asJsonObject["url"].asString)
+                                if (response.body() != null) {
+                                    response.body()?.getAsJsonArray()?.forEach {
+                                        arrayListAttachments.add(it.asJsonObject["url"].asString)
+                                    }
+                                    callEnqueueClubhouseAttachments(storyId = storyId)
                                 }
-                                callEnqueueClubhouseAttachments(storyId = storyId)
                             }
                         }
                     }
@@ -606,17 +618,17 @@ internal class ClubhouseApi {
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-                        if (response.code() in 400..499) {
-                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error")
-                        } else {
-                            LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse")
-                        }
-                        val coroutineCallClubhouseAttachments = CoroutineScope(Dispatchers.IO)
-                        coroutineCallClubhouseAttachments.async {
-                            val clubhouseAttachments = response.body()
-                            Log.d("clubhouse_attachment_result", response.code().toString())
-                            Log.d("clubhouse_attachment_result", response.body().toString())
+                        if (response.code() !in 200..299) {
+                            clubhouseExceptionHandler()
+                        }else{
+                            val coroutineCallClubhouseAttachments = CoroutineScope(Dispatchers.IO)
+                            coroutineCallClubhouseAttachments.async {
+                                val clubhouseAttachments = response.body()
+                                Log.d("clubhouse_attachment_result", response.code().toString())
+                                Log.d("clubhouse_attachment_result", response.body().toString())
+                                LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse")
 
+                            }
                         }
                     }
                 })
