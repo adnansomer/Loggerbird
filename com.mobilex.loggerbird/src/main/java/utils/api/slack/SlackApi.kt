@@ -456,7 +456,7 @@ internal class SlackApi {
         messagePath: String?,
         slackType: String?
     ) {
-
+        val stringBuilder = StringBuilder()
         when (slackType) {
             "user" ->
                 try {
@@ -464,7 +464,6 @@ internal class SlackApi {
                         if (messagePath != null) {
                             slack.methods(token).chatPostMessage {
                                 it.channel(hashMapUser[arrayListUsersName[spinnerPosition]].toString())
-                                val stringBuilder = StringBuilder()
                                 stringBuilder.append("Life Cycle Details:" + "\n")
                                 LoggerBird.classPathList.forEach { classPath ->
                                     stringBuilder.append("$classPath\n          |\n         v\n")
@@ -522,7 +521,6 @@ internal class SlackApi {
                             }
 
                             slack.methods(token).chatPostMessage {
-                                val stringBuilder = StringBuilder()
                                 stringBuilder.append("Life Cycle Details:" + "\n")
                                 LoggerBird.classPathList.forEach { classPath ->
                                     stringBuilder.append("$classPath\n          |\n         v\n")
