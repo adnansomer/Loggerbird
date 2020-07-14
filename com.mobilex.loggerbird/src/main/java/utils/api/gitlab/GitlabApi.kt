@@ -231,8 +231,10 @@ internal class GitlabApi {
                 jsonObject.addProperty("title", title)
             }
             stringBuilder.append("Life Cycle Details:" + "\n")
+            var classCounter = 0
             LoggerBird.classPathList.forEach {
-                stringBuilder.append("$it\n")
+                stringBuilder.append("$it ($classCounter)\n")
+                classCounter++
             }
 //            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
             jsonObject.addProperty("description", stringBuilder.toString())

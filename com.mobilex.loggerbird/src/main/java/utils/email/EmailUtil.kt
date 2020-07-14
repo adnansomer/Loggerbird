@@ -465,8 +465,10 @@ internal class EmailUtil {
                     stringBuilder.append(message + "\n")
                 }
                 stringBuilder.append("Life Cycle Details:" + "\n")
-                LoggerBird.classPathList.forEach { classPath ->
-                    stringBuilder.append("$classPath\n")
+                var classCounter = 0
+                LoggerBird.classPathList.forEach {
+                    stringBuilder.append("$it ($classCounter)\n")
+                    classCounter++
                 }
 //                stringBuilder.append("Life Cycle Details:"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString()  + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
                 mimeBodyPart.setContent(stringBuilder.toString(), "text/plain")

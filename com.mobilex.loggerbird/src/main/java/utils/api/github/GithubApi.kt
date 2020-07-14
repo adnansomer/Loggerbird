@@ -247,8 +247,10 @@ internal class GithubApi {
                 jsonObject.addProperty("body", stringBuilderGithub.toString() + "\n")
             }
             stringBuilderGithub.append("Life Cycle Details:" + "\n")
+            var classCounter = 0
             LoggerBird.classPathList.forEach {
-                stringBuilderGithub.append("$it\n")
+                stringBuilderGithub.append("$it ($classCounter)\n")
+                classCounter++
             }
 //            stringBuilderGithub.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString() + "\n")
             jsonObject.addProperty("title", title)

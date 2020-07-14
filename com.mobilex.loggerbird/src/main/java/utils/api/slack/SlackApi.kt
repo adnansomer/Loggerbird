@@ -464,8 +464,10 @@ internal class SlackApi {
                             slack.methods(token).chatPostMessage {
                                 it.channel(hashMapUser[arrayListUsersName[spinnerPosition]].toString())
                                 stringBuilder.append("Life Cycle Details:" + "\n")
-                                LoggerBird.classPathList.forEach { classPath ->
-                                    stringBuilder.append("$classPath\n")
+                                var classCounter = 0
+                                LoggerBird.classPathList.forEach {
+                                    stringBuilder.append("$it ($classCounter)\n")
+                                    classCounter++
                                 }
                                 it.text(messageUser + "\n" + stringBuilder.toString())
 //                                it.text(messageUser + "\n" + "Life Cycle Details"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
@@ -521,8 +523,10 @@ internal class SlackApi {
 
                             slack.methods(token).chatPostMessage {
                                 stringBuilder.append("Life Cycle Details:" + "\n")
-                                LoggerBird.classPathList.forEach { classPath ->
-                                    stringBuilder.append("$classPath\n")
+                                var classCounter = 0
+                                LoggerBird.classPathList.forEach {
+                                    stringBuilder.append("$it ($classCounter)\n")
+                                    classCounter++
                                 }
                                 it.channel(channel + "\n" + stringBuilder.toString())
 //                                it.channel(channel + "\n" + "Life Cycle Details" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())

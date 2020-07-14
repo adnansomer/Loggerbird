@@ -568,8 +568,10 @@ internal class ClubhouseApi {
                         attachmentCounter++
                     }
                     stringBuilder.append("\n"+"Life Cycle Details:" + "\n")
+                    var classCounter = 0
                     LoggerBird.classPathList.forEach {
-                        stringBuilder.append("$it\n")
+                        stringBuilder.append("$it ($classCounter)\n")
+                        classCounter++
                     }
                     val updatedDescription =
                         "$storyDescription\n" + stringBuilder.toString()
