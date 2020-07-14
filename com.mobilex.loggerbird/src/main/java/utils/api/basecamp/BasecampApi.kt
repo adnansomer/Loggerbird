@@ -205,7 +205,7 @@ internal class BasecampApi {
             stringBuilder.append("Life Cycle Details:" + "\n")
             var classCounter = 0
             LoggerBird.classPathList.forEach {
-                stringBuilder.append("$it ($classCounter)\n")
+                stringBuilder.append("$it (${LoggerBird.classPathListCounter[classCounter]})\n")
                 classCounter++
             }
             jsonObject.addProperty("content", stringBuilder.toString())

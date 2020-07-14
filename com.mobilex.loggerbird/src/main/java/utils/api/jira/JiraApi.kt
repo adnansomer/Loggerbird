@@ -364,7 +364,7 @@ internal class JiraApi {
                         stringBuilderDescription.append("Life Cycle Details:" + "\n")
                         var classCounter = 0
                         LoggerBird.classPathList.forEach {
-                            stringBuilder.append("$it ($classCounter)\n")
+                            stringBuilderDescription.append("$it (${LoggerBird.classPathListCounter[classCounter]})\n")
                             classCounter++
                         }
 //                        stringBuilderDescription.append("\n" + "Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())

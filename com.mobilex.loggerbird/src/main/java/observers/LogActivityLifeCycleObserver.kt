@@ -120,9 +120,14 @@ internal class LogActivityLifeCycleObserver() :
             }
             if (LoggerBird.classPathList.size > 20) {
                 LoggerBird.classPathList.removeAt(LoggerBird.classPathCounter)
+                LoggerBird.classPathListCounter.removeAt(LoggerBird.classPathCounter)
                 LoggerBird.classPathList.add(
                     LoggerBird.classPathCounter,
                     activity.javaClass.simpleName
+                )
+                LoggerBird.classPathListCounter.add(
+                    LoggerBird.classPathCounter,
+                    LoggerBird.classPathTotalCounter
                 )
                 LoggerBird.classPathCounter++
                 if (LoggerBird.classPathCounter >= LoggerBird.classPathList.size) {
@@ -130,7 +135,9 @@ internal class LogActivityLifeCycleObserver() :
                 }
             } else {
                 LoggerBird.classPathList.add(activity.javaClass.simpleName)
+                LoggerBird.classPathListCounter.add(LoggerBird.classPathTotalCounter)
             }
+            LoggerBird.classPathTotalCounter++
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()

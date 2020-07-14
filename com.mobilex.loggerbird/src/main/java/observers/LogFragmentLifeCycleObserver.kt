@@ -70,14 +70,24 @@ internal class LogFragmentLifeCycleObserver(
             }
             if (LoggerBird.classPathList.size > 20) {
                 LoggerBird.classPathList.removeAt(LoggerBird.classPathCounter)
-                LoggerBird.classPathList.add(LoggerBird.classPathCounter, className)
+                LoggerBird.classPathListCounter.removeAt(LoggerBird.classPathCounter)
+                LoggerBird.classPathList.add(
+                    LoggerBird.classPathCounter,
+                    className
+                )
+                LoggerBird.classPathListCounter.add(
+                    LoggerBird.classPathCounter,
+                    LoggerBird.classPathTotalCounter
+                )
                 LoggerBird.classPathCounter++
                 if (LoggerBird.classPathCounter >= LoggerBird.classPathList.size) {
                     LoggerBird.classPathCounter = 0
                 }
             } else {
                 LoggerBird.classPathList.add(className)
+                LoggerBird.classPathListCounter.add(LoggerBird.classPathTotalCounter)
             }
+            LoggerBird.classPathTotalCounter++
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
