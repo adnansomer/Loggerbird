@@ -70,7 +70,7 @@ internal class GitlabApi {
     private val arrayListLabelsId: ArrayList<String> = ArrayList()
     private val arrayListUsers: ArrayList<String> = ArrayList()
     private val arrayListUsersId: ArrayList<String> = ArrayList()
-    private val arrayListConfidentiality: ArrayList<String> = ArrayList()
+    private val arrayListConfidentiality: ArrayList<String> = arrayListOf("False", "True")
     private val arrayListAttachments: ArrayList<String> = ArrayList()
     private var hashMapProjects: HashMap<String, String> = HashMap()
     private var hashMapMilestones: HashMap<String, String> = HashMap()
@@ -79,8 +79,7 @@ internal class GitlabApi {
     private lateinit var timerTaskQueue: TimerTask
     private lateinit var issueId: String
     internal var dueDate: String? = null
-    private var workQueueLinkedGitlabAttachments: LinkedBlockingQueueUtil =
-        LinkedBlockingQueueUtil()
+    private var workQueueLinkedGitlabAttachments: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
     private var runnableListGitlabAttachments: ArrayList<Runnable> = ArrayList()
     /**
      * This method is used for calling Slack Api in order to determine operation.
@@ -245,7 +244,7 @@ internal class GitlabApi {
             if (dueDate != null) {
                 jsonObject.addProperty("due_date", dueDate)
             }
-            jsonObject.addProperty("confidential", confidentiality)
+            jsonObject.addProperty("confidential", confidentiality!!.toLowerCase())
 
             RetrofitGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/" + hashMapProjects[arrayListProjects[projectPosition]] + "/")
                 .create(AccountIdService::class.java)
@@ -338,24 +337,28 @@ internal class GitlabApi {
                         call: retrofit2.Call<List<GitlabProjectModel>>,
                         response: retrofit2.Response<List<GitlabProjectModel>>
                     ) {
-                        val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
-                        coroutineCallGitlabDetails.async {
-                            Log.d("gitlabprojects", response.code().toString())
-                            val gitlab = response.body()
-                            Log.d("gitlabprojects", gitlab.toString())
+                        if (response.code() !in 200..299) {
+                            gitlabExceptionHandler()
+                        }else{
+                            val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
+                            coroutineCallGitlabDetails.async {
+                                Log.d("gitlabprojects", response.code().toString())
+                                val gitlab = response.body()
+                                Log.d("gitlabprojects", gitlab.toString())
 
-                            val gitlabList = response.body()
-                            gitlabList?.forEach {
-                                if (it.id != null) {
-                                    arrayListProjects.add(it.name!!)
-                                    arrayListProjectsId.add(it.id!!)
-                                    hashMapProjects[it.name!!] = it.id!!
+                                val gitlabList = response.body()
+                                gitlabList?.forEach {
+                                    if (it.id != null) {
+                                        arrayListProjects.add(it.name!!)
+                                        arrayListProjectsId.add(it.id!!)
+                                        hashMapProjects[it.name!!] = it.id!!
+                                    }
                                 }
+                                gatherGitlabMilestonesDetails(projectId = arrayListProjectsId[projectPosition])
+                                gatherGitlabLabelsDetails(projectId = arrayListProjectsId[projectPosition])
+                                gatherGitlabUsersDetails(projectId = arrayListProjectsId[projectPosition])
+                                updateFields()
                             }
-                            gatherGitlabMilestonesDetails(projectId = arrayListProjectsId[projectPosition])
-                            gatherGitlabLabelsDetails(projectId = arrayListProjectsId[projectPosition])
-                            gatherGitlabUsersDetails(projectId = arrayListProjectsId[projectPosition])
-                            updateFields()
                         }
                     }
                 })
@@ -392,21 +395,25 @@ internal class GitlabApi {
                         response: retrofit2.Response<List<GitlabMilestonesModel>>
                     ) {
 
-                        val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
-                        coroutineCallGitlabDetails.async {
-                            Log.d("gitlabmilestones", response.code().toString())
-                            val gitlab = response.body()
-                            Log.d("gitlabmilestones", gitlab.toString())
+                        if (response.code() !in 200..299) {
+                            gitlabExceptionHandler()
+                        }else{
+                            val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
+                            coroutineCallGitlabDetails.async {
+                                Log.d("gitlabmilestones", response.code().toString())
+                                val gitlab = response.body()
+                                Log.d("gitlabmilestones", gitlab.toString())
 
-                            val gitlabMilestonesList = response.body()
-                            gitlabMilestonesList?.forEach {
-                                if (it.id != null) {
-                                    arrayListMilestones.add(it.title!!)
-                                    arrayListMilestonesId.add(it.id!!)
-                                    hashMapMilestones[it.title!!] = it.id!!
+                                val gitlabMilestonesList = response.body()
+                                gitlabMilestonesList?.forEach {
+                                    if (it.id != null) {
+                                        arrayListMilestones.add(it.title!!)
+                                        arrayListMilestonesId.add(it.id!!)
+                                        hashMapMilestones[it.title!!] = it.id!!
+                                    }
                                 }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -443,21 +450,25 @@ internal class GitlabApi {
                         response: retrofit2.Response<List<GitlabLabelsModel>>
                     ) {
 
-                        val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
-                        coroutineCallGitlabDetails.async {
-                            Log.d("gitlablabels", response.code().toString())
-                            val gitlab = response.body()
-                            Log.d("gitlablabels", gitlab.toString())
+                        if (response.code() !in 200..299) {
+                            gitlabExceptionHandler()
+                        }else{
+                            val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
+                            coroutineCallGitlabDetails.async {
+                                Log.d("gitlablabels", response.code().toString())
+                                val gitlab = response.body()
+                                Log.d("gitlablabels", gitlab.toString())
 
-                            val gitlabLabelsList = response.body()
-                            gitlabLabelsList?.forEach {
-                                if (it.id != null) {
-                                    arrayListLabels.add(it.name!!)
-                                    arrayListLabelsId.add(it.id!!)
-                                    hashMapLabels[it.name!!] = it.id!!
+                                val gitlabLabelsList = response.body()
+                                gitlabLabelsList?.forEach {
+                                    if (it.id != null) {
+                                        arrayListLabels.add(it.name!!)
+                                        arrayListLabelsId.add(it.id!!)
+                                        hashMapLabels[it.name!!] = it.id!!
+                                    }
                                 }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -493,21 +504,24 @@ internal class GitlabApi {
                         call: retrofit2.Call<List<GitlabUsersModel>>,
                         response: retrofit2.Response<List<GitlabUsersModel>>
                     ) {
+                        if (response.code() !in 200..299) {
+                            gitlabExceptionHandler()
+                        }else{
+                            val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
+                            coroutineCallGitlabDetails.async {
+                                val gitlab = response.body()
+                                Log.d("gitlabusers", gitlab.toString())
 
-                        val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
-                        coroutineCallGitlabDetails.async {
-                            val gitlab = response.body()
-                            Log.d("gitlabusers", gitlab.toString())
-
-                            val gitlabMilestonesList = response.body()
-                            gitlabMilestonesList?.forEach {
-                                if (it.id != null) {
-                                    arrayListUsers.add(it.name!!)
-                                    arrayListUsersId.add(it.id!!)
-                                    hashMapUsers[it.name!!] = it.id!!
+                                val gitlabMilestonesList = response.body()
+                                gitlabMilestonesList?.forEach {
+                                    if (it.id != null) {
+                                        arrayListUsers.add(it.name!!)
+                                        arrayListUsersId.add(it.id!!)
+                                        hashMapUsers[it.name!!] = it.id!!
+                                    }
                                 }
+                                updateFields()
                             }
-                            updateFields()
                         }
                     }
                 })
@@ -547,9 +561,6 @@ internal class GitlabApi {
                 hashMapMilestones.clear()
                 hashMapLabels.clear()
                 hashMapUsers.clear()
-                arrayListConfidentiality.clear()
-                arrayListConfidentiality.add("false")
-                arrayListConfidentiality.add("true")
                 gatherGitlabProjectDetails()
 
             } catch (e: Exception) {
@@ -593,10 +604,9 @@ internal class GitlabApi {
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-                        if (response.code() in 400..499) {
-                            LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error")
+                        if (response.code() !in 200..299) {
+                            gitlabExceptionHandler()
                         }
-
                         if (filePathMedia!!.name != "logger_bird_details.txt") {
                             if (filePathMedia!!.exists()) {
                                 filePathMedia!!.delete()
@@ -677,17 +687,16 @@ internal class GitlabApi {
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-
-                        if (response.code() in 400..499) {
-                            LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error") }
-                        else{
-                            LoggerBirdService.loggerBirdService.finishShareLayout("gitlab")
-                        }
-                        val coroutineCallGitlabAttachments = CoroutineScope(Dispatchers.IO)
-                        coroutineCallGitlabAttachments.async {
-                            val gitlabAttachments = response.body()
-                            Log.d("gitlab_attachment_result", response.code().toString())
-                            Log.d("gitlab_attachment_result", response.body().toString())
+                        if (response.code() !in 200..299) {
+                            gitlabExceptionHandler()
+                        }else{
+                            val coroutineCallGitlabAttachments = CoroutineScope(Dispatchers.IO)
+                            coroutineCallGitlabAttachments.async {
+                                val gitlabAttachments = response.body()
+                                Log.d("gitlab_attachment_result", response.code().toString())
+                                Log.d("gitlab_attachment_result", response.body().toString())
+                                LoggerBirdService.loggerBirdService.finishShareLayout("gitlab")
+                            }
                         }
                     }
                 })
