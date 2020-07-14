@@ -198,7 +198,11 @@ internal class TrelloApi {
             if (!description.isNullOrEmpty()) {
                 stringBuilder.append(description + "\n")
             }
-            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+            stringBuilder.append("Life Cycle Details:" + "\n")
+            LoggerBird.classPathList.forEach { classPath ->
+                stringBuilder.append("$classPath\n          |\n         v\n")
+            }
+//            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
             jsonObject.addProperty("desc", stringBuilder.toString())
             if (RecyclerViewTrelloLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()) {
                 RecyclerViewTrelloLabelAdapter.ViewHolder.arrayListLabelNames.forEach {

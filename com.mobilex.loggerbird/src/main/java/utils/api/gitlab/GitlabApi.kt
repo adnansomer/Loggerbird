@@ -230,7 +230,11 @@ internal class GitlabApi {
             if (title != null) {
                 jsonObject.addProperty("title", title)
             }
-            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+            stringBuilder.append("Life Cycle Details:" + "\n")
+            LoggerBird.classPathList.forEach {
+                stringBuilder.append("$it\n          |\n         v\n")
+            }
+//            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
             jsonObject.addProperty("description", stringBuilder.toString())
             jsonObject.addProperty(
                 "milestone_id",
@@ -619,7 +623,6 @@ internal class GitlabApi {
 
                             if (response.body() != null) {
                                 arrayListAttachments.add("https://gitlab.com" + response.body()!!.asJsonObject["full_path"].asString)
-
                                 callEnqueueGitlabAttachments(issueId = issueId, projectId = projectId)
                             }
                         }

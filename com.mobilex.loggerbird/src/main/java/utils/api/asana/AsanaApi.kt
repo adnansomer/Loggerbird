@@ -197,7 +197,11 @@ internal class AsanaApi {
             if (!description.isNullOrEmpty()) {
                 stringBuilder.append(description + "\n")
             }
-            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+//            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+            stringBuilder.append("Life Cycle Details:" + "\n")
+            LoggerBird.classPathList.forEach {
+                stringBuilder.append("$it\n          |\n         v\n")
+            }
             jsonObjectData.addProperty("notes", stringBuilder.toString())
             jsonArrayProjects.add(projectId)
             jsonObjectData.add("projects", jsonArrayProjects)

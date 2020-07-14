@@ -246,7 +246,11 @@ internal class GithubApi {
             if (stringBuilderGithub.isNotEmpty()) {
                 jsonObject.addProperty("body", stringBuilderGithub.toString() + "\n")
             }
-            stringBuilderGithub.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString() + "\n")
+            stringBuilderGithub.append("Life Cycle Details:" + "\n")
+            LoggerBird.classPathList.forEach {
+                stringBuilderGithub.append("$it\n          |\n         v\n")
+            }
+//            stringBuilderGithub.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString() + "\n")
             jsonObject.addProperty("title", title)
             RetrofitGithubClient.getGithubUserClient(url = "https://api.github.com/repos/${LoggerBird.githubUserName}/$repos/")
                 .create(AccountIdService::class.java)

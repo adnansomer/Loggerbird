@@ -203,7 +203,11 @@ internal class PivotalTrackerApi {
             if (!description.isNullOrEmpty()) {
                 stringBuilder.append(description + "\n")
             }
-            stringBuilder.append("Life Cycle Details:"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+            stringBuilder.append("Life Cycle Details:" + "\n")
+            LoggerBird.classPathList.forEach {
+                stringBuilder.append("$it\n          |\n         v\n")
+            }
+//            stringBuilder.append("Life Cycle Details:"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
             jsonObject.addProperty("description", stringBuilder.toString())
             if (RecyclerViewPivotalLabelAdapter.ViewHolder.arrayListLabelNames.isNotEmpty()) {
                 RecyclerViewPivotalLabelAdapter.ViewHolder.arrayListLabelNames.forEach {
