@@ -361,7 +361,13 @@ internal class JiraApi {
                                 }
                             }
                         }
-                        stringBuilderDescription.append("\n" + "Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+                        stringBuilderDescription.append("Life Cycle Details:" + "\n")
+                        var classCounter = 0
+                        LoggerBird.classPathList.forEach {
+                            stringBuilderDescription.append("$it (${LoggerBird.classPathListCounter[classCounter]})\n")
+                            classCounter++
+                        }
+//                        stringBuilderDescription.append("\n" + "Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
                         jsonObjectContent.addProperty(
                             "description",
                             stringBuilderDescription.toString()

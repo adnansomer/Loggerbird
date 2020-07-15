@@ -201,7 +201,13 @@ internal class BasecampApi {
             if (!descriptionMessage.isNullOrEmpty()) {
                 stringBuilder.append(descriptionMessage + "\n")
             }
-            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString()  + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+//            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString()  + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+            stringBuilder.append("Life Cycle Details:" + "\n")
+            var classCounter = 0
+            LoggerBird.classPathList.forEach {
+                stringBuilder.append("$it (${LoggerBird.classPathListCounter[classCounter]})\n")
+                classCounter++
+            }
             jsonObject.addProperty("content", stringBuilder.toString())
             if (!name.isNullOrEmpty()) {
                 basecampCreateTodoIssue(

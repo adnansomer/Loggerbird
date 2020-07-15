@@ -36,7 +36,7 @@ internal class LogActivityLifeCycleObserver() :
     private var activityStartTime: Long? = null
     private var activityPauseTime: Long? = null
     private var totalActivityTime: Long? = 0
-    private var totalTimeSpentInApplication:Long? = 0
+    private var totalTimeSpentInApplication: Long? = 0
 
     //Static global variables.
     internal companion object {
@@ -45,6 +45,7 @@ internal class LogActivityLifeCycleObserver() :
         internal var returnActivityLifeCycleClassName: String? = null
         internal lateinit var logActivityLifeCycleObserverInstance: LogActivityLifeCycleObserver
     }
+
     //Constructor.
     init {
         LoggerBird.stringBuilderActivityLifeCycleObserver.append("\n" + "Activity Details:" + "\n")
@@ -117,7 +118,26 @@ internal class LogActivityLifeCycleObserver() :
                     LoggerBird.classList.add(activity.javaClass.simpleName)
                 }
             }
-
+            if (LoggerBird.classPathList.size > 20) {
+                LoggerBird.classPathList.removeAt(LoggerBird.classPathCounter)
+                LoggerBird.classPathListCounter.removeAt(LoggerBird.classPathCounter)
+                LoggerBird.classPathList.add(
+                    LoggerBird.classPathCounter,
+                    activity.javaClass.simpleName
+                )
+                LoggerBird.classPathListCounter.add(
+                    LoggerBird.classPathCounter,
+                    LoggerBird.classPathTotalCounter
+                )
+                LoggerBird.classPathCounter++
+                if (LoggerBird.classPathCounter >= LoggerBird.classPathList.size) {
+                    LoggerBird.classPathCounter = 0
+                }
+            } else {
+                LoggerBird.classPathList.add(activity.javaClass.simpleName)
+                LoggerBird.classPathListCounter.add(LoggerBird.classPathTotalCounter)
+            }
+            LoggerBird.classPathTotalCounter++
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -206,13 +226,17 @@ internal class LogActivityLifeCycleObserver() :
             }
             val date = Calendar.getInstance().time
             activityPauseTime = date.time
-            totalActivityTime = totalActivityTime!! +  activityPauseTime!! - activityStartTime!!
+            totalActivityTime = totalActivityTime!! + activityPauseTime!! - activityStartTime!!
             totalTimeSpentInApplication = totalTimeSpentInApplication!! + totalActivityTime!!
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onPause"
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
-            LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName +" "+"Total time In This Activity:"+ timeString(totalActivityTime!!) +"\n")
+            LoggerBird.stringBuilderActivityLifeCycleObserver.append(
+                Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "Total time In This Activity:" + timeString(
+                    totalActivityTime!!
+                ) + "\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -253,7 +277,11 @@ internal class LogActivityLifeCycleObserver() :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onDestroy"
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
-            LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName +" "+ "Total activity time:"+ timeString(totalTimeSpentInApplication!!)+"\n")
+            LoggerBird.stringBuilderActivityLifeCycleObserver.append(
+                Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "Total activity time:" + timeString(
+                    totalTimeSpentInApplication!!
+                ) + "\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -360,8 +388,14 @@ internal class LogActivityLifeCycleObserver() :
      */
     private fun timeString(remainingSeconds: Long): String {
         return String.format(
-            Locale.getDefault(), "%02d:%02d:%02d:%02d", TimeUnit.MILLISECONDS.toDays(remainingSeconds),
-            TimeUnit.MILLISECONDS.toHours(remainingSeconds) - TimeUnit.DAYS.toHours(TimeUnit.MILLISECONDS.toDays(remainingSeconds)),
+            Locale.getDefault(),
+            "%02d:%02d:%02d:%02d",
+            TimeUnit.MILLISECONDS.toDays(remainingSeconds),
+            TimeUnit.MILLISECONDS.toHours(remainingSeconds) - TimeUnit.DAYS.toHours(
+                TimeUnit.MILLISECONDS.toDays(
+                    remainingSeconds
+                )
+            ),
             TimeUnit.MILLISECONDS.toMinutes(remainingSeconds) - TimeUnit.HOURS.toMinutes(
                 TimeUnit.MILLISECONDS.toHours(
                     remainingSeconds

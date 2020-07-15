@@ -464,7 +464,13 @@ internal class EmailUtil {
                 if (message != null) {
                     stringBuilder.append(message + "\n")
                 }
-                stringBuilder.append("Life Cycle Details:"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString()  + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+                stringBuilder.append("Life Cycle Details:" + "\n")
+                var classCounter = 0
+                LoggerBird.classPathList.forEach {
+                    stringBuilder.append("$it (${LoggerBird.classPathListCounter[classCounter]})\n")
+                    classCounter++
+                }
+//                stringBuilder.append("Life Cycle Details:"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString()  + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
                 mimeBodyPart.setContent(stringBuilder.toString(), "text/plain")
                 multiPart.addBodyPart(
                     mimeBodyPart
@@ -564,7 +570,8 @@ internal class EmailUtil {
                             context.stopService(Intent(context, LoggerBirdFutureTaskService::class.java))
                         }
                     }
-                    LoggerBirdService.loggerBirdService.finishShareLayout("single_email")
+//                    LoggerBirdService.loggerBirdService.finishShareLayout("single_email")
+//                        LoggerBirdService.callEnqueueEmail()
                     transport.close()
                 }
             } catch (e: Exception) {

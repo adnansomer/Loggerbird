@@ -285,9 +285,8 @@ class MainActivity : AppCompatActivity() {
             // LoggerBird.saveLifeCycleDetails()
 
 //            LoggerBird.takeLifeCycleDetails()
-
-
-            startActivity(Intent(this@MainActivity, Main2Activity::class.java))
+            supportFragmentManager.beginTransaction().add(R.id.main_activity_layout,FragmentMain3.newInstance()).commit()
+//            startActivity(Intent(this@MainActivity, Main2Activity::class.java))
         })
 
         button_performance.setOnClickListener {

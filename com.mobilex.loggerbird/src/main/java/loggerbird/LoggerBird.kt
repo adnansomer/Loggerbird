@@ -151,7 +151,10 @@ class LoggerBird : LifecycleObserver {
         internal lateinit var basecampApiToken: String
         internal lateinit var asanaApiToken: String
         internal lateinit var clubhouseApiToken: String
-
+        internal var classPathList:ArrayList<String> = ArrayList()
+        internal var classPathCounter:Int = 0
+        internal var classPathListCounter:ArrayList<Int> = ArrayList()
+        internal var classPathTotalCounter:Int = 0
         //---------------Public Methods:---------------//
 
         /**
