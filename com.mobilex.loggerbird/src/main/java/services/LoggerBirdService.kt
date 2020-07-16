@@ -12,16 +12,8 @@ import adapter.recyclerView.api.github.RecyclerViewGithubAssigneeAdapter
 import adapter.recyclerView.api.github.RecyclerViewGithubAttachmentAdapter
 import adapter.recyclerView.api.github.RecyclerViewGithubLabelAdapter
 import adapter.recyclerView.api.gitlab.RecyclerViewGitlabAttachmentAdapter
-import adapter.recyclerView.api.jira.RecyclerViewJiraAttachmentAdapter
-import adapter.recyclerView.api.jira.RecyclerViewJiraComponentAdapter
-import adapter.recyclerView.api.jira.RecyclerViewJiraFixVersionsAdapter
-import adapter.recyclerView.api.jira.RecyclerViewJiraIssueAdapter
-import adapter.recyclerView.api.jira.RecyclerViewJiraLabelAdapter
+import adapter.recyclerView.api.jira.*
 import adapter.recyclerView.api.pivotal.*
-import adapter.recyclerView.api.pivotal.RecyclerViewPivotalAttachmentAdapter
-import adapter.recyclerView.api.pivotal.RecyclerViewPivotalBlockerAdapter
-import adapter.recyclerView.api.pivotal.RecyclerViewPivotalLabelAdapter
-import adapter.recyclerView.api.pivotal.RecyclerViewPivotalOwnerAdapter
 import adapter.recyclerView.api.slack.RecyclerViewSlackAttachmentAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloLabelAdapter
@@ -51,11 +43,14 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.provider.Settings
+import android.text.InputFilter
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
-import android.view.animation.*
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.view.animation.BounceInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -64,6 +59,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -80,26 +76,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import loggerbird.LoggerBird
-import models.*
-import models.recyclerView.*
-import observers.LogActivityLifeCycleObserver
-//import org.aviran.cookiebar2.CookieBar
-import paint.PaintActivity
-import paint.PaintView
-import utils.email.EmailUtil
-import utils.other.LinkedBlockingQueueUtil
-import java.io.File
-import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import java.text.SimpleDateFormat
-import android.text.InputFilter
-import androidx.core.widget.addTextChangedListener
+import listeners.OnSwipeTouchListener
 import listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
 import listeners.layouts.LayoutFeedbackOnTouchListener
 import listeners.layouts.LayoutJiraOnTouchListener
+import loggerbird.LoggerBird
+import models.RecyclerViewModel
+import models.recyclerView.*
+import observers.LogActivityLifeCycleObserver
+import paint.PaintActivity
+import paint.PaintView
 import utils.api.asana.AsanaApi
 import utils.api.basecamp.BasecampApi
 import utils.api.clubhouse.ClubhouseApi
@@ -109,8 +95,15 @@ import utils.api.jira.JiraApi
 import utils.api.pivotal.PivotalTrackerApi
 import utils.api.slack.SlackApi
 import utils.api.trello.TrelloApi
+import utils.email.EmailUtil
 import utils.other.DefaultToast
 import utils.other.InputTypeFilter
+import utils.other.LinkedBlockingQueueUtil
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
@@ -11010,6 +11003,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initializeLoggerBirdActivatePopup(activity: Activity) {
         try {
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
@@ -11031,6 +11025,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 viewLoggerBirdActivatePopup,
                 windowManagerParamsLoggerBirdActivatePopup
             )
+
+            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+
             viewLoggerBirdActivatePopup.scaleX = 0F
             viewLoggerBirdActivatePopup.scaleY = 0F
             viewLoggerBirdActivatePopup.animate()
@@ -11040,10 +11038,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 .setInterpolator(BounceInterpolator())
                 .setStartDelay(0)
                 .start()
-            textViewLoggerBirdActivatePopupActivate =
-                viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_activate)
-            textViewLoggerBirdActivatePopupDismiss =
-                viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_dismiss)
+            textViewLoggerBirdActivatePopupActivate = viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_activate)
+            textViewLoggerBirdActivatePopupDismiss = viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_dismiss)
             initializeButtonClicksLoggerBirdActivatePopup(activity = activity)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -11075,6 +11071,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initializeLoggerBirdStartPopup(activity: Activity) {
         try {
             removeLoggerBirdDismissLayout()
@@ -11101,12 +11098,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     )
                 }
             windowManagerParamsLoggerBirdStartPopup.gravity = Gravity.TOP
-            windowManagerLoggerBirdStartPopup =
-                activity.getSystemService(Context.WINDOW_SERVICE)!!
-            (windowManagerLoggerBirdStartPopup as WindowManager).addView(
-                viewLoggerBirdStartPopup,
-                windowManagerParamsLoggerBirdStartPopup
-            )
+            windowManagerLoggerBirdStartPopup = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerLoggerBirdStartPopup as WindowManager).addView(viewLoggerBirdStartPopup, windowManagerParamsLoggerBirdStartPopup)
             viewLoggerBirdStartPopup.scaleX = 0F
             viewLoggerBirdStartPopup.scaleY = 0F
             viewLoggerBirdStartPopup.animate()
@@ -11116,6 +11109,21 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 .setInterpolator(BounceInterpolator())
                 .setStartDelay(0)
                 .start()
+
+            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+
+            viewLoggerBirdStartPopup.setOnTouchListener(object: OnSwipeTouchListener(this@LoggerBirdService) {
+                override fun onSwipeLeft() {
+                    Log.e("ViewSwipe", "Left")
+                    removeLoggerBirdStartLayout()
+                }
+                override fun onSwipeRight() {
+                    Log.e("ViewSwipe", "Right")
+                    removeLoggerBirdStartLayout()
+                }
+            })
+
             textViewLoggerBirdStartPopupSessionTime =
                 viewLoggerBirdStartPopup.findViewById(R.id.textView_session_time_pop_up)
             textViewLoggerBirdStartPopupSessionTime.text =
@@ -11132,7 +11140,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     }
                 }
             }
-            timerStartPopup.schedule(timerTaskStartPopup, 3000)
+            timerStartPopup.schedule(timerTaskStartPopup, 20000)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -11149,6 +11157,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initializeLoggerBirdClosePopup(activity: Activity) {
         try {
             removeLoggerBirdStartLayout()
@@ -11181,15 +11190,24 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 viewLoggerBirdDismissPopup,
                 windowManagerParamsLoggerBirdDismissPopup
             )
-            viewLoggerBirdDismissPopup.scaleX = 0F
-            viewLoggerBirdDismissPopup.scaleY = 0F
-            viewLoggerBirdDismissPopup.animate()
-                .scaleX(1F)
-                .scaleY(1F)
-                .setDuration(500)
-                .setInterpolator(BounceInterpolator())
-                .setStartDelay(0)
-                .start()
+            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+
+            viewLoggerBirdDismissPopup.setOnTouchListener(object: OnSwipeTouchListener(this@LoggerBirdService) {
+                override fun onSwipeLeft() {
+                    Log.e("ViewSwipe", "Left")
+                    removeLoggerBirdDismissLayout()
+
+                }
+                override fun onSwipeRight() {
+                    Log.e("ViewSwipe", "Right")
+                    removeLoggerBirdDismissLayout()
+                }
+            })
+
+            val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_down)
+            viewLoggerBirdDismissPopup.animation = animation
+
             textViewLoggerBirdDismissPopupFeedBack =
                 viewLoggerBirdDismissPopup.findViewById(R.id.textView_feed_back_pop_up)
             initializeButtonClicksLoggerBirdDismissPopup()
@@ -11197,11 +11215,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val timerTaskDismissPopup = object : TimerTask() {
                 override fun run() {
                     activity.runOnUiThread {
+                        val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_up)
+                        viewLoggerBirdDismissPopup.animation = animation
                         removeLoggerBirdDismissLayout()
                     }
                 }
             }
-            timerDismissPopup.schedule(timerTaskDismissPopup, 3000)
+            timerDismissPopup.schedule(timerTaskDismissPopup, 4000)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -11225,6 +11245,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initializeLoggerBirdFileActionPopup(activity: Activity) {
         try {
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
@@ -11256,6 +11277,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 viewLoggerBirdFileActionPopup,
                 windowManagerParamsLoggerBirdFileAction
             )
+
+            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
             viewLoggerBirdFileActionPopup.scaleX = 0F
             viewLoggerBirdFileActionPopup.scaleY = 0F
             viewLoggerBirdFileActionPopup.animate()
@@ -11341,6 +11365,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 viewLoggerBirdUnhandledExceptionPopup,
                 windowManagerParamsLoggerBirdUnhandledException
             )
+
+            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+
             viewLoggerBirdUnhandledExceptionPopup.scaleX = 0F
             viewLoggerBirdUnhandledExceptionPopup.scaleY = 0F
             viewLoggerBirdUnhandledExceptionPopup.animate()
@@ -11381,6 +11409,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeButtonClicksLoggerBirdUnhandledExceptionPopup(
         sharedPref: SharedPreferences,
         filePath: File,
