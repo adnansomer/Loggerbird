@@ -84,7 +84,7 @@ import loggerbird.LoggerBird
 import models.*
 import models.recyclerView.*
 import observers.LogActivityLifeCycleObserver
-import org.aviran.cookiebar2.CookieBar
+//import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
 import paint.PaintView
 import utils.email.EmailUtil
@@ -144,7 +144,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerAsanaDate: Any? = null
     private var windowManagerClubhouse: Any? = null
     private var windowManagerClubhouseDatePicker: Any? = null
-    private var windowManagerLoggerBirdPopup: Any? = null
+    private var windowManagerLoggerBirdActivatePopup: Any? = null
+    private var windowManagerLoggerBirdStartPopup: Any? = null
+    private var windowManagerLoggerBirdDismissPopup: Any? = null
+    private var windowManagerLoggerBirdFileActionPopup: Any? = null
+    private var windowManagerLoggerBirdUnhandledException: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -170,7 +174,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsAsanaDate: WindowManager.LayoutParams
     private lateinit var windowManagerParamsClubhouse: WindowManager.LayoutParams
     private lateinit var windowManagerParamsClubhouseDatePicker: WindowManager.LayoutParams
-    private lateinit var windowManagerParamsLoggerBirdPopup: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsLoggerBirdActivatePopup: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsLoggerBirdStartPopup: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsLoggerBirdDismissPopup: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsLoggerBirdFileAction: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsLoggerBirdUnhandledException: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudio: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -209,7 +217,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var timerTaskAudio: TimerTask? = null
     private var timerVideoTaskFileSize: TimerTask? = null
     private var timerAudioTaskFileSize: TimerTask? = null
-    private lateinit var cookieBar: CookieBar
+    //    private lateinit var cookieBar: CookieBar
     private lateinit var viewFeedback: View
     private lateinit var viewJira: View
     private lateinit var viewSlack: View
@@ -230,7 +238,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewAsana: View
     private lateinit var viewAsanaDate: View
     private lateinit var viewClubhouse: View
-    private lateinit var viewLoggerBirdPopup:View
+    private lateinit var viewLoggerBirdActivatePopup: View
+    private lateinit var viewLoggerBirdStartPopup: View
+    private lateinit var viewLoggerBirdDismissPopup: View
+    private lateinit var viewLoggerBirdFileActionPopup: View
+    private lateinit var viewLoggerBirdUnhandledExceptionPopup: View
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
     private var sessionTimeEnd: Long? = null
@@ -673,9 +685,21 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var recyclerViewClubhouseAttachment: RecyclerView
     private lateinit var progressBarClubhouse: ProgressBar
     private lateinit var progressBarClubhouseLayout: FrameLayout
-    //LoggerBird pop-up:
-    private lateinit var textViewLoggerBirdPopUpActivate:TextView
-    private lateinit var textViewLoggerBirdPopUpDismiss:TextView
+    //LoggerBird Activate Popup:
+    private lateinit var textViewLoggerBirdActivatePopupActivate: TextView
+    private lateinit var textViewLoggerBirdActivatePopupDismiss: TextView
+    //LoggerBird Start Popup:
+    private lateinit var textViewLoggerBirdStartPopupSessionTime: TextView
+    //LoggerBird Dismiss Popup:
+    private lateinit var textViewLoggerBirdDismissPopupFeedBack: TextView
+    //LoggerBird File Action Popup:
+    private lateinit var textViewLoggerBirdFileActionPopupDiscard: TextView
+    private lateinit var textViewLoggerBirdFileActionPopupEmail: TextView
+    //LoggerBird Unhandled Exception Popup:
+    private lateinit var textViewLoggerBirdUnhandledExceptionPopupDiscard: TextView
+    private lateinit var textViewLoggerBirdUnhandledExceptionPopupShare: TextView
+    private lateinit var checkBoxLoggerBirdUnhandledExceptionPopupDuplication: CheckBox
+
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
@@ -989,20 +1013,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     controlMedialFile()
                 }
                 (windowManager as WindowManager).removeViewImmediate(view)
-
-                CookieBar.build(activity)
-                    .setCustomView(R.layout.loggerbird_close_popup)
-                    .setCustomViewInitializer {
-                        val textViewFeedBack =
-                            it.findViewById<TextView>(R.id.textView_feed_back_pop_up)
-                        textViewFeedBack.setSafeOnClickListener {
-                            initializeFeedBackLayout()
-                            CookieBar.dismiss(activity)
-                        }
-                    }
-                    .setSwipeToDismiss(true)
-                    .setDuration(2000)
-                    .show()
+                initializeLoggerBirdClosePopup(activity = activity)
+//                CookieBar.build(activity)
+//                    .setCustomView(R.layout.loggerbird_close_popup)
+//                    .setCustomViewInitializer {
+//                        val textViewFeedBack =
+//                            it.findViewById<TextView>(R.id.textView_feed_back_pop_up)
+//                        textViewFeedBack.setSafeOnClickListener {
+//                            initializeFeedBackLayout()
+//                            CookieBar.dismiss(activity)
+//                        }
+//                    }
+//                    .setSwipeToDismiss(true)
+//                    .setDuration(2000)
+//                    .show()
                 windowManager = null
                 isFabEnable = false
 
@@ -1164,22 +1188,23 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         buttonClicks()
                     }
-                    CookieBar.build(activity)
-                        .setCustomView(R.layout.loggerbird_start_popup)
-                        .setCustomViewInitializer {
-                            val textViewSessionTime =
-                                it.findViewById<TextView>(R.id.textView_session_time_pop_up)
-                            textViewSessionTime.text =
-                                resources.getString(R.string.total_session_time) + timeStringDay(
-                                    totalSessionTime()
-                                ) + "\n" + resources.getString(R.string.last_session_time) + timeStringDay(
-                                    lastSessionTime()
-                                )
-                        }
-                        .setSwipeToDismiss(true)
-                        .setEnableAutoDismiss(true)
-                        .setDuration(3000)
-                        .show()
+                    initializeLoggerBirdStartPopup(activity = activity)
+//                    CookieBar.build(activity)
+//                        .setCustomView(R.layout.loggerbird_start_popup)
+//                        .setCustomViewInitializer {
+//                            val textViewSessionTime =
+//                                it.findViewById<TextView>(R.id.textView_session_time_pop_up)
+//                            textViewSessionTime.text =
+//                                resources.getString(R.string.total_session_time) + timeStringDay(
+//                                    totalSessionTime()
+//                                ) + "\n" + resources.getString(R.string.last_session_time) + timeStringDay(
+//                                    lastSessionTime()
+//                                )
+//                        }
+//                        .setSwipeToDismiss(true)
+//                        .setEnableAutoDismiss(true)
+//                        .setDuration(3000)
+//                        .show()
                     isFabEnable = true
 
                 } else {
@@ -2291,7 +2316,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             } else {
                 if (!isFabEnable) {
                     if (!isActivateDialogShown) {
-                        initializeLoggerBirdActivateBar(activity = this.activity)
+                        initializeLoggerBirdActivatePopup(activity = this.activity)
 //                        cookieBar = CookieBar.build(this.activity)
 //                            .setTitle(resources.getString(R.string.library_name))
 //                            .setMessage(resources.getString(R.string.logger_bird_floating_action_button_permission_message))
@@ -2718,29 +2743,30 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      */
     private fun chooseActionFiles() {
         this.controlFileAction = true
-        CookieBar.build(activity)
-            .setCustomView(R.layout.loggerbird_file_action_popup)
-            .setCustomViewInitializer {
-                val textViewDiscard = it.findViewById<TextView>(R.id.textView_files_action_discard)
-                textViewDiscard.setSafeOnClickListener {
-                    if (this.controlFileAction) {
-                        this.controlFileAction = false
-                        CookieBar.dismiss(activity)
-                        deleteOldFiles()
-                    }
-                }
-                val textViewEmail = it.findViewById<TextView>(R.id.textView_files_action_mail)
-                textViewEmail.setSafeOnClickListener {
-                    if (this.controlFileAction) {
-                        this.controlFileAction = false
-                        CookieBar.dismiss(activity)
-                        sendOldFilesEmail()
-                    }
-                }
-            }
-            .setSwipeToDismiss(false)
-            .setEnableAutoDismiss(false)
-            .show()
+        initializeLoggerBirdFileActionPopup(activity = this.activity)
+//        CookieBar.build(activity)
+//            .setCustomView(R.layout.loggerbird_file_action_popup)
+//            .setCustomViewInitializer {
+//                val textViewDiscard = it.findViewById<TextView>(R.id.textView_files_action_discard)
+//                textViewDiscard.setSafeOnClickListener {
+//                    if (this.controlFileAction) {
+//                        this.controlFileAction = false
+//                        CookieBar.dismiss(activity)
+//                        deleteOldFiles()
+//                    }
+//                }
+//                val textViewEmail = it.findViewById<TextView>(R.id.textView_files_action_mail)
+//                textViewEmail.setSafeOnClickListener {
+//                    if (this.controlFileAction) {
+//                        this.controlFileAction = false
+//                        CookieBar.dismiss(activity)
+//                        sendOldFilesEmail()
+//                    }
+//                }
+//            }
+//            .setSwipeToDismiss(false)
+//            .setEnableAutoDismiss(false)
+//            .show()
     }
 
     /**
@@ -5097,87 +5123,90 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             val filePath = File(sharedPref.getString("unhandled_file_path", null)!!)
-            CookieBar.build(activity)
-                .setCustomView(R.layout.loggerbird_unhandled_popup)
-                .setCustomViewInitializer {
-                    val textViewDiscard =
-                        it.findViewById<TextView>(R.id.textView_unhandled_discard)
-                    val textViewShare =
-                        it.findViewById<TextView>(R.id.textView_unhandled_share_title)
-//                    val textViewCustomizeJira =
-//                        it.findViewById<TextView>(R.id.textView_unhandled_jira_customize)
-                    val checkBoxDuplication =
-                        it.findViewById<CheckBox>(R.id.checkBox_unhandled)
-                    if (sharedPref.getBoolean("duplication_enabled", false)) {
-                        checkBoxDuplication.isChecked = true
-                    }
-                    checkBoxDuplication.setOnClickListener {
-                        if (checkBoxDuplication.isChecked) {
-                            with(sharedPref.edit()) {
-                                putBoolean("duplication_enabled", true)
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = activity.resources.getString(R.string.duplication_check_enabled)
-                            )
-                        } else {
-                            with(sharedPref.edit()) {
-                                putBoolean("duplication_enabled", false)
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = activity.resources.getString(R.string.duplication_check_disabled)
-                            )
-                        }
-                    }
-                    textViewDiscard.setSafeOnClickListener {
-                        if (filePath.exists()) {
-                            filePath.delete()
-                        }
-                        val editor: SharedPreferences.Editor = sharedPref.edit()
-                        editor.remove("unhandled_file_path")
-                        editor.apply()
-                        defaultToast.attachToast(
-                            activity = activity,
-                            toastMessage = context.resources.getString(R.string.unhandled_file_discard_success)
-                        )
-                        CookieBar.dismiss(activity)
-                    }
-                    textViewShare.setSafeOnClickListener {
-                        initializeFloatingActionButton(activity = this.activity)
-                        shareView(filePathMedia = filePath)
+            initializeLoggerBirdUnhandledExceptionPopup(
+                activity = this.activity,
+                sharedPref = sharedPref,
+                filePath = filePath
+            )
+//            CookieBar.build(activity)
+//                .setCustomView(R.layout.loggerbird_unhandled_popup)
+//                .setCustomViewInitializer {
+//                    val textViewDiscard =
+//                        it.findViewById<TextView>(R.id.textView_unhandled_discard)
+//                    val textViewShare =
+//                        it.findViewById<TextView>(R.id.textView_unhandled_share_title)
+//                    val checkBoxDuplication =
+//                        it.findViewById<CheckBox>(R.id.checkBox_unhandled)
+//                    if (sharedPref.getBoolean("duplication_enabled", false)) {
+//                        checkBoxDuplication.isChecked = true
+//                    }
+//                    checkBoxDuplication.setOnClickListener {
 //                        if (checkBoxDuplication.isChecked) {
-//                            attachProgressBar()
-//                            jiraAuthentication.callJira(
-//                                filePathMedia = filePath,
-//                                context = context,
+//                            with(sharedPref.edit()) {
+//                                putBoolean("duplication_enabled", true)
+//                                commit()
+//                            }
+//                            defaultToast.attachToast(
 //                                activity = activity,
-//                                task = "unhandled_duplication",
-//                                createMethod = "default"
+//                                toastMessage = activity.resources.getString(R.string.duplication_check_enabled)
 //                            )
 //                        } else {
-//                            createDefaultUnhandledJiraIssue(filePath = filePath)
-//                        }
-                    }
-//                    textViewCustomizeJira.setSafeOnClickListener {
-//                        if (checkBoxDuplication.isChecked) {
-//                            attachProgressBar()
-//                            jiraAuthentication.callJira(
-//                                filePathMedia = filePath,
-//                                context = context,
+//                            with(sharedPref.edit()) {
+//                                putBoolean("duplication_enabled", false)
+//                                commit()
+//                            }
+//                            defaultToast.attachToast(
 //                                activity = activity,
-//                                task = "unhandled_duplication",
-//                                createMethod = "customize"
+//                                toastMessage = activity.resources.getString(R.string.duplication_check_disabled)
 //                            )
-//                        } else {
-//                            createCustomizedUnhandledJiraIssue(filePath = filePath)
 //                        }
 //                    }
-                }.setSwipeToDismiss(false)
-                .setEnableAutoDismiss(false)
-                .show()
+//                    textViewDiscard.setSafeOnClickListener {
+//                        if (filePath.exists()) {
+//                            filePath.delete()
+//                        }
+//                        val editor: SharedPreferences.Editor = sharedPref.edit()
+//                        editor.remove("unhandled_file_path")
+//                        editor.apply()
+//                        defaultToast.attachToast(
+//                            activity = activity,
+//                            toastMessage = context.resources.getString(R.string.unhandled_file_discard_success)
+//                        )
+//                        CookieBar.dismiss(activity)
+//                    }
+//                    textViewShare.setSafeOnClickListener {
+//                        initializeFloatingActionButton(activity = this.activity)
+//                        shareView(filePathMedia = filePath)
+////                        if (checkBoxDuplication.isChecked) {
+////                            attachProgressBar()
+////                            jiraAuthentication.callJira(
+////                                filePathMedia = filePath,
+////                                context = context,
+////                                activity = activity,
+////                                task = "unhandled_duplication",
+////                                createMethod = "default"
+////                            )
+////                        } else {
+////                            createDefaultUnhandledJiraIssue(filePath = filePath)
+////                        }
+//                    }
+////                    textViewCustomizeJira.setSafeOnClickListener {
+////                        if (checkBoxDuplication.isChecked) {
+////                            attachProgressBar()
+////                            jiraAuthentication.callJira(
+////                                filePathMedia = filePath,
+////                                context = context,
+////                                activity = activity,
+////                                task = "unhandled_duplication",
+////                                createMethod = "customize"
+////                            )
+////                        } else {
+////                            createCustomizedUnhandledJiraIssue(filePath = filePath)
+////                        }
+////                    }
+//                }.setSwipeToDismiss(false)
+//                .setEnableAutoDismiss(false)
+//                .show()
 
         } catch (e: Exception) {
             detachProgressBar()
@@ -5192,7 +5221,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     /**
      * This method is used for sending default unhandled jira issue.
-     * @param filePathMedia is used for getting the reference of current media file.
+     * @param filePath is used for getting the reference of current media file.
      */
     @RequiresApi(Build.VERSION_CODES.M)
     internal fun createDefaultUnhandledJiraIssue(filePath: File) {
@@ -5205,7 +5234,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 filePath = filePath
             )
         }
-        CookieBar.dismiss(activity)
+//        CookieBar.dismiss(activity)
     }
 
     /**
@@ -5269,7 +5298,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val editor: SharedPreferences.Editor = sharedPref.edit()
         editor.remove("unhandled_file_path")
         editor.apply()
-        CookieBar.dismiss(activity)
+//        CookieBar.dismiss(activity)
         activity.runOnUiThread {
             defaultToast.attachToast(
                 activity = activity,
@@ -10981,13 +11010,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
 
-    private fun initializeLoggerBirdActivateBar(activity: Activity) {
+    private fun initializeLoggerBirdActivatePopup(activity: Activity) {
         try {
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
-            viewLoggerBirdPopup=
+            viewLoggerBirdActivatePopup =
                 LayoutInflater.from(activity)
                     .inflate(R.layout.loggerbird_activate_popup, rootView, false)
-            windowManagerParamsLoggerBirdPopup =
+            windowManagerParamsLoggerBirdActivatePopup =
                 WindowManager.LayoutParams(
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.WRAP_CONTENT,
@@ -10995,48 +11024,408 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                     PixelFormat.TRANSLUCENT
                 )
-            windowManagerParamsLoggerBirdPopup.gravity = Gravity.TOP
-            windowManagerLoggerBirdPopup = activity.getSystemService(Context.WINDOW_SERVICE)!!
-            (windowManagerLoggerBirdPopup as WindowManager).addView(
-                viewLoggerBirdPopup,
-                windowManagerParamsLoggerBirdPopup
+            windowManagerParamsLoggerBirdActivatePopup.gravity = Gravity.TOP
+            windowManagerLoggerBirdActivatePopup =
+                activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerLoggerBirdActivatePopup as WindowManager).addView(
+                viewLoggerBirdActivatePopup,
+                windowManagerParamsLoggerBirdActivatePopup
             )
-            viewLoggerBirdPopup.scaleX = 0F
-            viewLoggerBirdPopup.scaleY = 0F
-            viewLoggerBirdPopup.animate()
+            viewLoggerBirdActivatePopup.scaleX = 0F
+            viewLoggerBirdActivatePopup.scaleY = 0F
+            viewLoggerBirdActivatePopup.animate()
                 .scaleX(1F)
                 .scaleY(1F)
                 .setDuration(500)
                 .setInterpolator(BounceInterpolator())
                 .setStartDelay(0)
                 .start()
-            textViewLoggerBirdPopUpActivate = viewLoggerBirdPopup.findViewById(R.id.btn_action_activate)
-            textViewLoggerBirdPopUpDismiss = viewLoggerBirdPopup.findViewById(R.id.btn_action_dismiss)
-            initializeButtonClicksLoggerBirdActivateBar(activity = activity)
+            textViewLoggerBirdActivatePopupActivate =
+                viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_activate)
+            textViewLoggerBirdActivatePopupDismiss =
+                viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_dismiss)
+            initializeButtonClicksLoggerBirdActivatePopup(activity = activity)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e, tag = Constants.loggerBirdPopupTag)
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.loggerBirdActivatePopupTag
+            )
         }
     }
 
     internal fun removeLoggerBirdActivateLayout() {
-        if (this::viewLoggerBirdPopup.isInitialized && windowManagerLoggerBirdPopup != null) {
-            (windowManagerLoggerBirdPopup as WindowManager).removeViewImmediate(
-                viewLoggerBirdPopup
+        if (this::viewLoggerBirdActivatePopup.isInitialized && windowManagerLoggerBirdActivatePopup != null) {
+            (windowManagerLoggerBirdActivatePopup as WindowManager).removeViewImmediate(
+                viewLoggerBirdActivatePopup
             )
-            windowManagerLoggerBirdPopup = null
+            windowManagerLoggerBirdActivatePopup = null
         }
     }
 
-    private fun initializeButtonClicksLoggerBirdActivateBar(activity: Activity){
-        textViewLoggerBirdPopUpActivate.setSafeOnClickListener {
+    private fun initializeButtonClicksLoggerBirdActivatePopup(activity: Activity) {
+        textViewLoggerBirdActivatePopupActivate.setSafeOnClickListener {
             initializeFloatingActionButton(activity = activity)
             removeLoggerBirdActivateLayout()
         }
-        textViewLoggerBirdPopUpDismiss.setSafeOnClickListener {
+        textViewLoggerBirdActivatePopupDismiss.setSafeOnClickListener {
             sd.stop()
             removeLoggerBirdActivateLayout()
+        }
+    }
+
+    private fun initializeLoggerBirdStartPopup(activity: Activity) {
+        try {
+            removeLoggerBirdDismissLayout()
+            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+            viewLoggerBirdStartPopup =
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.loggerbird_start_popup, rootView, false)
+            windowManagerParamsLoggerBirdStartPopup =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+            windowManagerParamsLoggerBirdStartPopup.gravity = Gravity.TOP
+            windowManagerLoggerBirdStartPopup =
+                activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerLoggerBirdStartPopup as WindowManager).addView(
+                viewLoggerBirdStartPopup,
+                windowManagerParamsLoggerBirdStartPopup
+            )
+            viewLoggerBirdStartPopup.scaleX = 0F
+            viewLoggerBirdStartPopup.scaleY = 0F
+            viewLoggerBirdStartPopup.animate()
+                .scaleX(1F)
+                .scaleY(1F)
+                .setDuration(500)
+                .setInterpolator(BounceInterpolator())
+                .setStartDelay(0)
+                .start()
+            textViewLoggerBirdStartPopupSessionTime =
+                viewLoggerBirdStartPopup.findViewById(R.id.textView_session_time_pop_up)
+            textViewLoggerBirdStartPopupSessionTime.text =
+                resources.getString(R.string.total_session_time) + timeStringDay(
+                    totalSessionTime()
+                ) + "\n" + resources.getString(R.string.last_session_time) + timeStringDay(
+                    lastSessionTime()
+                )
+            val timerStartPopup = Timer()
+            val timerTaskStartPopup = object : TimerTask() {
+                override fun run() {
+                    activity.runOnUiThread {
+                        removeLoggerBirdStartLayout()
+                    }
+                }
+            }
+            timerStartPopup.schedule(timerTaskStartPopup, 3000)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.loggerBirdStartPopupTag)
+        }
+    }
+
+    internal fun removeLoggerBirdStartLayout() {
+        if (this::viewLoggerBirdStartPopup.isInitialized && windowManagerLoggerBirdStartPopup != null) {
+            (windowManagerLoggerBirdStartPopup as WindowManager).removeViewImmediate(
+                viewLoggerBirdStartPopup
+            )
+            windowManagerLoggerBirdStartPopup = null
+        }
+    }
+
+    private fun initializeLoggerBirdClosePopup(activity: Activity) {
+        try {
+            removeLoggerBirdStartLayout()
+            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+            viewLoggerBirdDismissPopup =
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.loggerbird_close_popup, rootView, false)
+            windowManagerParamsLoggerBirdDismissPopup =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+            windowManagerParamsLoggerBirdDismissPopup.gravity = Gravity.TOP
+            windowManagerLoggerBirdDismissPopup =
+                activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerLoggerBirdDismissPopup as WindowManager).addView(
+                viewLoggerBirdDismissPopup,
+                windowManagerParamsLoggerBirdDismissPopup
+            )
+            viewLoggerBirdDismissPopup.scaleX = 0F
+            viewLoggerBirdDismissPopup.scaleY = 0F
+            viewLoggerBirdDismissPopup.animate()
+                .scaleX(1F)
+                .scaleY(1F)
+                .setDuration(500)
+                .setInterpolator(BounceInterpolator())
+                .setStartDelay(0)
+                .start()
+            textViewLoggerBirdDismissPopupFeedBack =
+                viewLoggerBirdDismissPopup.findViewById(R.id.textView_feed_back_pop_up)
+            initializeButtonClicksLoggerBirdDismissPopup()
+            val timerDismissPopup = Timer()
+            val timerTaskDismissPopup = object : TimerTask() {
+                override fun run() {
+                    activity.runOnUiThread {
+                        removeLoggerBirdDismissLayout()
+                    }
+                }
+            }
+            timerDismissPopup.schedule(timerTaskDismissPopup, 3000)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.loggerBirdClosePopupTag)
+        }
+    }
+
+    internal fun removeLoggerBirdDismissLayout() {
+        if (this::viewLoggerBirdDismissPopup.isInitialized && windowManagerLoggerBirdDismissPopup != null) {
+            (windowManagerLoggerBirdDismissPopup as WindowManager).removeViewImmediate(
+                viewLoggerBirdDismissPopup
+            )
+            windowManagerLoggerBirdDismissPopup = null
+        }
+    }
+
+    private fun initializeButtonClicksLoggerBirdDismissPopup() {
+        textViewLoggerBirdDismissPopupFeedBack.setSafeOnClickListener {
+            initializeFeedBackLayout()
+            removeLoggerBirdDismissLayout()
+        }
+    }
+
+    private fun initializeLoggerBirdFileActionPopup(activity: Activity) {
+        try {
+            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+            viewLoggerBirdFileActionPopup =
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.loggerbird_file_action_popup, rootView, false)
+            windowManagerParamsLoggerBirdFileAction =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+            windowManagerParamsLoggerBirdFileAction.gravity = Gravity.TOP
+            windowManagerLoggerBirdFileActionPopup =
+                activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerLoggerBirdFileActionPopup as WindowManager).addView(
+                viewLoggerBirdFileActionPopup,
+                windowManagerParamsLoggerBirdFileAction
+            )
+            viewLoggerBirdFileActionPopup.scaleX = 0F
+            viewLoggerBirdFileActionPopup.scaleY = 0F
+            viewLoggerBirdFileActionPopup.animate()
+                .scaleX(1F)
+                .scaleY(1F)
+                .setDuration(500)
+                .setInterpolator(BounceInterpolator())
+                .setStartDelay(0)
+                .start()
+            textViewLoggerBirdFileActionPopupDiscard =
+                viewLoggerBirdFileActionPopup.findViewById(R.id.textView_files_action_discard)
+            textViewLoggerBirdFileActionPopupEmail =
+                viewLoggerBirdFileActionPopup.findViewById(R.id.textView_files_action_mail)
+            initializeButtonClicksLoggerBirdFileActionPopup()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.loggerBirdFileActionPopupTag
+            )
+        }
+    }
+
+    internal fun removeLoggerBirdFileActionLayout() {
+        if (this::viewLoggerBirdFileActionPopup.isInitialized && windowManagerLoggerBirdFileActionPopup != null) {
+            (windowManagerLoggerBirdFileActionPopup as WindowManager).removeViewImmediate(
+                viewLoggerBirdFileActionPopup
+            )
+            windowManagerLoggerBirdFileActionPopup = null
+        }
+    }
+
+    private fun initializeButtonClicksLoggerBirdFileActionPopup() {
+        textViewLoggerBirdFileActionPopupDiscard.setSafeOnClickListener {
+            if (this.controlFileAction) {
+                this.controlFileAction = false
+                removeLoggerBirdFileActionLayout()
+                deleteOldFiles()
+            }
+        }
+        textViewLoggerBirdFileActionPopupEmail.setSafeOnClickListener {
+            if (this.controlFileAction) {
+                this.controlFileAction = false
+                removeLoggerBirdFileActionLayout()
+                sendOldFilesEmail()
+            }
+        }
+    }
+
+    private fun initializeLoggerBirdUnhandledExceptionPopup(
+        activity: Activity,
+        sharedPref: SharedPreferences,
+        filePath: File
+    ) {
+        try {
+            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+            viewLoggerBirdUnhandledExceptionPopup =
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.loggerbird_unhandled_popup, rootView, false)
+            windowManagerParamsLoggerBirdUnhandledException =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+            windowManagerParamsLoggerBirdUnhandledException.gravity = Gravity.TOP
+            windowManagerLoggerBirdUnhandledException =
+                activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerLoggerBirdUnhandledException as WindowManager).addView(
+                viewLoggerBirdUnhandledExceptionPopup,
+                windowManagerParamsLoggerBirdUnhandledException
+            )
+            viewLoggerBirdUnhandledExceptionPopup.scaleX = 0F
+            viewLoggerBirdUnhandledExceptionPopup.scaleY = 0F
+            viewLoggerBirdUnhandledExceptionPopup.animate()
+                .scaleX(1F)
+                .scaleY(1F)
+                .setDuration(500)
+                .setInterpolator(BounceInterpolator())
+                .setStartDelay(0)
+                .start()
+            textViewLoggerBirdUnhandledExceptionPopupDiscard =
+                viewLoggerBirdUnhandledExceptionPopup.findViewById(R.id.textView_unhandled_discard)
+            textViewLoggerBirdUnhandledExceptionPopupShare =
+                viewLoggerBirdUnhandledExceptionPopup.findViewById(R.id.textView_unhandled_share_title)
+            checkBoxLoggerBirdUnhandledExceptionPopupDuplication =
+                viewLoggerBirdUnhandledExceptionPopup.findViewById(R.id.checkBox_unhandled)
+
+            initializeButtonClicksLoggerBirdUnhandledExceptionPopup(
+                activity = activity,
+                sharedPref = sharedPref,
+                filePath = filePath
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.loggerBirdUnhandledExceptionPopupTag
+            )
+        }
+    }
+
+    internal fun removeLoggerBirdUnhandledExceptionLayout() {
+        if (this::viewLoggerBirdUnhandledExceptionPopup.isInitialized && windowManagerLoggerBirdUnhandledException != null) {
+            (windowManagerLoggerBirdUnhandledException as WindowManager).removeViewImmediate(
+                viewLoggerBirdUnhandledExceptionPopup
+            )
+            windowManagerLoggerBirdUnhandledException = null
+        }
+    }
+
+    private fun initializeButtonClicksLoggerBirdUnhandledExceptionPopup(
+        sharedPref: SharedPreferences,
+        filePath: File,
+        activity: Activity
+    ) {
+        if (sharedPref.getBoolean("duplication_enabled", false)) {
+            checkBoxLoggerBirdUnhandledExceptionPopupDuplication.isChecked = true
+        }
+        checkBoxLoggerBirdUnhandledExceptionPopupDuplication.setOnClickListener {
+            if (checkBoxLoggerBirdUnhandledExceptionPopupDuplication.isChecked) {
+                with(sharedPref.edit()) {
+                    putBoolean("duplication_enabled", true)
+                    commit()
+                }
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.duplication_check_enabled)
+                )
+            } else {
+                with(sharedPref.edit()) {
+                    putBoolean("duplication_enabled", false)
+                    commit()
+                }
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.duplication_check_disabled)
+                )
+            }
+        }
+        textViewLoggerBirdUnhandledExceptionPopupDiscard.setSafeOnClickListener {
+            if (filePath.exists()) {
+                filePath.delete()
+            }
+            val editor: SharedPreferences.Editor = sharedPref.edit()
+            editor.remove("unhandled_file_path")
+            editor.apply()
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = context.resources.getString(R.string.unhandled_file_discard_success)
+            )
+            removeLoggerBirdUnhandledExceptionLayout()
+        }
+        textViewLoggerBirdUnhandledExceptionPopupShare.setSafeOnClickListener {
+            initializeFloatingActionButton(activity = activity)
+            shareView(filePathMedia = filePath)
         }
     }
 
