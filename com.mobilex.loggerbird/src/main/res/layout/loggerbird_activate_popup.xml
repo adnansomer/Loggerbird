@@ -11,52 +11,44 @@
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:paddingTop="40dp">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
         <ImageView
-            android:id="@+id/iv_icon"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginRight="16dp"
-
+            android:src="@drawable/loggerbird"
             android:layout_marginEnd="16dp"
             android:layout_gravity="center" />
-
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical">
-
             <TextView
-                android:id="@+id/tv_title"
+                android:id="@+id/textView_loggerbird_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
+                android:text="@string/library_name"
                 android:textStyle="bold" />
-
             <TextView
-                android:id="@+id/tv_message"
+                android:id="@+id/textView_loggerbird_permission"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
+                android:text="@string/logger_bird_floating_action_button_permission_message"
                 android:textColor="@android:color/white"
                 android:textSize="14sp" />
-
         </LinearLayout>
-
     </LinearLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:weightSum="2">
-
         <TextView
             android:layout_marginTop="6dp"
             android:layout_weight="1"
@@ -68,7 +60,6 @@
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold" />
-
         <TextView
             android:layout_marginTop="6dp"
             android:id="@+id/btn_action_activate"
@@ -81,7 +72,5 @@
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold" />
-
     </LinearLayout>
-
 </LinearLayout>
