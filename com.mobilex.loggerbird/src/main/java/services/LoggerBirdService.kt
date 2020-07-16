@@ -96,6 +96,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import java.text.SimpleDateFormat
 import android.text.InputFilter
+import androidx.core.widget.addTextChangedListener
 import listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
 import listeners.layouts.LayoutFeedbackOnTouchListener
 import listeners.layouts.LayoutJiraOnTouchListener
@@ -353,10 +354,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonEmailCreate: Button
     private lateinit var buttonEmailCancel: Button
     private lateinit var imageViewEmailAdd: ImageView
-    private lateinit var cardViewToList: CardView
-    private lateinit var editTextTo: EditText
-    private lateinit var editTextContent: EditText
-    private lateinit var editTextSubject: EditText
+    private lateinit var imageViewEmailClear:ImageView
+    private lateinit var cardViewEmailToList: CardView
+    private lateinit var editTextEmailTo: EditText
+    private lateinit var editTextEmailContent: EditText
+    private lateinit var editTextEmailSubject: EditText
     private lateinit var toolbarEmail: Toolbar
     private lateinit var recyclerViewEmailAttachment: RecyclerView
     private lateinit var recyclerViewEmailToList: RecyclerView
@@ -1705,6 +1707,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             workingAnimation =
                                 AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
                             floating_action_button.startAnimation(workingAnimation)
+                            floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
                             floating_action_button.backgroundTintList =
                                 ColorStateList.valueOf(
                                     ContextCompat.getColor(
@@ -2245,7 +2248,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @param filePathMedia is used for getting the reference of current media file.
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    private fun callEmail(filePathMedia: File, to: String) {
+    private fun callEmail(filePathMedia: File? = null, to: String) {
         if (LoggerBird.isLogInitAttached()) {
             if (runnableListEmail.isEmpty()) {
                 workQueueLinkedEmail.put {
@@ -2842,26 +2845,34 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun sendSingleMediaFile(
-        filePathMedia: File,
+        filePathMedia: File? = null,
         to: String,
         message: String? = null,
         subject: String? = null
     ) {
         coroutineCallSendSingleFile.async {
             try {
-                if (filePathMedia.exists()) {
-                    LoggerBird.callEmailSender(
-                        context = context,
-                        activity = activity,
-                        file = filePathMedia,
-                        to = to,
-                        message = message,
-                        subject = subject
-                    )
-                } else {
-                    finishShareLayout("single_email_error")
-                    resetEnqueueEmail()
-                }
+                LoggerBird.callEmailSender(
+                    context = context,
+                    activity = activity,
+                    file = filePathMedia,
+                    to = to,
+                    message = message,
+                    subject = subject
+                )
+//                if (filePathMedia.exists()) {
+//                    LoggerBird.callEmailSender(
+//                        context = context,
+//                        activity = activity,
+//                        file = filePathMedia,
+//                        to = to,
+//                        message = message,
+//                        subject = subject
+//                    )
+//                } else {
+//                    finishShareLayout("single_email_error")
+//                    resetEnqueueEmail()
+//                }
             } catch (e: Exception) {
                 finishShareLayout("single_email_error")
                 e.printStackTrace()
@@ -5504,17 +5515,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         buttonEmailCancel =
             viewEmail.findViewById(R.id.button_email_cancel)
         imageViewEmailAdd = viewEmail.findViewById(R.id.imageView_email_add)
-        editTextTo = viewEmail.findViewById(R.id.editText_email_to)
-        editTextSubject = viewEmail.findViewById(R.id.editText_email_subject)
-        editTextContent = viewEmail.findViewById(R.id.editText_email_message)
+        imageViewEmailClear = viewEmail.findViewById(R.id.imageView_email_clear)
+        editTextEmailTo = viewEmail.findViewById(R.id.editText_email_to)
+        editTextEmailSubject = viewEmail.findViewById(R.id.editText_email_subject)
+        editTextEmailContent = viewEmail.findViewById(R.id.editText_email_message)
         toolbarEmail = viewEmail.findViewById(R.id.toolbar_email)
         recyclerViewEmailAttachment =
             viewEmail.findViewById(R.id.recycler_view_email_attachment)
         recyclerViewEmailToList = viewEmail.findViewById(R.id.recycler_view_email_to_list)
-        cardViewToList = viewEmail.findViewById(R.id.cardView_to_list)
+        cardViewEmailToList = viewEmail.findViewById(R.id.cardView_to_list)
         initializeEmailAttachmentRecyclerView(filePathMedia = filePathMedia)
         initializeEmailToRecyclerView()
-        initializeEmailButtons(filePathMedia = filePathMedia)
+        initializeEmailButtons()
     }
 
 
@@ -5536,7 +5548,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun initializeEmailButtons(filePathMedia: File) {
+    private fun initializeEmailButtons() {
         try {
             buttonEmailCreate.setSafeOnClickListener {
                 if (checkBoxFutureTask.isChecked) {
@@ -5566,13 +5578,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 } else {
                     if (arraylistEmailToUsername.isNotEmpty()) {
                         arraylistEmailToUsername.forEach {
-                            callEmail(filePathMedia = filePathMedia, to = it.email)
+                            callEmail(to = it.email)
                         }
                     } else {
-                        if (checkEmailFormat(editTextTo.text.toString())) {
+                        if (checkEmailFormat(editTextEmailTo.text.toString())) {
                             callEmail(
-                                filePathMedia = filePathMedia,
-                                to = editTextTo.text.toString()
+                                to = editTextEmailTo.text.toString()
                             )
                         }
                     }
@@ -5583,15 +5594,27 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
             imageViewEmailAdd.setSafeOnClickListener {
                 hideKeyboard(activity = activity, view = viewEmail)
-                if (checkEmailFormat(editTextTo.text.toString())) {
-                    cardViewToList.visibility = View.VISIBLE
-                    addEmailToUser(email = editTextTo.text.toString())
+                if (checkEmailFormat(editTextEmailTo.text.toString())) {
+                    cardViewEmailToList.visibility = View.VISIBLE
+                    addEmailToUser(email = editTextEmailTo.text.toString())
                 }
+            }
+            imageViewEmailClear.setSafeOnClickListener {
+                hideKeyboard(activity = activity, view = viewEmail)
+                editTextEmailTo.text = null
+                imageViewEmailClear.visibility = View.GONE
             }
             toolbarEmail.setNavigationOnClickListener {
                 removeEmailLayout()
                 if (controlFloatingActionButtonView()) {
                     floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+            editTextEmailTo.addTextChangedListener {
+                if(editTextEmailTo.text.toString().isEmpty()){
+                    imageViewEmailClear.visibility = View.GONE
+                }else{
+                    imageViewEmailClear.visibility = View.VISIBLE
                 }
             }
         } catch (e: Exception) {
@@ -5613,10 +5636,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (arraylistEmailToUsername.isNotEmpty()) {
                 addFutureUserList()
             } else {
-                putString("future_task_email_to", editTextTo.text.toString())
+                putString("future_task_email_to", editTextEmailTo.text.toString())
             }
-            putString("future_task_email_subject", editTextSubject.text.toString())
-            putString("future_task_email_message", editTextContent.text.toString())
+            putString("future_task_email_subject", editTextEmailSubject.text.toString())
+            putString("future_task_email_message", editTextEmailContent.text.toString())
 //            putString("future_task_email_file", filePathMedia.absolutePath)
             commit()
         }
@@ -5633,14 +5656,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @param to is used for getting reference of email address.
      * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    private fun createEmailTask(filePathMedia: File, to: String) {
+    private fun createEmailTask(filePathMedia: File? = null, to: String) {
         try {
-            attachProgressBar()
+            activity.runOnUiThread {
+                detachProgressBar()
+                attachProgressBar()
+            }
             sendSingleMediaFile(
                 filePathMedia = filePathMedia,
                 to = to,
-                subject = editTextSubject.text.toString(),
-                message = editTextContent.text.toString()
+                subject = editTextEmailSubject.text.toString(),
+                message = editTextEmailContent.text.toString()
             )
 
         } catch (e: Exception) {
@@ -5682,7 +5708,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         emailToListAttachmentAdapter =
             RecyclerViewEmaiToListAttachmentAdapter(
                 arraylistEmailToUsername,
-                cardView = cardViewToList,
+                cardView = cardViewEmailToList,
                 context = context,
                 activity = activity,
                 rootView = rootView

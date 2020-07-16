@@ -567,8 +567,16 @@ internal class ClubhouseApi {
                         stringBuilder.append("\nattachment_$attachmentCounter:$it")
                         attachmentCounter++
                     }
+                    stringBuilder.append("\n"+"Life Cycle Details:" + "\n")
+                    var classCounter = 0
+                    LoggerBird.classPathList.forEach {
+                        stringBuilder.append("$it (${LoggerBird.classPathListCounter[classCounter]})\n")
+                        classCounter++
+                    }
                     val updatedDescription =
-                        "$storyDescription\n" + stringBuilder.toString() + "\n${"Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString()  + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString() + "\n"}"
+                        "$storyDescription\n" + stringBuilder.toString()
+//                    val updatedDescription =
+//                        "$storyDescription\n" + stringBuilder.toString() + "\n${"Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString()  + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString() + "\n"}"
                     uploadAttachments(
                         storyId = storyId,
                         description = updatedDescription.toString()

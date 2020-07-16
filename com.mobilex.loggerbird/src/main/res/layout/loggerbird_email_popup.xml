@@ -102,6 +102,12 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 app:srcCompat="@drawable/ic_add_black_24dp" />
+                            <ImageView
+                                android:id="@+id/imageView_email_clear"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:visibility="gone"
+                                app:srcCompat="@drawable/ic_clear_black_24dp" />
                         </LinearLayout>
                         <androidx.cardview.widget.CardView
                             android:id="@+id/cardView_to_list"

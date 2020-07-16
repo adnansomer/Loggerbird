@@ -98,7 +98,6 @@ class LoggerBird : LifecycleObserver {
         private var coroutineCallLifeCycle: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineCallAnalytics: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineCallFragmentManager: CoroutineScope = CoroutineScope(Dispatchers.IO)
-        private var coroutineCallGeneralLifeCycle: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineCallHttpRequest: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineCallInAPurchase: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private var coroutineCallRetrofit: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -113,10 +112,14 @@ class LoggerBird : LifecycleObserver {
         private var formattedTime: String? = null
         private var fileLimit: Long = 2097152
         internal lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
-        private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver = LogRecyclerViewAdapterDataObserver()
-        private var recyclerViewScrollListener: LogRecyclerViewScrollListener = LogRecyclerViewScrollListener()
-        private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener = LogRecyclerViewChildAttachStateChangeListener()
-        private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener = LogRecyclerViewItemTouchListener()
+        private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver =
+            LogRecyclerViewAdapterDataObserver()
+        private var recyclerViewScrollListener: LogRecyclerViewScrollListener =
+            LogRecyclerViewScrollListener()
+        private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener =
+            LogRecyclerViewChildAttachStateChangeListener()
+        private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener =
+            LogRecyclerViewItemTouchListener()
         private lateinit var workQueueLinked: LinkedBlockingQueueUtil
         private lateinit var recyclerViewItemObserver: LogDataSetObserver
         private lateinit var textViewFileReader: TextView
@@ -131,7 +134,6 @@ class LoggerBird : LifecycleObserver {
         private lateinit var activityLifeCycleObserver: LogActivityLifeCycleObserver
         internal var stringBuilderActivityLifeCycleObserver: StringBuilder = StringBuilder()
         internal var classList: ArrayList<String> = ArrayList()
-        private var stringBuilderGeneralLifeCycle: StringBuilder = StringBuilder()
         internal lateinit var filePathSecessionName: File
         internal lateinit var jiraDomainName: String
         internal lateinit var jiraUserName: String
@@ -149,7 +151,10 @@ class LoggerBird : LifecycleObserver {
         internal lateinit var basecampApiToken: String
         internal lateinit var asanaApiToken: String
         internal lateinit var clubhouseApiToken: String
-        internal lateinit var logLevel : LogLevel
+        internal var classPathList:ArrayList<String> = ArrayList()
+        internal var classPathCounter:Int = 0
+        internal var classPathListCounter:ArrayList<Int> = ArrayList()
+        internal var classPathTotalCounter:Int = 0
         //---------------Public Methods:---------------//
 
         /**
@@ -160,15 +165,43 @@ class LoggerBird : LifecycleObserver {
          */
         fun logInit(
             context: Context,
-            filePathName: String? = null,
-            logLevel: LogLevel? = null
+            //jiraDomainName: String,
+            //jiraUserName: String,
+            //jiraApiToken: String,
+            //slackApiToken: String,
+            //githubUserName: String,
+            //githubPassword: String,
+            //gitlabApiToken: String,
+            //trelloUserName: String,
+            //trelloPassword: String,
+            //trelloKey: String,
+            //trelloToken: String,
+            //pivotalApiToken: String,
+            //basecampApiToken: String,
+            //asanaApiToken: String,
+            //clubhouseApiToken: String,
+            filePathName: String? = null
         ): Boolean {
             this.context = context
             this.filePathName = filePathName
             if (!controlLogInit) {
                 try {
+                    //Companion.jiraDomainName = jiraDomainName
+                    //Companion.jiraUserName = jiraUserName
+                    //Companion.jiraApiToken = jiraApiToken
+                    //Companion.slackApiToken = slackApiToken
+                    //Companion.githubUserName = githubUserName
+                    //Companion.githubPassword = githubPassword
+                    //Companion.trelloUserName = trelloUserName
+                    //Companion.trelloPassword = trelloPassword
+                    //Companion.trelloKey = trelloKey
+                    //Companion.trelloToken = trelloToken
+                    //Companion.gitlabApiToken = gitlabApiToken
+                    //Companion.pivotalApiToken = pivotalApiToken
+                    //Companion.basecampApiToken = basecampApiToken
+                    //Companion.clubhouseApiToken = clubhouseApiToken
+                    //Companion.asanaApiToken = asanaApiToken
                     logAttachLifeCycleObservers(context = context)
-
                     fileDirectory = context.filesDir
                     if (filePathName != null) {
                         filePath = File(fileDirectory, "$filePathName.txt")
@@ -181,7 +214,6 @@ class LoggerBird : LifecycleObserver {
                             filePath.delete()
                         }
                         saveDefaultFileDetails(filePath = filePath)
-
                     }
                     workQueueLinked = LinkedBlockingQueueUtil()
                     val logcatObserver = UnhandledExceptionObserver()
@@ -191,18 +223,13 @@ class LoggerBird : LifecycleObserver {
                         context.startService(intentServiceMemory)
                     }
                     filePathSecessionName = filePath
+
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
             controlLogInit = true
             return controlLogInit
-        }
-
-        private fun setLogLevel(logLevel: LogLevel?){
-            if(logLevel == LogLevel.INFO){
-                callCpuDetails()
-            }
         }
 
 
@@ -262,7 +289,6 @@ class LoggerBird : LifecycleObserver {
                 }
             }
         }
-
 
         /**
          * This Method adds takeCpuDetails into queue.
@@ -1780,7 +1806,7 @@ class LoggerBird : LifecycleObserver {
                 } while (scannerStringBuilder.hasNextLine())
             } catch (e: Exception) {
                 e.printStackTrace()
-                callEnqueue ()
+                callEnqueue()
                 callExceptionDetails(
                     exception = e,
                     tag = Constants.exceedFileLimitTag
@@ -1801,6 +1827,10 @@ class LoggerBird : LifecycleObserver {
                     stringBuilderBuild.toString()
                 )
             }
+        }
+
+        private fun saveLifeCycleDetails(filePath: File){
+
         }
 
 
@@ -2404,6 +2434,10 @@ class LoggerBird : LifecycleObserver {
                             stringBuilderExceedFileWriterLimit.append(
                                 stringBuilderCpu.toString()
                             )
+                        } else {
+                            filePath.appendText(
+                                stringBuilderCpu.toString()
+                            )
                         }
                     }
                     callEnqueue()
@@ -2417,11 +2451,10 @@ class LoggerBird : LifecycleObserver {
                 } catch (e: Exception) {
                     e.printStackTrace()
                     callEnqueue()
-                    callExceptionDetails(exception = e, tag = Constants.lifeCycleTag)
+                    callExceptionDetails(exception = e, tag = Constants.cpuTag)
                 }
             }
         }
-
 
         /**
          * This Method Saves Exception Details To Txt File.
@@ -2729,10 +2762,7 @@ class LoggerBird : LifecycleObserver {
             }
             return false
         }
-    }
 
-    enum class LogLevel{
-        INFO,WARN,NONE,ALL
     }
 
     /**

@@ -17,6 +17,7 @@ internal class LogFragmentLifeCycleObserver(
     FragmentManager.FragmentLifecycleCallbacks() {
     //Global variables.
     private var classList: ArrayList<String> = ArrayList()
+
     //Static global variables.
     companion object {
         internal var stringBuilderFragmentLifeCycleObserver: StringBuilder = StringBuilder()
@@ -49,21 +50,44 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentViewCreated"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
-                if (classList.isEmpty()) {
-                    classList.add(f.tag!!)
-                }
-                while (classList.iterator().hasNext()) {
-                    if (classList.contains(f.tag!!)) {
-                        break;
-                    } else {
-                        classList.add(f.tag!!)
-                    }
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
+            }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
+            if (classList.isEmpty()) {
+                classList.add(className)
+            }
+            while (classList.iterator().hasNext()) {
+                if (classList.contains(className)) {
+                    break;
+                } else {
+                    classList.add(className)
                 }
             }
+            if (LoggerBird.classPathList.size > 20) {
+                LoggerBird.classPathList.removeAt(LoggerBird.classPathCounter)
+                LoggerBird.classPathListCounter.removeAt(LoggerBird.classPathCounter)
+                LoggerBird.classPathList.add(
+                    LoggerBird.classPathCounter,
+                    className
+                )
+                LoggerBird.classPathListCounter.add(
+                    LoggerBird.classPathCounter,
+                    LoggerBird.classPathTotalCounter
+                )
+                LoggerBird.classPathCounter++
+                if (LoggerBird.classPathCounter >= LoggerBird.classPathList.size) {
+                    LoggerBird.classPathCounter = 0
+                }
+            } else {
+                LoggerBird.classPathList.add(className)
+                LoggerBird.classPathListCounter.add(LoggerBird.classPathTotalCounter)
+            }
+            LoggerBird.classPathTotalCounter++
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -88,9 +112,12 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentAttached"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n")
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n")
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -115,11 +142,14 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentPreAttached"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -144,11 +174,14 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onSaveInstanceState"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -172,11 +205,14 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentViewDestroyed"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -205,11 +241,14 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentPreCreated"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -239,11 +278,14 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentActivityCreated"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -268,11 +310,14 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentCreate"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -297,11 +342,14 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentStarted"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -325,11 +373,14 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentResumed"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -353,11 +404,14 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentPaused"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -381,11 +435,14 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentStopped"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -410,11 +467,14 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentDestroyed"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -438,11 +498,14 @@ internal class LogFragmentLifeCycleObserver(
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentDetached"
-            if(f.tag != null){
-                stringBuilderFragmentLifeCycleObserver.append(
-                    Constants.fragmentTag + ":" + f.tag + " " + "$formattedTime:$currentLifeCycleState\n"
-                )
+            val className: String = if (f.tag != null) {
+                f.tag!!
+            } else {
+                f.javaClass.simpleName
             }
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()

@@ -31,6 +31,7 @@ import java.net.SocketTimeoutException
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.text.StringBuilder
 
 /** Loggerbird Slack api configration class **/
 internal class SlackApi {
@@ -63,13 +64,15 @@ internal class SlackApi {
     private var slackType: String? = null
     private var controlcallSlack: Boolean = false
     private lateinit var timerTaskQueue: TimerTask
+
     /** Loggerbird slack app client information **/
     companion object {
         internal const val CLIENT_ID = "1176309019584.1151103028997"
         internal const val CLIENT_SECRET = "6147f0bd55a0c777893d07c91f3b16ef"
         private const val REDIRECT_URL = "https://app.slack.com/client"
         private const val APP_ID = "A014F310UVB"
-        private const val INVITATION_URL = "https://slack.com/oauth/v2/authorize?client_id=1176309019584.1151103028997&scope=app_mentions:read,channels:join,channels:read,chat:write,files:write,groups:read,groups:write,im:write,incoming-webhook,mpim:read,mpim:write,usergroups:write,users:read,users:write,usergroups:read,users.profile:read,chat:write.public,team:read"
+        private const val INVITATION_URL =
+            "https://slack.com/oauth/v2/authorize?client_id=1176309019584.1151103028997&scope=app_mentions:read,channels:join,channels:read,chat:write,files:write,groups:read,groups:write,im:write,incoming-webhook,mpim:read,mpim:write,usergroups:write,users:read,users:write,usergroups:read,users.profile:read,chat:write.public,team:read"
     }
 
     /**
@@ -358,7 +361,8 @@ internal class SlackApi {
      */
     private suspend fun slackTaskGatherUsers(
         slack: Slack,
-        token: String) {
+        token: String
+    ) {
         queueCounter++
         withContext(Dispatchers.IO) {
             try {
@@ -451,7 +455,7 @@ internal class SlackApi {
         messagePath: String?,
         slackType: String?
     ) {
-
+        val stringBuilder = StringBuilder()
         when (slackType) {
             "user" ->
                 try {
@@ -459,7 +463,14 @@ internal class SlackApi {
                         if (messagePath != null) {
                             slack.methods(token).chatPostMessage {
                                 it.channel(hashMapUser[arrayListUsersName[spinnerPosition]].toString())
-                                it.text(messageUser + "\n" + "Life Cycle Details"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+                                stringBuilder.append("Life Cycle Details:" + "\n")
+                                var classCounter = 0
+                                LoggerBird.classPathList.forEach {
+                                    stringBuilder.append("$it (${LoggerBird.classPathListCounter[classCounter]})\n")
+                                    classCounter++
+                                }
+                                it.text(messageUser + "\n" + stringBuilder.toString())
+//                                it.text(messageUser + "\n" + "Life Cycle Details"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
                                 it.asUser(true)
                             }
                         }
@@ -511,7 +522,14 @@ internal class SlackApi {
                             }
 
                             slack.methods(token).chatPostMessage {
-                                it.channel(channel + "\n" + "Life Cycle Details"  + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
+                                stringBuilder.append("Life Cycle Details:" + "\n")
+                                var classCounter = 0
+                                LoggerBird.classPathList.forEach {
+                                    stringBuilder.append("$it (${LoggerBird.classPathListCounter[classCounter]})\n")
+                                    classCounter++
+                                }
+                                it.channel(channel + "\n" + stringBuilder.toString())
+//                                it.channel(channel + "\n" + "Life Cycle Details" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
                                 it.text(message)
                                 it.asUser(true)
                             }
