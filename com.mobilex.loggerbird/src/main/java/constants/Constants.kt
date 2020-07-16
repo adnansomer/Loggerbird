@@ -108,5 +108,6 @@ internal class Constants {
             "RecyclerView Clubhouse Adapter"
         internal const val clubhouseTag: String = "Clubhouse"
         internal const val clubhouseDatePopupTag = "Clubhouse Date Popup"
+        internal const val loggerBirdPopupTag = "LoggerBird Popup"
     }
 }

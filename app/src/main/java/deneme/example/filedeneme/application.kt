@@ -21,10 +21,9 @@ class application : Application() {
             .build()
 
         LoggerBird.logInit(
-            context = this
+            context = this,
+            logLevel = LoggerBird.LogLevel.ALL
         )
-
-        LoggerBird.callCpuDetails()
 
     }
 }
