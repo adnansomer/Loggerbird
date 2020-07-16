@@ -144,6 +144,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerAsanaDate: Any? = null
     private var windowManagerClubhouse: Any? = null
     private var windowManagerClubhouseDatePicker: Any? = null
+    private var windowManagerLoggerBirdPopup: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -169,6 +170,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsAsanaDate: WindowManager.LayoutParams
     private lateinit var windowManagerParamsClubhouse: WindowManager.LayoutParams
     private lateinit var windowManagerParamsClubhouseDatePicker: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsLoggerBirdPopup: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudio: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -228,6 +230,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewAsana: View
     private lateinit var viewAsanaDate: View
     private lateinit var viewClubhouse: View
+    private lateinit var viewLoggerBirdPopup:View
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
     private var sessionTimeEnd: Long? = null
@@ -354,7 +357,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonEmailCreate: Button
     private lateinit var buttonEmailCancel: Button
     private lateinit var imageViewEmailAdd: ImageView
-    private lateinit var imageViewEmailClear:ImageView
+    private lateinit var imageViewEmailClear: ImageView
     private lateinit var cardViewEmailToList: CardView
     private lateinit var editTextEmailTo: EditText
     private lateinit var editTextEmailContent: EditText
@@ -670,8 +673,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var recyclerViewClubhouseAttachment: RecyclerView
     private lateinit var progressBarClubhouse: ProgressBar
     private lateinit var progressBarClubhouseLayout: FrameLayout
-
-
+    //LoggerBird pop-up:
+    private lateinit var textViewLoggerBirdPopUpActivate:TextView
+    private lateinit var textViewLoggerBirdPopUpDismiss:TextView
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
@@ -2287,28 +2291,29 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             } else {
                 if (!isFabEnable) {
                     if (!isActivateDialogShown) {
-                        cookieBar = CookieBar.build(this.activity)
-                            .setTitle(resources.getString(R.string.library_name))
-                            .setMessage(resources.getString(R.string.logger_bird_floating_action_button_permission_message))
-                            .setCustomView(R.layout.loggerbird_activate_popup)
-                            .setIcon(R.drawable.loggerbird)
-                            .setSwipeToDismiss(true)
-                            .setCookieListener { isActivateDialogShown = false }
-                            .setEnableAutoDismiss(false)
-                            .setCustomViewInitializer(CookieBar.CustomViewInitializer {
-                                val txtActivate =
-                                    it.findViewById<TextView>(R.id.btn_action_activate)
-                                val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
-                                txtActivate.setSafeOnClickListener {
-                                    initializeFloatingActionButton(activity = activity)
-                                    CookieBar.dismiss(activity)
-                                }
-                                txtDismiss.setSafeOnClickListener {
-                                    sd.stop()
-                                    CookieBar.dismiss(activity)
-                                }
-                            })
-                            .show()
+                        initializeLoggerBirdActivateBar(activity = this.activity)
+//                        cookieBar = CookieBar.build(this.activity)
+//                            .setTitle(resources.getString(R.string.library_name))
+//                            .setMessage(resources.getString(R.string.logger_bird_floating_action_button_permission_message))
+//                            .setCustomView(R.layout.loggerbird_activate_popup)
+//                            .setIcon(R.drawable.loggerbird)
+//                            .setSwipeToDismiss(true)
+//                            .setCookieListener { isActivateDialogShown = false }
+//                            .setEnableAutoDismiss(false)
+//                            .setCustomViewInitializer(CookieBar.CustomViewInitializer {
+//                                val txtActivate =
+//                                    it.findViewById<TextView>(R.id.btn_action_activate)
+//                                val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
+//                                txtActivate.setSafeOnClickListener {
+//                                    initializeFloatingActionButton(activity = activity)
+//                                    CookieBar.dismiss(activity)
+//                                }
+//                                txtDismiss.setSafeOnClickListener {
+//                                    sd.stop()
+//                                    CookieBar.dismiss(activity)
+//                                }
+//                            })
+//                            .show()
                         isActivateDialogShown = true
                     }
                 }
@@ -5611,9 +5616,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             editTextEmailTo.addTextChangedListener {
-                if(editTextEmailTo.text.toString().isEmpty()){
+                if (editTextEmailTo.text.toString().isEmpty()) {
                     imageViewEmailClear.visibility = View.GONE
-                }else{
+                } else {
                     imageViewEmailClear.visibility = View.VISIBLE
                 }
             }
@@ -10975,6 +10980,65 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         return arrayListClubhouseFileName
     }
 
+
+    private fun initializeLoggerBirdActivateBar(activity: Activity) {
+        try {
+            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+            viewLoggerBirdPopup=
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.loggerbird_activate_popup, rootView, false)
+            windowManagerParamsLoggerBirdPopup =
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT
+                )
+            windowManagerParamsLoggerBirdPopup.gravity = Gravity.TOP
+            windowManagerLoggerBirdPopup = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerLoggerBirdPopup as WindowManager).addView(
+                viewLoggerBirdPopup,
+                windowManagerParamsLoggerBirdPopup
+            )
+            viewLoggerBirdPopup.scaleX = 0F
+            viewLoggerBirdPopup.scaleY = 0F
+            viewLoggerBirdPopup.animate()
+                .scaleX(1F)
+                .scaleY(1F)
+                .setDuration(500)
+                .setInterpolator(BounceInterpolator())
+                .setStartDelay(0)
+                .start()
+            textViewLoggerBirdPopUpActivate = viewLoggerBirdPopup.findViewById(R.id.btn_action_activate)
+            textViewLoggerBirdPopUpDismiss = viewLoggerBirdPopup.findViewById(R.id.btn_action_dismiss)
+            initializeButtonClicksLoggerBirdActivateBar(activity = activity)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.loggerBirdPopupTag)
+        }
+    }
+
+    internal fun removeLoggerBirdActivateLayout() {
+        if (this::viewLoggerBirdPopup.isInitialized && windowManagerLoggerBirdPopup != null) {
+            (windowManagerLoggerBirdPopup as WindowManager).removeViewImmediate(
+                viewLoggerBirdPopup
+            )
+            windowManagerLoggerBirdPopup = null
+        }
+    }
+
+    private fun initializeButtonClicksLoggerBirdActivateBar(activity: Activity){
+        textViewLoggerBirdPopUpActivate.setSafeOnClickListener {
+            initializeFloatingActionButton(activity = activity)
+            removeLoggerBirdActivateLayout()
+        }
+        textViewLoggerBirdPopUpDismiss.setSafeOnClickListener {
+            sd.stop()
+            removeLoggerBirdActivateLayout()
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class MediaProjectionCallback : MediaProjection.Callback() {
