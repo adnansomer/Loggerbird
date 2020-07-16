@@ -1,4 +1,4 @@
-package adapter.recyclerView.api.github
+package adapter.recyclerView.api.trello
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -17,26 +17,27 @@ import com.mobilex.loggerbird.R
 import java.util.concurrent.TimeUnit
 import android.provider.Settings
 import android.widget.Button
+import android.widget.CheckBox
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
-import models.recyclerView.RecyclerViewModelAssignee
+import models.recyclerView.RecyclerViewModelCheckList
 import services.LoggerBirdService
 
-//Custom recyclerView adapter class for github assignee.
+//Custom recyclerView adapter class for trello checklist.
 /**
- * @param assigneeList is for getting the list of assignees that will be used in recyclerView.
+ * @param checkListList is for getting the list of checklists that will be used in recyclerView.
  * @param context is for getting reference from the application context.
  * @param activity is for getting reference of current activity in the application.
  * @param rootView is for getting reference of the view that is in the root of current activity.
  */
-internal class RecyclerViewGithubAssigneeAdapter(
-    private val assigneeList: ArrayList<RecyclerViewModelAssignee>,
+internal class RecyclerViewTrelloCheckListAdapter(
+    private val checkListList: ArrayList<RecyclerViewModelCheckList>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View
 ) :
-    RecyclerView.Adapter<RecyclerViewGithubAssigneeAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerViewTrelloCheckListAdapter.ViewHolder>() {
 
     /**
      * Default RecyclerView.Adapter class method.
@@ -47,7 +48,7 @@ internal class RecyclerViewGithubAssigneeAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_github_assignee_item,
+                R.layout.recycler_view_trello_check_list_item,
                 parent,
                 false
             )
@@ -59,7 +60,7 @@ internal class RecyclerViewGithubAssigneeAdapter(
      * @return size of the list that will be used in the recyclerview.
      */
     override fun getItemCount(): Int {
-        return assigneeList.size
+        return checkListList.size
     }
 
     /**
@@ -69,17 +70,17 @@ internal class RecyclerViewGithubAssigneeAdapter(
      */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindItems(
-            item = assigneeList[position],
-            assigneeAdapter = this,
+            item = checkListList[position],
+            checkListAdapter = this,
             position = position,
-            assigneeList = assigneeList,
+            checkListList = checkListList,
             context = context,
             activity = activity,
             rootView = rootView
         )
     }
 
-    //Inner ViewHolder class for RecyclerViewGithubAssigneeAdapter class.
+    //Inner ViewHolder class for RecyclerViewTrelloCheckListAdapter class.
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         //Global variables.
         private var windowManagerRecyclerViewItemPopup: Any? = null
@@ -91,68 +92,80 @@ internal class RecyclerViewGithubAssigneeAdapter(
 
         //Static variables.
         companion object {
-            internal var arrayListAssigneeNames: ArrayList<RecyclerViewModelAssignee> = ArrayList()
+            internal var arrayListCheckListNames: ArrayList<RecyclerViewModelCheckList> =
+                ArrayList()
+            internal var arrayListCheckListValue: ArrayList<Boolean> = ArrayList()
         }
+
 
         /**
          * This method is used for binding the items into recyclerView.
          * @param item is used for getting reference of the base model that are used items in the recyclerView.
-         * @param assigneeAdapter is used for getting reference of the custom recyclerView adapter class.
+         * @param checkListAdapter is used for getting reference of the custom recyclerView adapter class.
          * @param position is used for getting reference of the current position of the item.
-         * @param assigneeList is used for getting reference of the list of assignees that will be used in recyclerView.
+         * @param checkListList is used for getting reference of the list of check lists that will be used in recyclerView.
          * @param context is for getting reference from the application context.
          * @param activity is for getting reference of current activity in the application.
          * @param rootView is for getting reference of the view that is in the root of current activity.
          */
         internal fun bindItems(
-            item: RecyclerViewModelAssignee,
-            assigneeAdapter: RecyclerViewGithubAssigneeAdapter,
+            item: RecyclerViewModelCheckList,
+            checkListAdapter: RecyclerViewTrelloCheckListAdapter,
             position: Int,
-            assigneeList: ArrayList<RecyclerViewModelAssignee>,
+            checkListList: ArrayList<RecyclerViewModelCheckList>,
             context: Context,
             activity: Activity,
             rootView: View
         ) {
-            arrayListAssigneeNames = assigneeList
+            arrayListCheckListNames = checkListList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
-            textViewFileName.text = item.assigneeName
+            val checkBoxList = itemView.findViewById<CheckBox>(R.id.checkBox_list)
+            arrayListCheckListValue.add(false)
+            checkBoxList.setOnCheckedChangeListener { buttonView, isChecked ->
+                arrayListCheckListValue.removeAt(position)
+                if (isChecked) {
+                    arrayListCheckListValue.add(position, true)
+                } else {
+                    arrayListCheckListValue.add(position, false)
+                }
+            }
+            textViewFileName.text = item.checkListName
             imageButtonCross.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
-                        assigneeList = assigneeList,
+                        checkListList = checkListList,
                         position = position,
-                        assigneeAdapter = assigneeAdapter
+                        checkListAdapter = checkListAdapter
                     )
                 }
             }
 
         }
 
-
         /**
          * This method is used for creating custom remove item popup for the recyclerView which is attached to application overlay.
          * @param activity is for getting reference of current activity in the application.
          * @param rootView is for getting reference of the view that is in the root of current activity.
-         * @param assigneeList is used for getting reference of the list of assignees that will be used in recyclerView.
+         * @param checkListList is used for getting reference of the list of checklists that will be used in recyclerView.
          * @param position is used for getting reference of the current position of the item.
-         * @param assigneeAdapter is used for getting reference of the custom recyclerView adapter class.
+         * @param checkListAdapter is used for getting reference of the custom recyclerView adapter class.
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         @RequiresApi(Build.VERSION_CODES.M)
         private fun removeItemPopup(
             activity: Activity,
             rootView: View,
-            assigneeList: ArrayList<RecyclerViewModelAssignee>,
+            checkListList: ArrayList<RecyclerViewModelCheckList>,
             position: Int,
-            assigneeAdapter: RecyclerViewGithubAssigneeAdapter
+            checkListAdapter: RecyclerViewTrelloCheckListAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_github_assignee_popup,
+                        R.layout.recycler_view_trello_check_list_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -184,14 +197,14 @@ internal class RecyclerViewGithubAssigneeAdapter(
                             windowManagerParamsRecyclerViewItemPopup
                         )
                         textViewTitle =
-                            viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_github_title)
+                            viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_trello_title)
                         buttonYes =
-                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_github_yes)
+                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_trello_yes)
                         buttonNo =
-                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_github_no)
-                        buttonClicksGithubPopup(
-                            assigneeAdapter = assigneeAdapter,
-                            assigneeList = assigneeList,
+                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_trello_no)
+                        buttonClicksTrelloPopup(
+                            checkListAdapter = checkListAdapter,
+                            checkList = checkListList,
                             position = position
                         )
                     }
@@ -201,28 +214,28 @@ internal class RecyclerViewGithubAssigneeAdapter(
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
-                    tag = Constants.recyclerViewGithubAdapterTag
+                    tag = Constants.recyclerViewTrelloAdapterTag
                 )
             }
         }
 
         /**
-         * This method is used for initializing button clicks of buttons that are inside in the recycler_view_github_assignee_popup.
-         * @param assigneeList is used for getting reference of the list of assignees that will be used in recyclerView.
+         * This method is used for initializing button clicks of buttons that are inside in the recycler_view_trello_check_list_popup.
+         * @param checkList is used for getting reference of the list of checklists that will be used in recyclerView.
          * @param position is used for getting reference of the current position of the item.
-         * @param assigneeAdapter is used for getting reference of the custom recyclerView adapter class.
+         * @param checkListAdapter is used for getting reference of the custom recyclerView adapter class.
          */
-        private fun buttonClicksGithubPopup(
-            assigneeList: ArrayList<RecyclerViewModelAssignee>,
+        private fun buttonClicksTrelloPopup(
+            checkList: ArrayList<RecyclerViewModelCheckList>,
             position: Int,
-            assigneeAdapter: RecyclerViewGithubAssigneeAdapter
+            checkListAdapter: RecyclerViewTrelloCheckListAdapter
         ) {
             buttonYes.setSafeOnClickListener {
-                assigneeList.removeAt(position)
-                arrayListAssigneeNames = assigneeList
-                assigneeAdapter.notifyDataSetChanged()
-                if (assigneeList.size <= 0) {
-                    LoggerBirdService.loggerBirdService.cardViewGithubAssigneeList.visibility =
+                checkList.removeAt(position)
+                arrayListCheckListNames = checkList
+                checkListAdapter.notifyDataSetChanged()
+                if (checkList.size <= 0) {
+                    LoggerBirdService.loggerBirdService.cardViewTrelloCheckList.visibility =
                         View.GONE
                 }
                 removePopupLayout()
@@ -235,7 +248,7 @@ internal class RecyclerViewGithubAssigneeAdapter(
 
 
         /**
-         * This method is used for removing recycler_view_github_assignee_popup from window.
+         * This method is used for removing recycler_view_trello_label_popup from window.
          */
         private fun removePopupLayout() {
             if (windowManagerRecyclerViewItemPopup != null && this::viewRecyclerViewItems.isInitialized) {

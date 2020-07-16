@@ -1,6 +1,7 @@
 package utils.api.trello
 
 import adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
+import adapter.recyclerView.api.trello.RecyclerViewTrelloCheckListAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloLabelAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloMemberAdapter
 import android.app.Activity
@@ -35,7 +36,7 @@ import utils.other.DefaultToast
 import utils.other.InternetConnectionUtil
 import kotlin.collections.HashMap
 
-/** Loggerbird Trello api configration class **/
+/** Loggerbird Trello api configuration class **/
 internal class TrelloApi {
     //Global variables.
     private lateinit var activity: Activity
@@ -66,6 +67,7 @@ internal class TrelloApi {
     private var description: String? = null
     private var member: String? = null
     private var label: String? = null
+    private var checkList:String? = null
     private val defaultToast = DefaultToast()
     private var calendar: Calendar? = null
     /**
@@ -253,6 +255,7 @@ internal class TrelloApi {
                         response: retrofit2.Response<JsonObject>
                     ) {
                         val coroutineCallTrelloAttachments = CoroutineScope(Dispatchers.IO)
+                        val coroutineCallTrelloCheckList = CoroutineScope(Dispatchers.IO)
                         Log.d("trello_details", response.code().toString())
                         val trelloList = response.body()
                         RecyclerViewTrelloAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
@@ -263,6 +266,30 @@ internal class TrelloApi {
                                     file = it.file,
                                     cardId = trelloList!!["id"].asString
                                 )
+                            }
+                        }
+                        if(RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames.isNotEmpty()){
+                            RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames.forEach {
+                                queueCounter++
+                                coroutineCallTrelloCheckList.async {
+                                    createCheckLists(
+                                        activity = activity,
+                                        checkListName = it.checkListName,
+                                        cardId = trelloList!!["id"].asString
+                                    )
+                                }
+                            }
+                        }else{
+                            if(!checkList.isNullOrEmpty()){
+                                queueCounter++
+                                coroutineCallTrelloCheckList.async {
+                                    createCheckLists(
+                                        activity = activity,
+                                        checkListName = checkList!!,
+                                        cardId = trelloList!!["id"].asString
+                                    )
+                                }
+
                             }
                         }
                         resetTrelloValues()
@@ -317,6 +344,44 @@ internal class TrelloApi {
                         Log.d("attachment_put_success", response.message())
                         resetTrelloValues()
                     }
+                }
+            })
+    }
+    /**
+     * This method is used for creating trello checklists when trello card created.
+     * @param cardId is used for getting reference of current created card id.
+     * @param checkListName is used for getting reference of the current checklist.
+     * @param activity is used for getting reference of current activity.
+     * @throws exception if error occurs.
+     * @see trelloExceptionHandler method.
+     */
+    private fun createCheckLists(cardId: String, checkListName:String , activity: Activity) {
+        val jsonObject = JsonObject()
+        jsonObject.addProperty("name",checkListName)
+        RetrofitTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/cards/$cardId/")
+            .create(AccountIdService::class.java)
+            .setTrelloCheckLists(
+                jsonObject = jsonObject,
+                key = LoggerBird.trelloKey,
+                token = LoggerBird.trelloToken
+            )
+            .enqueue(object : retrofit2.Callback<JsonObject> {
+                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                override fun onFailure(
+                    call: retrofit2.Call<JsonObject>,
+                    t: Throwable
+                ) {
+                    resetTrelloValues()
+                    trelloExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonObject>,
+                    response: retrofit2.Response<JsonObject>
+                ) {
+                    Log.d("checklist_put_success", response.code().toString())
+                    Log.d("checklist_put_success", response.message())
+                    resetTrelloValues()
                 }
             })
     }
@@ -620,10 +685,13 @@ internal class TrelloApi {
     /**
      * This method is used for getting details of editText in the trello layout.
      * @param editTextTitle is used for getting title details from title editText in the trello layout.
+     * @param editTextDescription is used for getting description details from description editText in the trello layout.
+     * @param editTextCheckList is used for getting checklist details from checklist editText in the trello layout.
      */
-    internal fun gatherEditTextDetails(editTextTitle: EditText, editTextDescription: EditText) {
+    internal fun gatherEditTextDetails(editTextTitle: EditText, editTextDescription: EditText,editTextCheckList:EditText) {
         title = editTextTitle.text.toString()
         description = editTextDescription.text.toString()
+        checkList = editTextCheckList.text.toString()
     }
 
     /**
@@ -743,6 +811,7 @@ internal class TrelloApi {
             calendar = null
             title = ""
             description = null
+            checkList = null
             member = null
             label = null
             labelPosition = 0

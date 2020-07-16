@@ -33,7 +33,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.text.StringBuilder
 
-/** Loggerbird Slack api configration class **/
+/** Loggerbird Slack api configuration class **/
 internal class SlackApi {
     private var coroutineCallSlack: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallOkHttpSlack: CoroutineScope = CoroutineScope(Dispatchers.IO)

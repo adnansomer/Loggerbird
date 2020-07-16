@@ -34,7 +34,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import utils.other.InternetConnectionUtil
 import utils.other.LinkedBlockingQueueUtil
 
-/** Loggerbird Clubhouse api configration class **/
+/** Loggerbird Clubhouse api configuration class **/
 internal class ClubhouseApi {
     private lateinit var activity: Activity
     private lateinit var context: Context
