@@ -23,5 +23,8 @@ class application : Application() {
         LoggerBird.logInit(
             context = this
         )
+
+        LoggerBird.callCpuDetails()
+
     }
 }

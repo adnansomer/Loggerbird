@@ -286,7 +286,6 @@ class MainActivity : AppCompatActivity() {
 
 //            LoggerBird.takeLifeCycleDetails()
 
-
             startActivity(Intent(this@MainActivity, Main2Activity::class.java))
         })
 
