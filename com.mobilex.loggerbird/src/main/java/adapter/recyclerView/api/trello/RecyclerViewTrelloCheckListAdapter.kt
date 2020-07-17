@@ -253,10 +253,10 @@ internal class RecyclerViewTrelloCheckListAdapter(
         ) {
             buttonYes.setSafeOnClickListener {
                 hashmapCheckListNames.remove(arrayListCheckListNames[position].checkListName)
+                arrayListTrelloItemName.clear()
+//                trelloItemAdapter.notifyDataSetChanged()
                 checkList.removeAt(position)
                 arrayListCheckListNames = checkList
-                arrayListTrelloItemName.clear()
-                trelloItemAdapter.notifyDataSetChanged()
                 checkListAdapter.notifyDataSetChanged()
                 if (checkList.size <= 0) {
                     LoggerBirdService.loggerBirdService.cardViewTrelloCheckList.visibility =
