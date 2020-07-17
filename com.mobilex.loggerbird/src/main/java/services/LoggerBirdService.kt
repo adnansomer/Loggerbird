@@ -105,7 +105,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
-internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
+internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
@@ -11100,18 +11100,22 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             windowManagerParamsLoggerBirdStartPopup.gravity = Gravity.TOP
             windowManagerLoggerBirdStartPopup = activity.getSystemService(Context.WINDOW_SERVICE)!!
             (windowManagerLoggerBirdStartPopup as WindowManager).addView(viewLoggerBirdStartPopup, windowManagerParamsLoggerBirdStartPopup)
-            viewLoggerBirdStartPopup.scaleX = 0F
-            viewLoggerBirdStartPopup.scaleY = 0F
-            viewLoggerBirdStartPopup.animate()
-                .scaleX(1F)
-                .scaleY(1F)
-                .setDuration(500)
-                .setInterpolator(BounceInterpolator())
-                .setStartDelay(0)
-                .start()
 
             activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
             activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+
+            val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_in_from_top)
+            viewLoggerBirdStartPopup.animation = animation
+//            viewLoggerBirdStartPopup.scaleX = 0F
+//            viewLoggerBirdStartPopup.scaleY = 0F
+//            viewLoggerBirdStartPopup.animate()
+//                .scaleX(1F)
+//                .scaleY(1F)
+//                .setDuration(500)
+//                .setInterpolator(BounceInterpolator())
+//                .setStartDelay(0)
+//                .start()
+
 
             viewLoggerBirdStartPopup.setOnTouchListener(object: OnSwipeTouchListener(this@LoggerBirdService) {
                 override fun onSwipeLeft() {
@@ -11136,11 +11140,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val timerTaskStartPopup = object : TimerTask() {
                 override fun run() {
                     activity.runOnUiThread {
+                        val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_out_to_top)
+                        viewLoggerBirdStartPopup.animation = animation
                         removeLoggerBirdStartLayout()
                     }
                 }
             }
-            timerStartPopup.schedule(timerTaskStartPopup, 20000)
+            timerStartPopup.schedule(timerTaskStartPopup, 3000)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -11184,8 +11190,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     )
                 }
             windowManagerParamsLoggerBirdDismissPopup.gravity = Gravity.TOP
-            windowManagerLoggerBirdDismissPopup =
-                activity.getSystemService(Context.WINDOW_SERVICE)!!
+            windowManagerLoggerBirdDismissPopup = activity.getSystemService(Context.WINDOW_SERVICE)!!
             (windowManagerLoggerBirdDismissPopup as WindowManager).addView(
                 viewLoggerBirdDismissPopup,
                 windowManagerParamsLoggerBirdDismissPopup
@@ -11196,17 +11201,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             viewLoggerBirdDismissPopup.setOnTouchListener(object: OnSwipeTouchListener(this@LoggerBirdService) {
                 override fun onSwipeLeft() {
                     Log.e("ViewSwipe", "Left")
+                    viewLoggerBirdDismissPopup.clearAnimation()
                     removeLoggerBirdDismissLayout()
 
                 }
                 override fun onSwipeRight() {
                     Log.e("ViewSwipe", "Right")
+                    viewLoggerBirdDismissPopup.clearAnimation()
                     removeLoggerBirdDismissLayout()
                 }
             })
-
-            val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_down)
-            viewLoggerBirdDismissPopup.animation = animation
 
             textViewLoggerBirdDismissPopupFeedBack =
                 viewLoggerBirdDismissPopup.findViewById(R.id.textView_feed_back_pop_up)
@@ -11228,6 +11232,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.loggerBirdClosePopupTag)
         }
     }
+
 
     internal fun removeLoggerBirdDismissLayout() {
         if (this::viewLoggerBirdDismissPopup.isInitialized && windowManagerLoggerBirdDismissPopup != null) {
