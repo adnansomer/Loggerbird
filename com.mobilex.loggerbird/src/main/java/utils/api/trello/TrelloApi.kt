@@ -1,7 +1,9 @@
 package utils.api.trello
 
+import adapter.recyclerView.api.trello.*
 import adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloCheckListAdapter
+import adapter.recyclerView.api.trello.RecyclerViewTrelloItemAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloLabelAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloMemberAdapter
 import android.app.Activity
@@ -67,7 +69,7 @@ internal class TrelloApi {
     private var description: String? = null
     private var member: String? = null
     private var label: String? = null
-    private var checkList:String? = null
+    private var checkList: String? = null
     private val defaultToast = DefaultToast()
     private var calendar: Calendar? = null
     /**
@@ -268,7 +270,7 @@ internal class TrelloApi {
                                 )
                             }
                         }
-                        if(RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames.isNotEmpty()){
+                        if (RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames.isNotEmpty()) {
                             RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames.forEach {
                                 queueCounter++
                                 coroutineCallTrelloCheckList.async {
@@ -279,8 +281,8 @@ internal class TrelloApi {
                                     )
                                 }
                             }
-                        }else{
-                            if(!checkList.isNullOrEmpty()){
+                        } else {
+                            if (!checkList.isNullOrEmpty()) {
                                 queueCounter++
                                 coroutineCallTrelloCheckList.async {
                                     createCheckLists(
@@ -347,6 +349,7 @@ internal class TrelloApi {
                 }
             })
     }
+
     /**
      * This method is used for creating trello checklists when trello card created.
      * @param cardId is used for getting reference of current created card id.
@@ -355,9 +358,9 @@ internal class TrelloApi {
      * @throws exception if error occurs.
      * @see trelloExceptionHandler method.
      */
-    private fun createCheckLists(cardId: String, checkListName:String , activity: Activity) {
+    private fun createCheckLists(cardId: String, checkListName: String, activity: Activity) {
         val jsonObject = JsonObject()
-        jsonObject.addProperty("name",checkListName)
+        jsonObject.addProperty("name", checkListName)
         RetrofitTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/cards/$cardId/")
             .create(AccountIdService::class.java)
             .setTrelloCheckLists(
@@ -381,6 +384,56 @@ internal class TrelloApi {
                 ) {
                     Log.d("checklist_put_success", response.code().toString())
                     Log.d("checklist_put_success", response.message())
+                    val trelloList = response.body()
+                    val coroutineCallCheckListItems = CoroutineScope(Dispatchers.IO)
+                    RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[checkListName]?.forEach {
+                        queueCounter++
+                        coroutineCallCheckListItems.async {
+                            createCheckListsItem(
+                                itemName = it.itemName,
+                                checkListId = trelloList!!["id"].asString,
+                                activity = activity
+                            )
+                        }
+                    }
+                    resetTrelloValues()
+                }
+            })
+    }
+
+    /**
+     * This method is used for creating trello checklist items when trello card created.
+     * @param checkListId is used for getting reference of the current checklist.
+     * @param activity is used for getting reference of current activity.
+     * @throws exception if error occurs.
+     * @see trelloExceptionHandler method.
+     */
+    private fun createCheckListsItem(itemName: String, checkListId: String, activity: Activity) {
+        val jsonObject = JsonObject()
+        jsonObject.addProperty("name", itemName)
+        RetrofitTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/checklists/$checkListId/")
+            .create(AccountIdService::class.java)
+            .setTrelloCheckListsItems(
+                jsonObject = jsonObject,
+                key = LoggerBird.trelloKey,
+                token = LoggerBird.trelloToken
+            )
+            .enqueue(object : retrofit2.Callback<JsonObject> {
+                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                override fun onFailure(
+                    call: retrofit2.Call<JsonObject>,
+                    t: Throwable
+                ) {
+                    resetTrelloValues()
+                    trelloExceptionHandler(throwable = t)
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<JsonObject>,
+                    response: retrofit2.Response<JsonObject>
+                ) {
+                    Log.d("checklist_item_put_success", response.code().toString())
+                    Log.d("checklist_item_put_success", response.message())
                     resetTrelloValues()
                 }
             })
@@ -688,7 +741,11 @@ internal class TrelloApi {
      * @param editTextDescription is used for getting description details from description editText in the trello layout.
      * @param editTextCheckList is used for getting checklist details from checklist editText in the trello layout.
      */
-    internal fun gatherEditTextDetails(editTextTitle: EditText, editTextDescription: EditText,editTextCheckList:EditText) {
+    internal fun gatherEditTextDetails(
+        editTextTitle: EditText,
+        editTextDescription: EditText,
+        editTextCheckList: EditText
+    ) {
         title = editTextTitle.text.toString()
         description = editTextDescription.text.toString()
         checkList = editTextCheckList.text.toString()

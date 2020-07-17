@@ -9,20 +9,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.ImageButton
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import java.util.concurrent.TimeUnit
 import android.provider.Settings
-import android.widget.Button
-import android.widget.CheckBox
+import android.view.inputmethod.InputMethodManager
+import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.recyclerview.widget.LinearLayoutManager
 import constants.Constants
 import loggerbird.LoggerBird
 import models.recyclerView.RecyclerViewModelCheckList
+import models.recyclerView.RecyclerViewModelItem
 import services.LoggerBirdService
+import utils.other.DefaultToast
 
 //Custom recyclerView adapter class for trello checklist.
 /**
@@ -89,14 +90,26 @@ internal class RecyclerViewTrelloCheckListAdapter(
         private lateinit var textViewTitle: TextView
         private lateinit var buttonYes: Button
         private lateinit var buttonNo: Button
+        private var windowManagerTrelloItem: Any? = null
+        private lateinit var viewTrelloItem: View
+        private lateinit var windowManagerParamsTrelloItem: WindowManager.LayoutParams
+        private lateinit var editTextTrelloCheckDescription: EditText
+        private lateinit var recyclerViewTrelloCheckItemList: RecyclerView
+        private lateinit var buttonTrelloCheckCancel: Button
+        private lateinit var buttonTrelloCheckCreate: Button
+        private lateinit var imageViewAddItem: ImageView
+        private lateinit var layoutTrelloCheck: FrameLayout
+        private val arrayListTrelloItemName: ArrayList<RecyclerViewModelItem> = ArrayList()
+        private lateinit var trelloItemAdapter: RecyclerViewTrelloItemAdapter
+        private val defaultToast = DefaultToast()
 
         //Static variables.
         companion object {
             internal var arrayListCheckListNames: ArrayList<RecyclerViewModelCheckList> =
                 ArrayList()
-            internal var arrayListCheckListValue: ArrayList<Boolean> = ArrayList()
+            internal var hashmapCheckListNames: HashMap<String, ArrayList<RecyclerViewModelItem>?> =
+                HashMap()
         }
-
 
         /**
          * This method is used for binding the items into recyclerView.
@@ -120,16 +133,16 @@ internal class RecyclerViewTrelloCheckListAdapter(
             arrayListCheckListNames = checkListList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
-            val checkBoxList = itemView.findViewById<CheckBox>(R.id.checkBox_list)
-            arrayListCheckListValue.add(false)
-            checkBoxList.setOnCheckedChangeListener { buttonView, isChecked ->
-                arrayListCheckListValue.removeAt(position)
-                if (isChecked) {
-                    arrayListCheckListValue.add(position, true)
-                } else {
-                    arrayListCheckListValue.add(position, false)
-                }
-            }
+            val imageViewAdd = itemView.findViewById<ImageView>(R.id.imageView_check_list_add)
+//            arrayListCheckListValue.add(false)
+//            checkBoxList.setOnCheckedChangeListener { buttonView, isChecked ->
+//                arrayListCheckListValue.removeAt(position)
+//                if (isChecked) {
+//                    arrayListCheckListValue.add(position, true)
+//                } else {
+//                    arrayListCheckListValue.add(position, false)
+//                }
+//            }
             textViewFileName.text = item.checkListName
             imageButtonCross.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -141,6 +154,14 @@ internal class RecyclerViewTrelloCheckListAdapter(
                         checkListAdapter = checkListAdapter
                     )
                 }
+            }
+            imageViewAdd.setSafeOnClickListener {
+                initializeItemLayout(
+                    activity = activity,
+                    context = context,
+                    rootView = rootView,
+                    position = position
+                )
             }
 
         }
@@ -231,8 +252,11 @@ internal class RecyclerViewTrelloCheckListAdapter(
             checkListAdapter: RecyclerViewTrelloCheckListAdapter
         ) {
             buttonYes.setSafeOnClickListener {
+                hashmapCheckListNames.remove(arrayListCheckListNames[position].checkListName)
                 checkList.removeAt(position)
                 arrayListCheckListNames = checkList
+                arrayListTrelloItemName.clear()
+                trelloItemAdapter.notifyDataSetChanged()
                 checkListAdapter.notifyDataSetChanged()
                 if (checkList.size <= 0) {
                     LoggerBirdService.loggerBirdService.cardViewTrelloCheckList.visibility =
@@ -248,7 +272,7 @@ internal class RecyclerViewTrelloCheckListAdapter(
 
 
         /**
-         * This method is used for removing recycler_view_trello_label_popup from window.
+         * This method is used for removing recycler_view_trello_check_list_popup_popup from window.
          */
         private fun removePopupLayout() {
             if (windowManagerRecyclerViewItemPopup != null && this::viewRecyclerViewItems.isInitialized) {
@@ -268,6 +292,161 @@ internal class RecyclerViewTrelloCheckListAdapter(
                 onClick(this)
             }
         }
-    }
 
+        /**
+         * This method is used for creating custom checklist item layout for the recyclerView which is attached to application overlay.
+         * @param activity is for getting reference of current activity in the application.
+         * @param context is for getting reference from the application context
+         * @param rootView is for getting reference of the view that is in the root of current activity.
+         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         */
+        @SuppressLint("ClickableViewAccessibility")
+        @RequiresApi(Build.VERSION_CODES.M)
+        private fun initializeItemLayout(
+            activity: Activity,
+            context: Context,
+            rootView: View,
+            position: Int
+        ) {
+            try {
+                removeItemLayout()
+                viewTrelloItem = LayoutInflater.from(activity)
+                    .inflate(
+                        R.layout.loggerbird_trello_check_list_item_popup,
+                        (rootView as ViewGroup),
+                        false
+                    )
+                if (Settings.canDrawOverlays(activity)) {
+                    windowManagerParamsTrelloItem =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            WindowManager.LayoutParams(
+                                WindowManager.LayoutParams.MATCH_PARENT,
+                                WindowManager.LayoutParams.MATCH_PARENT,
+                                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                                PixelFormat.TRANSLUCENT
+                            )
+                        } else {
+                            WindowManager.LayoutParams(
+                                WindowManager.LayoutParams.MATCH_PARENT,
+                                WindowManager.LayoutParams.MATCH_PARENT,
+                                WindowManager.LayoutParams.TYPE_APPLICATION,
+                                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                                PixelFormat.TRANSLUCENT
+                            )
+                        }
+
+                    windowManagerTrelloItem =
+                        activity.getSystemService(Context.WINDOW_SERVICE)!!
+                    if (windowManagerTrelloItem != null) {
+                        (windowManagerTrelloItem as WindowManager).addView(
+                            viewTrelloItem,
+                            windowManagerParamsTrelloItem
+                        )
+                        layoutTrelloCheck = viewTrelloItem.findViewById(R.id.layout_trello_check)
+                        editTextTrelloCheckDescription =
+                            viewTrelloItem.findViewById(R.id.editText_trello_check_description)
+                        buttonTrelloCheckCancel =
+                            viewTrelloItem.findViewById(R.id.button_trello_check_cancel)
+                        buttonTrelloCheckCreate =
+                            viewTrelloItem.findViewById(R.id.button_trello_check_create)
+                        imageViewAddItem = viewTrelloItem.findViewById(R.id.imageView_item_add)
+                        recyclerViewTrelloCheckItemList =
+                            viewTrelloItem.findViewById(R.id.recycler_view_trello_check_item_list)
+                        initializeTrelloItemRecyclerView(
+                            activity = activity,
+                            context = context,
+                            rootView = rootView,
+                            position = position
+                        )
+                        buttonClicksTrelloItem(activity = activity, position = position)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LoggerBird.callEnqueue()
+                LoggerBird.callExceptionDetails(
+                    exception = e,
+                    tag = Constants.recyclerViewTrelloItemAdapterTag
+                )
+            }
+        }
+
+        /**
+         * This method is used for removing loggerbird_trello_check_list_item from window.
+         */
+        private fun removeItemLayout() {
+            if (windowManagerTrelloItem != null && this::viewTrelloItem.isInitialized) {
+                (windowManagerTrelloItem as WindowManager).removeViewImmediate(
+                    viewTrelloItem
+                )
+                windowManagerTrelloItem = null
+            }
+        }
+
+        private fun buttonClicksTrelloItem(activity: Activity, position: Int) {
+            layoutTrelloCheck.setOnClickListener {
+                removeItemLayout()
+            }
+            buttonTrelloCheckCancel.setSafeOnClickListener {
+                removeItemLayout()
+            }
+            buttonTrelloCheckCreate.setSafeOnClickListener {
+                removeItemLayout()
+            }
+            imageViewAddItem.setOnClickListener {
+                hideKeyboard(
+                    activity = activity,
+                    view = viewTrelloItem
+                    )
+                if (editTextTrelloCheckDescription.text.toString().isNotEmpty()) {
+                    arrayListTrelloItemName.add(RecyclerViewModelItem(editTextTrelloCheckDescription.text.toString()))
+                    hashmapCheckListNames[arrayListCheckListNames[position].checkListName] =
+                        arrayListTrelloItemName
+                    trelloItemAdapter.notifyDataSetChanged()
+                } else {
+                    defaultToast.attachToast(
+                        activity = activity,
+                        toastMessage = activity.resources.getString(R.string.trello_title_empty)
+                    )
+                }
+            }
+        }
+
+        /**
+         * This method is used for initializing item recyclerView inside the loggerbird_trello_check_list_popup.
+         * @param activity is for getting reference of current activity in the application.
+         * @param context is for getting reference from the application context
+         * @param rootView is for getting reference of the view that is in the root of current activity.
+         */
+        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+        private fun initializeTrelloItemRecyclerView(
+            activity: Activity,
+            context: Context,
+            rootView: View,
+            position: Int
+        ) {
+            recyclerViewTrelloCheckItemList.layoutManager =
+                LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+            trelloItemAdapter =
+                RecyclerViewTrelloItemAdapter(
+                    arrayListTrelloItemName,
+                    context = context,
+                    activity = activity,
+                    rootView = rootView,
+                    checkListPosition = position
+                )
+            recyclerViewTrelloCheckItemList.adapter = trelloItemAdapter
+        }
+        /**
+         * This method is used for hiding the keyboard from the window.
+         * @param activity is for getting reference of current activity in the application.
+         * @param view is for getting reference of current activities view.
+         */
+        private fun hideKeyboard(activity: Activity, view: View) {
+            val inputMethodManager =
+                (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+            inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+        }
+    }
 }

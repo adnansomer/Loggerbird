@@ -120,6 +120,8 @@ internal interface AccountIdService {
     fun getTrelloLabels(@Query("key") key: String, @Query("token") token: String): Call<JsonArray>
     @POST("checklists?")
     fun setTrelloCheckLists(@Body jsonObject: JsonObject, @Query("key") key: String, @Query("token") token: String): Call<JsonObject>
+    @POST("checkItems?")
+    fun setTrelloCheckListsItems(@Body jsonObject: JsonObject, @Query("key") key: String, @Query("token") token: String): Call<JsonObject>
 
     /**Pivotal Methods**/
     @GET("projects")

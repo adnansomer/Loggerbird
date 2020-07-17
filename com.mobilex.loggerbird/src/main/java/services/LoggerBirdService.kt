@@ -24,8 +24,10 @@ import adapter.recyclerView.api.pivotal.RecyclerViewPivotalBlockerAdapter
 import adapter.recyclerView.api.pivotal.RecyclerViewPivotalLabelAdapter
 import adapter.recyclerView.api.pivotal.RecyclerViewPivotalOwnerAdapter
 import adapter.recyclerView.api.slack.RecyclerViewSlackAttachmentAdapter
+import adapter.recyclerView.api.trello.*
 import adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloCheckListAdapter
+import adapter.recyclerView.api.trello.RecyclerViewTrelloItemAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloLabelAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloMemberAdapter
 import adapter.recyclerView.email.RecyclerViewEmaiToListAttachmentAdapter
@@ -779,7 +781,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         internal lateinit var recyclerViewSlackAttachmentUser: RecyclerView
         internal lateinit var recyclerViewSlackNoAttachment: TextView
         internal lateinit var recyclerViewSlackUserNoAttachment: TextView
-
         /**
          * This method is used for removing video task from queue.
          */
@@ -7219,6 +7220,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 arrayListTrelloCheckListName.add(RecyclerViewModelCheckList(editTextTrelloCheckList.text.toString()))
                 trelloCheckListAdapter.notifyDataSetChanged()
                 cardViewTrelloCheckList.visibility = View.VISIBLE
+                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[editTextTrelloCheckList.text.toString()] = null
+//                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[editTextTrelloCheckList.text.toString()] = RecyclerViewTrelloItemAdapter.ViewHolder.arrayListItemNames
             } else if (arrayListTrelloCheckListName.contains(
                     RecyclerViewModelCheckList(editTextTrelloCheckList.text.toString())
                 )

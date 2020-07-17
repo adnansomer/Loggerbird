@@ -587,4 +587,15 @@
     <string name="textView_recyclerView_clubhouse_popup_title">Are you sure to remove attachment from your Clubhouse story?</string>
     <string name="button_recyclerView_clubhouse_yes">Delete Attachment</string>
     <string name="button_recyclerView_clubhouse_no">Keep File</string>
+    <!-- loggerbird_trello_check_list_item_popup-->
+    <string name="button_trello_check_create">Create</string>
+    <string name="button_trello_check_cancel">Cancel</string>
+    <string name="textView_trello_check_title">Item title</string>
+    <string name="editText_trello_check_hint">Enter a name for this item…</string>
+    <string name="textView_trello_check_item_list">Item List</string>
+    <!-- recycler_view_item_item_popup-->
+    <string name="textView_recyclerView_trello_item_popup_header">Delete Item</string>
+    <string name="textView_recyclerView_trello_item_popup_title">Are you sure to remove item from your Item list?</string>
+    <string name="button_recyclerView_trello_item_yes">Delete Item</string>
+    <string name="button_recyclerView_trello_item_no">Keep Item</string>
 </resources>
