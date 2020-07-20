@@ -36,7 +36,7 @@ import utils.other.DefaultToast
 import utils.other.InternetConnectionUtil
 import kotlin.collections.HashMap
 
-/** Loggerbird PivotalTracker api configration class **/
+/** Loggerbird PivotalTracker api configuration class **/
 internal class PivotalTrackerApi {
     //Global variables.
     private lateinit var activity: Activity

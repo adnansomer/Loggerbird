@@ -36,7 +36,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import utils.other.InternetConnectionUtil
 import utils.other.LinkedBlockingQueueUtil
 
-/** Loggerbird Gitlab api configration class **/
+/** Loggerbird Gitlab api configuration class **/
 internal class GitlabApi {
     private lateinit var activity: Activity
     private lateinit var context: Context

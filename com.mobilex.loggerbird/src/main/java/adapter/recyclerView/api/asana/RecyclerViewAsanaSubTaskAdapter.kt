@@ -296,11 +296,13 @@ internal class RecyclerViewAsanaSubTaskAdapter(
                 arrayListSubtask = subtaskList
                 subtaskAdapter.notifyDataSetChanged()
                 removePopupLayout()
-                hashMapSubAssignee.remove(subtaskList[position].subtaskName)
-                hashMapSubDate.remove(subtaskList[position].subtaskName)
-                hashMapSubDescription.remove(subtaskList[position].subtaskName)
-                hashmapSubSection.remove(subtaskList[position].subtaskName)
-                hashMapSubFile.remove(subtaskList[position].subtaskName)
+                if(subtaskList.size > position){
+                    hashMapSubAssignee.remove(subtaskList[position].subtaskName)
+                    hashMapSubDate.remove(subtaskList[position].subtaskName)
+                    hashMapSubDescription.remove(subtaskList[position].subtaskName)
+                    hashmapSubSection.remove(subtaskList[position].subtaskName)
+                    hashMapSubFile.remove(subtaskList[position].subtaskName)
+                }
                 if (subtaskList.size <= 0) {
                     LoggerBirdService.loggerBirdService.cardViewAsanaSubTasksList.visibility =
                         View.GONE

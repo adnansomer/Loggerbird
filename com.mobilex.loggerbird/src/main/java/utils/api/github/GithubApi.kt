@@ -3,6 +3,7 @@ package utils.api.github
 import adapter.recyclerView.api.github.RecyclerViewGithubAttachmentAdapter
 import adapter.recyclerView.api.github.RecyclerViewGithubAssigneeAdapter
 import adapter.recyclerView.api.github.RecyclerViewGithubLabelAdapter
+import adapter.recyclerView.api.github.RecyclerViewGithubProjectAdapter
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -240,8 +241,18 @@ internal class GithubApi {
             if (!linkedRequests.isNullOrEmpty() && arrayListLinkedRequestsUrl.size > linkedRequestPosition) {
                 stringBuilderGithub.append("Linked Pull Request:" + arrayListLinkedRequestsUrl[linkedRequestPosition] + "\n")
             }
-            if (!project.isNullOrEmpty() && arrayListProjectUrl.size > projectPosition) {
-                stringBuilderGithub.append("Project:" + arrayListProjectUrl[projectPosition] + "\n")
+            if(RecyclerViewGithubProjectAdapter.ViewHolder.arrayListProjectNames.isNotEmpty()){
+                var urlCounter = 0
+                RecyclerViewGithubProjectAdapter.ViewHolder.arrayListProjectNames.forEach {
+                    if(arrayListProjectUrl.size > urlCounter){
+                        stringBuilderGithub.append("Project"+ " "+it.projectName +":"+ arrayListProjectUrl[urlCounter] + "\n")
+                    }
+                    urlCounter++
+                }
+            }else{
+                if (!project.isNullOrEmpty() && arrayListProjectUrl.size > projectPosition) {
+                    stringBuilderGithub.append("Project:" + arrayListProjectUrl[projectPosition] + "\n")
+                }
             }
             if (stringBuilderGithub.isNotEmpty()) {
                 jsonObject.addProperty("body", stringBuilderGithub.toString() + "\n")

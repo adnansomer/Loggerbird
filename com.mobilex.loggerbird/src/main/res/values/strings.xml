@@ -110,6 +110,8 @@
     <string name="github_assignee_doesnt_exist">This assignee doesn\'t exist!</string>
     <string name="github_label_exist">This label already added to list!</string>
     <string name="github_label_doesnt_exist">This label doesn\'t exist!</string>
+    <string name="github_project_exist">This project already added to list!</string>
+    <string name="github_project_doesnt_exist">This project doesn\'t exist!</string>
     <string name="github_mile_stone_doesnt_exist">This milestone doesn\'t exist!</string>
     <string name="gitlab_sent">Gitlab issue is created!</string>
     <string name="gitlab_sent_error">An error happened while trying to create Gitlab issue!</string>
@@ -130,6 +132,8 @@
     <string name="trello_issue_preferences_delete">Issue preferences are deleted!</string>
     <string name="trello_time_line_empty">Date or time cannot be empty!</string>
     <string name="trello_time_line_success">Timeline details have been gathered!</string>
+    <string name="trello_check_list_exist">This checklist already added to list!</string>
+    <string name="trello_check_list_empty">Checklist cannot be empty!</string>
     <string name="pivotal_issue_success">Issue opened successfully!</string>
     <string name="pivotal_issue_failure">An error happened while trying to open pivotal issue!</string>
     <string name="pivotal_issue_time_out">An error happened while trying to open pivotal issue , system has been timed out!</string>
@@ -346,6 +350,7 @@
     <string name="textView_github_attachment">Attachments</string>
     <string name="textView_github_assignee_list">Assignee list</string>
     <string name="textView_github_label_list">Label list</string>
+    <string name="textView_github_project_list">Project list</string>
     <string name="button_github_create">Create</string>
     <string name="button_github_cancel">Cancel</string>
     <!-- recycler_view_github_item_popup-->
@@ -363,6 +368,11 @@
     <string name="textView_recyclerView_github_label_title">Are you sure to remove label from your github issue?</string>
     <string name="button_recyclerView_github_label_delete">Delete label</string>
     <string name="button_recyclerView_github_label_keep">Keep label</string>
+    <!-- recycler_view_github_project_popup-->
+    <string name="textView_recyclerView_github_project_header">Delete project</string>
+    <string name="textView_recyclerView_github_project_title">Are you sure to remove project from your github issue?</string>
+    <string name="button_recyclerView_github_project_delete">Delete project</string>
+    <string name="button_recyclerView_github_project_keep">Keep project</string>
     <!-- loggerbird_gitlab_popup-->
     <string name="textView_gitlab_toolbar_title">Create Gitlab Issue</string>
     <string name="textView_gitlab_project">Project</string>
@@ -394,6 +404,9 @@
     <string name="textView_trello_member_list">Member list</string>
     <string name="textView_trello_label">Label</string>
     <string name="textView_trello_label_list">Label list</string>
+    <string name="textView_trello_check_list">Checklist</string>
+    <string name="textView_trello_check_list_list">Checklist list</string>
+    <string name="editText_trello_check_list">Enter a title for this checklist…</string>
     <string name="textView_trello_start_date">Start date</string>
     <string name="textView_trello_attachment">Attachments</string>
     <string name="button_trello_create">Create</string>
@@ -413,6 +426,11 @@
     <string name="textView_recyclerView_trello_member_title">Are you sure to remove member from your trello issue?</string>
     <string name="button_recyclerView_trello_member_delete">Delete member</string>
     <string name="button_recyclerView_trello_member_keep">Keep member</string>
+    <!-- recycler_view_trello_check_list_popup-->
+    <string name="textView_recyclerView_trello_check_list_header">Delete checklist</string>
+    <string name="textView_recyclerView_trello_check_list_title">Are you sure to remove checklist from your trello issue?</string>
+    <string name="button_recyclerView_trello_check_list_delete">Delete checklist</string>
+    <string name="button_recyclerView_trello_check_list_keep">Keep checklist</string>
     <!-- loggerbird_trello_start_date_popup-->
     <string name="textView_trello_date_title">Set timeline</string>
     <string name="button_trello_date_proceed">Proceed</string>
@@ -569,4 +587,15 @@
     <string name="textView_recyclerView_clubhouse_popup_title">Are you sure to remove attachment from your Clubhouse story?</string>
     <string name="button_recyclerView_clubhouse_yes">Delete Attachment</string>
     <string name="button_recyclerView_clubhouse_no">Keep File</string>
+    <!-- loggerbird_trello_check_list_item_popup-->
+    <string name="button_trello_check_create">Create</string>
+    <string name="button_trello_check_cancel">Cancel</string>
+    <string name="textView_trello_check_title">Item title</string>
+    <string name="editText_trello_check_hint">Enter a name for this item…</string>
+    <string name="textView_trello_check_item_list">Item List</string>
+    <!-- recycler_view_item_item_popup-->
+    <string name="textView_recyclerView_trello_item_popup_header">Delete Item</string>
+    <string name="textView_recyclerView_trello_item_popup_title">Are you sure to remove item from your Item list?</string>
+    <string name="button_recyclerView_trello_item_yes">Delete Item</string>
+    <string name="button_recyclerView_trello_item_no">Keep Item</string>
 </resources>

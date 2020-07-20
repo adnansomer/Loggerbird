@@ -32,7 +32,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import utils.other.DefaultToast
 import utils.other.InternetConnectionUtil
 
-/** Loggerbird Asana api configration class **/
+/** Loggerbird Asana api configuration class **/
 internal class AsanaApi {
     //Global variables.
     private lateinit var activity: Activity

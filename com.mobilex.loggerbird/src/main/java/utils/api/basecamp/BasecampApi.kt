@@ -33,7 +33,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import utils.other.DefaultToast
 import utils.other.InternetConnectionUtil
 import kotlin.collections.HashMap
-/** Loggerbird Clubhouse api configration class **/
+/** Loggerbird Clubhouse api configuration class **/
 internal class BasecampApi {
     //Global variables.
     private lateinit var activity: Activity

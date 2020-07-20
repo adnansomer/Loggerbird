@@ -20,23 +20,23 @@ import android.widget.Button
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
-import models.recyclerView.RecyclerViewModelAssignee
+import models.recyclerView.RecyclerViewModelProject
 import services.LoggerBirdService
 
-//Custom recyclerView adapter class for github assignee.
+//Custom recyclerView adapter class for github project.
 /**
- * @param assigneeList is for getting the list of assignees that will be used in recyclerView.
+ * @param projectList is for getting the list of projects that will be used in recyclerView.
  * @param context is for getting reference from the application context.
  * @param activity is for getting reference of current activity in the application.
  * @param rootView is for getting reference of the view that is in the root of current activity.
  */
-internal class RecyclerViewGithubAssigneeAdapter(
-    private val assigneeList: ArrayList<RecyclerViewModelAssignee>,
+internal class RecyclerViewGithubProjectAdapter(
+    private val projectList: ArrayList<RecyclerViewModelProject>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View
 ) :
-    RecyclerView.Adapter<RecyclerViewGithubAssigneeAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerViewGithubProjectAdapter.ViewHolder>() {
 
     /**
      * Default RecyclerView.Adapter class method.
@@ -47,7 +47,7 @@ internal class RecyclerViewGithubAssigneeAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_github_assignee_item,
+                R.layout.recycler_view_github_project_item,
                 parent,
                 false
             )
@@ -59,7 +59,7 @@ internal class RecyclerViewGithubAssigneeAdapter(
      * @return size of the list that will be used in the recyclerview.
      */
     override fun getItemCount(): Int {
-        return assigneeList.size
+        return projectList.size
     }
 
     /**
@@ -69,17 +69,17 @@ internal class RecyclerViewGithubAssigneeAdapter(
      */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindItems(
-            item = assigneeList[position],
-            assigneeAdapter = this,
+            item = projectList[position],
+            projectAdapter = this,
             position = position,
-            assigneeList = assigneeList,
+            projectList = projectList,
             context = context,
             activity = activity,
             rootView = rootView
         )
     }
 
-    //Inner ViewHolder class for RecyclerViewGithubAssigneeAdapter class.
+    //Inner ViewHolder class for RecyclerViewGithubProjectAdapter class.
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         //Global variables.
         private var windowManagerRecyclerViewItemPopup: Any? = null
@@ -91,40 +91,40 @@ internal class RecyclerViewGithubAssigneeAdapter(
 
         //Static variables.
         companion object {
-            internal var arrayListAssigneeNames: ArrayList<RecyclerViewModelAssignee> = ArrayList()
+            internal var arrayListProjectNames: ArrayList<RecyclerViewModelProject> = ArrayList()
         }
 
         /**
          * This method is used for binding the items into recyclerView.
          * @param item is used for getting reference of the base model that are used items in the recyclerView.
-         * @param assigneeAdapter is used for getting reference of the custom recyclerView adapter class.
+         * @param projectAdapter is used for getting reference of the custom recyclerView adapter class.
          * @param position is used for getting reference of the current position of the item.
-         * @param assigneeList is used for getting reference of the list of assignees that will be used in recyclerView.
+         * @param projectList is used for getting reference of the list of projects that will be used in recyclerView.
          * @param context is for getting reference from the application context.
          * @param activity is for getting reference of current activity in the application.
          * @param rootView is for getting reference of the view that is in the root of current activity.
          */
         internal fun bindItems(
-            item: RecyclerViewModelAssignee,
-            assigneeAdapter: RecyclerViewGithubAssigneeAdapter,
+            item: RecyclerViewModelProject,
+            projectAdapter: RecyclerViewGithubProjectAdapter,
             position: Int,
-            assigneeList: ArrayList<RecyclerViewModelAssignee>,
+            projectList: ArrayList<RecyclerViewModelProject>,
             context: Context,
             activity: Activity,
             rootView: View
         ) {
-            arrayListAssigneeNames = assigneeList
+            arrayListProjectNames = projectList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
-            textViewFileName.text = item.assigneeName
+            textViewFileName.text = item.projectName
             imageButtonCross.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
-                        assigneeList = assigneeList,
+                        projectList = projectList,
                         position = position,
-                        assigneeAdapter = assigneeAdapter
+                        projectAdapter = projectAdapter
                     )
                 }
             }
@@ -136,23 +136,23 @@ internal class RecyclerViewGithubAssigneeAdapter(
          * This method is used for creating custom remove item popup for the recyclerView which is attached to application overlay.
          * @param activity is for getting reference of current activity in the application.
          * @param rootView is for getting reference of the view that is in the root of current activity.
-         * @param assigneeList is used for getting reference of the list of assignees that will be used in recyclerView.
+         * @param projectList is used for getting reference of the list of assignees that will be used in recyclerView.
          * @param position is used for getting reference of the current position of the item.
-         * @param assigneeAdapter is used for getting reference of the custom recyclerView adapter class.
+         * @param projectAdapter is used for getting reference of the custom recyclerView adapter class.
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         @RequiresApi(Build.VERSION_CODES.M)
         private fun removeItemPopup(
             activity: Activity,
             rootView: View,
-            assigneeList: ArrayList<RecyclerViewModelAssignee>,
+            projectList: ArrayList<RecyclerViewModelProject>,
             position: Int,
-            assigneeAdapter: RecyclerViewGithubAssigneeAdapter
+            projectAdapter: RecyclerViewGithubProjectAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_github_assignee_popup,
+                        R.layout.recycler_view_github_project_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -190,8 +190,8 @@ internal class RecyclerViewGithubAssigneeAdapter(
                         buttonNo =
                             viewRecyclerViewItems.findViewById(R.id.button_recycler_view_github_no)
                         buttonClicksGithubPopup(
-                            assigneeAdapter = assigneeAdapter,
-                            assigneeList = assigneeList,
+                            projectAdapter = projectAdapter,
+                            projectList = projectList,
                             position = position
                         )
                     }
@@ -207,22 +207,22 @@ internal class RecyclerViewGithubAssigneeAdapter(
         }
 
         /**
-         * This method is used for initializing button clicks of buttons that are inside in the recycler_view_github_assignee_popup.
-         * @param assigneeList is used for getting reference of the list of assignees that will be used in recyclerView.
+         * This method is used for initializing button clicks of buttons that are inside in the recycler_view_github_project_popup.
+         * @param projectList is used for getting reference of the list of assignees that will be used in recyclerView.
          * @param position is used for getting reference of the current position of the item.
-         * @param assigneeAdapter is used for getting reference of the custom recyclerView adapter class.
+         * @param projectAdapter is used for getting reference of the custom recyclerView adapter class.
          */
         private fun buttonClicksGithubPopup(
-            assigneeList: ArrayList<RecyclerViewModelAssignee>,
+            projectList: ArrayList<RecyclerViewModelProject>,
             position: Int,
-            assigneeAdapter: RecyclerViewGithubAssigneeAdapter
+            projectAdapter: RecyclerViewGithubProjectAdapter
         ) {
             buttonYes.setSafeOnClickListener {
-                assigneeList.removeAt(position)
-                arrayListAssigneeNames = assigneeList
-                assigneeAdapter.notifyDataSetChanged()
-                if (assigneeList.size <= 0) {
-                    LoggerBirdService.loggerBirdService.cardViewGithubAssigneeList.visibility =
+                projectList.removeAt(position)
+                arrayListProjectNames = projectList
+                projectAdapter.notifyDataSetChanged()
+                if (projectList.size <= 0) {
+                    LoggerBirdService.loggerBirdService.cardViewGithubProjectList.visibility =
                         View.GONE
                 }
                 removePopupLayout()
@@ -235,7 +235,7 @@ internal class RecyclerViewGithubAssigneeAdapter(
 
 
         /**
-         * This method is used for removing recycler_view_github_assignee_popup from window.
+         * This method is used for removing recycler_view_github_project_popup from window.
          */
         private fun removePopupLayout() {
             if (windowManagerRecyclerViewItemPopup != null && this::viewRecyclerViewItems.isInitialized) {
