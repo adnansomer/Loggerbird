@@ -7221,6 +7221,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 trelloCheckListAdapter.notifyDataSetChanged()
                 cardViewTrelloCheckList.visibility = View.VISIBLE
                 RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[editTextTrelloCheckList.text.toString()] = null
+                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[editTextTrelloCheckList.text.toString()] = null
 //                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[editTextTrelloCheckList.text.toString()] = RecyclerViewTrelloItemAdapter.ViewHolder.arrayListItemNames
             } else if (arrayListTrelloCheckListName.contains(
                     RecyclerViewModelCheckList(editTextTrelloCheckList.text.toString())
@@ -11434,6 +11435,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         filePath: File
     ) {
         try {
+            removeLoggerBirdUnhandledExceptionLayout()
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             viewLoggerBirdUnhandledExceptionPopup =
                 LayoutInflater.from(activity)
@@ -11546,6 +11548,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeLoggerBirdUnhandledExceptionLayout()
         }
         textViewLoggerBirdUnhandledExceptionPopupShare.setSafeOnClickListener {
+            removeLoggerBirdUnhandledExceptionLayout()
             initializeFloatingActionButton(activity = activity)
             shareView(filePathMedia = filePath)
         }

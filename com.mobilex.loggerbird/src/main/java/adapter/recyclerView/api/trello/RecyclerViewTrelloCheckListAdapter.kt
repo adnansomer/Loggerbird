@@ -20,6 +20,7 @@ import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import constants.Constants
 import loggerbird.LoggerBird
+import models.RecyclerViewModel
 import models.recyclerView.RecyclerViewModelCheckList
 import models.recyclerView.RecyclerViewModelItem
 import services.LoggerBirdService
@@ -39,7 +40,6 @@ internal class RecyclerViewTrelloCheckListAdapter(
     private val rootView: View
 ) :
     RecyclerView.Adapter<RecyclerViewTrelloCheckListAdapter.ViewHolder>() {
-
     /**
      * Default RecyclerView.Adapter class method.
      * @param parent is for getting the view group of the recyclerView.
@@ -100,6 +100,7 @@ internal class RecyclerViewTrelloCheckListAdapter(
         private lateinit var imageViewAddItem: ImageView
         private lateinit var layoutTrelloCheck: FrameLayout
         private val arrayListTrelloItemName: ArrayList<RecyclerViewModelItem> = ArrayList()
+        private var arrayListTrelloCheckedItem:ArrayList<Boolean> = ArrayList()
         private lateinit var trelloItemAdapter: RecyclerViewTrelloItemAdapter
         private val defaultToast = DefaultToast()
 
@@ -109,6 +110,7 @@ internal class RecyclerViewTrelloCheckListAdapter(
                 ArrayList()
             internal var hashmapCheckListNames: HashMap<String, ArrayList<RecyclerViewModelItem>?> =
                 HashMap()
+            internal var hashmapCheckListCheckedList:HashMap<String , ArrayList<Boolean>?> = HashMap()
         }
 
         /**
@@ -252,8 +254,11 @@ internal class RecyclerViewTrelloCheckListAdapter(
             checkListAdapter: RecyclerViewTrelloCheckListAdapter
         ) {
             buttonYes.setSafeOnClickListener {
-                hashmapCheckListNames.remove(arrayListCheckListNames[position].checkListName)
                 arrayListTrelloItemName.clear()
+                arrayListTrelloCheckedItem.clear()
+                hashmapCheckListNames.remove(arrayListCheckListNames[position].checkListName)
+                hashmapCheckListCheckedList.remove(arrayListCheckListNames[position].checkListName)
+//                arrayListTrelloItemName.clear()
 //                trelloItemAdapter.notifyDataSetChanged()
                 checkList.removeAt(position)
                 arrayListCheckListNames = checkList
@@ -389,6 +394,8 @@ internal class RecyclerViewTrelloCheckListAdapter(
                 removeItemLayout()
             }
             buttonTrelloCheckCancel.setSafeOnClickListener {
+                arrayListTrelloItemName.clear()
+                arrayListTrelloCheckedItem.clear()
                 removeItemLayout()
             }
             buttonTrelloCheckCreate.setSafeOnClickListener {
@@ -398,11 +405,13 @@ internal class RecyclerViewTrelloCheckListAdapter(
                 hideKeyboard(
                     activity = activity,
                     view = viewTrelloItem
-                    )
+                )
                 if (editTextTrelloCheckDescription.text.toString().isNotEmpty()) {
                     arrayListTrelloItemName.add(RecyclerViewModelItem(editTextTrelloCheckDescription.text.toString()))
+                    arrayListTrelloCheckedItem.add(false)
                     hashmapCheckListNames[arrayListCheckListNames[position].checkListName] =
                         arrayListTrelloItemName
+                    hashmapCheckListCheckedList[arrayListCheckListNames[position].checkListName] = arrayListTrelloCheckedItem
                     trelloItemAdapter.notifyDataSetChanged()
                 } else {
                     defaultToast.attachToast(
@@ -431,6 +440,7 @@ internal class RecyclerViewTrelloCheckListAdapter(
             trelloItemAdapter =
                 RecyclerViewTrelloItemAdapter(
                     arrayListTrelloItemName,
+                    arrayListTrelloCheckedItem,
                     context = context,
                     activity = activity,
                     rootView = rootView,
@@ -438,6 +448,7 @@ internal class RecyclerViewTrelloCheckListAdapter(
                 )
             recyclerViewTrelloCheckItemList.adapter = trelloItemAdapter
         }
+
         /**
          * This method is used for hiding the keyboard from the window.
          * @param activity is for getting reference of current activity in the application.

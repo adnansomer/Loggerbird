@@ -386,14 +386,21 @@ internal class TrelloApi {
                     Log.d("checklist_put_success", response.message())
                     val trelloList = response.body()
                     val coroutineCallCheckListItems = CoroutineScope(Dispatchers.IO)
+                    var counterChecked = 0
                     RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[checkListName]?.forEach {
                         queueCounter++
                         coroutineCallCheckListItems.async {
-                            createCheckListsItem(
-                                itemName = it.itemName,
-                                checkListId = trelloList!!["id"].asString,
-                                activity = activity
-                            )
+                            try {
+                                createCheckListsItem(
+                                    itemName = it.itemName,
+                                    itemChecked = RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[checkListName]!![counterChecked],
+                                    checkListId = trelloList!!["id"].asString,
+                                    activity = activity
+                                )
+                                counterChecked++
+                            } catch (e: Exception) {
+                               trelloExceptionHandler(e = e)
+                            }
                         }
                     }
                     resetTrelloValues()
@@ -408,8 +415,11 @@ internal class TrelloApi {
      * @throws exception if error occurs.
      * @see trelloExceptionHandler method.
      */
-    private fun createCheckListsItem(itemName: String, checkListId: String, activity: Activity) {
+    private fun createCheckListsItem(itemName: String,itemChecked:Boolean? = null, checkListId: String, activity: Activity) {
         val jsonObject = JsonObject()
+        if(itemChecked != null){
+            jsonObject.addProperty("checked",itemChecked)
+        }
         jsonObject.addProperty("name", itemName)
         RetrofitTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/checklists/$checkListId/")
             .create(AccountIdService::class.java)
