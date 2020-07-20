@@ -72,6 +72,7 @@ internal class TrelloApi {
     private var checkList: String? = null
     private val defaultToast = DefaultToast()
     private var calendar: Calendar? = null
+    private var counterChecked = 0
     /**
      * This method is used for calling an trello action with network connection check.
      * @param activity is used for getting reference of current activity.
@@ -193,6 +194,7 @@ internal class TrelloApi {
      */
     private fun trelloCreateCard(activity: Activity) {
         try {
+            counterChecked = 0
             queueCounter = 0
             queueCounter++
             this.activity = activity
@@ -385,22 +387,23 @@ internal class TrelloApi {
                     Log.d("checklist_put_success", response.code().toString())
                     Log.d("checklist_put_success", response.message())
                     val trelloList = response.body()
-                    val coroutineCallCheckListItems = CoroutineScope(Dispatchers.IO)
-                    var counterChecked = 0
                     RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[checkListName]?.forEach {
                         queueCounter++
-                        coroutineCallCheckListItems.async {
-                            try {
+                        try {
+                            if(RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[checkListName]!!.size <= counterChecked){
+                                counterChecked = 0
+                            }
+                            if (RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[checkListName]!!.size > counterChecked) {
                                 createCheckListsItem(
                                     itemName = it.itemName,
                                     itemChecked = RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[checkListName]!![counterChecked],
                                     checkListId = trelloList!!["id"].asString,
                                     activity = activity
                                 )
-                                counterChecked++
-                            } catch (e: Exception) {
-                               trelloExceptionHandler(e = e)
                             }
+                            counterChecked++
+                        } catch (e: Exception) {
+                            trelloExceptionHandler(e = e)
                         }
                     }
                     resetTrelloValues()
@@ -415,38 +418,47 @@ internal class TrelloApi {
      * @throws exception if error occurs.
      * @see trelloExceptionHandler method.
      */
-    private fun createCheckListsItem(itemName: String,itemChecked:Boolean? = null, checkListId: String, activity: Activity) {
-        val jsonObject = JsonObject()
-        if(itemChecked != null){
-            jsonObject.addProperty("checked",itemChecked)
-        }
-        jsonObject.addProperty("name", itemName)
-        RetrofitTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/checklists/$checkListId/")
-            .create(AccountIdService::class.java)
-            .setTrelloCheckListsItems(
-                jsonObject = jsonObject,
-                key = LoggerBird.trelloKey,
-                token = LoggerBird.trelloToken
-            )
-            .enqueue(object : retrofit2.Callback<JsonObject> {
-                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-                override fun onFailure(
-                    call: retrofit2.Call<JsonObject>,
-                    t: Throwable
-                ) {
-                    resetTrelloValues()
-                    trelloExceptionHandler(throwable = t)
-                }
+    private fun createCheckListsItem(
+        itemName: String,
+        itemChecked: Boolean? = null,
+        checkListId: String,
+        activity: Activity
+    ) {
+        val coroutineCallCheckListItems = CoroutineScope(Dispatchers.IO)
+        coroutineCallCheckListItems.async {
+            Log.d("item_name",itemName)
+            val jsonObject = JsonObject()
+            if (itemChecked != null) {
+                jsonObject.addProperty("checked", itemChecked)
+            }
+            jsonObject.addProperty("name", itemName)
+            RetrofitTrelloClient.getTrelloUserClient(url = "https://api.trello.com/1/checklists/$checkListId/")
+                .create(AccountIdService::class.java)
+                .setTrelloCheckListsItems(
+                    jsonObject = jsonObject,
+                    key = LoggerBird.trelloKey,
+                    token = LoggerBird.trelloToken
+                )
+                .enqueue(object : retrofit2.Callback<JsonObject> {
+                    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+                    override fun onFailure(
+                        call: retrofit2.Call<JsonObject>,
+                        t: Throwable
+                    ) {
+                        resetTrelloValues()
+                        trelloExceptionHandler(throwable = t)
+                    }
 
-                override fun onResponse(
-                    call: retrofit2.Call<JsonObject>,
-                    response: retrofit2.Response<JsonObject>
-                ) {
-                    Log.d("checklist_item_put_success", response.code().toString())
-                    Log.d("checklist_item_put_success", response.message())
-                    resetTrelloValues()
-                }
-            })
+                    override fun onResponse(
+                        call: retrofit2.Call<JsonObject>,
+                        response: retrofit2.Response<JsonObject>
+                    ) {
+                        Log.d("checklist_item_put_suc", response.code().toString())
+                        Log.d("checklist_item_put_suc", response.message())
+                        resetTrelloValues()
+                    }
+                })
+        }
     }
 
     /**
