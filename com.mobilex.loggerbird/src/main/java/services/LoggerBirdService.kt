@@ -11,11 +11,15 @@ import adapter.recyclerView.api.clubhouse.RecyclerViewClubhouseAttachmentAdapter
 import adapter.recyclerView.api.github.RecyclerViewGithubAssigneeAdapter
 import adapter.recyclerView.api.github.RecyclerViewGithubAttachmentAdapter
 import adapter.recyclerView.api.github.RecyclerViewGithubLabelAdapter
+import adapter.recyclerView.api.github.RecyclerViewGithubProjectAdapter
 import adapter.recyclerView.api.gitlab.RecyclerViewGitlabAttachmentAdapter
 import adapter.recyclerView.api.jira.*
 import adapter.recyclerView.api.pivotal.*
 import adapter.recyclerView.api.slack.RecyclerViewSlackAttachmentAdapter
+import adapter.recyclerView.api.trello.*
 import adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
+import adapter.recyclerView.api.trello.RecyclerViewTrelloCheckListAdapter
+import adapter.recyclerView.api.trello.RecyclerViewTrelloItemAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloLabelAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloMemberAdapter
 import adapter.recyclerView.email.RecyclerViewEmaiToListAttachmentAdapter
@@ -471,7 +475,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     private lateinit var githubAssigneeAdapter: RecyclerViewGithubAssigneeAdapter
     internal lateinit var cardViewGithubAssigneeList: CardView
     private val arrayListGithubAssigneeName: ArrayList<RecyclerViewModelAssignee> = ArrayList()
-    private lateinit var imageViewAssignee: ImageView
+    private lateinit var imageViewGithubAssignee: ImageView
     private lateinit var arrayListGithubAssignee: ArrayList<String>
     private lateinit var recyclerViewGithubLabel: RecyclerView
     private lateinit var githubLabelAdapter: RecyclerViewGithubLabelAdapter
@@ -479,13 +483,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     private val arrayListGithubLabelName: ArrayList<RecyclerViewModelLabel> = ArrayList()
     private lateinit var imageViewGithubLabel: ImageView
     private lateinit var arrayListGithubLabel: ArrayList<String>
-
+    private lateinit var recyclerViewGithubProject: RecyclerView
+    private lateinit var githubProjectAdapter: RecyclerViewGithubProjectAdapter
+    internal lateinit var cardViewGithubProjectList: CardView
+    private val arrayListGithubProjectName: ArrayList<RecyclerViewModelProject> = ArrayList()
+    private lateinit var imageViewGithubProject: ImageView
+    private lateinit var arrayListGithubProject: ArrayList<String>
     //Trello
     internal val trelloAuthentication = TrelloApi()
     private lateinit var buttonTrelloCreate: Button
     private lateinit var buttonTrelloCancel: Button
     private lateinit var editTextTrelloTitle: EditText
     private lateinit var editTextTrelloDescription: EditText
+    private lateinit var editTextTrelloCheckList: EditText
     private lateinit var toolbarTrello: Toolbar
     private lateinit var recyclerViewTrelloAttachment: RecyclerView
     private lateinit var trelloAttachmentAdapter: RecyclerViewTrelloAttachmentAdapter
@@ -496,7 +506,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     private lateinit var autoTextViewTrelloProjectAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewTrelloBoardAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewTrelloMemberAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewTrelloLabelLabelAdapter: AutoCompleteTextViewTrelloLabelAdapter
+    private lateinit var autoTextViewTrelloLabelAdapter:AutoCompleteTextViewTrelloLabelAdapter
     private lateinit var recyclerViewTrelloLabel: RecyclerView
     private lateinit var trelloLabelAdapter: RecyclerViewTrelloLabelAdapter
     private val arrayListTrelloFileName: ArrayList<RecyclerViewModel> = ArrayList()
@@ -511,7 +521,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     private var arrayListTrelloMemberName: ArrayList<RecyclerViewModelMember> = ArrayList()
     private lateinit var imageViewTrelloMember: ImageView
     private lateinit var arrayListTrelloMember: ArrayList<String>
-
+    internal lateinit var cardViewTrelloCheckList: CardView
+    private lateinit var recyclerViewTrelloCheckList: RecyclerView
+    private lateinit var trelloCheckListAdapter: RecyclerViewTrelloCheckListAdapter
+    private var arrayListTrelloCheckListName: ArrayList<RecyclerViewModelCheckList> = ArrayList()
+    private lateinit var imageViewTrelloCheckList: ImageView
+    private lateinit var arrayListTrelloCheckList: ArrayList<String>
     //trello_timeline:
     private lateinit var imageViewTrelloCalendar: ImageView
     private lateinit var imageButtonTrelloRemoveTimeline: ImageButton
@@ -774,7 +789,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         internal lateinit var recyclerViewSlackAttachmentUser: RecyclerView
         internal lateinit var recyclerViewSlackNoAttachment: TextView
         internal lateinit var recyclerViewSlackUserNoAttachment: TextView
-
         /**
          * This method is used for removing video task from queue.
          */
@@ -6215,12 +6229,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                 recyclerViewGithubAssignee =
                     viewGithub.findViewById(R.id.recycler_view_assignee_list)
                 cardViewGithubAssigneeList = viewGithub.findViewById(R.id.cardView_assignee_list)
-                imageViewAssignee = viewGithub.findViewById(R.id.imageView_assignee_add)
+                imageViewGithubAssignee = viewGithub.findViewById(R.id.imageView_assignee_add)
 
                 recyclerViewGithubLabel = viewGithub.findViewById(R.id.recycler_view_label_list)
                 cardViewGithubLabelList = viewGithub.findViewById(R.id.cardView_label_list)
                 imageViewGithubLabel = viewGithub.findViewById(R.id.imageView_label_add)
 
+                recyclerViewGithubProject = viewGithub.findViewById(R.id.recycler_view_project_list)
+                cardViewGithubProjectList = viewGithub.findViewById(R.id.cardView_project_list)
+                imageViewGithubProject = viewGithub.findViewById(R.id.imageView_project_add)
 
                 toolbarGithub.setOnMenuItemClickListener {
                     when (it.itemId) {
@@ -6294,6 +6311,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                 initializeGithubAttachmentRecyclerView(filePathMedia = filePathMedia)
                 initializeGithubAssigneeRecyclerView()
                 initializeGithubLabelRecyclerView()
+                initializeGithubProjectRecyclerView()
                 buttonClicksGithub(filePathMedia = filePathMedia)
                 githubAuthentication.callGithub(
                     activity = activity,
@@ -6388,7 +6406,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                 floatingActionButtonView.visibility = View.VISIBLE
             }
         }
-        imageViewAssignee.setSafeOnClickListener {
+        imageViewGithubAssignee.setSafeOnClickListener {
             hideKeyboard(activity = activity, view = viewGithub)
             if (!arrayListGithubAssigneeName.contains(
                     RecyclerViewModelAssignee(
@@ -6442,6 +6460,35 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                 defaultToast.attachToast(
                     activity = activity,
                     toastMessage = activity.resources.getString(R.string.github_label_doesnt_exist)
+                )
+            }
+
+        }
+        imageViewGithubProject.setSafeOnClickListener {
+            hideKeyboard(activity = activity, view = viewGithub)
+            if (!arrayListGithubProjectName.contains(
+                    RecyclerViewModelProject(
+                        autoTextViewGithubProject.editableText.toString()
+                    )
+                ) && arrayListGithubProject.contains(
+                    autoTextViewGithubProject.editableText.toString()
+                )
+            ) {
+                arrayListGithubProjectName.add(RecyclerViewModelProject(autoTextViewGithubProject.editableText.toString()))
+                githubProjectAdapter.notifyDataSetChanged()
+                cardViewGithubProjectList.visibility = View.VISIBLE
+            } else if (arrayListGithubProjectName.contains(
+                    RecyclerViewModelProject(autoTextViewGithubProject.editableText.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.github_project_exist)
+                )
+            } else if (!arrayListGithubProject.contains(autoTextViewGithubProject.editableText.toString())) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.github_project_doesnt_exist)
                 )
             }
 
@@ -6520,6 +6567,24 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     }
 
     /**
+     * This method is used for initializing github project recyclerView.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeGithubProjectRecyclerView() {
+        arrayListGithubProjectName.clear()
+        recyclerViewGithubProject.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        githubProjectAdapter =
+            RecyclerViewGithubProjectAdapter(
+                arrayListGithubProjectName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewGithubProject.adapter = githubProjectAdapter
+    }
+
+    /**
      * This method is used for title field is not empty in github layout.
      * @return Boolean value.
      */
@@ -6580,6 +6645,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         )
         this.arrayListGithubAssignee = arrayListGithubAssignee
         this.arrayListGithubLabel = arrayListGithubLabels
+        this.arrayListGithubProject = arrayListGithubProject
         detachProgressBar()
     }
 
@@ -6920,6 +6986,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                 editTextTrelloTitle = viewTrello.findViewById(R.id.editText_trello_title)
                 editTextTrelloDescription =
                     viewTrello.findViewById(R.id.editText_trello_description)
+                editTextTrelloCheckList = viewTrello.findViewById(R.id.editText_trello_check_list)
                 toolbarTrello = viewTrello.findViewById(R.id.toolbar_trello)
                 recyclerViewTrelloAttachment =
                     viewTrello.findViewById(R.id.recycler_view_trello_attachment)
@@ -6934,6 +7001,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                 recyclerViewTrelloMember = viewTrello.findViewById(R.id.recycler_view_member_list)
                 imageViewTrelloMember = viewTrello.findViewById(R.id.imageView_member_add)
                 cardViewTrelloMemberList = viewTrello.findViewById(R.id.cardView_member_list)
+                recyclerViewTrelloCheckList =
+                    viewTrello.findViewById(R.id.recycler_view_check_list_list)
+                imageViewTrelloCheckList = viewTrello.findViewById(R.id.imageView_check_list_add)
+                cardViewTrelloCheckList = viewTrello.findViewById(R.id.cardView_check_list_list)
                 imageViewTrelloCalendar = viewTrello.findViewById(R.id.imageView_start_date)
                 imageButtonTrelloRemoveTimeline =
                     viewTrello.findViewById(R.id.image_button_trello_remove_date)
@@ -6964,6 +7035,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                                     "trello_description",
                                     editTextTrelloDescription.text.toString()
                                 )
+                                putString("trello_checklist",editTextTrelloCheckList.text.toString())
                                 putString(
                                     "trello_member",
                                     autoTextViewTrelloMember.editableText.toString()
@@ -6989,6 +7061,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                             editor.remove("trello_board")
                             editor.remove("trello_member")
                             editor.remove("trello_label")
+                            editor.remove("trello_checklist")
                             editor.apply()
                             clearTrelloComponents()
                             defaultToast.attachToast(
@@ -7009,6 +7082,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                 initializeTrelloRecyclerView(filePathMedia = filePathMedia)
                 initializeTrelloLabelRecyclerView()
                 initializeTrelloMemberRecyclerView()
+                initializeTrelloCheckListRecyclerView()
                 buttonClicksTrello()
                 trelloAuthentication.callTrello(
                     activity = activity,
@@ -7051,7 +7125,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
             )
             trelloAuthentication.gatherEditTextDetails(
                 editTextTitle = editTextTrelloTitle,
-                editTextDescription = editTextTrelloDescription
+                editTextDescription = editTextTrelloDescription,
+                editTextCheckList = editTextTrelloCheckList
             )
             trelloAuthentication.gatherCalendarDetails(calendar = calendarTrello)
             if (trelloAuthentication.checkTitle(
@@ -7141,7 +7216,35 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                     toastMessage = activity.resources.getString(R.string.trello_member_doesnt_exist)
                 )
             }
-
+        }
+        imageViewTrelloCheckList.setSafeOnClickListener {
+            hideKeyboard(activity = activity, view = viewTrello)
+            if (!arrayListTrelloCheckListName.contains(
+                    RecyclerViewModelCheckList(
+                        editTextTrelloCheckList.text.toString()
+                    )
+                ) && editTextTrelloCheckList.text.isNotEmpty()
+            ) {
+                arrayListTrelloCheckListName.add(RecyclerViewModelCheckList(editTextTrelloCheckList.text.toString()))
+                trelloCheckListAdapter.notifyDataSetChanged()
+                cardViewTrelloCheckList.visibility = View.VISIBLE
+                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[editTextTrelloCheckList.text.toString()] = null
+                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[editTextTrelloCheckList.text.toString()] = null
+//                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[editTextTrelloCheckList.text.toString()] = RecyclerViewTrelloItemAdapter.ViewHolder.arrayListItemNames
+            } else if (arrayListTrelloCheckListName.contains(
+                    RecyclerViewModelCheckList(editTextTrelloCheckList.text.toString())
+                )
+            ) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.trello_check_list_exist)
+                )
+            } else if (editTextTrelloCheckList.text.isEmpty()) {
+                defaultToast.attachToast(
+                    activity = activity,
+                    toastMessage = activity.resources.getString(R.string.trello_check_list_empty)
+                )
+            }
         }
         imageViewTrelloCalendar.setSafeOnClickListener {
             initializeTrelloTimelineLayout()
@@ -7175,6 +7278,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         editTextTrelloTitle.setText(sharedPref.getString("trello_title", null))
         editTextTrelloDescription.setText(sharedPref.getString("trello_description", null))
+        editTextTrelloCheckList.setText(sharedPref.getString("trello_checklist",null))
         initializeTrelloProject(
             arrayListTrelloProject = arrayListTrelloProject,
             sharedPref = sharedPref
@@ -7357,14 +7461,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         arrayListTrelloLabelColor: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewTrelloLabelLabelAdapter =
+        autoTextViewTrelloLabelAdapter =
             AutoCompleteTextViewTrelloLabelAdapter(
                 this,
                 R.layout.auto_text_view_trello_label_item,
                 arrayListTrelloLabel,
                 arrayListTrelloLabelColor
             )
-        autoTextViewTrelloLabel.setAdapter(autoTextViewTrelloLabelLabelAdapter)
+        autoTextViewTrelloLabel.setAdapter(autoTextViewTrelloLabelAdapter)
         if (arrayListTrelloLabel.isNotEmpty() && autoTextViewTrelloLabel.editableText.isEmpty()) {
             if (sharedPref.getString("trello_label", null) != null) {
                 if (arrayListTrelloLabel.contains(
@@ -7463,6 +7567,24 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
             )
         recyclerViewTrelloMember.adapter = trelloMemberAdapter
     }
+    /**
+     * This method is used for initializing trello checklist recyclerView.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeTrelloCheckListRecyclerView() {
+        arrayListTrelloCheckListName.clear()
+        recyclerViewTrelloCheckList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        trelloCheckListAdapter =
+            RecyclerViewTrelloCheckListAdapter(
+                arrayListTrelloCheckListName,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewTrelloCheckList.adapter = trelloCheckListAdapter
+    }
+
 
     /**
      * This method is used for clearing trello components.
@@ -7476,6 +7598,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         trelloLabelAdapter.notifyDataSetChanged()
         editTextTrelloTitle.text = null
         editTextTrelloDescription.text = null
+        editTextTrelloCheckList.text = null
         autoTextViewTrelloLabel.setText("", false)
         autoTextViewTrelloMember.setText("", false)
         autoTextViewTrelloBoard.setText("", false)
@@ -11392,6 +11515,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         filePath: File
     ) {
         try {
+            removeLoggerBirdUnhandledExceptionLayout()
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             viewLoggerBirdUnhandledExceptionPopup =
                 LayoutInflater.from(activity)
@@ -11509,6 +11633,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
             removeLoggerBirdUnhandledExceptionLayout()
         }
         textViewLoggerBirdUnhandledExceptionPopupShare.setSafeOnClickListener {
+            removeLoggerBirdUnhandledExceptionLayout()
             initializeFloatingActionButton(activity = activity)
             shareView(filePathMedia = filePath)
         }

@@ -110,6 +110,8 @@
     <string name="github_assignee_doesnt_exist">Bu sorumlu bulunamadı!</string>
     <string name="github_label_exist">Bu etiket zaten listeye eklendi!</string>
     <string name="github_label_doesnt_exist">Bu etiket bulunamadı!</string>
+    <string name="github_project_exist">Bu proje zaten listeye eklendi!</string>
+    <string name="github_project_doesnt_exist">Bu proje bulunamadı!</string>
     <string name="github_mile_stone_doesnt_exist">Bu kilometre taşı bulunamadı!</string>
     <string name="gitlab_sent">Gitlab görevi başarılı bir şekilde açıldı!</string>
     <string name="gitlab_sent_error">Gitlab görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
@@ -130,6 +132,8 @@
     <string name="trello_issue_preferences_delete">Konu tercihleri silindi!</string>
     <string name="trello_time_line_empty">Tarih veya zaman boş olamaz!</string>
     <string name="trello_time_line_success">Zaman çizelgesi detayları alındı!</string>
+    <string name="trello_check_list_exist">Bu kontrol listesi zaten listenize eklendi!</string>
+    <string name="trello_check_list_empty">Kontrol listesi boş olamaz!</string>
     <string name="pivotal_issue_success">Görev başarılı bir şekilde açıldı!</string>
     <string name="pivotal_issue_failure">Pivotal görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
     <string name="pivotal_issue_time_out">Pivotal görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
@@ -347,6 +351,7 @@
     <string name="textView_github_attachment">Eklentiler</string>
     <string name="textView_github_assignee_list">Sorumlu listesi</string>
     <string name="textView_github_label_list">Etiketler listesi</string>
+    <string name="textView_github_project_list">Proje listesi</string>
     <string name="button_github_create">Oluştur</string>
     <string name="button_github_cancel">İptal</string>
     <!-- recycler_view_github_item_popup-->
@@ -364,6 +369,11 @@
     <string name="textView_recyclerView_github_label_title">Github görevlendirmenizden bu etiketi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_github_label_delete">Etiketi sil</string>
     <string name="button_recyclerView_github_label_keep">Etiketi tut</string>
+    <!-- recycler_view_github_project_popup-->
+    <string name="textView_recyclerView_github_project_header">Projeyi sil</string>
+    <string name="textView_recyclerView_github_project_title">Github görevlendirmenizden bu projeyi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_github_project_delete">Projeyi sil</string>
+    <string name="button_recyclerView_github_project_keep">Projeyi tut</string>
     <!-- loggerbird_gitlab_popup-->
     <string name="textView_gitlab_toolbar_title">Gitlab Konusu Olustur</string>
     <string name="textView_gitlab_project">Proje</string>
@@ -395,6 +405,9 @@
     <string name="textView_trello_member_list">Üye listesi</string>
     <string name="textView_trello_label">Etiket</string>
     <string name="textView_trello_label_list">Etiket listesi</string>
+    <string name="textView_trello_check_list">Kontrol listesi</string>
+    <string name="textView_trello_check_list_list">Kontrol lisesi listesi</string>
+    <string name="editText_trello_check_list">Bu kontrol listesi için bir başlık giriniz…</string>
     <string name="textView_trello_start_date">Başlangıç tarihi</string>
     <string name="textView_trello_attachment">Eklentiler</string>
     <string name="button_trello_create">Oluştur</string>
@@ -414,6 +427,11 @@
     <string name="textView_recyclerView_trello_member_title">Trello görevlendirmenizden bu üyeyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_trello_member_delete">Üyeyi sil</string>
     <string name="button_recyclerView_trello_member_keep">Üyeyi tut</string>
+    <!-- recycler_view_trello_check_list_popup-->
+    <string name="textView_recyclerView_trello_check_list_header">Kontrol listesini sil</string>
+    <string name="textView_recyclerView_trello_check_list_title">Trello görevlendirmenizden bu kontrol listesini kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_trello_check_list_delete">Kontrol listesini sil</string>
+    <string name="button_recyclerView_trello_check_list_keep">Kontrol listesini tut</string>
     <!-- loggerbird_trello_start_date_popup-->
     <string name="textView_trello_date_title">Zaman çizelgesi belirle</string>
     <string name="button_trello_date_proceed">Devam</string>
@@ -570,4 +588,15 @@
     <string name="textView_recyclerView_clubhouse_popup_title">Clubhouse görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_clubhouse_yes">Eklentiyi sil</string>
     <string name="button_recyclerView_clubhouse_no">Eklentiyi tut</string>
+    <!-- loggerbird_trello_check_list_item_popup-->
+    <string name="button_trello_check_create">Oluştur</string>
+    <string name="button_trello_check_cancel">İptal</string>
+    <string name="textView_trello_check_title">Madde başlığı</string>
+    <string name="editText_trello_check_hint">Bu madde için bir isim giriniz…</string>
+    <string name="textView_trello_check_item_list">Madde listesi</string>
+    <!-- recycler_view_item_item_popup-->
+    <string name="textView_recyclerView_trello_item_popup_header">Madde sil</string>
+    <string name="textView_recyclerView_trello_item_popup_title">Madde listenizden bu maddeyi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_trello_item_yes">Madde sil</string>
+    <string name="button_recyclerView_trello_item_no">Madde tut</string>
 </resources>
