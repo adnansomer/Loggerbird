@@ -51,12 +51,12 @@ internal class GitlabApi {
     private var labels: String? = null
     private var milestones: String? = null
     private var project: String? = null
-    private var confidentiality: String? = null
-    private var spinnerPositionProject: Int = 0
-    private var spinnerPositionLabels: Int = 0
-    private var spinnerPositionAssignee: Int = 0
-    private var spinnerPositionMilestones: Int = 0
-    private var spinnerPositionConfidentiality: Int = 0
+    internal var confidentiality: String? = null
+//    private var spinnerPositionProject: Int = 0
+//    private var spinnerPositionLabels: Int = 0
+//    private var spinnerPositionAssignee: Int = 0
+//    private var spinnerPositionMilestones: Int = 0
+//    private var spinnerPositionConfidentiality: Int = 0
     private var projectPosition = 0
     private var assigneePosition = 0
     private var labelPosition = 0
@@ -66,7 +66,7 @@ internal class GitlabApi {
     private val arrayListProjectsId: ArrayList<String> = ArrayList()
     private val arrayListMilestones: ArrayList<String> = ArrayList()
     private val arrayListMilestonesId: ArrayList<String> = ArrayList()
-    private val arrayListLabels: ArrayList<String> = ArrayList()
+    internal val arrayListLabels: ArrayList<String> = ArrayList()
     private val arrayListLabelsId: ArrayList<String> = ArrayList()
     private val arrayListUsers: ArrayList<String> = ArrayList()
     private val arrayListUsersId: ArrayList<String> = ArrayList()
@@ -196,7 +196,6 @@ internal class GitlabApi {
                     LoggerBird.callExceptionDetails(exception = e, tag = Constants.gitlabTag)
                 }
             }
-
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
@@ -236,20 +235,12 @@ internal class GitlabApi {
                 stringBuilder.append("$it (${LoggerBird.classPathListCounter[classCounter]})\n")
                 classCounter++
             }
-//            stringBuilder.append("Life Cycle Details:" + LoggerBird.stringBuilderActivityLifeCycleObserver.toString() + LogFragmentLifeCycleObserver.stringBuilderFragmentLifeCycleObserver.toString())
             jsonObject.addProperty("description", stringBuilder.toString())
-            jsonObject.addProperty(
-                "milestone_id",
-                hashMapMilestones[arrayListMilestones[spinnerPositionMilestones]]
-            )
+            jsonObject.addProperty("milestone_id", hashMapMilestones[arrayListMilestones[milestonePosition]])
             jsonObject.addProperty("labels", labels)
-            jsonObject.addProperty("assignee_ids", hashMapUsers[arrayListUsers[spinnerPositionAssignee]])
-            if (weight != null) {
-                jsonObject.addProperty("weight", weight)
-            }
-            if (dueDate != null) {
-                jsonObject.addProperty("due_date", dueDate)
-            }
+            jsonObject.addProperty("assignee_ids", hashMapUsers[arrayListUsers[assigneePosition]])
+            if (weight != null) { jsonObject.addProperty("weight", weight) }
+            if (dueDate != null) { jsonObject.addProperty("due_date", dueDate) }
             jsonObject.addProperty("confidential", confidentiality!!.toLowerCase())
 
             RetrofitGitlabClient.getGitlabUserClient(url = "https://gitlab.com/api/v4/projects/" + hashMapProjects[arrayListProjects[projectPosition]] + "/")
@@ -411,6 +402,8 @@ internal class GitlabApi {
                                 Log.d("gitlabmilestones", gitlab.toString())
 
                                 val gitlabMilestonesList = response.body()
+
+                                arrayListMilestones.add("")
                                 gitlabMilestonesList?.forEach {
                                     if (it.id != null) {
                                         arrayListMilestones.add(it.title!!)
@@ -466,6 +459,7 @@ internal class GitlabApi {
                                 Log.d("gitlablabels", gitlab.toString())
 
                                 val gitlabLabelsList = response.body()
+                                arrayListLabels.add("")
                                 gitlabLabelsList?.forEach {
                                     if (it.id != null) {
                                         arrayListLabels.add(it.name!!)
@@ -759,48 +753,29 @@ internal class GitlabApi {
         weight = editTextWeight.text.toString()
     }
 
-    /**
-     * This method is used for gathering issue details to be send to Gitlab.
-     * @param spinnerAssignee for getting reference of assignee.
-     * @param spinnerMilestone for getting reference of milestone.
-     * @param spinnerLabels for getting reference of labels.
-     * @param spinnerConfidentiality for getting reference of confidentiality
-     */
-    internal fun gatherGitlabProjectSpinnerDetails(
-        spinnerAssignee: Spinner,
-        spinnerMilestone: Spinner,
-        spinnerLabels: Spinner,
-        spinnerConfidentiality: Spinner
-
-    ) {
-
-        spinnerPositionConfidentiality = spinnerAssignee.selectedItemPosition
-        confidentiality = spinnerConfidentiality.selectedItem.toString()
-
-        spinnerPositionAssignee = spinnerAssignee.selectedItemPosition
-        assignee = spinnerAssignee.selectedItem.toString()
-
-        spinnerPositionLabels = spinnerLabels.selectedItemPosition
-        labels = spinnerMilestone.selectedItem.toString()
-
-        spinnerPositionMilestones = spinnerMilestone.selectedItemPosition
-        milestones = spinnerLabels.selectedItem.toString()
-    }
 
     /**
      * This method is used for gathering project details to be send to Gitlab.
      * @param autoTextViewProject for getting reference of project.
      */
     internal fun gatherGitlabProjectAutoTextDetails(
-        autoTextViewProject: AutoCompleteTextView
+        autoTextViewProject: AutoCompleteTextView,
+        autoTextViewLabels: AutoCompleteTextView,
+        autoTextViewConfidentiality: AutoCompleteTextView,
+        autoTextViewMilestone : AutoCompleteTextView,
+        autoTextViewAssignee : AutoCompleteTextView
     ) {
 
         project = autoTextViewProject.editableText.toString()
+        labels = autoTextViewLabels.editableText.toString()
+        confidentiality = autoTextViewConfidentiality.editableText.toString()
+        milestones = autoTextViewMilestone.editableText.toString()
+        assignee = autoTextViewAssignee.editableText.toString()
     }
 
     /**
      * This method is used for gathering project details to be send to Gitlab.
-     * @param autoTextViewProject for getting position of project from spinner.
+     * @param projectPosition for getting position of project from spinner.
      */
     internal fun gitlabProjectPosition(projectPosition: Int) {
 
@@ -809,20 +784,20 @@ internal class GitlabApi {
 
     /**
      * This method is used for gathering project details to be send to Gitlab.
-     * @param autoTextViewProject for getting position of assignee from spinner.
+     * @param labelPosition for getting position of assignee from spinner.
      */
     internal fun gitlabAssigneePosition(assigneePosition: Int) {
 
-        this.spinnerPositionAssignee = assigneePosition
+        this.assigneePosition = assigneePosition
     }
 
     /**
      * This method is used for gathering project details to be send to Gitlab.
-     * @param autoTextViewProject for getting position of label.
+     * @param labelPosition for getting position of label.
      */
     internal fun gitlabLabelPosition(labelPosition: Int) {
 
-        this.spinnerPositionLabels = labelPosition
+        this.labelPosition = labelPosition
     }
 
     /**
@@ -831,7 +806,7 @@ internal class GitlabApi {
      */
     internal fun gitlabMilestonesPosition(milestonePosition: Int) {
 
-        this.spinnerPositionMilestones = milestonePosition
+        this.milestonePosition = milestonePosition
     }
 
     /**
@@ -840,7 +815,7 @@ internal class GitlabApi {
      */
     internal fun gitlabConfidentialityPosition(confidentialityPosition: Int) {
 
-        this.spinnerPositionConfidentiality = confidentialityPosition
+        this.confidentialityPosition = confidentialityPosition
     }
 
     /**

@@ -32,6 +32,7 @@ import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
+import android.graphics.drawable.Drawable
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
@@ -71,7 +72,9 @@ import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import constants.Constants
+import eightbitlab.com.blurview.RenderScriptBlur
 import exception.LoggerBirdException
+import kotlinx.android.synthetic.main.loggerbird_start_popup.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -403,11 +406,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     private lateinit var autoTextViewGitlabProject: AutoCompleteTextView
     private lateinit var editTextGitlabTitle: EditText
     private lateinit var editTextGitlabDescription: EditText
-    private lateinit var spinnerGitlabMilestone: Spinner
-    private lateinit var spinnerGitlabAssignee: Spinner
+    private lateinit var autoTextViewGitlabMilestone: AutoCompleteTextView
+    private lateinit var autoTextViewGitlabAssignee: AutoCompleteTextView
     private lateinit var editTextGitlabWeight: EditText
-    private lateinit var spinnerGitlabLabels: Spinner
-    private lateinit var spinnerGitlabConfidentiality: Spinner
+    private lateinit var autoTextViewGitlabLabels: AutoCompleteTextView
+    private lateinit var autoTextViewGitlabConfidentiality: AutoCompleteTextView
     private lateinit var textViewGitlabDueDate: TextView
     private lateinit var buttonGitlabCreate: Button
     internal lateinit var buttonGitlabCancel: Button
@@ -423,11 +426,23 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     private lateinit var progressBarGitlab: ProgressBar
     private lateinit var progressBarGitlabLayout: FrameLayout
     private lateinit var autoTextViewGitlabProjectAdapter: ArrayAdapter<String>
-    private lateinit var spinnerGitlabAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var spinnerGitlabLabelsAdapter: ArrayAdapter<String>
-    private lateinit var spinnerGitlabMilestoneAdapter: ArrayAdapter<String>
-    private lateinit var spinnerGitlabConfidentialityAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGitlabAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGitlabLabelsAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGitlabMilestoneAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGitlabConfidentialityAdapter: ArrayAdapter<String>
     private val arrayListGitlabFileName: ArrayList<RecyclerViewModel> = ArrayList()
+    private lateinit var linearLayoutGitlabConfidentiality: LinearLayout
+    private lateinit var textViewGitlabConfidentiality: TextView
+    private lateinit var imageViewGitlabConfidentiality: ImageView
+    private lateinit var textViewGitlabMilestone : TextView
+    private lateinit var linearLayoutGitlabMilestone : LinearLayout
+    private lateinit var imageViewGitlabMilestone : ImageView
+    private lateinit var textViewGitlabAssignee : TextView
+    private lateinit var linearLayoutGitlabAssignee : LinearLayout
+    private lateinit var imageViewGitlabAssignee : ImageView
+    private lateinit var textViewGitlabLabels : TextView
+    private lateinit var linearLayoutGitlabLabels : LinearLayout
+    private lateinit var imageViewGitlabLabels : ImageView
 
     //Github
     internal val githubAuthentication = GithubApi()
@@ -7772,25 +7787,28 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                 }
 
                 toolbarGitlab = viewGitlab.findViewById(R.id.toolbar_gitlab)
-                autoTextViewGitlabProject =
-                    viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
+                autoTextViewGitlabProject = viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
                 editTextGitlabTitle = viewGitlab.findViewById(R.id.editText_gitlab_title)
-                editTextGitlabDescription =
-                    viewGitlab.findViewById(R.id.editText_gitlab_description)
+                editTextGitlabDescription = viewGitlab.findViewById(R.id.editText_gitlab_description)
                 editTextGitlabWeight = viewGitlab.findViewById(R.id.editText_gitlab_weight)
-                spinnerGitlabMilestone = viewGitlab.findViewById(R.id.spinner_gitlab_milestone)
-                spinnerGitlabAssignee = viewGitlab.findViewById(R.id.spinner_gitlab_assignee)
-                spinnerGitlabLabels = viewGitlab.findViewById(R.id.spinner_gitlab_labels)
-                spinnerGitlabConfidentiality =
-                    viewGitlab.findViewById(R.id.spinner_gitlab_confidentiality)
+                autoTextViewGitlabMilestone = viewGitlab.findViewById(R.id.auto_textView_gitlab_milestone)
+                autoTextViewGitlabAssignee = viewGitlab.findViewById(R.id.auto_textView_gitlab_assignee)
+                autoTextViewGitlabLabels = viewGitlab.findViewById(R.id.auto_textView_gitlab_labels)
+                autoTextViewGitlabConfidentiality = viewGitlab.findViewById(R.id.auto_textView_gitlab_confidentiality)
                 textViewGitlabDueDate = viewGitlab.findViewById(R.id.textView_gitlab_due_date)
                 buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
                 buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
                 progressBarGitlab = viewGitlab.findViewById(R.id.gitlab_progressbar)
-                progressBarGitlabLayout =
-                    viewGitlab.findViewById(R.id.gitlab_progressbar_background)
-                recyclerViewGitlabAttachment =
-                    viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
+                linearLayoutGitlabConfidentiality = viewGitlab.findViewById(R.id.linearLayout_gitlab_confidentiality)
+                linearLayoutGitlabMilestone = viewGitlab.findViewById(R.id.linearLayout_gitlab_milestone)
+                textViewGitlabMilestone = viewGitlab.findViewById(R.id.textView_gitlab_milestone)
+                imageViewGitlabMilestone = viewGitlab.findViewById(R.id.imageView_delete_milestone)
+                linearLayoutGitlabAssignee = viewGitlab.findViewById(R.id.linearLayout_gitlab_assignee)
+                linearLayoutGitlabLabels = viewGitlab.findViewById(R.id.linearLayout_gitlab_labels)
+                textViewGitlabLabels = viewGitlab.findViewById(R.id.textView_gitlab_labels)
+                imageViewGitlabLabels = viewGitlab.findViewById(R.id.imageView_delete_labels)
+                progressBarGitlabLayout = viewGitlab.findViewById(R.id.gitlab_progressbar_background)
+                recyclerViewGitlabAttachment = viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
                 editTextGitlabWeight.filters = arrayOf<InputFilter>(
                     InputTypeFilter(
                         "0",
@@ -7938,20 +7956,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
             if (checkGitlabTitleEmpty()) {
                 progressBarGitlabLayout.visibility = View.VISIBLE
                 progressBarGitlab.visibility = View.VISIBLE
-//                attachProgressBar()
                 gitlabAuthentication.gatherGitlabEditTextDetails(
                     editTextTitle = editTextGitlabTitle,
                     editTextDescription = editTextGitlabDescription,
                     editTextWeight = editTextGitlabWeight
                 )
-                gitlabAuthentication.gatherGitlabProjectSpinnerDetails(
-                    spinnerAssignee = spinnerGitlabAssignee,
-                    spinnerLabels = spinnerGitlabLabels,
-                    spinnerMilestone = spinnerGitlabMilestone,
-                    spinnerConfidentiality = spinnerGitlabConfidentiality
-                )
                 gitlabAuthentication.gatherGitlabProjectAutoTextDetails(
-                    autoTextViewProject = autoTextViewGitlabProject
+                    autoTextViewProject = autoTextViewGitlabProject,
+                    autoTextViewLabels = autoTextViewGitlabLabels,
+                    autoTextViewConfidentiality = autoTextViewGitlabConfidentiality,
+                    autoTextViewMilestone = autoTextViewGitlabMilestone,
+                    autoTextViewAssignee = autoTextViewGitlabAssignee
+
                 )
                 gitlabAuthentication.callGitlab(
                     activity = activity,
@@ -7971,6 +7987,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
             }
+        }
+
+        textViewGitlabLabels.setSafeOnClickListener {
+            linearLayoutGitlabLabels.visibility = View.VISIBLE
+            textViewGitlabLabels.visibility = View.GONE
+        }
+
+        textViewGitlabMilestone.setSafeOnClickListener {
+            linearLayoutGitlabMilestone.visibility = View.VISIBLE
+            textViewGitlabMilestone.visibility = View.GONE
+
         }
 
         buttonGitlabCancel.setSafeOnClickListener {
@@ -8020,13 +8047,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
 
         initializeGitlabProject(arrayListGitlabProjects = arrayListGitlabProjects)
 
-        initializeGitLabAssignee(arrayListGitlabAssignee = arrayListGitlabAssignee)
+        initializeGitlabAssignee(arrayListGitlabAssignee = arrayListGitlabAssignee)
 
-        initializeGitLabMilestones(arrayListGitlabMilestones = arrayListGitlabMilestones)
+        initializeGitlabMilestones(arrayListGitlabMilestones = arrayListGitlabMilestones)
 
-        initializeGitLabLabels(arrayListGitlabLabels = arrayListGitlabLabels)
+        initializeGitlabLabels(arrayListGitlabLabels = arrayListGitlabLabels)
 
-        initializeGitLabConfidentiality(arrayListGitlabConfidentiality = arrayListGitlabConfidentiality)
+        initializeGitlabConfidentiality(arrayListGitlabConfidentiality = arrayListGitlabConfidentiality)
 
         progressBarGitlab.visibility = View.GONE
         progressBarGitlabLayout.visibility = View.GONE
@@ -8036,6 +8063,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
      * This method is used for initializing project spinner in the loggerbird_gitlab_popup.
      * @param arrayListGitlabProjects is used for getting the project list for project spinner.
      */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     internal fun initializeGitlabProject(
         arrayListGitlabProjects: ArrayList<String>
@@ -8054,6 +8082,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
             false
         }
 
+        autoTextViewGitlabConfidentiality.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewGitlab)
+        }
+
         autoTextViewGitlabProject.setOnItemClickListener { parent, view, position, id ->
             gitlabAuthentication.gitlabProjectPosition(projectPosition = position)
 
@@ -8070,120 +8102,144 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+
     /**
-     * This method is used for initializing assignee spinner in the loggerbird_gitlab_popup.
-     * @param arrayListGitlabAssignee is used for getting the assignee list for assignee spinner.
+     * This method is used for initializing project spinner in the loggerbird_gitlab_popup.
+     * @param arrayListGitlabProjects is used for getting the project list for project spinner.
      */
-    internal fun initializeGitLabAssignee(
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeGitlabAssignee(
         arrayListGitlabAssignee: ArrayList<String>
     ) {
-        spinnerGitlabAssigneeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabAssignee)
-        spinnerGitlabAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGitlabAssignee.adapter = spinnerGitlabAssigneeAdapter
 
-        spinnerGitlabAssignee.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
+        autoTextViewGitlabAssigneeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabAssignee)
+        autoTextViewGitlabAssignee.setAdapter(autoTextViewGitlabAssigneeAdapter)
 
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                gitlabAuthentication.gitlabAssigneePosition(assigneePosition = position)
-            }
+        if (arrayListGitlabAssignee.isNotEmpty() && autoTextViewGitlabAssignee.text.isEmpty()) {
+            autoTextViewGitlabAssignee.setText(arrayListGitlabAssignee[0], false)
+        }
+
+        autoTextViewGitlabAssignee.setOnTouchListener { v, event ->
+            autoTextViewGitlabAssignee.showDropDown()
+            false
+        }
+
+        autoTextViewGitlabAssignee.setOnItemClickListener { parent, view, position, id ->
+            gitlabAuthentication.gitlabAssigneePosition(assigneePosition = position)
+        }
+
+        autoTextViewGitlabAssignee.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewGitlab)
         }
     }
 
-    /**
-     * This method is used for initializing label spinner in the loggerbird_gitlab_popup.
-     * @param arrayListGitlabLabels is used for getting the label list for label spinner.
-     */
-    internal fun initializeGitLabLabels(
-        arrayListGitlabLabels: ArrayList<String>
-    ) {
-        spinnerGitlabLabelsAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabLabels)
-        spinnerGitlabLabelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGitlabLabels.adapter = spinnerGitlabLabelsAdapter
-
-        spinnerGitlabLabels.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                gitlabAuthentication.gitlabLabelPosition(labelPosition = position)
-            }
-        }
-    }
 
     /**
-     * This method is used for initializing confidentiality spinner in the loggerbird_gitlab_popup.
-     * @param arrayListGitlabConfidentiality is used for getting the confidentiality list for confidentiality spinner.
+     * This method is used for initializing project spinner in the loggerbird_gitlab_popup.
+     * @param arrayListGitlabMilestones is used for getting the milestone list.
      */
-    internal fun initializeGitLabConfidentiality(
-        arrayListGitlabConfidentiality: ArrayList<String>
-    ) {
-        spinnerGitlabConfidentialityAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabConfidentiality)
-        spinnerGitlabConfidentialityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGitlabConfidentiality.adapter = spinnerGitlabConfidentialityAdapter
-
-        spinnerGitlabConfidentiality.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    gitlabAuthentication.gitlabConfidentialityPosition(confidentialityPosition = position)
-                }
-            }
-    }
-
-    /**
-     * This method is used for initializing milestone spinner in the loggerbird_gitlab_popup.
-     * @param arrayListGitlabMilestones is used for getting the milestone list for milestone spinner.
-     */
-    internal fun initializeGitLabMilestones(
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeGitlabMilestones(
         arrayListGitlabMilestones: ArrayList<String>
     ) {
-        spinnerGitlabMilestoneAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabMilestones)
-        spinnerGitlabMilestoneAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGitlabMilestone.adapter = spinnerGitlabMilestoneAdapter
 
-        spinnerGitlabMilestoneAdapter.notifyDataSetChanged()
+        autoTextViewGitlabMilestoneAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabMilestones)
+        autoTextViewGitlabMilestone.setAdapter(autoTextViewGitlabMilestoneAdapter)
 
-        spinnerGitlabMilestone.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    TODO("Not yet implemented")
-                }
+        if (arrayListGitlabMilestones.isNotEmpty() && autoTextViewGitlabMilestone.text.isEmpty()) {
+            autoTextViewGitlabMilestone.setText(arrayListGitlabMilestones[0], false)
+        }
 
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = position)
-                }
-            }
+        autoTextViewGitlabMilestone.setOnTouchListener { v, event ->
+            autoTextViewGitlabMilestone.showDropDown()
+            false
+        }
+
+        autoTextViewGitlabMilestone.setOnItemClickListener { parent, view, position, id ->
+            gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = position)
+        }
+
+        imageViewGitlabMilestone.setSafeOnClickListener {
+            linearLayoutGitlabMilestone.visibility = View.GONE
+            textViewGitlabMilestone.visibility = View.VISIBLE
+            gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = 0)
+        }
+
+        autoTextViewGitlabMilestone.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewGitlab)
+        }
+    }
+
+
+    /**
+     * This method is used for initializing project spinner in the loggerbird_gitlab_popup.
+     * @param arrayListGitlabConfidentiality is used for getting the confidentiality list.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeGitlabConfidentiality(
+        arrayListGitlabConfidentiality: ArrayList<String>
+    ) {
+
+        autoTextViewGitlabConfidentialityAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabConfidentiality)
+        autoTextViewGitlabConfidentiality.setAdapter(autoTextViewGitlabConfidentialityAdapter)
+
+        if (arrayListGitlabConfidentiality.isNotEmpty() && autoTextViewGitlabConfidentiality.text.isEmpty()) {
+            autoTextViewGitlabConfidentiality.setText(arrayListGitlabConfidentiality[0], false)
+        }
+
+        autoTextViewGitlabConfidentiality.setOnTouchListener { v, event ->
+            autoTextViewGitlabConfidentiality.showDropDown()
+            false
+        }
+
+        autoTextViewGitlabConfidentiality.setOnItemClickListener { parent, view, position, id ->
+            gitlabAuthentication.gitlabConfidentialityPosition(confidentialityPosition = position)
+
+        }
+
+        autoTextViewGitlabConfidentiality.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewGitlab)
+        }
+    }
+
+    /**
+     * This method is used for initializing project spinner in the loggerbird_gitlab_popup.
+     * @param arrayListGitlabLabels is used for getting the label list.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeGitlabLabels(
+        arrayListGitlabLabels: ArrayList<String>
+    ) {
+
+        autoTextViewGitlabLabelsAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabLabels)
+        autoTextViewGitlabLabels.setAdapter(autoTextViewGitlabLabelsAdapter)
+
+        if (arrayListGitlabLabels.isNotEmpty() && autoTextViewGitlabLabels.text.isEmpty()) {
+            autoTextViewGitlabLabels.setText(arrayListGitlabLabels[0], false)
+        }
+
+        autoTextViewGitlabLabels.setOnTouchListener { v, event ->
+            autoTextViewGitlabLabels.showDropDown()
+            false
+        }
+
+        autoTextViewGitlabLabels.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewGitlab)
+        }
+
+        autoTextViewGitlabLabels.setOnItemClickListener { parent, view, position, id ->
+            gitlabAuthentication.gitlabLabelPosition(labelPosition = position)
+        }
+
+        imageViewGitlabLabels.setSafeOnClickListener {
+            linearLayoutGitlabLabels.visibility = View.GONE
+            textViewGitlabLabels.visibility = View.VISIBLE
+            gitlabAuthentication.gitlabLabelPosition(labelPosition = 0)
+        }
     }
 
 
@@ -11076,9 +11132,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         try {
             removeLoggerBirdDismissLayout()
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+
             viewLoggerBirdStartPopup =
                 LayoutInflater.from(activity)
                     .inflate(R.layout.loggerbird_start_popup, rootView, false)
+
             windowManagerParamsLoggerBirdStartPopup =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
@@ -11106,16 +11164,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
 
             val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_in_from_top)
             viewLoggerBirdStartPopup.animation = animation
-//            viewLoggerBirdStartPopup.scaleX = 0F
-//            viewLoggerBirdStartPopup.scaleY = 0F
-//            viewLoggerBirdStartPopup.animate()
-//                .scaleX(1F)
-//                .scaleY(1F)
-//                .setDuration(500)
-//                .setInterpolator(BounceInterpolator())
-//                .setStartDelay(0)
-//                .start()
-
 
             viewLoggerBirdStartPopup.setOnTouchListener(object: OnSwipeTouchListener(this@LoggerBirdService) {
                 override fun onSwipeLeft() {
@@ -11197,6 +11245,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
             )
             activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
             activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_in_from_top)
+            viewLoggerBirdDismissPopup.animation = animation
 
             viewLoggerBirdDismissPopup.setOnTouchListener(object: OnSwipeTouchListener(this@LoggerBirdService) {
                 override fun onSwipeLeft() {
@@ -11219,13 +11269,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
             val timerTaskDismissPopup = object : TimerTask() {
                 override fun run() {
                     activity.runOnUiThread {
-                        val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_up)
+                        val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_out_to_top)
                         viewLoggerBirdDismissPopup.animation = animation
                         removeLoggerBirdDismissLayout()
                     }
                 }
             }
-            timerDismissPopup.schedule(timerTaskDismissPopup, 4000)
+            timerDismissPopup.schedule(timerTaskDismissPopup, 3000)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -11265,6 +11315,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                         WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                         PixelFormat.TRANSLUCENT
+
                     )
                 } else {
                     WindowManager.LayoutParams(

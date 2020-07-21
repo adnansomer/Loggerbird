@@ -1,45 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/cookie"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="bottom"
-    android:background="@color/cookieBarColor"
-    android:gravity="center_vertical"
-    android:orientation="vertical"
-    android:paddingBottom="16dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:windowSwipeToDismiss = "false"
-    android:paddingTop="20dp">
+    android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:weightSum="2">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:background="@color/cookieBarColor"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:paddingBottom="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="20dp">
 
-        <TextView
-            android:id="@+id/textView_start_pop_up"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="start|bottom"
-            android:text="@string/logger_bird_floating_action_button_open_message"
-            android:textColor="@android:color/white"
-            android:textSize="15sp" />
 
-        <TextView
-            android:id="@+id/textView_session_time_pop_up"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="end"
-            android:textColor="@android:color/white"
-            android:textSize="13sp"
-            android:textStyle="italic" />
+            <LinearLayout
+                android:id="@+id/loggerbird_start_popup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:weightSum="2">
 
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/textView_start_pop_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="start|bottom"
+                    android:text="@string/logger_bird_floating_action_button_open_message"
+                    android:textColor="@android:color/white"
+                    android:textSize="15sp" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+                <TextView
+                    android:id="@+id/textView_session_time_pop_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textColor="@android:color/white"
+                    android:textSize="13sp"
+                    android:textStyle="italic" />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+
+</LinearLayout>
+
+
 

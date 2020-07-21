@@ -102,6 +102,7 @@ dependencies {
     implementation('com.google.firebase:firebase-ml-natural-language-smart-reply-model:20.0.7')
     implementation('com.google.firebase:firebase-ml-natural-language:22.0.0')
     implementation('com.google.firebase:firebase-ml-natural-language-translate-model:20.0.8')
+    implementation 'com.eightbitlab:blurview:1.6.3'
 
     implementation 'org.slf4j:slf4j-simple:2.0.0-alpha1'
     implementation ('com.googlecode.json-simple:json-simple:1.1.1'){
