@@ -8131,6 +8131,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+
+
     /**
      * This method is used for initializing gitlab attachment recyclerView.
      * @param filePathMedia is used for getting the reference of current media file.
