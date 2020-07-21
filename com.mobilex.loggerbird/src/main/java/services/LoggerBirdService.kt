@@ -76,7 +76,6 @@ import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import constants.Constants
-import eightbitlab.com.blurview.RenderScriptBlur
 import exception.LoggerBirdException
 import kotlinx.android.synthetic.main.loggerbird_start_popup.*
 import kotlinx.coroutines.CoroutineScope
@@ -217,7 +216,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     private var timerTaskAudio: TimerTask? = null
     private var timerVideoTaskFileSize: TimerTask? = null
     private var timerAudioTaskFileSize: TimerTask? = null
-    //    private lateinit var cookieBar: CookieBar
     private lateinit var viewFeedback: View
     private lateinit var viewJira: View
     private lateinit var viewSlack: View
@@ -253,8 +251,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     private val coroutineCallFilesAction: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlFileAction: Boolean = false
     private lateinit var progressBarView: View
-    private val defaultToast: DefaultToast =
-        DefaultToast()
+    private val defaultToast: DefaultToast = DefaultToast()
 
     //Jira:
     internal val jiraAuthentication = JiraApi()
@@ -694,20 +691,23 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     private lateinit var textViewClubhouseDueDate: TextView
     private lateinit var autoTextViewClubhouseProject: AutoCompleteTextView
     private lateinit var autoTextViewClubhouseProjectAdapter: ArrayAdapter<String>
-    private lateinit var spinnerClubhouseEpic: Spinner
-    private lateinit var spinnerClubhouseEpicAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseEpic: AutoCompleteTextView
+    private lateinit var autoTextViewClubhouseEpicAdapter: ArrayAdapter<String>
     private lateinit var editTextClubhouseStoryName: EditText
     private lateinit var editTextClubhouseStoryDescription: EditText
     private lateinit var editTextClubhouseEstimate: EditText
-    private lateinit var spinnerClubhouseStoryType: Spinner
-    private lateinit var spinnerClubhouseStoryTypeAdapter: ArrayAdapter<String>
-    private lateinit var spinnerClubhouseRequester: Spinner
-    private lateinit var spinnerClubhouseRequesterAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseStoryType: AutoCompleteTextView
+    private lateinit var autoTextViewClubhouseStoryTypeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseRequester: AutoCompleteTextView
+    private lateinit var autoTextViewClubhouseRequesterAdapter: ArrayAdapter<String>
     private val arrayListClubhouseFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var clubhouseAttachmentAdapter: RecyclerViewClubhouseAttachmentAdapter
     private lateinit var recyclerViewClubhouseAttachment: RecyclerView
     private lateinit var progressBarClubhouse: ProgressBar
     private lateinit var progressBarClubhouseLayout: FrameLayout
+    private lateinit var textViewClubhouseEpic: TextView
+    private lateinit var linearLayoutClubhouseEpic: LinearLayout
+    private lateinit var imageViewClubhouseDueDate: ImageView
     //LoggerBird Activate Popup:
     private lateinit var textViewLoggerBirdActivatePopupActivate: TextView
     private lateinit var textViewLoggerBirdActivatePopupDismiss: TextView
@@ -766,10 +766,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         internal var controlPermissionRequest: Boolean = false
         private var runnableList: ArrayList<Runnable> = ArrayList()
         private var runnableListEmail: ArrayList<Runnable> = ArrayList()
-        private var workQueueLinkedVideo: LinkedBlockingQueueUtil =
-            LinkedBlockingQueueUtil()
-        private var workQueueLinkedEmail: LinkedBlockingQueueUtil =
-            LinkedBlockingQueueUtil()
+        private var workQueueLinkedVideo: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
+        private var workQueueLinkedEmail: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
         internal var controlVideoPermission: Boolean = false
         internal var controlAudioPermission: Boolean = false
         internal var controlDrawableSettingsPermission: Boolean = false
@@ -805,6 +803,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         /**
          * This method is used for removing email task from queue.
          */
+        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
         internal fun callEnqueueEmail() {
             workQueueLinkedEmail.controlRunnable = false
             if (runnableListEmail.size > 0) {
@@ -1036,19 +1035,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                 }
                 (windowManager as WindowManager).removeViewImmediate(view)
                 initializeLoggerBirdClosePopup(activity = activity)
-//                CookieBar.build(activity)
-//                    .setCustomView(R.layout.loggerbird_close_popup)
-//                    .setCustomViewInitializer {
-//                        val textViewFeedBack =
-//                            it.findViewById<TextView>(R.id.textView_feed_back_pop_up)
-//                        textViewFeedBack.setSafeOnClickListener {
-//                            initializeFeedBackLayout()
-//                            CookieBar.dismiss(activity)
-//                        }
-//                    }
-//                    .setSwipeToDismiss(true)
-//                    .setDuration(2000)
-//                    .show()
                 windowManager = null
                 isFabEnable = false
 
@@ -1077,7 +1063,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                     .setInterpolator(BounceInterpolator())
                     .setStartDelay(0)
                     .start()
-
 
                 if (Settings.canDrawOverlays(activity)) {
                     windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -1130,7 +1115,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                         ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white))
                     floating_action_button.backgroundTintList =
                         ColorStateList.valueOf(ContextCompat.getColor(this, R.color.black))
-
 
                     if (audioRecording || videoRecording || screenshotDrawing) {
                         workingAnimation =
@@ -1211,22 +1195,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                         buttonClicks()
                     }
                     initializeLoggerBirdStartPopup(activity = activity)
-//                    CookieBar.build(activity)
-//                        .setCustomView(R.layout.loggerbird_start_popup)
-//                        .setCustomViewInitializer {
-//                            val textViewSessionTime =
-//                                it.findViewById<TextView>(R.id.textView_session_time_pop_up)
-//                            textViewSessionTime.text =
-//                                resources.getString(R.string.total_session_time) + timeStringDay(
-//                                    totalSessionTime()
-//                                ) + "\n" + resources.getString(R.string.last_session_time) + timeStringDay(
-//                                    lastSessionTime()
-//                                )
-//                        }
-//                        .setSwipeToDismiss(true)
-//                        .setEnableAutoDismiss(true)
-//                        .setDuration(3000)
-//                        .show()
                     isFabEnable = true
 
                 } else {
@@ -9277,42 +9245,28 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                     windowManagerParamsBaseCamp
                 )
 
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
+                activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
                 activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
                 buttonBasecampCancel = viewBasecamp.findViewById(R.id.button_basecamp_cancel)
                 buttonBasecampCreate = viewBasecamp.findViewById(R.id.button_basecamp_create)
                 toolbarBasecamp = viewBasecamp.findViewById(R.id.toolbar_basecamp)
-                autoTextViewBasecampProject =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_project)
-                autoTextViewBasecampAssignee =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_assignee)
-                autoTextViewBasecampCategory =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_category)
-                autoTextViewBasecampNotify =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_notify)
-                editTextBasecampDescriptionMessage =
-                    viewBasecamp.findViewById(R.id.editText_basecamp_description_messsage)
-                editTextBasecampDescriptionTodo =
-                    viewBasecamp.findViewById(R.id.editText_basecamp_description_todo)
-                editTextBasecampTitle =
-                    viewBasecamp.findViewById(R.id.editText_basecamp_title)
+                autoTextViewBasecampProject = viewBasecamp.findViewById(R.id.auto_textView_basecamp_project)
+                autoTextViewBasecampAssignee = viewBasecamp.findViewById(R.id.auto_textView_basecamp_assignee)
+                autoTextViewBasecampCategory = viewBasecamp.findViewById(R.id.auto_textView_basecamp_category)
+                autoTextViewBasecampNotify = viewBasecamp.findViewById(R.id.auto_textView_basecamp_notify)
+                editTextBasecampDescriptionMessage = viewBasecamp.findViewById(R.id.editText_basecamp_description_messsage)
+                editTextBasecampDescriptionTodo = viewBasecamp.findViewById(R.id.editText_basecamp_description_todo)
+                editTextBasecampTitle = viewBasecamp.findViewById(R.id.editText_basecamp_title)
                 editTextBasecampContent = viewBasecamp.findViewById(R.id.editText_basecamp_content)
                 editTextBasecampName = viewBasecamp.findViewById(R.id.editText_basecamp_name)
                 imageViewBasecampAssignee = viewBasecamp.findViewById(R.id.imageView_assignee_add)
                 imageViewBasecampNotify = viewBasecamp.findViewById(R.id.imageView_notify_add)
-                cardViewBasecampAssigneeList =
-                    viewBasecamp.findViewById(R.id.cardView_assignee_list)
+                cardViewBasecampAssigneeList = viewBasecamp.findViewById(R.id.cardView_assignee_list)
                 cardViewBasecampNotifyList = viewBasecamp.findViewById(R.id.cardView_notify_list)
-                recyclerViewBasecampAssigneeList =
-                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_assignee_list)
-                recyclerViewBasecampNotifyList =
-                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_notify_list)
-                recyclerViewBasecampAttachmentList =
-                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_attachment)
-                imageButtonBasecampRemoveDate =
-                    viewBasecamp.findViewById(R.id.image_button_basecamp_remove_date)
+                recyclerViewBasecampAssigneeList = viewBasecamp.findViewById(R.id.recycler_view_basecamp_assignee_list)
+                recyclerViewBasecampNotifyList = viewBasecamp.findViewById(R.id.recycler_view_basecamp_notify_list)
+                recyclerViewBasecampAttachmentList = viewBasecamp.findViewById(R.id.recycler_view_basecamp_attachment)
+                imageButtonBasecampRemoveDate = viewBasecamp.findViewById(R.id.image_button_basecamp_remove_date)
                 imageViewBasecampDate = viewBasecamp.findViewById(R.id.imageView_start_date)
                 scrollViewBasecamp = viewBasecamp.findViewById(R.id.scrollView_basecamp)
                 scrollViewBasecamp.setOnTouchListener { v, event ->
@@ -10718,15 +10672,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                     viewClubhouse.findViewById(R.id.editText_clubhouse_story_name)
                 editTextClubhouseStoryDescription =
                     viewClubhouse.findViewById(R.id.editText_clubhouse_description)
-                spinnerClubhouseRequester =
-                    viewClubhouse.findViewById(R.id.spinner_clubhouse_requester)
-                spinnerClubhouseStoryType =
-                    viewClubhouse.findViewById(R.id.spinner_clubhouse_story_type)
+                autoTextViewClubhouseRequester =
+                    viewClubhouse.findViewById(R.id.auto_textView_clubhouse_requester)
+                autoTextViewClubhouseStoryType =
+                    viewClubhouse.findViewById(R.id.auto_textView_clubhouse_story_type)
                 recyclerViewClubhouseAttachment =
                     viewClubhouse.findViewById(R.id.recycler_view_clubhouse_attachment)
                 autoTextViewClubhouseProject =
                     viewClubhouse.findViewById(R.id.auto_textview_clubhouse_project)
-                spinnerClubhouseEpic = viewClubhouse.findViewById(R.id.spinner_clubhouse_epic)
+                autoTextViewClubhouseEpic = viewClubhouse.findViewById(R.id.auto_textView_clubhouse_epic)
                 textViewClubhouseDueDate =
                     viewClubhouse.findViewById(R.id.textView_clubhouse_due_date)
                 editTextClubhouseEstimate =
@@ -10734,6 +10688,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
                 progressBarClubhouse = viewClubhouse.findViewById(R.id.clubhouse_progressbar)
                 progressBarClubhouseLayout =
                     viewClubhouse.findViewById(R.id.clubhouse_progressbar_background)
+                textViewClubhouseEpic = viewClubhouse.findViewById(R.id.textView_clubhouse_epic)
+                linearLayoutClubhouseEpic = viewClubhouse.findViewById(R.id.linearLayout_clubhouse_epic)
+                imageViewClubhouseDueDate = viewClubhouse.findViewById(R.id.imageView_delete_clubhouse_dueDate)
 
                 clubhouseAuthentication.callClubhouse(
                     activity = activity,
@@ -10759,16 +10716,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
      * This method is used for initializing project autoCompleteTextView in the loggerbird_clubhouse_popup.
      * @param arrayListClubhouseProjects is used for getting the project list for project autoCompleteTextView.
      */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     internal fun initializeClubhouseProject(
         arrayListClubhouseProjects: ArrayList<String>
     ) {
 
-        autoTextViewClubhouseProjectAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            arrayListClubhouseProjects
-        )
+        autoTextViewClubhouseProjectAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseProjects)
         autoTextViewClubhouseProject.setAdapter(autoTextViewClubhouseProjectAdapter)
 
         if (arrayListClubhouseProjects.isNotEmpty() && autoTextViewClubhouseProject.text.isEmpty()) {
@@ -10798,6 +10752,35 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+
+    /**
+     * This method is used for initializing project autoCompleteTextView in the loggerbird_clubhouse_popup.
+     * @param arrayListClubhouseStoryType is used for getting the project story type for project autoCompleteTextView.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeClubhouseStoryType(
+        arrayListClubhouseStoryType: ArrayList<String>
+    ) {
+        autoTextViewClubhouseStoryTypeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseStoryType)
+        autoTextViewClubhouseStoryType.setAdapter(autoTextViewClubhouseStoryTypeAdapter)
+
+        if (arrayListClubhouseStoryType.isNotEmpty() && autoTextViewClubhouseStoryType.text.isEmpty()) {
+            autoTextViewClubhouseStoryType.setText(arrayListClubhouseStoryType[0], false)
+        }
+
+        autoTextViewClubhouseStoryType.setOnTouchListener { v, event ->
+            autoTextViewClubhouseStoryType.showDropDown()
+            false
+        }
+
+        autoTextViewClubhouseStoryType.setOnItemClickListener { parent, view, position, id ->
+            clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
+
+            hideKeyboard(activity = activity, view = viewClubhouse)
+        }
+    }
+
     /**
      * This method is used for initializing epic autoCompleteTextView in the loggerbird_clubhouse_popup.
      * @param arrayListClubhouseEpic is used for getting the epic list for epic autoCompleteTextView.
@@ -10806,26 +10789,47 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     internal fun initializeClubhouseEpic(
         arrayListClubhouseEpic: ArrayList<String>
     ) {
+        autoTextViewClubhouseEpicAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseEpic)
+        autoTextViewClubhouseEpic.setAdapter(autoTextViewClubhouseEpicAdapter)
 
-        spinnerClubhouseEpicAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseEpic)
-        spinnerClubhouseEpicAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerClubhouseEpic.adapter = spinnerClubhouseEpicAdapter
-        spinnerClubhouseEpicAdapter.notifyDataSetChanged()
+        if (arrayListClubhouseEpic.isNotEmpty() && autoTextViewClubhouseEpic.text.isEmpty()) {
+            autoTextViewClubhouseEpic.setText(arrayListClubhouseEpic[0], false)
+        }
 
-        spinnerClubhouseEpic.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
+        autoTextViewClubhouseEpic.setOnTouchListener { v, event ->
+            autoTextViewClubhouseEpic.showDropDown()
+            false
+        }
 
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
-            }
+        autoTextViewClubhouseEpic.setOnItemClickListener { parent, view, position, id ->
+            clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
+            hideKeyboard(activity = activity, view = viewClubhouse)
+        }
+    }
+
+    /**
+     * This method is used for initializing epic autoCompleteTextView in the loggerbird_clubhouse_popup.
+     * @param arrayListClubhouseRequester is used for getting the requester user list for epic autoCompleteTextView.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeClubhouseRequester(
+        arrayListClubhouseRequester: ArrayList<String>
+    ) {
+        autoTextViewClubhouseRequesterAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseRequester)
+        autoTextViewClubhouseRequester.setAdapter(autoTextViewClubhouseRequesterAdapter)
+
+        if (arrayListClubhouseRequester.isNotEmpty() && autoTextViewClubhouseRequester.text.isEmpty()) {
+            autoTextViewClubhouseRequester.setText(arrayListClubhouseRequester[0], false)
+        }
+
+        autoTextViewClubhouseRequester.setOnTouchListener { v, event ->
+            autoTextViewClubhouseRequester.showDropDown()
+            false
+        }
+
+        autoTextViewClubhouseRequester.setOnItemClickListener { parent, view, position, id ->
+            clubhouseAuthentication.clubhouseUserPosition(userPosition = position)
+            hideKeyboard(activity = activity, view = viewClubhouse)
         }
     }
 
@@ -10842,7 +10846,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         arrayListClubhouseProjects: ArrayList<String>,
         arrayListClubhouseStoryType: ArrayList<String>,
         arrayListClubhouseEpic: ArrayList<String>
-
     ) {
         initializeClubhouseProject(arrayListClubhouseProjects)
         initializeClubhouseRequester(arrayListClubhouseRequester)
@@ -10850,36 +10853,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         initializeClubhouseEpic(arrayListClubhouseEpic)
         progressBarClubhouse.visibility = View.GONE
         progressBarClubhouseLayout.visibility = View.GONE
-    }
-
-    /**
-     * This method is used for initializing story type autoCompleteTextView in the loggerbird_clubhouse_popup.
-     * @param arrayListClubhouseStoryType is used for getting the story type list for story type autoCompleteTextView.
-     */
-    internal fun initializeClubhouseStoryType(
-        arrayListClubhouseStoryType: ArrayList<String>
-    ) {
-        spinnerClubhouseStoryTypeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseStoryType)
-        spinnerClubhouseStoryTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerClubhouseStoryType.adapter = spinnerClubhouseStoryTypeAdapter
-        spinnerClubhouseStoryTypeAdapter.notifyDataSetChanged()
-
-        spinnerClubhouseStoryType.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    clubhouseAuthentication.clubhouseStoryTypePosition(storyTypePosition = position)
-                }
-            }
     }
 
     /**
@@ -10930,16 +10903,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         var mYear = calendar.get(Calendar.YEAR)
         var mMonth = calendar.get(Calendar.MONTH)
         var mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
-        var dueDate: String = ""
-        var dueDateFormat: String = ""
-        calendarViewClubhouseLayout =
-            calendarViewClubhouseView.findViewById(R.id.clubhouse_calendar_view_layout)
-        calendarViewClubhouseDueDate =
-            calendarViewClubhouseView.findViewById(R.id.calendarView_clubhouse_due_date)
-        buttonCalendarViewClubhouseCancel =
-            calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_cancel)
-        buttonCalendarViewClubhouseOk =
-            calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_ok)
+        var dueDate: String? = null
+        var dueDateFormat: String? = null
+        calendarViewClubhouseLayout = calendarViewClubhouseView.findViewById(R.id.clubhouse_calendar_view_layout)
+        calendarViewClubhouseDueDate = calendarViewClubhouseView.findViewById(R.id.calendarView_clubhouse_due_date)
+        buttonCalendarViewClubhouseCancel = calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_cancel)
+        buttonCalendarViewClubhouseOk = calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_ok)
 
         calendarViewClubhouseDueDate.minDate = System.currentTimeMillis()
         if (calendarViewClubhouseDate != null) {
@@ -10951,12 +10920,22 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
             mMonth = month + 1
             mDayOfMonth = dayOfMonth
             calendarViewClubhouseDate = viewStartDate.date
-            dueDate = "$mMonth/$mDayOfMonth/$mYear"
+            dueDate = "$mDayOfMonth/$mMonth/$mYear"
             dueDateFormat = "$mYear-$mMonth-$mDayOfMonth"
             activity.runOnUiThread {
                 textViewClubhouseDueDate.text = dueDate
                 textViewClubhouseDueDate.setTextColor(resources.getColor(R.color.black))
+                imageViewClubhouseDueDate.visibility = View.VISIBLE
             }
+            clubhouseAuthentication.dueDate = dueDateFormat
+        }
+
+        imageViewClubhouseDueDate.setOnClickListener {
+            activity.runOnUiThread {
+                imageViewClubhouseDueDate.visibility = View.GONE
+                textViewClubhouseDueDate.text = null
+            }
+            clubhouseAuthentication.dueDate = null
         }
 
         buttonCalendarViewClubhouseCancel.setOnClickListener {
@@ -10964,9 +10943,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
 
         buttonCalendarViewClubhouseOk.setOnClickListener {
-            if (dueDate != null) {
-                clubhouseAuthentication.dueDate = dueDateFormat
-            }
+            clubhouseAuthentication.dueDate = dueDateFormat
             detachClubhouseDatePicker()
         }
     }
@@ -10983,54 +10960,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     }
 
     /**
-     * This method is used for initializing requester autoCompleteTextView in the loggerbird_clubhouse_popup.
-     * @param arrayListClubhouseRequester is used for getting the requester list for requester autoCompleteTextView.
-     */
-    internal fun initializeClubhouseRequester(
-        arrayListClubhouseRequester: ArrayList<String>
-    ) {
-        spinnerClubhouseRequesterAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseRequester)
-        spinnerClubhouseRequesterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerClubhouseRequester.adapter = spinnerClubhouseRequesterAdapter
-        spinnerClubhouseRequesterAdapter.notifyDataSetChanged()
-
-        spinnerClubhouseRequester.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    clubhouseAuthentication.clubhouseUserPosition(userPosition = position)
-                }
-            }
-    }
-
-    /**
      * This method is used for initializing button clicks of buttons that are inside in the loggerbird_clubhouse_popup.
      * @param filePathMedia is used for getting the reference of current media file.
      */
     @RequiresApi(Build.VERSION_CODES.M)
     private fun buttonClicksClubhouse(filePathMedia: File) {
         buttonClubhouseCreate.setSafeOnClickListener {
-            if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty() &&
-                checkClubhouseStoryDueDateEmpty() && checkClubhouseStoryEstimatePoint()
+            if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty()
             ) {
 
-                clubhouseAuthentication.gatherClubhouseSpinnerDetails(
-                    spinnerUser = spinnerClubhouseRequester,
-                    spinnerStoryType = spinnerClubhouseStoryType,
-                    spinnerEpic = spinnerClubhouseEpic
-                )
-
                 clubhouseAuthentication.gatherClubhouseProjectAutoTextDetails(
-                    autoTextViewProject = autoTextViewClubhouseProject
+                    autoTextViewProject = autoTextViewClubhouseProject,
+                    autoTextViewEpic = autoTextViewClubhouseEpic,
+                    autoTextViewStoryType = autoTextViewClubhouseStoryType,
+                    autoTextViewRequester = autoTextViewClubhouseRequester
                 )
 
                 clubhouseAuthentication.gatherClubhouseEditTextDetails(
@@ -11066,6 +11009,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
             }
+        }
+
+        textViewClubhouseEpic.setSafeOnClickListener {
+            linearLayoutClubhouseEpic.visibility = View.VISIBLE
+            textViewClubhouseEpic.visibility = View.GONE
         }
     }
 
@@ -11121,23 +11069,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     }
 
     /**
-     * This method used for estimate point field is not empty in clubhouse layout.
-     * @return Boolean value.
-     */
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun checkClubhouseStoryEstimatePoint(): Boolean {
-        if (editTextClubhouseEstimate.text.toString().isNotEmpty()) {
-            return true
-        } else {
-            defaultToast.attachToast(
-                activity = activity,
-                toastMessage = activity.resources.getString(R.string.textView_clubhouse_story_estimate_empty)
-            )
-        }
-        return false
-    }
-
-    /**
      * This method is used for removing loggerbird_clubhouse_popup from window.
      */
     internal fun removeClubhouseLayout() {
@@ -11183,7 +11114,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         return arrayListClubhouseFileName
     }
 
-
+    /**
+     * This method is used for initializing Loggerbird activation popup.
+     * @param activity is used for getting reference of current activity.
+     */
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initializeLoggerBirdActivatePopup(activity: Activity) {
         try {
@@ -11232,6 +11166,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+    /**
+     * This method is used for removing Loggerbird activation popup.
+     */
     internal fun removeLoggerBirdActivateLayout() {
         if (this::viewLoggerBirdActivatePopup.isInitialized && windowManagerLoggerBirdActivatePopup != null) {
             (windowManagerLoggerBirdActivatePopup as WindowManager).removeViewImmediate(
@@ -11241,6 +11178,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+    /**
+     * This method is used for initializing button clicks of Loggerbird activation popup.
+     * @param activity is used for getting reference of current activity.
+     */
     private fun initializeButtonClicksLoggerBirdActivatePopup(activity: Activity) {
         textViewLoggerBirdActivatePopupActivate.setSafeOnClickListener {
             initializeFloatingActionButton(activity = activity)
@@ -11252,6 +11193,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+    /**
+     * This method is used for initializing Loggerbird start popup.
+     * @param activity is used for getting reference of current activity.
+     */
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initializeLoggerBirdStartPopup(activity: Activity) {
         try {
@@ -11327,6 +11272,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+    /**
+     * This method is used for removing Loggerbird start popup.
+     */
     internal fun removeLoggerBirdStartLayout() {
         if (this::viewLoggerBirdStartPopup.isInitialized && windowManagerLoggerBirdStartPopup != null) {
             (windowManagerLoggerBirdStartPopup as WindowManager).removeViewImmediate(
@@ -11336,6 +11284,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+    /**
+     * This method is used for initializing Loggerbird close popup.
+     * @param activity is used for getting reference of current activity.
+     */
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initializeLoggerBirdClosePopup(activity: Activity) {
         try {
@@ -11408,7 +11360,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
-
+    /**
+     * This method is used for removing Loggerbird close popup.
+     */
     internal fun removeLoggerBirdDismissLayout() {
         if (this::viewLoggerBirdDismissPopup.isInitialized && windowManagerLoggerBirdDismissPopup != null) {
             (windowManagerLoggerBirdDismissPopup as WindowManager).removeViewImmediate(
@@ -11418,6 +11372,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+    /**
+     * This method is used for initializing button clicks of Loggerbird close popup.
+     */
     private fun initializeButtonClicksLoggerBirdDismissPopup() {
         textViewLoggerBirdDismissPopupFeedBack.setSafeOnClickListener {
             initializeFeedBackLayout()
@@ -11425,6 +11382,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+    /**
+     * This method is used for initializing button clicks of Loggerbird file action popup to determine whether keep or clean files.
+     * @param activity is used for getting reference of current activity.
+     */
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initializeLoggerBirdFileActionPopup(activity: Activity) {
         try {
@@ -11485,6 +11446,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+    /**
+     * This method is used for removing Loggerbird file action popup.
+     */
     internal fun removeLoggerBirdFileActionLayout() {
         if (this::viewLoggerBirdFileActionPopup.isInitialized && windowManagerLoggerBirdFileActionPopup != null) {
             (windowManagerLoggerBirdFileActionPopup as WindowManager).removeViewImmediate(
@@ -11494,6 +11458,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+    /**
+     * This method is used for initializing button clicks of Loggerbird file action popup.
+     */
     private fun initializeButtonClicksLoggerBirdFileActionPopup() {
         textViewLoggerBirdFileActionPopupDiscard.setSafeOnClickListener {
             if (this.controlFileAction) {
@@ -11511,6 +11478,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+    /**
+     * This method is used for initializing Loggerbird unhandled exception popup.
+     * @param activity is used for getting reference of current activity.
+     * @param sharedPref is used for getting reference of shared preferences to keep file names in local database.
+     * @param filePath is used for getting reference of filepath.
+     */
     private fun initializeLoggerBirdUnhandledExceptionPopup(
         activity: Activity,
         sharedPref: SharedPreferences,
@@ -11582,6 +11555,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+    /**
+     * This method is used for removing Loggerbird unhandled exception popup.
+     */
     internal fun removeLoggerBirdUnhandledExceptionLayout() {
         if (this::viewLoggerBirdUnhandledExceptionPopup.isInitialized && windowManagerLoggerBirdUnhandledException != null) {
             (windowManagerLoggerBirdUnhandledException as WindowManager).removeViewImmediate(
@@ -11591,6 +11567,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
         }
     }
 
+    /**
+     * This method is used for initializing button clicks of Loggerbird unhandled exception popup.
+     * @param activity is used for getting reference of current activity.
+     * @param sharedPref is used for getting reference of shared preferences to keep file names in local database.
+     * @param filePath is used for getting reference of filepath.
+     */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeButtonClicksLoggerBirdUnhandledExceptionPopup(
         sharedPref: SharedPreferences,

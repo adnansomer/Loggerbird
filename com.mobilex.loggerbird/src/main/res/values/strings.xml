@@ -587,6 +587,7 @@
     <string name="textView_clubhouse_enter_due_date">Set a due date for story!</string>
     <string name="textView_clubhouse_estimate_point">Estimate Point</string>
     <string name="editText_clubhouse_estimate_point">Write your estimate point here!</string>
+    <string name="textView_clubhouse_epic_enter">Select your story epic here!</string>
     <!-- recycler_view_clubhouse_item_popup-->
     <string name="textView_recyclerView_clubhouse_popup_title">Are you sure to remove attachment from your Clubhouse story?</string>
     <string name="button_recyclerView_clubhouse_yes">Delete Attachment</string>

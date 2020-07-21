@@ -194,10 +194,10 @@ internal interface AccountIdService {
         @Query("name") name: String,
         @Query("description") description: String,
         @Query("story_type") storyType: String,
-        @Query("deadline") deadline: String,
+        @Query("deadline") deadline: String?,
         @Query("requested_by_id") requestedBy: String,
-        @Query("epic_id") epicId: String,
-        @Query("estimate") estimate: String
+        @Query("epic_id") epicId: String?,
+        @Query("estimate") estimate: String?
     ): Call<JsonObject>
     @Multipart
     @POST("files")
