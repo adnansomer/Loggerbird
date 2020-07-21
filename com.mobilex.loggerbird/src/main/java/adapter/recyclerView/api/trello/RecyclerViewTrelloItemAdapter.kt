@@ -17,6 +17,7 @@ import com.mobilex.loggerbird.R
 import java.util.concurrent.TimeUnit
 import android.provider.Settings
 import android.widget.Button
+import android.widget.CheckBox
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
@@ -32,6 +33,7 @@ import services.LoggerBirdService
  */
 internal class RecyclerViewTrelloItemAdapter(
     private val itemList: ArrayList<RecyclerViewModelItem>,
+    private val checkList: ArrayList<Boolean>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View,
@@ -71,6 +73,7 @@ internal class RecyclerViewTrelloItemAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindItems(
             item = itemList[position],
+            checkList = checkList,
             itemAdapter = this,
             position = position,
             itemList = itemList,
@@ -94,6 +97,7 @@ internal class RecyclerViewTrelloItemAdapter(
         //Static variables.
         companion object {
             internal var arrayListItemNames: ArrayList<RecyclerViewModelItem> = ArrayList()
+            internal var arrayListItemChecked: ArrayList<Boolean> = ArrayList()
         }
 
 
@@ -112,14 +116,28 @@ internal class RecyclerViewTrelloItemAdapter(
             itemAdapter: RecyclerViewTrelloItemAdapter,
             position: Int,
             itemList: ArrayList<RecyclerViewModelItem>,
+            checkList: ArrayList<Boolean>,
             context: Context,
             activity: Activity,
             rootView: View,
             checkListPosition: Int
         ) {
-            arrayListItemNames = itemList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
+            val checkBox = itemView.findViewById<CheckBox>(R.id.checkBox_item)
+            arrayListItemNames = itemList
+            arrayListItemChecked = checkList
+//            if (arrayListItemChecked.size > position) {
+//                arrayListItemChecked.add(position , arrayListItemChecked[position])
+//            } else {
+//                arrayListItemChecked.add(position, false)
+//            }
+            if (RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames.size > checkListPosition) {
+                if (RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[checkListPosition].checkListName] != null) {
+                    checkBox.isChecked =
+                        RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[checkListPosition].checkListName]!![position]
+                }
+            }
             textViewFileName.text = item.itemName
             imageButtonCross.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -131,6 +149,12 @@ internal class RecyclerViewTrelloItemAdapter(
                         itemAdapter = itemAdapter
                     )
                 }
+            }
+            checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
+                arrayListItemChecked[position] = isChecked
+                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[checkListPosition].checkListName] =
+                    arrayListItemChecked
+
             }
 //            if(checkListPosition == position){
 //                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[position].checkListName] = arrayListItemNames
@@ -223,8 +247,12 @@ internal class RecyclerViewTrelloItemAdapter(
             itemAdapter: RecyclerViewTrelloItemAdapter
         ) {
             buttonYes.setSafeOnClickListener {
-                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[position].checkListName] = arrayListItemNames
+                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[position].checkListName] =
+                    arrayListItemChecked
+                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[position].checkListName] =
+                    arrayListItemNames
                 itemList.removeAt(position)
+                arrayListItemChecked.removeAt(position)
                 arrayListItemNames = itemList
                 itemAdapter.notifyDataSetChanged()
                 removePopupLayout()
