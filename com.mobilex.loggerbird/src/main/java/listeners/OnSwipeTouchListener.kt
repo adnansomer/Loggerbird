@@ -63,6 +63,7 @@ open class OnSwipeTouchListener(ctx: Context) : View.OnTouchListener {
 
     }
 
+
     open fun onSwipeRight() {}
 
     open fun onSwipeLeft() {}

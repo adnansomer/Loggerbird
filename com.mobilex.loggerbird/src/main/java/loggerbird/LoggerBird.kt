@@ -57,11 +57,14 @@ import utils.email.EmailUtil
 import utils.other.InternetConnectionUtil
 import utils.other.LinkedBlockingQueueUtil
 import java.io.File
+import java.lang.Byte.decode
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.crypto.spec.IvParameterSpec
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
+import javax.crypto.*
 
 
 /**
@@ -147,6 +150,8 @@ class LoggerBird : LifecycleObserver {
         internal lateinit var basecampApiToken: String
         internal lateinit var asanaApiToken: String
         internal lateinit var clubhouseApiToken: String
+        internal lateinit var bitbucketUserName: String
+        internal lateinit var bitbucketPassword: String
         internal var classPathList:ArrayList<String> = ArrayList()
         internal var classPathCounter:Int = 0
         internal var classPathListCounter:ArrayList<Int> = ArrayList()
@@ -2681,6 +2686,8 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+
+
         /**
          * This method is used for returning whether Clubhouse token is initialized.
          * @return true if it initialized.
@@ -2779,6 +2786,17 @@ class LoggerBird : LifecycleObserver {
             }
             return false
         }
+        /**
+         * This method is used for returning whether Bitbucket credentials is initialized.
+         * @return true if it initialized.
+         */
+        internal fun bitbucketIsInitialized(): Boolean {
+            if (this::bitbucketUserName.isInitialized && this::bitbucketPassword.isInitialized) {
+                return true
+            }
+            return false
+        }
+
     }
 
     /**
@@ -2809,7 +2827,9 @@ class LoggerBird : LifecycleObserver {
         val trelloToken: String?,
         val jiraDomainName: String?,
         val jiraUserName: String?,
-        val jiraApiToken: String?
+        val jiraApiToken: String?,
+        val bitbucketUserName: String?,
+        val bitbucketPassword: String?
     ) {
         data class Builder(
             private var clubhouseApiToken: String? = null,
@@ -2826,7 +2846,9 @@ class LoggerBird : LifecycleObserver {
             private var trelloToken: String? = null,
             private var jiraDomainName: String? = null,
             private var jiraUserName: String? = null,
-            private var jiraApiToken: String? = null
+            private var jiraApiToken: String? = null,
+            private var bitbucketUserName: String? = null,
+            private var bitbucketPassword: String? = null
         ) {
             fun setClubhouseIntegration(clubhouseApiToken: String) =
                 apply { LoggerBird.clubhouseApiToken = clubhouseApiToken }
@@ -2871,6 +2893,14 @@ class LoggerBird : LifecycleObserver {
                 jiraUserName; LoggerBird.jiraApiToken = jiraApiToken
             }
 
+            fun setBitbucketIntegration(
+                bitbucketUserName: String,
+                bitbucketPassword: String
+            ) = apply {
+                LoggerBird.bitbucketUserName = bitbucketUserName;LoggerBird.bitbucketPassword =
+                bitbucketPassword
+            }
+
             fun build() = LoggerBirdIntegration(
                 clubhouseApiToken,
                 slackApiToken,
@@ -2886,7 +2916,9 @@ class LoggerBird : LifecycleObserver {
                 trelloToken,
                 jiraDomainName,
                 jiraUserName,
-                jiraApiToken
+                jiraApiToken,
+                bitbucketUserName,
+                bitbucketPassword
             )
         }
     }

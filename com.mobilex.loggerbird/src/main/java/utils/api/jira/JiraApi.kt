@@ -24,7 +24,6 @@ import loggerbird.LoggerBird
 import loggerbird.LoggerBird.Companion.jiraDomainName
 import models.*
 import models.api.jira.*
-import observers.LogFragmentLifeCycleObserver
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -544,7 +543,7 @@ internal class JiraApi {
                             url = "$jiraDomainName/rest/api/2/"
                         )
                             .create(AccountIdService::class.java)
-                            .createIssue(jsonObjectIssue)
+                            .createJiraIssue(jsonObjectIssue)
                             .enqueue(object : retrofit2.Callback<JsonObject> {
                                 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                                 override fun onFailure(
@@ -617,7 +616,7 @@ internal class JiraApi {
                 )
                 RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
                     .create(AccountIdService::class.java)
-                    .setAssignee(jsonObject = jsonObjectAssignee)
+                    .setJiraAssignee(jsonObject = jsonObjectAssignee)
                     .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
                         @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                         override fun onFailure(
@@ -666,7 +665,7 @@ internal class JiraApi {
                 jsonObjectField.add("fields", jsonObjectReporterField)
                 RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
                     .create(AccountIdService::class.java)
-                    .setReporter(jsonObject = jsonObjectField)
+                    .setJiraReporter(jsonObject = jsonObjectField)
                     .enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
                         @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                         override fun onFailure(
@@ -708,7 +707,7 @@ internal class JiraApi {
                 jsonObjectFieldSprint.add("fields", jsonObjectSprint)
                 RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
                     .create(AccountIdService::class.java)
-                    .setSprint(jsonObject = jsonObjectFieldSprint)
+                    .setJiraSprint(jsonObject = jsonObjectFieldSprint)
                     .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
                         @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                         override fun onFailure(
@@ -749,7 +748,7 @@ internal class JiraApi {
             jsonObjectFieldStartDate.add("fields", jsonObjectStartDate)
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
                 .create(AccountIdService::class.java)
-                .setStartDate(jsonObject = jsonObjectFieldStartDate)
+                .setJiraStartDate(jsonObject = jsonObjectFieldStartDate)
                 .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
@@ -789,7 +788,7 @@ internal class JiraApi {
         val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
         RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/issue/$issueKey/")
             .create(AccountIdService::class.java)
-            .setAttachments(file = body)
+            .setJiraAttachments(file = body)
             .enqueue(object : retrofit2.Callback<List<JiraSprintModel>> {
                 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                 override fun onFailure(
@@ -868,7 +867,7 @@ internal class JiraApi {
             jsonObjectIssue.add("fields", jsonObjectContent)
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
                 .create(AccountIdService::class.java)
-                .createIssue(jsonObjectIssue)
+                .createJiraIssue(jsonObjectIssue)
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
@@ -1108,7 +1107,7 @@ internal class JiraApi {
         coroutineCallProjectKeys.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
                 .create(AccountIdService::class.java)
-                .getProjectList()
+                .getJiraProjectList()
                 .enqueue(object : retrofit2.Callback<List<JiraProjectModel>> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
@@ -1157,7 +1156,7 @@ internal class JiraApi {
         coroutineCallIssueTypes.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
                 .create(AccountIdService::class.java)
-                .getIssueTypes()
+                .getJiraIssueTypes()
                 .enqueue(object : retrofit2.Callback<List<JiraIssueTypeModel>> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
@@ -1203,7 +1202,7 @@ internal class JiraApi {
         coroutineCallGatherAssignee.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/user/")
                 .create(AccountIdService::class.java)
-                .getAccountIdList().enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
+                .getJiraAccountIdList().enqueue(object : retrofit2.Callback<List<JiraUserModel>> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
                         call: retrofit2.Call<List<JiraUserModel>>,
@@ -1251,7 +1250,7 @@ internal class JiraApi {
         coroutineCallLinkedIssues.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
                 .create(AccountIdService::class.java)
-                .getLinkedIssueList()
+                .getJiraLinkedIssueList()
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
@@ -1306,7 +1305,7 @@ internal class JiraApi {
         coroutineCallGatherIssues.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
                 .create(AccountIdService::class.java)
-                .getIssueList()
+                .getJiraIssueList()
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
@@ -1356,7 +1355,7 @@ internal class JiraApi {
         coroutineCallGatherLabels.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
                 .create(AccountIdService::class.java)
-                .getLabelList()
+                .getJiraLabelList()
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
@@ -1398,7 +1397,7 @@ internal class JiraApi {
         coroutineCallEpic.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
                 .create(AccountIdService::class.java)
-                .getEpicList()
+                .getJiraEpicList()
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
@@ -1447,7 +1446,7 @@ internal class JiraApi {
         coroutineCallPriorities.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
                 .create(AccountIdService::class.java)
-                .getPriorities()
+                .getJiraPriorities()
                 .enqueue(object : retrofit2.Callback<List<JiraPriorityModel>> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
@@ -1492,7 +1491,7 @@ internal class JiraApi {
         coroutineCallGatherfixComp.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/project/$projectKey/")
                 .create(AccountIdService::class.java)
-                .getFixCompList()
+                .getFixJiraCompList()
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
@@ -1549,7 +1548,7 @@ internal class JiraApi {
         coroutineCallSprint.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/agile/1.0/")
                 .create(AccountIdService::class.java)
-                .getBoardList().enqueue(object : retrofit2.Callback<JsonObject> {
+                .getJiraBoardList().enqueue(object : retrofit2.Callback<JsonObject> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(call: retrofit2.Call<JsonObject>, t: Throwable) {
                         jiraExceptionHandler(throwable = t)
@@ -1575,7 +1574,7 @@ internal class JiraApi {
                                         url = "$jiraDomainName/rest/agile/1.0/board/$it/"
                                     )
                                         .create(AccountIdService::class.java)
-                                        .getSprintList()
+                                        .getJiraSprintList()
                                         .enqueue(object : retrofit2.Callback<JsonObject> {
                                             @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                                             override fun onFailure(
@@ -1628,7 +1627,7 @@ internal class JiraApi {
         coroutineCallGatherBoards.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/agile/1.0/")
                 .create(AccountIdService::class.java)
-                .getBoardList()
+                .getJiraBoardList()
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
@@ -1671,7 +1670,7 @@ internal class JiraApi {
         coroutineCallGatherFields.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
                 .create(AccountIdService::class.java)
-                .getFieldList()
+                .getJiraFieldList()
                 .enqueue(object : retrofit2.Callback<List<JiraFieldModel>> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(
