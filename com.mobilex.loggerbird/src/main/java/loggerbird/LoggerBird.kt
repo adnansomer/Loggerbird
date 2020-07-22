@@ -57,11 +57,14 @@ import utils.email.EmailUtil
 import utils.other.InternetConnectionUtil
 import utils.other.LinkedBlockingQueueUtil
 import java.io.File
+import java.lang.Byte.decode
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.crypto.spec.IvParameterSpec
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
+import javax.crypto.*
 
 
 /**
@@ -112,14 +115,10 @@ class LoggerBird : LifecycleObserver {
         private var formattedTime: String? = null
         private var fileLimit: Long = 2097152
         internal lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
-        private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver =
-            LogRecyclerViewAdapterDataObserver()
-        private var recyclerViewScrollListener: LogRecyclerViewScrollListener =
-            LogRecyclerViewScrollListener()
-        private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener =
-            LogRecyclerViewChildAttachStateChangeListener()
-        private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener =
-            LogRecyclerViewItemTouchListener()
+        private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver = LogRecyclerViewAdapterDataObserver()
+        private var recyclerViewScrollListener: LogRecyclerViewScrollListener = LogRecyclerViewScrollListener()
+        private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener = LogRecyclerViewChildAttachStateChangeListener()
+        private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener = LogRecyclerViewItemTouchListener()
         private lateinit var workQueueLinked: LinkedBlockingQueueUtil
         private lateinit var recyclerViewItemObserver: LogDataSetObserver
         private lateinit var textViewFileReader: TextView
@@ -153,10 +152,11 @@ class LoggerBird : LifecycleObserver {
         internal lateinit var clubhouseApiToken: String
         internal lateinit var bitbucketUserName: String
         internal lateinit var bitbucketPassword: String
-        internal var classPathList: ArrayList<String> = ArrayList()
-        internal var classPathCounter: Int = 0
-        internal var classPathListCounter: ArrayList<Int> = ArrayList()
-        internal var classPathTotalCounter: Int = 0
+        internal var classPathList:ArrayList<String> = ArrayList()
+        internal var classPathCounter:Int = 0
+        internal var classPathListCounter:ArrayList<Int> = ArrayList()
+        internal var classPathTotalCounter:Int = 0
+        internal var logLevel : LogLevel? = LogLevel.ALL
         //---------------Public Methods:---------------//
 
         /**
@@ -167,42 +167,13 @@ class LoggerBird : LifecycleObserver {
          */
         fun logInit(
             context: Context,
-            //jiraDomainName: String,
-            //jiraUserName: String,
-            //jiraApiToken: String,
-            //slackApiToken: String,
-            //githubUserName: String,
-            //githubPassword: String,
-            //gitlabApiToken: String,
-            //trelloUserName: String,
-            //trelloPassword: String,
-            //trelloKey: String,
-            //trelloToken: String,
-            //pivotalApiToken: String,
-            //basecampApiToken: String,
-            //asanaApiToken: String,
-            //clubhouseApiToken: String,
+            logLevel: LogLevel? = null,
             filePathName: String? = null
         ): Boolean {
             this.context = context
             this.filePathName = filePathName
             if (!controlLogInit) {
                 try {
-                    //Companion.jiraDomainName = jiraDomainName
-                    //Companion.jiraUserName = jiraUserName
-                    //Companion.jiraApiToken = jiraApiToken
-                    //Companion.slackApiToken = slackApiToken
-                    //Companion.githubUserName = githubUserName
-                    //Companion.githubPassword = githubPassword
-                    //Companion.trelloUserName = trelloUserName
-                    //Companion.trelloPassword = trelloPassword
-                    //Companion.trelloKey = trelloKey
-                    //Companion.trelloToken = trelloToken
-                    //Companion.gitlabApiToken = gitlabApiToken
-                    //Companion.pivotalApiToken = pivotalApiToken
-                    //Companion.basecampApiToken = basecampApiToken
-                    //Companion.clubhouseApiToken = clubhouseApiToken
-                    //Companion.asanaApiToken = asanaApiToken
                     logAttachLifeCycleObservers(context = context)
                     fileDirectory = context.filesDir
                     if (filePathName != null) {
@@ -225,7 +196,9 @@ class LoggerBird : LifecycleObserver {
                         context.startService(intentServiceMemory)
                     }
                     filePathSecessionName = filePath
-
+                    if(logLevel != null){
+                        this.logLevel = logLevel
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -298,14 +271,18 @@ class LoggerBird : LifecycleObserver {
          */
         fun callCpuDetails() {
             if (controlLogInit) {
-                if (runnableList.isEmpty()) {
-                    workQueueLinked.put {
-                        takeCpuDetails()
+                if(logLevel != LogLevel.NONE){
+                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                        if (runnableList.isEmpty()) {
+                            workQueueLinked.put {
+                                takeCpuDetails()
+                            }
+                        }
+                        runnableList.add(Runnable {
+                            takeCpuDetails()
+                        })
                     }
                 }
-                runnableList.add(Runnable {
-                    takeCpuDetails()
-                })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
@@ -318,14 +295,18 @@ class LoggerBird : LifecycleObserver {
          */
         fun callMemoryUsageDetails(threshold: Long?) {
             if (controlLogInit) {
-                if (runnableList.isEmpty()) {
-                    workQueueLinked.put {
-                        takeMemoryUsageDetails(threshold = threshold)
+                if(logLevel != LogLevel.NONE){
+                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                        if (runnableList.isEmpty()) {
+                            workQueueLinked.put {
+                                takeMemoryUsageDetails(threshold = threshold)
+                            }
+                        }
+                        runnableList.add(Runnable {
+                            takeMemoryUsageDetails(threshold = threshold)
+                        })
                     }
                 }
-                runnableList.add(Runnable {
-                    takeMemoryUsageDetails(threshold = threshold)
-                })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
@@ -339,20 +320,24 @@ class LoggerBird : LifecycleObserver {
          */
         fun callComponentDetails(view: View?, resources: Resources?) {
             if (controlLogInit) {
-                if (runnableList.isEmpty()) {
-                    workQueueLinked.put {
-                        takeComponentDetails(
-                            view = view,
-                            resources = resources
-                        )
+                if(logLevel != LogLevel.NONE){
+                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                        if (runnableList.isEmpty()) {
+                            workQueueLinked.put {
+                                takeComponentDetails(
+                                    view = view,
+                                    resources = resources
+                                )
+                            }
+                        }
+                        runnableList.add(Runnable {
+                            takeComponentDetails(
+                                view = view,
+                                resources = resources
+                            )
+                        })
                     }
                 }
-                runnableList.add(Runnable {
-                    takeComponentDetails(
-                        view = view,
-                        resources = resources
-                    )
-                })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
@@ -364,10 +349,14 @@ class LoggerBird : LifecycleObserver {
          */
         fun callLifeCycleDetails() {
             if (controlLogInit) {
-                if (runnableList.isEmpty()) {
-                    workQueueLinked.put { takeLifeCycleDetails() }
+                if(logLevel != LogLevel.NONE){
+                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                        if (runnableList.isEmpty()) {
+                            workQueueLinked.put { takeLifeCycleDetails() }
+                        }
+                        runnableList.add(Runnable { takeLifeCycleDetails() })
+                    }
                 }
-                runnableList.add(Runnable { takeLifeCycleDetails() })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
@@ -381,12 +370,16 @@ class LoggerBird : LifecycleObserver {
          */
         fun callAnalyticsDetails(bundle: Bundle?) {
             if (controlLogInit) {
-                if (runnableList.isEmpty()) {
-                    workQueueLinked.put {
-                        takeAnalyticsDetails(bundle = bundle)
+                if(logLevel != LogLevel.NONE){
+                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                        if (runnableList.isEmpty()) {
+                            workQueueLinked.put {
+                                takeAnalyticsDetails(bundle = bundle)
+                            }
+                        }
+                        runnableList.add(Runnable { takeAnalyticsDetails(bundle = bundle) })
                     }
                 }
-                runnableList.add(Runnable { takeAnalyticsDetails(bundle = bundle) })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
@@ -400,12 +393,16 @@ class LoggerBird : LifecycleObserver {
          */
         fun callFragmentManagerDetails(fragmentManager: FragmentManager?) {
             if (controlLogInit) {
-                if (runnableList.isEmpty()) {
-                    workQueueLinked.put {
-                        takeFragmentManagerDetails(fragmentManager = fragmentManager)
+                if (logLevel != LogLevel.NONE) {
+                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                        if (runnableList.isEmpty()) {
+                            workQueueLinked.put {
+                                takeFragmentManagerDetails(fragmentManager = fragmentManager)
+                            }
+                        }
+                        runnableList.add(Runnable { takeFragmentManagerDetails(fragmentManager = fragmentManager) })
                     }
                 }
-                runnableList.add(Runnable { takeFragmentManagerDetails(fragmentManager = fragmentManager) })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
 
@@ -419,13 +416,16 @@ class LoggerBird : LifecycleObserver {
          */
         fun callHttpRequestDetails(httpUrlConnection: HttpURLConnection?) {
             if (controlLogInit) {
-                if (runnableList.isEmpty()) {
-                    workQueueLinked.put {
-                        takeHttpRequestDetails(httpUrlConnection = httpUrlConnection)
+                if (logLevel != LogLevel.NONE) {
+                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                        if (runnableList.isEmpty()) {
+                            workQueueLinked.put {
+                                takeHttpRequestDetails(httpUrlConnection = httpUrlConnection)
+                            }
+                        }
+                        runnableList.add(Runnable { takeHttpRequestDetails(httpUrlConnection = httpUrlConnection) })
                     }
                 }
-                runnableList.add(Runnable { takeHttpRequestDetails(httpUrlConnection = httpUrlConnection) })
-
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
@@ -448,26 +448,30 @@ class LoggerBird : LifecycleObserver {
             acknowledgePurchaseParams: AcknowledgePurchaseParams? = null
         ) {
             if (controlLogInit) {
-                if (runnableList.isEmpty()) {
-                    workQueueLinked.put {
-                        takeInAPurchaseDetails(
-                            billingClient = billingClient,
-                            billingResult = billingResult,
-                            skuDetailsParams = skuDetailsParams,
-                            billingFlowParams = billingFlowParams,
-                            acknowledgePurchaseParams = acknowledgePurchaseParams
-                        )
+                if (logLevel != LogLevel.NONE) {
+                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                        if (runnableList.isEmpty()) {
+                            workQueueLinked.put {
+                                takeInAPurchaseDetails(
+                                    billingClient = billingClient,
+                                    billingResult = billingResult,
+                                    skuDetailsParams = skuDetailsParams,
+                                    billingFlowParams = billingFlowParams,
+                                    acknowledgePurchaseParams = acknowledgePurchaseParams
+                                )
+                            }
+                        }
+                        runnableList.add(Runnable {
+                            takeInAPurchaseDetails(
+                                billingClient = billingClient,
+                                billingResult = billingResult,
+                                skuDetailsParams = skuDetailsParams,
+                                billingFlowParams = billingFlowParams,
+                                acknowledgePurchaseParams = acknowledgePurchaseParams
+                            )
+                        })
                     }
                 }
-                runnableList.add(Runnable {
-                    takeInAPurchaseDetails(
-                        billingClient = billingClient,
-                        billingResult = billingResult,
-                        skuDetailsParams = skuDetailsParams,
-                        billingFlowParams = billingFlowParams,
-                        acknowledgePurchaseParams = acknowledgePurchaseParams
-                    )
-                })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
@@ -485,20 +489,24 @@ class LoggerBird : LifecycleObserver {
             okHttpURLConnection: HttpURLConnection? = null
         ) {
             if (controlLogInit) {
-                if (runnableList.isEmpty()) {
-                    workQueueLinked.put {
-                        takeOkHttpDetails(
-                            url = url,
-                            okHttpURLConnection = okHttpURLConnection
-                        )
+                if (logLevel != LogLevel.NONE) {
+                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                        if (runnableList.isEmpty()) {
+                            workQueueLinked.put {
+                                takeOkHttpDetails(
+                                    url = url,
+                                    okHttpURLConnection = okHttpURLConnection
+                                )
+                            }
+                        }
+                        runnableList.add(Runnable {
+                            takeOkHttpDetails(
+                                url = url,
+                                okHttpURLConnection = okHttpURLConnection
+                            )
+                        })
                     }
                 }
-                runnableList.add(Runnable {
-                    takeOkHttpDetails(
-                        url = url,
-                        okHttpURLConnection = okHttpURLConnection
-                    )
-                })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
@@ -517,22 +525,26 @@ class LoggerBird : LifecycleObserver {
             request: Request? = null
         ) {
             if (controlLogInit) {
-                if (runnableList.isEmpty()) {
-                    workQueueLinked.put {
-                        takeRetrofitRequestDetails(
-                            retrofit = retrofit,
-                            response = response,
-                            request = request
-                        )
+                if (logLevel != LogLevel.NONE) {
+                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                        if (runnableList.isEmpty()) {
+                            workQueueLinked.put {
+                                takeRetrofitRequestDetails(
+                                    retrofit = retrofit,
+                                    response = response,
+                                    request = request
+                                )
+                            }
+                        }
+                        runnableList.add(Runnable {
+                            takeRetrofitRequestDetails(
+                                retrofit = retrofit,
+                                response = response,
+                                request = request
+                            )
+                        })
                     }
                 }
-                runnableList.add(Runnable {
-                    takeRetrofitRequestDetails(
-                        retrofit = retrofit,
-                        response = response,
-                        request = request
-                    )
-                })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
@@ -546,19 +558,54 @@ class LoggerBird : LifecycleObserver {
          */
         fun callRealmDetails(realm: Realm? = null, realmModel: RealmModel? = null) {
             if (controlLogInit) {
-                if (runnableList.isEmpty()) {
-                    workQueueLinked.put {
-                        takeRealmDetails(realm = realm, realmModel = realmModel)
+                if (logLevel != LogLevel.NONE) {
+                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                        if (runnableList.isEmpty()) {
+                            workQueueLinked.put {
+                                takeRealmDetails(realm = realm, realmModel = realmModel)
+                            }
+                        }
+                        runnableList.add(Runnable {
+                            takeRealmDetails(
+                                realm = realm,
+                                realmModel = realmModel
+                            )
+                        })
                     }
                 }
-                runnableList.add(Runnable {
-                    takeRealmDetails(
-                        realm = realm,
-                        realmModel = realmModel
-                    )
-                })
             } else {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
+            }
+        }
+
+        /**
+         * //In progress method still need to be modified!
+         * This Method adds takeExceptionDetails into queue.
+         * @param exception parameter used for getting details from Exception class details
+         * @param tag parameter used for getting details of which method caused this exception.
+         * @param throwable used for getting details from Throwable class details.
+         * @throws exception if controlLogInit value is false.
+         */
+        fun callExceptionDetails(
+            exception: Exception? = null,
+            tag: String? = null,
+            throwable: Throwable? = null
+        ) {
+            if(logLevel != LogLevel.NONE) {
+                if(logLevel == LogLevel.ALL || logLevel == LogLevel.ERROR){
+                    if (runnableList.isEmpty()) {
+                        workQueueLinked.put {
+                            takeExceptionDetails(exception = exception, tag = tag, throwable = throwable)
+                        }
+                    }
+                    runnableList.add(Runnable {
+                        takeExceptionDetails(
+                            exception = exception,
+                            tag = tag,
+                            throwable = throwable
+                        )
+                    })
+                }
             }
         }
 
@@ -630,33 +677,6 @@ class LoggerBird : LifecycleObserver {
                 e.printStackTrace()
                 takeExceptionDetails(e, Constants.componentTag)
             }
-        }
-
-        /**
-         * //In progress method still need to be modified!
-         * This Method adds takeExceptionDetails into queue.
-         * @param exception parameter used for getting details from Exception class details
-         * @param tag parameter used for getting details of which method caused this exception.
-         * @param throwable used for getting details from Throwable class details.
-         * @throws exception if controlLogInit value is false.
-         */
-        fun callExceptionDetails(
-            exception: Exception? = null,
-            tag: String? = null,
-            throwable: Throwable? = null
-        ) {
-            if (runnableList.isEmpty()) {
-                workQueueLinked.put {
-                    takeExceptionDetails(exception = exception, tag = tag, throwable = throwable)
-                }
-            }
-            runnableList.add(Runnable {
-                takeExceptionDetails(
-                    exception = exception,
-                    tag = tag,
-                    throwable = throwable
-                )
-            })
         }
 
         /**
@@ -1831,7 +1851,7 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-        private fun saveLifeCycleDetails(filePath: File) {
+        private fun saveLifeCycleDetails(filePath: File){
 
         }
 
@@ -2666,6 +2686,8 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+
+
         /**
          * This method is used for returning whether Clubhouse token is initialized.
          * @return true if it initialized.
@@ -2775,6 +2797,16 @@ class LoggerBird : LifecycleObserver {
             return false
         }
 
+    }
+
+    /**
+     * LogLevel class is used for defining log levels of Loggerbird.
+     */
+    enum class LogLevel{
+        ALL,
+        NONE,
+        INFO,
+        ERROR
     }
 
     /**
