@@ -693,7 +693,7 @@ internal class SlackApi {
         timerTaskQueue = object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error_time_out")
+                    LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
                 }
             }
         }
