@@ -25,44 +25,44 @@ internal interface AccountIdService {
 
     /**Jira Methods**/
     @POST("issue")
-    fun createIssue(@Body jsonObject: JsonObject): Call<JsonObject>
+    fun createJiraIssue(@Body jsonObject: JsonObject): Call<JsonObject>
     @GET("search?query")
-    fun getAccountIdList(): Call<List<JiraUserModel>>
+    fun getJiraAccountIdList(): Call<List<JiraUserModel>>
     @PUT("assignee")
-    fun setAssignee(@Body jsonObject: JsonObject): Call<List<JiraUserModel>>
+    fun setJiraAssignee(@Body jsonObject: JsonObject): Call<List<JiraUserModel>>
     @PUT("?")
-    fun setReporter(@Body jsonObject: JsonObject): Call<List<JiraUserModel>>
+    fun setJiraReporter(@Body jsonObject: JsonObject): Call<List<JiraUserModel>>
     @PUT("?")
-    fun setSprint(@Body jsonObject: JsonObject): Call<List<JiraSprintModel>>
+    fun setJiraSprint(@Body jsonObject: JsonObject): Call<List<JiraSprintModel>>
     @PUT("?")
-    fun setStartDate(@Body jsonObject: JsonObject): Call<List<JiraSprintModel>>
+    fun setJiraStartDate(@Body jsonObject: JsonObject): Call<List<JiraSprintModel>>
     @Multipart
     @POST("attachments")
-    fun setAttachments(@Part file: MultipartBody.Part): Call<List<JiraSprintModel>>
+    fun setJiraAttachments(@Part file: MultipartBody.Part): Call<List<JiraSprintModel>>
     @GET("sprint")
-    fun getSprintList(): Call<JsonObject>
+    fun getJiraSprintList(): Call<JsonObject>
     @GET("board")
-    fun getBoardList(): Call<JsonObject>
+    fun getJiraBoardList(): Call<JsonObject>
     @GET("search?")
-    fun getAttachmentList(@Query("project") projectKey: String, @Query("fields") attachmentTitle: String): Call<JsonObject>
+    fun getJiraAttachmentList(@Query("project") projectKey: String, @Query("fields") attachmentTitle: String): Call<JsonObject>
     @GET("field")
-    fun getFieldList(): Call<List<JiraFieldModel>>
+    fun getJiraFieldList(): Call<List<JiraFieldModel>>
     @GET("project")
-    fun getProjectList(): Call<List<JiraProjectModel>>
+    fun getJiraProjectList(): Call<List<JiraProjectModel>>
     @GET("issuetype")
-    fun getIssueTypes(): Call<List<JiraIssueTypeModel>>
+    fun getJiraIssueTypes(): Call<List<JiraIssueTypeModel>>
     @GET("priority")
-    fun getPriorities(): Call<List<JiraPriorityModel>>
+    fun getJiraPriorities(): Call<List<JiraPriorityModel>>
     @GET("search?query")
-    fun getIssueList(): Call<JsonObject>
+    fun getJiraIssueList(): Call<JsonObject>
     @GET("?")
-    fun getFixCompList(): Call<JsonObject>
+    fun getFixJiraCompList(): Call<JsonObject>
     @GET("label")
-    fun getLabelList(): Call<JsonObject>
+    fun getJiraLabelList(): Call<JsonObject>
     @GET("search?jql=issuetype=10000")
-    fun getEpicList(): Call<JsonObject>
+    fun getJiraEpicList(): Call<JsonObject>
     @GET("issueLinkType")
-    fun getLinkedIssueList(): Call<JsonObject>
+    fun getJiraLinkedIssueList(): Call<JsonObject>
 
     /**Github Methods**/
     @POST("issues")
@@ -205,4 +205,16 @@ internal interface AccountIdService {
     @PUT("stories/{id}")
     fun setClubhouseStory(@Path("id") id: String, @Query("token") token: String, @Query("description") description: String): Call<JsonObject>
 
+    /**Bitbucket Methods**/
+    @GET("{userName}?")
+    fun getBitbucketProjects(@Path("userName") userName: String): Call<JsonObject>
+    @GET("members")
+    fun getBitbucketAssignees(): Call<JsonObject>
+    @POST("issues")
+    fun createBitbucketIssues(@Body jsonObject: JsonObject): Call<JsonObject>
+    @PUT("{issueId}?")
+    fun setBitbucketAssignee(@Path("issueId") issueId: String ,@Body jsonObject: JsonObject): Call<JsonObject>
+    @Multipart
+    @POST("attachments")
+    fun setBitbucketAttachments(@Part file: MultipartBody.Part): Call<Void>
 }

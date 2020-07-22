@@ -7,6 +7,7 @@ import adapter.recyclerView.api.asana.RecyclerViewAsanaSubTaskAdapter
 import adapter.recyclerView.api.basecamp.RecyclerViewBasecampAssigneeAdapter
 import adapter.recyclerView.api.basecamp.RecyclerViewBasecampAttachmentAdapter
 import adapter.recyclerView.api.basecamp.RecyclerViewBasecampNotifyAdapter
+import adapter.recyclerView.api.bitbucket.RecyclerViewBitbucketAttachmentAdapter
 import adapter.recyclerView.api.clubhouse.RecyclerViewClubhouseAttachmentAdapter
 import adapter.recyclerView.api.github.RecyclerViewGithubAssigneeAdapter
 import adapter.recyclerView.api.github.RecyclerViewGithubAttachmentAdapter
@@ -24,10 +25,8 @@ import adapter.recyclerView.api.pivotal.RecyclerViewPivotalBlockerAdapter
 import adapter.recyclerView.api.pivotal.RecyclerViewPivotalLabelAdapter
 import adapter.recyclerView.api.pivotal.RecyclerViewPivotalOwnerAdapter
 import adapter.recyclerView.api.slack.RecyclerViewSlackAttachmentAdapter
-import adapter.recyclerView.api.trello.*
 import adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloCheckListAdapter
-import adapter.recyclerView.api.trello.RecyclerViewTrelloItemAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloLabelAdapter
 import adapter.recyclerView.api.trello.RecyclerViewTrelloMemberAdapter
 import adapter.recyclerView.email.RecyclerViewEmaiToListAttachmentAdapter
@@ -106,6 +105,7 @@ import listeners.layouts.LayoutFeedbackOnTouchListener
 import listeners.layouts.LayoutJiraOnTouchListener
 import utils.api.asana.AsanaApi
 import utils.api.basecamp.BasecampApi
+import utils.api.bitbucket.BitbucketApi
 import utils.api.clubhouse.ClubhouseApi
 import utils.api.github.GithubApi
 import utils.api.gitlab.GitlabApi
@@ -153,6 +153,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerLoggerBirdDismissPopup: Any? = null
     private var windowManagerLoggerBirdFileActionPopup: Any? = null
     private var windowManagerLoggerBirdUnhandledException: Any? = null
+    private var windowManagerBitbucket: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -183,6 +184,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsLoggerBirdDismissPopup: WindowManager.LayoutParams
     private lateinit var windowManagerParamsLoggerBirdFileAction: WindowManager.LayoutParams
     private lateinit var windowManagerParamsLoggerBirdUnhandledException: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsBitbucket: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudio: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -247,6 +249,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewLoggerBirdDismissPopup: View
     private lateinit var viewLoggerBirdFileActionPopup: View
     private lateinit var viewLoggerBirdUnhandledExceptionPopup: View
+    private lateinit var viewBitbucket: View
     private val fileLimit: Long = 10485760
     private var sessionTimeStart: Long? = System.currentTimeMillis()
     private var sessionTimeEnd: Long? = null
@@ -498,7 +501,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewTrelloProjectAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewTrelloBoardAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewTrelloMemberAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewTrelloLabelAdapter:AutoCompleteTextViewTrelloLabelAdapter
+    private lateinit var autoTextViewTrelloLabelAdapter: AutoCompleteTextViewTrelloLabelAdapter
     private lateinit var recyclerViewTrelloLabel: RecyclerView
     private lateinit var trelloLabelAdapter: RecyclerViewTrelloLabelAdapter
     private val arrayListTrelloFileName: ArrayList<RecyclerViewModel> = ArrayList()
@@ -700,20 +703,45 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var recyclerViewClubhouseAttachment: RecyclerView
     private lateinit var progressBarClubhouse: ProgressBar
     private lateinit var progressBarClubhouseLayout: FrameLayout
+
     //LoggerBird Activate Popup:
     private lateinit var textViewLoggerBirdActivatePopupActivate: TextView
     private lateinit var textViewLoggerBirdActivatePopupDismiss: TextView
+
     //LoggerBird Start Popup:
     private lateinit var textViewLoggerBirdStartPopupSessionTime: TextView
+
     //LoggerBird Dismiss Popup:
     private lateinit var textViewLoggerBirdDismissPopupFeedBack: TextView
+
     //LoggerBird File Action Popup:
     private lateinit var textViewLoggerBirdFileActionPopupDiscard: TextView
     private lateinit var textViewLoggerBirdFileActionPopupEmail: TextView
+
     //LoggerBird Unhandled Exception Popup:
     private lateinit var textViewLoggerBirdUnhandledExceptionPopupDiscard: TextView
     private lateinit var textViewLoggerBirdUnhandledExceptionPopupShare: TextView
     private lateinit var checkBoxLoggerBirdUnhandledExceptionPopupDuplication: CheckBox
+
+    //LoggerBird Bitbucket Popup:
+    internal val bitbucketAuthentication = BitbucketApi()
+    private lateinit var buttonBitbucketCancel: Button
+    private lateinit var buttonBitbucketCreate: Button
+    private lateinit var toolbarBitbucket: Toolbar
+    private lateinit var scrollViewBitbucket: ScrollView
+    private lateinit var autoTextViewBitbucketProject: AutoCompleteTextView
+    private lateinit var autoTextViewBitbucketProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextviewBitbucketKind: AutoCompleteTextView
+    private lateinit var autoTextViewBitbucketKindAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBitbucketAssignee: AutoCompleteTextView
+    private lateinit var autoTextViewBitbucketAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBitbucketPriority: AutoCompleteTextView
+    private lateinit var autoTextViewBitbucketPriorityAdapter: ArrayAdapter<String>
+    private lateinit var editTextBitbucketTitle: EditText
+    private lateinit var editTextBitbucketDescription: EditText
+    private lateinit var recyclerViewBitbucketAttachmentList: RecyclerView
+    private lateinit var bitbucketAttachmentAdapter: RecyclerViewBitbucketAttachmentAdapter
+    private val arrayListBitbucketFileName: ArrayList<RecyclerViewModel> = ArrayList()
 
     //Static global variables:
     internal companion object {
@@ -734,6 +762,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         private lateinit var textView_share_basecamp: TextView
         private lateinit var textView_share_asana: TextView
         private lateinit var textView_share_clubhouse: TextView
+        private lateinit var textView_share_bitbucket: TextView
         private lateinit var textView_discard: TextView
         private lateinit var textView_counter_video: TextView
         private lateinit var textView_counter_audio: TextView
@@ -1112,6 +1141,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     textView_share_basecamp = view.findViewById(R.id.textView_share_basecamp)
                     textView_share_asana = view.findViewById(R.id.textView_share_asana)
                     textView_share_clubhouse = view.findViewById(R.id.textView_share_clubhouse)
+                    textView_share_bitbucket = view.findViewById(R.id.textView_share_bitbucket)
                     textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
                     textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
                     textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
@@ -1420,7 +1450,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         textView_share_pivotal.visibility = View.GONE
         textView_share_slack.visibility = View.GONE
         textView_share_trello.visibility = View.GONE
-
+        textView_share_bitbucket.visibility = View.GONE
         if (LoggerBird.clubhouseIsInitialized()) {
             textView_share_clubhouse.visibility = View.VISIBLE
         }
@@ -1456,7 +1486,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (LoggerBird.trelloIsInitialized()) {
             textView_share_trello.visibility = View.VISIBLE
         }
-
+        if (LoggerBird.bitbucketIsInitialized()) {
+            textView_share_bitbucket.visibility = View.VISIBLE
+        }
         shareViewClicks(filePathMedia = filePathMedia)
     }
 
@@ -1551,6 +1583,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         floatingActionButtonView.visibility = View.GONE
                     }
                     initializeClubhouseLayout(filePathMedia = filePathMedia)
+                }
+            }
+            textView_share_bitbucket.setSafeOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
+                    }
+                    initializeBitbucketLayout(filePathMedia = filePathMedia)
                 }
             }
 
@@ -3153,6 +3193,25 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     )
                         .show()
                     finishSuccessFab()
+                }
+                "bitbucket" -> {
+                    detachProgressBar()
+                    removeBitbucketLayout()
+                    Toast.makeText(context, R.string.bitbucket_issue_success, Toast.LENGTH_SHORT)
+                        .show()
+                    finishSuccessFab()
+                }
+                "bitbucket_error" -> {
+                    detachProgressBar()
+                    removeBitbucketLayout()
+                    Toast.makeText(context, R.string.bitbucket_issue_failure, Toast.LENGTH_SHORT)
+                        .show()
+                }
+                "bitbucket_error_time_out" -> {
+                    detachProgressBar()
+                    removeBitbucketLayout()
+                    Toast.makeText(context, R.string.bitbucket_issue_time_out, Toast.LENGTH_SHORT)
+                        .show()
                 }
 
             }
@@ -7027,7 +7086,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                     "trello_description",
                                     editTextTrelloDescription.text.toString()
                                 )
-                                putString("trello_checklist",editTextTrelloCheckList.text.toString())
+                                putString(
+                                    "trello_checklist",
+                                    editTextTrelloCheckList.text.toString()
+                                )
                                 putString(
                                     "trello_member",
                                     autoTextViewTrelloMember.editableText.toString()
@@ -7220,8 +7282,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 arrayListTrelloCheckListName.add(RecyclerViewModelCheckList(editTextTrelloCheckList.text.toString()))
                 trelloCheckListAdapter.notifyDataSetChanged()
                 cardViewTrelloCheckList.visibility = View.VISIBLE
-                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[editTextTrelloCheckList.text.toString()] = null
-                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[editTextTrelloCheckList.text.toString()] = null
+                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[editTextTrelloCheckList.text.toString()] =
+                    null
+                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[editTextTrelloCheckList.text.toString()] =
+                    null
 //                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[editTextTrelloCheckList.text.toString()] = RecyclerViewTrelloItemAdapter.ViewHolder.arrayListItemNames
             } else if (arrayListTrelloCheckListName.contains(
                     RecyclerViewModelCheckList(editTextTrelloCheckList.text.toString())
@@ -7270,7 +7334,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         editTextTrelloTitle.setText(sharedPref.getString("trello_title", null))
         editTextTrelloDescription.setText(sharedPref.getString("trello_description", null))
-        editTextTrelloCheckList.setText(sharedPref.getString("trello_checklist",null))
+        editTextTrelloCheckList.setText(sharedPref.getString("trello_checklist", null))
         initializeTrelloProject(
             arrayListTrelloProject = arrayListTrelloProject,
             sharedPref = sharedPref
@@ -7559,6 +7623,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
         recyclerViewTrelloMember.adapter = trelloMemberAdapter
     }
+
     /**
      * This method is used for initializing trello checklist recyclerView.
      */
@@ -10606,16 +10671,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun clearAsanaComponents() {
         cardViewAsanaSubTasksList.visibility = View.GONE
         arrayListAsanaSubtaskName.clear()
-        arrayListAsanaFileName
         asanaSubTasksAdapter.notifyDataSetChanged()
-        asanaAttachmentAdapter.notifyDataSetChanged()
         editTextAsanaSubTask.text = null
         editTextAsanaDescription.text = null
         editTextAsanaTaskName.text = null
         autoTextViewAsanaPriority.setText("", false)
         autoTextViewAsanaSector.setText("", false)
         autoTextViewAsanaAssignee.setText("", false)
-//        autoTextViewPivotalProject.setText("",false)
     }
 
 
@@ -11552,6 +11614,511 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             initializeFloatingActionButton(activity = activity)
             shareView(filePathMedia = filePath)
         }
+    }
+
+
+    //Bitbucket
+    /**
+     * This method is used for creating bitbucket layout which is attached to application overlay.
+     * @param filePathMedia is used for getting the reference of current media file.
+     * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initializeBitbucketLayout(filePathMedia: File) {
+        try {
+            removeBitbucketLayout()
+            viewBitbucket = LayoutInflater.from(activity)
+                .inflate(
+                    R.layout.loggerbird_bitbucket_popup,
+                    (this.rootView as ViewGroup),
+                    false
+                )
+
+            if (Settings.canDrawOverlays(activity)) {
+                windowManagerParamsBitbucket = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+
+                windowManagerBitbucket = activity.getSystemService(Context.WINDOW_SERVICE)!!
+                (windowManagerBitbucket as WindowManager).addView(
+                    viewBitbucket,
+                    windowManagerParamsBitbucket
+                )
+
+                activity.window.navigationBarColor =
+                    ContextCompat.getColor(this, R.color.black)
+                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+                buttonBitbucketCancel = viewBitbucket.findViewById(R.id.button_bitbucket_cancel)
+                buttonBitbucketCreate = viewBitbucket.findViewById(R.id.button_bitbucket_create)
+                toolbarBitbucket = viewBitbucket.findViewById(R.id.toolbar_bitbucket)
+                autoTextViewBitbucketProject =
+                    viewBitbucket.findViewById(R.id.auto_textView_bitbucket_project)
+                autoTextviewBitbucketKind =
+                    viewBitbucket.findViewById(R.id.auto_textView_bitbucket_kind)
+                autoTextViewBitbucketAssignee =
+                    viewBitbucket.findViewById(R.id.auto_textView_bitbucket_assignee)
+                autoTextViewBitbucketPriority =
+                    viewBitbucket.findViewById(R.id.auto_textView_bitbucket_priority)
+                editTextBitbucketTitle = viewBitbucket.findViewById(R.id.editText_bitbucket_title)
+                editTextBitbucketDescription =
+                    viewBitbucket.findViewById(R.id.editText_bitbucket_description)
+                editTextBitbucketTitle = viewBitbucket.findViewById(R.id.editText_bitbucket_title)
+                editTextBitbucketDescription =
+                    viewBitbucket.findViewById(R.id.editText_bitbucket_description)
+                recyclerViewBitbucketAttachmentList =
+                    viewBitbucket.findViewById(R.id.recycler_view_bitbucket_attachment)
+                scrollViewBitbucket = viewBitbucket.findViewById(R.id.scrollView_bitbucket)
+                scrollViewBitbucket.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        hideKeyboard(activity = activity, view = viewBitbucket)
+                    }
+                    return@setOnTouchListener false
+                }
+
+                toolbarBitbucket.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.bitbucket_menu_save -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            with(sharedPref.edit()) {
+                                putString(
+                                    "bitbucket_project",
+                                    autoTextViewBitbucketProject.editableText.toString()
+                                )
+                                putString(
+                                    "bitbucket_assignee",
+                                    autoTextViewBitbucketAssignee.editableText.toString()
+                                )
+                                putString(
+                                    "bitbucket_kind",
+                                    autoTextviewBitbucketKind.editableText.toString()
+                                )
+                                putString(
+                                    "bitbucket_priority",
+                                    autoTextViewBitbucketPriority.editableText.toString()
+                                )
+                                putString(
+                                    "bitbucket_description",
+                                    editTextBitbucketDescription.text.toString()
+                                )
+                                putString(
+                                    "bitbucket_title",
+                                    editTextBitbucketTitle.text.toString()
+                                )
+                                commit()
+                            }
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.bitbucket_issue_preferences_save)
+                            )
+                        }
+                        R.id.bitbucket_menu_clear -> {
+                            val sharedPref =
+                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                            val editor: SharedPreferences.Editor = sharedPref.edit()
+                            editor.remove("bitbucket_project")
+                            editor.remove("bitbucket_assignee")
+                            editor.remove("bitbucket_kind")
+                            editor.remove("bitbucket_priority")
+                            editor.remove("bitbucket_description")
+                            editor.remove("bitbucket_title")
+                            editor.apply()
+                            clearBitbucketComponents()
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = context.resources.getString(R.string.bitbucket_issue_preferences_delete)
+                            )
+                        }
+                    }
+                    return@setOnMenuItemClickListener true
+                }
+
+                toolbarBitbucket.setNavigationOnClickListener {
+                    removeBitbucketLayout()
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.VISIBLE
+                    }
+                }
+                initializeBitbucketAttachmentRecyclerView(filePathMedia = filePathMedia)
+                buttonClicksBitbucket()
+                bitbucketAuthentication.callBitbucket(
+                    activity = activity,
+                    context = context,
+                    task = "get",
+                    filePathMedia = filePathMedia
+                )
+                attachProgressBar()
+            }
+        } catch (e: Exception) {
+            finishShareLayout("bitbucket_error")
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.bitbucketTag)
+        }
+    }
+
+    /**
+     * This method is used for initializing bitbucket attachment recyclerView.
+     * @param filePathMedia is used for getting the reference of current media file.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeBitbucketAttachmentRecyclerView(filePathMedia: File) {
+        arrayListBitbucketFileName.clear()
+        recyclerViewBitbucketAttachmentList.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        bitbucketAttachmentAdapter =
+            RecyclerViewBitbucketAttachmentAdapter(
+                addBitbucketFileNames(filePathMedia = filePathMedia),
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewBitbucketAttachmentList.adapter = bitbucketAttachmentAdapter
+    }
+
+    /**
+     * This method is used for adding files to bitbucket file list.
+     * @param filePathMedia is used for getting the reference of current media file.
+     * @return ArrayList<RecyclerViewModel> value.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addBitbucketFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListBitbucketFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (LoggerBird.filePathSecessionName.exists()) {
+            arrayListBitbucketFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListBitbucketFileName
+    }
+
+    /**
+     * This method is used for initializing button clicks of buttons that are inside in the loggerbird_bitbucket_popup.
+     */
+    private fun buttonClicksBitbucket() {
+        buttonBitbucketCreate.setSafeOnClickListener {
+            bitbucketAuthentication.gatherAutoTextDetails(
+                autoTextViewProject = autoTextViewBitbucketProject,
+                autoTextViewPriority = autoTextViewBitbucketPriority,
+                autoTextViewAssignee = autoTextViewBitbucketAssignee,
+                autoTextViewKind = autoTextviewBitbucketKind
+            )
+            bitbucketAuthentication.gatherEditTextDetails(
+                editTextDescription = editTextBitbucketDescription,
+                editTextTitle = editTextBitbucketTitle
+            )
+            if (bitbucketAuthentication.checkBitbucketProject(
+                    activity = activity,
+                    autoTextViewProject = autoTextViewBitbucketProject
+                )
+                && bitbucketAuthentication.checkBitbucketTitle(
+                    activity = activity,
+                    editTextTitle = editTextBitbucketTitle
+                )
+                && bitbucketAuthentication.checkBitbucketAssignee(
+                    activity = activity,
+                    autoTextViewAssignee = autoTextViewBitbucketAssignee
+                )
+                && bitbucketAuthentication.checkBitbucketKind(
+                    activity = activity,
+                    autoTextViewKind = autoTextviewBitbucketKind
+                )
+                && bitbucketAuthentication.checkBitbucketPriority(
+                    activity = activity,
+                    autoTextViewPriority = autoTextViewBitbucketPriority
+                )
+            ){
+                bitbucketAuthentication.callBitbucket(
+                    activity = activity,
+                    context = context,
+                    task = "create"
+                )
+                attachProgressBar()
+            }
+        }
+        buttonBitbucketCancel.setSafeOnClickListener {
+            removeBitbucketLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    /**
+     * This method is used for removing loggerbird_bitbucket_popup from window.
+     */
+    internal fun removeBitbucketLayout() {
+        if (this::viewBitbucket.isInitialized && windowManagerBitbucket != null) {
+            (windowManagerBitbucket as WindowManager).removeViewImmediate(
+                viewBitbucket
+            )
+            windowManagerBitbucket = null
+        }
+    }
+
+    /**
+     * This method is used for initializing  autoCompleteTextViews in the loggerbird_bitbucket_popup.
+     * @param arrayListBitbucketProject is used for getting the project list for project autoCompleteTextView.
+     * @param arrayListBitbucketAssignee is used for getting the assignee list for assignee autoCompleteTextView.
+     * @param arrayListBitbucketKind is used for getting the kind list for kind autoCompleteTextView.
+     * @param arrayListBitbucketPriority is used for getting the priority list for priority autoCompleteTextView.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    internal fun initializeBitbucketAutoTextViews(
+        arrayListBitbucketProject: ArrayList<String>,
+        arrayListBitbucketAssignee: ArrayList<String>,
+        arrayListBitbucketKind: ArrayList<String>,
+        arrayListBitbucketPriority: ArrayList<String>
+    ) {
+        val sharedPref =
+            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+        editTextBitbucketTitle.setText(
+            sharedPref.getString(
+                "bitbucket_title",
+                null
+            )
+        )
+        editTextBitbucketDescription.setText(
+            sharedPref.getString(
+                "bitbucket_description",
+                null
+            )
+        )
+        initializeBitbucketProject(
+            arrayListBitbucketProject = arrayListBitbucketProject,
+            sharedPref = sharedPref
+        )
+        initializeBitbucketAssignee(
+            arrayListBitbucketAssignee = arrayListBitbucketAssignee,
+            sharedPref = sharedPref
+        )
+        initializeBitbucketPriority(
+            arrayListBitbucketPriority = arrayListBitbucketPriority,
+            sharedPref = sharedPref
+        )
+        initializeBitbucketKind(
+            arrayListBitbucketKind = arrayListBitbucketKind,
+            sharedPref = sharedPref
+        )
+        detachProgressBar()
+    }
+
+    /**
+     * This method is used for initializing project autoCompleteTextView in the loggerbird_bitbucket_popup.
+     * @param arrayListBitbucketProject is used for getting the project list for project autoCompleteTextView.
+     * @param sharedPref is used for getting the reference of SharedPreferences of current activity.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeBitbucketProject(
+        arrayListBitbucketProject: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewBitbucketProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListBitbucketProject
+        )
+        autoTextViewBitbucketProject.setAdapter(autoTextViewBitbucketProjectAdapter)
+        if (arrayListBitbucketProject.isNotEmpty() && autoTextViewBitbucketProject.editableText.isEmpty()) {
+            if (sharedPref.getString("bitbucket_project", null) != null) {
+                if (arrayListBitbucketProject.contains(
+                        sharedPref.getString(
+                            "bitbucket_project",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewBitbucketProject.setText(
+                        sharedPref.getString("bitbucket_project", null),
+                        false
+                    )
+                } else {
+                    autoTextViewBitbucketProject.setText(arrayListBitbucketProject[0], false)
+                }
+            } else {
+                autoTextViewBitbucketProject.setText(arrayListBitbucketProject[0], false)
+            }
+        }
+        autoTextViewBitbucketProject.setOnTouchListener { v, event ->
+            autoTextViewBitbucketProject.showDropDown()
+            false
+        }
+        autoTextViewBitbucketProject.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewBitbucket)
+            clearBitbucketComponents()
+            bitbucketAuthentication.setProjectPosition(projectPosition = position)
+            bitbucketAuthentication.callBitbucket(
+                activity = activity,
+                context = context,
+                task = "get"
+            )
+            attachProgressBar()
+        }
+    }
+
+    /**
+     * This method is used for initializing assignee autoCompleteTextView in the loggerbird_bitbucket_popup.
+     * @param arrayListBitbucketAssignee is used for getting the assignee list for assignee autoCompleteTextView.
+     * @param sharedPref is used for getting the reference of SharedPreferences of current activity.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeBitbucketAssignee(
+        arrayListBitbucketAssignee: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewBitbucketAssigneeAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListBitbucketAssignee
+        )
+        autoTextViewBitbucketAssignee.setAdapter(autoTextViewBitbucketAssigneeAdapter)
+        if (arrayListBitbucketAssignee.isNotEmpty() && autoTextViewBitbucketAssignee.editableText.isEmpty()) {
+            if (sharedPref.getString("bitbucket_assignee", null) != null) {
+                if (arrayListBitbucketAssignee.contains(
+                        sharedPref.getString(
+                            "bitbucket_assignee",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewBitbucketAssignee.setText(
+                        sharedPref.getString("bitbucket_assignee", null),
+                        false
+                    )
+                } else {
+                    autoTextViewBitbucketAssignee.setText(arrayListBitbucketAssignee[0], false)
+                }
+            }
+        }
+        autoTextViewBitbucketAssignee.setOnTouchListener { v, event ->
+            autoTextViewBitbucketAssignee.showDropDown()
+            false
+        }
+        autoTextViewBitbucketAssignee.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewBitbucket)
+            bitbucketAuthentication.setAssignee(assigneePosition = position)
+        }
+    }
+
+    /**
+     * This method is used for initializing priority autoCompleteTextView in the loggerbird_bitbucket_popup.
+     * @param arrayListBitbucketPriority is used for getting the priority list for priority autoCompleteTextView.
+     * @param sharedPref is used for getting the reference of SharedPreferences of current activity.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeBitbucketPriority(
+        arrayListBitbucketPriority: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewBitbucketPriorityAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListBitbucketPriority
+        )
+        autoTextViewBitbucketPriority.setAdapter(autoTextViewBitbucketPriorityAdapter)
+        if (arrayListBitbucketPriority.isNotEmpty() && autoTextViewBitbucketPriority.editableText.isEmpty()) {
+            if (sharedPref.getString("bitbucket_priority", null) != null) {
+                if (arrayListBitbucketPriority.contains(
+                        sharedPref.getString(
+                            "bitbucket_priority",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextViewBitbucketPriority.setText(
+                        sharedPref.getString("bitbucket_priority", null),
+                        false
+                    )
+                } else {
+                    autoTextViewBitbucketPriority.setText(arrayListBitbucketPriority[0], false)
+                }
+            } else {
+                autoTextViewBitbucketPriority.setText(arrayListBitbucketPriority[0], false)
+            }
+        }
+        autoTextViewBitbucketPriority.setOnTouchListener { v, event ->
+            autoTextViewBitbucketPriority.showDropDown()
+            false
+        }
+        autoTextViewBitbucketPriority.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewBitbucket)
+        }
+    }
+
+    /**
+     * This method is used for initializing kind autoCompleteTextView in the loggerbird_bitbucket_popup.
+     * @param arrayListBitbucketKind is used for getting the kind list for kind autoCompleteTextView.
+     * @param sharedPref is used for getting the reference of SharedPreferences of current activity.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private fun initializeBitbucketKind(
+        arrayListBitbucketKind: ArrayList<String>,
+        sharedPref: SharedPreferences
+    ) {
+        autoTextViewBitbucketKindAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListBitbucketKind
+        )
+        autoTextviewBitbucketKind.setAdapter(autoTextViewBitbucketKindAdapter)
+        if (arrayListBitbucketKind.isNotEmpty() && autoTextviewBitbucketKind.editableText.isEmpty()) {
+            if (sharedPref.getString("bitbucket_kind", null) != null) {
+                if (arrayListBitbucketKind.contains(
+                        sharedPref.getString(
+                            "bitbucket_kind",
+                            null
+                        )!!
+                    )
+                ) {
+                    autoTextviewBitbucketKind.setText(
+                        sharedPref.getString("bitbucket_kind", null),
+                        false
+                    )
+                } else {
+                    autoTextviewBitbucketKind.setText(arrayListBitbucketKind[0], false)
+                }
+            } else {
+                autoTextviewBitbucketKind.setText(arrayListBitbucketKind[0], false)
+            }
+        }
+        autoTextviewBitbucketKind.setOnTouchListener { v, event ->
+            autoTextviewBitbucketKind.showDropDown()
+            false
+        }
+        autoTextviewBitbucketKind.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewBitbucket)
+        }
+    }
+
+    /**
+     * This method is used for clearing bitbucket components.
+     */
+    private fun clearBitbucketComponents() {
+        editTextBitbucketDescription.text = null
+        editTextBitbucketTitle.text = null
+        autoTextViewBitbucketPriority.setText("", false)
+        autoTextviewBitbucketKind.setText("", false)
+        autoTextViewBitbucketPriority.setText("", false)
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
