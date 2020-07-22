@@ -4150,8 +4150,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         hashMapJiraBoardList: HashMap<String, String>
     ) {
         try {
-            this.arrayListJiraIssue.clear()
-            this.arrayListJiraLabel
             val sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             editTextJiraSummary.setText(sharedPref.getString("jira_summary", null))
