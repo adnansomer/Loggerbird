@@ -62,7 +62,7 @@ internal class ClubhouseApi {
     private var hashMapProjects: HashMap<String, String> = HashMap()
     private var epicPosition = 0
     private var epic: String? = null
-    private val arrayListEpicId: ArrayList<String> = ArrayList()
+    private val arrayListEpicId: ArrayList<String?> = ArrayList()
     private val arrayListEpicName: ArrayList<String> = ArrayList()
     private var hashMapEpic: HashMap<String, String> = HashMap()
     private var storyName: String? = ""
@@ -72,8 +72,7 @@ internal class ClubhouseApi {
     private lateinit var storyId: String
     private val arrayListAttachments: ArrayList<String> = ArrayList()
     private var descriptionString = StringBuilder()
-    private var workQueueLinkedClubhouseAttachments: LinkedBlockingQueueUtil =
-        LinkedBlockingQueueUtil()
+    private var workQueueLinkedClubhouseAttachments: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
     private var runnableListClubhouseAttachments: ArrayList<Runnable> = ArrayList()
 
     companion object {
@@ -224,7 +223,7 @@ internal class ClubhouseApi {
                 arrayListUsers.clear()
                 arrayListUsersId.clear()
                 hashMapUsers.clear()
-                arrayListEpicId.clear()
+                arrayListEpicId!!.clear()
                 arrayListEpicName.clear()
                 hashMapEpic.clear()
                 arrayListAttachments.clear()
@@ -380,6 +379,8 @@ internal class ClubhouseApi {
                                 Log.d("clubhouseEpics", response.code().toString())
                                 val clubhouse = response.body()
                                 Log.d("clubhouseEpics", response.toString())
+                                arrayListEpicId.add(null)
+                                arrayListEpicName.add("")
                                 clubhouse?.forEach {
                                     if (it.name != null) {
                                         arrayListEpicId.add(it.id!!)
@@ -425,10 +426,10 @@ internal class ClubhouseApi {
                     name = storyName!!,
                     description = storyDescription!!,
                     storyType = storyType!!.toLowerCase(),
-                    deadline = dueDate!!,
+                    deadline = null,
                     requestedBy = hashMapUsers[userName]!!,
-                    epicId = hashMapEpic[epic]!!,
-                    estimate = estimate!!
+                    epicId = hashMapEpic[epic],
+                    estimate = estimate
                 )
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     override fun onFailure(call: retrofit2.Call<JsonObject>, t: Throwable) {
@@ -661,25 +662,6 @@ internal class ClubhouseApi {
         }
     }
 
-    /**
-     * This method is used for gathering issue details to be send to Clubhouse.
-     * @param spinnerUser for getting reference of user.
-     * @param spinnerStoryType for getting reference of story type.
-     * @param spinnerEpic for getting reference of epics.
-     * @param spinnerConfidentiality for getting reference of confidentiality
-     */
-    internal fun gatherClubhouseSpinnerDetails(
-        spinnerUser: Spinner,
-        spinnerStoryType: Spinner,
-        spinnerEpic: Spinner
-    ) {
-        spinnerPositionUser = spinnerUser.selectedItemPosition
-        userName = spinnerUser.selectedItem.toString()
-        spinnerPositionStoryType = spinnerStoryType.selectedItemPosition
-        storyType = spinnerStoryType.selectedItem.toString()
-        spinnerPositionEpic = spinnerEpic.selectedItemPosition
-        epic = spinnerEpic.selectedItem.toString()
-    }
 
     /**
      * This method is used for gathering issue details to be send to Clubhouse.
@@ -694,7 +676,12 @@ internal class ClubhouseApi {
     ) {
         storyName = editTextStoryName.text.toString()
         storyDescription = editTextStoryDescription.text.toString()
-        estimate = editTextEstimate.text.toString()
+        if(estimate != "" && estimate != null){
+            estimate = editTextEstimate.text.toString()
+        }else{
+            estimate == null
+        }
+
     }
 
     /**
@@ -702,9 +689,15 @@ internal class ClubhouseApi {
      * @param autoTextViewProject for getting reference of project.
      */
     internal fun gatherClubhouseProjectAutoTextDetails(
-        autoTextViewProject: AutoCompleteTextView
+        autoTextViewProject: AutoCompleteTextView,
+        autoTextViewEpic: AutoCompleteTextView,
+        autoTextViewStoryType: AutoCompleteTextView,
+        autoTextViewRequester: AutoCompleteTextView
     ) {
         project = autoTextViewProject.editableText.toString()
+        epic = autoTextViewEpic.editableText.toString()
+        storyType = autoTextViewStoryType.editableText.toString()
+        userName = autoTextViewRequester.editableText.toString()
     }
 
     /**

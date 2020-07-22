@@ -13,16 +13,8 @@ import adapter.recyclerView.api.github.RecyclerViewGithubAttachmentAdapter
 import adapter.recyclerView.api.github.RecyclerViewGithubLabelAdapter
 import adapter.recyclerView.api.github.RecyclerViewGithubProjectAdapter
 import adapter.recyclerView.api.gitlab.RecyclerViewGitlabAttachmentAdapter
-import adapter.recyclerView.api.jira.RecyclerViewJiraAttachmentAdapter
-import adapter.recyclerView.api.jira.RecyclerViewJiraComponentAdapter
-import adapter.recyclerView.api.jira.RecyclerViewJiraFixVersionsAdapter
-import adapter.recyclerView.api.jira.RecyclerViewJiraIssueAdapter
-import adapter.recyclerView.api.jira.RecyclerViewJiraLabelAdapter
+import adapter.recyclerView.api.jira.*
 import adapter.recyclerView.api.pivotal.*
-import adapter.recyclerView.api.pivotal.RecyclerViewPivotalAttachmentAdapter
-import adapter.recyclerView.api.pivotal.RecyclerViewPivotalBlockerAdapter
-import adapter.recyclerView.api.pivotal.RecyclerViewPivotalLabelAdapter
-import adapter.recyclerView.api.pivotal.RecyclerViewPivotalOwnerAdapter
 import adapter.recyclerView.api.slack.RecyclerViewSlackAttachmentAdapter
 import adapter.recyclerView.api.trello.*
 import adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
@@ -44,6 +36,7 @@ import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
+import android.graphics.drawable.Drawable
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
@@ -55,11 +48,14 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.provider.Settings
+import android.text.InputFilter
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
-import android.view.animation.*
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.view.animation.BounceInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -68,6 +64,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -80,30 +77,21 @@ import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import constants.Constants
 import exception.LoggerBirdException
+import kotlinx.android.synthetic.main.loggerbird_start_popup.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import loggerbird.LoggerBird
-import models.*
-import models.recyclerView.*
-import observers.LogActivityLifeCycleObserver
-//import org.aviran.cookiebar2.CookieBar
-import paint.PaintActivity
-import paint.PaintView
-import utils.email.EmailUtil
-import utils.other.LinkedBlockingQueueUtil
-import java.io.File
-import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import java.text.SimpleDateFormat
-import android.text.InputFilter
-import androidx.core.widget.addTextChangedListener
+import listeners.OnSwipeTouchListener
 import listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
 import listeners.layouts.LayoutFeedbackOnTouchListener
 import listeners.layouts.LayoutJiraOnTouchListener
+import loggerbird.LoggerBird
+import models.RecyclerViewModel
+import models.recyclerView.*
+import observers.LogActivityLifeCycleObserver
+import paint.PaintActivity
+import paint.PaintView
 import utils.api.asana.AsanaApi
 import utils.api.basecamp.BasecampApi
 import utils.api.clubhouse.ClubhouseApi
@@ -113,10 +101,17 @@ import utils.api.jira.JiraApi
 import utils.api.pivotal.PivotalTrackerApi
 import utils.api.slack.SlackApi
 import utils.api.trello.TrelloApi
+import utils.email.EmailUtil
 import utils.other.DefaultToast
 import utils.other.InputTypeFilter
+import utils.other.LinkedBlockingQueueUtil
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
-internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
+internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     //Global variables:
     private lateinit var activity: Activity
     private var intentService: Intent? = null
@@ -221,7 +216,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var timerTaskAudio: TimerTask? = null
     private var timerVideoTaskFileSize: TimerTask? = null
     private var timerAudioTaskFileSize: TimerTask? = null
-    //    private lateinit var cookieBar: CookieBar
     private lateinit var viewFeedback: View
     private lateinit var viewJira: View
     private lateinit var viewSlack: View
@@ -257,8 +251,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private val coroutineCallFilesAction: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlFileAction: Boolean = false
     private lateinit var progressBarView: View
-    private val defaultToast: DefaultToast =
-        DefaultToast()
+    private val defaultToast: DefaultToast = DefaultToast()
 
     //Jira:
     internal val jiraAuthentication = JiraApi()
@@ -414,11 +407,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewGitlabProject: AutoCompleteTextView
     private lateinit var editTextGitlabTitle: EditText
     private lateinit var editTextGitlabDescription: EditText
-    private lateinit var spinnerGitlabMilestone: Spinner
-    private lateinit var spinnerGitlabAssignee: Spinner
+    private lateinit var autoTextViewGitlabMilestone: AutoCompleteTextView
+    private lateinit var autoTextViewGitlabAssignee: AutoCompleteTextView
     private lateinit var editTextGitlabWeight: EditText
-    private lateinit var spinnerGitlabLabels: Spinner
-    private lateinit var spinnerGitlabConfidentiality: Spinner
+    private lateinit var autoTextViewGitlabLabels: AutoCompleteTextView
+    private lateinit var autoTextViewGitlabConfidentiality: AutoCompleteTextView
     private lateinit var textViewGitlabDueDate: TextView
     private lateinit var buttonGitlabCreate: Button
     internal lateinit var buttonGitlabCancel: Button
@@ -434,11 +427,23 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var progressBarGitlab: ProgressBar
     private lateinit var progressBarGitlabLayout: FrameLayout
     private lateinit var autoTextViewGitlabProjectAdapter: ArrayAdapter<String>
-    private lateinit var spinnerGitlabAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var spinnerGitlabLabelsAdapter: ArrayAdapter<String>
-    private lateinit var spinnerGitlabMilestoneAdapter: ArrayAdapter<String>
-    private lateinit var spinnerGitlabConfidentialityAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGitlabAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGitlabLabelsAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGitlabMilestoneAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGitlabConfidentialityAdapter: ArrayAdapter<String>
     private val arrayListGitlabFileName: ArrayList<RecyclerViewModel> = ArrayList()
+    private lateinit var linearLayoutGitlabConfidentiality: LinearLayout
+    private lateinit var textViewGitlabConfidentiality: TextView
+    private lateinit var imageViewGitlabConfidentiality: ImageView
+    private lateinit var textViewGitlabMilestone : TextView
+    private lateinit var linearLayoutGitlabMilestone : LinearLayout
+    private lateinit var imageViewGitlabMilestone : ImageView
+    private lateinit var textViewGitlabAssignee : TextView
+    private lateinit var linearLayoutGitlabAssignee : LinearLayout
+    private lateinit var imageViewGitlabAssignee : ImageView
+    private lateinit var textViewGitlabLabels : TextView
+    private lateinit var linearLayoutGitlabLabels : LinearLayout
+    private lateinit var imageViewGitlabLabels : ImageView
 
     //Github
     internal val githubAuthentication = GithubApi()
@@ -686,20 +691,23 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var textViewClubhouseDueDate: TextView
     private lateinit var autoTextViewClubhouseProject: AutoCompleteTextView
     private lateinit var autoTextViewClubhouseProjectAdapter: ArrayAdapter<String>
-    private lateinit var spinnerClubhouseEpic: Spinner
-    private lateinit var spinnerClubhouseEpicAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseEpic: AutoCompleteTextView
+    private lateinit var autoTextViewClubhouseEpicAdapter: ArrayAdapter<String>
     private lateinit var editTextClubhouseStoryName: EditText
     private lateinit var editTextClubhouseStoryDescription: EditText
     private lateinit var editTextClubhouseEstimate: EditText
-    private lateinit var spinnerClubhouseStoryType: Spinner
-    private lateinit var spinnerClubhouseStoryTypeAdapter: ArrayAdapter<String>
-    private lateinit var spinnerClubhouseRequester: Spinner
-    private lateinit var spinnerClubhouseRequesterAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseStoryType: AutoCompleteTextView
+    private lateinit var autoTextViewClubhouseStoryTypeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseRequester: AutoCompleteTextView
+    private lateinit var autoTextViewClubhouseRequesterAdapter: ArrayAdapter<String>
     private val arrayListClubhouseFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var clubhouseAttachmentAdapter: RecyclerViewClubhouseAttachmentAdapter
     private lateinit var recyclerViewClubhouseAttachment: RecyclerView
     private lateinit var progressBarClubhouse: ProgressBar
     private lateinit var progressBarClubhouseLayout: FrameLayout
+    private lateinit var textViewClubhouseEpic: TextView
+    private lateinit var linearLayoutClubhouseEpic: LinearLayout
+    private lateinit var imageViewClubhouseDueDate: ImageView
     //LoggerBird Activate Popup:
     private lateinit var textViewLoggerBirdActivatePopupActivate: TextView
     private lateinit var textViewLoggerBirdActivatePopupDismiss: TextView
@@ -758,10 +766,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         internal var controlPermissionRequest: Boolean = false
         private var runnableList: ArrayList<Runnable> = ArrayList()
         private var runnableListEmail: ArrayList<Runnable> = ArrayList()
-        private var workQueueLinkedVideo: LinkedBlockingQueueUtil =
-            LinkedBlockingQueueUtil()
-        private var workQueueLinkedEmail: LinkedBlockingQueueUtil =
-            LinkedBlockingQueueUtil()
+        private var workQueueLinkedVideo: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
+        private var workQueueLinkedEmail: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
         internal var controlVideoPermission: Boolean = false
         internal var controlAudioPermission: Boolean = false
         internal var controlDrawableSettingsPermission: Boolean = false
@@ -797,6 +803,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         /**
          * This method is used for removing email task from queue.
          */
+        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
         internal fun callEnqueueEmail() {
             workQueueLinkedEmail.controlRunnable = false
             if (runnableListEmail.size > 0) {
@@ -1028,19 +1035,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
                 (windowManager as WindowManager).removeViewImmediate(view)
                 initializeLoggerBirdClosePopup(activity = activity)
-//                CookieBar.build(activity)
-//                    .setCustomView(R.layout.loggerbird_close_popup)
-//                    .setCustomViewInitializer {
-//                        val textViewFeedBack =
-//                            it.findViewById<TextView>(R.id.textView_feed_back_pop_up)
-//                        textViewFeedBack.setSafeOnClickListener {
-//                            initializeFeedBackLayout()
-//                            CookieBar.dismiss(activity)
-//                        }
-//                    }
-//                    .setSwipeToDismiss(true)
-//                    .setDuration(2000)
-//                    .show()
                 windowManager = null
                 isFabEnable = false
 
@@ -1069,7 +1063,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     .setInterpolator(BounceInterpolator())
                     .setStartDelay(0)
                     .start()
-
 
                 if (Settings.canDrawOverlays(activity)) {
                     windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -1122,7 +1115,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white))
                     floating_action_button.backgroundTintList =
                         ColorStateList.valueOf(ContextCompat.getColor(this, R.color.black))
-
 
                     if (audioRecording || videoRecording || screenshotDrawing) {
                         workingAnimation =
@@ -1203,22 +1195,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         buttonClicks()
                     }
                     initializeLoggerBirdStartPopup(activity = activity)
-//                    CookieBar.build(activity)
-//                        .setCustomView(R.layout.loggerbird_start_popup)
-//                        .setCustomViewInitializer {
-//                            val textViewSessionTime =
-//                                it.findViewById<TextView>(R.id.textView_session_time_pop_up)
-//                            textViewSessionTime.text =
-//                                resources.getString(R.string.total_session_time) + timeStringDay(
-//                                    totalSessionTime()
-//                                ) + "\n" + resources.getString(R.string.last_session_time) + timeStringDay(
-//                                    lastSessionTime()
-//                                )
-//                        }
-//                        .setSwipeToDismiss(true)
-//                        .setEnableAutoDismiss(true)
-//                        .setDuration(3000)
-//                        .show()
                     isFabEnable = true
 
                 } else {
@@ -7902,25 +7878,28 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
 
                 toolbarGitlab = viewGitlab.findViewById(R.id.toolbar_gitlab)
-                autoTextViewGitlabProject =
-                    viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
+                autoTextViewGitlabProject = viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
                 editTextGitlabTitle = viewGitlab.findViewById(R.id.editText_gitlab_title)
-                editTextGitlabDescription =
-                    viewGitlab.findViewById(R.id.editText_gitlab_description)
+                editTextGitlabDescription = viewGitlab.findViewById(R.id.editText_gitlab_description)
                 editTextGitlabWeight = viewGitlab.findViewById(R.id.editText_gitlab_weight)
-                spinnerGitlabMilestone = viewGitlab.findViewById(R.id.spinner_gitlab_milestone)
-                spinnerGitlabAssignee = viewGitlab.findViewById(R.id.spinner_gitlab_assignee)
-                spinnerGitlabLabels = viewGitlab.findViewById(R.id.spinner_gitlab_labels)
-                spinnerGitlabConfidentiality =
-                    viewGitlab.findViewById(R.id.spinner_gitlab_confidentiality)
+                autoTextViewGitlabMilestone = viewGitlab.findViewById(R.id.auto_textView_gitlab_milestone)
+                autoTextViewGitlabAssignee = viewGitlab.findViewById(R.id.auto_textView_gitlab_assignee)
+                autoTextViewGitlabLabels = viewGitlab.findViewById(R.id.auto_textView_gitlab_labels)
+                autoTextViewGitlabConfidentiality = viewGitlab.findViewById(R.id.auto_textView_gitlab_confidentiality)
                 textViewGitlabDueDate = viewGitlab.findViewById(R.id.textView_gitlab_due_date)
                 buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
                 buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
                 progressBarGitlab = viewGitlab.findViewById(R.id.gitlab_progressbar)
-                progressBarGitlabLayout =
-                    viewGitlab.findViewById(R.id.gitlab_progressbar_background)
-                recyclerViewGitlabAttachment =
-                    viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
+                linearLayoutGitlabConfidentiality = viewGitlab.findViewById(R.id.linearLayout_gitlab_confidentiality)
+                linearLayoutGitlabMilestone = viewGitlab.findViewById(R.id.linearLayout_gitlab_milestone)
+                textViewGitlabMilestone = viewGitlab.findViewById(R.id.textView_gitlab_milestone)
+                imageViewGitlabMilestone = viewGitlab.findViewById(R.id.imageView_delete_milestone)
+                linearLayoutGitlabAssignee = viewGitlab.findViewById(R.id.linearLayout_gitlab_assignee)
+                linearLayoutGitlabLabels = viewGitlab.findViewById(R.id.linearLayout_gitlab_labels)
+                textViewGitlabLabels = viewGitlab.findViewById(R.id.textView_gitlab_labels)
+                imageViewGitlabLabels = viewGitlab.findViewById(R.id.imageView_delete_labels)
+                progressBarGitlabLayout = viewGitlab.findViewById(R.id.gitlab_progressbar_background)
+                recyclerViewGitlabAttachment = viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
                 editTextGitlabWeight.filters = arrayOf<InputFilter>(
                     InputTypeFilter(
                         "0",
@@ -8068,20 +8047,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (checkGitlabTitleEmpty()) {
                 progressBarGitlabLayout.visibility = View.VISIBLE
                 progressBarGitlab.visibility = View.VISIBLE
-//                attachProgressBar()
                 gitlabAuthentication.gatherGitlabEditTextDetails(
                     editTextTitle = editTextGitlabTitle,
                     editTextDescription = editTextGitlabDescription,
                     editTextWeight = editTextGitlabWeight
                 )
-                gitlabAuthentication.gatherGitlabProjectSpinnerDetails(
-                    spinnerAssignee = spinnerGitlabAssignee,
-                    spinnerLabels = spinnerGitlabLabels,
-                    spinnerMilestone = spinnerGitlabMilestone,
-                    spinnerConfidentiality = spinnerGitlabConfidentiality
-                )
                 gitlabAuthentication.gatherGitlabProjectAutoTextDetails(
-                    autoTextViewProject = autoTextViewGitlabProject
+                    autoTextViewProject = autoTextViewGitlabProject,
+                    autoTextViewLabels = autoTextViewGitlabLabels,
+                    autoTextViewConfidentiality = autoTextViewGitlabConfidentiality,
+                    autoTextViewMilestone = autoTextViewGitlabMilestone,
+                    autoTextViewAssignee = autoTextViewGitlabAssignee
+
                 )
                 gitlabAuthentication.callGitlab(
                     activity = activity,
@@ -8103,6 +8080,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
         }
 
+        textViewGitlabLabels.setSafeOnClickListener {
+            linearLayoutGitlabLabels.visibility = View.VISIBLE
+            textViewGitlabLabels.visibility = View.GONE
+        }
+
+        textViewGitlabMilestone.setSafeOnClickListener {
+            linearLayoutGitlabMilestone.visibility = View.VISIBLE
+            textViewGitlabMilestone.visibility = View.GONE
+
+        }
+
         buttonGitlabCancel.setSafeOnClickListener {
             removeGitlabLayout()
             if (controlFloatingActionButtonView()) {
@@ -8110,6 +8098,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
         }
     }
+
+
 
     /**
      * This method is used for initializing gitlab attachment recyclerView.
@@ -8150,13 +8140,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
         initializeGitlabProject(arrayListGitlabProjects = arrayListGitlabProjects)
 
-        initializeGitLabAssignee(arrayListGitlabAssignee = arrayListGitlabAssignee)
+        initializeGitlabAssignee(arrayListGitlabAssignee = arrayListGitlabAssignee)
 
-        initializeGitLabMilestones(arrayListGitlabMilestones = arrayListGitlabMilestones)
+        initializeGitlabMilestones(arrayListGitlabMilestones = arrayListGitlabMilestones)
 
-        initializeGitLabLabels(arrayListGitlabLabels = arrayListGitlabLabels)
+        initializeGitlabLabels(arrayListGitlabLabels = arrayListGitlabLabels)
 
-        initializeGitLabConfidentiality(arrayListGitlabConfidentiality = arrayListGitlabConfidentiality)
+        initializeGitlabConfidentiality(arrayListGitlabConfidentiality = arrayListGitlabConfidentiality)
 
         progressBarGitlab.visibility = View.GONE
         progressBarGitlabLayout.visibility = View.GONE
@@ -8166,6 +8156,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for initializing project spinner in the loggerbird_gitlab_popup.
      * @param arrayListGitlabProjects is used for getting the project list for project spinner.
      */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     internal fun initializeGitlabProject(
         arrayListGitlabProjects: ArrayList<String>
@@ -8184,6 +8175,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             false
         }
 
+        autoTextViewGitlabConfidentiality.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewGitlab)
+        }
+
         autoTextViewGitlabProject.setOnItemClickListener { parent, view, position, id ->
             gitlabAuthentication.gitlabProjectPosition(projectPosition = position)
 
@@ -8200,120 +8195,144 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+
     /**
-     * This method is used for initializing assignee spinner in the loggerbird_gitlab_popup.
-     * @param arrayListGitlabAssignee is used for getting the assignee list for assignee spinner.
+     * This method is used for initializing project spinner in the loggerbird_gitlab_popup.
+     * @param arrayListGitlabProjects is used for getting the project list for project spinner.
      */
-    internal fun initializeGitLabAssignee(
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeGitlabAssignee(
         arrayListGitlabAssignee: ArrayList<String>
     ) {
-        spinnerGitlabAssigneeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabAssignee)
-        spinnerGitlabAssigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGitlabAssignee.adapter = spinnerGitlabAssigneeAdapter
 
-        spinnerGitlabAssignee.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
+        autoTextViewGitlabAssigneeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabAssignee)
+        autoTextViewGitlabAssignee.setAdapter(autoTextViewGitlabAssigneeAdapter)
 
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                gitlabAuthentication.gitlabAssigneePosition(assigneePosition = position)
-            }
+        if (arrayListGitlabAssignee.isNotEmpty() && autoTextViewGitlabAssignee.text.isEmpty()) {
+            autoTextViewGitlabAssignee.setText(arrayListGitlabAssignee[0], false)
+        }
+
+        autoTextViewGitlabAssignee.setOnTouchListener { v, event ->
+            autoTextViewGitlabAssignee.showDropDown()
+            false
+        }
+
+        autoTextViewGitlabAssignee.setOnItemClickListener { parent, view, position, id ->
+            gitlabAuthentication.gitlabAssigneePosition(assigneePosition = position)
+        }
+
+        autoTextViewGitlabAssignee.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewGitlab)
         }
     }
 
-    /**
-     * This method is used for initializing label spinner in the loggerbird_gitlab_popup.
-     * @param arrayListGitlabLabels is used for getting the label list for label spinner.
-     */
-    internal fun initializeGitLabLabels(
-        arrayListGitlabLabels: ArrayList<String>
-    ) {
-        spinnerGitlabLabelsAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabLabels)
-        spinnerGitlabLabelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGitlabLabels.adapter = spinnerGitlabLabelsAdapter
-
-        spinnerGitlabLabels.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                gitlabAuthentication.gitlabLabelPosition(labelPosition = position)
-            }
-        }
-    }
 
     /**
-     * This method is used for initializing confidentiality spinner in the loggerbird_gitlab_popup.
-     * @param arrayListGitlabConfidentiality is used for getting the confidentiality list for confidentiality spinner.
+     * This method is used for initializing project spinner in the loggerbird_gitlab_popup.
+     * @param arrayListGitlabMilestones is used for getting the milestone list.
      */
-    internal fun initializeGitLabConfidentiality(
-        arrayListGitlabConfidentiality: ArrayList<String>
-    ) {
-        spinnerGitlabConfidentialityAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabConfidentiality)
-        spinnerGitlabConfidentialityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGitlabConfidentiality.adapter = spinnerGitlabConfidentialityAdapter
-
-        spinnerGitlabConfidentiality.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    gitlabAuthentication.gitlabConfidentialityPosition(confidentialityPosition = position)
-                }
-            }
-    }
-
-    /**
-     * This method is used for initializing milestone spinner in the loggerbird_gitlab_popup.
-     * @param arrayListGitlabMilestones is used for getting the milestone list for milestone spinner.
-     */
-    internal fun initializeGitLabMilestones(
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeGitlabMilestones(
         arrayListGitlabMilestones: ArrayList<String>
     ) {
-        spinnerGitlabMilestoneAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListGitlabMilestones)
-        spinnerGitlabMilestoneAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGitlabMilestone.adapter = spinnerGitlabMilestoneAdapter
 
-        spinnerGitlabMilestoneAdapter.notifyDataSetChanged()
+        autoTextViewGitlabMilestoneAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabMilestones)
+        autoTextViewGitlabMilestone.setAdapter(autoTextViewGitlabMilestoneAdapter)
 
-        spinnerGitlabMilestone.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    TODO("Not yet implemented")
-                }
+        if (arrayListGitlabMilestones.isNotEmpty() && autoTextViewGitlabMilestone.text.isEmpty()) {
+            autoTextViewGitlabMilestone.setText(arrayListGitlabMilestones[0], false)
+        }
 
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = position)
-                }
-            }
+        autoTextViewGitlabMilestone.setOnTouchListener { v, event ->
+            autoTextViewGitlabMilestone.showDropDown()
+            false
+        }
+
+        autoTextViewGitlabMilestone.setOnItemClickListener { parent, view, position, id ->
+            gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = position)
+        }
+
+        imageViewGitlabMilestone.setSafeOnClickListener {
+            linearLayoutGitlabMilestone.visibility = View.GONE
+            textViewGitlabMilestone.visibility = View.VISIBLE
+            gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = 0)
+        }
+
+        autoTextViewGitlabMilestone.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewGitlab)
+        }
+    }
+
+
+    /**
+     * This method is used for initializing project spinner in the loggerbird_gitlab_popup.
+     * @param arrayListGitlabConfidentiality is used for getting the confidentiality list.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeGitlabConfidentiality(
+        arrayListGitlabConfidentiality: ArrayList<String>
+    ) {
+
+        autoTextViewGitlabConfidentialityAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabConfidentiality)
+        autoTextViewGitlabConfidentiality.setAdapter(autoTextViewGitlabConfidentialityAdapter)
+
+        if (arrayListGitlabConfidentiality.isNotEmpty() && autoTextViewGitlabConfidentiality.text.isEmpty()) {
+            autoTextViewGitlabConfidentiality.setText(arrayListGitlabConfidentiality[0], false)
+        }
+
+        autoTextViewGitlabConfidentiality.setOnTouchListener { v, event ->
+            autoTextViewGitlabConfidentiality.showDropDown()
+            false
+        }
+
+        autoTextViewGitlabConfidentiality.setOnItemClickListener { parent, view, position, id ->
+            gitlabAuthentication.gitlabConfidentialityPosition(confidentialityPosition = position)
+
+        }
+
+        autoTextViewGitlabConfidentiality.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewGitlab)
+        }
+    }
+
+    /**
+     * This method is used for initializing project spinner in the loggerbird_gitlab_popup.
+     * @param arrayListGitlabLabels is used for getting the label list.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeGitlabLabels(
+        arrayListGitlabLabels: ArrayList<String>
+    ) {
+
+        autoTextViewGitlabLabelsAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabLabels)
+        autoTextViewGitlabLabels.setAdapter(autoTextViewGitlabLabelsAdapter)
+
+        if (arrayListGitlabLabels.isNotEmpty() && autoTextViewGitlabLabels.text.isEmpty()) {
+            autoTextViewGitlabLabels.setText(arrayListGitlabLabels[0], false)
+        }
+
+        autoTextViewGitlabLabels.setOnTouchListener { v, event ->
+            autoTextViewGitlabLabels.showDropDown()
+            false
+        }
+
+        autoTextViewGitlabLabels.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboard(activity = activity, view = viewGitlab)
+        }
+
+        autoTextViewGitlabLabels.setOnItemClickListener { parent, view, position, id ->
+            gitlabAuthentication.gitlabLabelPosition(labelPosition = position)
+        }
+
+        imageViewGitlabLabels.setSafeOnClickListener {
+            linearLayoutGitlabLabels.visibility = View.GONE
+            textViewGitlabLabels.visibility = View.VISIBLE
+            gitlabAuthentication.gitlabLabelPosition(labelPosition = 0)
+        }
     }
 
 
@@ -9226,42 +9245,28 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     windowManagerParamsBaseCamp
                 )
 
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
+                activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
                 activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
                 buttonBasecampCancel = viewBasecamp.findViewById(R.id.button_basecamp_cancel)
                 buttonBasecampCreate = viewBasecamp.findViewById(R.id.button_basecamp_create)
                 toolbarBasecamp = viewBasecamp.findViewById(R.id.toolbar_basecamp)
-                autoTextViewBasecampProject =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_project)
-                autoTextViewBasecampAssignee =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_assignee)
-                autoTextViewBasecampCategory =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_category)
-                autoTextViewBasecampNotify =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_notify)
-                editTextBasecampDescriptionMessage =
-                    viewBasecamp.findViewById(R.id.editText_basecamp_description_messsage)
-                editTextBasecampDescriptionTodo =
-                    viewBasecamp.findViewById(R.id.editText_basecamp_description_todo)
-                editTextBasecampTitle =
-                    viewBasecamp.findViewById(R.id.editText_basecamp_title)
+                autoTextViewBasecampProject = viewBasecamp.findViewById(R.id.auto_textView_basecamp_project)
+                autoTextViewBasecampAssignee = viewBasecamp.findViewById(R.id.auto_textView_basecamp_assignee)
+                autoTextViewBasecampCategory = viewBasecamp.findViewById(R.id.auto_textView_basecamp_category)
+                autoTextViewBasecampNotify = viewBasecamp.findViewById(R.id.auto_textView_basecamp_notify)
+                editTextBasecampDescriptionMessage = viewBasecamp.findViewById(R.id.editText_basecamp_description_messsage)
+                editTextBasecampDescriptionTodo = viewBasecamp.findViewById(R.id.editText_basecamp_description_todo)
+                editTextBasecampTitle = viewBasecamp.findViewById(R.id.editText_basecamp_title)
                 editTextBasecampContent = viewBasecamp.findViewById(R.id.editText_basecamp_content)
                 editTextBasecampName = viewBasecamp.findViewById(R.id.editText_basecamp_name)
                 imageViewBasecampAssignee = viewBasecamp.findViewById(R.id.imageView_assignee_add)
                 imageViewBasecampNotify = viewBasecamp.findViewById(R.id.imageView_notify_add)
-                cardViewBasecampAssigneeList =
-                    viewBasecamp.findViewById(R.id.cardView_assignee_list)
+                cardViewBasecampAssigneeList = viewBasecamp.findViewById(R.id.cardView_assignee_list)
                 cardViewBasecampNotifyList = viewBasecamp.findViewById(R.id.cardView_notify_list)
-                recyclerViewBasecampAssigneeList =
-                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_assignee_list)
-                recyclerViewBasecampNotifyList =
-                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_notify_list)
-                recyclerViewBasecampAttachmentList =
-                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_attachment)
-                imageButtonBasecampRemoveDate =
-                    viewBasecamp.findViewById(R.id.image_button_basecamp_remove_date)
+                recyclerViewBasecampAssigneeList = viewBasecamp.findViewById(R.id.recycler_view_basecamp_assignee_list)
+                recyclerViewBasecampNotifyList = viewBasecamp.findViewById(R.id.recycler_view_basecamp_notify_list)
+                recyclerViewBasecampAttachmentList = viewBasecamp.findViewById(R.id.recycler_view_basecamp_attachment)
+                imageButtonBasecampRemoveDate = viewBasecamp.findViewById(R.id.image_button_basecamp_remove_date)
                 imageViewBasecampDate = viewBasecamp.findViewById(R.id.imageView_start_date)
                 scrollViewBasecamp = viewBasecamp.findViewById(R.id.scrollView_basecamp)
                 scrollViewBasecamp.setOnTouchListener { v, event ->
@@ -10667,15 +10672,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     viewClubhouse.findViewById(R.id.editText_clubhouse_story_name)
                 editTextClubhouseStoryDescription =
                     viewClubhouse.findViewById(R.id.editText_clubhouse_description)
-                spinnerClubhouseRequester =
-                    viewClubhouse.findViewById(R.id.spinner_clubhouse_requester)
-                spinnerClubhouseStoryType =
-                    viewClubhouse.findViewById(R.id.spinner_clubhouse_story_type)
+                autoTextViewClubhouseRequester =
+                    viewClubhouse.findViewById(R.id.auto_textView_clubhouse_requester)
+                autoTextViewClubhouseStoryType =
+                    viewClubhouse.findViewById(R.id.auto_textView_clubhouse_story_type)
                 recyclerViewClubhouseAttachment =
                     viewClubhouse.findViewById(R.id.recycler_view_clubhouse_attachment)
                 autoTextViewClubhouseProject =
                     viewClubhouse.findViewById(R.id.auto_textview_clubhouse_project)
-                spinnerClubhouseEpic = viewClubhouse.findViewById(R.id.spinner_clubhouse_epic)
+                autoTextViewClubhouseEpic = viewClubhouse.findViewById(R.id.auto_textView_clubhouse_epic)
                 textViewClubhouseDueDate =
                     viewClubhouse.findViewById(R.id.textView_clubhouse_due_date)
                 editTextClubhouseEstimate =
@@ -10683,6 +10688,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 progressBarClubhouse = viewClubhouse.findViewById(R.id.clubhouse_progressbar)
                 progressBarClubhouseLayout =
                     viewClubhouse.findViewById(R.id.clubhouse_progressbar_background)
+                textViewClubhouseEpic = viewClubhouse.findViewById(R.id.textView_clubhouse_epic)
+                linearLayoutClubhouseEpic = viewClubhouse.findViewById(R.id.linearLayout_clubhouse_epic)
+                imageViewClubhouseDueDate = viewClubhouse.findViewById(R.id.imageView_delete_clubhouse_dueDate)
 
                 clubhouseAuthentication.callClubhouse(
                     activity = activity,
@@ -10708,16 +10716,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for initializing project autoCompleteTextView in the loggerbird_clubhouse_popup.
      * @param arrayListClubhouseProjects is used for getting the project list for project autoCompleteTextView.
      */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     internal fun initializeClubhouseProject(
         arrayListClubhouseProjects: ArrayList<String>
     ) {
 
-        autoTextViewClubhouseProjectAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            arrayListClubhouseProjects
-        )
+        autoTextViewClubhouseProjectAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseProjects)
         autoTextViewClubhouseProject.setAdapter(autoTextViewClubhouseProjectAdapter)
 
         if (arrayListClubhouseProjects.isNotEmpty() && autoTextViewClubhouseProject.text.isEmpty()) {
@@ -10747,6 +10752,35 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+
+    /**
+     * This method is used for initializing project autoCompleteTextView in the loggerbird_clubhouse_popup.
+     * @param arrayListClubhouseStoryType is used for getting the project story type for project autoCompleteTextView.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeClubhouseStoryType(
+        arrayListClubhouseStoryType: ArrayList<String>
+    ) {
+        autoTextViewClubhouseStoryTypeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseStoryType)
+        autoTextViewClubhouseStoryType.setAdapter(autoTextViewClubhouseStoryTypeAdapter)
+
+        if (arrayListClubhouseStoryType.isNotEmpty() && autoTextViewClubhouseStoryType.text.isEmpty()) {
+            autoTextViewClubhouseStoryType.setText(arrayListClubhouseStoryType[0], false)
+        }
+
+        autoTextViewClubhouseStoryType.setOnTouchListener { v, event ->
+            autoTextViewClubhouseStoryType.showDropDown()
+            false
+        }
+
+        autoTextViewClubhouseStoryType.setOnItemClickListener { parent, view, position, id ->
+            clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
+
+            hideKeyboard(activity = activity, view = viewClubhouse)
+        }
+    }
+
     /**
      * This method is used for initializing epic autoCompleteTextView in the loggerbird_clubhouse_popup.
      * @param arrayListClubhouseEpic is used for getting the epic list for epic autoCompleteTextView.
@@ -10755,26 +10789,47 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseEpic(
         arrayListClubhouseEpic: ArrayList<String>
     ) {
+        autoTextViewClubhouseEpicAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseEpic)
+        autoTextViewClubhouseEpic.setAdapter(autoTextViewClubhouseEpicAdapter)
 
-        spinnerClubhouseEpicAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseEpic)
-        spinnerClubhouseEpicAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerClubhouseEpic.adapter = spinnerClubhouseEpicAdapter
-        spinnerClubhouseEpicAdapter.notifyDataSetChanged()
+        if (arrayListClubhouseEpic.isNotEmpty() && autoTextViewClubhouseEpic.text.isEmpty()) {
+            autoTextViewClubhouseEpic.setText(arrayListClubhouseEpic[0], false)
+        }
 
-        spinnerClubhouseEpic.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
-            }
+        autoTextViewClubhouseEpic.setOnTouchListener { v, event ->
+            autoTextViewClubhouseEpic.showDropDown()
+            false
+        }
 
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
-            }
+        autoTextViewClubhouseEpic.setOnItemClickListener { parent, view, position, id ->
+            clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
+            hideKeyboard(activity = activity, view = viewClubhouse)
+        }
+    }
+
+    /**
+     * This method is used for initializing epic autoCompleteTextView in the loggerbird_clubhouse_popup.
+     * @param arrayListClubhouseRequester is used for getting the requester user list for epic autoCompleteTextView.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeClubhouseRequester(
+        arrayListClubhouseRequester: ArrayList<String>
+    ) {
+        autoTextViewClubhouseRequesterAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseRequester)
+        autoTextViewClubhouseRequester.setAdapter(autoTextViewClubhouseRequesterAdapter)
+
+        if (arrayListClubhouseRequester.isNotEmpty() && autoTextViewClubhouseRequester.text.isEmpty()) {
+            autoTextViewClubhouseRequester.setText(arrayListClubhouseRequester[0], false)
+        }
+
+        autoTextViewClubhouseRequester.setOnTouchListener { v, event ->
+            autoTextViewClubhouseRequester.showDropDown()
+            false
+        }
+
+        autoTextViewClubhouseRequester.setOnItemClickListener { parent, view, position, id ->
+            clubhouseAuthentication.clubhouseUserPosition(userPosition = position)
+            hideKeyboard(activity = activity, view = viewClubhouse)
         }
     }
 
@@ -10791,7 +10846,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListClubhouseProjects: ArrayList<String>,
         arrayListClubhouseStoryType: ArrayList<String>,
         arrayListClubhouseEpic: ArrayList<String>
-
     ) {
         initializeClubhouseProject(arrayListClubhouseProjects)
         initializeClubhouseRequester(arrayListClubhouseRequester)
@@ -10799,36 +10853,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         initializeClubhouseEpic(arrayListClubhouseEpic)
         progressBarClubhouse.visibility = View.GONE
         progressBarClubhouseLayout.visibility = View.GONE
-    }
-
-    /**
-     * This method is used for initializing story type autoCompleteTextView in the loggerbird_clubhouse_popup.
-     * @param arrayListClubhouseStoryType is used for getting the story type list for story type autoCompleteTextView.
-     */
-    internal fun initializeClubhouseStoryType(
-        arrayListClubhouseStoryType: ArrayList<String>
-    ) {
-        spinnerClubhouseStoryTypeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseStoryType)
-        spinnerClubhouseStoryTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerClubhouseStoryType.adapter = spinnerClubhouseStoryTypeAdapter
-        spinnerClubhouseStoryTypeAdapter.notifyDataSetChanged()
-
-        spinnerClubhouseStoryType.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    clubhouseAuthentication.clubhouseStoryTypePosition(storyTypePosition = position)
-                }
-            }
     }
 
     /**
@@ -10879,16 +10903,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         var mYear = calendar.get(Calendar.YEAR)
         var mMonth = calendar.get(Calendar.MONTH)
         var mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
-        var dueDate: String = ""
-        var dueDateFormat: String = ""
-        calendarViewClubhouseLayout =
-            calendarViewClubhouseView.findViewById(R.id.clubhouse_calendar_view_layout)
-        calendarViewClubhouseDueDate =
-            calendarViewClubhouseView.findViewById(R.id.calendarView_clubhouse_due_date)
-        buttonCalendarViewClubhouseCancel =
-            calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_cancel)
-        buttonCalendarViewClubhouseOk =
-            calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_ok)
+        var dueDate: String? = null
+        var dueDateFormat: String? = null
+        calendarViewClubhouseLayout = calendarViewClubhouseView.findViewById(R.id.clubhouse_calendar_view_layout)
+        calendarViewClubhouseDueDate = calendarViewClubhouseView.findViewById(R.id.calendarView_clubhouse_due_date)
+        buttonCalendarViewClubhouseCancel = calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_cancel)
+        buttonCalendarViewClubhouseOk = calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_ok)
 
         calendarViewClubhouseDueDate.minDate = System.currentTimeMillis()
         if (calendarViewClubhouseDate != null) {
@@ -10900,12 +10920,22 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             mMonth = month + 1
             mDayOfMonth = dayOfMonth
             calendarViewClubhouseDate = viewStartDate.date
-            dueDate = "$mMonth/$mDayOfMonth/$mYear"
+            dueDate = "$mDayOfMonth/$mMonth/$mYear"
             dueDateFormat = "$mYear-$mMonth-$mDayOfMonth"
             activity.runOnUiThread {
                 textViewClubhouseDueDate.text = dueDate
                 textViewClubhouseDueDate.setTextColor(resources.getColor(R.color.black))
+                imageViewClubhouseDueDate.visibility = View.VISIBLE
             }
+            clubhouseAuthentication.dueDate = dueDateFormat
+        }
+
+        imageViewClubhouseDueDate.setOnClickListener {
+            activity.runOnUiThread {
+                imageViewClubhouseDueDate.visibility = View.GONE
+                textViewClubhouseDueDate.text = null
+            }
+            clubhouseAuthentication.dueDate = null
         }
 
         buttonCalendarViewClubhouseCancel.setOnClickListener {
@@ -10913,9 +10943,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
 
         buttonCalendarViewClubhouseOk.setOnClickListener {
-            if (dueDate != null) {
-                clubhouseAuthentication.dueDate = dueDateFormat
-            }
+            clubhouseAuthentication.dueDate = dueDateFormat
             detachClubhouseDatePicker()
         }
     }
@@ -10932,54 +10960,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     /**
-     * This method is used for initializing requester autoCompleteTextView in the loggerbird_clubhouse_popup.
-     * @param arrayListClubhouseRequester is used for getting the requester list for requester autoCompleteTextView.
-     */
-    internal fun initializeClubhouseRequester(
-        arrayListClubhouseRequester: ArrayList<String>
-    ) {
-        spinnerClubhouseRequesterAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListClubhouseRequester)
-        spinnerClubhouseRequesterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerClubhouseRequester.adapter = spinnerClubhouseRequesterAdapter
-        spinnerClubhouseRequesterAdapter.notifyDataSetChanged()
-
-        spinnerClubhouseRequester.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    clubhouseAuthentication.clubhouseUserPosition(userPosition = position)
-                }
-            }
-    }
-
-    /**
      * This method is used for initializing button clicks of buttons that are inside in the loggerbird_clubhouse_popup.
      * @param filePathMedia is used for getting the reference of current media file.
      */
     @RequiresApi(Build.VERSION_CODES.M)
     private fun buttonClicksClubhouse(filePathMedia: File) {
         buttonClubhouseCreate.setSafeOnClickListener {
-            if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty() &&
-                checkClubhouseStoryDueDateEmpty() && checkClubhouseStoryEstimatePoint()
+            if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty()
             ) {
 
-                clubhouseAuthentication.gatherClubhouseSpinnerDetails(
-                    spinnerUser = spinnerClubhouseRequester,
-                    spinnerStoryType = spinnerClubhouseStoryType,
-                    spinnerEpic = spinnerClubhouseEpic
-                )
-
                 clubhouseAuthentication.gatherClubhouseProjectAutoTextDetails(
-                    autoTextViewProject = autoTextViewClubhouseProject
+                    autoTextViewProject = autoTextViewClubhouseProject,
+                    autoTextViewEpic = autoTextViewClubhouseEpic,
+                    autoTextViewStoryType = autoTextViewClubhouseStoryType,
+                    autoTextViewRequester = autoTextViewClubhouseRequester
                 )
 
                 clubhouseAuthentication.gatherClubhouseEditTextDetails(
@@ -11015,6 +11009,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
             }
+        }
+
+        textViewClubhouseEpic.setSafeOnClickListener {
+            linearLayoutClubhouseEpic.visibility = View.VISIBLE
+            textViewClubhouseEpic.visibility = View.GONE
         }
     }
 
@@ -11070,23 +11069,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     /**
-     * This method used for estimate point field is not empty in clubhouse layout.
-     * @return Boolean value.
-     */
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun checkClubhouseStoryEstimatePoint(): Boolean {
-        if (editTextClubhouseEstimate.text.toString().isNotEmpty()) {
-            return true
-        } else {
-            defaultToast.attachToast(
-                activity = activity,
-                toastMessage = activity.resources.getString(R.string.textView_clubhouse_story_estimate_empty)
-            )
-        }
-        return false
-    }
-
-    /**
      * This method is used for removing loggerbird_clubhouse_popup from window.
      */
     internal fun removeClubhouseLayout() {
@@ -11132,7 +11114,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         return arrayListClubhouseFileName
     }
 
-
+    /**
+     * This method is used for initializing Loggerbird activation popup.
+     * @param activity is used for getting reference of current activity.
+     */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initializeLoggerBirdActivatePopup(activity: Activity) {
         try {
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
@@ -11154,6 +11140,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 viewLoggerBirdActivatePopup,
                 windowManagerParamsLoggerBirdActivatePopup
             )
+
+            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+
             viewLoggerBirdActivatePopup.scaleX = 0F
             viewLoggerBirdActivatePopup.scaleY = 0F
             viewLoggerBirdActivatePopup.animate()
@@ -11163,10 +11153,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 .setInterpolator(BounceInterpolator())
                 .setStartDelay(0)
                 .start()
-            textViewLoggerBirdActivatePopupActivate =
-                viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_activate)
-            textViewLoggerBirdActivatePopupDismiss =
-                viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_dismiss)
+            textViewLoggerBirdActivatePopupActivate = viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_activate)
+            textViewLoggerBirdActivatePopupDismiss = viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_dismiss)
             initializeButtonClicksLoggerBirdActivatePopup(activity = activity)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -11178,6 +11166,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for removing Loggerbird activation popup.
+     */
     internal fun removeLoggerBirdActivateLayout() {
         if (this::viewLoggerBirdActivatePopup.isInitialized && windowManagerLoggerBirdActivatePopup != null) {
             (windowManagerLoggerBirdActivatePopup as WindowManager).removeViewImmediate(
@@ -11187,6 +11178,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing button clicks of Loggerbird activation popup.
+     * @param activity is used for getting reference of current activity.
+     */
     private fun initializeButtonClicksLoggerBirdActivatePopup(activity: Activity) {
         textViewLoggerBirdActivatePopupActivate.setSafeOnClickListener {
             initializeFloatingActionButton(activity = activity)
@@ -11198,13 +11193,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing Loggerbird start popup.
+     * @param activity is used for getting reference of current activity.
+     */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initializeLoggerBirdStartPopup(activity: Activity) {
         try {
             removeLoggerBirdDismissLayout()
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+
             viewLoggerBirdStartPopup =
                 LayoutInflater.from(activity)
                     .inflate(R.layout.loggerbird_start_popup, rootView, false)
+
             windowManagerParamsLoggerBirdStartPopup =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
@@ -11224,21 +11226,26 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     )
                 }
             windowManagerParamsLoggerBirdStartPopup.gravity = Gravity.TOP
-            windowManagerLoggerBirdStartPopup =
-                activity.getSystemService(Context.WINDOW_SERVICE)!!
-            (windowManagerLoggerBirdStartPopup as WindowManager).addView(
-                viewLoggerBirdStartPopup,
-                windowManagerParamsLoggerBirdStartPopup
-            )
-            viewLoggerBirdStartPopup.scaleX = 0F
-            viewLoggerBirdStartPopup.scaleY = 0F
-            viewLoggerBirdStartPopup.animate()
-                .scaleX(1F)
-                .scaleY(1F)
-                .setDuration(500)
-                .setInterpolator(BounceInterpolator())
-                .setStartDelay(0)
-                .start()
+            windowManagerLoggerBirdStartPopup = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerLoggerBirdStartPopup as WindowManager).addView(viewLoggerBirdStartPopup, windowManagerParamsLoggerBirdStartPopup)
+
+            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+
+            val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_in_from_top)
+            viewLoggerBirdStartPopup.animation = animation
+
+            viewLoggerBirdStartPopup.setOnTouchListener(object: OnSwipeTouchListener(this@LoggerBirdService) {
+                override fun onSwipeLeft() {
+                    Log.e("ViewSwipe", "Left")
+                    removeLoggerBirdStartLayout()
+                }
+                override fun onSwipeRight() {
+                    Log.e("ViewSwipe", "Right")
+                    removeLoggerBirdStartLayout()
+                }
+            })
+
             textViewLoggerBirdStartPopupSessionTime =
                 viewLoggerBirdStartPopup.findViewById(R.id.textView_session_time_pop_up)
             textViewLoggerBirdStartPopupSessionTime.text =
@@ -11251,6 +11258,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val timerTaskStartPopup = object : TimerTask() {
                 override fun run() {
                     activity.runOnUiThread {
+                        val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_out_to_top)
+                        viewLoggerBirdStartPopup.animation = animation
                         removeLoggerBirdStartLayout()
                     }
                 }
@@ -11263,6 +11272,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for removing Loggerbird start popup.
+     */
     internal fun removeLoggerBirdStartLayout() {
         if (this::viewLoggerBirdStartPopup.isInitialized && windowManagerLoggerBirdStartPopup != null) {
             (windowManagerLoggerBirdStartPopup as WindowManager).removeViewImmediate(
@@ -11272,6 +11284,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing Loggerbird close popup.
+     * @param activity is used for getting reference of current activity.
+     */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initializeLoggerBirdClosePopup(activity: Activity) {
         try {
             removeLoggerBirdStartLayout()
@@ -11298,21 +11315,30 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     )
                 }
             windowManagerParamsLoggerBirdDismissPopup.gravity = Gravity.TOP
-            windowManagerLoggerBirdDismissPopup =
-                activity.getSystemService(Context.WINDOW_SERVICE)!!
+            windowManagerLoggerBirdDismissPopup = activity.getSystemService(Context.WINDOW_SERVICE)!!
             (windowManagerLoggerBirdDismissPopup as WindowManager).addView(
                 viewLoggerBirdDismissPopup,
                 windowManagerParamsLoggerBirdDismissPopup
             )
-            viewLoggerBirdDismissPopup.scaleX = 0F
-            viewLoggerBirdDismissPopup.scaleY = 0F
-            viewLoggerBirdDismissPopup.animate()
-                .scaleX(1F)
-                .scaleY(1F)
-                .setDuration(500)
-                .setInterpolator(BounceInterpolator())
-                .setStartDelay(0)
-                .start()
+            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_in_from_top)
+            viewLoggerBirdDismissPopup.animation = animation
+
+            viewLoggerBirdDismissPopup.setOnTouchListener(object: OnSwipeTouchListener(this@LoggerBirdService) {
+                override fun onSwipeLeft() {
+                    Log.e("ViewSwipe", "Left")
+                    viewLoggerBirdDismissPopup.clearAnimation()
+                    removeLoggerBirdDismissLayout()
+
+                }
+                override fun onSwipeRight() {
+                    Log.e("ViewSwipe", "Right")
+                    viewLoggerBirdDismissPopup.clearAnimation()
+                    removeLoggerBirdDismissLayout()
+                }
+            })
+
             textViewLoggerBirdDismissPopupFeedBack =
                 viewLoggerBirdDismissPopup.findViewById(R.id.textView_feed_back_pop_up)
             initializeButtonClicksLoggerBirdDismissPopup()
@@ -11320,6 +11346,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val timerTaskDismissPopup = object : TimerTask() {
                 override fun run() {
                     activity.runOnUiThread {
+                        val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_out_to_top)
+                        viewLoggerBirdDismissPopup.animation = animation
                         removeLoggerBirdDismissLayout()
                     }
                 }
@@ -11332,6 +11360,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for removing Loggerbird close popup.
+     */
     internal fun removeLoggerBirdDismissLayout() {
         if (this::viewLoggerBirdDismissPopup.isInitialized && windowManagerLoggerBirdDismissPopup != null) {
             (windowManagerLoggerBirdDismissPopup as WindowManager).removeViewImmediate(
@@ -11341,6 +11372,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing button clicks of Loggerbird close popup.
+     */
     private fun initializeButtonClicksLoggerBirdDismissPopup() {
         textViewLoggerBirdDismissPopupFeedBack.setSafeOnClickListener {
             initializeFeedBackLayout()
@@ -11348,6 +11382,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing button clicks of Loggerbird file action popup to determine whether keep or clean files.
+     * @param activity is used for getting reference of current activity.
+     */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initializeLoggerBirdFileActionPopup(activity: Activity) {
         try {
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
@@ -11362,6 +11401,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                         PixelFormat.TRANSLUCENT
+
                     )
                 } else {
                     WindowManager.LayoutParams(
@@ -11379,6 +11419,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 viewLoggerBirdFileActionPopup,
                 windowManagerParamsLoggerBirdFileAction
             )
+
+            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
             viewLoggerBirdFileActionPopup.scaleX = 0F
             viewLoggerBirdFileActionPopup.scaleY = 0F
             viewLoggerBirdFileActionPopup.animate()
@@ -11403,6 +11446,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for removing Loggerbird file action popup.
+     */
     internal fun removeLoggerBirdFileActionLayout() {
         if (this::viewLoggerBirdFileActionPopup.isInitialized && windowManagerLoggerBirdFileActionPopup != null) {
             (windowManagerLoggerBirdFileActionPopup as WindowManager).removeViewImmediate(
@@ -11412,6 +11458,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing button clicks of Loggerbird file action popup.
+     */
     private fun initializeButtonClicksLoggerBirdFileActionPopup() {
         textViewLoggerBirdFileActionPopupDiscard.setSafeOnClickListener {
             if (this.controlFileAction) {
@@ -11429,6 +11478,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing Loggerbird unhandled exception popup.
+     * @param activity is used for getting reference of current activity.
+     * @param sharedPref is used for getting reference of shared preferences to keep file names in local database.
+     * @param filePath is used for getting reference of filepath.
+     */
     private fun initializeLoggerBirdUnhandledExceptionPopup(
         activity: Activity,
         sharedPref: SharedPreferences,
@@ -11465,6 +11520,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 viewLoggerBirdUnhandledExceptionPopup,
                 windowManagerParamsLoggerBirdUnhandledException
             )
+
+            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+
             viewLoggerBirdUnhandledExceptionPopup.scaleX = 0F
             viewLoggerBirdUnhandledExceptionPopup.scaleY = 0F
             viewLoggerBirdUnhandledExceptionPopup.animate()
@@ -11496,6 +11555,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for removing Loggerbird unhandled exception popup.
+     */
     internal fun removeLoggerBirdUnhandledExceptionLayout() {
         if (this::viewLoggerBirdUnhandledExceptionPopup.isInitialized && windowManagerLoggerBirdUnhandledException != null) {
             (windowManagerLoggerBirdUnhandledException as WindowManager).removeViewImmediate(
@@ -11505,6 +11567,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing button clicks of Loggerbird unhandled exception popup.
+     * @param activity is used for getting reference of current activity.
+     * @param sharedPref is used for getting reference of shared preferences to keep file names in local database.
+     * @param filePath is used for getting reference of filepath.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeButtonClicksLoggerBirdUnhandledExceptionPopup(
         sharedPref: SharedPreferences,
         filePath: File,

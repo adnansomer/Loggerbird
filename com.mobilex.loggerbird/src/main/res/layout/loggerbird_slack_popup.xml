@@ -25,7 +25,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/colorFab"
-                app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
+                app:navigationIcon="@drawable/ic_slack_logo_24dp"
                 app:menu="@menu/loggerbird_slack_toolbar_menu"
                 app:title="@string/textView_slack_title"
                 app:titleTextColor="@color/black">
