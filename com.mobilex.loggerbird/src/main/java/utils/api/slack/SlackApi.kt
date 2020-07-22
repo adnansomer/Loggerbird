@@ -697,7 +697,7 @@ internal class SlackApi {
                 }
             }
         }
-        timerQueue.schedule(timerTaskQueue, 180000)
+        timerQueue.schedule(timerTaskQueue, 1000)
     }
 
     /**

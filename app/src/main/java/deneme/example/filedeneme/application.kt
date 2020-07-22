@@ -22,7 +22,10 @@ class application : Application() {
             .build()
 
         LoggerBird.logInit(
-            context = this
+            context = this,
+            logLevel = LoggerBird.LogLevel.NONE
         )
+
+        LoggerBird.callCpuDetails()
     }
 }

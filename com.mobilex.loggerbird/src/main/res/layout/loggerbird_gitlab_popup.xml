@@ -21,12 +21,15 @@
             android:orientation="vertical">
 
             <androidx.appcompat.widget.Toolbar
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:id="@+id/toolbar_gitlab"
                 android:layout_width="match_parent"
+                android:layout_gravity="center"
                 android:layout_height="wrap_content"
                 android:background="@color/colorFab"
-                app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
                 app:title="@string/textView_gitlab_toolbar_title"
+                app:navigationIcon="@drawable/ic_gitlab_logo_24dp"
                 app:titleTextColor="@color/black">
             </androidx.appcompat.widget.Toolbar>
 
@@ -188,11 +191,22 @@
                                 android:textColor="@color/black"
                                 android:textSize="16sp">
                             </TextView>
-                            <Spinner
-                                android:id="@+id/spinner_gitlab_assignee"
+                        <LinearLayout
+                            android:id="@+id/linearLayout_gitlab_assignee"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:weightSum="10">
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_gitlab_assignee"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-                            </Spinner>
+                                android:layout_weight="10"
+                                android:layout_height="wrap_content"
+                                android:background="@null"
+                                android:dropDownHeight="100dp"
+                                android:singleLine="true">
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                        </LinearLayout>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
@@ -214,11 +228,43 @@
                                 android:textColor="@color/black"
                                 android:textSize="16sp">
                             </TextView>
-                            <Spinner
-                                android:id="@+id/spinner_gitlab_milestone"
+                            <TextView
+                                android:id="@+id/textView_gitlab_milestone"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-                            </Spinner>
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="5dp"
+                                android:layout_marginRight="5dp"
+                                android:layout_marginBottom="10dp"
+                                android:background="@null"
+                                android:gravity="top"
+                                android:textCursorDrawable="@color/colorBlack"
+                                android:hint="@string/textView_gitlab_milestone_enter"
+                                android:textSize="16sp">
+                            </TextView>
+                            <LinearLayout
+                                android:visibility="gone"
+                                android:id="@+id/linearLayout_gitlab_milestone"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:weightSum="10">
+                                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                    android:id="@+id/auto_textView_gitlab_milestone"
+                                    android:layout_width="match_parent"
+                                    android:layout_weight="10"
+                                    android:layout_height="wrap_content"
+                                    android:background="@null"
+                                    android:dropDownHeight="100dp"
+                                    android:singleLine="true">
+                                </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                                <ImageView
+                                    android:id="@+id/imageView_delete_milestone"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    app:srcCompat="@drawable/ic_delete_black_24dp">
+                                </ImageView>
+                            </LinearLayout>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
@@ -227,6 +273,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="7dp"
                         app:cardElevation="5dp">
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -240,11 +287,43 @@
                                 android:textColor="@color/black"
                                 android:textSize="16sp">
                             </TextView>
-                            <Spinner
-                                android:id="@+id/spinner_gitlab_labels"
+                            <TextView
+                                android:id="@+id/textView_gitlab_labels"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-                            </Spinner>
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="5dp"
+                                android:layout_marginRight="5dp"
+                                android:layout_marginBottom="10dp"
+                                android:background="@null"
+                                android:gravity="top"
+                                android:textCursorDrawable="@color/colorBlack"
+                                android:hint="@string/textView_gitlab_labels_enter"
+                                android:textSize="16sp">
+                            </TextView>
+                            <LinearLayout
+                                android:visibility="gone"
+                                android:id="@+id/linearLayout_gitlab_labels"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:weightSum="10">
+                                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                    android:id="@+id/auto_textView_gitlab_labels"
+                                    android:layout_width="match_parent"
+                                    android:layout_weight="10"
+                                    android:layout_height="wrap_content"
+                                    android:background="@null"
+                                    android:dropDownHeight="100dp"
+                                    android:singleLine="true">
+                                </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                                <ImageView
+                                    android:id="@+id/imageView_delete_labels"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    app:srcCompat="@drawable/ic_delete_black_24dp">
+                                </ImageView>
+                            </LinearLayout>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
@@ -266,11 +345,23 @@
                                 android:textColor="@color/black"
                                 android:textSize="16sp">
                             </TextView>
-                            <Spinner
-                                android:id="@+id/spinner_gitlab_confidentiality"
+                            <LinearLayout
+                                android:id="@+id/linearLayout_gitlab_confidentiality"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-                            </Spinner>
+                                android:layout_height="wrap_content"
+                                android:weightSum="10"
+                                android:orientation="horizontal">
+                                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                    android:id="@+id/auto_textView_gitlab_confidentiality"
+                                    android:layout_width="wrap_content"
+                                    android:layout_weight="10"
+                                    android:layout_height="wrap_content"
+                                    android:background="@null"
+                                    android:dropDownHeight="100dp"
+                                    android:singleLine="true">
+                                </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                            </LinearLayout>
+
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
@@ -302,9 +393,9 @@
                                 android:background="@null"
                                 android:cursorVisible="true"
                                 android:gravity="top"
+                                android:textCursorDrawable="@color/colorBlack"
                                 android:inputType="number"
                                 android:hint="@string/editText_gitlab_weight"
-                                android:textCursorDrawable="@color/colorBlack"
                                 android:textSize="16sp">
                             </com.google.android.material.textfield.TextInputEditText>
                         </LinearLayout>
@@ -337,7 +428,7 @@
                                 android:textCursorDrawable="@color/colorBlack"
                                 android:layout_marginBottom="10dp"
                                 android:textSize="16sp"
-                                android:text="@string/textView_gitlab_enter_due_date"
+                                android:hint="@string/textView_gitlab_enter_due_date"
                                 android:layout_marginEnd="5dp" />
 
                         </LinearLayout>
