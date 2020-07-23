@@ -573,9 +573,9 @@ internal class PivotalTrackerApi {
             hashMapLabel.clear()
             hashMapOwner.clear()
             arrayListPoints.clear()
-            gatherTaskProject()
             gatherTaskStoryType()
             gatherTaskPoints()
+            gatherTaskProject()
         } catch (e: Exception) {
             pivotalExceptionHandler(e = e)
         }

@@ -25,7 +25,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/colorFab"
-                app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
+                app:navigationIcon="@drawable/ic_clubhouse_logo_24dp"
                 app:title="@string/textView_clubhouse_toolbar_title"
                 app:titleTextColor="@color/black">
             </androidx.appcompat.widget.Toolbar>
@@ -108,11 +108,15 @@
                                 android:textColor="@color/black"
                                 android:textSize="16sp">
                             </TextView>
-                            <Spinner
-                                android:id="@+id/spinner_clubhouse_requester"
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_clubhouse_requester"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-                            </Spinner>
+                                android:layout_weight="10"
+                                android:layout_height="wrap_content"
+                                android:background="@null"
+                                android:dropDownHeight="100dp"
+                                android:singleLine="true">
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
@@ -134,11 +138,15 @@
                                 android:textColor="@color/black"
                                 android:textSize="16sp">
                             </TextView>
-                            <Spinner
-                                android:id="@+id/spinner_clubhouse_story_type"
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_clubhouse_story_type"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-                            </Spinner>
+                                android:layout_weight="10"
+                                android:layout_height="wrap_content"
+                                android:background="@null"
+                                android:dropDownHeight="100dp"
+                                android:singleLine="true">
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
@@ -235,11 +243,36 @@
                                 android:textColor="@color/black"
                                 android:textSize="16sp">
                             </TextView>
-                            <Spinner
-                                android:id="@+id/spinner_clubhouse_epic"
+                            <TextView
+                                android:id="@+id/textView_clubhouse_epic"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-                            </Spinner>
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="5dp"
+                                android:layout_marginRight="5dp"
+                                android:layout_marginBottom="10dp"
+                                android:background="@null"
+                                android:gravity="top"
+                                android:textCursorDrawable="@color/colorBlack"
+                                android:hint="@string/textView_clubhouse_epic_enter"
+                                android:textSize="16sp">
+                            </TextView>
+                        <LinearLayout
+                            android:visibility="gone"
+                            android:id="@+id/linearLayout_clubhouse_epic"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:weightSum="10">
+                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                                android:id="@+id/auto_textView_clubhouse_epic"
+                                android:layout_width="match_parent"
+                                android:layout_weight="10"
+                                android:layout_height="wrap_content"
+                                android:background="@null"
+                                android:dropDownHeight="100dp"
+                                android:singleLine="true">
+                            </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                        </LinearLayout>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
@@ -261,18 +294,33 @@
                                 android:textColor="@color/black"
                                 android:textSize="16sp">
                             </TextView>
-
+                            <LinearLayout
+                                android:visibility="visible"
+                                android:id="@+id/linearLayout_clubhouse_dueDate"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:weightSum="10">
                             <TextView
                                 android:id="@+id/textView_clubhouse_due_date"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="5dp"
+                                android:layout_weight="10"
                                 android:textCursorDrawable="@color/colorBlack"
                                 android:layout_marginBottom="10dp"
                                 android:textSize="16sp"
                                 android:hint="@string/textView_clubhouse_enter_due_date"
                                 android:layout_marginEnd="5dp" />
-
+                            <ImageView
+                                android:visibility="gone"
+                                android:id="@+id/imageView_delete_clubhouse_dueDate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                app:srcCompat="@drawable/ic_delete_black_24dp">
+                            </ImageView>
+                            </LinearLayout>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 

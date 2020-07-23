@@ -1,4 +1,4 @@
-package adapter.recyclerView.api.trello
+package adapter.recyclerView.api.bitbucket
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -14,32 +14,28 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
+import models.RecyclerViewModel
 import java.util.concurrent.TimeUnit
 import android.provider.Settings
 import android.widget.Button
-import android.widget.CheckBox
 import androidx.annotation.RequiresApi
 import constants.Constants
 import loggerbird.LoggerBird
-import models.recyclerView.RecyclerViewModelItem
-import services.LoggerBirdService
 
-//Custom recyclerView adapter class for trello item.
+//Custom recyclerView adapter class for Bitbucket attachment.
 /**
- * @param itemList is for getting the list of labels that will be used in recyclerView.
+ * @param fileList is for getting the list of files that will be used in recyclerView.
  * @param context is for getting reference from the application context.
  * @param activity is for getting reference of current activity in the application.
  * @param rootView is for getting reference of the view that is in the root of current activity.
  */
-internal class RecyclerViewTrelloItemAdapter(
-    private val itemList: ArrayList<RecyclerViewModelItem>,
-    private val checkList: ArrayList<Boolean>,
+internal class RecyclerViewBitbucketAttachmentAdapter(
+    private val fileList: ArrayList<RecyclerViewModel>,
     private val context: Context,
     private val activity: Activity,
-    private val rootView: View,
-    private val checkListPosition: Int
+    private val rootView: View
 ) :
-    RecyclerView.Adapter<RecyclerViewTrelloItemAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerViewBitbucketAttachmentAdapter.ViewHolder>() {
 
     /**
      * Default RecyclerView.Adapter class method.
@@ -50,7 +46,7 @@ internal class RecyclerViewTrelloItemAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_trello_item_item,
+                R.layout.recycler_view_bitbucket_item,
                 parent,
                 false
             )
@@ -62,7 +58,7 @@ internal class RecyclerViewTrelloItemAdapter(
      * @return size of the list that will be used in the recyclerview.
      */
     override fun getItemCount(): Int {
-        return itemList.size
+        return fileList.size
     }
 
     /**
@@ -72,19 +68,17 @@ internal class RecyclerViewTrelloItemAdapter(
      */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindItems(
-            item = itemList[position],
-            checkList = checkList,
-            itemAdapter = this,
+            item = fileList[position],
+            attachmentAdapter = this,
             position = position,
-            itemList = itemList,
+            fileList = fileList,
             context = context,
             activity = activity,
-            rootView = rootView,
-            checkListPosition = checkListPosition
+            rootView = rootView
         )
     }
 
-    //Inner ViewHolder class for RecyclerViewTrelloItemAdapter class.
+    //Inner ViewHolder class for RecyclerViewBitbucketAttachmentAdapter class.
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         //Global variables.
         private var windowManagerRecyclerViewItemPopup: Any? = null
@@ -96,92 +90,67 @@ internal class RecyclerViewTrelloItemAdapter(
 
         //Static variables.
         companion object {
-            internal var arrayListItemNames: ArrayList<RecyclerViewModelItem> = ArrayList()
-            internal var arrayListItemChecked: ArrayList<Boolean> = ArrayList()
+            internal lateinit var arrayListFilePaths: ArrayList<RecyclerViewModel>
         }
-
 
         /**
          * This method is used for binding the items into recyclerView.
          * @param item is used for getting reference of the base model that are used items in the recyclerView.
-         * @param itemAdapter is used for getting reference of the custom recyclerView adapter class.
+         * @param attachmentAdapter is used for getting reference of the custom recyclerView adapter class.
          * @param position is used for getting reference of the current position of the item.
-         * @param itemList is used for getting reference of the list of item that will be used in recyclerView.
+         * @param fileList is used for getting reference of the list of files that will be used in recyclerView.
          * @param context is for getting reference from the application context.
          * @param activity is for getting reference of current activity in the application.
          * @param rootView is for getting reference of the view that is in the root of current activity.
          */
         internal fun bindItems(
-            item: RecyclerViewModelItem,
-            itemAdapter: RecyclerViewTrelloItemAdapter,
+            item: RecyclerViewModel,
+            attachmentAdapter: RecyclerViewBitbucketAttachmentAdapter,
             position: Int,
-            itemList: ArrayList<RecyclerViewModelItem>,
-            checkList: ArrayList<Boolean>,
+            fileList: ArrayList<RecyclerViewModel>,
             context: Context,
             activity: Activity,
-            rootView: View,
-            checkListPosition: Int
+            rootView: View
         ) {
+            arrayListFilePaths = fileList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
-            val checkBox = itemView.findViewById<CheckBox>(R.id.checkBox_item)
-            arrayListItemNames = itemList
-            arrayListItemChecked = checkList
-//            if (arrayListItemChecked.size > position) {
-//                arrayListItemChecked.add(position , arrayListItemChecked[position])
-//            } else {
-//                arrayListItemChecked.add(position, false)
-//            }
-            if (RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames.size > checkListPosition) {
-                if (RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[checkListPosition].checkListName] != null) {
-                    checkBox.isChecked =
-                        RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[checkListPosition].checkListName]!![position]
-                }
-            }
-            textViewFileName.text = item.itemName
+            textViewFileName.text = item.file.name
             imageButtonCross.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
-                        itemList = itemList,
+                        fileList = fileList,
                         position = position,
-                        itemAdapter = itemAdapter
+                        attachmentAdapter = attachmentAdapter
                     )
                 }
             }
-            checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
-                arrayListItemChecked[position] = isChecked
-                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[checkListPosition].checkListName] =
-                    arrayListItemChecked
 
-            }
-//            if(checkListPosition == position){
-//                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[position].checkListName] = arrayListItemNames
-//            }
         }
 
         /**
          * This method is used for creating custom remove item popup for the recyclerView which is attached to application overlay.
          * @param activity is for getting reference of current activity in the application.
          * @param rootView is for getting reference of the view that is in the root of current activity.
-         * @param itemList is used for getting reference of the list of items that will be used in recyclerView.
+         * @param fileList is used for getting reference of the list of files that will be used in recyclerView.
          * @param position is used for getting reference of the current position of the item.
-         * @param itemAdapter is used for getting reference of the custom recyclerView adapter class.
+         * @param attachmentAdapter is used for getting reference of the custom recyclerView adapter class.
          * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         @RequiresApi(Build.VERSION_CODES.M)
         private fun removeItemPopup(
             activity: Activity,
             rootView: View,
-            itemList: ArrayList<RecyclerViewModelItem>,
+            fileList: ArrayList<RecyclerViewModel>,
             position: Int,
-            itemAdapter: RecyclerViewTrelloItemAdapter
+            attachmentAdapter: RecyclerViewBitbucketAttachmentAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_trello_item_item_popup,
+                        R.layout.recycler_view_bitbucket_item_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -213,14 +182,14 @@ internal class RecyclerViewTrelloItemAdapter(
                             windowManagerParamsRecyclerViewItemPopup
                         )
                         textViewTitle =
-                            viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_trello_title)
+                            viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_bitbucket_title)
                         buttonYes =
-                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_trello_yes)
+                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_bitbucket_yes)
                         buttonNo =
-                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_trello_no)
-                        buttonClicksTrelloPopup(
-                            itemAdapter = itemAdapter,
-                            itemList = itemList,
+                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_bitbucket_no)
+                        buttonClicksBitbucketPopup(
+                            attachmentAdapter = attachmentAdapter,
+                            fileList = fileList,
                             position = position
                         )
                     }
@@ -230,31 +199,26 @@ internal class RecyclerViewTrelloItemAdapter(
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
-                    tag = Constants.recyclerViewTrelloAdapterTag
+                    tag = Constants.recyclerViewBitbucketAdapterTag
                 )
             }
         }
 
         /**
-         * This method is used for initializing button clicks of buttons that are inside in the recycler_view_trello_item_item_popup.
-         * @param itemList is used for getting reference of the list of item that will be used in recyclerView.
+         * This method is used for initializing button clicks of buttons that are inside in the recycler_view_bitbucket_item_popup.
+         * @param fileList is used for getting reference of the list of files that will be used in recyclerView.
          * @param position is used for getting reference of the current position of the item.
-         * @param itemAdapter is used for getting reference of the custom recyclerView adapter class.
+         * @param attachmentAdapter is used for getting reference of the custom recyclerView adapter class.
          */
-        private fun buttonClicksTrelloPopup(
-            itemList: ArrayList<RecyclerViewModelItem>,
+        private fun buttonClicksBitbucketPopup(
+            fileList: ArrayList<RecyclerViewModel>,
             position: Int,
-            itemAdapter: RecyclerViewTrelloItemAdapter
+            attachmentAdapter: RecyclerViewBitbucketAttachmentAdapter
         ) {
             buttonYes.setSafeOnClickListener {
-                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[position].checkListName] =
-                    arrayListItemChecked
-                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[position].checkListName] =
-                    arrayListItemNames
-                itemList.removeAt(position)
-                arrayListItemChecked.removeAt(position)
-                arrayListItemNames = itemList
-                itemAdapter.notifyDataSetChanged()
+                fileList.removeAt(position)
+                arrayListFilePaths = fileList
+                attachmentAdapter.notifyDataSetChanged()
                 removePopupLayout()
             }
             buttonNo.setSafeOnClickListener {
@@ -263,9 +227,8 @@ internal class RecyclerViewTrelloItemAdapter(
 
         }
 
-
         /**
-         * This method is used for removing recycler_view_trello_item_item_popup from window.
+         * This method is used for removing recycler_view_bitbucket_item_popup from window.
          */
         private fun removePopupLayout() {
             if (windowManagerRecyclerViewItemPopup != null && this::viewRecyclerViewItems.isInitialized) {
@@ -280,7 +243,7 @@ internal class RecyclerViewTrelloItemAdapter(
          * This method is used for preventing spamming of a button and allows to be button click methods executed in every 2 second.
          */
         @SuppressLint("CheckResult")
-        private fun View.setSafeOnClickListener(onClick: (View) -> Unit) {
+       private fun View.setSafeOnClickListener(onClick: (View) -> Unit) {
             RxView.clicks(this).throttleFirst(2000, TimeUnit.MILLISECONDS).subscribe {
                 onClick(this)
             }

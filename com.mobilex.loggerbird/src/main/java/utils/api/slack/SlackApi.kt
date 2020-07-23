@@ -25,6 +25,8 @@ import okhttp3.*
 import services.LoggerBirdService
 import utils.other.DefaultToast
 import utils.other.InternetConnectionUtil
+import utils.other.LoggerBirdEncryption
+import utils.other.RandomStringGenerator
 import java.io.File
 import java.io.IOException
 import java.net.SocketTimeoutException
@@ -53,8 +55,7 @@ internal class SlackApi {
     private val hashMapChannel: HashMap<String, String> = HashMap()
     private var convertedToken: String = ""
     private val slack = Slack.getInstance()
-    private val defaultToast: DefaultToast =
-        DefaultToast()
+    private val defaultToast: DefaultToast = DefaultToast()
     private var queueCounter: Int = 0
     private lateinit var activity: Activity
     private lateinit var context: Context
@@ -64,6 +65,8 @@ internal class SlackApi {
     private var slackType: String? = null
     private var controlcallSlack: Boolean = false
     private lateinit var timerTaskQueue: TimerTask
+    private val loggerBirdEncryption = LoggerBirdEncryption()
+    private val randomStringGenerator = RandomStringGenerator()
 
     /** Loggerbird slack app client information **/
     companion object {
@@ -231,7 +234,7 @@ internal class SlackApi {
             this.activity = activity
             val sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-            val token = sharedPref.getString("slackAccessToken", "")
+            val token = loggerBirdEncryption.decrypt(stringToDecrypt = sharedPref.getString("slackAccessToken", "")!!, secret =  sharedPref.getString("slackAccessTokenKey","")!!)
             //val token = "xoxb-523949707746-1185252116928-e77ayP6N5Mv0VfJbYhQ4JyaB" //mobilex
             //val token = "xoxb-1176309019584-1152486968594-k4brnZhlrUXAAy80Be0GmaVv" //loggerbird
             if (token == "") {
@@ -245,8 +248,10 @@ internal class SlackApi {
                     val convertedToken = convertToken.accessToken
                     val sharedPref =
                         PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                    val randomGeneratedKey =  randomStringGenerator.randomStringGenerator()
                     with(sharedPref.edit()) {
-                        putString("slackAccessToken", convertedToken)
+                        putString("slackAccessToken", loggerBirdEncryption.encrypt(stringToEncrypt = convertedToken , secret = randomGeneratedKey))
+                        putString("slackAccessTokenKey",randomGeneratedKey)
                         commit()
                     }
                 }
@@ -276,14 +281,8 @@ internal class SlackApi {
             }
 
         } catch (e: Exception) {
-            slackExceptionHandler(e = e)
             LoggerBird.callEnqueue()
             Log.d(Constants.slackTag, "No Authorizated Token")
-            slackExceptionHandler(
-                e = e,
-                filePathName = filePathMedia,
-                socketTimeOut = SocketTimeoutException()
-            )
         }
     }
 
@@ -693,7 +692,7 @@ internal class SlackApi {
         timerTaskQueue = object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error_time_out")
+                    LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
                 }
             }
         }

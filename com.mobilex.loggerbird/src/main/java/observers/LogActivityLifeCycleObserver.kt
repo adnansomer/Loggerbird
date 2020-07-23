@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import services.LoggerBirdService
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 internal class LogActivityLifeCycleObserver() :
@@ -329,6 +330,7 @@ internal class LogActivityLifeCycleObserver() :
             Toast.makeText(context, R.string.permission_audio_granted, Toast.LENGTH_SHORT).show()
         }
     }
+
 
     /**
      * This method is used for checking for write-external storage permission result.
