@@ -116,5 +116,6 @@ internal class Constants {
         internal const val recyclerViewTrelloItemAdapterTag: String = "RecyclerView Trello Item Adapter"
         internal const val bitbucketTag: String = "Bitbucket"
         internal const val recyclerViewBitbucketAdapterTag: String = "RecyclerView Bitbucket Adapter"
+        internal const val encryptionTag: String = "Encryption"
     }
 }
