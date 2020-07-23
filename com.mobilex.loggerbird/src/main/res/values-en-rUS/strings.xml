@@ -183,6 +183,19 @@
     <string name="clubhouse_issue_success">Clubhouse Story opened successfully!</string>
     <string name="clubhouse_issue_failure">An error happened while trying to open Clubhouse Story!</string>
     <string name="clubhouse_issue_time_out">An error happened while trying to open Clubhouse Story , system has been timed out!</string>
+    <string name="bitbucket_issue_preferences_save">Issue preferences are saved!</string>
+    <string name="bitbucket_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="bitbucket_issue_success">Issue opened successfully!</string>
+    <string name="bitbucket_issue_failure">An error happened while trying to open bitbucket issue!</string>
+    <string name="bitbucket_issue_time_out">An error happened while trying to open bitbucket issue , system has been timed out!</string>
+    <string name="bitbucket_project_empty">Project cannot be empty!</string>
+    <string name="bitbucket_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="bitbucket_title_empty">Title cannot be empty!</string>
+    <string name="bitbucket_assignee_doesnt_exist">This bitbucket doesn\'t exist!</string>
+    <string name="bitbucket_priority_empty">Priority cannot be empty!</string>
+    <string name="bitbucket_priority_doesnt_exist">This priority doesn\'t exist!</string>
+    <string name="bitbucket_kind_empty">Kind cannot be empty!</string>
+    <string name="bitbucket_kind_doesnt_exist">This kind doesn\'t exist!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -208,6 +221,7 @@
     <string name="textView_loggerbird_basecamp_title">Share with Basecamp</string>
     <string name="textView_loggerbird_asana_title">Share with Asana</string>
     <string name="textView_loggerbird_clubhouse_title">Share with Clubhouse</string>
+    <string name="textView_loggerbird_bitbucket_title">Share with Bitbucket</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>
     <!-- activity_paint_save_dialog-->
@@ -598,4 +612,21 @@
     <string name="textView_recyclerView_trello_item_popup_title">Are you sure to remove item from your Item list?</string>
     <string name="button_recyclerView_trello_item_yes">Delete Item</string>
     <string name="button_recyclerView_trello_item_no">Keep Item</string>
+    <!-- loggerbird_bitbucket_popup-->
+    <string name="textView_bitbucket_project">Project</string>
+    <string name="textView_bitbucket_assignee">Assignee</string>
+    <string name="textView_bitbucket_priority">Priority</string>
+    <string name="textView_bitbucket_kind">Kind</string>
+    <string name="textView_bitbucket_title">Title</string>
+    <string name="editText_bitbucket_title">Write a title about your issue…</string>
+    <string name="editText_bitbucket_description">Describe your issue in details…</string>
+    <string name="textView_bitbucket_description">Description</string>
+    <string name="textView_bitbucket_attachment">Attachments</string>
+    <string name="button_bitbucket_create">Create</string>
+    <string name="button_bitbucket_cancel">Cancel</string>
+    <!-- loggerbird_bitbucket_menu-->
+    <string name="textView_bitbucket_menu_save">Save Issue Info</string>
+    <string name="textView_bitbucket_menu_clear">Clear Issue Info</string>
+    <!-- recycler_view_bitbucket_item_popup-->
+    <string name="textView_recyclerView_bitbucket_popup_title">Are you sure to remove attachment from your bitbucket issue?</string>
 </resources>

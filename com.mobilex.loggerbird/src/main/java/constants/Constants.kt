@@ -114,5 +114,8 @@ internal class Constants {
         internal const val loggerBirdFileActionPopupTag = "LoggerBird File Action Popup"
         internal const val loggerBirdUnhandledExceptionPopupTag = "LoggerBird Unhandled Exception Popup"
         internal const val recyclerViewTrelloItemAdapterTag: String = "RecyclerView Trello Item Adapter"
+        internal const val bitbucketTag: String = "Bitbucket"
+        internal const val recyclerViewBitbucketAdapterTag: String = "RecyclerView Bitbucket Adapter"
+        internal const val encryptionTag: String = "Encryption"
     }
 }
