@@ -194,8 +194,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private val coroutineCallDiscardFile: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var mediaRecorderAudio: MediaRecorder? = null
     private var state: Boolean = false
-    private lateinit var filePathVideo: File
-    private lateinit var filePathAudio: File
+    private  var filePathVideo: File? =  null
+    private  var filePathAudio: File? = null
     private var isOpen = false
     private var screenDensity: Int = 0
     private var projectManager: MediaProjectionManager? = null
@@ -1069,7 +1069,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         try {
             if (windowManager != null && this::view.isInitialized) {
                 if (revealLinearLayoutShare.visibility == View.VISIBLE) {
-                    controlMedialFile()
+                    controlMediaFile()
                 }
                 (windowManager as WindowManager).removeViewImmediate(view)
                 initializeLoggerBirdClosePopup(activity = activity)
@@ -1347,6 +1347,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (floating_action_button_screenshot.visibility == View.VISIBLE) {
                 if (!PaintActivity.controlPaintInPictureState) {
                     if (!audioRecording && !videoRecording) {
+                        resetFileReferences()
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
                     } else {
                         Toast.makeText(context, R.string.media_recording_error, Toast.LENGTH_SHORT)
@@ -1366,6 +1367,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         floating_action_button_audio.setSafeOnClickListener {
             if (floating_action_button_audio.visibility == View.VISIBLE) {
                 if (!videoRecording && !screenshotDrawing) {
+                    resetFileReferences()
                     takeAudioRecording()
                 } else {
                     Toast.makeText(context, R.string.media_recording_error, Toast.LENGTH_SHORT)
@@ -1377,13 +1379,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         textView_counter_audio.setSafeOnClickListener {
             if (textView_counter_audio.visibility == View.VISIBLE) {
                 takeAudioRecording()
-                shareView(filePathMedia = filePathAudio)
+                if(filePathAudio != null){
+                    shareView(filePathMedia = filePathAudio!!)
+                }
             }
         }
 
         floating_action_button_video.setSafeOnClickListener {
             if (floating_action_button_video.visibility == View.VISIBLE) {
                 if (!audioRecording && !screenshotDrawing) {
+                    resetFileReferences()
                     callVideoRecording(
                         requestCode = requestCode,
                         resultCode = resultCode,
@@ -1402,8 +1407,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     resultCode = resultCode,
                     data = dataIntent
                 )
-                shareView(filePathMedia = filePathVideo)
-
+                if(filePathVideo != null){
+                    shareView(filePathMedia = filePathVideo!!)
+                }
             }
         }
 
@@ -1423,6 +1429,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 revealLinearLayoutShare = revealLinearLayoutShare
             )
         )
+    }
+
+    private fun resetFileReferences(){
+        filePathAudio = null
+        filePathVideo = null
+        PaintView.filePathScreenShot = null
     }
 
     /**
@@ -1859,16 +1871,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                 fileDirectory,
                                 "logger_bird_audio" + System.currentTimeMillis().toString() + "recording.3gpp"
                             )
-                            addFileNameList(fileName = filePathAudio.absolutePath)
-                            arrayListFile.add(filePathAudio)
+                            addFileNameList(fileName = filePathAudio!!.absolutePath)
+                            arrayListFile.add(filePathAudio!!)
                             mediaRecorderAudio = MediaRecorder()
                             mediaRecorderAudio?.setAudioSource(MediaRecorder.AudioSource.MIC)
                             mediaRecorderAudio?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
                             mediaRecorderAudio?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                mediaRecorderAudio?.setOutputFile(filePathAudio)
+                                mediaRecorderAudio?.setOutputFile(filePathAudio!!)
                             } else {
-                                mediaRecorderAudio?.setOutputFile(filePathAudio.path)
+                                mediaRecorderAudio?.setOutputFile(filePathAudio!!.path)
                             }
                             startAudioRecording()
                             audioRecording = true
@@ -2032,8 +2044,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             }
                         }
                     } else {
-                        if (this@LoggerBirdService::filePathVideo.isInitialized) {
-                            if (this@LoggerBirdService.filePathVideo.length() > 0 || controlTimeControllerVideo) {
+                        if (this@LoggerBirdService::filePathVideo != null) {
+                            if (this@LoggerBirdService.filePathVideo!!.length() > 0 || controlTimeControllerVideo) {
                                 withContext(Dispatchers.Main) {
                                     Toast.makeText(
                                         context,
@@ -2045,7 +2057,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                     textView_video_size.visibility = View.GONE
                                     floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
                                     if (controlTimeControllerVideo) {
-                                        filePathVideo.delete()
+                                        if(filePathVideo!= null){
+                                            if(filePathVideo!!.exists()){
+                                                filePathVideo!!.delete()
+                                            }
+                                        }
                                         controlTimeControllerVideo = false
                                     }
                                     withContext(Dispatchers.IO) {
@@ -2150,10 +2166,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         fileDirectory,
                         "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4"
                     )
-                    addFileNameList(fileName = filePathVideo.absolutePath)
-                    arrayListFile.add(filePathVideo)
+                    addFileNameList(fileName = filePathVideo!!.absolutePath)
+                    arrayListFile.add(filePathVideo!!)
                     mediaCodecsFile = File("/data/misc/media/media_codecs_profiling_results.xml")
-                    mediaRecorderVideo?.setOutputFile(filePathVideo.path)
+                    mediaRecorderVideo?.setOutputFile(filePathVideo!!.path)
                     mediaRecorderVideo?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
                     mediaRecorderVideo?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
                     mediaRecorderVideo?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
@@ -2440,7 +2456,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 timerVideoTaskFileSize = object : TimerTask() {
                     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
                     override fun run() {
-                        val fileSize = filePathVideo.length()
+                        val fileSize = filePathVideo!!.length()
                         val sizePrintVideo =
                             android.text.format.Formatter.formatShortFileSize(
                                 activity,
@@ -2502,7 +2518,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 timerAudioTaskFileSize = object : TimerTask() {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun run() {
-                        val fileSize = filePathAudio.length()
+                        val fileSize = filePathAudio!!.length()
                         val sizePrintAudio =
                             android.text.format.Formatter.formatShortFileSize(
                                 activity,
@@ -2922,7 +2938,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 if (checkUnhandledFilePath()) {
                     finishShareLayout("unhandled")
                 } else {
-                    if (controlMedialFile()) {
+                    if (controlMediaFile()) {
                         finishShareLayout(message = "media")
                     } else {
                         finishShareLayout(message = "media_error")
@@ -5567,26 +5583,26 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for controlling the media file actions.
      * @return Boolean values.
      */
-    private fun controlMedialFile(): Boolean {
-        if (this@LoggerBirdService::filePathVideo.isInitialized) {
-            return if (filePathVideo.exists()) {
-                filePathVideo.delete()
+    private fun controlMediaFile(): Boolean {
+        if (filePathVideo != null) {
+            return if (filePathVideo!!.exists()) {
+                filePathVideo!!.delete()
                 true
             } else {
                 false
             }
         }
-        if (this@LoggerBirdService::filePathAudio.isInitialized) {
-            return if (filePathAudio.exists()) {
-                filePathAudio.delete()
+        if (filePathAudio != null) {
+            return if (filePathAudio!!.exists()) {
+                filePathAudio!!.delete()
                 true
             } else {
                 false
             }
         }
         if (PaintView.controlScreenShotFile()) {
-            return if (PaintView.filePathScreenShot.exists()) {
-                PaintView.filePathScreenShot.delete()
+            return if (PaintView.filePathScreenShot!!.exists()) {
+                PaintView.filePathScreenShot!!.delete()
                 true
             } else {
                 false
