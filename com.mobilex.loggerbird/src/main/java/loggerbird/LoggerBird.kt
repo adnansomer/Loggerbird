@@ -57,11 +57,14 @@ import utils.email.EmailUtil
 import utils.other.InternetConnectionUtil
 import utils.other.LinkedBlockingQueueUtil
 import java.io.File
+import java.lang.Byte.decode
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.crypto.spec.IvParameterSpec
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
+import javax.crypto.*
 
 
 /**
@@ -2680,6 +2683,8 @@ class LoggerBird : LifecycleObserver {
                 throw LoggerBirdException(Constants.logInitErrorMessage)
             }
         }
+
+
 
         /**
          * This method is used for returning whether Clubhouse token is initialized.

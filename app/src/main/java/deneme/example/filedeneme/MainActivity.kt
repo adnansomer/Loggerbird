@@ -52,6 +52,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.NullPointerException
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
+import utils.*
+import utils.other.AESUtils
 
 
 class MainActivity : AppCompatActivity() {
@@ -279,22 +281,42 @@ class MainActivity : AppCompatActivity() {
         })
 
         button_next_activity.setOnClickListener({
-            //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
-//            LogDeneme.saveAllDetails(context=this)
-            //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
-            // LoggerBird.saveLifeCycleDetails()
+//            //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
+////            LogDeneme.saveAllDetails(context=this)
+//            //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
+//            // LoggerBird.saveLifeCycleDetails()
+//
+////            LoggerBird.takeLifeCycleDetails()
+//            supportFragmentManager.beginTransaction().add(R.id.main_activity_layout,FragmentMain3.newInstance()).commit()
+////            startActivity(Intent(this@MainActivity, Main2Activity::class.java))
 
-//            LoggerBird.takeLifeCycleDetails()
-            supportFragmentManager.beginTransaction().add(R.id.main_activity_layout,FragmentMain3.newInstance()).commit()
-//            startActivity(Intent(this@MainActivity, Main2Activity::class.java))
+            var encrypted = "582D3163703A2ADA6E40FE5B9D176402"
+            var decrypted = ""
+
+            try {
+                decrypted = AESUtils.decrypt(encrypted)
+                android.util.Log.d("TEST", "decrypted:" + decrypted)
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
         })
+
+
 
         button_performance.setOnClickListener {
             LoggerBird.callLifeCycleDetails()
             LoggerBird.callComponentDetails(view=it,resources = it.resources)
-            //            LoggerBird.takeDeviceInformationDetails()
-//            LoggerBird.takeDevicePerformanceDetails()
-//            LoggerBird.takeDeviceCpuDetails()
+            var encrypted: String = ""
+            var sourceStr: String = "LOGGERBIRD"
+            try {
+                encrypted = AESUtils.encrypt(sourceStr)
+                android.util.Log.d("TEST", "encrypted:" + encrypted)
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
+
+
+
 
 
         }

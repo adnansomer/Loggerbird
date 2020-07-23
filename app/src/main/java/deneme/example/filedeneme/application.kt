@@ -11,7 +11,7 @@ class application : Application() {
         LoggerBird.LoggerBirdIntegration.Builder()
             .setClubhouseIntegration(clubhouseApiToken = "5ef8dbb1-aad1-4d9d-8ea0-1bfd13826aff")
             .setGitlabIntegration(gitlabApiToken = "wLD4tf4jyKRmCM27S27d")
-            .setSlackIntegration(slackApiToken = "523949707746.1219372475703.11d273b8dc1a69a76ecda1a6eff536e6e59c8dc67dd634232bd12153abf2726c")
+            .setSlackIntegration(slackApiToken = "523949707746.1268982313905.66d6222f5a09205b2717030a3ac048475262da559df047e20b579e12b993022a")
             .setPivotalIntegraton(pivotalApiToken = "fb4f04edbdeaeed3758839f75c1939b1")
             .setGithubIntegration(githubUserName = "berkavc", githubPassword = "umbasta1")
             .setAsanaIntegration(asanaApiToken = "1/1182746606250186:defab27f657ce740cf05ba7f5180cc6e")

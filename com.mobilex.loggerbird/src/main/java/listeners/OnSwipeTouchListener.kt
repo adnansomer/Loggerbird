@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
-import android.view.WindowManager
 
 open class OnSwipeTouchListener(ctx: Context) : View.OnTouchListener {
 
@@ -59,8 +58,6 @@ open class OnSwipeTouchListener(ctx: Context) : View.OnTouchListener {
 
             return result
         }
-
-
     }
 
     open fun onSwipeRight() {}

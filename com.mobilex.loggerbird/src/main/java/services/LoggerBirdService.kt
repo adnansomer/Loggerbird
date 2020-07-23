@@ -10831,7 +10831,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
             clubhouseAuthentication.clubhouseUserPosition(userPosition = position)
             hideKeyboard(activity = activity, view = viewClubhouse)
         }
-    }
+
+        autoTextViewClubhouseRequester.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListClubhouseRequester.contains(autoTextViewClubhouseRequester.editableText.toString())) {
+                    if (arrayListClubhouseRequester.isNotEmpty()) {
+                        autoTextViewClubhouseRequester.setText(arrayListClubhouseRequester[0], false)
+                        }
+                    }
+                }
+            }
+        }
 
     /**
      * This method is used for initializing  autoCompleteTextViews in the loggerbird_clubhouse_popup.
@@ -10966,8 +10976,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener{
     @RequiresApi(Build.VERSION_CODES.M)
     private fun buttonClicksClubhouse(filePathMedia: File) {
         buttonClubhouseCreate.setSafeOnClickListener {
-            if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty()
-            ) {
+            if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty()) {
+
 
                 clubhouseAuthentication.gatherClubhouseProjectAutoTextDetails(
                     autoTextViewProject = autoTextViewClubhouseProject,

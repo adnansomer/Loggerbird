@@ -53,8 +53,7 @@ internal class SlackApi {
     private val hashMapChannel: HashMap<String, String> = HashMap()
     private var convertedToken: String = ""
     private val slack = Slack.getInstance()
-    private val defaultToast: DefaultToast =
-        DefaultToast()
+    private val defaultToast: DefaultToast = DefaultToast()
     private var queueCounter: Int = 0
     private lateinit var activity: Activity
     private lateinit var context: Context
@@ -276,14 +275,8 @@ internal class SlackApi {
             }
 
         } catch (e: Exception) {
-            slackExceptionHandler(e = e)
             LoggerBird.callEnqueue()
             Log.d(Constants.slackTag, "No Authorizated Token")
-            slackExceptionHandler(
-                e = e,
-                filePathName = filePathMedia,
-                socketTimeOut = SocketTimeoutException()
-            )
         }
     }
 
@@ -693,11 +686,11 @@ internal class SlackApi {
         timerTaskQueue = object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error_time_out")
+                    LoggerBirdService.loggerBirdService.finishShareLayout("slack_error_time_out")
                 }
             }
         }
-        timerQueue.schedule(timerTaskQueue, 1000)
+        timerQueue.schedule(timerTaskQueue, 180000)
     }
 
     /**
