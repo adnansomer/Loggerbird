@@ -62,6 +62,10 @@
     <string name="jira_sent_error">Jira dosyası açılmaya çalışırken bir hatayla karşılaşıldı!</string>
     <string name="jira_sent_error_time_out">Jira dosyası açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
     <string name="media_recording_error">Lütfen önce diğer medya operasyonunuzu tamamlayın!</string>
+    <string name="jira_project_empty">Proje boş olamaz!</string>
+    <string name="jira_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="jira_issue_type_empty">Görev tipi boş olamaz!</string>
+    <string name="jira_issue_type_doesnt_exist">Bu görev tipi bulunamadı!</string>
     <string name="jira_summary_empty">Özet boş olamaz!</string>
     <string name="jira_reporter_empty">Bildiren bulunamadı!</string>
     <string name="jira_fix_version_empty">Düzeltme versiyonu bulunamadı!</string>
@@ -80,6 +84,10 @@
     <string name="jira_component_doesnt_exist">Bu komponent bulunamadı!</string>
     <string name="jira_fix_versions_exist">Bu düzeltme versiyonu zaten listeye eklendi!</string>
     <string name="jira_fix_versions_doesnt_exist">Bu düzeltme versiyonu bulunamadı!</string>
+    <string name="jira_priority_empty">Öncelik boş olamaz!</string>
+    <string name="jira_priority_doesnt_exist">Bu öncelik bulunamadı!</string>
+    <string name="jira_linked_issue_empty">Bağlantılı görev boş olamaz!</string>
+    <string name="jira_linked_issue_doesnt_exist">Bu bağlantılı görev bulunamadı!</string>
     <string name="slack_message_empty">Mesaj boş olamaz!</string>
     <string name="slack_sent">Slack mesajı gönderildi!</string>
     <string name="slack_sent_error">Slack mesajı gönderilmeye çalışırken bir hatayla karşılaşıldı!</string>
@@ -113,6 +121,7 @@
     <string name="github_project_exist">Bu proje zaten listeye eklendi!</string>
     <string name="github_project_doesnt_exist">Bu proje bulunamadı!</string>
     <string name="github_mile_stone_doesnt_exist">Bu kilometre taşı bulunamadı!</string>
+    <string name="github_linked_pull_request_doesnt_exist">Bu bağlantılı çekme isteği taşı bulunamadı!!</string>
     <string name="gitlab_sent">Gitlab görevi başarılı bir şekilde açıldı!</string>
     <string name="gitlab_sent_error">Gitlab görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
     <string name="gitlab_sent_error_time_out">Gitlab görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>

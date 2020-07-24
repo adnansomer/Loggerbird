@@ -194,8 +194,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private val coroutineCallDiscardFile: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var mediaRecorderAudio: MediaRecorder? = null
     private var state: Boolean = false
-    private  var filePathVideo: File? =  null
-    private  var filePathAudio: File? = null
+    private var filePathVideo: File? = null
+    private var filePathAudio: File? = null
     private var isOpen = false
     private var screenDensity: Int = 0
     private var projectManager: MediaProjectionManager? = null
@@ -446,15 +446,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var linearLayoutGitlabConfidentiality: LinearLayout
     private lateinit var textViewGitlabConfidentiality: TextView
     private lateinit var imageViewGitlabConfidentiality: ImageView
-    private lateinit var textViewGitlabMilestone : TextView
-    private lateinit var linearLayoutGitlabMilestone : LinearLayout
-    private lateinit var imageViewGitlabMilestone : ImageView
-    private lateinit var textViewGitlabAssignee : TextView
-    private lateinit var linearLayoutGitlabAssignee : LinearLayout
-    private lateinit var imageViewGitlabAssignee : ImageView
-    private lateinit var textViewGitlabLabels : TextView
-    private lateinit var linearLayoutGitlabLabels : LinearLayout
-    private lateinit var imageViewGitlabLabels : ImageView
+    private lateinit var textViewGitlabMilestone: TextView
+    private lateinit var linearLayoutGitlabMilestone: LinearLayout
+    private lateinit var imageViewGitlabMilestone: ImageView
+    private lateinit var textViewGitlabAssignee: TextView
+    private lateinit var linearLayoutGitlabAssignee: LinearLayout
+    private lateinit var imageViewGitlabAssignee: ImageView
+    private lateinit var textViewGitlabLabels: TextView
+    private lateinit var linearLayoutGitlabLabels: LinearLayout
+    private lateinit var imageViewGitlabLabels: ImageView
 
     //Github
     internal val githubAuthentication = GithubApi()
@@ -1379,7 +1379,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         textView_counter_audio.setSafeOnClickListener {
             if (textView_counter_audio.visibility == View.VISIBLE) {
                 takeAudioRecording()
-                if(filePathAudio != null){
+                if (filePathAudio != null) {
                     shareView(filePathMedia = filePathAudio!!)
                 }
             }
@@ -1407,7 +1407,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     resultCode = resultCode,
                     data = dataIntent
                 )
-                if(filePathVideo != null){
+                if (filePathVideo != null) {
                     shareView(filePathMedia = filePathVideo!!)
                 }
             }
@@ -1431,7 +1431,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         )
     }
 
-    private fun resetFileReferences(){
+    private fun resetFileReferences() {
         filePathAudio = null
         filePathVideo = null
         PaintView.filePathScreenShot = null
@@ -2057,8 +2057,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                     textView_video_size.visibility = View.GONE
                                     floating_action_button_video.setImageResource(R.drawable.ic_videocam_black_24dp)
                                     if (controlTimeControllerVideo) {
-                                        if(filePathVideo!= null){
-                                            if(filePathVideo!!.exists()){
+                                        if (filePathVideo != null) {
+                                            if (filePathVideo!!.exists()) {
                                                 filePathVideo!!.delete()
                                             }
                                         }
@@ -3749,7 +3749,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (autoTextViewJiraIssueType.editableText.toString() != "Epic") {
                 callJiraTask(filePathMedia = filePathMedia)
             } else {
-                if (jiraAuthentication.checkEpicName(activity = activity, context = context)) {
+                if (jiraAuthentication.checkJiraEpicName(activity = activity, context = context)) {
                     callJiraTask(filePathMedia = filePathMedia)
                 }
             }
@@ -4062,21 +4062,39 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun callJiraTask(filePathMedia: File) {
-        if (jiraAuthentication.checkSummaryEmpty(
+        if (jiraAuthentication.checkJiraProjectEmpty(
+                activity = activity,
+                autoTextViewProject = autoTextViewJiraProject
+            ) && jiraAuthentication.checkJiraIssueTypeEmpty(
+                activity = activity,
+                autoTextViewIssueType = autoTextViewJiraIssueType
+            ) && jiraAuthentication.checkJiraSummaryEmpty(
                 activity = activity,
                 context = context
-            ) && jiraAuthentication.checkReporterEmpty(
+            ) && jiraAuthentication.checkJiraReporterEmpty(
                 activity = activity,
                 context = context
-            ) && jiraAuthentication.checkFixVersionsEmpty(
+            ) && jiraAuthentication.checkJiraFixVersionsEmpty(
                 activity = activity,
                 context = context
-            ) && jiraAuthentication.checkEpicLinkEmpty(
+            ) && jiraAuthentication.checkJiraEpicLinkEmpty(
                 activity = activity,
                 context = context
-            ) && jiraAuthentication.checkComponentEmpty(
+            ) && jiraAuthentication.checkJiraComponentEmpty(
                 activity = activity,
                 context = context
+            ) && jiraAuthentication.checkJiraLabel(
+                activity = activity,
+                autoTextViewLabel = autoTextViewJiraLabel
+            ) && jiraAuthentication.checkJiraIssue(
+                activity = activity,
+                autoTextViewIssue = autoTextViewJiraIssue
+            ) && jiraAuthentication.checkJiraPriorityEmpty(
+                activity = activity,
+                autoTextViewPriority = autoTextViewJiraPriority
+            ) && jiraAuthentication.checkJiraLinkedIssuesEmpty(
+                activity = activity,
+                autoTextViewLinkedIssues = autoTextViewJiraLinkedIssue
             )
         ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -6458,6 +6476,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 ) && githubAuthentication.checkGithubMileStone(
                     activity = activity,
                     autoTextViewMileStone = autoTextViewGithubMileStone
+                ) && githubAuthentication.checkGithubLinkedPullRequest(
+                    activity = activity,
+                    autoTextViewLinkedPullRequest = autoTextViewGithubLinkedRequests
                 )
             ) {
                 attachProgressBar()
@@ -7992,28 +8013,38 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     }
                 }
                 toolbarGitlab = viewGitlab.findViewById(R.id.toolbar_gitlab)
-                autoTextViewGitlabProject = viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
+                autoTextViewGitlabProject =
+                    viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
                 editTextGitlabTitle = viewGitlab.findViewById(R.id.editText_gitlab_title)
-                editTextGitlabDescription = viewGitlab.findViewById(R.id.editText_gitlab_description)
+                editTextGitlabDescription =
+                    viewGitlab.findViewById(R.id.editText_gitlab_description)
                 editTextGitlabWeight = viewGitlab.findViewById(R.id.editText_gitlab_weight)
-                autoTextViewGitlabMilestone = viewGitlab.findViewById(R.id.auto_textView_gitlab_milestone)
-                autoTextViewGitlabAssignee = viewGitlab.findViewById(R.id.auto_textView_gitlab_assignee)
+                autoTextViewGitlabMilestone =
+                    viewGitlab.findViewById(R.id.auto_textView_gitlab_milestone)
+                autoTextViewGitlabAssignee =
+                    viewGitlab.findViewById(R.id.auto_textView_gitlab_assignee)
                 autoTextViewGitlabLabels = viewGitlab.findViewById(R.id.auto_textView_gitlab_labels)
-                autoTextViewGitlabConfidentiality = viewGitlab.findViewById(R.id.auto_textView_gitlab_confidentiality)
+                autoTextViewGitlabConfidentiality =
+                    viewGitlab.findViewById(R.id.auto_textView_gitlab_confidentiality)
                 textViewGitlabDueDate = viewGitlab.findViewById(R.id.textView_gitlab_due_date)
                 buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
                 buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
                 progressBarGitlab = viewGitlab.findViewById(R.id.gitlab_progressbar)
-                linearLayoutGitlabConfidentiality = viewGitlab.findViewById(R.id.linearLayout_gitlab_confidentiality)
-                linearLayoutGitlabMilestone = viewGitlab.findViewById(R.id.linearLayout_gitlab_milestone)
+                linearLayoutGitlabConfidentiality =
+                    viewGitlab.findViewById(R.id.linearLayout_gitlab_confidentiality)
+                linearLayoutGitlabMilestone =
+                    viewGitlab.findViewById(R.id.linearLayout_gitlab_milestone)
                 textViewGitlabMilestone = viewGitlab.findViewById(R.id.textView_gitlab_milestone)
                 imageViewGitlabMilestone = viewGitlab.findViewById(R.id.imageView_delete_milestone)
-                linearLayoutGitlabAssignee = viewGitlab.findViewById(R.id.linearLayout_gitlab_assignee)
+                linearLayoutGitlabAssignee =
+                    viewGitlab.findViewById(R.id.linearLayout_gitlab_assignee)
                 linearLayoutGitlabLabels = viewGitlab.findViewById(R.id.linearLayout_gitlab_labels)
                 textViewGitlabLabels = viewGitlab.findViewById(R.id.textView_gitlab_labels)
                 imageViewGitlabLabels = viewGitlab.findViewById(R.id.imageView_delete_labels)
-                progressBarGitlabLayout = viewGitlab.findViewById(R.id.gitlab_progressbar_background)
-                recyclerViewGitlabAttachment = viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
+                progressBarGitlabLayout =
+                    viewGitlab.findViewById(R.id.gitlab_progressbar_background)
+                recyclerViewGitlabAttachment =
+                    viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
                 editTextGitlabWeight.filters = arrayOf<InputFilter>(
                     InputTypeFilter(
                         "0",
@@ -8292,7 +8323,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabAssignee(
         arrayListGitlabAssignee: ArrayList<String>
     ) {
-        autoTextViewGitlabAssigneeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabAssignee)
+        autoTextViewGitlabAssigneeAdapter =
+            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabAssignee)
         autoTextViewGitlabAssignee.setAdapter(autoTextViewGitlabAssigneeAdapter)
         if (arrayListGitlabAssignee.isNotEmpty() && autoTextViewGitlabAssignee.text.isEmpty()) {
             autoTextViewGitlabAssignee.setText(arrayListGitlabAssignee[0], false)
@@ -8318,7 +8350,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabLabels(
         arrayListGitlabLabels: ArrayList<String>
     ) {
-        autoTextViewGitlabLabelsAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabLabels)
+        autoTextViewGitlabLabelsAdapter =
+            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabLabels)
         autoTextViewGitlabLabels.setAdapter(autoTextViewGitlabLabelsAdapter)
         if (arrayListGitlabLabels.isNotEmpty() && autoTextViewGitlabLabels.text.isEmpty()) {
             autoTextViewGitlabLabels.setText(arrayListGitlabLabels[0], false)
@@ -8349,7 +8382,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabConfidentiality(
         arrayListGitlabConfidentiality: ArrayList<String>
     ) {
-        autoTextViewGitlabConfidentialityAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabConfidentiality)
+        autoTextViewGitlabConfidentialityAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListGitlabConfidentiality
+        )
         autoTextViewGitlabConfidentiality.setAdapter(autoTextViewGitlabConfidentialityAdapter)
         if (arrayListGitlabConfidentiality.isNotEmpty() && autoTextViewGitlabConfidentiality.text.isEmpty()) {
             autoTextViewGitlabConfidentiality.setText(arrayListGitlabConfidentiality[0], false)
@@ -8375,7 +8412,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabMilestones(
         arrayListGitlabMilestones: ArrayList<String>
     ) {
-        autoTextViewGitlabMilestoneAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabMilestones)
+        autoTextViewGitlabMilestoneAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListGitlabMilestones
+        )
         autoTextViewGitlabMilestone.setAdapter(autoTextViewGitlabMilestoneAdapter)
         if (arrayListGitlabMilestones.isNotEmpty() && autoTextViewGitlabMilestone.text.isEmpty()) {
             autoTextViewGitlabMilestone.setText(arrayListGitlabMilestones[0], false)
@@ -10749,7 +10790,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     viewClubhouse.findViewById(R.id.recycler_view_clubhouse_attachment)
                 autoTextViewClubhouseProject =
                     viewClubhouse.findViewById(R.id.auto_textview_clubhouse_project)
-                autoTextViewClubhouseEpic = viewClubhouse.findViewById(R.id.auto_textView_clubhouse_epic)
+                autoTextViewClubhouseEpic =
+                    viewClubhouse.findViewById(R.id.auto_textView_clubhouse_epic)
                 textViewClubhouseDueDate =
                     viewClubhouse.findViewById(R.id.textView_clubhouse_due_date)
                 editTextClubhouseEstimate =
@@ -10758,8 +10800,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 progressBarClubhouseLayout =
                     viewClubhouse.findViewById(R.id.clubhouse_progressbar_background)
                 textViewClubhouseEpic = viewClubhouse.findViewById(R.id.textView_clubhouse_epic)
-                linearLayoutClubhouseEpic = viewClubhouse.findViewById(R.id.linearLayout_clubhouse_epic)
-                imageViewClubhouseDueDate = viewClubhouse.findViewById(R.id.imageView_delete_clubhouse_dueDate)
+                linearLayoutClubhouseEpic =
+                    viewClubhouse.findViewById(R.id.linearLayout_clubhouse_epic)
+                imageViewClubhouseDueDate =
+                    viewClubhouse.findViewById(R.id.imageView_delete_clubhouse_dueDate)
                 clubhouseAuthentication.callClubhouse(
                     activity = activity,
                     context = context,
@@ -10788,7 +10832,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseProject(
         arrayListClubhouseProjects: ArrayList<String>
     ) {
-        autoTextViewClubhouseProjectAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseProjects)
+        autoTextViewClubhouseProjectAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListClubhouseProjects
+        )
         autoTextViewClubhouseProject.setAdapter(autoTextViewClubhouseProjectAdapter)
         if (arrayListClubhouseProjects.isNotEmpty() && autoTextViewClubhouseProject.text.isEmpty()) {
             autoTextViewClubhouseProject.setText(arrayListClubhouseProjects[0], false)
@@ -10820,7 +10868,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseEpic(
         arrayListClubhouseEpic: ArrayList<String>
     ) {
-        autoTextViewClubhouseEpicAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseEpic)
+        autoTextViewClubhouseEpicAdapter =
+            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseEpic)
         autoTextViewClubhouseEpic.setAdapter(autoTextViewClubhouseEpicAdapter)
         if (arrayListClubhouseEpic.isNotEmpty() && autoTextViewClubhouseEpic.text.isEmpty()) {
             autoTextViewClubhouseEpic.setText(arrayListClubhouseEpic[0], false)
@@ -10866,7 +10915,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseStoryType(
         arrayListClubhouseStoryType: ArrayList<String>
     ) {
-        autoTextViewClubhouseStoryTypeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseStoryType)
+        autoTextViewClubhouseStoryTypeAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListClubhouseStoryType
+        )
         autoTextViewClubhouseStoryType.setAdapter(autoTextViewClubhouseStoryTypeAdapter)
         if (arrayListClubhouseStoryType.isNotEmpty() && autoTextViewClubhouseStoryType.text.isEmpty()) {
             autoTextViewClubhouseStoryType.setText(arrayListClubhouseStoryType[0], false)
@@ -10931,10 +10984,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         var mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         var dueDate: String? = null
         var dueDateFormat: String? = null
-        calendarViewClubhouseLayout = calendarViewClubhouseView.findViewById(R.id.clubhouse_calendar_view_layout)
-        calendarViewClubhouseDueDate = calendarViewClubhouseView.findViewById(R.id.calendarView_clubhouse_due_date)
-        buttonCalendarViewClubhouseCancel = calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_cancel)
-        buttonCalendarViewClubhouseOk = calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_ok)
+        calendarViewClubhouseLayout =
+            calendarViewClubhouseView.findViewById(R.id.clubhouse_calendar_view_layout)
+        calendarViewClubhouseDueDate =
+            calendarViewClubhouseView.findViewById(R.id.calendarView_clubhouse_due_date)
+        buttonCalendarViewClubhouseCancel =
+            calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_cancel)
+        buttonCalendarViewClubhouseOk =
+            calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_ok)
         calendarViewClubhouseDueDate.minDate = System.currentTimeMillis()
         if (calendarViewClubhouseDate != null) {
             calendarViewClubhouseDueDate.date = calendarViewClubhouseDate!!
@@ -10988,7 +11045,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseRequester(
         arrayListClubhouseRequester: ArrayList<String>
     ) {
-        autoTextViewClubhouseRequesterAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseRequester)
+        autoTextViewClubhouseRequesterAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListClubhouseRequester
+        )
         autoTextViewClubhouseRequester.setAdapter(autoTextViewClubhouseRequesterAdapter)
         if (arrayListClubhouseRequester.isNotEmpty() && autoTextViewClubhouseRequester.text.isEmpty()) {
             autoTextViewClubhouseRequester.setText(arrayListClubhouseRequester[0], false)
@@ -11162,7 +11223,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 windowManagerParamsLoggerBirdActivatePopup
             )
 
-            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.cookieBarColor)
             activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
 
             viewLoggerBirdActivatePopup.scaleX = 0F
@@ -11174,8 +11236,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 .setInterpolator(BounceInterpolator())
                 .setStartDelay(0)
                 .start()
-            textViewLoggerBirdActivatePopupActivate = viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_activate)
-            textViewLoggerBirdActivatePopupDismiss = viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_dismiss)
+            textViewLoggerBirdActivatePopupActivate =
+                viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_activate)
+            textViewLoggerBirdActivatePopupDismiss =
+                viewLoggerBirdActivatePopup.findViewById(R.id.btn_action_dismiss)
             initializeButtonClicksLoggerBirdActivatePopup(activity = activity)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -11248,19 +11312,26 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             windowManagerParamsLoggerBirdStartPopup.gravity = Gravity.TOP
             windowManagerLoggerBirdStartPopup = activity.getSystemService(Context.WINDOW_SERVICE)!!
-            (windowManagerLoggerBirdStartPopup as WindowManager).addView(viewLoggerBirdStartPopup, windowManagerParamsLoggerBirdStartPopup)
+            (windowManagerLoggerBirdStartPopup as WindowManager).addView(
+                viewLoggerBirdStartPopup,
+                windowManagerParamsLoggerBirdStartPopup
+            )
 
-            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.cookieBarColor)
             activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
 
-            val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_in_from_top)
+            val animation: Animation =
+                AnimationUtils.loadAnimation(applicationContext, R.anim.slide_in_from_top)
             viewLoggerBirdStartPopup.animation = animation
 
-            viewLoggerBirdStartPopup.setOnTouchListener(object: OnSwipeTouchListener(this@LoggerBirdService) {
+            viewLoggerBirdStartPopup.setOnTouchListener(object :
+                OnSwipeTouchListener(this@LoggerBirdService) {
                 override fun onSwipeLeft() {
                     Log.e("ViewSwipe", "Left")
                     removeLoggerBirdStartLayout()
                 }
+
                 override fun onSwipeRight() {
                     Log.e("ViewSwipe", "Right")
                     removeLoggerBirdStartLayout()
@@ -11279,7 +11350,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val timerTaskStartPopup = object : TimerTask() {
                 override fun run() {
                     activity.runOnUiThread {
-                        val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_out_to_top)
+                        val animation: Animation = AnimationUtils.loadAnimation(
+                            applicationContext,
+                            R.anim.slide_out_to_top
+                        )
                         viewLoggerBirdStartPopup.animation = animation
                         removeLoggerBirdStartLayout()
                     }
@@ -11336,23 +11410,28 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     )
                 }
             windowManagerParamsLoggerBirdDismissPopup.gravity = Gravity.TOP
-            windowManagerLoggerBirdDismissPopup = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            windowManagerLoggerBirdDismissPopup =
+                activity.getSystemService(Context.WINDOW_SERVICE)!!
             (windowManagerLoggerBirdDismissPopup as WindowManager).addView(
                 viewLoggerBirdDismissPopup,
                 windowManagerParamsLoggerBirdDismissPopup
             )
-            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.cookieBarColor)
             activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
-            val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_in_from_top)
+            val animation: Animation =
+                AnimationUtils.loadAnimation(applicationContext, R.anim.slide_in_from_top)
             viewLoggerBirdDismissPopup.animation = animation
 
-            viewLoggerBirdDismissPopup.setOnTouchListener(object: OnSwipeTouchListener(this@LoggerBirdService) {
+            viewLoggerBirdDismissPopup.setOnTouchListener(object :
+                OnSwipeTouchListener(this@LoggerBirdService) {
                 override fun onSwipeLeft() {
                     Log.e("ViewSwipe", "Left")
                     viewLoggerBirdDismissPopup.clearAnimation()
                     removeLoggerBirdDismissLayout()
 
                 }
+
                 override fun onSwipeRight() {
                     Log.e("ViewSwipe", "Right")
                     viewLoggerBirdDismissPopup.clearAnimation()
@@ -11367,7 +11446,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val timerTaskDismissPopup = object : TimerTask() {
                 override fun run() {
                     activity.runOnUiThread {
-                        val animation: Animation = AnimationUtils.loadAnimation(applicationContext, R.anim.slide_out_to_top)
+                        val animation: Animation = AnimationUtils.loadAnimation(
+                            applicationContext,
+                            R.anim.slide_out_to_top
+                        )
                         viewLoggerBirdDismissPopup.animation = animation
                         removeLoggerBirdDismissLayout()
                     }
@@ -11441,7 +11523,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 windowManagerParamsLoggerBirdFileAction
             )
 
-            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.cookieBarColor)
             activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
             viewLoggerBirdFileActionPopup.scaleX = 0F
             viewLoggerBirdFileActionPopup.scaleY = 0F
@@ -11542,7 +11625,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 windowManagerParamsLoggerBirdUnhandledException
             )
 
-            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.cookieBarColor)
             activity.window.statusBarColor = ContextCompat.getColor(this, R.color.cookieBarColor)
 
             viewLoggerBirdUnhandledExceptionPopup.scaleX = 0F
@@ -11871,7 +11955,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     activity = activity,
                     autoTextViewPriority = autoTextViewBitbucketPriority
                 )
-            ){
+            ) {
                 bitbucketAuthentication.callBitbucket(
                     activity = activity,
                     context = context,

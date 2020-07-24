@@ -24,7 +24,6 @@ import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
 import models.*
 import models.api.github.*
-import observers.LogFragmentLifeCycleObserver
 import okhttp3.*
 import services.LoggerBirdService
 import utils.other.DefaultToast
@@ -999,6 +998,26 @@ internal class GithubApi {
             defaultToast.attachToast(
                 activity = activity,
                 toastMessage = activity.resources.getString(R.string.github_mile_stone_doesnt_exist)
+            )
+        }
+        return false
+    }
+    /**
+     * This method is used for checking linked pull request reference exist in the linked pull request list or not empty in the linked pull request AutoCompleteTextView field in the linked pull request layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewLinkedPullRequest is used for getting reference of linked pull request autoCompleteTextView in the github layout.
+     * @return Boolean value.
+     */
+    internal fun checkGithubLinkedPullRequest(
+        activity: Activity,
+        autoTextViewLinkedPullRequest: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListLinkedRequests.contains(autoTextViewLinkedPullRequest.editableText.toString()) || autoTextViewLinkedPullRequest.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.github_linked_pull_request_doesnt_exist)
             )
         }
         return false

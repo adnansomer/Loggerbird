@@ -62,6 +62,10 @@
     <string name="jira_sent_error">An error happened while trying to open jira issue!</string>
     <string name="jira_sent_error_time_out">An error happened while trying to open jira issue , system has been timed out!</string>
     <string name="media_recording_error">Please complete your other media operation!</string>
+    <string name="jira_project_empty">Project cannot be empty!</string>
+    <string name="jira_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="jira_issue_type_empty">Issue type cannot be empty!</string>
+    <string name="jira_issue_type_doesnt_exist">This issue type doesn\'t exist!</string>
     <string name="jira_summary_empty">Summary cannot be empty!</string>
     <string name="jira_reporter_empty">Reporter doesn\'t exist!</string>
     <string name="jira_fix_version_empty">Fix version doesn\'t exist!</string>
@@ -80,6 +84,10 @@
     <string name="jira_component_doesnt_exist">This component doesn\'t exist!</string>
     <string name="jira_fix_versions_exist">This fix-version already added to list!</string>
     <string name="jira_fix_versions_doesnt_exist">This fix-version doesn\'t exist!</string>
+    <string name="jira_priority_empty">Priority cannot be empty!</string>
+    <string name="jira_priority_doesnt_exist">This priority doesn\'t exist!</string>
+    <string name="jira_linked_issue_empty">Linked issue cannot be empty!</string>
+    <string name="jira_linked_issue_doesnt_exist">This linked issue doesn\'t exist!</string>
     <string name="slack_message_empty">Message cannot be empty!</string>
     <string name="slack_sent">Slack message sent!</string>
     <string name="slack_sent_error">An error happened while trying to send slack message!</string>
@@ -113,6 +121,7 @@
     <string name="github_project_exist">This project already added to list!</string>
     <string name="github_project_doesnt_exist">This project doesn\'t exist!</string>
     <string name="github_mile_stone_doesnt_exist">This milestone doesn\'t exist!</string>
+    <string name="github_linked_pull_request_doesnt_exist">This linked pull request doesn\'t exist!</string>
     <string name="gitlab_sent">Gitlab issue is created!</string>
     <string name="gitlab_sent_error">An error happened while trying to create Gitlab issue!</string>
     <string name="gitlab_sent_error_time_out">An error happened while trying to open Gitlab issue , system has been timed out!</string>
@@ -191,7 +200,7 @@
     <string name="bitbucket_project_empty">Project cannot be empty!</string>
     <string name="bitbucket_project_doesnt_exist">This project doesn\'t exist!</string>
     <string name="bitbucket_title_empty">Title cannot be empty!</string>
-    <string name="bitbucket_assignee_doesnt_exist">This bitbucket doesn\'t exist!</string>
+    <string name="bitbucket_assignee_doesnt_exist">This assignee doesn\'t exist!</string>
     <string name="bitbucket_priority_empty">Priority cannot be empty!</string>
     <string name="bitbucket_priority_doesnt_exist">This priority doesn\'t exist!</string>
     <string name="bitbucket_kind_empty">Kind cannot be empty!</string>
