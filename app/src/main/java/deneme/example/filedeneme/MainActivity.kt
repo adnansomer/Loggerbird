@@ -5,9 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
 import android.net.Uri
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
@@ -21,30 +18,14 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.core.app.ComponentActivity
-import androidx.core.view.drawToBitmap
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions.bitmapTransform
-import deneme.example.filedeneme.ApiServiceInterface.Companion.client
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.Sort
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import io.reactivex.disposables.Disposable
-import jp.wasabeef.glide.transformations.BlurTransformation
-import kotlinx.android.synthetic.main.recycler_view_item.*
-import loggerbird.LoggerBird.Companion.loggerBirdInterceptorClient
-import okhttp3.FormBody
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Response
-import okhttp3.Request
 import retrofit2.Callback
 import retrofit2.Retrofit
 import org.json.JSONObject;
@@ -52,8 +33,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.NullPointerException
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
-import utils.*
-import utils.other.AESUtils
 
 
 class MainActivity : AppCompatActivity() {
@@ -290,15 +269,15 @@ class MainActivity : AppCompatActivity() {
 //            supportFragmentManager.beginTransaction().add(R.id.main_activity_layout,FragmentMain3.newInstance()).commit()
 ////            startActivity(Intent(this@MainActivity, Main2Activity::class.java))
 
-            var encrypted = "582D3163703A2ADA6E40FE5B9D176402"
-            var decrypted = ""
-
-            try {
-                decrypted = AESUtils.decrypt(encrypted)
-                android.util.Log.d("TEST", "decrypted:" + decrypted)
-            } catch (e: java.lang.Exception) {
-                e.printStackTrace()
-            }
+//            var encrypted = "582D3163703A2ADA6E40FE5B9D176402"
+//            var decrypted = ""
+//
+//            try {
+//                decrypted = AESUtils.decrypt(encrypted)
+//                android.util.Log.d("TEST", "decrypted:" + decrypted)
+//            } catch (e: java.lang.Exception) {
+//                e.printStackTrace()
+//            }
         })
 
 
@@ -306,14 +285,14 @@ class MainActivity : AppCompatActivity() {
         button_performance.setOnClickListener {
             LoggerBird.callLifeCycleDetails()
             LoggerBird.callComponentDetails(view=it,resources = it.resources)
-            var encrypted: String = ""
-            var sourceStr: String = "LOGGERBIRD"
-            try {
-                encrypted = AESUtils.encrypt(sourceStr)
-                android.util.Log.d("TEST", "encrypted:" + encrypted)
-            } catch (e: java.lang.Exception) {
-                e.printStackTrace()
-            }
+//            var encrypted: String = ""
+//            var sourceStr: String = "LOGGERBIRD"
+//            try {
+//                encrypted = AESUtils.encrypt(sourceStr)
+//                android.util.Log.d("TEST", "encrypted:" + encrypted)
+//            } catch (e: java.lang.Exception) {
+//                e.printStackTrace()
+//            }
 
 
 
