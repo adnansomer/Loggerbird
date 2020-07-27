@@ -28,43 +28,39 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.billingclient.api.*
 import com.google.gson.GsonBuilder
 import com.mobilex.loggerbird.R
-import constants.Constants
-import exception.LoggerBirdException
-import interceptors.LogOkHttpAuthenticationInterceptor
-import interceptors.LogOkHttpCacheInterceptor
-import interceptors.LogOkHttpErrorInterceptor
-import interceptors.LogOkHttpInterceptor
+import loggerbird.constants.Constants
+import loggerbird.exception.LoggerBirdException
+import loggerbird.interceptors.LogOkHttpAuthenticationInterceptor
+import loggerbird.interceptors.LogOkHttpCacheInterceptor
+import loggerbird.interceptors.LogOkHttpErrorInterceptor
+import loggerbird.interceptors.LogOkHttpInterceptor
 import io.realm.Realm
 import io.realm.RealmModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import listeners.recyclerViews.LogRecyclerViewChildAttachStateChangeListener
-import listeners.recyclerViews.LogRecyclerViewItemTouchListener
-import listeners.recyclerViews.LogRecyclerViewScrollListener
-import observers.*
+import loggerbird.listeners.recyclerViews.LogRecyclerViewChildAttachStateChangeListener
+import loggerbird.listeners.recyclerViews.LogRecyclerViewItemTouchListener
+import loggerbird.listeners.recyclerViews.LogRecyclerViewScrollListener
+import loggerbird.observers.*
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import services.LoggerBirdMemoryService
-import services.LoggerBirdService
-import utils.other.DefaultToast
-import utils.email.EmailUtil
-import utils.other.InternetConnectionUtil
-import utils.other.LinkedBlockingQueueUtil
+import loggerbird.services.LoggerBirdMemoryService
+import loggerbird.services.LoggerBirdService
+import loggerbird.utils.email.EmailUtil
+import loggerbird.utils.other.InternetConnectionUtil
+import loggerbird.utils.other.LinkedBlockingQueueUtil
 import java.io.File
-import java.lang.Byte.decode
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.crypto.spec.IvParameterSpec
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
-import javax.crypto.*
 
 
 /**
@@ -388,7 +384,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method adds takeFragmentManagerDetails into queue.
-         * @param fragmentManager parameter used for getting details from FragmentManager and printing all fragments in FragmentManager.
+         * @param fragmentManager parameter used for getting details from FragmentManager and printing all loggerbird.fragments in FragmentManager.
          * @throws exception if controlLogInit value is false.
          */
         fun callFragmentManagerDetails(fragmentManager: FragmentManager?) {
@@ -582,7 +578,7 @@ class LoggerBird : LifecycleObserver {
          * //In progress method still need to be modified!
          * This Method adds takeExceptionDetails into queue.
          * @param exception parameter used for getting details from Exception class details
-         * @param tag parameter used for getting details of which method caused this exception.
+         * @param tag parameter used for getting details of which method caused this loggerbird.exception.
          * @param throwable used for getting details from Throwable class details.
          * @throws exception if controlLogInit value is false.
          */
@@ -684,7 +680,7 @@ class LoggerBird : LifecycleObserver {
          * This Method adds sendDetailsAsEmail into queue.
          * @param file parameter used for getting file details for sending as email.
          * @param context parameter used for getting context of the current activity or fragment.
-         * @param progressBar parameter used for getting custom progressbar that provided by method caller , if progressbar is null there will be default progressbar with default layout and you need to provide rootview in order to not get deneme.example.loggerbird.exception from default progressbar.
+         * @param progressBar parameter used for getting custom progressbar that provided by method caller , if progressbar is null there will be default progressbar with default layout and you need to provide rootview in order to not get deneme.example.loggerbird.loggerbird.exception from default progressbar.
          * @param rootView parameter used for getting the current view of activity or fragment.
          * @throws exception if controlLogInit value is false.
          */
@@ -843,7 +839,7 @@ class LoggerBird : LifecycleObserver {
         }
 
         /**This Method Takes Device Performance Details
-         * @throws exception if error occurs then deneme.example.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then deneme.example.loggerbird.loggerbird.exception message will be hold in the instance of logExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         private fun takeDevicePerformanceDetails() {
@@ -908,7 +904,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Takes CPU and Processor Details of Android Device
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         private fun takeCpuDetails() {
@@ -945,7 +941,7 @@ class LoggerBird : LifecycleObserver {
 
         /**This Method Determines Whether Memory is Overused.
          * @param threshold takes threshold value to determine whether memory is overused.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         private fun takeMemoryUsageDetails(threshold: Long?) {
@@ -989,7 +985,7 @@ class LoggerBird : LifecycleObserver {
          * This Method Takes Component Details.
          * @param view parameter used for getting id of the component.
          * @param resources parameter used for getting component name with view parameter.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         private fun takeComponentDetails(view: View?, resources: Resources?) {
@@ -1039,7 +1035,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Takes Life-Cycle Details.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         internal fun takeLifeCycleDetails() {
@@ -1143,7 +1139,7 @@ class LoggerBird : LifecycleObserver {
         /**
          * This Method Takes Analytics Details.
          * @param bundle parameter used for getting details from analytic bundle.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         private fun takeAnalyticsDetails(bundle: Bundle? = null) {
@@ -1182,8 +1178,8 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Takes FragmentManager Details.
-         * @param fragmentManager parameter used for getting details from FragmentManager and printing all fragments in FragmentManager.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @param fragmentManager parameter used for getting details from FragmentManager and printing all loggerbird.fragments in FragmentManager.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         private fun takeFragmentManagerDetails(
@@ -1220,7 +1216,7 @@ class LoggerBird : LifecycleObserver {
         /**
          * This Method Takes HttpRequest Details.
          * @param httpUrlConnection parameter used for getting details from HttpUrlConnection which is used for printing response code and response message.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         private fun takeHttpRequestDetails(
@@ -1257,7 +1253,7 @@ class LoggerBird : LifecycleObserver {
          * @param skuDetailsParams parameter used for getting the skusList and sku type of Billing flow.
          * @param billingFlowParams parameter used for getting the details of the sku's in the Billing flow.
          * @param acknowledgePurchaseParams parameter used for getting the details developer payload and purchase token.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         private fun takeInAPurchaseDetails(
@@ -1352,7 +1348,7 @@ class LoggerBird : LifecycleObserver {
          * @param retrofit parameter used for getting details from Retrofit which is used for getting base url of request.
          * @param response parameter used for getting details from Response which is used for getting response code ,response message , response success and response body.
          * @param request parameter used for getting details from Request which is used for getting request query and request method.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         private fun takeRetrofitRequestDetails(
@@ -1409,7 +1405,7 @@ class LoggerBird : LifecycleObserver {
          * This Method Takes OkHttp Request Details.
          * @param url parameter used for getting reference of url used in okhttp request.
          * @param okHttpURLConnection parameter used for getting details from okHttpUrlConnection and get it's response code , error message , response message.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         private fun takeOkHttpDetails(
@@ -1517,7 +1513,7 @@ class LoggerBird : LifecycleObserver {
          * This Method Takes Realm Details.
          * @param realm parameter used for getting details from Realm which is used for getting permissions,privileges and copy realm data.
          * @param realm model parameter used for getting details from RealmModel which is used for giving realm data to the Realm method which is copyFromRealm().
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          * @throws exception if logInit method return value is false.
          */
         private fun takeRealmDetails(
@@ -1555,7 +1551,7 @@ class LoggerBird : LifecycleObserver {
         /**
          * This Method Takes Exception Details.
          * @param exception parameter used for getting details from Exception class details
-         * @param tag parameter used for getting details of which method caused this exception.
+         * @param tag parameter used for getting details of which method caused this loggerbird.exception.
          * @param throwable used for getting details from Throwable class details.
          * @throws exception if logInit method return value is false.
          */
@@ -1662,9 +1658,9 @@ class LoggerBird : LifecycleObserver {
          * This Method Sends Desired File As Email.
          * @param file parameter used for getting file details for sending as email.
          * @param context parameter used for getting context of the current activity or fragment.
-         * @param progressBar parameter used for getting custom progressbar that provided by method caller , if progressbar is null there will be default progressbar with default layout and you need to provide rootview in order to not get deneme.example.loggerbird.exception from default progressbar.
+         * @param progressBar parameter used for getting custom progressbar that provided by method caller , if progressbar is null there will be default progressbar with default layout and you need to provide rootview in order to not get deneme.example.loggerbird.loggerbird.exception from default progressbar.
          * @param rootView parameter used for getting the current view of activity or fragment.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun sendDetailsAsEmail(
             file: File,
@@ -1785,7 +1781,7 @@ class LoggerBird : LifecycleObserver {
          * This Method used for when a saving method exceed's 2mb file limit and delete's old entries at the start and add's new entries to the end of the file.
          * @param stringBuilder is used for getting the reference of stringBuilder of called saving method.
          * @param file is used for getting the reference of stringBuilder of called saving method.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun exceededFileLimitWriter(
             stringBuilder: StringBuilder,
@@ -1858,7 +1854,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Component Details To Txt File.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun saveComponentDetails() {
             if (stringBuilderComponent.isNotEmpty()) {
@@ -1912,7 +1908,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Life-Cycle Details To Txt File.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun saveLifeCycleDetails() {
             if (stringBuilderLifeCycle.isNotEmpty()) {
@@ -1972,7 +1968,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves FragmentManager Details To Txt File.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun saveFragmentManagerDetails() {
             if (stringBuilderFragmentManager.isNotEmpty()) {
@@ -2029,7 +2025,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Analytics Details To Txt File.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun saveAnalyticsDetails() {
             if (stringBuilderAnalyticsManager.isNotEmpty()) {
@@ -2086,7 +2082,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves HttpRequest Details To Txt File.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun saveHttpRequestDetails() {
             if (stringBuilderHttp.isNotEmpty()) {
@@ -2143,7 +2139,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Android In A Purchase Details To Txt File.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun saveInAPurchaseDetails() {
             if (stringBuilderInAPurchase.isNotEmpty()) {
@@ -2200,7 +2196,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves OkHttp Request Details To Txt File.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun saveOkHttpRequestDetails() {
             if (stringBuilderOkHttp.isNotEmpty()) {
@@ -2257,7 +2253,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Retrofit Request Details To Txt File.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun saveRetrofitRequestDetails() {
             if (stringBuilderRetrofit.isNotEmpty()) {
@@ -2314,7 +2310,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Realm Details To Txt File.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun saveRealmDetails() {
             if (stringBuilderRealm.isNotEmpty()) {
@@ -2367,7 +2363,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Performance Details To Txt File.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun saveMemoryUsageDetails(
         ) {
@@ -2425,7 +2421,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Cpu Details To Txt File.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun saveCpuDetails() {
             if (stringBuilderCpu.isNotEmpty()) {
@@ -2535,7 +2531,7 @@ class LoggerBird : LifecycleObserver {
 
         /**
          * This Method Saves Details File Into Old Session File.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails , which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun saveSessionIntoOldSessionFile() {
             try {
@@ -2598,7 +2594,7 @@ class LoggerBird : LifecycleObserver {
          * @param requestCode takes request code from relevant permission.
          * @param resultCode takes result code from relevant permission.
          * @param data takes permission intent.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails ,
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails ,
          * which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         @RequiresApi(Build.VERSION_CODES.M)
@@ -2642,7 +2638,7 @@ class LoggerBird : LifecycleObserver {
          * @param requestCode is used for taking request code from relevant permission.
          * @param permissions is used for taking permissions that are wanted from user
          * @param grantResults is used for granted permission results.
-         * @throws exception if error occurs then com.mobilex.loggerbird.exception message will be put in the queue with callExceptionDetails ,
+         * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails ,
          * which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         fun onRequestPermissionResult(

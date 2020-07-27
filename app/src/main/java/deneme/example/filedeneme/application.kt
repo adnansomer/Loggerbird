@@ -23,7 +23,7 @@ class application : Application() {
 
         LoggerBird.logInit(
             context = this,
-            logLevel = LoggerBird.LogLevel.NONE
+            logLevel = LoggerBird.LogLevel.ALL
         )
 
         LoggerBird.callCpuDetails()
