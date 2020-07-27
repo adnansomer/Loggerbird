@@ -52,11 +52,6 @@ internal class GitlabApi {
     private var milestones: String? = null
     private var project: String? = null
     internal var confidentiality: String? = null
-//    private var spinnerPositionProject: Int = 0
-//    private var spinnerPositionLabels: Int = 0
-//    private var spinnerPositionAssignee: Int = 0
-//    private var spinnerPositionMilestones: Int = 0
-//    private var spinnerPositionConfidentiality: Int = 0
     private var projectPosition = 0
     private var assigneePosition = 0
     private var labelPosition = 0
