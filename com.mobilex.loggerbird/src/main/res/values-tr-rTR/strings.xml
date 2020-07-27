@@ -405,6 +405,10 @@
     <string name="textView_gitlab_description">Aciklama</string>
     <string name="editText_gitlab_description">Konu aciklamanizi buraya yaziniz!</string>
     <string name="editText_gitlab_weight">Konu agirligini buraya giriniz!</string>
+    <string name="textView_gitlab_confidentiality_enter">Görev gizliliği seç</string>
+    <string name="textView_gitlab_labels_enter">Görev etiketi seç</string>
+    <string name="textView_gitlab_milestone_enter">Görev kilometretaşı seç</string>
+    <string name="textView_gitlab_assginee_enter">Görev sorumlusu seç </string>
     <string name="textView_gitlab_assignee">Sorumlu</string>
     <string name="textView_gitlab_labels">Etiket</string>
     <string name="textView_gitlab_weight">Agirlik</string>
@@ -413,6 +417,12 @@
     <string name="textView_gitlab_due_date">Bitis tarihi</string>
     <string name="textView_gitlab_confidentiality">Gizlilik</string>
     <string name="textView_gitlab_enter_due_date">Konunuz icin bitis tarihi giriniz!</string>
+    <string name="textView_gitlab_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="textView_gitlab_assignee_doesnt_exist">Bu sorumlu bulunamadı!</string>
+    <string name="textView_gitlab_assignee_not_be_empty">Sorumlu boş olamaz!</string>
+    <string name="textView_gitlab_label_doesnt_exist">Bu etiket bulunamadı!</string>
+    <string name="textView_gitlab_confidentiality_doesnt_exist">Bu gizlilik bulunamadı!</string>
+    <string name="textView_gitlab_milestone_doesnt_exist">Bu kilometre taşı bulunamadı!</string>
     <!-- recycler_view_gitlab_item_popup-->
     <string name="textView_recyclerView_gitlab_popup_title">Gitlab görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_gitlab_yes">Eklentiyi sil</string>
@@ -594,6 +604,8 @@
     <string name="textView_clubhouse_story_description">Hikaye açıklaması</string>
     <string name="editText_clubhouse_subject">Hikaye ismini buraya yazınız!</string>
     <string name="editText_clubhouse_story_description">Hikaye açıklamanızı buraya yazınız!</string>
+    <string name="editText_clubhouse_story_type_empty">Hikaye tipi boş olamaz!</string>
+    <string name="editText_clubhouse_story_requester_empty">Hikaye isteyicisi boş olamaz!</string>
     <string name="textView_clubhouse_story_type">Hikaye tipi</string>
     <string name="textView_clubhouse_attachment">Eklentiler</string>
     <string name="textView_clubhouse_no_attachment">Eklenti yok.</string>
@@ -607,6 +619,11 @@
     <string name="textView_clubhouse_enter_due_date">hikaye için bitiş tarihi belirleyiniz!</string>
     <string name="textView_clubhouse_estimate_point">Yaklaşık puan</string>
     <string name="editText_clubhouse_estimate_point">Yaklaşık puanınızı buraya yazınız!</string>
+    <string name="textView_clubhouse_epic_enter">Select your story epic here!</string>
+    <string name="textView_clubhouse_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="textView_clubhouse_story_type_doesnt_exist">Bu hikaye tipi bulunamadı!</string>
+    <string name="textView_clubhouse_epic_doesnt_exist">Bu epik bulunamadı!</string>
+    <string name="textView_clubhouse_user_doesnt_exist">Bu kullanıcı bulunamadı!</string>
     <!-- recycler_view_clubhouse_item_popup-->
     <string name="textView_recyclerView_clubhouse_popup_title">Clubhouse görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_clubhouse_yes">Eklentiyi sil</string>

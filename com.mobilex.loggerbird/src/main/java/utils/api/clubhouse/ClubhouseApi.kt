@@ -7,7 +7,6 @@ import android.os.Build
 import android.util.Log
 import android.widget.AutoCompleteTextView
 import android.widget.EditText
-import android.widget.Spinner
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.mobilex.loggerbird.R
@@ -28,7 +27,6 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import observers.LogFragmentLifeCycleObserver
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import utils.other.InternetConnectionUtil
@@ -653,7 +651,7 @@ internal class ClubhouseApi {
     private fun updateFields() {
         timerTaskQueue.cancel()
         activity.runOnUiThread {
-            LoggerBirdService.loggerBirdService.initializeClubhouseSpinner(
+            LoggerBirdService.loggerBirdService.initializeClubhouseAutoTextViews(
                 arrayListClubhouseRequester = arrayListUsers,
                 arrayListClubhouseProjects = arrayListProjectName,
                 arrayListClubhouseStoryType = arrayListStoryType,

@@ -87,7 +87,6 @@ import loggerbird.LoggerBird
 import models.*
 import models.recyclerView.*
 import observers.LogActivityLifeCycleObserver
-//import org.aviran.cookiebar2.CookieBar
 import paint.PaintActivity
 import paint.PaintView
 import utils.email.EmailUtil
@@ -224,7 +223,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var timerTaskAudio: TimerTask? = null
     private var timerVideoTaskFileSize: TimerTask? = null
     private var timerAudioTaskFileSize: TimerTask? = null
-    //    private lateinit var cookieBar: CookieBar
     private lateinit var viewFeedback: View
     private lateinit var viewJira: View
     private lateinit var viewSlack: View
@@ -455,7 +453,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var textViewGitlabLabels: TextView
     private lateinit var linearLayoutGitlabLabels: LinearLayout
     private lateinit var imageViewGitlabLabels: ImageView
-
+    private lateinit var imageViewGitlabDueDate: ImageView
     //Github
     internal val githubAuthentication = GithubApi()
     private lateinit var buttonGithubCreate: Button
@@ -1073,19 +1071,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
                 (windowManager as WindowManager).removeViewImmediate(view)
                 initializeLoggerBirdClosePopup(activity = activity)
-//                CookieBar.build(activity)
-//                    .setCustomView(R.layout.loggerbird_close_popup)
-//                    .setCustomViewInitializer {
-//                        val textViewFeedBack =
-//                            it.findViewById<TextView>(R.id.textView_feed_back_pop_up)
-//                        textViewFeedBack.setSafeOnClickListener {
-//                            initializeFeedBackLayout()
-//                            CookieBar.dismiss(activity)
-//                        }
-//                    }
-//                    .setSwipeToDismiss(true)
-//                    .setDuration(2000)
-//                    .show()
                 windowManager = null
                 isFabEnable = false
 
@@ -1249,22 +1234,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         buttonClicks()
                     }
                     initializeLoggerBirdStartPopup(activity = activity)
-//                    CookieBar.build(activity)
-//                        .setCustomView(R.layout.loggerbird_start_popup)
-//                        .setCustomViewInitializer {
-//                            val textViewSessionTime =
-//                                it.findViewById<TextView>(R.id.textView_session_time_pop_up)
-//                            textViewSessionTime.text =
-//                                resources.getString(R.string.total_session_time) + timeStringDay(
-//                                    totalSessionTime()
-//                                ) + "\n" + resources.getString(R.string.last_session_time) + timeStringDay(
-//                                    lastSessionTime()
-//                                )
-//                        }
-//                        .setSwipeToDismiss(true)
-//                        .setEnableAutoDismiss(true)
-//                        .setDuration(3000)
-//                        .show()
                     isFabEnable = true
 
                 } else {
@@ -1529,10 +1498,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             textView_send_email.setSafeOnClickListener {
-                //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    attachProgressBar()
-//                }
-//                sendSingleMediaFile(filePathMedia = filePathMedia)
                 initializeEmailLayout(filePathMedia = filePathMedia)
             }
 
@@ -2044,7 +2009,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             }
                         }
                     } else {
-                        if (this@LoggerBirdService::filePathVideo != null) {
+                        if (this@LoggerBirdService.filePathVideo != null) {
                             if (this@LoggerBirdService.filePathVideo!!.length() > 0 || controlTimeControllerVideo) {
                                 withContext(Dispatchers.Main) {
                                     Toast.makeText(
@@ -2403,28 +2368,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 if (!isFabEnable) {
                     if (!isActivateDialogShown) {
                         initializeLoggerBirdActivatePopup(activity = this.activity)
-//                        cookieBar = CookieBar.build(this.activity)
-//                            .setTitle(resources.getString(R.string.library_name))
-//                            .setMessage(resources.getString(R.string.logger_bird_floating_action_button_permission_message))
-//                            .setCustomView(R.layout.loggerbird_activate_popup)
-//                            .setIcon(R.drawable.loggerbird)
-//                            .setSwipeToDismiss(true)
-//                            .setCookieListener { isActivateDialogShown = false }
-//                            .setEnableAutoDismiss(false)
-//                            .setCustomViewInitializer(CookieBar.CustomViewInitializer {
-//                                val txtActivate =
-//                                    it.findViewById<TextView>(R.id.btn_action_activate)
-//                                val txtDismiss = it.findViewById<TextView>(R.id.btn_action_dismiss)
-//                                txtActivate.setSafeOnClickListener {
-//                                    initializeFloatingActionButton(activity = activity)
-//                                    CookieBar.dismiss(activity)
-//                                }
-//                                txtDismiss.setSafeOnClickListener {
-//                                    sd.stop()
-//                                    CookieBar.dismiss(activity)
-//                                }
-//                            })
-//                            .show()
                         isActivateDialogShown = true
                     }
                 }
@@ -2830,29 +2773,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun chooseActionFiles() {
         this.controlFileAction = true
         initializeLoggerBirdFileActionPopup(activity = this.activity)
-//        CookieBar.build(activity)
-//            .setCustomView(R.layout.loggerbird_file_action_popup)
-//            .setCustomViewInitializer {
-//                val textViewDiscard = it.findViewById<TextView>(R.id.textView_files_action_discard)
-//                textViewDiscard.setSafeOnClickListener {
-//                    if (this.controlFileAction) {
-//                        this.controlFileAction = false
-//                        CookieBar.dismiss(activity)
-//                        deleteOldFiles()
-//                    }
-//                }
-//                val textViewEmail = it.findViewById<TextView>(R.id.textView_files_action_mail)
-//                textViewEmail.setSafeOnClickListener {
-//                    if (this.controlFileAction) {
-//                        this.controlFileAction = false
-//                        CookieBar.dismiss(activity)
-//                        sendOldFilesEmail()
-//                    }
-//                }
-//            }
-//            .setSwipeToDismiss(false)
-//            .setEnableAutoDismiss(false)
-//            .show()
     }
 
     /**
@@ -3010,13 +2930,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 "media" -> {
                     Toast.makeText(context, R.string.share_media_delete, Toast.LENGTH_SHORT).show()
                     finishSuccessFab()
-                    //detachProgressBar()
                 }
                 "media_error" -> {
                     Toast.makeText(context, R.string.share_media_delete_error, Toast.LENGTH_SHORT)
                         .show()
                     finishErrorFab()
-                    //detachProgressBar()
                 }
                 "single_email" -> {
                     detachProgressBar()
@@ -8041,6 +7959,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 linearLayoutGitlabLabels = viewGitlab.findViewById(R.id.linearLayout_gitlab_labels)
                 textViewGitlabLabels = viewGitlab.findViewById(R.id.textView_gitlab_labels)
                 imageViewGitlabLabels = viewGitlab.findViewById(R.id.imageView_delete_labels)
+                imageViewGitlabDueDate =
+                    viewGitlab.findViewById(R.id.imageView_gitlab_delete_due_date)
                 progressBarGitlabLayout =
                     viewGitlab.findViewById(R.id.gitlab_progressbar_background)
                 recyclerViewGitlabAttachment =
@@ -8096,7 +8016,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         buttonCalendarViewGitlabCancel.setOnClickListener {
             detachGitlabDatePicker()
         }
+        imageViewGitlabDueDate.setOnClickListener {
 
+            imageViewGitlabDueDate.visibility = View.GONE
+
+            textViewGitlabDueDate.text = null
+
+            gitlabAuthentication.dueDate = null
+
+        }
         buttonCalendarViewGitlabOk.setOnClickListener {
             if (dueDate != null) {
                 gitlabAuthentication.dueDate = dueDate
@@ -8113,7 +8041,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val dueDateFormat = "$mMonth/$mDayOfMonth/$mYear"
             activity.runOnUiThread {
                 textViewGitlabDueDate.text = dueDateFormat
-                textViewGitlabDueDate.setTextColor(resources.getColor(R.color.black))
+                textViewGitlabDueDate.setTextColor(
+                    ColorStateList.valueOf(
+                        ContextCompat.getColor(
+                            this,
+                            R.color.black
+                        )
+                    )
+                )
+                imageViewGitlabDueDate.visibility = View.VISIBLE
             }
         }
     }
@@ -8185,7 +8121,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.M)
     private fun buttonClicksGitlab(filePathMedia: File) {
         buttonGitlabCreate.setSafeOnClickListener {
-            if (checkGitlabTitleEmpty()) {
+            if (checkGitlabTitleEmpty() && checkGitlabAssigneeEmpty()) {
                 progressBarGitlabLayout.visibility = View.VISIBLE
                 progressBarGitlab.visibility = View.VISIBLE
                 gitlabAuthentication.gatherGitlabEditTextDetails(
@@ -8311,6 +8247,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 context = context,
                 task = "get"
             )
+            autoTextViewGitlabProject.setOnFocusChangeListener { v, hasFocus ->
+                if (!hasFocus) {
+                    if (!arrayListGitlabProjects.contains(autoTextViewGitlabProject.editableText.toString())) {
+                        if (arrayListGitlabProjects.isNotEmpty()) {
+                            defaultToast.attachToast(
+                                activity = activity,
+                                toastMessage = activity.resources.getString(R.string.textView_gitlab_project_doesnt_exist)
+                            )
+                            autoTextViewGitlabProject.setText(arrayListGitlabProjects[0], false)
+
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -8338,6 +8288,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGitlabAssignee.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewGitlab)
+        }
+        autoTextViewGitlabAssignee.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListGitlabAssignee.contains(autoTextViewGitlabAssignee.editableText.toString())) {
+                    if (arrayListGitlabAssignee.isNotEmpty()) {
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = activity.resources.getString(R.string.textView_gitlab_assignee_doesnt_exist)
+                        )
+                        autoTextViewGitlabAssignee.setText(arrayListGitlabAssignee[0], false)
+                        checkGitlabAssigneeEmpty()
+                    }
+                }
+            }
         }
     }
 
@@ -8369,7 +8333,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         imageViewGitlabLabels.setSafeOnClickListener {
             linearLayoutGitlabLabels.visibility = View.GONE
             textViewGitlabLabels.visibility = View.VISIBLE
-            gitlabAuthentication.gitlabLabelPosition(labelPosition = 0)
+        }
+        autoTextViewGitlabLabels.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListGitlabLabels.contains(autoTextViewGitlabLabels.editableText.toString())) {
+                    if (arrayListGitlabLabels.isNotEmpty()) {
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = activity.resources.getString(R.string.textView_gitlab_label_doesnt_exist)
+                        )
+                        autoTextViewGitlabLabels.setText(arrayListGitlabLabels[0], false)
+                    }
+                }
+            }
         }
     }
 
@@ -8400,6 +8376,22 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGitlabConfidentiality.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewGitlab)
+        }
+        autoTextViewGitlabConfidentiality.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListGitlabConfidentiality.contains(autoTextViewGitlabConfidentiality.editableText.toString())) {
+                    if (arrayListGitlabConfidentiality.isNotEmpty()) {
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = activity.resources.getString(R.string.textView_gitlab_confidentiality_doesnt_exist)
+                        )
+                        autoTextViewGitlabConfidentiality.setText(
+                            arrayListGitlabConfidentiality[0],
+                            false
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -8436,6 +8428,34 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewGitlabMilestone.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewGitlab)
         }
+
+        autoTextViewGitlabMilestone.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListGitlabMilestones.contains(autoTextViewGitlabMilestone.editableText.toString())) {
+                    if (arrayListGitlabMilestones.isNotEmpty()) {
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = activity.resources.getString(R.string.textView_gitlab_milestone_doesnt_exist)
+                        )
+                        autoTextViewGitlabMilestone.setText(arrayListGitlabMilestones[0], false)
+                    }
+                }
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun checkGitlabAssigneeEmpty(): Boolean {
+        if (autoTextViewGitlabAssignee.text.toString().isNotEmpty()) {
+            return true
+
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.editText_gitlab_title_empty)
+            )
+        }
+        return false
     }
 
 
@@ -10824,6 +10844,126 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     /**
+     * This method is used for removing loggerbird_clubhouse_popup from window.
+     */
+    internal fun removeClubhouseLayout() {
+        if (windowManagerClubhouse != null && this::viewClubhouse.isInitialized) {
+            (windowManagerClubhouse as WindowManager).removeViewImmediate(viewClubhouse)
+            windowManagerClubhouse = null
+            arrayListClubhouseFileName.clear()
+        }
+    }
+
+    /**
+     * This method is used for initializing clubhouse attachment recyclerView.
+     * @param filePathMedia is used for getting the reference of current media file.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeClubhouseAttachmentRecyclerView(filePathMedia: File) {
+        arrayListClubhouseFileName.clear()
+        recyclerViewClubhouseAttachment.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        clubhouseAttachmentAdapter =
+            RecyclerViewClubhouseAttachmentAdapter(
+                addClubhouseFileNames(filePathMedia = filePathMedia),
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewClubhouseAttachment.adapter = clubhouseAttachmentAdapter
+    }
+
+    /**
+     * This method is used for adding files to clubhouse file list.
+     * @param filePathMedia is used for getting the reference of current media file.
+     * @return ArrayList<RecyclerViewModel> value.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun addClubhouseFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
+        if (filePathMedia.exists()) {
+            arrayListClubhouseFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (LoggerBird.filePathSecessionName.exists()) {
+            arrayListClubhouseFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
+        }
+        return arrayListClubhouseFileName
+    }
+
+    /**
+     * This method is used for initializing button clicks of buttons that are inside in the loggerbird_clubhouse_popup.
+     * @param filePathMedia is used for getting the reference of current media file.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun buttonClicksClubhouse(filePathMedia: File) {
+        buttonClubhouseCreate.setSafeOnClickListener {
+            if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty()
+                && checkClubhouseStoryTypeEmpty() && checkClubhouseRequesterEmpty()
+            ) {
+                clubhouseAuthentication.gatherClubhouseProjectAutoTextDetails(
+                    autoTextViewProject = autoTextViewClubhouseProject,
+                    autoTextViewEpic = autoTextViewClubhouseEpic,
+                    autoTextViewStoryType = autoTextViewClubhouseStoryType,
+                    autoTextViewRequester = autoTextViewClubhouseRequester
+                )
+                clubhouseAuthentication.gatherClubhouseEditTextDetails(
+                    editTextStoryName = editTextClubhouseStoryName,
+                    editTextStoryDescription = editTextClubhouseStoryDescription,
+                    editTextEstimate = editTextClubhouseEstimate
+                )
+                progressBarClubhouse.visibility = View.VISIBLE
+                progressBarClubhouseLayout.visibility = View.VISIBLE
+                clubhouseAuthentication.callClubhouse(
+                    activity = activity,
+                    context = context,
+                    task = "create",
+                    filePathMedia = filePathMedia
+                )
+            }
+        }
+        textViewClubhouseDueDate.setSafeOnClickListener {
+            attachClubhouseDatePicker()
+        }
+        toolbarClubhouse.setNavigationOnClickListener {
+            removeClubhouseLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+        buttonClubhouseCancel.setSafeOnClickListener {
+            removeClubhouseLayout()
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
+        textViewClubhouseEpic.setSafeOnClickListener {
+            linearLayoutClubhouseEpic.visibility = View.VISIBLE
+            textViewClubhouseEpic.visibility = View.GONE
+        }
+    }
+
+    /**
+     * This method is used for initializing  autoCompleteTextViews in the loggerbird_clubhouse_popup.
+     * @param arrayListClubhouseRequester is used for getting the requester list for requester autoCompleteTextView.
+     * @param arrayListClubhouseProjects is used for getting the project list for project autoCompleteTextView.
+     * @param arrayListClubhouseStoryType is used for getting the story type list for story type autoCompleteTextView.
+     * @param arrayListClubhouseEpic is used for getting the epic list for epic autoCompleteTextView.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun initializeClubhouseAutoTextViews(
+        arrayListClubhouseRequester: ArrayList<String>,
+        arrayListClubhouseProjects: ArrayList<String>,
+        arrayListClubhouseStoryType: ArrayList<String>,
+        arrayListClubhouseEpic: ArrayList<String>
+    ) {
+        initializeClubhouseProject(arrayListClubhouseProjects)
+        initializeClubhouseRequester(arrayListClubhouseRequester)
+        initializeClubhouseStoryType(arrayListClubhouseStoryType)
+        initializeClubhouseEpic(arrayListClubhouseEpic)
+        progressBarClubhouse.visibility = View.GONE
+        progressBarClubhouseLayout.visibility = View.GONE
+    }
+
+    /**
      * This method is used for initializing project autoCompleteTextView in the loggerbird_clubhouse_popup.
      * @param arrayListClubhouseProjects is used for getting the project list for project autoCompleteTextView.
      */
@@ -10882,28 +11022,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
             hideKeyboard(activity = activity, view = viewClubhouse)
         }
-    }
-
-    /**
-     * This method is used for initializing  autoCompleteTextViews in the loggerbird_clubhouse_popup.
-     * @param arrayListClubhouseRequester is used for getting the requester list for requester autoCompleteTextView.
-     * @param arrayListClubhouseProjects is used for getting the project list for project autoCompleteTextView.
-     * @param arrayListClubhouseStoryType is used for getting the story type list for story type autoCompleteTextView.
-     * @param arrayListClubhouseEpic is used for getting the epic list for epic autoCompleteTextView.
-     */
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun initializeClubhouseSpinner(
-        arrayListClubhouseRequester: ArrayList<String>,
-        arrayListClubhouseProjects: ArrayList<String>,
-        arrayListClubhouseStoryType: ArrayList<String>,
-        arrayListClubhouseEpic: ArrayList<String>
-    ) {
-        initializeClubhouseProject(arrayListClubhouseProjects)
-        initializeClubhouseRequester(arrayListClubhouseRequester)
-        initializeClubhouseStoryType(arrayListClubhouseStoryType)
-        initializeClubhouseEpic(arrayListClubhouseEpic)
-        progressBarClubhouse.visibility = View.GONE
-        progressBarClubhouseLayout.visibility = View.GONE
+        autoTextViewClubhouseEpic.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListClubhouseEpic.contains(autoTextViewClubhouseEpic.editableText.toString())) {
+                    if (arrayListClubhouseEpic.isNotEmpty()) {
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = activity.resources.getString(R.string.textView_clubhouse_epic_doesnt_exist)
+                        )
+                        autoTextViewClubhouseEpic.setText(arrayListClubhouseEpic[0], false)
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -10931,6 +11062,65 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewClubhouseStoryType.setOnItemClickListener { parent, view, position, id ->
             clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
             hideKeyboard(activity = activity, view = viewClubhouse)
+        }
+        autoTextViewClubhouseStoryType.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListClubhouseStoryType.contains(autoTextViewClubhouseStoryType.editableText.toString())) {
+                    if (arrayListClubhouseStoryType.isNotEmpty()) {
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = activity.resources.getString(R.string.textView_clubhouse_story_type_doesnt_exist)
+                        )
+                        autoTextViewClubhouseStoryType.setText(
+                            arrayListClubhouseStoryType[0],
+                            false
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * This method is used for initializing requester autoCompleteTextView in the loggerbird_clubhouse_popup.
+     * @param arrayListClubhouseRequester is used for getting the requester list for requester autoCompleteTextView.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    internal fun initializeClubhouseRequester(
+        arrayListClubhouseRequester: ArrayList<String>
+    ) {
+        autoTextViewClubhouseRequesterAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            arrayListClubhouseRequester
+        )
+        autoTextViewClubhouseRequester.setAdapter(autoTextViewClubhouseRequesterAdapter)
+        if (arrayListClubhouseRequester.isNotEmpty() && autoTextViewClubhouseRequester.text.isEmpty()) {
+            autoTextViewClubhouseRequester.setText(arrayListClubhouseRequester[0], false)
+        }
+        autoTextViewClubhouseRequester.setOnTouchListener { v, event ->
+            autoTextViewClubhouseRequester.showDropDown()
+            false
+        }
+        autoTextViewClubhouseRequester.setOnItemClickListener { parent, view, position, id ->
+            clubhouseAuthentication.clubhouseUserPosition(userPosition = position)
+            hideKeyboard(activity = activity, view = viewClubhouse)
+        }
+        autoTextViewClubhouseRequester.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListClubhouseRequester.contains(autoTextViewClubhouseRequester.editableText.toString())) {
+                    if (arrayListClubhouseRequester.isNotEmpty()) {
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = activity.resources.getString(R.string.textView_clubhouse_user_doesnt_exist)
+                        )
+                        autoTextViewClubhouseRequester.setText(
+                            arrayListClubhouseRequester[0],
+                            false
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -11001,7 +11191,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             mMonth = month + 1
             mDayOfMonth = dayOfMonth
             calendarViewClubhouseDate = viewStartDate.date
-            dueDate = "$mDayOfMonth/$mMonth/$mYear"
+            dueDate = "$mMonth/$mDayOfMonth/$mYear"
             dueDateFormat = "$mYear-$mMonth-$mDayOfMonth"
             activity.runOnUiThread {
                 textViewClubhouseDueDate.text = dueDate
@@ -11034,84 +11224,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             (windowManagerClubhouseDatePicker as WindowManager).removeViewImmediate(
                 calendarViewClubhouseView
             )
-        }
-    }
-
-    /**
-     * This method is used for initializing requester autoCompleteTextView in the loggerbird_clubhouse_popup.
-     * @param arrayListClubhouseRequester is used for getting the requester list for requester autoCompleteTextView.
-     */
-    @SuppressLint("ClickableViewAccessibility")
-    internal fun initializeClubhouseRequester(
-        arrayListClubhouseRequester: ArrayList<String>
-    ) {
-        autoTextViewClubhouseRequesterAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            arrayListClubhouseRequester
-        )
-        autoTextViewClubhouseRequester.setAdapter(autoTextViewClubhouseRequesterAdapter)
-        if (arrayListClubhouseRequester.isNotEmpty() && autoTextViewClubhouseRequester.text.isEmpty()) {
-            autoTextViewClubhouseRequester.setText(arrayListClubhouseRequester[0], false)
-        }
-        autoTextViewClubhouseRequester.setOnTouchListener { v, event ->
-            autoTextViewClubhouseRequester.showDropDown()
-            false
-        }
-        autoTextViewClubhouseRequester.setOnItemClickListener { parent, view, position, id ->
-            clubhouseAuthentication.clubhouseUserPosition(userPosition = position)
-            hideKeyboard(activity = activity, view = viewClubhouse)
-        }
-    }
-
-    /**
-     * This method is used for initializing button clicks of buttons that are inside in the loggerbird_clubhouse_popup.
-     * @param filePathMedia is used for getting the reference of current media file.
-     */
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun buttonClicksClubhouse(filePathMedia: File) {
-        buttonClubhouseCreate.setSafeOnClickListener {
-            if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty()
-            ) {
-                clubhouseAuthentication.gatherClubhouseProjectAutoTextDetails(
-                    autoTextViewProject = autoTextViewClubhouseProject,
-                    autoTextViewEpic = autoTextViewClubhouseEpic,
-                    autoTextViewStoryType = autoTextViewClubhouseStoryType,
-                    autoTextViewRequester = autoTextViewClubhouseRequester
-                )
-                clubhouseAuthentication.gatherClubhouseEditTextDetails(
-                    editTextStoryName = editTextClubhouseStoryName,
-                    editTextStoryDescription = editTextClubhouseStoryDescription,
-                    editTextEstimate = editTextClubhouseEstimate
-                )
-                progressBarClubhouse.visibility = View.VISIBLE
-                progressBarClubhouseLayout.visibility = View.VISIBLE
-                clubhouseAuthentication.callClubhouse(
-                    activity = activity,
-                    context = context,
-                    task = "create",
-                    filePathMedia = filePathMedia
-                )
-            }
-        }
-        textViewClubhouseDueDate.setSafeOnClickListener {
-            attachClubhouseDatePicker()
-        }
-        toolbarClubhouse.setNavigationOnClickListener {
-            removeClubhouseLayout()
-            if (controlFloatingActionButtonView()) {
-                floatingActionButtonView.visibility = View.VISIBLE
-            }
-        }
-        buttonClubhouseCancel.setSafeOnClickListener {
-            removeClubhouseLayout()
-            if (controlFloatingActionButtonView()) {
-                floatingActionButtonView.visibility = View.VISIBLE
-            }
-        }
-        textViewClubhouseEpic.setSafeOnClickListener {
-            linearLayoutClubhouseEpic.visibility = View.VISIBLE
-            textViewClubhouseEpic.visibility = View.GONE
         }
     }
 
@@ -11150,51 +11262,39 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     /**
-     * This method is used for removing loggerbird_clubhouse_popup from window.
-     */
-    internal fun removeClubhouseLayout() {
-        if (windowManagerClubhouse != null && this::viewClubhouse.isInitialized) {
-            (windowManagerClubhouse as WindowManager).removeViewImmediate(viewClubhouse)
-            windowManagerClubhouse = null
-            arrayListClubhouseFileName.clear()
-        }
-    }
-
-    /**
-     * This method is used for initializing clubhouse attachment recyclerView.
-     * @param filePathMedia is used for getting the reference of current media file.
+     * This method is used for story type field is not empty in clubhouse layout.
+     * @return Boolean value.
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun initializeClubhouseAttachmentRecyclerView(filePathMedia: File) {
-        arrayListClubhouseFileName.clear()
-        recyclerViewClubhouseAttachment.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        clubhouseAttachmentAdapter =
-            RecyclerViewClubhouseAttachmentAdapter(
-                addClubhouseFileNames(filePathMedia = filePathMedia),
-                context = context,
+    private fun checkClubhouseStoryTypeEmpty(): Boolean {
+        if (autoTextViewClubhouseStoryType.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
                 activity = activity,
-                rootView = rootView
+                toastMessage = activity.resources.getString(R.string.editText_clubhouse_story_type_empty)
             )
-        recyclerViewClubhouseAttachment.adapter = clubhouseAttachmentAdapter
+        }
+        return false
     }
+
 
     /**
-     * This method is used for adding files to clubhouse file list.
-     * @param filePathMedia is used for getting the reference of current media file.
-     * @return ArrayList<RecyclerViewModel> value.
+     * This method is used for assignee field is not empty in clubhouse layout.
+     * @return Boolean value.
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun addClubhouseFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
-        if (filePathMedia.exists()) {
-            arrayListClubhouseFileName.add(RecyclerViewModel(file = filePathMedia))
+    private fun checkClubhouseRequesterEmpty(): Boolean {
+        if (autoTextViewClubhouseRequester.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.editText_clubhouse_story_requester_empty)
+            )
         }
-        if (LoggerBird.filePathSecessionName.exists()) {
-            arrayListClubhouseFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
-        }
-        return arrayListClubhouseFileName
+        return false
     }
-
 
     /**
      * This method is used for initializing Loggerbird activation popup.
