@@ -455,6 +455,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var textViewGitlabLabels : TextView
     private lateinit var linearLayoutGitlabLabels : LinearLayout
     private lateinit var imageViewGitlabLabels : ImageView
+    private lateinit var imageViewGitlabDueDate : ImageView
 
     //Github
     internal val githubAuthentication = GithubApi()
@@ -8013,6 +8014,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 textViewGitlabLabels = viewGitlab.findViewById(R.id.textView_gitlab_labels)
                 imageViewGitlabLabels = viewGitlab.findViewById(R.id.imageView_delete_labels)
                 progressBarGitlabLayout = viewGitlab.findViewById(R.id.gitlab_progressbar_background)
+                imageViewGitlabDueDate = viewGitlab.findViewById(R.id.imageView_gitlab_delete_due_date)
                 recyclerViewGitlabAttachment = viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
                 editTextGitlabWeight.filters = arrayOf<InputFilter>(
                     InputTypeFilter(
@@ -8066,6 +8068,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             detachGitlabDatePicker()
         }
 
+        imageViewGitlabDueDate.setOnClickListener{
+            imageViewGitlabDueDate.visibility = View.GONE
+            textViewGitlabDueDate.text = null
+            gitlabAuthentication.dueDate = null
+        }
+
         buttonCalendarViewGitlabOk.setOnClickListener {
             if (dueDate != null) {
                 gitlabAuthentication.dueDate = dueDate
@@ -8083,6 +8091,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             activity.runOnUiThread {
                 textViewGitlabDueDate.text = dueDateFormat
                 textViewGitlabDueDate.setTextColor(resources.getColor(R.color.black))
+                imageViewGitlabDueDate.visibility = View.VISIBLE
             }
         }
     }
@@ -8154,7 +8163,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.M)
     private fun buttonClicksGitlab(filePathMedia: File) {
         buttonGitlabCreate.setSafeOnClickListener {
-            if (checkGitlabTitleEmpty()) {
+            if (checkGitlabTitleEmpty() && checkGitlabAssigneeEmpty()) {
                 progressBarGitlabLayout.visibility = View.VISIBLE
                 progressBarGitlab.visibility = View.VISIBLE
                 gitlabAuthentication.gatherGitlabEditTextDetails(
@@ -8256,8 +8265,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabProject(
         arrayListGitlabProjects: ArrayList<String>
     ) {
-        autoTextViewGitlabProjectAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabProjects)
+        autoTextViewGitlabProjectAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabProjects)
         autoTextViewGitlabProject.setAdapter(autoTextViewGitlabProjectAdapter)
         if (arrayListGitlabProjects.isNotEmpty() && autoTextViewGitlabProject.text.isEmpty()) {
             autoTextViewGitlabProject.setText(arrayListGitlabProjects[0], false)
@@ -8280,6 +8288,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 context = context,
                 task = "get"
             )
+        }
+        autoTextViewGitlabProject.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListGitlabProjects.contains(autoTextViewGitlabProject.editableText.toString())) {
+                    if (arrayListGitlabProjects.isNotEmpty()) {
+                        defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_gitlab_project_doesnt_exist))
+                        autoTextViewGitlabProject.setText(arrayListGitlabProjects[0], false)
+
+                    }
+                }
+            }
         }
     }
 
@@ -8306,6 +8325,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGitlabAssignee.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewGitlab)
+        }
+        autoTextViewGitlabAssignee.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListGitlabAssignee.contains(autoTextViewGitlabAssignee.editableText.toString())) {
+                    if (arrayListGitlabAssignee.isNotEmpty()) {
+                        defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_gitlab_assignee_doesnt_exist))
+                        autoTextViewGitlabAssignee.setText(arrayListGitlabAssignee[0], false)
+                        checkGitlabAssigneeEmpty()
+                    }
+                }
+            }
         }
     }
 
@@ -8336,7 +8366,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         imageViewGitlabLabels.setSafeOnClickListener {
             linearLayoutGitlabLabels.visibility = View.GONE
             textViewGitlabLabels.visibility = View.VISIBLE
-            gitlabAuthentication.gitlabLabelPosition(labelPosition = 0)
+        }
+        autoTextViewGitlabLabels.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListGitlabLabels.contains(autoTextViewGitlabLabels.editableText.toString())) {
+                    if (arrayListGitlabLabels.isNotEmpty()) {
+                        defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_gitlab_label_doesnt_exist))
+                        autoTextViewGitlabLabels.setText(arrayListGitlabLabels[0], false)
+                    }
+                }
+            }
         }
     }
 
@@ -8363,6 +8402,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGitlabConfidentiality.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewGitlab)
+        }
+        autoTextViewGitlabConfidentiality.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListGitlabConfidentiality.contains(autoTextViewGitlabConfidentiality.editableText.toString())) {
+                    if (arrayListGitlabConfidentiality.isNotEmpty()) {
+                        defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_gitlab_confidentiality_doesnt_exist))
+                        autoTextViewGitlabConfidentiality.setText(arrayListGitlabConfidentiality[0], false)
+                    }
+                }
+            }
         }
     }
 
@@ -8395,6 +8444,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewGitlabMilestone.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewGitlab)
         }
+        autoTextViewGitlabMilestone.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListGitlabMilestones.contains(autoTextViewGitlabMilestone.editableText.toString())) {
+                    if (arrayListGitlabMilestones.isNotEmpty()) {
+                        defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_gitlab_milestone_doesnt_exist))
+                        autoTextViewGitlabMilestone.setText(arrayListGitlabMilestones[0], false)
+                    }
+                }
+            }
+        }
     }
 
 
@@ -8421,6 +8480,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun checkGitlabTitleEmpty(): Boolean {
         if (editTextGitlabTitle.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.editText_gitlab_title_empty)
+            )
+        }
+        return false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun checkGitlabAssigneeEmpty(): Boolean {
+        if (autoTextViewGitlabAssignee.text.toString().isNotEmpty()) {
             return true
         } else {
             defaultToast.attachToast(
@@ -10810,6 +10882,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 task = "get"
             )
         }
+
+        autoTextViewClubhouseProject.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListClubhouseProjects.contains(autoTextViewClubhouseProject.editableText.toString())) {
+                    if (arrayListClubhouseProjects.isNotEmpty()) {
+                        defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_clubhouse_project_doesnt_exist))
+                        autoTextViewClubhouseProject.setText(arrayListClubhouseProjects[0], false)
+
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -10832,6 +10916,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewClubhouseEpic.setOnItemClickListener { parent, view, position, id ->
             clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
             hideKeyboard(activity = activity, view = viewClubhouse)
+        }
+        autoTextViewClubhouseEpic.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListClubhouseEpic.contains(autoTextViewClubhouseEpic.editableText.toString())) {
+                    if (arrayListClubhouseEpic.isNotEmpty()) {
+                        defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_clubhouse_epic_doesnt_exist))
+                        autoTextViewClubhouseEpic.setText(arrayListClubhouseEpic[0], false)
+
+                    }
+                }
+            }
         }
     }
 
@@ -10878,6 +10973,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewClubhouseStoryType.setOnItemClickListener { parent, view, position, id ->
             clubhouseAuthentication.clubhouseEpicPosition(epicPosition = position)
             hideKeyboard(activity = activity, view = viewClubhouse)
+        }
+        autoTextViewClubhouseStoryType.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListClubhouseStoryType.contains(autoTextViewClubhouseStoryType.editableText.toString())) {
+                    if (arrayListClubhouseStoryType.isNotEmpty()) {
+                        defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_clubhouse_story_type_doesnt_exist))
+                        autoTextViewClubhouseStoryType.setText(arrayListClubhouseStoryType[0], false)
+
+                    }
+                }
+            }
         }
     }
 
@@ -10944,7 +11050,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             mMonth = month + 1
             mDayOfMonth = dayOfMonth
             calendarViewClubhouseDate = viewStartDate.date
-            dueDate = "$mDayOfMonth/$mMonth/$mYear"
+            dueDate = "$mMonth/$mDayOfMonth/$mYear"
             dueDateFormat = "$mYear-$mMonth-$mDayOfMonth"
             activity.runOnUiThread {
                 textViewClubhouseDueDate.text = dueDate
@@ -11001,6 +11107,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             clubhouseAuthentication.clubhouseUserPosition(userPosition = position)
             hideKeyboard(activity = activity, view = viewClubhouse)
         }
+        autoTextViewClubhouseRequester.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                if (!arrayListClubhouseRequester.contains(autoTextViewClubhouseRequester.editableText.toString())) {
+                    if (arrayListClubhouseRequester.isNotEmpty()) {
+                        defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_clubhouse_user_doesnt_exist))
+                        autoTextViewClubhouseRequester.setText(arrayListClubhouseRequester[0], false)
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -11011,6 +11127,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun buttonClicksClubhouse(filePathMedia: File) {
         buttonClubhouseCreate.setSafeOnClickListener {
             if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty()
+                && checkClubhouseStoryTypeEmpty() && checkClubhouseRequesterEmpty()
             ) {
                 clubhouseAuthentication.gatherClubhouseProjectAutoTextDetails(
                     autoTextViewProject = autoTextViewClubhouseProject,
@@ -11089,6 +11206,40 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     /**
+     * This method is used for story type field is not empty in clubhouse layout.
+     * @return Boolean value.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun checkClubhouseStoryTypeEmpty(): Boolean {
+        if (autoTextViewClubhouseStoryType.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.editText_clubhouse_story_type_empty)
+            )
+        }
+        return false
+    }
+
+    /**
+     * This method is used for assignee field is not empty in clubhouse layout.
+     * @return Boolean value.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun checkClubhouseRequesterEmpty(): Boolean {
+        if (autoTextViewClubhouseRequester.text.toString().isNotEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.editText_clubhouse_story_requester_empty)
+            )
+        }
+        return false
+    }
+
+    /**
      * This method is used for removing loggerbird_clubhouse_popup from window.
      */
     internal fun removeClubhouseLayout() {
@@ -11133,7 +11284,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         return arrayListClubhouseFileName
     }
-
 
     /**
      * This method is used for initializing Loggerbird activation popup.

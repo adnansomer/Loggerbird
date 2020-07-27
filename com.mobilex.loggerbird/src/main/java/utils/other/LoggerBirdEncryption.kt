@@ -36,7 +36,7 @@ internal class LoggerBirdEncryption {
         try {
             setKey(secret)
             val cipher =
-                Cipher.getInstance("AES/CBC/PKCS5Padding")
+                Cipher.getInstance("AES/ECB/PKCS5Padding")
             cipher.init(Cipher.ENCRYPT_MODE, secretKey)
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 Base64.getEncoder()
@@ -66,7 +66,7 @@ internal class LoggerBirdEncryption {
             }
             setKey(secret)
             val cipher =
-                Cipher.getInstance("AES/CBC/PKCS5PADDING")
+                Cipher.getInstance("AES/ECB/PKCS5PADDING")
             cipher.init(Cipher.DECRYPT_MODE, secretKey)
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 String(cipher.doFinal(getDecoder().decode(strToDecrypt)))

@@ -419,18 +419,30 @@
                                 android:textColor="@color/black"
                                 android:textSize="16sp">
                             </TextView>
-
+                        <LinearLayout
+                            android:id="@+id/linearLayout_gitlab_due_date"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:weightSum="10"
+                            android:orientation="horizontal">
                             <TextView
                                 android:id="@+id/textView_gitlab_due_date"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginRight="5dp"
+                                android:layout_weight="10"
                                 android:textCursorDrawable="@color/colorBlack"
                                 android:layout_marginBottom="10dp"
                                 android:textSize="16sp"
-                                android:hint="@string/textView_gitlab_enter_due_date"
-                                android:layout_marginEnd="5dp" />
-
+                                android:hint="@string/textView_gitlab_enter_due_date" />
+                            <ImageView
+                                android:visibility="gone"
+                                android:id="@+id/imageView_gitlab_delete_due_date"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                app:srcCompat="@drawable/ic_delete_black_24dp">
+                            </ImageView>
+                        </LinearLayout>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
