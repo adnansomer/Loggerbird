@@ -313,16 +313,16 @@ internal class JiraApi {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun jiraNormalTask(activity: Activity, context: Context) {
         try {
-            if (checkSummaryEmpty(
+            if (checkJiraSummaryEmpty(
                     activity = activity,
                     context = context
-                ) && checkReporterEmpty(
+                ) && checkJiraReporterEmpty(
                     activity = activity,
                     context = context
-                ) && checkFixVersionsEmpty(
+                ) && checkJiraFixVersionsEmpty(
                     activity = activity,
                     context = context
-                ) && checkEpicLinkEmpty(activity = activity, context = context)
+                ) && checkJiraEpicLinkEmpty(activity = activity, context = context)
             ) {
                 val coroutineCallJiraCreateIssue = CoroutineScope(Dispatchers.IO)
                 coroutineCallJiraCreateIssue.async {
@@ -539,6 +539,7 @@ internal class JiraApi {
                             jsonObjectIssue.add("update", jsonObjectUpdate)
 
                         }
+                        Log.d("object",jsonObjectIssue.toString())
                         RetrofitJiraClient.getJiraUserClient(
                             url = "$jiraDomainName/rest/api/2/"
                         )
@@ -1641,9 +1642,9 @@ internal class JiraApi {
                         call: retrofit2.Call<JsonObject>,
                         response: retrofit2.Response<JsonObject>
                     ) {
-                        if(response.code() !in 200..299){
+                        if (response.code() !in 200..299) {
                             jiraExceptionHandler()
-                        }else{
+                        } else {
                             coroutineCallGatherBoards.async {
                                 Log.d("board_details", response.code().toString())
                                 val boardList = response.body()
@@ -1976,13 +1977,73 @@ internal class JiraApi {
     }
 
     /**
+     * This method is used for checking project reference exist in the project list or not empty in the project AutoCompleteTextView field in the jira layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewProject is used for getting reference of project autoCompleteTextView in the jira layout.
+     * @return Boolean value.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun checkJiraProjectEmpty(
+        activity: Activity,
+        autoTextViewProject: AutoCompleteTextView
+    ): Boolean {
+        if (autoTextViewProject.editableText.toString().isNotEmpty() && arrayListProjects.contains(
+                autoTextViewProject.editableText.toString()
+            )
+        ) {
+            return true
+        } else if (autoTextViewProject.editableText.toString().isEmpty()) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.jira_project_empty)
+            )
+        } else if (!arrayListProjects.contains(autoTextViewProject.editableText.toString())) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.jira_project_doesnt_exist)
+            )
+        }
+        return false
+    }
+
+    /**
+     * This method is used for checking issue type reference exist in the issue type list or not empty in the issue type AutoCompleteTextView field in the jira layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewIssueType is used for getting reference of issue type autoCompleteTextView in the jira layout.
+     * @return Boolean value.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun checkJiraIssueTypeEmpty(
+        activity: Activity,
+        autoTextViewIssueType: AutoCompleteTextView
+    ): Boolean {
+        if (autoTextViewIssueType.editableText.toString().isNotEmpty() && arrayListIssueTypes.contains(
+                autoTextViewIssueType.editableText.toString()
+            )
+        ) {
+            return true
+        } else if (autoTextViewIssueType.editableText.toString().isEmpty()) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.jira_issue_type_empty)
+            )
+        } else if (!arrayListIssueTypes.contains(autoTextViewIssueType.editableText.toString())) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.jira_issue_type_doesnt_exist)
+            )
+        }
+        return false
+    }
+
+    /**
      * This method is used for checking summary is not empty.
      * @param activity is used for getting reference of current activity.
      * @param context is for getting reference from the application context.
      * @return Boolean value.
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun checkSummaryEmpty(activity: Activity, context: Context): Boolean {
+    internal fun checkJiraSummaryEmpty(activity: Activity, context: Context): Boolean {
         return if (summary.isNotEmpty()) {
             true
         } else {
@@ -2003,7 +2064,7 @@ internal class JiraApi {
      * @return Boolean value.
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun checkReporterEmpty(activity: Activity, context: Context): Boolean {
+    internal fun checkJiraReporterEmpty(activity: Activity, context: Context): Boolean {
         return if (arrayListReporter.contains(reporter)) {
             true
         } else {
@@ -2024,7 +2085,7 @@ internal class JiraApi {
      * @return Boolean value.
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun checkFixVersionsEmpty(activity: Activity, context: Context): Boolean {
+    internal fun checkJiraFixVersionsEmpty(activity: Activity, context: Context): Boolean {
         return if (arrayListFixVersions.contains(fixVersion) || fixVersion!!.isEmpty()) {
             true
         } else {
@@ -2045,7 +2106,7 @@ internal class JiraApi {
      * @return Boolean value.
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun checkComponentEmpty(activity: Activity, context: Context): Boolean {
+    internal fun checkJiraComponentEmpty(activity: Activity, context: Context): Boolean {
         return if (arrayListComponents.contains(component) || component!!.isEmpty()) {
             true
         } else {
@@ -2066,7 +2127,7 @@ internal class JiraApi {
      * @return Boolean value.
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun checkEpicLinkEmpty(activity: Activity, context: Context): Boolean {
+    internal fun checkJiraEpicLinkEmpty(activity: Activity, context: Context): Boolean {
         return if (arrayListEpicLink.contains(epicLink) || epicLink!!.isEmpty()) {
             true
         } else {
@@ -2087,7 +2148,7 @@ internal class JiraApi {
      * @return Boolean value.
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    internal fun checkEpicName(activity: Activity, context: Context): Boolean {
+    internal fun checkJiraEpicName(activity: Activity, context: Context): Boolean {
         return if (epicName.isNotEmpty()) {
             true
         } else {
@@ -2099,5 +2160,107 @@ internal class JiraApi {
             }
             false
         }
+    }
+
+    /**
+     * This method is used for checking label reference exist in the label list or not empty in the label AutoCompleteTextView field in the jira layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewLabel is used for getting reference of label autoCompleteTextView in the jira layout.
+     * @return Boolean value.
+     */
+    internal fun checkJiraLabel(
+        activity: Activity,
+        autoTextViewLabel: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListLabel.contains(autoTextViewLabel.editableText.toString()) || autoTextViewLabel.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.jira_label_doesnt_exist)
+            )
+        }
+        return false
+    }
+
+    /**
+     * This method is used for checking issue reference exist in the issue list or not empty in the issue AutoCompleteTextView field in the jira layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewIssue is used for getting reference of issue autoCompleteTextView in the jira layout.
+     * @return Boolean value.
+     */
+    internal fun checkJiraIssue(
+        activity: Activity,
+        autoTextViewIssue: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListIssues.contains(autoTextViewIssue.editableText.toString()) || autoTextViewIssue.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.jira_issue_doesnt_exist)
+            )
+        }
+        return false
+    }
+
+    /**
+     * This method is used for checking priority reference exist in the priority list or not empty in the priority AutoCompleteTextView field in the jira layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewPriority is used for getting reference of priority autoCompleteTextView in the jira layout.
+     * @return Boolean value.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun checkJiraPriorityEmpty(
+        activity: Activity,
+        autoTextViewPriority: AutoCompleteTextView
+    ): Boolean {
+        if (autoTextViewPriority.editableText.toString().isNotEmpty() && arrayListPriorities.contains(
+                autoTextViewPriority.editableText.toString()
+            )
+        ) {
+            return true
+        } else if (autoTextViewPriority.editableText.toString().isEmpty()) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.jira_priority_empty)
+            )
+        } else if (!arrayListPriorities.contains(autoTextViewPriority.editableText.toString())) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.jira_priority_doesnt_exist)
+            )
+        }
+        return false
+    }
+
+    /**
+     * This method is used for checking linked issue reference exist in the linked issues list or not empty in the linked issues AutoCompleteTextView field in the jira layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewLinkedIssues is used for getting reference of linked issues autoCompleteTextView in the jira layout.
+     * @return Boolean value.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    internal fun checkJiraLinkedIssuesEmpty(
+        activity: Activity,
+        autoTextViewLinkedIssues: AutoCompleteTextView
+    ): Boolean {
+        if (autoTextViewLinkedIssues.editableText.toString().isNotEmpty() && arrayListIssueLinkedTypes.contains(
+                autoTextViewLinkedIssues.editableText.toString()
+            )
+        ) {
+            return true
+        } else if (autoTextViewLinkedIssues.editableText.toString().isEmpty()) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.jira_linked_issue_empty)
+            )
+        } else if (!arrayListIssueLinkedTypes.contains(autoTextViewLinkedIssues.editableText.toString())) {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.jira_linked_issue_doesnt_exist)
+            )
+        }
+        return false
     }
 }

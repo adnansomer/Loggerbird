@@ -62,6 +62,10 @@
     <string name="jira_sent_error">Jira dosyası açılmaya çalışırken bir hatayla karşılaşıldı!</string>
     <string name="jira_sent_error_time_out">Jira dosyası açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
     <string name="media_recording_error">Lütfen önce diğer medya operasyonunuzu tamamlayın!</string>
+    <string name="jira_project_empty">Proje boş olamaz!</string>
+    <string name="jira_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="jira_issue_type_empty">Görev tipi boş olamaz!</string>
+    <string name="jira_issue_type_doesnt_exist">Bu görev tipi bulunamadı!</string>
     <string name="jira_summary_empty">Özet boş olamaz!</string>
     <string name="jira_reporter_empty">Bildiren bulunamadı!</string>
     <string name="jira_fix_version_empty">Düzeltme versiyonu bulunamadı!</string>
@@ -80,6 +84,10 @@
     <string name="jira_component_doesnt_exist">Bu komponent bulunamadı!</string>
     <string name="jira_fix_versions_exist">Bu düzeltme versiyonu zaten listeye eklendi!</string>
     <string name="jira_fix_versions_doesnt_exist">Bu düzeltme versiyonu bulunamadı!</string>
+    <string name="jira_priority_empty">Öncelik boş olamaz!</string>
+    <string name="jira_priority_doesnt_exist">Bu öncelik bulunamadı!</string>
+    <string name="jira_linked_issue_empty">Bağlantılı görev boş olamaz!</string>
+    <string name="jira_linked_issue_doesnt_exist">Bu bağlantılı görev bulunamadı!</string>
     <string name="slack_message_empty">Mesaj boş olamaz!</string>
     <string name="slack_sent">Slack mesajı gönderildi!</string>
     <string name="slack_sent_error">Slack mesajı gönderilmeye çalışırken bir hatayla karşılaşıldı!</string>
@@ -113,6 +121,7 @@
     <string name="github_project_exist">Bu proje zaten listeye eklendi!</string>
     <string name="github_project_doesnt_exist">Bu proje bulunamadı!</string>
     <string name="github_mile_stone_doesnt_exist">Bu kilometre taşı bulunamadı!</string>
+    <string name="github_linked_pull_request_doesnt_exist">Bu bağlantılı çekme isteği taşı bulunamadı!!</string>
     <string name="gitlab_sent">Gitlab görevi başarılı bir şekilde açıldı!</string>
     <string name="gitlab_sent_error">Gitlab görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
     <string name="gitlab_sent_error_time_out">Gitlab görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
@@ -396,6 +405,10 @@
     <string name="textView_gitlab_description">Aciklama</string>
     <string name="editText_gitlab_description">Konu aciklamanizi buraya yaziniz!</string>
     <string name="editText_gitlab_weight">Konu agirligini buraya giriniz!</string>
+    <string name="textView_gitlab_confidentiality_enter">Görev gizliliği seç</string>
+    <string name="textView_gitlab_labels_enter">Görev etiketi seç</string>
+    <string name="textView_gitlab_milestone_enter">Görev kilometretaşı seç</string>
+    <string name="textView_gitlab_assginee_enter">Görev sorumlusu seç </string>
     <string name="textView_gitlab_assignee">Sorumlu</string>
     <string name="textView_gitlab_labels">Etiket</string>
     <string name="textView_gitlab_weight">Agirlik</string>
@@ -404,6 +417,12 @@
     <string name="textView_gitlab_due_date">Bitis tarihi</string>
     <string name="textView_gitlab_confidentiality">Gizlilik</string>
     <string name="textView_gitlab_enter_due_date">Konunuz icin bitis tarihi giriniz!</string>
+    <string name="textView_gitlab_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="textView_gitlab_assignee_doesnt_exist">Bu sorumlu bulunamadı!</string>
+    <string name="textView_gitlab_assignee_not_be_empty">Sorumlu boş olamaz!</string>
+    <string name="textView_gitlab_label_doesnt_exist">Bu etiket bulunamadı!</string>
+    <string name="textView_gitlab_confidentiality_doesnt_exist">Bu gizlilik bulunamadı!</string>
+    <string name="textView_gitlab_milestone_doesnt_exist">Bu kilometre taşı bulunamadı!</string>
     <!-- recycler_view_gitlab_item_popup-->
     <string name="textView_recyclerView_gitlab_popup_title">Gitlab görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_gitlab_yes">Eklentiyi sil</string>
@@ -585,6 +604,8 @@
     <string name="textView_clubhouse_story_description">Hikaye açıklaması</string>
     <string name="editText_clubhouse_subject">Hikaye ismini buraya yazınız!</string>
     <string name="editText_clubhouse_story_description">Hikaye açıklamanızı buraya yazınız!</string>
+    <string name="editText_clubhouse_story_type_empty">Hikaye tipi boş olamaz!</string>
+    <string name="editText_clubhouse_story_requester_empty">Hikaye isteyicisi boş olamaz!</string>
     <string name="textView_clubhouse_story_type">Hikaye tipi</string>
     <string name="textView_clubhouse_attachment">Eklentiler</string>
     <string name="textView_clubhouse_no_attachment">Eklenti yok.</string>
@@ -598,6 +619,11 @@
     <string name="textView_clubhouse_enter_due_date">hikaye için bitiş tarihi belirleyiniz!</string>
     <string name="textView_clubhouse_estimate_point">Yaklaşık puan</string>
     <string name="editText_clubhouse_estimate_point">Yaklaşık puanınızı buraya yazınız!</string>
+    <string name="textView_clubhouse_epic_enter">Select your story epic here!</string>
+    <string name="textView_clubhouse_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="textView_clubhouse_story_type_doesnt_exist">Bu hikaye tipi bulunamadı!</string>
+    <string name="textView_clubhouse_epic_doesnt_exist">Bu epik bulunamadı!</string>
+    <string name="textView_clubhouse_user_doesnt_exist">Bu kullanıcı bulunamadı!</string>
     <!-- recycler_view_clubhouse_item_popup-->
     <string name="textView_recyclerView_clubhouse_popup_title">Clubhouse görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_clubhouse_yes">Eklentiyi sil</string>

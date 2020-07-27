@@ -82,7 +82,9 @@ internal class AsanaApi {
     ) {
         this.activity = activity
         this.context = context
-        this.filePathMedia = filePathMedia
+        if(filePathMedia != null){
+            this.filePathMedia = filePathMedia
+        }
         coroutineCallOkHttpAsana.async {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {

@@ -62,6 +62,10 @@
     <string name="jira_sent_error">An error happened while trying to open jira issue!</string>
     <string name="jira_sent_error_time_out">An error happened while trying to open jira issue , system has been timed out!</string>
     <string name="media_recording_error">Please complete your other media operation!</string>
+    <string name="jira_project_empty">Project cannot be empty!</string>
+    <string name="jira_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="jira_issue_type_empty">Issue type cannot be empty!</string>
+    <string name="jira_issue_type_doesnt_exist">This issue type doesn\'t exist!</string>
     <string name="jira_summary_empty">Summary cannot be empty!</string>
     <string name="jira_reporter_empty">Reporter doesn\'t exist!</string>
     <string name="jira_fix_version_empty">Fix version doesn\'t exist!</string>
@@ -80,6 +84,10 @@
     <string name="jira_component_doesnt_exist">This component doesn\'t exist!</string>
     <string name="jira_fix_versions_exist">This fix-version already added to list!</string>
     <string name="jira_fix_versions_doesnt_exist">This fix-version doesn\'t exist!</string>
+    <string name="jira_priority_empty">Priority cannot be empty!</string>
+    <string name="jira_priority_doesnt_exist">This priority doesn\'t exist!</string>
+    <string name="jira_linked_issue_empty">Linked issue cannot be empty!</string>
+    <string name="jira_linked_issue_doesnt_exist">This linked issue doesn\'t exist!</string>
     <string name="slack_message_empty">Message cannot be empty!</string>
     <string name="slack_sent">Slack message sent!</string>
     <string name="slack_sent_error">An error happened while trying to send slack message!</string>
@@ -111,6 +119,7 @@
     <string name="github_label_exist">This label already added to list!</string>
     <string name="github_label_doesnt_exist">This label doesn\'t exist!</string>
     <string name="github_mile_stone_doesnt_exist">This milestone doesn\'t exist!</string>
+    <string name="github_linked_pull_request_doesnt_exist">This linked pull request doesn\'t exist!</string>
     <string name="github_project_exist">This project already added to list!</string>
     <string name="github_project_doesnt_exist">This project doesn\'t exist!</string>
     <string name="gitlab_sent">Gitlab issue is created!</string>
@@ -191,7 +200,7 @@
     <string name="bitbucket_project_empty">Project cannot be empty!</string>
     <string name="bitbucket_project_doesnt_exist">This project doesn\'t exist!</string>
     <string name="bitbucket_title_empty">Title cannot be empty!</string>
-    <string name="bitbucket_assignee_doesnt_exist">This bitbucket doesn\'t exist!</string>
+    <string name="bitbucket_assignee_doesnt_exist">This assignee doesn\'t exist!</string>
     <string name="bitbucket_priority_empty">Priority cannot be empty!</string>
     <string name="bitbucket_priority_doesnt_exist">This priority doesn\'t exist!</string>
     <string name="bitbucket_kind_empty">Kind cannot be empty!</string>
@@ -395,6 +404,10 @@
     <string name="textView_gitlab_description">Description</string>
     <string name="editText_gitlab_description">Write your issue description here!</string>
     <string name="editText_gitlab_weight">Write your issue weight here!</string>
+    <string name="textView_gitlab_confidentiality_enter">Select your issue confidentiality</string>
+    <string name="textView_gitlab_labels_enter">Select your issue label</string>
+    <string name="textView_gitlab_milestone_enter">Select your issue milestone</string>
+    <string name="textView_gitlab_assginee_enter">Select your issue assignee</string>
     <string name="textView_gitlab_assignee">Assignee</string>
     <string name="textView_gitlab_labels">Labels</string>
     <string name="textView_gitlab_weight">Weight</string>
@@ -403,6 +416,12 @@
     <string name="textView_gitlab_due_date">Due Date</string>
     <string name="textView_gitlab_confidentiality">Confidentiality</string>
     <string name="textView_gitlab_enter_due_date">Set a due date for issue!</string>
+    <string name="textView_gitlab_project_doesnt_exist">This project doesn\'t exist</string>
+    <string name="textView_gitlab_assignee_doesnt_exist">This assignee doesn\'t exist</string>
+    <string name="textView_gitlab_assignee_not_be_empty">Your assignee cannot be empty!</string>
+    <string name="textView_gitlab_label_doesnt_exist">This label doesn\'t exist</string>
+    <string name="textView_gitlab_confidentiality_doesnt_exist">This confidentiality doesn\'t exist</string>
+    <string name="textView_gitlab_milestone_doesnt_exist">This milestone doesn\'t exist</string>
     <!-- recycler_view_gitlab_item_popup-->
     <string name="textView_recyclerView_gitlab_popup_title">Are you sure to remove attachment from your Gitlab Issue?</string>
     <string name="button_recyclerView_gitlab_yes">Delete Attachment</string>
@@ -584,6 +603,8 @@
     <string name="textView_clubhouse_story_description">Story Description</string>
     <string name="editText_clubhouse_subject">Write your story name here!</string>
     <string name="editText_clubhouse_story_description">Write your story description here!</string>
+    <string name="editText_clubhouse_story_type_empty">Your story type cannot be empty!</string>
+    <string name="editText_clubhouse_story_requester_empty">Your story requester cannot be empty!</string>
     <string name="textView_clubhouse_story_type">Story Type</string>
     <string name="textView_clubhouse_attachment">Attachments</string>
     <string name="textView_clubhouse_no_attachment">There is no attachment.</string>
@@ -597,6 +618,11 @@
     <string name="textView_clubhouse_enter_due_date">Set a due date for story!</string>
     <string name="textView_clubhouse_estimate_point">Estimate Point</string>
     <string name="editText_clubhouse_estimate_point">Write your estimate point here!</string>
+    <string name="textView_clubhouse_epic_enter">Select your story epic here!</string>
+    <string name="textView_clubhouse_project_doesnt_exist">This project doesn\'t exist</string>
+    <string name="textView_clubhouse_story_type_doesnt_exist">This story type doesn\'t exist</string>
+    <string name="textView_clubhouse_epic_doesnt_exist">This epic doesn\'t exist</string>
+    <string name="textView_clubhouse_user_doesnt_exist">This user doesn\'t exist</string>
     <!-- recycler_view_clubhouse_item_popup-->
     <string name="textView_recyclerView_clubhouse_popup_title">Are you sure to remove attachment from your Clubhouse story?</string>
     <string name="button_recyclerView_clubhouse_yes">Delete Attachment</string>

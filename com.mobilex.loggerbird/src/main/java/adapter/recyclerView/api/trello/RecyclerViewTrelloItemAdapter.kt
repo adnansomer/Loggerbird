@@ -110,6 +110,7 @@ internal class RecyclerViewTrelloItemAdapter(
          * @param context is for getting reference from the application context.
          * @param activity is for getting reference of current activity in the application.
          * @param rootView is for getting reference of the view that is in the root of current activity.
+         * @param checkListPosition is used for getting reference of the current position of the item that exist in outer checklist recyclerView.
          */
         internal fun bindItems(
             item: RecyclerViewModelItem,
@@ -146,6 +147,7 @@ internal class RecyclerViewTrelloItemAdapter(
                         rootView = rootView,
                         itemList = itemList,
                         position = position,
+                        checkListPosition = checkListPosition,
                         itemAdapter = itemAdapter
                     )
                 }
@@ -176,6 +178,7 @@ internal class RecyclerViewTrelloItemAdapter(
             rootView: View,
             itemList: ArrayList<RecyclerViewModelItem>,
             position: Int,
+            checkListPosition: Int,
             itemAdapter: RecyclerViewTrelloItemAdapter
         ) {
             try {
@@ -221,6 +224,7 @@ internal class RecyclerViewTrelloItemAdapter(
                         buttonClicksTrelloPopup(
                             itemAdapter = itemAdapter,
                             itemList = itemList,
+                            checkListPosition = checkListPosition,
                             position = position
                         )
                     }
@@ -244,12 +248,13 @@ internal class RecyclerViewTrelloItemAdapter(
         private fun buttonClicksTrelloPopup(
             itemList: ArrayList<RecyclerViewModelItem>,
             position: Int,
+            checkListPosition: Int,
             itemAdapter: RecyclerViewTrelloItemAdapter
         ) {
             buttonYes.setSafeOnClickListener {
-                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[position].checkListName] =
+                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListCheckedList[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[checkListPosition].checkListName] =
                     arrayListItemChecked
-                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[position].checkListName] =
+                RecyclerViewTrelloCheckListAdapter.ViewHolder.hashmapCheckListNames[RecyclerViewTrelloCheckListAdapter.ViewHolder.arrayListCheckListNames[checkListPosition].checkListName] =
                     arrayListItemNames
                 itemList.removeAt(position)
                 arrayListItemChecked.removeAt(position)
