@@ -110,7 +110,6 @@ internal class JiraApi {
     private var epicLinkField: String? = null
     private var queueCreateTask = 0
     private lateinit var timerTaskQueue: TimerTask
-    private var controlDuplication = false
     /**
      * This method is used for calling an jira action with network connection check.
      * @param filePathMedia is used for getting the reference of current media file.
@@ -204,37 +203,6 @@ internal class JiraApi {
                             "get" -> jiraTaskGatherDetails(
                                 activity = activity
                             )
-                            "unhandled_duplication" ->
-                                if (duplicateErrorMessageCheck(
-                                        activity = activity
-                                    )
-                                ) {
-                                    activity.runOnUiThread {
-                                        LoggerBirdService.loggerBirdService.detachProgressBar()
-                                        when (createMethod) {
-                                            "default" -> LoggerBirdService.loggerBirdService.attachUnhandledDuplicationLayout(
-                                                unhandledExceptionIssueMethod = "default",
-                                                filePath = filePathMediaName!!
-                                            )
-                                            "customize" -> LoggerBirdService.loggerBirdService.attachUnhandledDuplicationLayout(
-                                                unhandledExceptionIssueMethod = "customize",
-                                                filePath = filePathMediaName!!
-                                            )
-                                        }
-                                    }
-                                } else {
-                                    activity.runOnUiThread {
-                                        LoggerBirdService.loggerBirdService.detachProgressBar()
-                                        when (createMethod) {
-                                            "default" -> LoggerBirdService.loggerBirdService.createDefaultUnhandledJiraIssue(
-                                                filePath = filePathMediaName!!
-                                            )
-                                            "customize" -> LoggerBirdService.loggerBirdService.createCustomizedUnhandledJiraIssue(
-                                                filePath = filePathMediaName!!
-                                            )
-                                        }
-                                    }
-                                }
                         }
 
                     } else {
@@ -539,7 +507,7 @@ internal class JiraApi {
                             jsonObjectIssue.add("update", jsonObjectUpdate)
 
                         }
-                        Log.d("object",jsonObjectIssue.toString())
+                        Log.d("object", jsonObjectIssue.toString())
                         RetrofitJiraClient.getJiraUserClient(
                             url = "$jiraDomainName/rest/api/2/"
                         )
@@ -950,89 +918,6 @@ internal class JiraApi {
         }
     }
 
-    //    internal fun duplicateIssueCheck(restClient: JiraRestClient): Boolean {
-//        val sharedPref =
-//            PreferenceManager.getDefaultSharedPreferences(LoggerBird.context.applicationContext)
-//        if (sharedPref.getString("unhandled_file_path", null) != null) {
-//            val fileUnhandled = File(sharedPref.getString("unhandled_file_path", null)!!)
-//            var fileIssue: File
-//                try {
-//                    val arrayListFile:ArrayList<File> = ArrayList()
-//                    val projectClient = restClient.projectClient
-//                    val searchClient = restClient.searchClient
-//                    projectClient.allProjects.claim().forEach {
-//                        //                        val jsonObjectAssignee = JsonObject()
-////                        jsonObjectAssignee.addProperty(
-////                            "accountId",
-////                            arrayListAccountId[assigneePosition]
-////                        )
-//                        RetrofitUserJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
-//                            .create(AccountIdService::class.java)
-//                            .getAttachmentList(projectKey = it.key , attachmentTitle = "attachment")
-//                            .enqueue(object : retrofit2.Callback<JsonObject> {
-//                                @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-//                                override fun onFailure(
-//                                    call: retrofit2.Call<JsonObject>,
-//                                    t: Throwable
-//                                ) {
-////                                    resetJiraValues()
-//                                    jiraExceptionHandler(throwable = t)
-//                                }
-//
-//                                override fun onResponse(
-//                                    call: retrofit2.Call<JsonObject>,
-//                                    response: retrofit2.Response<JsonObject>
-//                                ) {
-////                                    resetJiraValues()
-//                                    Log.d("attachment_get_success", response.code().toString())
-//                                    response.body()?.getAsJsonArray("issues")?.forEach { issue ->
-//                                        val jsonObjectIssues:JsonObject = issue.asJsonObject
-//                                            val jsonObjectFields:JsonObject = jsonObjectIssues.asJsonObject["fields"].asJsonObject
-//                                            jsonObjectFields.getAsJsonArray("attachment").forEach { self ->
-//                                                fileIssue = File(URI(self.asJsonObject["content"].asString))
-//                                                if (fileIssue.readBytes().contentEquals(
-//                                                        fileUnhandled.readBytes()
-//                                                    )) {
-//                                                    Log.d("found_duplicate", "duplication!")
-//                                                    return
-//                                                }
-//                                        }
-//                                    }
-//                                }
-//                            })
-////                        searchClient.searchJql("project=" + it.key+"&fields=attachment").claim()
-////                            .issues.forEach { issue ->
-////                            issue.attachments.find { file ->
-////                                fileIssue = File(file.contentUri)
-////                                Log.d("file",file.filename)
-////                                if (fileIssue == fileUnhandled) {
-////                                    Log.d("found_duplicate", "duplication!")
-////                                    return@async true
-////                                }
-////                                return@forEach
-////                            }
-//
-//                    }
-//                } catch (e: Exception) {
-//                    e.printStackTrace()
-//                    LoggerBird.callEnqueue()
-//                    LoggerBird.callExceptionDetails(loggerbird.exception = e, tag = Constants.jiraTag)
-//                }
-//        }
-//        return false
-//    }
-    internal fun duplicateErrorMessageCheck(
-        activity: Activity
-    ): Boolean {
-        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-        if (sharedPref.getString("unhandled_exception_message", null) != null) {
-            val exceptionMessage = sharedPref.getString("unhandled_exception_message", null)
-            jiraTaskGatherIssues(task = "duplication", exceptionMessage = exceptionMessage)
-            Thread.sleep(10000)
-        }
-        return controlDuplication
-    }
-
     /**
      * This method is used for initializing the gathering action of jira.
      * @throws exception if error occurs.
@@ -1298,10 +1183,7 @@ internal class JiraApi {
      * @throws exception if error occurs.
      * @see jiraExceptionHandler method.
      */
-    private fun jiraTaskGatherIssues(task: String, exceptionMessage: String? = null) {
-        if (task != "duplication") {
-            queueCounter++
-        }
+    private fun jiraTaskGatherIssues(task: String) {
         val coroutineCallGatherIssues = CoroutineScope(Dispatchers.IO)
         coroutineCallGatherIssues.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")
@@ -1327,17 +1209,9 @@ internal class JiraApi {
                                 Log.d("issue_details", response.code().toString())
                                 val issueList = response.body()
                                 issueList?.getAsJsonArray("issues")?.forEach {
-                                    if (task != "duplication" && exceptionMessage == null) {
-                                        arrayListIssues.add(it.asJsonObject["key"].asString)
-                                    } else {
-                                        if (exceptionMessage!! == it.asJsonObject["fields"].asJsonObject["description"].asString) {
-                                            controlDuplication = true
-                                        }
-                                    }
+                                    arrayListIssues.add(it.asJsonObject["key"].asString)
                                 }
-                                if (task != "duplication") {
-                                    updateFields()
-                                }
+                                updateFields()
                             }
                         }
                     }

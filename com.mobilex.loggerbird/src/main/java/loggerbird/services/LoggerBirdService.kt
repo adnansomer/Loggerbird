@@ -50,6 +50,7 @@ import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
+import android.opengl.Visibility
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -1070,7 +1071,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     controlMediaFile()
                 }
                 (windowManager as WindowManager).removeViewImmediate(view)
-                initializeLoggerBirdClosePopup(activity = activity)
+                if(!checkUnhandledFilePath()){
+                    initializeLoggerBirdClosePopup(activity = activity)
+                }
                 windowManager = null
                 isFabEnable = false
 
@@ -1233,7 +1236,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         buttonClicks()
                     }
-                    initializeLoggerBirdStartPopup(activity = activity)
+                    if(!checkUnhandledFilePath()){
+                        initializeLoggerBirdStartPopup(activity = activity)   
+                    }
                     isFabEnable = true
 
                 } else {
@@ -1498,7 +1503,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             textView_send_email.setSafeOnClickListener {
-                initializeEmailLayout(filePathMedia = filePathMedia)
+                if(!checkDuplicationField(sharedPref = sharedPref , filePath = filePathMedia,field = "email")){
+                    initializeEmailLayout(filePathMedia = filePathMedia)
+                }
             }
 
             textView_share_jira.setSafeOnClickListener {
@@ -1506,7 +1513,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    initializeJiraLayout(filePathMedia = filePathMedia)
+                    if(!checkDuplicationField(sharedPref = sharedPref , filePath = filePathMedia,field = "jira")){
+                        initializeJiraLayout(filePathMedia = filePathMedia)
+                    }
                 }
             }
 
@@ -1515,7 +1524,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    initializeSlackLayout(filePathMedia = filePathMedia)
+                    if(!checkDuplicationField(sharedPref = sharedPref , filePath = filePathMedia,field = "slack")){
+                        initializeSlackLayout(filePathMedia = filePathMedia)
+                    }
                 }
             }
 
@@ -1524,7 +1535,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    initializeGithubLayout(filePathMedia = filePathMedia)
+                    if(!checkDuplicationField(sharedPref = sharedPref , filePath = filePathMedia,field = "github")){
+                        initializeGithubLayout(filePathMedia = filePathMedia)
+                    }
                 }
             }
 
@@ -1533,7 +1546,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    initializeGitlabLayout(filePathMedia = filePathMedia)
+                    if(!checkDuplicationField(sharedPref = sharedPref , filePath = filePathMedia,field = "gitlab")){
+                        initializeGitlabLayout(filePathMedia = filePathMedia)
+                    }
                 }
             }
 
@@ -1542,7 +1557,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    initializeTrelloLayout(filePathMedia = filePathMedia)
+                    if(!checkDuplicationField(sharedPref = sharedPref , filePath = filePathMedia,field = "trello")){
+                        initializeTrelloLayout(filePathMedia = filePathMedia)
+                    }
                 }
             }
 
@@ -1551,7 +1568,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    initializePivotalLayout(filePathMedia = filePathMedia)
+                    if(!checkDuplicationField(sharedPref = sharedPref , filePath = filePathMedia,field = "pivotal")){
+                        initializePivotalLayout(filePathMedia = filePathMedia)
+                    }
                 }
             }
             textView_share_basecamp.setSafeOnClickListener {
@@ -1559,7 +1578,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    initializeBasecampLayout(filePathMedia = filePathMedia)
+                    if(!checkDuplicationField(sharedPref = sharedPref , filePath = filePathMedia,field = "basecamp")){
+                        initializeBasecampLayout(filePathMedia = filePathMedia)
+                    }
                 }
             }
             textView_share_asana.setSafeOnClickListener {
@@ -1567,7 +1588,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    initializeAsanaLayout(filePathMedia = filePathMedia)
+                    if(!checkDuplicationField(sharedPref = sharedPref , filePath = filePathMedia,field = "asana")){
+                        initializeAsanaLayout(filePathMedia = filePathMedia)
+                    }
                 }
             }
             textView_share_clubhouse.setSafeOnClickListener {
@@ -1575,7 +1598,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    initializeClubhouseLayout(filePathMedia = filePathMedia)
+                    if(!checkDuplicationField(sharedPref = sharedPref , filePath = filePathMedia,field = "clubhouse")){
+                        initializeClubhouseLayout(filePathMedia = filePathMedia)
+                    }
                 }
             }
             textView_share_bitbucket.setSafeOnClickListener {
@@ -1583,7 +1608,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                    initializeBitbucketLayout(filePathMedia = filePathMedia)
+                    if(!checkDuplicationField(sharedPref = sharedPref , filePath = filePathMedia,field = "bitbucket")){
+                        initializeBitbucketLayout(filePathMedia = filePathMedia)
+                    }
                 }
             }
 
@@ -1624,6 +1651,23 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
         }
+    }
+
+    private fun checkDuplicationField(sharedPref: SharedPreferences,filePath: File , field:String): Boolean {
+        if (sharedPref.getBoolean("duplication_enabled", false)) {
+            if (sharedPref.getString(
+                    "unhandled_stack_class",
+                    null
+                ) == sharedPref.getString("unhandled_stack_class_old", null)
+                && sharedPref.getString("unhandled_stack_method",null)  == sharedPref.getString("unhandled_stack_method_old",null)
+                && sharedPref.getString("unhandled_stack_line",null) == sharedPref.getString("unhandled_stack_line_old",null)
+                && sharedPref.getString("unhandled_stack_field",null) == field
+            ) {
+                attachUnhandledDuplicationLayout(filePath = filePath,field = field)
+                return true
+            }
+        }
+        return false
     }
 
     /**
@@ -2940,7 +2984,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     detachProgressBar()
                     removeEmailLayout()
                     Toast.makeText(context, R.string.share_file_sent, Toast.LENGTH_SHORT).show()
-                    finishSuccessFab()
+                    finishSuccessFab(duplicationField = "email")
                 }
                 "single_email_error" -> {
                     Toast.makeText(context, R.string.share_file_sent_error, Toast.LENGTH_SHORT)
@@ -2951,7 +2995,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 "jira" -> {
                     removeJiraLayout()
                     Toast.makeText(context, R.string.jira_sent, Toast.LENGTH_SHORT).show()
-                    finishSuccessFab()
+                    finishSuccessFab(duplicationField = "jira")
                 }
                 "jira_error" -> {
                     removeJiraLayout()
@@ -2976,7 +3020,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
                 "slack" -> {
                     Toast.makeText(context, R.string.slack_sent, Toast.LENGTH_SHORT).show()
-                    finishSuccessFab()
+                    finishSuccessFab(duplicationField = "slack")
                 }
 
                 "slack_error" -> {
@@ -2996,7 +3040,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
                 "gitlab" -> {
                     Toast.makeText(context, R.string.gitlab_sent, Toast.LENGTH_SHORT).show()
-                    finishSuccessFab()
+                    finishSuccessFab(duplicationField = "gitlab")
                     removeGitlabLayout()
                     progressBarGitlabLayout.visibility = View.GONE
                     progressBarGitlab.visibility = View.GONE
@@ -3023,7 +3067,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     removeGithubLayout()
                     Toast.makeText(context, R.string.github_issue_success, Toast.LENGTH_SHORT)
                         .show()
-                    finishSuccessFab()
+                    finishSuccessFab(duplicationField = "github")
                 }
                 "github_error" -> {
                     detachProgressBar()
@@ -3042,7 +3086,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     removeTrelloLayout()
                     Toast.makeText(context, R.string.trello_issue_success, Toast.LENGTH_SHORT)
                         .show()
-                    finishSuccessFab()
+                    finishSuccessFab(duplicationField = "trello")
                 }
                 "trello_error" -> {
                     detachProgressBar()
@@ -3061,7 +3105,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     removePivotalLayout()
                     Toast.makeText(context, R.string.pivotal_issue_success, Toast.LENGTH_SHORT)
                         .show()
-                    finishSuccessFab()
+                    finishSuccessFab(duplicationField = "pivotal")
                 }
                 "pivotal_error" -> {
                     detachProgressBar()
@@ -3080,7 +3124,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     removeBasecampLayout()
                     Toast.makeText(context, R.string.basecamp_issue_success, Toast.LENGTH_SHORT)
                         .show()
-                    finishSuccessFab()
+                    finishSuccessFab(duplicationField = "basecamp")
                 }
                 "basecamp_error" -> {
                     detachProgressBar()
@@ -3099,7 +3143,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     removeAsanaLayout()
                     Toast.makeText(context, R.string.asana_issue_success, Toast.LENGTH_SHORT)
                         .show()
-                    finishSuccessFab()
+                    finishSuccessFab(duplicationField = "asana")
                 }
                 "asana_error" -> {
                     detachProgressBar()
@@ -3119,7 +3163,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     removeClubhouseLayout()
                     Toast.makeText(context, R.string.clubhouse_issue_success, Toast.LENGTH_SHORT)
                         .show()
-                    finishSuccessFab()
+                    finishSuccessFab(duplicationField = "clubhouse")
                 }
                 "clubhouse_error" -> {
                     progressBarClubhouseLayout.visibility = View.GONE
@@ -3149,7 +3193,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     removeBitbucketLayout()
                     Toast.makeText(context, R.string.bitbucket_issue_success, Toast.LENGTH_SHORT)
                         .show()
-                    finishSuccessFab()
+                    finishSuccessFab(duplicationField = "bitbucket")
                 }
                 "bitbucket_error" -> {
                     detachProgressBar()
@@ -3175,7 +3219,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for showing an success happened when using a loggerbird action with main floating action button.
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun finishSuccessFab() {
+    private fun finishSuccessFab(duplicationField:String? = null) {
         if (controlRevealShareLayout() && controlFloatingActionButtonView()) {
             if (checkUnhandledFilePath()) {
                 val sharedPref =
@@ -3185,18 +3229,28 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     if (filepath.exists()) {
                         filepath.delete()
                     }
-//                    else {
-//                        activity.runOnUiThread {
-//                            defaultToast.attachToast(
-//                                activity = activity,
-//                                toastMessage = activity.resources.getString(R.string.unhandled_file_doesnt_exist)
-//                            )
-//                        }
-//                    }
                 }
                 val editor: SharedPreferences.Editor = sharedPref.edit()
                 editor.remove("unhandled_file_path")
                 editor.apply()
+                if (sharedPref.getBoolean("duplication_enabled", false) && duplicationField != null) {
+                    with(sharedPref.edit()) {
+                        putString(
+                            "unhandled_stack_class_old",
+                            sharedPref.getString("unhandled_stack_class", null)
+                        )
+                        putString(
+                            "unhandled_stack_method_old",
+                            sharedPref.getString("unhandled_stack_method", null)
+                        )
+                        putString(
+                            "unhandled_stack_line_old",
+                            sharedPref.getString("unhandled_stack_line", null)
+                        )
+                        putString("unhandled_stack_field",duplicationField)
+                        commit()
+                    }
+                }
             }
             revealLinearLayoutShare.visibility = View.GONE
             Handler().postDelayed({
@@ -4499,7 +4553,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
     /**
      * This method is used for initializing linked issues autoCompleteTextView in the loggerbird_jira_popup.
-     * @param arrayListJiraIssueTypes is used for getting the linked issues list for linked issues autoCompleteTextView.
+     * @param arrayListJiraLinkedIssues is used for getting the linked issues list for linked issues autoCompleteTextView.
      * @param sharedPref is used for getting the reference of SharedPreferences of current activity.
      */
     @SuppressLint("ClickableViewAccessibility")
@@ -5167,86 +5221,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 sharedPref = sharedPref,
                 filePath = filePath
             )
-//            CookieBar.build(activity)
-//                .setCustomView(R.layout.loggerbird_unhandled_popup)
-//                .setCustomViewInitializer {
-//                    val textViewDiscard =
-//                        it.findViewById<TextView>(R.id.textView_unhandled_discard)
-//                    val textViewShare =
-//                        it.findViewById<TextView>(R.id.textView_unhandled_share_title)
-//                    val checkBoxDuplication =
-//                        it.findViewById<CheckBox>(R.id.checkBox_unhandled)
-//                    if (sharedPref.getBoolean("duplication_enabled", false)) {
-//                        checkBoxDuplication.isChecked = true
-//                    }
-//                    checkBoxDuplication.setOnClickListener {
-//                        if (checkBoxDuplication.isChecked) {
-//                            with(sharedPref.edit()) {
-//                                putBoolean("duplication_enabled", true)
-//                                commit()
-//                            }
-//                            defaultToast.attachToast(
-//                                activity = activity,
-//                                toastMessage = activity.resources.getString(R.string.duplication_check_enabled)
-//                            )
-//                        } else {
-//                            with(sharedPref.edit()) {
-//                                putBoolean("duplication_enabled", false)
-//                                commit()
-//                            }
-//                            defaultToast.attachToast(
-//                                activity = activity,
-//                                toastMessage = activity.resources.getString(R.string.duplication_check_disabled)
-//                            )
-//                        }
-//                    }
-//                    textViewDiscard.setSafeOnClickListener {
-//                        if (filePath.exists()) {
-//                            filePath.delete()
-//                        }
-//                        val editor: SharedPreferences.Editor = sharedPref.edit()
-//                        editor.remove("unhandled_file_path")
-//                        editor.apply()
-//                        defaultToast.attachToast(
-//                            activity = activity,
-//                            toastMessage = context.resources.getString(R.string.unhandled_file_discard_success)
-//                        )
-//                        CookieBar.dismiss(activity)
-//                    }
-//                    textViewShare.setSafeOnClickListener {
-//                        initializeFloatingActionButton(activity = this.activity)
-//                        shareView(filePathMedia = filePath)
-////                        if (checkBoxDuplication.isChecked) {
-////                            attachProgressBar()
-////                            jiraAuthentication.callJira(
-////                                filePathMedia = filePath,
-////                                context = context,
-////                                activity = activity,
-////                                task = "unhandled_duplication",
-////                                createMethod = "default"
-////                            )
-////                        } else {
-////                            createDefaultUnhandledJiraIssue(filePath = filePath)
-////                        }
-//                    }
-////                    textViewCustomizeJira.setSafeOnClickListener {
-////                        if (checkBoxDuplication.isChecked) {
-////                            attachProgressBar()
-////                            jiraAuthentication.callJira(
-////                                filePathMedia = filePath,
-////                                context = context,
-////                                activity = activity,
-////                                task = "unhandled_duplication",
-////                                createMethod = "customize"
-////                            )
-////                        } else {
-////                            createCustomizedUnhandledJiraIssue(filePath = filePath)
-////                        }
-////                    }
-//                }.setSwipeToDismiss(false)
-//                .setEnableAutoDismiss(false)
-//                .show()
-
         } catch (e: Exception) {
             detachProgressBar()
             e.printStackTrace()
@@ -5256,24 +5230,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 tag = Constants.unhandledExceptionPopupTag
             )
         }
-    }
-
-    /**
-     * This method is used for sending default unhandled jira issue.
-     * @param filePath is used for getting the reference of current media file.
-     */
-    @RequiresApi(Build.VERSION_CODES.M)
-    internal fun createDefaultUnhandledJiraIssue(filePath: File) {
-        attachProgressBar()
-        val coroutineCallUnhandledTask = CoroutineScope(Dispatchers.IO)
-        coroutineCallUnhandledTask.async {
-            jiraAuthentication.jiraUnhandledExceptionTask(
-                context = context,
-                activity = activity,
-                filePath = filePath
-            )
-        }
-//        CookieBar.dismiss(activity)
     }
 
     /**
@@ -5297,10 +5253,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val sharedPref =
             PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         if (sharedPref.getString("unhandled_file_path", null) != null) {
-            val filepath = File(sharedPref.getString("unhandled_file_path", null)!!)
-            if (filepath.exists()) {
-                return true
-            }
+//            val filepath = File(sharedPref.getString("unhandled_file_path", null)!!)
+//            if (filepath.exists()) {
+//                return true
+//            }
 //            else {
 //                activity.runOnUiThread {
 //                    defaultToast.attachToast(
@@ -5309,7 +5265,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                    )
 //                }
 //            }
-            return false
+            return true
         }
         return false
     }
@@ -5439,12 +5395,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Unhandled duplication
     /**
      * This method is used for creating unhandled duplcation layout which is attached to application overlay.
-     * @param unhandledExceptionIssueMethod is used for getting the reference of method type for unhandled duplication loggerbird.exception.
      * @param filePath is used for getting the reference of current  file.
      */
     internal fun attachUnhandledDuplicationLayout(
-        unhandledExceptionIssueMethod: String,
-        filePath: File
+        filePath: File,
+        field: String
     ) {
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         viewUnhandledDuplication =
@@ -5474,8 +5429,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             windowManagerParamsUnhandledDuplication
         )
         initializeUnhandledDuplicationButtons(
-            unhandledExceptionIssueMethod = unhandledExceptionIssueMethod,
-            filePath = filePath
+            filePath = filePath,
+            field = field
         )
     }
 
@@ -5496,22 +5451,34 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      */
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initializeUnhandledDuplicationButtons(
-        unhandledExceptionIssueMethod: String,
-        filePath: File
+        filePath: File,
+        field: String
     ) {
         val buttonProceed =
             viewUnhandledDuplication.findViewById<Button>(R.id.button_unhandled_duplication_proceed)
         val buttonCancel =
             viewUnhandledDuplication.findViewById<Button>(R.id.button_unhandled_duplication_cancel)
         buttonProceed.setSafeOnClickListener {
-            when (unhandledExceptionIssueMethod) {
-                "default" -> createDefaultUnhandledJiraIssue(filePath = filePath)
-                "customize" -> createCustomizedUnhandledJiraIssue(filePath = filePath)
-            }
             detachUnhandledDuplicationLayout()
+            when(field){
+                    "email" -> initializeEmailLayout(filePathMedia = filePath)
+                    "jira" -> initializeJiraLayout(filePathMedia = filePath)
+                    "slack" -> initializeSlackLayout(filePathMedia = filePath)
+                    "github" -> initializeGithubLayout(filePathMedia = filePath)
+                    "gitlab" -> initializeGitlabLayout(filePathMedia = filePath)
+                    "trello" -> initializeTrelloLayout(filePathMedia = filePath)
+                    "pivotal" -> initializePivotalLayout(filePathMedia = filePath)
+                    "basecamp" -> initializeBasecampLayout(filePathMedia = filePath)
+                    "asana" -> initializeAsanaLayout(filePathMedia = filePath)
+                    "clubhouse" -> initializeClubhouseLayout(filePathMedia = filePath)
+                    "bitbucket" -> initializeBitbucketLayout(filePathMedia = filePath)
+            }
         }
         buttonCancel.setSafeOnClickListener {
             detachUnhandledDuplicationLayout()
+            if(controlFloatingActionButtonView()){
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -11694,6 +11661,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         filePath: File
     ) {
         try {
+            if(controlRevealShareLayout() && controlFloatingActionButtonView()){
+                revealLinearLayoutShare.visibility = View.GONE
+                floating_action_button.visibility = View.GONE
+            }
             removeLoggerBirdUnhandledExceptionLayout()
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             viewLoggerBirdUnhandledExceptionPopup =
