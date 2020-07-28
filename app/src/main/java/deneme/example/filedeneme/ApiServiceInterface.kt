@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.AsyncTask
 import loggerbird.LoggerBird
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+//import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -26,23 +26,23 @@ interface ApiServiceInterface {
     companion object {
 
 
-        fun create(context: Context): ApiServiceInterface {
-            val retrofit = Retrofit.Builder()
-                .addCallAdapterFactory(
-                    RxJava2CallAdapterFactory.create()
-                )
-                .addConverterFactory(
-                    GsonConverterFactory.create()
-                )
-                .baseUrl("http://api.openweathermap.org")
-                .client(client)
-                .client(LoggerBird.loggerBirdInterceptorClient()!!)
-                .build()
-
-//            LogDeneme.saveAllDetails(fileName ="berk_deneme",retrofit =retrofit,context = context)
-
-            return retrofit.create(ApiServiceInterface::class.java)
-        }
+//        fun create(context: Context): ApiServiceInterface {
+//            val retrofit = Retrofit.Builder()
+//                .addCallAdapterFactory(
+//                    RxJava2CallAdapterFactory.create()
+//                )
+//                .addConverterFactory(
+//                    GsonConverterFactory.create()
+//                )
+//                .baseUrl("http://api.openweathermap.org")
+//                .client(client)
+//                .client(LoggerBird.loggerBirdInterceptorClient()!!)
+//                .build()
+//
+////            LogDeneme.saveAllDetails(fileName ="berk_deneme",retrofit =retrofit,context = context)
+//
+//            return retrofit.create(ApiServiceInterface::class.java)
+//        }
 
         fun createObject(): Retrofit? {
             var retrofit:Retrofit? = null

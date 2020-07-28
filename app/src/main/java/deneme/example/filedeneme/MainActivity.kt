@@ -165,8 +165,8 @@ class MainActivity : AppCompatActivity() {
         Log.d("deep_link_url", uri.toString())
         //addRecyclerViewList()
 //        recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-//        adapter = RecyclerViewAdapter(this,recyclerViewList)
-//        recycler_view.adapter = adapter
+//        loggerbird.adapter = RecyclerViewAdapter(this,recyclerViewList)
+//        recycler_view.loggerbird.adapter = loggerbird.adapter
 //        LoggerBird.registerRecyclerViewObservers(recycler_view)
 
 //        (this as androidx.activity.ComponentActivity).prepareCall(
@@ -189,7 +189,7 @@ class MainActivity : AppCompatActivity() {
 
             //recyclerViewList.removeAt(0)
             //recyclerViewList.add(RecyclerModel("hello how are you"))
-//            adapter.notifyDataSetChanged()
+//            loggerbird.adapter.notifyDataSetChanged()
 //            LoggerBird.callComponentDetails(
 //                view = recycler_view,
 //                resources = recycler_view.resources
@@ -314,59 +314,59 @@ class MainActivity : AppCompatActivity() {
 
     private fun beginSearch(srsearch: String, context: Context) {
         var retrofit: Retrofit? = ApiServiceInterface.createObject()
-        val ApiService by lazy {
-            ApiServiceInterface.create(this)
+//        val ApiService by lazy {
+//            ApiServiceInterface.create(this)
+////
+//        }
+//        ApiService.run {
+//            hitCountCheck().enqueue(object :
+//                Callback<RetroFitModel.Result> {
+//                override fun onFailure(call: Call<RetroFitModel.Result>, t: Throwable) {
+//                    t.printStackTrace()
+//                }
 //
-        }
-        ApiService.run {
-            hitCountCheck().enqueue(object :
-                Callback<RetroFitModel.Result> {
-                override fun onFailure(call: Call<RetroFitModel.Result>, t: Throwable) {
-                    t.printStackTrace()
-                }
-
-                override fun onResponse(
-                    call: Call<RetroFitModel.Result>,
-                    response: Response<RetroFitModel.Result>?
-                ) {
-                    Log.d("response", "response Success!")
-
-//                    val httpUrl: HttpUrl = HttpUrl.Builder()
-//                        .scheme("http")
-//                        .host("api.openweathermap.org")
-////                        .addPathSegment("search")
-////                        .addQueryParameter("q", "DNA")
-////                        .addQueryParameter("q", "DNA2")
-////                        .addQueryParameter("q", "DNA3")
-////                        .addQueryParameter("z", "title:RNA")
-//                        .build();
+//                override fun onResponse(
+//                    call: Call<RetroFitModel.Result>,
+//                    response: Response<RetroFitModel.Result>?
+//                ) {
+//                    Log.d("response", "response Success!")
 //
-//                    val fromBodyBuilder = FormBody.Builder()
-//                    val request = Request.Builder()
-//                        .url(httpUrl)
-//                        .post(fromBodyBuilder.build())
-//                        .build()
-
-
-//                    coroutineCallInternet.async {
+////                    val httpUrl: HttpUrl = HttpUrl.Builder()
+////                        .scheme("http")
+////                        .host("api.openweathermap.org")
+//////                        .addPathSegment("search")
+//////                        .addQueryParameter("q", "DNA")
+//////                        .addQueryParameter("q", "DNA2")
+//////                        .addQueryParameter("q", "DNA3")
+//////                        .addQueryParameter("z", "title:RNA")
+////                        .build();
+////
+////                    val fromBodyBuilder = FormBody.Builder()
+////                    val request = Request.Builder()
+////                        .url(httpUrl)
+////                        .post(fromBodyBuilder.build())
+////                        .build()
 //
-//                       // LoggerBird.saveRetrofitRequestDetails()
-//                    }
-//                    for (i in 0..10) {
-//                        LoggerBird.callRetrofitRequestDetails(
-//                            response = ApiServiceInterface.httpClient(
-//                                request
-//                            ), request = request
-//                        )
-//                    }
-
-
-                    //  LogDeneme.saveRetrofitRequestDetails()
-                    //  LogDeneme.saveAllDetails(response=ApiServiceInterface.httpClient(request),context = context,request=request)
-
-                }
-            })
-        }
+//
+////                    coroutineCallInternet.async {
+////
+////                       // LoggerBird.saveRetrofitRequestDetails()
+////                    }
+////                    for (i in 0..10) {
+////                        LoggerBird.callRetrofitRequestDetails(
+////                            response = ApiServiceInterface.httpClient(
+////                                request
+////                            ), request = request
+////                        )
+////                    }
+//
+//
+//                    //  LogDeneme.saveRetrofitRequestDetails()
+//                    //  LogDeneme.saveAllDetails(response=ApiServiceInterface.httpClient(request),context = context,request=request)
+//
+//                }
+//            })
+//        }
 
 
     }

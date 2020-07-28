@@ -54,13 +54,13 @@ class FragmentMain4 : Fragment() {
         button_dummy_3.setOnClickListener(){
 //            LoggerBird.takeLifeCycleDetails()
 //            LogDeneme.saveLifeCycleDetails()
-//            for(i in fragmentManager!!.fragments){
+//            for(i in fragmentManager!!.loggerbird.fragments){
 //                fragmentManager!!.beginTransaction().remove(i).commitNow()
 //                LogDeneme.saveFragmentManagerDetails(fragmentManager = fragmentManager)
 //                break
 //            }
 
-//            fragmentManager?.popBackStack(fragmentManager!!.fragments.get(0).tag,0)
+//            fragmentManager?.popBackStack(fragmentManager!!.loggerbird.fragments.get(0).tag,0)
 
 
 
