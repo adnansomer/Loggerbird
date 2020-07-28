@@ -1,13 +1,8 @@
 package loggerbird.observers
 
 import androidx.preference.PreferenceManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import loggerbird.constants.Constants
 import loggerbird.LoggerBird
-import loggerbird.models.room.UnhandledDuplication
-import loggerbird.models.room.UnhandledDuplicationDb
 
 //Custom UnHandledExceptionObserver class used for observing unhandled exceptions in the attached application and library itself.
 internal class UnhandledExceptionObserver : Thread.UncaughtExceptionHandler {

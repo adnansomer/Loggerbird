@@ -104,7 +104,7 @@ import loggerbird.listeners.floatingActionButtons.FloatingActionButtonOnTouchLis
 import loggerbird.listeners.layouts.LayoutFeedbackOnTouchListener
 import loggerbird.listeners.layouts.LayoutJiraOnTouchListener
 import loggerbird.models.room.UnhandledDuplication
-import loggerbird.models.room.UnhandledDuplicationDb
+import loggerbird.room.UnhandledDuplicationDb
 import loggerbird.utils.api.asana.AsanaApi
 import loggerbird.utils.api.basecamp.BasecampApi
 import loggerbird.utils.api.bitbucket.BitbucketApi
