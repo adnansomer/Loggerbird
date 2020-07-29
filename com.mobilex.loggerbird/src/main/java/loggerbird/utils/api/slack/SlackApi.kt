@@ -245,8 +245,7 @@ internal class SlackApi {
                         it.redirectUri(REDIRECT_URL)
                     }
                     val convertedToken = convertToken.accessToken
-                    val sharedPref =
-                        PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     val randomGeneratedKey =  randomStringGenerator.randomStringGenerator()
                     with(sharedPref.edit()) {
                         putString("slackAccessToken", loggerBirdEncryption.encrypt(stringToEncrypt = convertedToken , secret = randomGeneratedKey))

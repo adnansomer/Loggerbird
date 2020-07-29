@@ -31,6 +31,7 @@ import retrofit2.Retrofit
 import org.json.JSONObject;
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.NullPointerException
+import javax.crypto.KeyGenerator
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
 
@@ -163,6 +164,7 @@ class MainActivity : AppCompatActivity() {
         val intent: Intent = getIntent()
         val uri: Uri? = intent.data
         Log.d("deep_link_url", uri.toString())
+
         //addRecyclerViewList()
 //        recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 //        loggerbird.adapter = RecyclerViewAdapter(this,recyclerViewList)

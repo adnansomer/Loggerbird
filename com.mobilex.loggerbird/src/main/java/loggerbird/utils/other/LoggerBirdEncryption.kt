@@ -58,15 +58,14 @@ internal class LoggerBirdEncryption {
         return null
     }
     @RequiresApi(Build.VERSION_CODES.KITKAT)
-    internal fun decrypt(stringToDecrypt: String, secret: String): String? {
+    internal fun decrypt(stringToDecrypt: String, secret: String): String {
         var strToDecrypt = stringToDecrypt
         try {
             if (strToDecrypt.endsWith("\n")) {
                 strToDecrypt = strToDecrypt.substring(0, strToDecrypt.length - 1)
             }
             setKey(secret)
-            val cipher =
-                Cipher.getInstance("AES/ECB/PKCS5PADDING")
+            val cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING")
             cipher.init(Cipher.DECRYPT_MODE, secretKey)
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 String(cipher.doFinal(getDecoder().decode(strToDecrypt)))
@@ -85,7 +84,7 @@ internal class LoggerBirdEncryption {
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.encryptionTag)
         }
-        return null
+        return strToDecrypt
     }
 
 }

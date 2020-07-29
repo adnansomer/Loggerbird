@@ -11,6 +11,8 @@ import android.content.res.Resources
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.LayoutInflater
@@ -53,14 +55,18 @@ import retrofit2.Retrofit
 import loggerbird.services.LoggerBirdMemoryService
 import loggerbird.services.LoggerBirdService
 import loggerbird.utils.email.EmailUtil
+import loggerbird.utils.other.*
 import loggerbird.utils.other.InternetConnectionUtil
 import loggerbird.utils.other.LinkedBlockingQueueUtil
+import loggerbird.utils.other.LoggerBirdEncryption
+import loggerbird.utils.other.RandomStringGenerator
 import java.io.File
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
+import javax.crypto.KeyGenerator
 
 
 /**
@@ -153,6 +159,9 @@ class LoggerBird : LifecycleObserver {
         internal var classPathListCounter:ArrayList<Int> = ArrayList()
         internal var classPathTotalCounter:Int = 0
         internal var logLevel : LogLevel? = LogLevel.ALL
+        private val loggerBirdEncryption = LoggerBirdEncryption()
+        private val randomStringGenerator = RandomStringGenerator()
+        private val loggerBirdKeyStore = LoggerBirdKeyStore()
         //---------------Public Methods:---------------//
 
         /**
@@ -2682,8 +2691,6 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-
-
         /**
          * This method is used for returning whether Clubhouse token is initialized.
          * @return true if it initialized.
@@ -2793,6 +2800,41 @@ class LoggerBird : LifecycleObserver {
             return false
         }
 
+
+
+
+        internal fun initializeClubhouseToken(clubhouseApiToken: String) {
+                val sharedPref = PreferenceManager.getDefaultSharedPreferences(this.context)
+                val randomGeneratedKey =  randomStringGenerator.randomStringGenerator()
+                with(sharedPref.edit()) {
+                    putString("clubhouseApiToken", loggerBirdEncryption.encrypt(stringToEncrypt = clubhouseApiToken , secret = randomGeneratedKey))
+                    putString("clubhouseApiTokenKey",randomGeneratedKey)
+                    commit()
+                }
+        }
+
+        internal fun decryptClubhouseToken() : String{
+            val sharedPref = PreferenceManager.getDefaultSharedPreferences(this.context)
+            val token = loggerBirdEncryption.decrypt(stringToDecrypt = sharedPref.getString("clubhouseApiToken", "")!!, secret =  sharedPref.getString("clubhouseApiTokenKey","")!!)
+            return token
+        }
+
+        internal fun initializeGitlabToken(gitlabApiToken: String) {
+            val sharedPref = PreferenceManager.getDefaultSharedPreferences(this.context)
+            val randomGeneratedKey =  randomStringGenerator.randomStringGenerator()
+            with(sharedPref.edit()) {
+                putString("gitlabApiToken", loggerBirdEncryption.encrypt(stringToEncrypt = gitlabApiToken , secret = randomGeneratedKey))
+                putString("gitlabApiTokenKey",randomGeneratedKey)
+                commit()
+            }
+        }
+
+        internal fun decryptGitlabToken() : String{
+            val sharedPref = PreferenceManager.getDefaultSharedPreferences(this.context)
+            val gitlabApiToken = loggerBirdEncryption.decrypt(stringToDecrypt = sharedPref.getString("gitlabApiToken", "")!!, secret =  sharedPref.getString("gitlabApiTokenKey","")!!)
+            return gitlabApiToken
+        }
+
     }
 
     /**
@@ -2846,14 +2888,20 @@ class LoggerBird : LifecycleObserver {
             private var bitbucketUserName: String? = null,
             private var bitbucketPassword: String? = null
         ) {
-            fun setClubhouseIntegration(clubhouseApiToken: String) =
-                apply { LoggerBird.clubhouseApiToken = clubhouseApiToken }
+            fun setClubhouseIntegration() =
+                apply {
+                    initializeClubhouseToken(clubhouseApiToken = "5ef8dbb1-aad1-4d9d-8ea0-1bfd13826aff")
+                    val clubhouseToken = decryptClubhouseToken()
+                    LoggerBird.clubhouseApiToken = clubhouseToken }
 
             fun setSlackIntegration(slackApiToken: String) =
                 apply { LoggerBird.slackApiToken = slackApiToken }
 
-            fun setGitlabIntegration(gitlabApiToken: String) =
-                apply { LoggerBird.gitlabApiToken = gitlabApiToken }
+            fun setGitlabIntegration() =
+                apply {
+                    initializeGitlabToken(gitlabApiToken = "wLD4tf4jyKRmCM27S27d")
+                    val gitlabApiToken = decryptGitlabToken()
+                    LoggerBird.gitlabApiToken = gitlabApiToken }
 
             fun setGithubIntegration(githubUserName: String, githubPassword: String) = apply {
                 LoggerBird.githubUserName = githubUserName;LoggerBird.githubPassword =

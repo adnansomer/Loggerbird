@@ -8,9 +8,15 @@ class application : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        LoggerBird.logInit(
+            context = this,
+            logLevel = LoggerBird.LogLevel.ALL
+        )
+
         LoggerBird.LoggerBirdIntegration.Builder()
-            .setClubhouseIntegration(clubhouseApiToken = "5ef8dbb1-aad1-4d9d-8ea0-1bfd13826aff")
-            .setGitlabIntegration(gitlabApiToken = "wLD4tf4jyKRmCM27S27d")
+            .setClubhouseIntegration()
+            //.setClubhouseIntegration(clubhouseApiToken = "5ef8dbb1-aad1-4d9d-8ea0-1bfd13826aff")
+            .setGitlabIntegration()
             .setSlackIntegration(slackApiToken = "523949707746.1257384981893.00e598163567a90678d9730951c72fbdd33d4b7fbd326c64281163c2e3e31c67")
             .setPivotalIntegraton(pivotalApiToken = "fb4f04edbdeaeed3758839f75c1939b1")
             .setGithubIntegration(githubUserName = "berkavc", githubPassword = "umbasta1")
@@ -20,11 +26,6 @@ class application : Application() {
             .setBitbucketIntegration(bitbucketUserName = "appcaesars",bitbucketPassword = "umbasta1")
             .setTrelloIntegration(trelloUserName = "appcaesars@gmail.com", trelloPassword = "umbasta1", trelloToken = "23c4a97f599e7db20e36b32d38853210cf2120bbb955a7cc4fe9550a24f8b32c", trelloKey = "4b4185b55f32b9e76fef2effcc9147c8" )
             .build()
-
-        LoggerBird.logInit(
-            context = this,
-            logLevel = LoggerBird.LogLevel.ALL
-        )
 
         LoggerBird.callCpuDetails()
     }
