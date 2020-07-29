@@ -250,7 +250,7 @@ class MainActivity : AppCompatActivity() {
 //            }
         }
         button_read_logs.setOnClickListener(View.OnClickListener {
-            throw  NullPointerException("asdf");
+            throw  NullPointerException("asdf123123");
 //            getCurrentData()
 //            beginSearch("dog", this)
             // LogDeneme.saveComponentDetails(view=button_read_logs,resources = button_read_logs.resources)
@@ -260,7 +260,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         button_next_activity.setOnClickListener({
-            throw  NullPointerException("asdf")
+            throw  NullPointerException("asdf12")
 //            //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
 ////            LogDeneme.saveAllDetails(context=this)
 //            //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
