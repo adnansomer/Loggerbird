@@ -262,6 +262,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         button_next_activity.setOnClickListener({
+            throw  NullPointerException("asdf")
 //            //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
 ////            LogDeneme.saveAllDetails(context=this)
 //            //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
