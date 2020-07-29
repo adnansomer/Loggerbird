@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity
 internal data class UnhandledDuplication(
     @PrimaryKey(autoGenerate = true)
-    val id: Int? = null,
+    val pid: Int? = null,
     val className: String? = null,
     val methodName:String? = null,
     val lineName:String? = null,

@@ -24,8 +24,6 @@ import okhttp3.*
 import loggerbird.services.LoggerBirdService
 import loggerbird.utils.other.DefaultToast
 import loggerbird.utils.other.InternetConnectionUtil
-import loggerbird.utils.other.LoggerBirdEncryption
-import loggerbird.utils.other.RandomStringGenerator
 import java.io.File
 import java.io.IOException
 import java.net.SocketTimeoutException
@@ -64,8 +62,6 @@ internal class SlackApi {
     private var slackType: String? = null
     private var controlcallSlack: Boolean = false
     private lateinit var timerTaskQueue: TimerTask
-    private val loggerBirdEncryption = LoggerBirdEncryption()
-    private val randomStringGenerator = RandomStringGenerator()
 
     /** Loggerbird slack app client information **/
     companion object {
@@ -231,10 +227,12 @@ internal class SlackApi {
     ) {
         try {
             this.activity = activity
-            val sharedPref =
-                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-            val token = loggerBirdEncryption.decrypt(stringToDecrypt = sharedPref.getString("slackAccessToken", "")!!, secret =  sharedPref.getString("slackAccessTokenKey","")!!)
-            //val token = "xoxb-523949707746-1185252116928-e77ayP6N5Mv0VfJbYhQ4JyaB" //mobilex
+            val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+            val token = sharedPref.getString("slackAccessToken", "")
+//            this.activity = activity
+//            val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+//            val token = loggerBirdEncryption.decrypt(stringToDecrypt = sharedPref.getString("slackAccessToken", "")!!, secret =  sharedPref.getString("slackAccessTokenKey","")!!)
+//            //val token = "xoxb-523949707746-1185252116928-e77ayP6N5Mv0VfJbYhQ4JyaB" //mobilex
             //val token = "xoxb-1176309019584-1152486968594-k4brnZhlrUXAAy80Be0GmaVv" //loggerbird
             if (token == "") {
                 withContext(Dispatchers.IO) {
@@ -245,11 +243,10 @@ internal class SlackApi {
                         it.redirectUri(REDIRECT_URL)
                     }
                     val convertedToken = convertToken.accessToken
-                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                    val randomGeneratedKey =  randomStringGenerator.randomStringGenerator()
+                    val sharedPref =
+                        PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     with(sharedPref.edit()) {
-                        putString("slackAccessToken", loggerBirdEncryption.encrypt(stringToEncrypt = convertedToken , secret = randomGeneratedKey))
-                        putString("slackAccessTokenKey",randomGeneratedKey)
+                        putString("slackAccessToken", convertedToken)
                         commit()
                     }
                 }

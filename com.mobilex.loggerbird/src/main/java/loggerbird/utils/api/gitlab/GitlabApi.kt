@@ -827,7 +827,7 @@ internal class GitlabApi {
         if (arrayListProjects.contains(autoTextViewProject.editableText.toString()) || autoTextViewProject.editableText.toString().isEmpty()) {
             return true
         } else {
-            defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_gitlab_assignee_doesnt_exist))
+            defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_gitlab_project_doesnt_exist))
         }
         return false
     }
