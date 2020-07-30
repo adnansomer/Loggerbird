@@ -261,8 +261,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private val coroutineCallFilesAction: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var controlFileAction: Boolean = false
     private lateinit var progressBarView: View
-    private val defaultToast: DefaultToast =
-        DefaultToast()
+    private val defaultToast: DefaultToast = DefaultToast()
 
     //Jira:
     internal val jiraAuthentication = JiraApi()
@@ -8137,7 +8136,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.M)
     private fun buttonClicksGitlab(filePathMedia: File) {
         buttonGitlabCreate.setSafeOnClickListener {
-            if (checkGitlabTitleEmpty() && checkGitlabAssigneeEmpty()) {
+            if (checkGitlabTitleEmpty() && checkGitlabAssigneeEmpty()
+                && gitlabAuthentication.checkGitlabAssignee(activity = activity, autoTextViewAssignee = autoTextViewGitlabAssignee)
+                && gitlabAuthentication.checkGitlabLabel(activity = activity, autoTextViewLabel = autoTextViewGitlabLabels)
+                && gitlabAuthentication.checkGitlabMilestone(activity = activity, autoTextViewMilestone = autoTextViewGitlabMilestone)
+                && gitlabAuthentication.checkGitlabProject(activity = activity, autoTextViewProject = autoTextViewGitlabProject)
+            ) {
                 progressBarGitlabLayout.visibility = View.VISIBLE
                 progressBarGitlab.visibility = View.VISIBLE
                 gitlabAuthentication.gatherGitlabEditTextDetails(
@@ -10914,6 +10918,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         buttonClubhouseCreate.setSafeOnClickListener {
             if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty()
                 && checkClubhouseStoryTypeEmpty() && checkClubhouseRequesterEmpty()
+                && clubhouseAuthentication.checkClubhouseProject(activity = activity, autoTextViewProjects = autoTextViewClubhouseProject)
+                && clubhouseAuthentication.checkClubhouseRequester(activity = activity, autoTextViewRequester = autoTextViewClubhouseRequester)
+                && clubhouseAuthentication.checkClubhouseStoryType(activity = activity, autoTextViewStoryType = autoTextViewClubhouseStoryType)
             ) {
                 clubhouseAuthentication.gatherClubhouseProjectAutoTextDetails(
                     autoTextViewProject = autoTextViewClubhouseProject,
