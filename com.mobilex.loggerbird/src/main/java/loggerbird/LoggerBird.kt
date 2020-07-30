@@ -11,6 +11,8 @@ import android.content.res.Resources
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.LayoutInflater
@@ -53,6 +55,7 @@ import retrofit2.Retrofit
 import loggerbird.services.LoggerBirdMemoryService
 import loggerbird.services.LoggerBirdService
 import loggerbird.utils.email.EmailUtil
+import loggerbird.utils.other.*
 import loggerbird.utils.other.InternetConnectionUtil
 import loggerbird.utils.other.LinkedBlockingQueueUtil
 import java.io.File
@@ -61,6 +64,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
+import javax.crypto.KeyGenerator
 
 
 /**
@@ -133,7 +137,6 @@ class LoggerBird : LifecycleObserver {
         internal lateinit var jiraDomainName: String
         internal lateinit var jiraUserName: String
         internal lateinit var jiraApiToken: String
-        internal lateinit var slackApiToken: String
         internal lateinit var githubUserName: String
         internal lateinit var githubPassword: String
         internal lateinit var trelloUserName: String
@@ -148,11 +151,13 @@ class LoggerBird : LifecycleObserver {
         internal lateinit var clubhouseApiToken: String
         internal lateinit var bitbucketUserName: String
         internal lateinit var bitbucketPassword: String
+        internal lateinit var slackApiToken: String
         internal var classPathList:ArrayList<String> = ArrayList()
         internal var classPathCounter:Int = 0
         internal var classPathListCounter:ArrayList<Int> = ArrayList()
         internal var classPathTotalCounter:Int = 0
-        internal var logLevel : LogLevel? = LogLevel.ALL
+        internal var logLevel : LoggerBirdLogLevel? = LoggerBirdLogLevel.ALL
+        private val loggerBirdKeyStore = LoggerBirdKeyStore()
         //---------------Public Methods:---------------//
 
         /**
@@ -163,7 +168,7 @@ class LoggerBird : LifecycleObserver {
          */
         fun logInit(
             context: Context,
-            logLevel: LogLevel? = null,
+            logLevel: LoggerBirdLogLevel? = null,
             filePathName: String? = null
         ): Boolean {
             this.context = context
@@ -267,8 +272,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callCpuDetails() {
             if (controlLogInit) {
-                if(logLevel != LogLevel.NONE){
-                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                if(logLevel != LoggerBirdLogLevel.NONE){
+                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeCpuDetails()
@@ -291,8 +296,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callMemoryUsageDetails(threshold: Long?) {
             if (controlLogInit) {
-                if(logLevel != LogLevel.NONE){
-                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                if(logLevel != LoggerBirdLogLevel.NONE){
+                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeMemoryUsageDetails(threshold = threshold)
@@ -316,8 +321,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callComponentDetails(view: View?, resources: Resources?) {
             if (controlLogInit) {
-                if(logLevel != LogLevel.NONE){
-                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                if(logLevel != LoggerBirdLogLevel.NONE){
+                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeComponentDetails(
@@ -345,8 +350,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callLifeCycleDetails() {
             if (controlLogInit) {
-                if(logLevel != LogLevel.NONE){
-                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                if(logLevel != LoggerBirdLogLevel.NONE){
+                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put { takeLifeCycleDetails() }
                         }
@@ -366,8 +371,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callAnalyticsDetails(bundle: Bundle?) {
             if (controlLogInit) {
-                if(logLevel != LogLevel.NONE){
-                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                if(logLevel != LoggerBirdLogLevel.NONE){
+                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeAnalyticsDetails(bundle = bundle)
@@ -389,8 +394,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callFragmentManagerDetails(fragmentManager: FragmentManager?) {
             if (controlLogInit) {
-                if (logLevel != LogLevel.NONE) {
-                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                if (logLevel != LoggerBirdLogLevel.NONE) {
+                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeFragmentManagerDetails(fragmentManager = fragmentManager)
@@ -412,8 +417,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callHttpRequestDetails(httpUrlConnection: HttpURLConnection?) {
             if (controlLogInit) {
-                if (logLevel != LogLevel.NONE) {
-                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                if (logLevel != LoggerBirdLogLevel.NONE) {
+                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeHttpRequestDetails(httpUrlConnection = httpUrlConnection)
@@ -444,8 +449,8 @@ class LoggerBird : LifecycleObserver {
             acknowledgePurchaseParams: AcknowledgePurchaseParams? = null
         ) {
             if (controlLogInit) {
-                if (logLevel != LogLevel.NONE) {
-                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                if (logLevel != LoggerBirdLogLevel.NONE) {
+                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeInAPurchaseDetails(
@@ -485,8 +490,8 @@ class LoggerBird : LifecycleObserver {
             okHttpURLConnection: HttpURLConnection? = null
         ) {
             if (controlLogInit) {
-                if (logLevel != LogLevel.NONE) {
-                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                if (logLevel != LoggerBirdLogLevel.NONE) {
+                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeOkHttpDetails(
@@ -521,8 +526,8 @@ class LoggerBird : LifecycleObserver {
             request: Request? = null
         ) {
             if (controlLogInit) {
-                if (logLevel != LogLevel.NONE) {
-                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                if (logLevel != LoggerBirdLogLevel.NONE) {
+                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeRetrofitRequestDetails(
@@ -554,8 +559,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callRealmDetails(realm: Realm? = null, realmModel: RealmModel? = null) {
             if (controlLogInit) {
-                if (logLevel != LogLevel.NONE) {
-                    if(logLevel == LogLevel.ALL || logLevel == LogLevel.INFO){
+                if (logLevel != LoggerBirdLogLevel.NONE) {
+                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeRealmDetails(realm = realm, realmModel = realmModel)
@@ -587,8 +592,8 @@ class LoggerBird : LifecycleObserver {
             tag: String? = null,
             throwable: Throwable? = null
         ) {
-            if(logLevel != LogLevel.NONE) {
-                if(logLevel == LogLevel.ALL || logLevel == LogLevel.ERROR){
+            if(logLevel != LoggerBirdLogLevel.NONE) {
+                if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.ERROR){
                     if (runnableList.isEmpty()) {
                         workQueueLinked.put {
                             takeExceptionDetails(exception = exception, tag = tag, throwable = throwable)
@@ -2682,8 +2687,6 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-
-
         /**
          * This method is used for returning whether Clubhouse token is initialized.
          * @return true if it initialized.
@@ -2793,129 +2796,17 @@ class LoggerBird : LifecycleObserver {
             return false
         }
 
-    }
-
-    /**
-     * LogLevel class is used for defining log levels of Loggerbird.
-     */
-    enum class LogLevel{
-        ALL,
-        NONE,
-        INFO,
-        ERROR
-    }
-
-    /**
-     * LoggerbirdIntegration class is a builder class for calling third party integrations in this pattern.
-     */
-    class LoggerBirdIntegration(
-        val clubhouseApiToken: String?,
-        val slackApiToken: String?,
-        val gitlabApiToken: String?,
-        val githubUserName: String?,
-        val githubPassword: String?,
-        val asanaApiToken: String?,
-        val basecampApiToken: String?,
-        val pivotalApiToken: String?,
-        val trelloUserName: String?,
-        val trelloPassword: String?,
-        val trelloKey: String?,
-        val trelloToken: String?,
-        val jiraDomainName: String?,
-        val jiraUserName: String?,
-        val jiraApiToken: String?,
-        val bitbucketUserName: String?,
-        val bitbucketPassword: String?
-    ) {
-        data class Builder(
-            private var clubhouseApiToken: String? = null,
-            private var slackApiToken: String? = null,
-            private var gitlabApiToken: String? = null,
-            private var githubUserName: String? = null,
-            private var githubPassword: String? = null,
-            private var asanaApiToken: String? = null,
-            private var basecampApiToken: String? = null,
-            private var pivotalApiToken: String? = null,
-            private var trelloUserName: String? = null,
-            private var trelloPassword: String? = null,
-            private var trelloKey: String? = null,
-            private var trelloToken: String? = null,
-            private var jiraDomainName: String? = null,
-            private var jiraUserName: String? = null,
-            private var jiraApiToken: String? = null,
-            private var bitbucketUserName: String? = null,
-            private var bitbucketPassword: String? = null
-        ) {
-            fun setClubhouseIntegration(clubhouseApiToken: String) =
-                apply { LoggerBird.clubhouseApiToken = clubhouseApiToken }
-
-            fun setSlackIntegration(slackApiToken: String) =
-                apply { LoggerBird.slackApiToken = slackApiToken }
-
-            fun setGitlabIntegration(gitlabApiToken: String) =
-                apply { LoggerBird.gitlabApiToken = gitlabApiToken }
-
-            fun setGithubIntegration(githubUserName: String, githubPassword: String) = apply {
-                LoggerBird.githubUserName = githubUserName;LoggerBird.githubPassword =
-                githubPassword
-            }
-
-            fun setAsanaIntegration(asanaApiToken: String) =
-                apply { LoggerBird.asanaApiToken = asanaApiToken }
-
-            fun setBasecampIntegration(basecampApiToken: String) =
-                apply { LoggerBird.basecampApiToken = basecampApiToken }
-
-            fun setPivotalIntegraton(pivotalApiToken: String) =
-                apply { LoggerBird.pivotalApiToken = pivotalApiToken }
-
-            fun setTrelloIntegration(
-                trelloUserName: String,
-                trelloPassword: String,
-                trelloKey: String,
-                trelloToken: String
-            ) = apply {
-                LoggerBird.trelloUserName = trelloUserName;LoggerBird.trelloPassword =
-                trelloPassword; LoggerBird.trelloKey = trelloKey; LoggerBird.trelloToken =
-                trelloToken
-            }
-
-            fun setJiraIntegration(
-                jiraDomainName: String,
-                jiraUserName: String,
-                jiraApiToken: String
-            ) = apply {
-                LoggerBird.jiraDomainName = jiraDomainName;LoggerBird.jiraUserName =
-                jiraUserName; LoggerBird.jiraApiToken = jiraApiToken
-            }
-
-            fun setBitbucketIntegration(
-                bitbucketUserName: String,
-                bitbucketPassword: String
-            ) = apply {
-                LoggerBird.bitbucketUserName = bitbucketUserName;LoggerBird.bitbucketPassword =
-                bitbucketPassword
-            }
-
-            fun build() = LoggerBirdIntegration(
-                clubhouseApiToken,
-                slackApiToken,
-                gitlabApiToken,
-                githubUserName,
-                githubPassword,
-                asanaApiToken,
-                basecampApiToken,
-                pivotalApiToken,
-                trelloUserName,
-                trelloPassword,
-                trelloKey,
-                trelloToken,
-                jiraDomainName,
-                jiraUserName,
-                jiraApiToken,
-                bitbucketUserName,
-                bitbucketPassword
-            )
+        /**
+         * This method is used for decrypting token key for relevant third party tool.
+         * @param token is necessary to decrypt token
+         * @return decrypted token to use.
+         */
+        internal fun decryptTokenKey(token: String) : String{
+            val pair = loggerBirdKeyStore.encryptData(token)
+            val encryptedData = pair.second.toString(Charsets.UTF_8)
+            val decryptedData = loggerBirdKeyStore.decryptData(pair.first,pair.second)
+            return decryptedData
         }
+
     }
 }

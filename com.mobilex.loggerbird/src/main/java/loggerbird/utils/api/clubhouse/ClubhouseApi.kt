@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
 import loggerbird.models.*
+import loggerbird.utils.other.*
 import loggerbird.models.api.clubhouse.*
 import okhttp3.*
 import loggerbird.services.LoggerBirdService
@@ -72,10 +73,9 @@ internal class ClubhouseApi {
     private var descriptionString = StringBuilder()
     private var workQueueLinkedClubhouseAttachments: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
     private var runnableListClubhouseAttachments: ArrayList<Runnable> = ArrayList()
+    private val defaultToast = DefaultToast()
 
-    companion object {
-        const val BASE_URL = "https://api.clubhouse.io/api/v3/"
-    }
+    companion object { const val BASE_URL = "https://api.clubhouse.io/api/v3/" }
 
     /**
      * This method is used for calling Clubhouse Api in order to determine operation.
@@ -679,7 +679,6 @@ internal class ClubhouseApi {
         }else{
             estimate == null
         }
-
     }
 
     /**
@@ -744,6 +743,69 @@ internal class ClubhouseApi {
             }
         }
         timerQueue.schedule(timerTaskQueue, 100000)
+    }
+
+    /**
+     * This method is used for checking project reference exist in the project name list or not empty in the AutoCompleteTextView field in the Clubhouse layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewProjects is used for getting reference of project name autoCompleteTextView in the Clubhouse layout.
+     * @return Boolean value.
+     */
+    internal fun checkClubhouseProject(
+        activity: Activity,
+        autoTextViewProjects: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListProjectName.contains(autoTextViewProjects.editableText.toString()) || autoTextViewProjects.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.textView_clubhouse_project_doesnt_exist)
+            )
+        }
+        return false
+    }
+
+    /**
+     * This method is used for checking user reference exist in the user list or not empty in the AutoCompleteTextView field in the Clubhouse layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewRequester is used for getting reference of member autoCompleteTextView in the Clubhouse layout.
+     * @return Boolean value.
+     */
+    internal fun checkClubhouseRequester(
+        activity: Activity,
+        autoTextViewRequester: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListUsers.contains(autoTextViewRequester.editableText.toString()) || autoTextViewRequester.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.textView_clubhouse_user_doesnt_exist)
+            )
+        }
+        return false
+    }
+
+    /**
+     * This method is used for checking type reference exist in the story type list or not empty in the AutoCompleteTextView field in the Clubhouse layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewStoryType is used for getting reference of story type autoCompleteTextView in the Clubhouse layout.
+     * @return Boolean value.
+     */
+    internal fun checkClubhouseStoryType(
+        activity: Activity,
+        autoTextViewStoryType: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListStoryType.contains(autoTextViewStoryType.editableText.toString()) || autoTextViewStoryType.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(
+                activity = activity,
+                toastMessage = activity.resources.getString(R.string.textView_clubhouse_story_type_doesnt_exist)
+            )
+        }
+        return false
     }
 
     /**

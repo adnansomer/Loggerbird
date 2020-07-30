@@ -22,6 +22,7 @@ import loggerbird.services.LoggerBirdService
 import java.io.File
 import java.io.IOException
 import java.util.*
+import loggerbird.utils.other.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import com.google.gson.JsonObject
@@ -75,6 +76,7 @@ internal class GitlabApi {
     internal var dueDate: String? = null
     private var workQueueLinkedGitlabAttachments: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
     private var runnableListGitlabAttachments: ArrayList<Runnable> = ArrayList()
+    private val defaultToast = DefaultToast()
     /**
      * This method is used for calling Slack Api in order to determine operation.
      * @param activity is used for getting reference of current activity.
@@ -810,6 +812,78 @@ internal class GitlabApi {
     internal fun gitlabConfidentialityPosition(confidentialityPosition: Int) {
 
         this.confidentialityPosition = confidentialityPosition
+    }
+
+    /**
+     * This method is used for checking assignee reference exist in the assginee list or not empty in the AutoCompleteTextView field in the Gitlab layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewAssignee is used for getting reference of assignee autoCompleteTextView in the Gitlab layout.
+     * @return Boolean value.
+     */
+    internal fun checkGitlabProject(
+        activity: Activity,
+        autoTextViewProject: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListProjects.contains(autoTextViewProject.editableText.toString()) || autoTextViewProject.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_gitlab_project_doesnt_exist))
+        }
+        return false
+    }
+
+    /**
+     * This method is used for checking assignee reference exist in the assginee list or not empty in the AutoCompleteTextView field in the Gitlab layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewAssignee is used for getting reference of assignee autoCompleteTextView in the Gitlab layout.
+     * @return Boolean value.
+     */
+    internal fun checkGitlabAssignee(
+        activity: Activity,
+        autoTextViewAssignee: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListUsers.contains(autoTextViewAssignee.editableText.toString()) || autoTextViewAssignee.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_gitlab_assignee_doesnt_exist))
+        }
+        return false
+    }
+
+    /**
+     * This method is used for checking milestone reference exist in the milestone list or not empty in the AutoCompleteTextView field in the Gitlab layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewAssignee is used for getting reference of milestone autoCompleteTextView in the Gitlab layout.
+     * @return Boolean value.
+     */
+    internal fun checkGitlabMilestone(
+        activity: Activity,
+        autoTextViewMilestone: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListMilestones.contains(autoTextViewMilestone.editableText.toString()) || autoTextViewMilestone.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_gitlab_milestone_doesnt_exist))
+        }
+        return false
+    }
+
+    /**
+     * This method is used for checking label reference exist in the label list or not empty in the label AutoCompleteTextView field in the Gitlab layout.
+     * @param activity is used for getting reference of current activity.
+     * @param autoTextViewAssignee is used for getting reference of member autoCompleteTextView in the Gitlab layout.
+     * @return Boolean value.
+     */
+    internal fun checkGitlabLabel(
+        activity: Activity,
+        autoTextViewLabel: AutoCompleteTextView
+    ): Boolean {
+        if (arrayListLabels.contains(autoTextViewLabel.editableText.toString()) || autoTextViewLabel.editableText.toString().isEmpty()) {
+            return true
+        } else {
+            defaultToast.attachToast(activity = activity, toastMessage = activity.resources.getString(R.string.textView_gitlab_label_doesnt_exist))
+        }
+        return false
     }
 
     /**
