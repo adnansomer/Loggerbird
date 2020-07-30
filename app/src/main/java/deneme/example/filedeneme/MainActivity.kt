@@ -164,6 +164,14 @@ class MainActivity : AppCompatActivity() {
         val intent: Intent = getIntent()
         val uri: Uri? = intent.data
         Log.d("deep_link_url", uri.toString())
+        Thread.getAllStackTraces().forEach {
+            Log.d("thread",it.key.name)
+            it.value.forEach {
+                Log.d("thread_class",it.className)
+                Log.d("thread_method",it.methodName)
+                Log.d("thread_line",it.lineNumber.toString())
+            }
+        }
 
         //addRecyclerViewList()
 //        recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
