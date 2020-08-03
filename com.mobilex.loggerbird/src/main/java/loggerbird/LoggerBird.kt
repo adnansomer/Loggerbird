@@ -1739,49 +1739,6 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
-        //dummy method probably removed.
-        private fun attachRootView(rootView: ViewGroup) {
-            val view: View = LayoutInflater.from(context)
-                .inflate(
-                    R.layout.default_file_text_reader,
-                    rootView,
-                    true
-                )
-            textViewFileReader =
-                view.findViewById(R.id.textView_file_reader)
-            buttonFileReader =
-                view.findViewById(R.id.button_file_reader)
-            textViewFileReader.movementMethod =
-                ScrollingMovementMethod()
-            when {
-                stringBuilderComponent.isNotEmpty() -> textViewFileReader.text =
-                    stringBuilderComponent
-                stringBuilderLifeCycle.isNotEmpty() -> textViewFileReader.text =
-                    stringBuilderLifeCycle
-                stringBuilderFragmentManager.isNotEmpty() -> textViewFileReader.text =
-                    stringBuilderFragmentManager
-                stringBuilderAnalyticsManager.isNotEmpty() -> textViewFileReader.text =
-                    stringBuilderAnalyticsManager
-                stringBuilderHttp.isNotEmpty() -> textViewFileReader.text =
-                    stringBuilderHttp
-                stringBuilderInAPurchase.isNotEmpty() -> textViewFileReader.text =
-                    stringBuilderInAPurchase
-                stringBuilderRetrofit.isNotEmpty() -> textViewFileReader.text =
-                    stringBuilderRetrofit
-                stringBuilderQuery.isNotEmpty() -> textViewFileReader.text =
-                    stringBuilderQuery
-                stringBuilderRealm.isNotEmpty() -> textViewFileReader.text =
-                    stringBuilderRealm
-                stringBuilderException.isNotEmpty() -> textViewFileReader.text =
-                    stringBuilderException
-                stringBuilderAll.isNotEmpty() -> textViewFileReader.text =
-                    stringBuilderAll
-            }
-            buttonFileReader.setOnClickListener {
-                //                rootView.removeView(view.rootView)
-            }
-        }
-
         /**
          * This Method used for when a saving method exceed's 2mb file limit and delete's old entries at the start and add's new entries to the end of the file.
          * @param stringBuilder is used for getting the reference of stringBuilder of called saving method.
@@ -1850,10 +1807,6 @@ class LoggerBird : LifecycleObserver {
                     stringBuilderBuild.toString()
                 )
             }
-        }
-
-        private fun saveLifeCycleDetails(filePath: File){
-
         }
 
 

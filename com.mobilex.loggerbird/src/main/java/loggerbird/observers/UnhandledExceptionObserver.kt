@@ -13,9 +13,9 @@ internal class UnhandledExceptionObserver : Thread.UncaughtExceptionHandler {
         try {
             val sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(LoggerBird.context.applicationContext)
-//            val coroutineScopeUnhandledDuplication = CoroutineScope(Dispatchers.IO)
             if (e.cause != null) {
                 with(sharedPref.edit()) {
+                    putString("unhandled_stack_exception",e.toString())
                     putString(
                         "unhandled_stack_class",
                         e.cause!!.stackTrace[0].className
@@ -30,22 +30,10 @@ internal class UnhandledExceptionObserver : Thread.UncaughtExceptionHandler {
                     )
                     commit()
                 }
-//                coroutineScopeUnhandledDuplication.async {
-//                    val unhandledDuplicationDb =
-//                        UnhandledDuplicationDb.getUnhandledDuplicationDb(LoggerBird.context.applicationContext)
-//                    val unhandledDuplicationDao = unhandledDuplicationDb?.unhandledDuplicationDao()
-//                    val unhandledDuplication = UnhandledDuplication(
-//                        className = e.cause!!.stackTrace[0].className,
-//                        methodName = e.cause!!.stackTrace[0].methodName,
-//                        lineName = e.cause!!.stackTrace[0].lineNumber.toString()
-//                    )
-//                    with(unhandledDuplicationDao) {
-//                        this?.insertUnhandledDuplication(unhandledDuplication = unhandledDuplication)
-//                    }
-//                }
                 loggerBirdClass(className = e.cause!!.stackTrace[0].className, e = e)
             } else {
                 with(sharedPref.edit()) {
+                    putString("unhandled_stack_exception",e.toString())
                     putString(
                         "unhandled_stack_class",
                         e.stackTrace[0].className
@@ -60,19 +48,6 @@ internal class UnhandledExceptionObserver : Thread.UncaughtExceptionHandler {
                     )
                     commit()
                 }
-//                coroutineScopeUnhandledDuplication.async {
-//                    val unhandledDuplicationDb =
-//                        UnhandledDuplicationDb.getUnhandledDuplicationDb(LoggerBird.context.applicationContext)
-//                    val unhandledDuplicationDao = unhandledDuplicationDb?.unhandledDuplicationDao()
-//                    val unhandledDuplication = UnhandledDuplication(
-//                        className = e.stackTrace[0].className,
-//                        methodName = e.stackTrace[0].methodName,
-//                        lineName = e.stackTrace[0].lineNumber.toString()
-//                    )
-//                    with(unhandledDuplicationDao) {
-//                        this?.insertUnhandledDuplication(unhandledDuplication = unhandledDuplication)
-//                    }
-//                }
                 loggerBirdClass(className = e.stackTrace[0].className, e = e)
             }
         } catch (e: Exception) {

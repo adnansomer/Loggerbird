@@ -164,6 +164,14 @@ class MainActivity : AppCompatActivity() {
         val intent: Intent = getIntent()
         val uri: Uri? = intent.data
         Log.d("deep_link_url", uri.toString())
+        Thread.getAllStackTraces().forEach {
+            Log.d("thread",it.key.name)
+            it.value.forEach {
+                Log.d("thread_class",it.className)
+                Log.d("thread_method",it.methodName)
+                Log.d("thread_line",it.lineNumber.toString())
+            }
+        }
 
         //addRecyclerViewList()
 //        recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -252,7 +260,7 @@ class MainActivity : AppCompatActivity() {
 //            }
         }
         button_read_logs.setOnClickListener(View.OnClickListener {
-            throw  NullPointerException("asdf");
+            throw  NullPointerException("asdf123123");
 //            getCurrentData()
 //            beginSearch("dog", this)
             // LogDeneme.saveComponentDetails(view=button_read_logs,resources = button_read_logs.resources)
@@ -262,7 +270,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         button_next_activity.setOnClickListener({
-            throw  NullPointerException("asdf")
+            throw  NullPointerException("asdf12")
 //            //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
 ////            LogDeneme.saveAllDetails(context=this)
 //            //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
