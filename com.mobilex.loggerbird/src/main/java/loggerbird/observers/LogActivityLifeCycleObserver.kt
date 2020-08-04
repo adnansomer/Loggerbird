@@ -9,6 +9,10 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +21,7 @@ import com.mobilex.loggerbird.R
 import loggerbird.constants.Constants
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
+import loggerbird.listeners.layouts.LayoutOnTouchListener
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -137,6 +142,19 @@ internal class LogActivityLifeCycleObserver() :
                 LoggerBird.classPathListCounter.add(LoggerBird.classPathTotalCounter)
             }
             LoggerBird.classPathTotalCounter++
+            val rootView: ViewGroup =
+                activity.window.decorView.findViewById(android.R.id.content)
+            rootView.viewTreeObserver.addOnTouchModeChangeListener {
+                Log.d("touch",it.toString())
+            }
+//            (rootView.parent as ViewGroup).setOnTouchListener(LayoutOnTouchListener())
+//            for (childIndex in 0..(rootView.parent as ViewGroup).childCount) {
+//                if ((rootView.parent as ViewGroup).getChildAt(childIndex) != null) {
+//                    (rootView.parent as ViewGroup).getChildAt(childIndex)
+//                        .setOnTouchListener(LayoutOnTouchListener())
+//                }
+//            }
+
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()

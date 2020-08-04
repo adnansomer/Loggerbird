@@ -14,7 +14,6 @@ class application : Application() {
             context = this,
             logLevel = LoggerBirdLogLevel.ALL
         )
-
         LoggerBirdIntegrationBuilder.Builder()
             .setClubhouseIntegration()
             .setGitlabIntegration()
