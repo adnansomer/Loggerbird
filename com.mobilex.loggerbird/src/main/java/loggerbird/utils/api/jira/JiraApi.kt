@@ -1184,6 +1184,7 @@ internal class JiraApi {
      * @see jiraExceptionHandler method.
      */
     private fun jiraTaskGatherIssues(task: String) {
+        queueCounter++
         val coroutineCallGatherIssues = CoroutineScope(Dispatchers.IO)
         coroutineCallGatherIssues.async {
             RetrofitJiraClient.getJiraUserClient(url = "$jiraDomainName/rest/api/2/")

@@ -5747,7 +5747,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun createEmailTask(filePathMedia: File? = null, to: String) {
         try {
             activity.runOnUiThread {
-                detachProgressBar()
                 attachProgressBar()
             }
             sendSingleMediaFile(
