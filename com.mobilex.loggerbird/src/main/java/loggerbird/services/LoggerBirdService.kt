@@ -1524,25 +1524,25 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
 
-                textView_share_jira.setSafeOnClickListener {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (controlFloatingActionButtonView()) {
-                            floatingActionButtonView.visibility = View.GONE
-                        }
+            textView_share_jira.setSafeOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (controlFloatingActionButtonView()) {
+                        floatingActionButtonView.visibility = View.GONE
                     }
-                    coroutineScopeShareView.async {
-                        if (!checkDuplicationField(
-                                sharedPref = sharedPref,
-                                filePath = filePathMedia,
-                                field = "jira"
-                            )
-                        ) {
-                            activity.runOnUiThread {
-                                initializeJiraLayout(filePathMedia = filePathMedia)
-                            }
+                }
+                coroutineScopeShareView.async {
+                    if (!checkDuplicationField(
+                            sharedPref = sharedPref,
+                            filePath = filePathMedia,
+                            field = "jira"
+                        )
+                    ) {
+                        activity.runOnUiThread {
+                            initializeJiraLayout(filePathMedia = filePathMedia)
                         }
                     }
                 }
+            }
 
             textView_share_slack.setSafeOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -1765,20 +1765,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         field: String
     ): Boolean {
         if (sharedPref.getBoolean("duplication_enabled", false)) {
-//            if (sharedPref.getString(
-//                    "unhandled_stack_class",
-//                    null
-//                ) == sharedPref.getString("unhandled_stack_class_old", null)
-//                && sharedPref.getString("unhandled_stack_method",null)  == sharedPref.getString("unhandled_stack_method_old",null)
-//                && sharedPref.getString("unhandled_stack_line",null) == sharedPref.getString("unhandled_stack_line_old",null)
-//                && sharedPref.getString("unhandled_stack_field",null) == field
-//            ) {
-//                attachUnhandledDuplicationLayout(filePath = filePath,field = field)
-//                return true
-//            }
             val unhandledDuplicationDb =
                 UnhandledDuplicationDb.getUnhandledDuplicationDb(LoggerBird.context.applicationContext)
             val unhandledDuplicationDao = unhandledDuplicationDb?.unhandledDuplicationDao()
+            if(unhandledDuplicationDao != null){
+                if(unhandledDuplicationDao.getUnhandledDuplicationCount() >= 1000){
+                    unhandledDuplicationDao.deleteUnhandledDuplication()
+                }
+            }
             unhandledDuplicationDao?.getUnhandledDuplication()?.forEach {
                 if (sharedPref.getString(
                         "unhandled_stack_class", null
@@ -1792,6 +1786,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         null
                     ) == it.lineName
                     && field == it.fieldName
+                    && sharedPref.getString(
+                        "unhandled_stack_exception", null
+                    ) == it.exceptionName
                 ) {
                     activity.runOnUiThread {
                         attachUnhandledDuplicationLayout(filePath = filePath, field = field)
@@ -3370,22 +3367,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         false
                     ) && duplicationField != null
                 ) {
-//                    with(sharedPref.edit()) {
-//                        putString(
-//                            "unhandled_stack_class_old",
-//                            sharedPref.getString("unhandled_stack_class", null)
-//                        )
-//                        putString(
-//                            "unhandled_stack_method_old",
-//                            sharedPref.getString("unhandled_stack_method", null)
-//                        )
-//                        putString(
-//                            "unhandled_stack_line_old",
-//                            sharedPref.getString("unhandled_stack_line", null)
-//                        )
-//                        putString("unhandled_stack_field",duplicationField)
-//                        commit()
-//                    }
                     val coroutineScopeUnhandledDuplication = CoroutineScope(Dispatchers.IO)
                     coroutineScopeUnhandledDuplication.async {
                         val unhandledDuplicationDb =
@@ -3396,7 +3377,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             className = sharedPref.getString("unhandled_stack_class", null),
                             methodName = sharedPref.getString("unhandled_stack_method", null),
                             lineName = sharedPref.getString("unhandled_stack_line", null),
-                            fieldName = duplicationField
+                            fieldName = duplicationField,
+                            exceptionName = sharedPref.getString("unhandled_stack_exception", null)
                         )
                         with(unhandledDuplicationDao) {
                             this?.insertUnhandledDuplication(unhandledDuplication = unhandledDuplication)

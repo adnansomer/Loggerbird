@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import loggerbird.models.room.UnhandledDuplication
 
-@Database(entities = [UnhandledDuplication::class], version = 1)
+@Database(entities = [UnhandledDuplication::class], version = 3)
 internal abstract class UnhandledDuplicationDb : RoomDatabase() {
     abstract fun unhandledDuplicationDao(): UnhandledDuplicationDao
 

@@ -12,4 +12,8 @@ internal interface UnhandledDuplicationDao {
     fun insertUnhandledDuplication(unhandledDuplication: UnhandledDuplication)
     @Query("SELECT * FROM UnhandledDuplication")
     fun getUnhandledDuplication():List<UnhandledDuplication>
+    @Query("SELECT COUNT(*) FROM UnhandledDuplication")
+    fun getUnhandledDuplicationCount():Int
+    @Query("DELETE FROM UnhandledDuplication WHERE pId in (SELECT pId FROM UnhandledDuplication limit 100)")
+    fun deleteUnhandledDuplication()
 }
