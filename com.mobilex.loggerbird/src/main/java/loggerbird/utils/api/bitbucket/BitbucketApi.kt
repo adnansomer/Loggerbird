@@ -480,7 +480,7 @@ internal class BitbucketApi {
         timerTaskQueue = object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("bitbucket_error_time_out")
+                    resetBitbucketValues(shareLayoutMessage = "bitbucket_error_time_out")
                 }
             }
         }
@@ -535,7 +535,7 @@ internal class BitbucketApi {
     private fun resetBitbucketValues(shareLayoutMessage: String) {
         queueCounter--
         Log.d("queue_counter", queueCounter.toString())
-        if (queueCounter == 0) {
+        if (queueCounter == 0 || shareLayoutMessage == "bitbucket_error" || shareLayoutMessage == "bitbucket_error_time_out") {
             RecyclerViewBitbucketAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
                 if (it.file.name != "logger_bird_details.txt") {
                     if (it.file.exists()) {

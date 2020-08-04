@@ -592,7 +592,6 @@ internal class JiraApi {
                             call: retrofit2.Call<List<JiraUserModel>>,
                             t: Throwable
                         ) {
-                            resetJiraValues()
                             jiraExceptionHandler(throwable = t)
                         }
 
@@ -600,7 +599,7 @@ internal class JiraApi {
                             call: retrofit2.Call<List<JiraUserModel>>,
                             response: retrofit2.Response<List<JiraUserModel>>
                         ) {
-                            resetJiraValues()
+                            resetJiraValues(shareLayoutMessage = "jira")
                             Log.d("assignee_put_success", response.code().toString())
                         }
                     })
@@ -641,7 +640,6 @@ internal class JiraApi {
                             call: retrofit2.Call<List<JiraUserModel>>,
                             t: Throwable
                         ) {
-                            resetJiraValues()
                             jiraExceptionHandler(throwable = t)
                         }
 
@@ -649,7 +647,7 @@ internal class JiraApi {
                             call: retrofit2.Call<List<JiraUserModel>>,
                             response: retrofit2.Response<List<JiraUserModel>>
                         ) {
-                            resetJiraValues()
+                            resetJiraValues(shareLayoutMessage = "jira")
                             Log.d("reporter_put_success", response.code().toString())
                         }
                     })
@@ -683,7 +681,6 @@ internal class JiraApi {
                             call: retrofit2.Call<List<JiraSprintModel>>,
                             t: Throwable
                         ) {
-                            resetJiraValues()
                             jiraExceptionHandler(throwable = t)
                         }
 
@@ -691,7 +688,7 @@ internal class JiraApi {
                             call: retrofit2.Call<List<JiraSprintModel>>,
                             response: retrofit2.Response<List<JiraSprintModel>>
                         ) {
-                            resetJiraValues()
+                            resetJiraValues(shareLayoutMessage = "jira")
                             Log.d("sprint_put_success", response.code().toString())
                         }
                     })
@@ -724,7 +721,6 @@ internal class JiraApi {
                         call: retrofit2.Call<List<JiraSprintModel>>,
                         t: Throwable
                     ) {
-                        resetJiraValues()
                         jiraExceptionHandler(throwable = t)
                     }
 
@@ -732,7 +728,7 @@ internal class JiraApi {
                         call: retrofit2.Call<List<JiraSprintModel>>,
                         response: retrofit2.Response<List<JiraSprintModel>>
                     ) {
-                        resetJiraValues()
+                        resetJiraValues(shareLayoutMessage = "jira")
                         Log.d("start_put_success", response.code().toString())
                     }
                 })
@@ -764,9 +760,6 @@ internal class JiraApi {
                     call: retrofit2.Call<List<JiraSprintModel>>,
                     t: Throwable
                 ) {
-                    if (task != "unhandled") {
-                        resetJiraValues()
-                    }
                     jiraExceptionHandler(throwable = t)
                 }
 
@@ -774,15 +767,13 @@ internal class JiraApi {
                     call: retrofit2.Call<List<JiraSprintModel>>,
                     response: retrofit2.Response<List<JiraSprintModel>>
                 ) {
-                    if (task != "unhandled") {
-                        resetJiraValues()
-                    }
                     if (file.name != "logger_bird_details.txt") {
                         if (file.exists()) {
                             file.delete()
                         }
                     }
                     Log.d("attachment_put_success", response.code().toString())
+                    resetJiraValues(shareLayoutMessage = "jira")
                 }
             })
     }
@@ -1693,7 +1684,9 @@ internal class JiraApi {
         if (this::timerTaskQueue.isInitialized) {
             timerTaskQueue.cancel()
         }
-        LoggerBirdService.loggerBirdService.finishShareLayout("jira_error")
+        activity.runOnUiThread {
+            resetJiraValues(shareLayoutMessage = "jira_error")
+        }
         throwable?.printStackTrace()
         e?.printStackTrace()
         LoggerBird.callEnqueue()
@@ -1795,10 +1788,9 @@ internal class JiraApi {
     /**
      * This method is used for resetting the values in jira action.
      */
-    private fun resetJiraValues() {
+    private fun resetJiraValues(shareLayoutMessage:String) {
         queueCreateTask--
-        if (queueCreateTask == 0) {
-            LoggerBirdService.loggerBirdService.finishShareLayout("jira")
+        if (queueCreateTask == 0 || shareLayoutMessage == "jira_error" || shareLayoutMessage == "jira_error_time_out") {
             timerTaskQueue.cancel()
             summary = ""
             project = null
@@ -1831,6 +1823,9 @@ internal class JiraApi {
             reporterPosition = 0
             sprintPosition = 0
             epicNamePosition = 0
+            activity.runOnUiThread {
+                LoggerBirdService.loggerBirdService.finishShareLayout(shareLayoutMessage)
+            }
         }
 
     }
@@ -1844,7 +1839,7 @@ internal class JiraApi {
         timerTaskQueue = object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("jira_error_time_out")
+                    resetJiraValues(shareLayoutMessage = "jira_error_time_out")
                 }
             }
         }

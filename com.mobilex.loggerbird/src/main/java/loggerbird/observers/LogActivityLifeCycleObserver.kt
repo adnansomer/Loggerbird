@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.InputEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -142,11 +143,8 @@ internal class LogActivityLifeCycleObserver() :
                 LoggerBird.classPathListCounter.add(LoggerBird.classPathTotalCounter)
             }
             LoggerBird.classPathTotalCounter++
-            val rootView: ViewGroup =
-                activity.window.decorView.findViewById(android.R.id.content)
-            rootView.viewTreeObserver.addOnTouchModeChangeListener {
-                Log.d("touch",it.toString())
-            }
+//            val rootView: ViewGroup =
+//                activity.window.decorView.findViewById(android.R.id.content)
 //            (rootView.parent as ViewGroup).setOnTouchListener(LayoutOnTouchListener())
 //            for (childIndex in 0..(rootView.parent as ViewGroup).childCount) {
 //                if ((rootView.parent as ViewGroup).getChildAt(childIndex) != null) {
