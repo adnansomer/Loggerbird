@@ -103,6 +103,7 @@ import loggerbird.listeners.OnSwipeTouchListener
 import loggerbird.listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
 import loggerbird.listeners.layouts.LayoutFeedbackOnTouchListener
 import loggerbird.listeners.layouts.LayoutJiraOnTouchListener
+import loggerbird.listeners.layouts.LayoutOnTouchListener
 import loggerbird.models.room.UnhandledDuplication
 import loggerbird.room.UnhandledDuplicationDb
 import loggerbird.utils.api.asana.AsanaApi
@@ -761,7 +762,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
-        lateinit var floating_action_button: FloatingActionButton
+        internal lateinit var floating_action_button: FloatingActionButton
         internal lateinit var filePathMedia: File
         private lateinit var floating_action_button_screenshot: FloatingActionButton
         private lateinit var floating_action_button_video: FloatingActionButton

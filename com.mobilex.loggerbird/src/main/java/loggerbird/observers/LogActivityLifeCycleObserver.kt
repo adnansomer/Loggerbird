@@ -1,6 +1,7 @@
 package loggerbird.observers
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
@@ -10,14 +11,15 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import android.view.InputEvent
-import android.view.View
-import android.view.ViewGroup
-import android.view.ViewTreeObserver
+import android.view.*
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import com.mobilex.loggerbird.R
 import loggerbird.constants.Constants
 import kotlinx.coroutines.*
@@ -28,6 +30,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import loggerbird.services.LoggerBirdService
 import java.util.concurrent.TimeUnit
+import kotlin.collections.HashMap
 
 internal class LogActivityLifeCycleObserver() :
     Activity(),
@@ -42,9 +45,11 @@ internal class LogActivityLifeCycleObserver() :
     private var activityPauseTime: Long? = null
     private var totalActivityTime: Long? = 0
     private var totalTimeSpentInApplication: Long? = 0
-
+    private lateinit var viewLoggerBirdCoordinator: View
+    private val arrayListComponentViews:ArrayList<View> = ArrayList()
     //Static global variables.
     internal companion object {
+        internal var hashMapActivityComponents:HashMap<Activity,ArrayList<View>> = HashMap()
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
         internal var returnActivityLifeCycleClassName: String? = null
@@ -143,16 +148,6 @@ internal class LogActivityLifeCycleObserver() :
                 LoggerBird.classPathListCounter.add(LoggerBird.classPathTotalCounter)
             }
             LoggerBird.classPathTotalCounter++
-//            val rootView: ViewGroup =
-//                activity.window.decorView.findViewById(android.R.id.content)
-//            (rootView.parent as ViewGroup).setOnTouchListener(LayoutOnTouchListener())
-//            for (childIndex in 0..(rootView.parent as ViewGroup).childCount) {
-//                if ((rootView.parent as ViewGroup).getChildAt(childIndex) != null) {
-//                    (rootView.parent as ViewGroup).getChildAt(childIndex)
-//                        .setOnTouchListener(LayoutOnTouchListener())
-//                }
-//            }
-
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -178,6 +173,8 @@ internal class LogActivityLifeCycleObserver() :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onStart"
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            gatherActivityComponentViews(activity = activity)
+            initializeLoggerBirdCoordinatorLayout(activity = activity)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -287,6 +284,8 @@ internal class LogActivityLifeCycleObserver() :
      */
     override fun onActivityDestroyed(activity: Activity) {
         try {
+//            removeLoggerBirdCoordinatorLayout()
+            hashMapActivityComponents.remove(activity)
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -424,5 +423,33 @@ internal class LogActivityLifeCycleObserver() :
             )
         )
     }
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializeLoggerBirdCoordinatorLayout(activity: Activity){
+        removeLoggerBirdCoordinatorLayout()
+        val layoutInflater:LayoutInflater = (activity.applicationContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater)
+        viewLoggerBirdCoordinator = layoutInflater.inflate(R.layout.loggerbird_coordinator,activity.window.decorView.findViewById(android.R.id.content),true)
+        val frameLayout = viewLoggerBirdCoordinator.findViewById<FrameLayout>(R.id.logger_bird_coordinator)
+        frameLayout.setOnTouchListener(LayoutOnTouchListener())
+    }
 
+    private fun removeLoggerBirdCoordinatorLayout(){
+        if(this::viewLoggerBirdCoordinator.isInitialized){
+            activity.windowManager.removeViewImmediate(viewLoggerBirdCoordinator)
+        }
+    }
+
+    private fun gatherActivityComponentViews(activity: Activity){
+        arrayListComponentViews.clear()
+        (activity.window.decorView as ViewGroup).getAllViews().forEach {
+            arrayListComponentViews.add(it)
+        }
+        hashMapActivityComponents[activity] = arrayListComponentViews
+    }
+    private fun View.getAllViews(): List<View> {
+        if (this !is ViewGroup || childCount == 0) return listOf(this)
+        return children
+            .toList()
+            .flatMap { it.getAllViews() }
+            .plus(this as View)
+    }
 }
