@@ -103,7 +103,6 @@ import loggerbird.listeners.OnSwipeTouchListener
 import loggerbird.listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
 import loggerbird.listeners.layouts.LayoutFeedbackOnTouchListener
 import loggerbird.listeners.layouts.LayoutJiraOnTouchListener
-import loggerbird.listeners.layouts.LayoutOnTouchListener
 import loggerbird.models.room.UnhandledDuplication
 import loggerbird.room.UnhandledDuplicationDb
 import loggerbird.utils.api.asana.AsanaApi
@@ -366,8 +365,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var recyclerViewSlackAttachment: RecyclerView
     private lateinit var recyclerViewSlackAttachmentUser: RecyclerView
     private val arrayListSlackFileName: ArrayList<RecyclerViewModel> = ArrayList()
-    private lateinit var progressBarSlack: ProgressBar
-    private lateinit var progressBarSlackLayout: FrameLayout
     private lateinit var slackChannelLayout: ScrollView
     private lateinit var slackUserLayout: ScrollView
     private lateinit var slackBottomNavigationView: BottomNavigationView
@@ -435,8 +432,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonCalendarViewGitlabOk: Button
     private lateinit var recyclerViewGitlabAttachment: RecyclerView
     private lateinit var gitlabAttachmentAdapter: RecyclerViewGitlabAttachmentAdapter
-    private lateinit var progressBarGitlab: ProgressBar
-    private lateinit var progressBarGitlabLayout: FrameLayout
     private lateinit var autoTextViewGitlabProjectAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewGitlabAssigneeAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewGitlabLabelsAdapter: ArrayAdapter<String>
@@ -714,8 +709,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private val arrayListClubhouseFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var clubhouseAttachmentAdapter: RecyclerViewClubhouseAttachmentAdapter
     private lateinit var recyclerViewClubhouseAttachment: RecyclerView
-    private lateinit var progressBarClubhouse: ProgressBar
-    private lateinit var progressBarClubhouseLayout: FrameLayout
     private lateinit var textViewClubhouseEpic: TextView
     private lateinit var linearLayoutClubhouseEpic: LinearLayout
     private lateinit var imageViewClubhouseDueDate: ImageView
@@ -762,7 +755,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
-        internal lateinit var floating_action_button: FloatingActionButton
+        lateinit var floating_action_button: FloatingActionButton
         internal lateinit var filePathMedia: File
         private lateinit var floating_action_button_screenshot: FloatingActionButton
         private lateinit var floating_action_button_video: FloatingActionButton
@@ -826,6 +819,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         internal lateinit var recyclerViewSlackAttachmentUser: RecyclerView
         internal lateinit var recyclerViewSlackNoAttachment: TextView
         internal lateinit var recyclerViewSlackUserNoAttachment: TextView
+        internal lateinit var imageViewProgressBarClose : ImageView
         /**
          * This method is used for removing video task from queue.
          */
@@ -3130,21 +3124,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 "jira_error" -> {
                     removeJiraLayout()
                     Toast.makeText(context, R.string.jira_sent_error, Toast.LENGTH_SHORT).show()
-                    if (this::progressBarJiraLayout.isInitialized && this::progressBarJira.isInitialized) {
-                        progressBarJiraLayout.visibility = View.GONE
-                        progressBarJira.visibility = View.GONE
-                    }
                     detachProgressBar()
                 }
                 "jira_error_time_out" -> {
                     removeJiraLayout()
                     Toast.makeText(context, R.string.jira_sent_error_time_out, Toast.LENGTH_SHORT)
                         .show()
-                    if (this::progressBarJiraLayout.isInitialized && this::progressBarJira.isInitialized) {
-                        progressBarJiraLayout.visibility = View.GONE
-                        progressBarJira.visibility = View.GONE
-                    }
-
                     detachProgressBar()
                 }
 
@@ -3156,40 +3141,34 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 "slack_error" -> {
                     removeSlackLayout()
                     Toast.makeText(context, R.string.slack_sent_error, Toast.LENGTH_SHORT).show()
-                    progressBarSlackLayout.visibility = View.GONE
-                    progressBarSlack.visibility = View.GONE
+                    detachProgressBar()
                 }
 
                 "slack_error_time_out" -> {
                     removeSlackLayout()
                     Toast.makeText(context, R.string.slack_sent_error_time_out, Toast.LENGTH_SHORT)
                         .show()
-                    progressBarSlackLayout.visibility = View.GONE
-                    progressBarSlack.visibility = View.GONE
+                    detachProgressBar()
                 }
 
                 "gitlab" -> {
                     Toast.makeText(context, R.string.gitlab_sent, Toast.LENGTH_SHORT).show()
                     finishSuccessFab(duplicationField = "gitlab")
                     removeGitlabLayout()
-                    progressBarGitlabLayout.visibility = View.GONE
-                    progressBarGitlab.visibility = View.GONE
+                    detachProgressBar()
                 }
 
                 "gitlab_error" -> {
                     removeGitlabLayout()
                     Toast.makeText(context, R.string.gitlab_sent_error, Toast.LENGTH_SHORT).show()
-                    progressBarGitlabLayout.visibility = View.GONE
-                    progressBarGitlab.visibility = View.GONE
-
+                    detachProgressBar()
                 }
 
                 "gitlab_error_time_out" -> {
                     removeGitlabLayout()
                     Toast.makeText(context, R.string.gitlab_sent_error_time_out, Toast.LENGTH_SHORT)
                         .show()
-                    progressBarGitlabLayout.visibility = View.GONE
-                    progressBarGitlab.visibility = View.GONE
+                    detachProgressBar()
                 }
 
                 "github" -> {
@@ -3288,23 +3267,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         .show()
                 }
                 "clubhouse" -> {
-                    progressBarClubhouseLayout.visibility = View.GONE
-                    progressBarClubhouse.visibility = View.GONE
+                    detachProgressBar()
                     removeClubhouseLayout()
                     Toast.makeText(context, R.string.clubhouse_issue_success, Toast.LENGTH_SHORT)
                         .show()
                     finishSuccessFab(duplicationField = "clubhouse")
                 }
                 "clubhouse_error" -> {
-                    progressBarClubhouseLayout.visibility = View.GONE
-                    progressBarClubhouse.visibility = View.GONE
+                    detachProgressBar()
                     removeClubhouseLayout()
                     Toast.makeText(context, R.string.clubhouse_issue_failure, Toast.LENGTH_SHORT)
                         .show()
                 }
                 "clubhouse_error_time_out" -> {
-                    progressBarClubhouseLayout.visibility = View.GONE
-                    progressBarClubhouse.visibility = View.GONE
+                    detachProgressBar()
                     removeClubhouseLayout()
                     Toast.makeText(context, R.string.clubhouse_issue_time_out, Toast.LENGTH_SHORT)
                         .show()
@@ -3492,7 +3468,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method attaches default progressbar into the window.
      */
     @RequiresApi(Build.VERSION_CODES.M)
-    internal fun attachProgressBar() {
+    internal fun attachProgressBar(task: String) {
         detachProgressBar()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         progressBarView =
@@ -3515,11 +3491,61 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
         }
         windowManagerProgressBar = activity.getSystemService(Context.WINDOW_SERVICE)!!
+
         (windowManagerProgressBar as WindowManager).addView(
             progressBarView,
             windowManagerParamsProgressBar
         )
         progressBarView.isClickable = false
+        closeProgressBar(task)
+
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun closeProgressBar(task:String){
+        imageViewProgressBarClose = progressBarView.findViewById(R.id.imageView_progressbar_close)
+        imageViewProgressBarClose.setSafeOnClickListener {
+            detachProgressBar()
+            when (task) {
+                "email" -> {
+                    removeEmailLayout()
+                }
+                "jira" -> {
+                    removeJiraLayout()
+                }
+                "slack" -> {
+                    removeSlackLayout()
+                }
+                "gitlab" -> {
+                    removeGitlabLayout()
+                }
+                "github" -> {
+                    removeGithubLayout()
+                }
+                "trello" -> {
+                    removeTrelloLayout()
+                }
+                "pivotal" -> {
+                    removePivotalLayout()
+                }
+                "basecamp" -> {
+                    removeBasecampLayout()
+                }
+                "asana" -> {
+                    removeAsanaLayout()
+                }
+                "clubhouse" -> {
+                    removeClubhouseLayout()
+                }
+                "bitbucket" -> {
+                    removeBitbucketLayout()
+                }
+            }
+            if (controlFloatingActionButtonView()) {
+                floatingActionButtonView.visibility = View.VISIBLE
+            }
+        }
     }
 
     /**
@@ -3795,9 +3821,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     initializeJiraComponentRecyclerView()
                     initializeJiraFixVersionsRecyclerView()
                     buttonClicksJira(filePathMedia = filePathMedia)
-//                    attachProgressBar()
-                    progressBarJiraLayout.visibility = View.VISIBLE
-                    progressBarJira.visibility = View.VISIBLE
+                    attachProgressBar(task = "jira")
+//                    progressBarJiraLayout.visibility = View.VISIBLE
+//                    progressBarJira.visibility = View.VISIBLE
                 }
             }
         } catch (e: Exception) {
@@ -4205,9 +4231,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
         ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                progressBarJira.visibility = View.VISIBLE
-                progressBarJiraLayout.visibility = View.VISIBLE
-//                    attachProgressBar()
+//                progressBarJira.visibility = View.VISIBLE
+//                progressBarJiraLayout.visibility = View.VISIBLE
+                    attachProgressBar(task = "jira")
             }
 //                hideKeyboard(activity = activity)
             jiraAuthentication.callJira(
@@ -4358,13 +4384,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
 
-            progressBarJiraLayout.visibility = View.GONE
-            progressBarJira.visibility = View.GONE
-//            detachProgressBar()
+//            progressBarJiraLayout.visibility = View.GONE
+//            progressBarJira.visibility = View.GONE
+            detachProgressBar()
         } catch (e: Exception) {
-            progressBarJiraLayout.visibility = View.GONE
-            progressBarJira.visibility = View.GONE
-//            detachProgressBar()
+//            progressBarJiraLayout.visibility = View.GONE
+//            progressBarJira.visibility = View.GONE
+            detachProgressBar()
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraTag)
@@ -4881,9 +4907,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             controlProjectJiraPosition = true
             jiraAuthentication.setProjectPosition(projectPosition = position)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                progressBarJira.visibility = View.VISIBLE
-                progressBarJiraLayout.visibility = View.VISIBLE
-//                    attachProgressBar()
+//                progressBarJira.visibility = View.VISIBLE
+//                progressBarJiraLayout.visibility = View.VISIBLE
+                    attachProgressBar(task = "jira")
             }
             hideKeyboard(activity = activity, view = viewJira)
             jiraAuthentication.callJira(
@@ -5037,12 +5063,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         viewSlack.findViewById(R.id.button_slack_cancel_user)
                     buttonSlackCreateUser =
                         viewSlack.findViewById(R.id.button_slack_create_user)
-                    progressBarSlack = viewSlack.findViewById(R.id.slack_progressbar)
                     toolbarSlack = viewSlack.findViewById(R.id.toolbar_slack)
                     slackBottomNavigationView =
                         viewSlack.findViewById(R.id.slack_bottom_nav_view)
-                    progressBarSlackLayout =
-                        viewSlack.findViewById(R.id.slack_progressbar_background)
 
                     slackAuthentication.callSlack(
                         context = context,
@@ -5052,8 +5075,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     )
                     initializeSlackRecyclerView(filePathMedia = filePathMedia)
                     buttonClicksSlack(filePathMedia)
-                    progressBarSlackLayout.visibility = View.VISIBLE
-                    progressBarSlack.visibility = View.VISIBLE
+                    attachProgressBar(task = "slack")
 
                 }
             }
@@ -5087,8 +5109,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             slackAuthentication.gatherSlackEditTextDetails(editTextMessage = editTextMessage)
             slackAuthentication.gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems = arrayListSlackFileName)
             if (slackAuthentication.checkMessageEmpty(activity = activity, context = context)) {
-                progressBarSlack.visibility = View.VISIBLE
-                progressBarSlackLayout.visibility = View.VISIBLE
+                attachProgressBar(task = "slack")
                 slackAuthentication.callSlack(
                     activity = activity,
                     context = context,
@@ -5111,8 +5132,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     context = context
                 )
             ) {
-                progressBarSlack.visibility = View.VISIBLE
-                progressBarSlackLayout.visibility = View.VISIBLE
+                attachProgressBar(task = "slack")
                 slackAuthentication.callSlack(
                     activity = activity,
                     context = context,
@@ -5169,8 +5189,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         filePathMedia = filePathMedia,
                         slackTask = "get"
                     )
-                    progressBarSlackLayout.visibility = View.VISIBLE
-                    progressBarSlack.visibility = View.VISIBLE
+                    attachProgressBar(task = "slack")
                 }
             }
             return@setOnMenuItemClickListener true
@@ -5234,9 +5253,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         spinnerUsersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerUsers.adapter = spinnerUsersAdapter
 
-        progressBarSlack.visibility = View.GONE
-        progressBarSlackLayout.visibility = View.GONE
-
+        detachProgressBar()
     }
 
     /**
@@ -5641,7 +5658,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         try {
             buttonEmailCreate.setSafeOnClickListener {
                 if (checkBoxFutureTask.isChecked) {
-                    attachProgressBar()
+                    attachProgressBar(task = "email")
                     val coroutineCallFutureTask = CoroutineScope(Dispatchers.IO)
                     coroutineCallFutureTask.async {
                         //                        if (arraylistEmailToUsername.isNotEmpty()) {
@@ -5748,7 +5765,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun createEmailTask(filePathMedia: File? = null, to: String) {
         try {
             activity.runOnUiThread {
-                attachProgressBar()
+                attachProgressBar(task = "email")
             }
             sendSingleMediaFile(
                 filePathMedia = filePathMedia,
@@ -6351,7 +6368,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     task = "get",
                     filePathMedia = filePathMedia
                 )
-                attachProgressBar()
+                attachProgressBar(task = "github")
 
             }
         } catch (e: Exception) {
@@ -6414,7 +6431,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     autoTextViewLinkedPullRequest = autoTextViewGithubLinkedRequests
                 )
             ) {
-                attachProgressBar()
+                attachProgressBar(task = "github")
                 githubAuthentication.gatherAutoTextDetails(
                     autoTextViewAssignee = autoTextViewGithubAssignee,
                     autoTextViewRepos = autoTextViewGithubRepo,
@@ -6718,7 +6735,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewGithubRepo.setOnItemClickListener { parent, view, position, id ->
             githubAuthentication.setRepoPosition(repoPosition = position)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                attachProgressBar()
+                attachProgressBar(task = "github")
             }
             hideKeyboard(activity = activity, view = viewGithub)
             clearGithubComponents()
@@ -7128,7 +7145,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     task = "get",
                     filePathMedia = filePathMedia
                 )
-                attachProgressBar()
+                attachProgressBar(task = "trello")
             }
         } catch (e: Exception) {
             finishShareLayout("trello_error")
@@ -7184,7 +7201,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     autoTextViewProject = autoTextViewTrelloProject
                 )
             ) {
-                attachProgressBar()
+                attachProgressBar(task = "trello")
                 trelloAuthentication.callTrello(
                     activity = activity,
                     context = context,
@@ -7391,7 +7408,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 context = context,
                 task = "get"
             )
-            attachProgressBar()
+            attachProgressBar("trello")
         }
     }
 
@@ -7962,7 +7979,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 textViewGitlabDueDate = viewGitlab.findViewById(R.id.textView_gitlab_due_date)
                 buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
                 buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
-                progressBarGitlab = viewGitlab.findViewById(R.id.gitlab_progressbar)
                 linearLayoutGitlabConfidentiality =
                     viewGitlab.findViewById(R.id.linearLayout_gitlab_confidentiality)
                 linearLayoutGitlabMilestone =
@@ -7976,8 +7992,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 imageViewGitlabLabels = viewGitlab.findViewById(R.id.imageView_delete_labels)
                 imageViewGitlabDueDate =
                     viewGitlab.findViewById(R.id.imageView_gitlab_delete_due_date)
-                progressBarGitlabLayout =
-                    viewGitlab.findViewById(R.id.gitlab_progressbar_background)
                 recyclerViewGitlabAttachment =
                     viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
                 editTextGitlabWeight.filters = arrayOf<InputFilter>(
@@ -7992,8 +8006,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     task = "get",
                     filePathMedia = filePathMedia
                 )
-                progressBarGitlab.visibility = View.VISIBLE
-                progressBarGitlabLayout.visibility = View.VISIBLE
+
+                attachProgressBar("gitlab")
                 initializeGitlabAttachmentRecyclerView(filePathMedia = filePathMedia)
                 buttonClicksGitlab(filePathMedia = filePathMedia)
             }
@@ -8034,9 +8048,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         imageViewGitlabDueDate.setOnClickListener {
 
             imageViewGitlabDueDate.visibility = View.GONE
-
             textViewGitlabDueDate.text = null
-
             gitlabAuthentication.dueDate = null
 
         }
@@ -8142,8 +8154,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 && gitlabAuthentication.checkGitlabMilestone(activity = activity, autoTextViewMilestone = autoTextViewGitlabMilestone)
                 && gitlabAuthentication.checkGitlabProject(activity = activity, autoTextViewProject = autoTextViewGitlabProject)
             ) {
-                progressBarGitlabLayout.visibility = View.VISIBLE
-                progressBarGitlab.visibility = View.VISIBLE
+//                progressBarGitlabLayout.visibility = View.VISIBLE
+//                progressBarGitlab.visibility = View.VISIBLE
+                attachProgressBar(task = "gitlab")
                 gitlabAuthentication.gatherGitlabEditTextDetails(
                     editTextTitle = editTextGitlabTitle,
                     editTextDescription = editTextGitlabDescription,
@@ -8230,8 +8243,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         initializeGitlabMilestones(arrayListGitlabMilestones = arrayListGitlabMilestones)
         initializeGitlabLabels(arrayListGitlabLabels = arrayListGitlabLabels)
         initializeGitlabConfidentiality(arrayListGitlabConfidentiality = arrayListGitlabConfidentiality)
-        progressBarGitlab.visibility = View.GONE
-        progressBarGitlabLayout.visibility = View.GONE
+        detachProgressBar()
     }
 
     /**
@@ -8259,8 +8271,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewGitlabProject.setOnItemClickListener { parent, view, position, id ->
             gitlabAuthentication.gitlabProjectPosition(projectPosition = position)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                progressBarGitlab.visibility = View.VISIBLE
-                progressBarGitlabLayout.visibility = View.VISIBLE
+                attachProgressBar(task = "gitlab")
             }
             gitlabAuthentication.callGitlab(
                 activity = activity,
@@ -8698,7 +8709,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     task = "get",
                     filePathMedia = filePathMedia
                 )
-                attachProgressBar()
+                attachProgressBar(task = "pivotal")
             }
         } catch (e: Exception) {
             finishShareLayout("pivotal_error")
@@ -8768,7 +8779,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     autoTextViewRequester = autoTextViewPivotalRequester
                 )
             ) {
-                attachProgressBar()
+                attachProgressBar(task = "pivotal")
                 pivotalAuthentication.callPivotal(
                     activity = activity,
                     context = context,
@@ -8993,7 +9004,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 context = context,
                 task = "get"
             )
-            attachProgressBar()
+            attachProgressBar(task = "pivotal")
         }
     }
 
@@ -9519,7 +9530,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     task = "get",
                     filePathMedia = filePathMedia
                 )
-                attachProgressBar()
+                attachProgressBar(task = "basecamp")
             }
         } catch (e: Exception) {
             finishShareLayout("basecamp_error")
@@ -9583,7 +9594,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     context = context,
                     task = "create"
                 )
-                attachProgressBar()
+                attachProgressBar(task = "basecamp")
             }
         }
         buttonBasecampCancel.setSafeOnClickListener {
@@ -9779,7 +9790,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 context = context,
                 task = "get"
             )
-            attachProgressBar()
+            attachProgressBar(task = "basecamp")
         }
     }
 
@@ -10252,7 +10263,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     task = "get",
                     filePathMedia = filePathMedia
                 )
-                attachProgressBar()
+                attachProgressBar(task = "asana")
             }
         } catch (e: Exception) {
             finishShareLayout("asana_error")
@@ -10312,7 +10323,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     context = context,
                     task = "create"
                 )
-                attachProgressBar()
+                attachProgressBar(task = "asana")
             }
         }
         buttonAsanaCancel.setSafeOnClickListener {
@@ -10521,7 +10532,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 context = context,
                 task = "get"
             )
-            attachProgressBar()
+            attachProgressBar(task = "asana")
         }
     }
 
@@ -10836,9 +10847,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     viewClubhouse.findViewById(R.id.textView_clubhouse_due_date)
                 editTextClubhouseEstimate =
                     viewClubhouse.findViewById(R.id.editText_clubhouse_estimate_point)
-                progressBarClubhouse = viewClubhouse.findViewById(R.id.clubhouse_progressbar)
-                progressBarClubhouseLayout =
-                    viewClubhouse.findViewById(R.id.clubhouse_progressbar_background)
                 textViewClubhouseEpic = viewClubhouse.findViewById(R.id.textView_clubhouse_epic)
                 linearLayoutClubhouseEpic =
                     viewClubhouse.findViewById(R.id.linearLayout_clubhouse_epic)
@@ -10850,8 +10858,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     task = "get",
                     filePathMedia = filePathMedia
                 )
-                progressBarClubhouse.visibility = View.VISIBLE
-                progressBarClubhouseLayout.visibility = View.VISIBLE
+                attachProgressBar(task = "clubhouse")
                 initializeClubhouseAttachmentRecyclerView(filePathMedia = filePathMedia)
                 buttonClicksClubhouse(filePathMedia = filePathMedia)
             }
@@ -10933,8 +10940,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     editTextStoryDescription = editTextClubhouseStoryDescription,
                     editTextEstimate = editTextClubhouseEstimate
                 )
-                progressBarClubhouse.visibility = View.VISIBLE
-                progressBarClubhouseLayout.visibility = View.VISIBLE
+                detachProgressBar()
                 clubhouseAuthentication.callClubhouse(
                     activity = activity,
                     context = context,
@@ -10982,8 +10988,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         initializeClubhouseRequester(arrayListClubhouseRequester)
         initializeClubhouseStoryType(arrayListClubhouseStoryType)
         initializeClubhouseEpic(arrayListClubhouseEpic)
-        progressBarClubhouse.visibility = View.GONE
-        progressBarClubhouseLayout.visibility = View.GONE
+        detachProgressBar()
     }
 
     /**
@@ -11012,8 +11017,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             clubhouseAuthentication.clubhouseProjectPosition(projectPosition = position)
             hideKeyboard(activity = activity, view = viewClubhouse)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                progressBarClubhouse.visibility = View.VISIBLE
-                progressBarClubhouseLayout.visibility = View.VISIBLE
+                attachProgressBar(task = "clubhouse")
             }
             clubhouseAuthentication.callClubhouse(
                 activity = activity,
@@ -12002,7 +12006,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     task = "get",
                     filePathMedia = filePathMedia
                 )
-                attachProgressBar()
+                attachProgressBar(task = "bitbucket")
             }
         } catch (e: Exception) {
             finishShareLayout("bitbucket_error")
@@ -12088,7 +12092,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     context = context,
                     task = "create"
                 )
-                attachProgressBar()
+                attachProgressBar(task = "bitbucket")
             }
         }
         buttonBitbucketCancel.setSafeOnClickListener {
@@ -12208,7 +12212,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 context = context,
                 task = "get"
             )
-            attachProgressBar()
+            attachProgressBar(task = "bitbucket")
         }
     }
 

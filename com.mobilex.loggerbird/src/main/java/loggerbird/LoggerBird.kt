@@ -610,6 +610,7 @@ class LoggerBird : LifecycleObserver {
             }
         }
 
+
         //In progress method.
         fun registerRecyclerViewObservers(recyclerView: RecyclerView) {
             recyclerView.adapter?.registerAdapterDataObserver(recyclerViewAdapterDataObserver)
