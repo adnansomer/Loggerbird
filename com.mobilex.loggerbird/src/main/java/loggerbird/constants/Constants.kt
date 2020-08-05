@@ -116,5 +116,6 @@ internal class Constants {
         internal const val recyclerViewBitbucketAdapterTag: String = "RecyclerView Bitbucket Adapter"
         internal const val encryptionTag: String = "Encryption"
         internal const val layoutOnTouchTag: String = "Layout OnTouch"
+        internal const val componentObserverTag: String = "Component Observer"
     }
 }
