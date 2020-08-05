@@ -41,9 +41,7 @@ internal class LoggerBirdKeyStore {
         cipher.init(Cipher.ENCRYPT_MODE, getKey())
         val ivBytes = cipher.iv
         val encryptedBytes = cipher.doFinal(temp.toByteArray(Charsets.UTF_8))
-
         return  Pair(ivBytes, encryptedBytes)
-
     }
 
     internal fun decryptData(ivBytes : ByteArray, data: ByteArray): String{
