@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
+import androidx.fragment.app.Fragment
 import com.mobilex.loggerbird.R
 import loggerbird.constants.Constants
 import kotlinx.coroutines.*
@@ -45,8 +46,7 @@ internal class LogActivityLifeCycleObserver() :
     private var activityPauseTime: Long? = null
     private var totalActivityTime: Long? = 0
     private var totalTimeSpentInApplication: Long? = 0
-    private lateinit var viewLoggerBirdCoordinator: View
-    private val arrayListComponentViews:ArrayList<View> = ArrayList()
+    private val logComponentObserver = LogComponentObserver()
     //Static global variables.
     internal companion object {
         internal var hashMapActivityComponents:HashMap<Activity,ArrayList<View>> = HashMap()
@@ -173,8 +173,9 @@ internal class LogActivityLifeCycleObserver() :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onStart"
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
-            gatherActivityComponentViews(activity = activity)
-            initializeLoggerBirdCoordinatorLayout(activity = activity)
+            logComponentObserver.initializeLoggerBirdCoordinatorLayout(activity = activity)
+//            gatherActivityComponentViews(activity = activity)
+//            initializeLoggerBirdCoordinatorLayout(activity = activity)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -422,34 +423,5 @@ internal class LogActivityLifeCycleObserver() :
                 )
             )
         )
-    }
-    @SuppressLint("ClickableViewAccessibility")
-    private fun initializeLoggerBirdCoordinatorLayout(activity: Activity){
-        removeLoggerBirdCoordinatorLayout()
-        val layoutInflater:LayoutInflater = (activity.applicationContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater)
-        viewLoggerBirdCoordinator = layoutInflater.inflate(R.layout.loggerbird_coordinator,activity.window.decorView.findViewById(android.R.id.content),true)
-        val frameLayout = viewLoggerBirdCoordinator.findViewById<FrameLayout>(R.id.logger_bird_coordinator)
-        frameLayout.setOnTouchListener(LayoutOnTouchListener())
-    }
-
-    private fun removeLoggerBirdCoordinatorLayout(){
-        if(this::viewLoggerBirdCoordinator.isInitialized){
-            activity.windowManager.removeViewImmediate(viewLoggerBirdCoordinator)
-        }
-    }
-
-    private fun gatherActivityComponentViews(activity: Activity){
-        arrayListComponentViews.clear()
-        (activity.window.decorView as ViewGroup).getAllViews().forEach {
-            arrayListComponentViews.add(it)
-        }
-        hashMapActivityComponents[activity] = arrayListComponentViews
-    }
-    private fun View.getAllViews(): List<View> {
-        if (this !is ViewGroup || childCount == 0) return listOf(this)
-        return children
-            .toList()
-            .flatMap { it.getAllViews() }
-            .plus(this as View)
     }
 }
