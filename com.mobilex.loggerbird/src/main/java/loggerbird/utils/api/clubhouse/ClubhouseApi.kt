@@ -32,6 +32,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import loggerbird.utils.other.InternetConnectionUtil
 import loggerbird.utils.other.LinkedBlockingQueueUtil
+import java.net.SocketTimeoutException
 
 /** Loggerbird Clubhouse api configuration class **/
 internal class ClubhouseApi {
@@ -41,7 +42,6 @@ internal class ClubhouseApi {
     private val coroutineCallOkHttpClubhouse = CoroutineScope(Dispatchers.IO)
     private val coroutineCallClubhouse = CoroutineScope(Dispatchers.IO)
     private val internetConnectionUtil = InternetConnectionUtil()
-    private lateinit var timerTaskQueue: TimerTask
     private var spinnerPositionUser: Int = 0
     private var userPosition = 0
     private var userId: String = ""
@@ -98,7 +98,6 @@ internal class ClubhouseApi {
         coroutineCallOkHttpClubhouse.async {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
-                    checkQueueTime(activity = activity)
                     okHttpClubhouseAuthentication(
                         activity = activity,
                         context = context,
@@ -254,9 +253,7 @@ internal class ClubhouseApi {
                         call: retrofit2.Call<List<ClubhouseProjectModel>>,
                         t: Throwable
                     ) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
+                        clubhouseExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
@@ -306,9 +303,7 @@ internal class ClubhouseApi {
                         call: retrofit2.Call<JsonArray>,
                         t: Throwable
                     ) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
+                        clubhouseExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
@@ -360,9 +355,7 @@ internal class ClubhouseApi {
                         call: retrofit2.Call<List<ClubHouseEpicModel>>,
                         t: Throwable
                     ) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
+                        clubhouseExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
@@ -431,9 +424,7 @@ internal class ClubhouseApi {
                 )
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     override fun onFailure(call: retrofit2.Call<JsonObject>, t: Throwable) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
+                        clubhouseExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
@@ -511,9 +502,7 @@ internal class ClubhouseApi {
                 .enqueue(object : retrofit2.Callback<JsonArray> {
                     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
                     override fun onFailure(call: retrofit2.Call<JsonArray>, t: Throwable) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
+                        clubhouseExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
@@ -616,9 +605,7 @@ internal class ClubhouseApi {
                         call: retrofit2.Call<JsonObject>,
                         t: Throwable
                     ) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.clubhouseTag)
+                        clubhouseExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
@@ -649,7 +636,6 @@ internal class ClubhouseApi {
      * This method is used for updating data fields of Clubhouse.
      */
     private fun updateFields() {
-        timerTaskQueue.cancel()
         activity.runOnUiThread {
             LoggerBirdService.loggerBirdService.initializeClubhouseAutoTextViews(
                 arrayListClubhouseRequester = arrayListUsers,
@@ -730,22 +716,6 @@ internal class ClubhouseApi {
     }
 
     /**
-     * This method is used for checking time for time out situation.
-     * @param activity is used for getting reference of current activity.
-     */
-    private fun checkQueueTime(activity: Activity) {
-        val timerQueue = Timer()
-        timerTaskQueue = object : TimerTask() {
-            override fun run() {
-                activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error_time_out")
-                }
-            }
-        }
-        timerQueue.schedule(timerTaskQueue, 100000)
-    }
-
-    /**
      * This method is used for checking project reference exist in the project name list or not empty in the AutoCompleteTextView field in the Clubhouse layout.
      * @param activity is used for getting reference of current activity.
      * @param autoTextViewProjects is used for getting reference of project name autoCompleteTextView in the Clubhouse layout.
@@ -821,10 +791,17 @@ internal class ClubhouseApi {
         filePathName: File? = null,
         throwable: Throwable? = null
     ) {
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
+        when (throwable) {
+            is SocketTimeoutException -> {
+                LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error_time_out")
+            }
+            is IOException -> {
+                LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error_time_out")
+            }
+            else -> {
+                LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error")
+            }
         }
-        LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse_error")
         e?.printStackTrace()
         LoggerBird.callEnqueue()
         LoggerBird.callExceptionDetails(

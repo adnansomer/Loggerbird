@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import loggerbird.LoggerBird
+import loggerbird.observers.LogActivityLifeCycleObserver
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
@@ -153,7 +154,6 @@ internal class LoggerBirdMemoryService : Service() {
             val usedMemorySize = (runtimeTotalMemory - runtimeFreeMemory)
             if (usedMemorySize > memoryThreshold) {
                 memoryOverused = true
-                stringBuilderMemoryUsage.append("Memory Overused: $memoryOverused\nMemory Usage: $usedMemorySize Bytes\n")
             }
 
         } catch (e: Exception) {
