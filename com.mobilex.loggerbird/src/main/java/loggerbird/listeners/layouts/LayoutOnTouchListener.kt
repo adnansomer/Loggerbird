@@ -1,6 +1,7 @@
 package loggerbird.listeners.layouts
 
 import android.app.Activity
+import android.graphics.Rect
 import android.os.Build
 import android.util.Log
 import android.view.*
@@ -24,26 +25,34 @@ internal class LayoutOnTouchListener(
             Log.d("touch_y", event.rawY.toString())
             if(activity != null){
                 LogActivityLifeCycleObserver.hashMapActivityComponents[activity]?.forEach {
-                    val locations = IntArray(2)
-                    it.getLocationOnScreen(locations)
-                    if ((event.rawX.toInt() <= (locations[0] + it.width) && (event.rawX.toInt() >= (locations[0] - it.width)))
-                        && ((event.rawY.toInt() <= (locations[1] + it.height) && (event.rawY.toInt() >= (locations[1] - it.height))))
-                    ) {
-                        Log.d("touch_clicked_activity", "Id:" + it.id + "\n" + it.toString())
-                    } else {
-                        Log.d("touch_false_activity", "false")
+//                    val locations = IntArray(2)
+//                    it.getLocationOnScreen(locations)
+//                    if ((event.rawX.toInt() <= (locations[0] + it.width) && (event.rawX.toInt() >= (locations[0] - it.width)))
+//                        && ((event.rawY.toInt() <= (locations[1] + it.height) && (event.rawY.toInt() >= (locations[1] - it.height))))
+//                    ) {
+//                        Log.d("touch_clicked_activity", "Id:" + it.id + "\n" + it.toString())
+//                    } else {
+//                        Log.d("touch_false_activity", "false")
+//                    }
+                    val rect = Rect(it.left,it.top,it.right,it.bottom)
+                    if(rect.contains(event.x.toInt(),event.y.toInt())){
+                     Log.d("touch_clicked_activity", "Id:" + it.id + "\n" + it.toString())
                     }
                 }
             }else if(fragment != null){
                 LogFragmentLifeCycleObserver.hashMapFragmentComponents[fragment]?.forEach {
-                    val locations = IntArray(2)
-                    it.getLocationOnScreen(locations)
-                    if ((event.rawX.toInt() <= (locations[0] + it.width) && (event.rawX.toInt() >= (locations[0] - it.width)))
-                        && ((event.rawY.toInt() <= (locations[1] + it.height) && (event.rawY.toInt() >= (locations[1] - it.height))))
-                    ) {
-                        Log.d("touch_clicked_fragment", "Id:" + it.id + "\n" + it.toString())
-                    } else {
-                        Log.d("touch_false_fragment", "false")
+//                    val locations = IntArray(2)
+//                    it.getLocationOnScreen(locations)
+//                    if ((event.rawX.toInt() <= (locations[0] + it.width) && (event.rawX.toInt() >= (locations[0] - it.width)))
+//                        && ((event.rawY.toInt() <= (locations[1] + it.height) && (event.rawY.toInt() >= (locations[1] - it.height))))
+//                    ) {
+//                        Log.d("touch_clicked_fragment", "Id:" + it.id + "\n" + it.toString())
+//                    } else {
+//                        Log.d("touch_false_fragment", "false")
+//                    }
+                    val rect = Rect(it.left,it.top,it.right,it.bottom)
+                    if(rect.contains(event.x.toInt(),event.y.toInt())){
+                        Log.d("touch_clicked_activity", "Id:" + it.id + "\n" + it.toString())
                     }
                 }
             }
