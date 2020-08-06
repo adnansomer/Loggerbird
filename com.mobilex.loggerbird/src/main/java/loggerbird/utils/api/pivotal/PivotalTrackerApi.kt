@@ -33,6 +33,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import loggerbird.utils.other.DefaultToast
 import loggerbird.utils.other.InternetConnectionUtil
+import java.net.SocketTimeoutException
 import kotlin.collections.HashMap
 
 /** Loggerbird PivotalTracker api configuration class **/
@@ -93,7 +94,7 @@ internal class PivotalTrackerApi {
         coroutineCallOkHttpPivotal.async {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
-                    checkQueueTime(activity = activity)
+//                    checkQueueTime(activity = activity)
                     okHttpPivotalAuthentication(
                         activity = activity,
                         context = context,
@@ -796,7 +797,7 @@ internal class PivotalTrackerApi {
         queueCounter--
         Log.d("que_counter", queueCounter.toString())
         if (queueCounter == 0) {
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializePivotalAutoTextViews(
                     arrayListPivotalProject = arrayListProjectNames,
@@ -837,11 +838,14 @@ internal class PivotalTrackerApi {
         e: Exception? = null,
         throwable: Throwable? = null
     ) {
-        resetPivotalValues(shareLayoutMessage = "pivotal_error")
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
+//        if (this::timerTaskQueue.isInitialized) {
+//            timerTaskQueue.cancel()
+//        }
+        if(throwable is SocketTimeoutException){
+            resetPivotalValues(shareLayoutMessage = "pivotal_error_time_out")
+        }else{
+            resetPivotalValues(shareLayoutMessage = "pivotal_error")
         }
-        LoggerBirdService.loggerBirdService.finishShareLayout("pivotal_error")
         throwable?.printStackTrace()
         e?.printStackTrace()
         LoggerBird.callEnqueue()
@@ -877,7 +881,7 @@ internal class PivotalTrackerApi {
         queueCounter--
         Log.d("queue_counter", queueCounter.toString())
         if (queueCounter == 0 || shareLayoutMessage == "pivotal_error" || shareLayoutMessage == "pivotal_error_time_out") {
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             arrayListProjectNames.clear()
             arrayListProjectId.clear()
             arrayListStoryTypeNames.clear()

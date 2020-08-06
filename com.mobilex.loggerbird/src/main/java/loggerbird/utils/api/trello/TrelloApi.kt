@@ -33,6 +33,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import loggerbird.utils.other.DefaultToast
 import loggerbird.utils.other.InternetConnectionUtil
+import java.net.SocketTimeoutException
 import kotlin.collections.HashMap
 
 /** Loggerbird Trello api configuration class **/
@@ -92,7 +93,7 @@ internal class TrelloApi {
         coroutineCallOkHttpTrello.async {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
-                    checkQueueTime(activity = activity)
+//                    checkQueueTime(activity = activity)
                     okHttpTrelloAuthentication(
                         activity = activity,
                         context = context,
@@ -782,7 +783,7 @@ internal class TrelloApi {
         queueCounter--
         Log.d("que_counter", queueCounter.toString())
         if (queueCounter == 0) {
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeTrelloAutoTextViews(
                     arrayListTrelloProject = arrayListProjectNames,
@@ -820,9 +821,13 @@ internal class TrelloApi {
         e: Exception? = null,
         throwable: Throwable? = null
     ) {
-        resetTrelloValues("trello_error")
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
+//        if (this::timerTaskQueue.isInitialized) {
+//            timerTaskQueue.cancel()
+//        }
+        if(throwable is SocketTimeoutException){
+            resetTrelloValues("trello_error_time_out")
+        }else{
+            resetTrelloValues("trello_error")
         }
         throwable?.printStackTrace()
         e?.printStackTrace()
@@ -864,7 +869,7 @@ internal class TrelloApi {
     private fun resetTrelloValues(shareLayoutMessage:String) {
         queueCounter--
         if (queueCounter == 0 || shareLayoutMessage == "trello_error" || shareLayoutMessage == "trello_error_time_out") {
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             arrayListProjectNames.clear()
             arrayListProjectId.clear()
             arrayListBoardNames.clear()

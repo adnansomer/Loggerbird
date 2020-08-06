@@ -52,7 +52,7 @@ internal class LayoutOnTouchListener(
 //                    }
                     val rect = Rect(it.left,it.top,it.right,it.bottom)
                     if(rect.contains(event.x.toInt(),event.y.toInt())){
-                        Log.d("touch_clicked_activity", "Id:" + it.id + "\n" + it.toString())
+                        Log.d("touch_clicked_fragment", "Id:" + it.id + "\n" + it.toString())
                     }
                 }
             }

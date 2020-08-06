@@ -32,6 +32,7 @@ import loggerbird.utils.other.LinkedBlockingQueueUtil
 import java.io.File
 import java.io.IOException
 import java.lang.StringBuilder
+import java.net.SocketTimeoutException
 import java.nio.file.Files
 import java.util.*
 import kotlin.collections.ArrayList
@@ -99,7 +100,7 @@ internal class GithubApi {
         coroutineCallOkHttpGithub.async {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
-                    checkQueueTime(activity = activity)
+//                    checkQueueTime(activity = activity)
                     okHttpGithubAuthentication(
                         activity = activity,
                         context = context,
@@ -795,7 +796,7 @@ internal class GithubApi {
         queueCounter--
         Log.d("que_counter", queueCounter.toString())
         if (queueCounter == 0) {
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeGithubAutoTextViews(
                     arrayListGithubRepos = arrayListRepo,
@@ -837,10 +838,14 @@ internal class GithubApi {
         throwable: Throwable? = null
     ) {
         resetGithubValues()
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
+//        if (this::timerTaskQueue.isInitialized) {
+//            timerTaskQueue.cancel()
+//        }
+        if(throwable is SocketTimeoutException){
+            LoggerBirdService.loggerBirdService.finishShareLayout("github_error_time_out")
+        }else{
+            LoggerBirdService.loggerBirdService.finishShareLayout("github_error")
         }
-        LoggerBirdService.loggerBirdService.finishShareLayout("github_error")
         throwable?.printStackTrace()
         e?.printStackTrace()
         LoggerBird.callEnqueue()

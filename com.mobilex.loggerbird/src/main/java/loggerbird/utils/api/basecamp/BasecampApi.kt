@@ -31,6 +31,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import loggerbird.utils.other.DefaultToast
 import loggerbird.utils.other.InternetConnectionUtil
+import java.net.SocketTimeoutException
 import kotlin.collections.HashMap
 /** Loggerbird Clubhouse api configuration class **/
 internal class BasecampApi {
@@ -92,7 +93,7 @@ internal class BasecampApi {
         coroutineCallOkHttpBasecamp.async {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
-                    checkQueueTime(activity = activity)
+//                    checkQueueTime(activity = activity)
                     okHttpBasecampAuthentication(
                         activity = activity,
                         context = context,
@@ -787,7 +788,7 @@ internal class BasecampApi {
         queueCounter--
         Log.d("que_counter", queueCounter.toString())
         if (queueCounter == 0) {
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeBasecampAutoTextViews(
                     arrayListBasecampProject = arrayListProjectNames,
@@ -828,11 +829,15 @@ internal class BasecampApi {
         e: Exception? = null,
         throwable: Throwable? = null
     ) {
-        resetBasecampValues(shareLayoutMessage = "basecamp_error")
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
+
+//        if (this::timerTaskQueue.isInitialized) {
+//            timerTaskQueue.cancel()
+//        }
+        if(throwable is SocketTimeoutException){
+            resetBasecampValues(shareLayoutMessage = "basecamp_error_time_out")
+        }else{
+            resetBasecampValues(shareLayoutMessage = "basecamp_error")
         }
-        LoggerBirdService.loggerBirdService.finishShareLayout("basecamp_error")
         throwable?.printStackTrace()
         e?.printStackTrace()
         LoggerBird.callEnqueue()
@@ -875,7 +880,7 @@ internal class BasecampApi {
         queueCounter--
         Log.d("queue_counter", queueCounter.toString())
         if (queueCounter == 0 || shareLayoutMessage == "basecamp_error" || shareLayoutMessage == "basecamp_error_time_out") {
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             arrayListProjectNames.clear()
             arrayListProjectId.clear()
             arrayListAssigneeNames.clear()
