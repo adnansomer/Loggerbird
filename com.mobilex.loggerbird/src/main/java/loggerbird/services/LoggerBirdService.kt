@@ -755,7 +755,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Static global variables:
     internal companion object {
         internal lateinit var floatingActionButtonView: View
-        lateinit var floating_action_button: FloatingActionButton
+        internal lateinit var floating_action_button: FloatingActionButton
         internal lateinit var filePathMedia: File
         private lateinit var floating_action_button_screenshot: FloatingActionButton
         private lateinit var floating_action_button_video: FloatingActionButton

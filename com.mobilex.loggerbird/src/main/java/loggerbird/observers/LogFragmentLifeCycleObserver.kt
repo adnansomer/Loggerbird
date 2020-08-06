@@ -17,12 +17,13 @@ internal class LogFragmentLifeCycleObserver(
     FragmentManager.FragmentLifecycleCallbacks() {
     //Global variables.
     private var classList: ArrayList<String> = ArrayList()
-
+    private val logComponentObserver = LogComponentObserver()
     //Static global variables.
     companion object {
         internal var stringBuilderFragmentLifeCycleObserver: StringBuilder = StringBuilder()
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
+        internal var hashMapFragmentComponents:HashMap<Fragment,ArrayList<View>> = HashMap()
     }
 
     //Constructor.
@@ -350,6 +351,7 @@ internal class LogFragmentLifeCycleObserver(
             stringBuilderFragmentLifeCycleObserver.append(
                 Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
             )
+            logComponentObserver.initializeLoggerBirdCoordinatorLayout(fragment = f)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()

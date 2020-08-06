@@ -293,7 +293,7 @@ internal class TrelloApi {
 
                             }
                         }
-                        resetTrelloValues()
+                        resetTrelloValues(shareLayoutMessage = "trello")
                     }
                 })
 
@@ -326,7 +326,6 @@ internal class TrelloApi {
                     call: retrofit2.Call<JsonObject>,
                     t: Throwable
                 ) {
-                    resetTrelloValues()
                     trelloExceptionHandler(throwable = t)
                 }
 
@@ -343,7 +342,7 @@ internal class TrelloApi {
                         }
                         Log.d("attachment_put_success", response.code().toString())
                         Log.d("attachment_put_success", response.message())
-                        resetTrelloValues()
+                        resetTrelloValues(shareLayoutMessage = "trello")
                     }
                 }
             })
@@ -373,7 +372,6 @@ internal class TrelloApi {
                     call: retrofit2.Call<JsonObject>,
                     t: Throwable
                 ) {
-                    resetTrelloValues()
                     trelloExceptionHandler(throwable = t)
                 }
 
@@ -403,7 +401,7 @@ internal class TrelloApi {
                             trelloExceptionHandler(e = e)
                         }
                     }
-                    resetTrelloValues()
+                    resetTrelloValues(shareLayoutMessage = "trello")
                 }
             })
     }
@@ -442,7 +440,6 @@ internal class TrelloApi {
                         call: retrofit2.Call<JsonObject>,
                         t: Throwable
                     ) {
-                        resetTrelloValues()
                         trelloExceptionHandler(throwable = t)
                     }
 
@@ -452,7 +449,7 @@ internal class TrelloApi {
                     ) {
                         Log.d("checklist_item_put_suc", response.code().toString())
                         Log.d("checklist_item_put_suc", response.message())
-                        resetTrelloValues()
+                        resetTrelloValues(shareLayoutMessage = "trello")
                     }
                 })
         }
@@ -807,9 +804,7 @@ internal class TrelloApi {
         val timerQueue = Timer()
         timerTaskQueue = object : TimerTask() {
             override fun run() {
-                activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("trello_error_time_out")
-                }
+              resetTrelloValues(shareLayoutMessage = "trello_error_time_out")
             }
         }
         timerQueue.schedule(timerTaskQueue, 180000)
@@ -825,11 +820,10 @@ internal class TrelloApi {
         e: Exception? = null,
         throwable: Throwable? = null
     ) {
-        resetTrelloValues()
+        resetTrelloValues("trello_error")
         if (this::timerTaskQueue.isInitialized) {
             timerTaskQueue.cancel()
         }
-        LoggerBirdService.loggerBirdService.finishShareLayout("trello_error")
         throwable?.printStackTrace()
         e?.printStackTrace()
         LoggerBird.callEnqueue()
@@ -867,9 +861,9 @@ internal class TrelloApi {
     /**
      * This method is used for resetting the values in trello action.
      */
-    private fun resetTrelloValues() {
+    private fun resetTrelloValues(shareLayoutMessage:String) {
         queueCounter--
-        if (queueCounter == 0) {
+        if (queueCounter == 0 || shareLayoutMessage == "trello_error" || shareLayoutMessage == "trello_error_time_out") {
             timerTaskQueue.cancel()
             arrayListProjectNames.clear()
             arrayListProjectId.clear()
@@ -892,7 +886,7 @@ internal class TrelloApi {
             label = null
             labelPosition = 0
             activity.runOnUiThread {
-                LoggerBirdService.loggerBirdService.finishShareLayout("trello")
+                LoggerBirdService.loggerBirdService.finishShareLayout(shareLayoutMessage)
             }
         }
     }

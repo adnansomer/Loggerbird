@@ -194,7 +194,8 @@ class MainActivity : AppCompatActivity() {
 //        }
         button_add.setOnClickListener() {
             val coroutineScope = CoroutineScope(Dispatchers.IO)
-                throw  NullPointerException("Parameter Type cannot be null");
+//                throw  NullPointerException("Parameter Type cannot be null");
+
 
 
             //recyclerViewList.removeAt(0)
@@ -260,7 +261,7 @@ class MainActivity : AppCompatActivity() {
 //            }
         }
         button_read_logs.setOnClickListener(View.OnClickListener {
-            throw  NullPointerException("asdf123123");
+//            throw  NullPointerException("asdf123123");
 //            getCurrentData()
 //            beginSearch("dog", this)
             // LogDeneme.saveComponentDetails(view=button_read_logs,resources = button_read_logs.resources)
@@ -270,7 +271,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         button_next_activity.setOnClickListener({
-            throw  NullPointerException("asdf12")
+//            throw  NullPointerException("asdf12")
 //            //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
 ////            LogDeneme.saveAllDetails(context=this)
 //            //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
@@ -278,7 +279,7 @@ class MainActivity : AppCompatActivity() {
 //
 ////            LoggerBird.takeLifeCycleDetails()
 //            supportFragmentManager.beginTransaction().add(R.id.main_activity_layout,FragmentMain3.newInstance()).commit()
-////            startActivity(Intent(this@MainActivity, Main2Activity::class.java))
+          startActivity(Intent(this@MainActivity, Main2Activity::class.java))
 
 //            var encrypted = "582D3163703A2ADA6E40FE5B9D176402"
 //            var decrypted = ""

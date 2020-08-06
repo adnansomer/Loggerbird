@@ -684,7 +684,7 @@ internal class AsanaApi {
         timerTaskQueue = object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("asana_error_time_out")
+                    resetasanaValues(shareLayoutMessage = "asana_error_time_out")
                 }
             }
         }
@@ -755,7 +755,7 @@ internal class AsanaApi {
     private fun resetasanaValues(shareLayoutMessage: String) {
         queueCounter--
         Log.d("queue_counter", queueCounter.toString())
-        if (queueCounter == 0) {
+        if (queueCounter == 0 || shareLayoutMessage == "asana_error" || shareLayoutMessage == "asana_error_time_out") {
             RecyclerViewAsanaAttachmentAdapter.ViewHolder.arrayListFilePaths.forEach {
                 if (it.file.name != "logger_bird_details.txt") {
                     if (it.file.exists()) {

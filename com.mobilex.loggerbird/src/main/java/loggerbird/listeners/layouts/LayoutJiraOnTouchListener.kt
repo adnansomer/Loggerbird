@@ -48,7 +48,7 @@ internal class LayoutJiraOnTouchListener(
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(
                 exception = e,
-                tag = Constants.feedbackOnTouchTag
+                tag = Constants.jiraTag
             )
         }
         return false

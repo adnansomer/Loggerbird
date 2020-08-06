@@ -820,7 +820,7 @@ internal class PivotalTrackerApi {
         timerTaskQueue = object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("pivotal_error_time_out")
+                    resetPivotalValues(shareLayoutMessage = "pivotal_error_time_out")
                 }
             }
         }
@@ -876,7 +876,7 @@ internal class PivotalTrackerApi {
     private fun resetPivotalValues(shareLayoutMessage: String) {
         queueCounter--
         Log.d("queue_counter", queueCounter.toString())
-        if (queueCounter == 0) {
+        if (queueCounter == 0 || shareLayoutMessage == "pivotal_error" || shareLayoutMessage == "pivotal_error_time_out") {
             timerTaskQueue.cancel()
             arrayListProjectNames.clear()
             arrayListProjectId.clear()

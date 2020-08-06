@@ -1,6 +1,7 @@
 package loggerbird.observers
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
@@ -9,19 +10,28 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
+import android.view.*
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
+import androidx.fragment.app.Fragment
 import com.mobilex.loggerbird.R
 import loggerbird.constants.Constants
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
+import loggerbird.listeners.layouts.LayoutOnTouchListener
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import loggerbird.services.LoggerBirdService
 import java.util.concurrent.TimeUnit
+import kotlin.collections.HashMap
 
 internal class LogActivityLifeCycleObserver() :
     Activity(),
@@ -36,9 +46,10 @@ internal class LogActivityLifeCycleObserver() :
     private var activityPauseTime: Long? = null
     private var totalActivityTime: Long? = 0
     private var totalTimeSpentInApplication: Long? = 0
-
+    private val logComponentObserver = LogComponentObserver()
     //Static global variables.
     internal companion object {
+        internal var hashMapActivityComponents:HashMap<Activity,ArrayList<View>> = HashMap()
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
         internal var returnActivityLifeCycleClassName: String? = null
@@ -162,6 +173,9 @@ internal class LogActivityLifeCycleObserver() :
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onStart"
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
+            logComponentObserver.initializeLoggerBirdCoordinatorLayout(activity = activity)
+//            gatherActivityComponentViews(activity = activity)
+//            initializeLoggerBirdCoordinatorLayout(activity = activity)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -271,6 +285,8 @@ internal class LogActivityLifeCycleObserver() :
      */
     override fun onActivityDestroyed(activity: Activity) {
         try {
+//            removeLoggerBirdCoordinatorLayout()
+            hashMapActivityComponents.remove(activity)
             val date = Calendar.getInstance().time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
@@ -408,5 +424,4 @@ internal class LogActivityLifeCycleObserver() :
             )
         )
     }
-
 }

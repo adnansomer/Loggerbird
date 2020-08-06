@@ -811,7 +811,7 @@ internal class BasecampApi {
         timerTaskQueue = object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("basecamp_error_time_out")
+                    resetBasecampValues(shareLayoutMessage = "basecamp_error_time_out")
                 }
             }
         }
@@ -874,7 +874,7 @@ internal class BasecampApi {
     private fun resetBasecampValues(shareLayoutMessage: String) {
         queueCounter--
         Log.d("queue_counter", queueCounter.toString())
-        if (queueCounter == 0) {
+        if (queueCounter == 0 || shareLayoutMessage == "basecamp_error" || shareLayoutMessage == "basecamp_error_time_out") {
             timerTaskQueue.cancel()
             arrayListProjectNames.clear()
             arrayListProjectId.clear()
