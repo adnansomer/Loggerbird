@@ -295,7 +295,7 @@ class MainActivity : AppCompatActivity() {
 
 
         button_performance.setOnClickListener {
-            LoggerBird.callLifeCycleDetails()
+//            LoggerBird.callLifeCycleDetails()
             LoggerBird.callComponentDetails(view=it,resources = it.resources)
 //            var encrypted: String = ""
 //            var sourceStr: String = "LOGGERBIRD"
