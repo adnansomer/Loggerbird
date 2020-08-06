@@ -501,10 +501,16 @@ internal class BitbucketApi {
 //        if (this::timerTaskQueue.isInitialized) {
 //            timerTaskQueue.cancel()
 //        }
-        if(throwable is SocketTimeoutException){
-            resetBitbucketValues(shareLayoutMessage = "bitbucket_error_time_out")
-        }else{
-            resetBitbucketValues(shareLayoutMessage = "bitbucket_error")
+        when (throwable) {
+            is SocketTimeoutException -> {
+                resetBitbucketValues(shareLayoutMessage = "bitbucket_error_time_out")
+            }
+            is IOException -> {
+                resetBitbucketValues(shareLayoutMessage = "bitbucket_error_time_out")
+            }
+            else -> {
+                resetBitbucketValues(shareLayoutMessage = "bitbucket_error")
+            }
         }
         throwable?.printStackTrace()
         e?.printStackTrace()

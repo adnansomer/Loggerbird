@@ -841,10 +841,16 @@ internal class GithubApi {
 //        if (this::timerTaskQueue.isInitialized) {
 //            timerTaskQueue.cancel()
 //        }
-        if(throwable is SocketTimeoutException){
-            LoggerBirdService.loggerBirdService.finishShareLayout("github_error_time_out")
-        }else{
-            LoggerBirdService.loggerBirdService.finishShareLayout("github_error")
+        when (throwable) {
+            is SocketTimeoutException -> {
+                LoggerBirdService.loggerBirdService.finishShareLayout("github_error_time_out")
+            }
+            is IOException -> {
+                LoggerBirdService.loggerBirdService.finishShareLayout("github_error_time_out")
+            }
+            else -> {
+                LoggerBirdService.loggerBirdService.finishShareLayout("github_error")
+            }
         }
         throwable?.printStackTrace()
         e?.printStackTrace()

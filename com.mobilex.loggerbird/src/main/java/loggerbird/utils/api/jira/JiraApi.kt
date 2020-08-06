@@ -1686,10 +1686,16 @@ internal class JiraApi {
 //            timerTaskQueue.cancel()
 //        }
         activity.runOnUiThread {
-            if(throwable is SocketTimeoutException){
-                resetJiraValues(shareLayoutMessage = "jira_error_time_out")
-            }else{
-                resetJiraValues(shareLayoutMessage = "jira_error")
+            when (throwable) {
+                is SocketTimeoutException -> {
+                    resetJiraValues(shareLayoutMessage = "jira_error_time_out")
+                }
+                is IOException -> {
+                    resetJiraValues(shareLayoutMessage = "jira_error_time_out")
+                }
+                else -> {
+                    resetJiraValues(shareLayoutMessage = "jira_error")
+                }
             }
         }
         throwable?.printStackTrace()

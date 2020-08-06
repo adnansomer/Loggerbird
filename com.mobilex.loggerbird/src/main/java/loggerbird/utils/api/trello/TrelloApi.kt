@@ -824,10 +824,16 @@ internal class TrelloApi {
 //        if (this::timerTaskQueue.isInitialized) {
 //            timerTaskQueue.cancel()
 //        }
-        if(throwable is SocketTimeoutException){
-            resetTrelloValues("trello_error_time_out")
-        }else{
-            resetTrelloValues("trello_error")
+        when (throwable) {
+            is SocketTimeoutException -> {
+                resetTrelloValues("trello_error_time_out")
+            }
+            is IOException -> {
+                resetTrelloValues("trello_error_time_out")
+            }
+            else -> {
+                resetTrelloValues("trello_error")
+            }
         }
         throwable?.printStackTrace()
         e?.printStackTrace()

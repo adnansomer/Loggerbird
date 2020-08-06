@@ -841,10 +841,16 @@ internal class PivotalTrackerApi {
 //        if (this::timerTaskQueue.isInitialized) {
 //            timerTaskQueue.cancel()
 //        }
-        if(throwable is SocketTimeoutException){
-            resetPivotalValues(shareLayoutMessage = "pivotal_error_time_out")
-        }else{
-            resetPivotalValues(shareLayoutMessage = "pivotal_error")
+        when (throwable) {
+            is SocketTimeoutException -> {
+                resetPivotalValues(shareLayoutMessage = "pivotal_error_time_out")
+            }
+            is IOException -> {
+                resetPivotalValues(shareLayoutMessage = "pivotal_error_time_out")
+            }
+            else -> {
+                resetPivotalValues(shareLayoutMessage = "pivotal_error")
+            }
         }
         throwable?.printStackTrace()
         e?.printStackTrace()

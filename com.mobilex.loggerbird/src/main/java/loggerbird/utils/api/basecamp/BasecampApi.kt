@@ -833,10 +833,16 @@ internal class BasecampApi {
 //        if (this::timerTaskQueue.isInitialized) {
 //            timerTaskQueue.cancel()
 //        }
-        if(throwable is SocketTimeoutException){
-            resetBasecampValues(shareLayoutMessage = "basecamp_error_time_out")
-        }else{
-            resetBasecampValues(shareLayoutMessage = "basecamp_error")
+        when (throwable) {
+            is SocketTimeoutException -> {
+                resetBasecampValues(shareLayoutMessage = "basecamp_error_time_out")
+            }
+            is IOException -> {
+                resetBasecampValues(shareLayoutMessage = "basecamp_error_time_out")
+            }
+            else -> {
+                resetBasecampValues(shareLayoutMessage = "basecamp_error")
+            }
         }
         throwable?.printStackTrace()
         e?.printStackTrace()

@@ -705,10 +705,16 @@ internal class AsanaApi {
 //        if (this::timerTaskQueue.isInitialized) {
 //            timerTaskQueue.cancel()
 //        }
-        if(throwable is SocketTimeoutException){
-            resetasanaValues(shareLayoutMessage = "asana_error_time_out")
-        }else{
-            resetasanaValues(shareLayoutMessage = "asana_error")
+        when (throwable) {
+            is SocketTimeoutException -> {
+                resetasanaValues(shareLayoutMessage = "asana_error_time_out")
+            }
+            is IOException -> {
+                resetasanaValues(shareLayoutMessage = "asana_error_time_out")
+            }
+            else -> {
+                resetasanaValues(shareLayoutMessage = "asana_error")
+            }
         }
         throwable?.printStackTrace()
         e?.printStackTrace()
