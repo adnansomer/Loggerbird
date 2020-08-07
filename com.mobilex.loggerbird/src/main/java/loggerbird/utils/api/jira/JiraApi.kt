@@ -130,6 +130,7 @@ internal class JiraApi {
         task: String,
         createMethod: String
     ) {
+        this.activity = activity
         coroutineCallJira.async {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
@@ -202,7 +203,6 @@ internal class JiraApi {
                                 createMethod = createMethod
                             )
                             "get" -> jiraTaskGatherDetails(
-                                activity = activity
                             )
                         }
 
@@ -917,11 +917,9 @@ internal class JiraApi {
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun jiraTaskGatherDetails(
-        activity: Activity
     ) {
         try {
             queueCounter = 0
-            this.activity = activity
             val coroutineCallGatherDetails = CoroutineScope(Dispatchers.IO)
             coroutineCallGatherDetails.launch {
                 arrayListProjects.clear()
@@ -1670,7 +1668,7 @@ internal class JiraApi {
     /**
      * This method is used for default loggerbird.exception handling of jira class.
      * @param e is used for getting reference of loggerbird.exception.
-     * @param filePathMedia is used for getting the reference of current media file.
+     * @param filePathName is used for getting the reference of current media file.
      * @param throwable is used for getting reference of throwable.
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
