@@ -173,6 +173,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        LoggerBird.callMemoryUsageDetails(1)
+
         //addRecyclerViewList()
 //        recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 //        loggerbird.adapter = RecyclerViewAdapter(this,recyclerViewList)

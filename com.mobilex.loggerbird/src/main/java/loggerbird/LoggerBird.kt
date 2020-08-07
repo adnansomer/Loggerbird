@@ -896,7 +896,7 @@ class LoggerBird : LifecycleObserver {
                     "Available Memory:$availableMemory MB\nTotal Memory:$totalMemory MB\nRuntime Max Memory: $runtimeMaxMemory MB \n" +
                             "Runtime Total Memory:$runtimeTotalMemory MB\nRuntime Free Memory:$runtimeFreeMemory MB\nLow Memory: ${lowMemory.toString().trim()}\nAvailable Processors:$availableProcessors\n"
                             + "Used Memory Size:$usedMemorySize MB\nCPU ABI:${cpuAbi.trim()}\nNetwork Usage(Send):$sendNetworkUsage Bytes\nNetwork Usage(Received):$receivedNetworkUsage Bytes\n"
-                            + "Battery:${battery.toString().trim()}\n "
+                            + "Battery:${battery.toString().trim()}\n\n"
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -968,7 +968,12 @@ class LoggerBird : LifecycleObserver {
                         }
                         if (usedMemorySize > memoryThreshold) {
                             memoryOverused = true
-                            stringBuilderMemoryUsage.append("Memory Overused: $memoryOverused\nMemory Usage: $usedMemorySize Bytes\n")
+                            stringBuilderMemoryUsage.append(
+                                        "Memory Usage Information:\n"+
+                                        "Memory Overused: $memoryOverused\n"+
+                                        "Memory Usage: $usedMemorySize Bytes\n"+
+                                        "Memory Overused Activity: ${LogActivityLifeCycleObserver.returnActivityLifeCycleClassName}")
+
                         }
                         saveMemoryUsageDetails()
 

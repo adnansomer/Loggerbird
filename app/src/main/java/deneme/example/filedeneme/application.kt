@@ -27,6 +27,6 @@ class application : Application() {
             .setTrelloIntegration()
             .build()
 
-        LoggerBird.callCpuDetails()
+
     }
 }
