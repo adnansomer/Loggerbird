@@ -4,6 +4,7 @@ import loggerbird.LoggerBird
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 /**
  * This class is used for creating retrofit client for Bitbucket
@@ -21,6 +22,10 @@ internal class RetrofitBitbucketClient {
                         LoggerBird.bitbucketPassword
                     )
                 )
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .callTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
                 .build()
             return Retrofit.Builder()
                 .baseUrl(url)

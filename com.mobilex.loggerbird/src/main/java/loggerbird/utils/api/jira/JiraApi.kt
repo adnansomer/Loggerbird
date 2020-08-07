@@ -32,6 +32,7 @@ import loggerbird.utils.other.DefaultToast
 import loggerbird.utils.other.InternetConnectionUtil
 import java.io.*
 import java.lang.StringBuilder
+import java.net.SocketTimeoutException
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -192,7 +193,7 @@ internal class JiraApi {
                 Log.d("response_code", response.code.toString())
                 try {
                     if (response.code in 200..299) {
-                        checkQueueTime(activity = activity)
+//                        checkQueueTime(activity = activity)
                         when (task) {
                             "create" -> jiraTaskCreateIssue(
                                 filePathMediaName = filePathMediaName,
@@ -792,7 +793,7 @@ internal class JiraApi {
         context: Context,
         filePathName: File
     ) {
-        checkQueueTime(activity = activity)
+//        checkQueueTime(activity = activity)
         val coroutineCallCreateUnhandledIssue = CoroutineScope(Dispatchers.IO)
         coroutineCallCreateUnhandledIssue.async {
             val sharedPref =
@@ -861,7 +862,7 @@ internal class JiraApi {
                                 val editor: SharedPreferences.Editor = sharedPref.edit()
                                 editor.remove("unhandled_file_path")
                                 editor.apply()
-                                timerTaskQueue.cancel()
+//                                timerTaskQueue.cancel()
                                 LoggerBirdService.loggerBirdService.returnActivity().runOnUiThread {
                                     LoggerBirdService.loggerBirdService.detachProgressBar()
                                     defaultToast.attachToast(
@@ -1643,7 +1644,7 @@ internal class JiraApi {
         queueCounter--
         Log.d("que_counter", queueCounter.toString())
         if (queueCounter == 0) {
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeJiraAutoTextViews(
                     arrayListJiraProjectNames = arrayListProjects,
@@ -1681,11 +1682,21 @@ internal class JiraApi {
 //        if(filePathName?.name != "logger_bird_details_old_session.txt"){
 //            filePathName?.delete()
 //        }
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
-        }
+//        if (this::timerTaskQueue.isInitialized) {
+//            timerTaskQueue.cancel()
+//        }
         activity.runOnUiThread {
-            resetJiraValues(shareLayoutMessage = "jira_error")
+            when (throwable) {
+                is SocketTimeoutException -> {
+                    resetJiraValues(shareLayoutMessage = "jira_error_time_out")
+                }
+                is IOException -> {
+                    resetJiraValues(shareLayoutMessage = "jira_error_time_out")
+                }
+                else -> {
+                    resetJiraValues(shareLayoutMessage = "jira_error")
+                }
+            }
         }
         throwable?.printStackTrace()
         e?.printStackTrace()
@@ -1791,7 +1802,7 @@ internal class JiraApi {
     private fun resetJiraValues(shareLayoutMessage:String) {
         queueCreateTask--
         if (queueCreateTask == 0 || shareLayoutMessage == "jira_error" || shareLayoutMessage == "jira_error_time_out") {
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             summary = ""
             project = null
             issueType = null

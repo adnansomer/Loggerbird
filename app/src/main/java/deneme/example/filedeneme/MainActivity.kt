@@ -263,7 +263,7 @@ class MainActivity : AppCompatActivity() {
 //            }
         }
         button_read_logs.setOnClickListener(View.OnClickListener {
-//            throw  NullPointerException("asdf123123");
+            throw  NullPointerException("asdf123123");
 //            getCurrentData()
 //            beginSearch("dog", this)
             // LogDeneme.saveComponentDetails(view=button_read_logs,resources = button_read_logs.resources)
@@ -297,7 +297,7 @@ class MainActivity : AppCompatActivity() {
 
 
         button_performance.setOnClickListener {
-            LoggerBird.callLifeCycleDetails()
+//            LoggerBird.callLifeCycleDetails()
             LoggerBird.callComponentDetails(view=it,resources = it.resources)
 //            var encrypted: String = ""
 //            var sourceStr: String = "LOGGERBIRD"

@@ -7,9 +7,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import loggerbird.constants.Constants
 import loggerbird.LoggerBird
+import loggerbird.utils.other.TimeFormatter
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 //LogFragmentCycleObserver class is used for attaching lifecycle observer for your current fragment.
 internal class LogFragmentLifeCycleObserver(
@@ -18,12 +20,18 @@ internal class LogFragmentLifeCycleObserver(
     //Global variables.
     private var classList: ArrayList<String> = ArrayList()
     private val logComponentObserver = LogComponentObserver()
+    private var fragmentStartTime: Long? = null
+    private var fragmentPauseTime: Long? = null
+    private var totalFragmentTime: Long? = 0
+    private var totalTimeSpentInFragment: Long? = 0
+    private val timeFormatter:TimeFormatter = TimeFormatter()
+    //    private var totalTimeSpentInApplication: Long? = 0
     //Static global variables.
     companion object {
         internal var stringBuilderFragmentLifeCycleObserver: StringBuilder = StringBuilder()
         private var currentLifeCycleState: String? = null
         private var formattedTime: String? = null
-        internal var hashMapFragmentComponents:HashMap<Fragment,ArrayList<View>> = HashMap()
+        internal var hashMapFragmentComponents: HashMap<Fragment, ArrayList<View>> = HashMap()
     }
 
     //Constructor.
@@ -340,6 +348,7 @@ internal class LogFragmentLifeCycleObserver(
         try {
             super.onFragmentStarted(fm, f)
             val date = Calendar.getInstance().time
+            fragmentStartTime = date.time
             val formatter = SimpleDateFormat.getDateTimeInstance()
             formattedTime = formatter.format(date)
             currentLifeCycleState = "onFragmentStarted"
@@ -402,15 +411,23 @@ internal class LogFragmentLifeCycleObserver(
     override fun onFragmentPaused(fm: FragmentManager, f: Fragment) {
         try {
             super.onFragmentPaused(fm, f)
-            val date = Calendar.getInstance().time
-            val formatter = SimpleDateFormat.getDateTimeInstance()
-            formattedTime = formatter.format(date)
-            currentLifeCycleState = "onFragmentPaused"
             val className: String = if (f.tag != null) {
                 f.tag!!
             } else {
                 f.javaClass.simpleName
             }
+            val date = Calendar.getInstance().time
+            fragmentPauseTime = date.time
+            totalFragmentTime = totalFragmentTime!! + fragmentPauseTime!! - fragmentStartTime!!
+            totalTimeSpentInFragment = totalTimeSpentInFragment!! + totalFragmentTime!!
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "Total time In This Fragment:" + timeFormatter.timeString(
+                    totalFragmentTime!!
+                ) + "\n"
+            )
+            val formatter = SimpleDateFormat.getDateTimeInstance()
+            formattedTime = formatter.format(date)
+            currentLifeCycleState = "onFragmentPaused"
             stringBuilderFragmentLifeCycleObserver.append(
                 Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
             )
@@ -507,6 +524,11 @@ internal class LogFragmentLifeCycleObserver(
             }
             stringBuilderFragmentLifeCycleObserver.append(
                 Constants.fragmentTag + ":" + className + " " + "$formattedTime:$currentLifeCycleState\n"
+            )
+            stringBuilderFragmentLifeCycleObserver.append(
+                Constants.fragmentTag + ":" + className + " " + "Total fragment time:" + timeFormatter.timeString(
+                    totalTimeSpentInFragment!!
+                ) + "\n"
             )
         } catch (e: Exception) {
             e.printStackTrace()
