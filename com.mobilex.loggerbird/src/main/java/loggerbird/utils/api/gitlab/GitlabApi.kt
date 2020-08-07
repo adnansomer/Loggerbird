@@ -35,6 +35,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import loggerbird.utils.other.InternetConnectionUtil
 import loggerbird.utils.other.LinkedBlockingQueueUtil
+import java.net.*
 
 /** Loggerbird Gitlab api configuration class **/
 internal class GitlabApi {
@@ -98,7 +99,6 @@ internal class GitlabApi {
         coroutineCallOkHttpGitlab.async {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
-                    checkQueueTime(activity = activity)
                     okHttpGitlabAuthentication(
                         activity = activity,
                         context = context,
@@ -247,9 +247,7 @@ internal class GitlabApi {
                         call: retrofit2.Call<JsonObject>,
                         t: Throwable
                     ) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
+                        gitlabExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
@@ -321,18 +319,14 @@ internal class GitlabApi {
                         call: retrofit2.Call<List<GitlabProjectModel>>,
                         t: Throwable
                     ) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
+                        gitlabExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
                         call: retrofit2.Call<List<GitlabProjectModel>>,
                         response: retrofit2.Response<List<GitlabProjectModel>>
                     ) {
-                        if (response.code() !in 200..299) {
-                            gitlabExceptionHandler()
-                        }else{
+
                             val coroutineCallGitlabDetails = CoroutineScope(Dispatchers.IO)
                             coroutineCallGitlabDetails.async {
                                 Log.d("gitlabprojects", response.code().toString())
@@ -352,7 +346,7 @@ internal class GitlabApi {
                                 gatherGitlabUsersDetails(projectId = arrayListProjectsId[projectPosition])
                                 updateFields()
                             }
-                        }
+
                     }
                 })
         } catch (e: Exception) {
@@ -378,9 +372,7 @@ internal class GitlabApi {
                     override fun onFailure(
                         call: retrofit2.Call<List<GitlabMilestonesModel>>, t: Throwable
                     ) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
+                        gitlabExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
@@ -435,9 +427,7 @@ internal class GitlabApi {
                     override fun onFailure(
                         call: retrofit2.Call<List<GitlabLabelsModel>>, t: Throwable
                     ) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
+                        gitlabExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
@@ -491,9 +481,7 @@ internal class GitlabApi {
                     override fun onFailure(
                         call: retrofit2.Call<List<GitlabUsersModel>>, t: Throwable
                     ) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
+                        gitlabExceptionHandler(throwable = t)
                     }
 
                     override fun onResponse(
@@ -592,9 +580,7 @@ internal class GitlabApi {
                         call: retrofit2.Call<JsonObject>,
                         t: Throwable
                     ) {
-                        t.printStackTrace()
-                        LoggerBird.callEnqueue()
-                        LoggerBird.callExceptionDetails(throwable = t, tag = Constants.gitlabTag)
+                        gitlabExceptionHandler(throwable = t)
                     }
                     override fun onResponse(
                         call: retrofit2.Call<JsonObject>,
@@ -704,7 +690,6 @@ internal class GitlabApi {
      * This method is used for updating data fields of Gitlab.
      */
     private fun updateFields() {
-        timerTaskQueue.cancel()
         activity.runOnUiThread {
             LoggerBirdService.loggerBirdService.initializeGitlabSpinner(
                 arrayListGitlabProjects = arrayListProjects,
@@ -714,22 +699,6 @@ internal class GitlabApi {
                 arrayListGitlabConfidentiality = arrayListConfidentiality
             )
         }
-    }
-
-    /**
-     * This method is used for checking time for time out situation.
-     * @param activity is used for getting reference of current activity.
-     */
-    private fun checkQueueTime(activity: Activity) {
-        val timerQueue = Timer()
-        timerTaskQueue = object : TimerTask() {
-            override fun run() {
-                activity.runOnUiThread {
-                    LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error_time_out")
-                }
-            }
-        }
-        timerQueue.schedule(timerTaskQueue, 180000)
     }
 
 
@@ -899,10 +868,17 @@ internal class GitlabApi {
         filePathName: File? = null,
         throwable: Throwable? = null
     ) {
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
+        when (throwable) {
+            is SocketTimeoutException -> {
+                LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error_time_out")
+            }
+            is IOException -> {
+                LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error_time_out")
+            }
+            else -> {
+                LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error")
+            }
         }
-        LoggerBirdService.loggerBirdService.finishShareLayout("gitlab_error")
         e?.printStackTrace()
         LoggerBird.callEnqueue()
         LoggerBird.callExceptionDetails(
