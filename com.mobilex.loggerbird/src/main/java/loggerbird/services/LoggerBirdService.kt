@@ -2133,6 +2133,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     /**
      * This method is used for starting the foreground service of video recording.
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun takeForegroundService() {
         workQueueLinkedVideo.controlRunnable = true
         intentForegroundServiceVideo =
@@ -2258,9 +2259,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 workingAnimation = AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
                 floating_action_button.startAnimation(workingAnimation)
                 floating_action_button.backgroundTintList =
-                    ColorStateList.valueOf(resources.getColor(R.color.mediaRecordColor))
+                    ColorStateList.valueOf(
+                        ContextCompat.getColor(
+                            this@LoggerBirdService,
+                            R.color.mediaRecordColor
+                        )
+                    )
                 floating_action_button.imageTintList =
-                    ColorStateList.valueOf(resources.getColor(R.color.white))
+                    ColorStateList.valueOf(
+                        ContextCompat.getColor(
+                            this@LoggerBirdService,
+                            R.color.white
+                        )
+                    )
                 callEnqueueVideo()
             }
             initRecorder()
