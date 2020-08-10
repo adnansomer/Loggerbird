@@ -819,7 +819,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         internal lateinit var recyclerViewSlackAttachmentUser: RecyclerView
         internal lateinit var recyclerViewSlackNoAttachment: TextView
         internal lateinit var recyclerViewSlackUserNoAttachment: TextView
-        internal lateinit var imageViewProgressBarClose : ImageView
+        internal lateinit var imageViewProgressBarClose: ImageView
         /**
          * This method is used for removing video task from queue.
          */
@@ -1087,7 +1087,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         rootView,
                         false
                     )
-
                 view.scaleX = 0F
                 view.scaleY = 0F
                 view.animate()
@@ -1097,8 +1096,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     .setInterpolator(BounceInterpolator())
                     .setStartDelay(0)
                     .start()
-
-
                 if (Settings.canDrawOverlays(activity)) {
                     windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         WindowManager.LayoutParams(
@@ -1110,8 +1107,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         )
                     } else {
                         WindowManager.LayoutParams(
-                            WindowManager.LayoutParams.MATCH_PARENT,
-                            WindowManager.LayoutParams.MATCH_PARENT,
+                            WindowManager.LayoutParams.WRAP_CONTENT,
+                            WindowManager.LayoutParams.WRAP_CONTENT,
                             WindowManager.LayoutParams.TYPE_APPLICATION,
                             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                             PixelFormat.TRANSLUCENT
@@ -1381,7 +1378,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
         }
-
         floating_action_button.setOnTouchListener(
             FloatingActionButtonOnTouchListener(
                 windowManager = (windowManager as WindowManager),
@@ -1394,7 +1390,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 textViewCounterVideo = textView_counter_video,
                 textViewCounterAudio = textView_counter_audio,
                 textViewVideoSize = textView_video_size,
-                textViewAudiosize = textView_audio_size,
+                textViewAudioSize = textView_audio_size,
                 revealLinearLayoutShare = revealLinearLayoutShare
             )
         )
@@ -1762,8 +1758,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val unhandledDuplicationDb =
                 UnhandledDuplicationDb.getUnhandledDuplicationDb(LoggerBird.context.applicationContext)
             val unhandledDuplicationDao = unhandledDuplicationDb?.unhandledDuplicationDao()
-            if(unhandledDuplicationDao != null){
-                if(unhandledDuplicationDao.getUnhandledDuplicationCount() >= 1000){
+            if (unhandledDuplicationDao != null) {
+                if (unhandledDuplicationDao.getUnhandledDuplicationCount() >= 1000) {
                     unhandledDuplicationDao.deleteUnhandledDuplication()
                 }
             }
@@ -2139,28 +2135,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      */
     private fun takeForegroundService() {
         workQueueLinkedVideo.controlRunnable = true
-            intentForegroundServiceVideo =
-                Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
-        when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
-                startForegroundServiceVideo()
-            }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> {
-                takeVideoRecording(
-                    requestCode = requestCode,
-                    resultCode = resultCode,
-                    data = dataIntent
-                )
-            }
-            else -> {
-                Toast.makeText(
-                    context,
-                    R.string.screen_recording_unsupported,
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-
+        intentForegroundServiceVideo =
+            Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
+        startForegroundServiceVideo()
     }
 
     /**
@@ -2392,7 +2369,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     virtualDisplay?.release()
                 }
                 destroyMediaProjection()
-                stopForegroundServiceVideo()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    stopForegroundServiceVideo()
+                }
                 videoRecording = false
                 stopVideoFileSize()
             }
@@ -2458,7 +2437,25 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 workQueueLinkedVideo.controlRunnable = false
                 runnableList.clear()
                 workQueueLinkedVideo.clear()
-                callForegroundService()
+                when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                        callForegroundService()
+                    }
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> {
+                        takeVideoRecording(
+                            requestCode = requestCode,
+                            resultCode = resultCode,
+                            data = data
+                        )
+                    }
+                    else -> {
+                        Toast.makeText(
+                            context,
+                            R.string.screen_recording_unsupported,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
                 if (runnableList.isEmpty()) {
                     workQueueLinkedVideo.put {
                         takeVideoRecording(
@@ -3519,7 +3516,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-    private fun closeProgressBar(task:String){
+    private fun closeProgressBar(task: String) {
         imageViewProgressBarClose = progressBarView.findViewById(R.id.imageView_progressbar_close)
         imageViewProgressBarClose.setSafeOnClickListener {
             detachProgressBar()
@@ -4249,7 +4246,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                progressBarJira.visibility = View.VISIBLE
 //                progressBarJiraLayout.visibility = View.VISIBLE
-                    attachProgressBar(task = "jira")
+                attachProgressBar(task = "jira")
             }
 //                hideKeyboard(activity = activity)
             jiraAuthentication.callJira(
@@ -4925,7 +4922,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                progressBarJira.visibility = View.VISIBLE
 //                progressBarJiraLayout.visibility = View.VISIBLE
-                    attachProgressBar(task = "jira")
+                attachProgressBar(task = "jira")
             }
             hideKeyboard(activity = activity, view = viewJira)
             jiraAuthentication.callJira(
@@ -5673,7 +5670,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun initializeEmailButtons() {
         try {
             buttonEmailCreate.setSafeOnClickListener {
-                if (checkBoxFutureTask.isChecked) {
+                if (checkBoxFutureTask.isChecked && checkEmailFormat(editTextEmailTo.text.toString())) {
                     attachProgressBar(task = "email")
                     val coroutineCallFutureTask = CoroutineScope(Dispatchers.IO)
                     coroutineCallFutureTask.async {
@@ -8165,10 +8162,22 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun buttonClicksGitlab(filePathMedia: File) {
         buttonGitlabCreate.setSafeOnClickListener {
             if (checkGitlabTitleEmpty() && checkGitlabAssigneeEmpty()
-                && gitlabAuthentication.checkGitlabAssignee(activity = activity, autoTextViewAssignee = autoTextViewGitlabAssignee)
-                && gitlabAuthentication.checkGitlabLabel(activity = activity, autoTextViewLabel = autoTextViewGitlabLabels)
-                && gitlabAuthentication.checkGitlabMilestone(activity = activity, autoTextViewMilestone = autoTextViewGitlabMilestone)
-                && gitlabAuthentication.checkGitlabProject(activity = activity, autoTextViewProject = autoTextViewGitlabProject)
+                && gitlabAuthentication.checkGitlabAssignee(
+                    activity = activity,
+                    autoTextViewAssignee = autoTextViewGitlabAssignee
+                )
+                && gitlabAuthentication.checkGitlabLabel(
+                    activity = activity,
+                    autoTextViewLabel = autoTextViewGitlabLabels
+                )
+                && gitlabAuthentication.checkGitlabMilestone(
+                    activity = activity,
+                    autoTextViewMilestone = autoTextViewGitlabMilestone
+                )
+                && gitlabAuthentication.checkGitlabProject(
+                    activity = activity,
+                    autoTextViewProject = autoTextViewGitlabProject
+                )
             ) {
 //                progressBarGitlabLayout.visibility = View.VISIBLE
 //                progressBarGitlab.visibility = View.VISIBLE
@@ -10941,9 +10950,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         buttonClubhouseCreate.setSafeOnClickListener {
             if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty()
                 && checkClubhouseStoryTypeEmpty() && checkClubhouseRequesterEmpty()
-                && clubhouseAuthentication.checkClubhouseProject(activity = activity, autoTextViewProjects = autoTextViewClubhouseProject)
-                && clubhouseAuthentication.checkClubhouseRequester(activity = activity, autoTextViewRequester = autoTextViewClubhouseRequester)
-                && clubhouseAuthentication.checkClubhouseStoryType(activity = activity, autoTextViewStoryType = autoTextViewClubhouseStoryType)
+                && clubhouseAuthentication.checkClubhouseProject(
+                    activity = activity,
+                    autoTextViewProjects = autoTextViewClubhouseProject
+                )
+                && clubhouseAuthentication.checkClubhouseRequester(
+                    activity = activity,
+                    autoTextViewRequester = autoTextViewClubhouseRequester
+                )
+                && clubhouseAuthentication.checkClubhouseStoryType(
+                    activity = activity,
+                    autoTextViewStoryType = autoTextViewClubhouseStoryType
+                )
             ) {
                 clubhouseAuthentication.gatherClubhouseProjectAutoTextDetails(
                     autoTextViewProject = autoTextViewClubhouseProject,

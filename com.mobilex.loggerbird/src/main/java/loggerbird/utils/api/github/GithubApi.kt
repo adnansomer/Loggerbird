@@ -7,6 +7,7 @@ import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubProjectAdapt
 import android.app.Activity
 import android.content.Context
 import android.os.Build
+import android.os.FileUtils
 import android.util.Log
 import android.widget.AutoCompleteTextView
 import android.widget.EditText
@@ -370,7 +371,6 @@ internal class GithubApi {
      * @throws exception if error occurs.
      * @see githubExceptionHandler method.
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun createAttachments(repo: String, file: File) {
         try {
             val coroutineCallAttachments = CoroutineScope(Dispatchers.IO)
@@ -382,10 +382,17 @@ internal class GithubApi {
                     "loggerbirdfile"
                 )
                 withContext(Dispatchers.IO) {
-                    jsonObject.addProperty(
-                        "content",
-                        Base64.getEncoder().encodeToString(Files.readAllBytes(file.toPath()))
-                    )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        jsonObject.addProperty(
+                            "content",
+                            Base64.getEncoder().encodeToString(Files.readAllBytes(file.toPath()))
+                        )
+                    } else {
+                        jsonObject.addProperty(
+                            "content",android.util.Base64.encodeToString(org.apache.commons.io.FileUtils.readFileToByteArray(file), android.util.Base64.DEFAULT)
+                        )
+                    }
+
                 }
                 RetrofitGithubClient.getGithubUserClient(url = "https://api.github.com/repos/${LoggerBird.githubUserName}/$repo/")
                     .create(AccountIdService::class.java)
