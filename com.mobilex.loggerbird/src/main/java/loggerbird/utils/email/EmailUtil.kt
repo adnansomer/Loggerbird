@@ -96,10 +96,12 @@ internal class EmailUtil {
                     )
                 ) {
                     if (internetConnectionUtil.makeHttpRequest() == 200) {
-                        Log.d(
-                            "email_time",
-                            systemTime()
-                        )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            Log.d(
+                                "email_time",
+                                systemTime()
+                            )
+                        }
                         runnableConnectionTimeOut = Runnable {
                             connectionTimeoutAction(
                                 activity = activity
@@ -120,10 +122,12 @@ internal class EmailUtil {
                             controlServiceTask = false,
                             progressBar = progressBar
                         )
-                        Log.d(
-                            "email_time",
-                            systemTime()
-                        )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            Log.d(
+                                "email_time",
+                                systemTime()
+                            )
+                        }
                         withContext(Dispatchers.Main) {
                             progressBar.visibility = View.GONE
                         }
@@ -223,21 +227,27 @@ internal class EmailUtil {
                     )
                 ) {
                     if (internetConnectionUtil.makeHttpRequest() == 200) {
-                        Log.d(
-                            "email_time",
-                            systemTime()
-                        )
-                        sendSingleEmail(
-                            subject = "unhandled_log_details",
-                            file = file,
-                            context = context,
-                            to = to,
-                            controlServiceTask = false
-                        )
-                        Log.d(
-                            "email_time",
-                            systemTime()
-                        )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            Log.d(
+                                "email_time",
+                                systemTime()
+                            )
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                            sendSingleEmail(
+                                subject = "unhandled_log_details",
+                                file = file,
+                                context = context,
+                                to = to,
+                                controlServiceTask = false
+                            )
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            Log.d(
+                                "email_time",
+                                systemTime()
+                            )
+                        }
 
 
                     } else {
@@ -295,21 +305,27 @@ internal class EmailUtil {
                     )
                 ) {
                     if (internetConnectionUtil.makeHttpRequest() == 200) {
-                        Log.d(
-                            "email_time",
-                            systemTime()
-                        )
-                        sendSingleEmail(
-                            message = message,
-                            subject = "feed_back_details",
-                            context = context,
-                            to = to,
-                            controlServiceTask = false
-                        )
-                        Log.d(
-                            "email_time",
-                            systemTime()
-                        )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            Log.d(
+                                "email_time",
+                                systemTime()
+                            )
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                            sendSingleEmail(
+                                message = message,
+                                subject = "feed_back_details",
+                                context = context,
+                                to = to,
+                                controlServiceTask = false
+                            )
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            Log.d(
+                                "email_time",
+                                systemTime()
+                            )
+                        }
 
 
                     } else {
@@ -354,6 +370,7 @@ internal class EmailUtil {
         /**
          * This method is used for returning system time.
          */
+        @RequiresApi(Build.VERSION_CODES.O)
         private fun systemTime(): String {
             val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
             val currentTime: LocalDateTime = LocalDateTime.now()
