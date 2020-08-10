@@ -16,11 +16,16 @@ internal class RetrofitGithubClient {
          */
        internal fun getGithubUserClient(url:String): Retrofit {
             val client = OkHttpClient.Builder()
-                .addInterceptor(AuthGithubInterceptor(LoggerBird.githubUserName, LoggerBird.githubPassword))
-                .connectTimeout(120, TimeUnit.SECONDS)
-                .callTimeout(120, TimeUnit.SECONDS)
-                .writeTimeout(120, TimeUnit.SECONDS)
-                .readTimeout(120, TimeUnit.SECONDS)
+                .addInterceptor(
+                    AuthGithubInterceptor(
+                        LoggerBird.githubUserName,
+                        LoggerBird.githubPassword
+                    )
+                )
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .callTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
                 .build()
             return Retrofit.Builder()
                 .baseUrl(url)

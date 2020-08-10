@@ -3137,6 +3137,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     removeJiraLayout()
                     Toast.makeText(context, R.string.jira_sent, Toast.LENGTH_SHORT).show()
                     finishSuccessFab(duplicationField = "jira")
+                    detachProgressBar()
                 }
                 "jira_error" -> {
                     removeJiraLayout()

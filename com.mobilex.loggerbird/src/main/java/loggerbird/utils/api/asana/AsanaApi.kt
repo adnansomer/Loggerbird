@@ -30,6 +30,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import loggerbird.utils.other.DefaultToast
 import loggerbird.utils.other.InternetConnectionUtil
+import java.net.SocketTimeoutException
 
 /** Loggerbird Asana api configuration class **/
 internal class AsanaApi {
@@ -87,7 +88,7 @@ internal class AsanaApi {
         coroutineCallOkHttpAsana.async {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
-                    checkQueueTime(activity = activity)
+//                    checkQueueTime(activity = activity)
                     okHttpAsanaAuthentication(
                         activity = activity,
                         context = context,
@@ -660,7 +661,7 @@ internal class AsanaApi {
         queueCounter--
         Log.d("que_counter", queueCounter.toString())
         if (queueCounter == 0) {
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeAsanaAutoTextViews(
                     arrayListAsanaProject = arrayListProjectNames,
@@ -701,11 +702,20 @@ internal class AsanaApi {
         e: Exception? = null,
         throwable: Throwable? = null
     ) {
-        resetasanaValues(shareLayoutMessage = "asana_error")
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
+//        if (this::timerTaskQueue.isInitialized) {
+//            timerTaskQueue.cancel()
+//        }
+        when (throwable) {
+            is SocketTimeoutException -> {
+                resetasanaValues(shareLayoutMessage = "asana_error_time_out")
+            }
+            is IOException -> {
+                resetasanaValues(shareLayoutMessage = "asana_error_time_out")
+            }
+            else -> {
+                resetasanaValues(shareLayoutMessage = "asana_error")
+            }
         }
-        LoggerBirdService.loggerBirdService.finishShareLayout("asana_error")
         throwable?.printStackTrace()
         e?.printStackTrace()
         LoggerBird.callEnqueue()
@@ -763,7 +773,7 @@ internal class AsanaApi {
                     }
                 }
             }
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             arrayListProjectNames.clear()
             arrayListProjectId.clear()
             arrayListAssigneeNames.clear()

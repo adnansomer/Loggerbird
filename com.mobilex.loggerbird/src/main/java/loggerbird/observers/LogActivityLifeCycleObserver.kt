@@ -12,24 +12,19 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.*
-import android.widget.FrameLayout
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.children
-import androidx.fragment.app.Fragment
 import com.mobilex.loggerbird.R
 import loggerbird.constants.Constants
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
-import loggerbird.listeners.layouts.LayoutOnTouchListener
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import loggerbird.services.LoggerBirdService
+import loggerbird.utils.other.TimeFormatter
 import java.util.concurrent.TimeUnit
 import kotlin.collections.HashMap
 
@@ -47,6 +42,7 @@ internal class LogActivityLifeCycleObserver() :
     private var totalActivityTime: Long? = 0
     private var totalTimeSpentInApplication: Long? = 0
     private val logComponentObserver = LogComponentObserver()
+    private val timeFormatter: TimeFormatter = TimeFormatter()
     //Static global variables.
     internal companion object {
         internal var hashMapActivityComponents:HashMap<Activity,ArrayList<View>> = HashMap()
@@ -246,7 +242,7 @@ internal class LogActivityLifeCycleObserver() :
             currentLifeCycleState = "onPause"
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(
-                Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "Total time In This Activity:" + timeString(
+                Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "Total time In This Activity:" + timeFormatter.timeString(
                     totalActivityTime!!
                 ) + "\n"
             )
@@ -293,7 +289,7 @@ internal class LogActivityLifeCycleObserver() :
             currentLifeCycleState = "onDestroy"
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "$formattedTime:$currentLifeCycleState\n")
             LoggerBird.stringBuilderActivityLifeCycleObserver.append(
-                Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "Total activity time:" + timeString(
+                Constants.activityTag + ":" + activity.javaClass.simpleName + " " + "Total activity time:" + timeFormatter.timeString(
                     totalTimeSpentInApplication!!
                 ) + "\n"
             )
@@ -395,33 +391,5 @@ internal class LogActivityLifeCycleObserver() :
      */
     internal fun activityInstance(): Activity {
         return this.activity
-    }
-
-    /**
-     * This method is used for formatting certain time value in day/hour/second/millisecond format.
-     * @param remainingSeconds is for getting reference of time value.
-     * @return String value.
-     */
-    private fun timeString(remainingSeconds: Long): String {
-        return String.format(
-            Locale.getDefault(),
-            "%02d:%02d:%02d:%02d",
-            TimeUnit.MILLISECONDS.toDays(remainingSeconds),
-            TimeUnit.MILLISECONDS.toHours(remainingSeconds) - TimeUnit.DAYS.toHours(
-                TimeUnit.MILLISECONDS.toDays(
-                    remainingSeconds
-                )
-            ),
-            TimeUnit.MILLISECONDS.toMinutes(remainingSeconds) - TimeUnit.HOURS.toMinutes(
-                TimeUnit.MILLISECONDS.toHours(
-                    remainingSeconds
-                )
-            ),
-            TimeUnit.MILLISECONDS.toSeconds(remainingSeconds) - TimeUnit.MINUTES.toSeconds(
-                TimeUnit.MILLISECONDS.toMinutes(
-                    remainingSeconds
-                )
-            )
-        )
     }
 }

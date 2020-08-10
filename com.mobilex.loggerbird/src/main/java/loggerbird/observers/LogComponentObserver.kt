@@ -60,12 +60,16 @@ internal class LogComponentObserver {
             arrayListComponentViews.clear()
             if(activity!= null){
                 (activity.window.decorView as ViewGroup).getAllViews().forEach {
-                    arrayListComponentViews.add(it)
+                    if (it !is ViewGroup) {
+                        arrayListComponentViews.add(it)
+                    }
                 }
                 LogActivityLifeCycleObserver.hashMapActivityComponents[activity] = arrayListComponentViews
             }else if(fragment != null){
                 (fragment.view as ViewGroup).getAllViews().forEach {
-                    arrayListComponentViews.add(it)
+                    if (it !is ViewGroup) {
+                        arrayListComponentViews.add(it)
+                    }
                 }
                 LogFragmentLifeCycleObserver.hashMapFragmentComponents[fragment] = arrayListComponentViews
             }

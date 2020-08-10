@@ -28,6 +28,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import loggerbird.utils.other.DefaultToast
 import loggerbird.utils.other.InternetConnectionUtil
+import java.net.SocketTimeoutException
 
 /** Loggerbird Bitbucket api configuration class **/
 internal class BitbucketApi {
@@ -80,7 +81,7 @@ internal class BitbucketApi {
         coroutineCallOkHttpBitbucket.async {
             try {
                 if (internetConnectionUtil.checkNetworkConnection(context = context)) {
-                    checkQueueTime(activity = activity)
+//                    checkQueueTime(activity = activity)
                     okHttpBitbucketAuthentication(
                         activity = activity,
                         context = context,
@@ -457,7 +458,7 @@ internal class BitbucketApi {
         queueCounter--
         Log.d("que_counter", queueCounter.toString())
         if (queueCounter == 0) {
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             activity.runOnUiThread {
                 LoggerBirdService.loggerBirdService.initializeBitbucketAutoTextViews(
                     arrayListBitbucketProject = arrayListProjectNames,
@@ -497,11 +498,20 @@ internal class BitbucketApi {
         e: Exception? = null,
         throwable: Throwable? = null
     ) {
-        resetBitbucketValues(shareLayoutMessage = "bitbucket_error")
-        if (this::timerTaskQueue.isInitialized) {
-            timerTaskQueue.cancel()
+//        if (this::timerTaskQueue.isInitialized) {
+//            timerTaskQueue.cancel()
+//        }
+        when (throwable) {
+            is SocketTimeoutException -> {
+                resetBitbucketValues(shareLayoutMessage = "bitbucket_error_time_out")
+            }
+            is IOException -> {
+                resetBitbucketValues(shareLayoutMessage = "bitbucket_error_time_out")
+            }
+            else -> {
+                resetBitbucketValues(shareLayoutMessage = "bitbucket_error")
+            }
         }
-        LoggerBirdService.loggerBirdService.finishShareLayout("bitbucket_error")
         throwable?.printStackTrace()
         e?.printStackTrace()
         LoggerBird.callEnqueue()
@@ -543,7 +553,7 @@ internal class BitbucketApi {
                     }
                 }
             }
-            timerTaskQueue.cancel()
+//            timerTaskQueue.cancel()
             arrayListProjectNames.clear()
             arrayListProjectId.clear()
             arrayListAssigneeNames.clear()
