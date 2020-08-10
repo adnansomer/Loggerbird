@@ -17,7 +17,7 @@ internal class RetrofitGitlabClient {
             val client = OkHttpClient.Builder()
                 .addInterceptor(AuthGitlabInterceptor())
                 .connectTimeout(120, TimeUnit.SECONDS)
-                .callTimeout(120, TimeUnit.SECONDS)
+                .callTimeout(180, TimeUnit.SECONDS)
                 .writeTimeout(120, TimeUnit.SECONDS)
                 .readTimeout(120, TimeUnit.SECONDS)
                 .build()

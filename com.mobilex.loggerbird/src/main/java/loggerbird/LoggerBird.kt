@@ -2366,7 +2366,6 @@ class LoggerBird : LifecycleObserver {
                         }
                     }
                     if (!memoryOverused) {
-                        callEnqueue()
                         if (runnableList.size == 0 && stringBuilderExceedFileWriterLimit.isNotEmpty()) {
                             exceededFileLimitWriter(
                                 stringBuilder = stringBuilderExceedFileWriterLimit,
@@ -2374,6 +2373,7 @@ class LoggerBird : LifecycleObserver {
                             )
                         }
                     }
+                    callEnqueue()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     callEnqueue()

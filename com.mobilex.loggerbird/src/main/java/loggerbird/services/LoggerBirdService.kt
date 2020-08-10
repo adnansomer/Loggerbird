@@ -251,7 +251,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewLoggerBirdFileActionPopup: View
     private lateinit var viewLoggerBirdUnhandledExceptionPopup: View
     private lateinit var viewBitbucket: View
-    private val fileLimit: Long = 10485760
+    private val fileLimit: Long = 20971520
     private var sessionTimeStart: Long? = System.currentTimeMillis()
     private var sessionTimeEnd: Long? = null
     private var timeControllerVideo: Long? = null
