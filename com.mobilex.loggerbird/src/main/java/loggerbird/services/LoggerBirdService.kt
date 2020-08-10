@@ -2134,18 +2134,33 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+
     /**
      * This method is used for starting the foreground service of video recording.
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun takeForegroundService() {
         workQueueLinkedVideo.controlRunnable = true
-        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            intentForegroundServiceVideo = Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
-            startForegroundServiceVideo()
-        //} else {
-           // resetEnqueueVideo()
-        //}
+        intentForegroundServiceVideo =
+            Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                startForegroundServiceVideo()
+            }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> {
+                takeVideoRecording(
+                    requestCode = requestCode,
+                    resultCode = resultCode,
+                    data = dataIntent
+                )
+            }
+            else -> {
+                Toast.makeText(
+                    context,
+                    R.string.screen_recording_unsupported,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     /**
