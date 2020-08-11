@@ -251,7 +251,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewLoggerBirdFileActionPopup: View
     private lateinit var viewLoggerBirdUnhandledExceptionPopup: View
     private lateinit var viewBitbucket: View
-    private val fileLimit: Long = 10485760
+    private val fileLimit: Long = 20971520
     private var sessionTimeStart: Long? = System.currentTimeMillis()
     private var sessionTimeEnd: Long? = null
     private var timeControllerVideo: Long? = null
@@ -2309,8 +2309,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     mediaRecorderVideo?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
                     mediaRecorderVideo?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
                     mediaRecorderVideo?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-                    mediaRecorderVideo?.setVideoEncodingBitRate(1000000000)
-                    mediaRecorderVideo?.setVideoFrameRate(120)
+                    mediaRecorderVideo?.setVideoEncodingBitRate(500000000)
+                    mediaRecorderVideo?.setVideoFrameRate(60)
                     val rotation: Int = (context as Activity).windowManager.defaultDisplay.rotation
                     val orientation: Int = ORIENTATIONS.get(rotation + 90)
                     mediaRecorderVideo?.setOrientationHint(orientation)
@@ -10985,7 +10985,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     editTextStoryDescription = editTextClubhouseStoryDescription,
                     editTextEstimate = editTextClubhouseEstimate
                 )
-                detachProgressBar()
+                attachProgressBar(task = "clubhouse")
                 clubhouseAuthentication.callClubhouse(
                     activity = activity,
                     context = context,
