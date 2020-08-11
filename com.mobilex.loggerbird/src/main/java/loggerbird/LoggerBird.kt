@@ -2569,7 +2569,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails ,
          * which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        @RequiresApi(Build.VERSION_CODES.M)
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             if (controlLogInit) {
                 try {

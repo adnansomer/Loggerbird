@@ -982,7 +982,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @param startId (no idea).
      * @return START_NOT_STICKY value.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
             intentService = intent
@@ -1046,7 +1046,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for getting reference of current activity and context.
      * @param activity is used for getting reference of current activity.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun initializeActivity(activity: Activity) {
         this.activity = activity
         this.context = activity
@@ -1058,7 +1058,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @param activity is used for getting reference of current activity.
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun initializeFloatingActionButton(activity: Activity) {
         try {
             if (windowManager != null && this::view.isInitialized) {
@@ -1073,170 +1073,185 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 isFabEnable = false
 
             } else {
-                removeFeedBackLayout()
-                val rootView: ViewGroup =
-                    activity.window.decorView.findViewById(android.R.id.content)
-                val view: View
-                val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                view = LayoutInflater.from(activity)
-                    .inflate(
-                        R.layout.fragment_logger_bird,
-                        rootView,
-                        false
-                    )
-                view.scaleX = 0F
-                view.scaleY = 0F
-                view.animate()
-                    .scaleX(1F)
-                    .scaleY(1F)
-                    .setDuration(500)
-                    .setInterpolator(BounceInterpolator())
-                    .setStartDelay(0)
-                    .start()
-                if (Settings.canDrawOverlays(activity)) {
-                    windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        WindowManager.LayoutParams(
-                            WindowManager.LayoutParams.WRAP_CONTENT,
-                            WindowManager.LayoutParams.WRAP_CONTENT,
-                            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                            PixelFormat.TRANSLUCENT
-                        )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (Settings.canDrawOverlays(activity)) {
+                        initializeFloatingActionButtonView()
                     } else {
-                        WindowManager.LayoutParams(
-                            WindowManager.LayoutParams.WRAP_CONTENT,
-                            WindowManager.LayoutParams.WRAP_CONTENT,
-                            WindowManager.LayoutParams.TYPE_APPLICATION,
-                            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                            PixelFormat.TRANSLUCENT
-                        )
+                        checkDrawOtherAppPermission(activity = (context as Activity))
                     }
-                    windowManager = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                    (windowManager as WindowManager).addView(view, windowManagerParams)
-                    this.rootView = rootView
-                    this.view = view
-                    floatingActionButtonView = view
-                    floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
-                    floating_action_button_screenshot =
-                        view.findViewById(R.id.fragment_floating_action_button_screenshot)
-                    floating_action_button_video =
-                        view.findViewById(R.id.fragment_floating_action_button_video)
-                    floating_action_button_audio =
-                        view.findViewById(R.id.fragment_floating_action_button_audio)
-                    revealLinearLayoutShare = view.findViewById(R.id.reveal_linear_layout_share)
-                    textView_send_email = view.findViewById(R.id.textView_send_email)
-                    textView_discard = view.findViewById(R.id.textView_discard)
-                    textView_share_jira = view.findViewById(R.id.textView_share_jira)
-                    textView_share_slack = view.findViewById(R.id.textView_share_slack)
-                    textView_share_github = view.findViewById(R.id.textView_share_github)
-                    textView_share_trello = view.findViewById(R.id.textView_share_trello)
-                    textView_share_pivotal = view.findViewById(R.id.textView_share_pivotal)
-                    textView_share_basecamp = view.findViewById(R.id.textView_share_basecamp)
-                    textView_share_asana = view.findViewById(R.id.textView_share_asana)
-                    textView_share_clubhouse = view.findViewById(R.id.textView_share_clubhouse)
-                    textView_share_bitbucket = view.findViewById(R.id.textView_share_bitbucket)
-                    textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
-                    textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
-                    textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
-                    textView_audio_size = view.findViewById(R.id.fragment_textView_size_audio)
-                    checkBoxFutureTask = view.findViewById(R.id.checkBox_future_task)
-                    textView_share_gitlab = view.findViewById(R.id.textView_share_gitlab)
-                    floating_action_button.imageTintList =
-                        ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white))
-                    floating_action_button.backgroundTintList =
-                        ColorStateList.valueOf(ContextCompat.getColor(this, R.color.black))
-
-
-                    if (audioRecording || videoRecording || screenshotDrawing) {
-                        workingAnimation =
-                            AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
-                        if (controlWorkingAnimation()) {
-                            floating_action_button.startAnimation(workingAnimation)
-                            floating_action_button.backgroundTintList =
-                                ColorStateList.valueOf(
-                                    ContextCompat.getColor(
-                                        this,
-                                        R.color.mediaRecordColor
-                                    )
-                                )
-                            floating_action_button.imageTintList =
-                                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white))
-                            if (audioRecording) {
-                                floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
-                            }
-                            if (videoRecording) {
-                                floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
-                            }
-                            if (screenshotDrawing) {
-                                floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
-                            }
-                        }
-                    }
-
-                    (floating_action_button_screenshot.layoutParams as FrameLayout.LayoutParams).setMargins(
-                        0,
-                        450,
-                        0,
-                        0
-                    )
-                    (floating_action_button_video.layoutParams as FrameLayout.LayoutParams).setMargins(
-                        0,
-                        150,
-                        0,
-                        0
-                    )
-                    (textView_counter_video.layoutParams as FrameLayout.LayoutParams).setMargins(
-                        0,
-                        150,
-                        0,
-                        0
-                    )
-                    (textView_video_size.layoutParams as FrameLayout.LayoutParams).setMargins(
-                        0,
-                        150,
-                        0,
-                        0
-                    )
-                    (floating_action_button_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                        0,
-                        300,
-                        0,
-                        0
-                    )
-                    (textView_counter_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                        0,
-                        300,
-                        0,
-                        0
-                    )
-                    (textView_audio_size.layoutParams as FrameLayout.LayoutParams).setMargins(
-                        0,
-                        300,
-                        0,
-                        0
-                    )
-
-                    if (videoRecording) {
-                        floating_action_button_video.visibility = View.GONE
-                    }
-                    if (audioRecording) {
-                        floating_action_button_audio.visibility = View.GONE
-                    }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        buttonClicks()
-                    }
-                    if (!checkUnhandledFilePath()) {
-                        initializeLoggerBirdStartPopup(activity = activity)
-                    }
-                    isFabEnable = true
-
                 } else {
-                    checkDrawOtherAppPermission(activity = (context as Activity))
+                    initializeFloatingActionButtonView()
                 }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.floatingActionButtonTag)
+        }
+    }
+
+    /**
+     * This method is used for initializing view of the main loggerbird layout.
+     * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
+    private fun initializeFloatingActionButtonView() {
+        try {
+            removeFeedBackLayout()
+            val rootView: ViewGroup =
+                activity.window.decorView.findViewById(android.R.id.content)
+            val view: View
+            val layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            view = LayoutInflater.from(activity)
+                .inflate(
+                    R.layout.fragment_logger_bird,
+                    rootView,
+                    false
+                )
+            view.scaleX = 0F
+            view.scaleY = 0F
+            view.animate()
+                .scaleX(1F)
+                .scaleY(1F)
+                .setDuration(500)
+                .setInterpolator(BounceInterpolator())
+                .setStartDelay(0)
+                .start()
+            windowManagerParams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+            windowManager = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManager as WindowManager).addView(view, windowManagerParams)
+            this.rootView = rootView
+            this.view = view
+            floatingActionButtonView = view
+            floating_action_button = view.findViewById(R.id.fragment_floating_action_button)
+            floating_action_button_screenshot =
+                view.findViewById(R.id.fragment_floating_action_button_screenshot)
+            floating_action_button_video =
+                view.findViewById(R.id.fragment_floating_action_button_video)
+            floating_action_button_audio =
+                view.findViewById(R.id.fragment_floating_action_button_audio)
+            revealLinearLayoutShare = view.findViewById(R.id.reveal_linear_layout_share)
+            textView_send_email = view.findViewById(R.id.textView_send_email)
+            textView_discard = view.findViewById(R.id.textView_discard)
+            textView_share_jira = view.findViewById(R.id.textView_share_jira)
+            textView_share_slack = view.findViewById(R.id.textView_share_slack)
+            textView_share_github = view.findViewById(R.id.textView_share_github)
+            textView_share_trello = view.findViewById(R.id.textView_share_trello)
+            textView_share_pivotal = view.findViewById(R.id.textView_share_pivotal)
+            textView_share_basecamp = view.findViewById(R.id.textView_share_basecamp)
+            textView_share_asana = view.findViewById(R.id.textView_share_asana)
+            textView_share_clubhouse = view.findViewById(R.id.textView_share_clubhouse)
+            textView_share_bitbucket = view.findViewById(R.id.textView_share_bitbucket)
+            textView_counter_video = view.findViewById(R.id.fragment_textView_counter_video)
+            textView_counter_audio = view.findViewById(R.id.fragment_textView_counter_audio)
+            textView_video_size = view.findViewById(R.id.fragment_textView_size_video)
+            textView_audio_size = view.findViewById(R.id.fragment_textView_size_audio)
+            checkBoxFutureTask = view.findViewById(R.id.checkBox_future_task)
+            textView_share_gitlab = view.findViewById(R.id.textView_share_gitlab)
+            floating_action_button.imageTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white))
+            floating_action_button.backgroundTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.black))
+            if (audioRecording || videoRecording || screenshotDrawing) {
+                workingAnimation =
+                    AnimationUtils.loadAnimation(context, R.anim.pulse_in_out)
+                if (controlWorkingAnimation()) {
+                    floating_action_button.startAnimation(workingAnimation)
+                    floating_action_button.backgroundTintList =
+                        ColorStateList.valueOf(
+                            ContextCompat.getColor(
+                                this,
+                                R.color.mediaRecordColor
+                            )
+                        )
+                    floating_action_button.imageTintList =
+                        ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white))
+                    if (audioRecording) {
+                        floating_action_button.setImageResource(R.drawable.ic_mic_black_24dp)
+                    }
+                    if (videoRecording) {
+                        floating_action_button.setImageResource(R.drawable.ic_videocam_black_24dp)
+                    }
+                    if (screenshotDrawing) {
+                        floating_action_button.setImageResource(R.drawable.ic_photo_camera_black_24dp)
+                    }
+                }
+            }
+
+            (floating_action_button_screenshot.layoutParams as FrameLayout.LayoutParams).setMargins(
+                0,
+                450,
+                0,
+                0
+            )
+            (floating_action_button_video.layoutParams as FrameLayout.LayoutParams).setMargins(
+                0,
+                150,
+                0,
+                0
+            )
+            (textView_counter_video.layoutParams as FrameLayout.LayoutParams).setMargins(
+                0,
+                150,
+                0,
+                0
+            )
+            (textView_video_size.layoutParams as FrameLayout.LayoutParams).setMargins(
+                0,
+                150,
+                0,
+                0
+            )
+            (floating_action_button_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                0,
+                300,
+                0,
+                0
+            )
+            (textView_counter_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
+                0,
+                300,
+                0,
+                0
+            )
+            (textView_audio_size.layoutParams as FrameLayout.LayoutParams).setMargins(
+                0,
+                300,
+                0,
+                0
+            )
+
+            if (videoRecording) {
+                floating_action_button_video.visibility = View.GONE
+            }
+            if (audioRecording) {
+                floating_action_button_audio.visibility = View.GONE
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                buttonClicks()
+            }
+            if (!checkUnhandledFilePath()) {
+                initializeLoggerBirdStartPopup(activity = activity)
+            }
+            isFabEnable = true
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -1299,12 +1314,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     /**
      * This method is used for initializing button clicks of buttons that are inside in the fragment_logger_bird.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     @SuppressLint("ClickableViewAccessibility")
     private fun buttonClicks() {
         floating_action_button.setOnClickListener {
-            if (!Settings.canDrawOverlays(context)) {
-                checkDrawOtherAppPermission(activity = (context as Activity))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (!Settings.canDrawOverlays(context)) {
+                    checkDrawOtherAppPermission(activity = (context as Activity))
+                } else {
+                    animationVisibility()
+                }
             } else {
                 animationVisibility()
             }
@@ -1495,11 +1514,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             val coroutineScopeShareView = CoroutineScope(Dispatchers.IO)
             textView_send_email.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1515,11 +1532,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_jira.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1535,10 +1550,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_slack.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
-                    }
                     coroutineScopeShareView.async {
                         if (!checkDuplicationField(
                                 sharedPref = sharedPref,
@@ -1555,11 +1568,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_github.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1575,11 +1586,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_gitlab.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1595,11 +1604,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_trello.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1615,11 +1622,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_pivotal.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1634,11 +1639,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             textView_share_basecamp.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1653,11 +1656,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             textView_share_asana.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1672,11 +1673,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             textView_share_clubhouse.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1691,11 +1690,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             textView_share_bitbucket.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (controlFloatingActionButtonView()) {
                         floatingActionButtonView.visibility = View.GONE
                     }
-                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1894,16 +1891,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     /**
      * This method is used for requesting drawing overlay permission.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun checkDrawOtherAppPermission(activity: Activity) {
         controlPermissionRequest = true
         controlDrawableSettingsPermission = true
         sd.stop()
-        val intent = Intent(
-            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-            Uri.parse("package:" + activity.packageName)
-        )
-        activity.startActivityForResult(intent, REQUEST_CODE_DRAW_OTHER_APP_SETTINGS)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:" + activity.packageName)
+            )
+            activity.startActivityForResult(intent, REQUEST_CODE_DRAW_OTHER_APP_SETTINGS)
+        }
     }
 
     /**
@@ -2497,6 +2496,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used when video foreground service methods needs to be in queue and executed in synchronized way.
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun callForegroundService() {
         if (LoggerBird.isLogInitAttached()) {
             if (!videoRecording) {
@@ -2537,36 +2537,46 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     /**
      * This method is used when device was shaked.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun hearShake() {
         try {
             Log.d("shake", "shake fired!!")
-            if (Settings.canDrawOverlays(this.activity)) {
-                if (checkUnhandledFilePath()) {
-                    gatherUnhandledExceptionDetails()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (Settings.canDrawOverlays(this.activity)) {
+                    initializeShakeAction()
                 } else {
-                    if (!controlFileAction) {
-                        initializeFloatingActionButton(activity = this.activity)
-                    } else {
-                        Toast.makeText(
-                            context,
-                            R.string.files_action_limit,
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    if (!isFabEnable) {
+                        if (!isActivateDialogShown) {
+                            initializeLoggerBirdActivatePopup(activity = this.activity)
+                            isActivateDialogShown = true
+                        }
                     }
                 }
             } else {
-                if (!isFabEnable) {
-                    if (!isActivateDialogShown) {
-                        initializeLoggerBirdActivatePopup(activity = this.activity)
-                        isActivateDialogShown = true
-                    }
-                }
+                initializeShakeAction()
             }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.shakerTag)
+        }
+    }
+    /**
+     * This method is used for initializing actions when device was shaked.
+     */
+    private fun initializeShakeAction(){
+        if (checkUnhandledFilePath()) {
+            gatherUnhandledExceptionDetails()
+        } else {
+            if (!controlFileAction) {
+                initializeFloatingActionButton(activity = this.activity)
+            } else {
+                Toast.makeText(
+                    context,
+                    R.string.files_action_limit,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 
@@ -3491,7 +3501,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     /**
      * This method attaches default progressbar into the window.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     internal fun attachProgressBar(task: String) {
         detachProgressBar()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
@@ -3591,11 +3601,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
     //Feedback
     /**
-     * This method is used for creating jira layout which is attached to application overlay.
+     * This method is used for creating feedback layout which is attached to application overlay.
      * @param filePathMedia is used for getting the reference of current media file.
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeFeedBackLayout() {
         try {
             if (windowManagerFeedback != null && this::viewFeedback.isInitialized) {
@@ -3607,42 +3617,39 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-            if (Settings.canDrawOverlays(activity)) {
-                windowManagerParamsFeedback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerFeedback = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                if (windowManagerFeedback != null) {
-                    (windowManagerFeedback as WindowManager).addView(
-                        viewFeedback,
-                        windowManagerParamsFeedback
-                    )
-                    floating_action_button_feedback =
-                        viewFeedback.findViewById(R.id.floating_action_button_feed)
-                    floating_action_button_feed_close =
-                        viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
-                    editText_feedback = viewFeedback.findViewById(R.id.editText_feed_back)
-                    toolbarFeedback = viewFeedback.findViewById(R.id.toolbar_feedback)
-                    progressBarFeedback = viewFeedback.findViewById(R.id.feedback_progressbar)
-                    progressBarFeedbackLayout =
-                        viewFeedback.findViewById(R.id.feedback_progressbar_background)
-                    buttonClicksFeedback()
-                }
+            windowManagerParamsFeedback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+            windowManagerFeedback = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            if (windowManagerFeedback != null) {
+                (windowManagerFeedback as WindowManager).addView(
+                    viewFeedback,
+                    windowManagerParamsFeedback
+                )
+                floating_action_button_feedback =
+                    viewFeedback.findViewById(R.id.floating_action_button_feed)
+                floating_action_button_feed_close =
+                    viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
+                editText_feedback = viewFeedback.findViewById(R.id.editText_feed_back)
+                toolbarFeedback = viewFeedback.findViewById(R.id.toolbar_feedback)
+                progressBarFeedback = viewFeedback.findViewById(R.id.feedback_progressbar)
+                progressBarFeedbackLayout =
+                    viewFeedback.findViewById(R.id.feedback_progressbar_background)
+                buttonClicksFeedback()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -3722,7 +3729,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeJiraLayout(filePathMedia: File) {
         try {
             if (windowManagerJira != null && this::viewJira.isInitialized) {
@@ -3732,123 +3739,115 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             this.rootView = activity.window.decorView.findViewById(android.R.id.content)
             viewJira = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_jira_popup, (this.rootView as ViewGroup), false)
+            windowManagerParamsJira = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+            windowManagerJira = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            if (windowManagerJira != null) {
+                (windowManagerJira as WindowManager).addView(
+                    viewJira,
+                    windowManagerParamsJira
+                )
+                activity.window.navigationBarColor =
+                    ContextCompat.getColor(this, R.color.black)
+                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
 
-            if (Settings.canDrawOverlays(activity)) {
-                windowManagerParamsJira = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
+                autoTextViewJiraProject = viewJira.findViewById(R.id.auto_textView_jira_project)
+                autoTextViewJiraIssueType =
+                    viewJira.findViewById(R.id.auto_textView_jira_issue_type)
+                recyclerViewJiraAttachment =
+                    viewJira.findViewById(R.id.recycler_view_jira_attachment)
+                editTextJiraSummary = viewJira.findViewById(R.id.editText_jira_summary)
+                editTextJiraDescription = viewJira.findViewById(R.id.editText_jira_description)
+                autoTextViewJiraReporter =
+                    viewJira.findViewById(R.id.auto_textView_jira_reporter)
+                autoTextViewJiraLinkedIssue =
+                    viewJira.findViewById(R.id.auto_textView_jira_linked_issues)
+                autoTextViewJiraIssue = viewJira.findViewById(R.id.auto_textView_jira_issues)
+                autoTextViewJiraAssignee =
+                    viewJira.findViewById(R.id.auto_textView_jira_assignee)
+                autoTextViewJiraPriority =
+                    viewJira.findViewById(R.id.auto_textView_jira_priority)
+                autoTextViewJiraComponent =
+                    viewJira.findViewById(R.id.auto_textView_jira_component)
+                autoTextViewJiraFixVersions =
+                    viewJira.findViewById(R.id.auto_textView_jira_fix_versions)
+                autoTextViewJiraLabel = viewJira.findViewById(R.id.auto_textView_jira_labels)
+                autoTextViewJiraEpicLink =
+                    viewJira.findViewById(R.id.auto_textView_jira_epic_link)
+                autoTextViewJiraSprint = viewJira.findViewById(R.id.auto_textView_jira_sprint)
+                autoTextViewJiraEpicName =
+                    viewJira.findViewById(R.id.auto_textView_jira_epic_name)
+                buttonJiraCreate = viewJira.findViewById(R.id.button_jira_create)
+                buttonJiraCancel = viewJira.findViewById(R.id.button_jira_cancel)
+                toolbarJira = viewJira.findViewById(R.id.textView_jira_title)
+                layoutJira = viewJira.findViewById(R.id.layout_jira)
+                progressBarJira = viewJira.findViewById(R.id.jira_progressbar)
+                progressBarJiraLayout = viewJira.findViewById(R.id.jira_progressbar_background)
+                cardViewJiraSprint = viewJira.findViewById(R.id.cardView_sprint)
+                cardViewJiraStartDate = viewJira.findViewById(R.id.cardView_start_date)
+                cardViewJiraEpicName = viewJira.findViewById(R.id.cardView_epic_name)
+                cardViewJiraEpicLink = viewJira.findViewById(R.id.cardView_epic_link)
+                imageViewStartDate = viewJira.findViewById(R.id.imageView_start_date)
+                imageButtonRemoveDate =
+                    viewJira.findViewById(R.id.image_button_jira_remove_date)
+                scrollViewJira = viewJira.findViewById(R.id.scrollView_jira)
 
-                windowManagerJira = activity.getSystemService(Context.WINDOW_SERVICE)!!
-
-                if (windowManagerJira != null) {
-                    (windowManagerJira as WindowManager).addView(
-                        viewJira,
-                        windowManagerParamsJira
-                    )
-
-                    activity.window.navigationBarColor =
-                        ContextCompat.getColor(this, R.color.black)
-                    activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                    autoTextViewJiraProject = viewJira.findViewById(R.id.auto_textView_jira_project)
-                    autoTextViewJiraIssueType =
-                        viewJira.findViewById(R.id.auto_textView_jira_issue_type)
-                    recyclerViewJiraAttachment =
-                        viewJira.findViewById(R.id.recycler_view_jira_attachment)
-                    editTextJiraSummary = viewJira.findViewById(R.id.editText_jira_summary)
-                    editTextJiraDescription = viewJira.findViewById(R.id.editText_jira_description)
-                    autoTextViewJiraReporter =
-                        viewJira.findViewById(R.id.auto_textView_jira_reporter)
-                    autoTextViewJiraLinkedIssue =
-                        viewJira.findViewById(R.id.auto_textView_jira_linked_issues)
-                    autoTextViewJiraIssue = viewJira.findViewById(R.id.auto_textView_jira_issues)
-                    autoTextViewJiraAssignee =
-                        viewJira.findViewById(R.id.auto_textView_jira_assignee)
-                    autoTextViewJiraPriority =
-                        viewJira.findViewById(R.id.auto_textView_jira_priority)
-                    autoTextViewJiraComponent =
-                        viewJira.findViewById(R.id.auto_textView_jira_component)
-                    autoTextViewJiraFixVersions =
-                        viewJira.findViewById(R.id.auto_textView_jira_fix_versions)
-                    autoTextViewJiraLabel = viewJira.findViewById(R.id.auto_textView_jira_labels)
-                    autoTextViewJiraEpicLink =
-                        viewJira.findViewById(R.id.auto_textView_jira_epic_link)
-                    autoTextViewJiraSprint = viewJira.findViewById(R.id.auto_textView_jira_sprint)
-                    autoTextViewJiraEpicName =
-                        viewJira.findViewById(R.id.auto_textView_jira_epic_name)
-                    buttonJiraCreate = viewJira.findViewById(R.id.button_jira_create)
-                    buttonJiraCancel = viewJira.findViewById(R.id.button_jira_cancel)
-                    toolbarJira = viewJira.findViewById(R.id.textView_jira_title)
-                    layoutJira = viewJira.findViewById(R.id.layout_jira)
-                    progressBarJira = viewJira.findViewById(R.id.jira_progressbar)
-                    progressBarJiraLayout = viewJira.findViewById(R.id.jira_progressbar_background)
-                    cardViewJiraSprint = viewJira.findViewById(R.id.cardView_sprint)
-                    cardViewJiraStartDate = viewJira.findViewById(R.id.cardView_start_date)
-                    cardViewJiraEpicName = viewJira.findViewById(R.id.cardView_epic_name)
-                    cardViewJiraEpicLink = viewJira.findViewById(R.id.cardView_epic_link)
-                    imageViewStartDate = viewJira.findViewById(R.id.imageView_start_date)
-                    imageButtonRemoveDate =
-                        viewJira.findViewById(R.id.image_button_jira_remove_date)
-                    scrollViewJira = viewJira.findViewById(R.id.scrollView_jira)
-
-                    scrollViewJira.setOnTouchListener { v, event ->
-                        if (event.action == MotionEvent.ACTION_DOWN) {
-                            hideKeyboard(activity = activity, view = viewJira)
-                        }
-                        return@setOnTouchListener false
+                scrollViewJira.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        hideKeyboard(activity = activity, view = viewJira)
                     }
-                    cardViewJiraIssueList = viewJira.findViewById(R.id.cardView_issues_list)
-                    imageViewJiraIssue = viewJira.findViewById(R.id.imageView_issue_add)
-                    recyclerViewJiraIssueList =
-                        viewJira.findViewById(R.id.recycler_view_issues_list)
-
-                    cardViewJiraLabelList = viewJira.findViewById(R.id.cardView_label_list)
-                    imageViewJiraLabel = viewJira.findViewById(R.id.imageView_label_add)
-                    recyclerViewJiraLabelList = viewJira.findViewById(R.id.recycler_view_label_list)
-
-                    cardViewJiraComponentList = viewJira.findViewById(R.id.cardView_component_list)
-                    imageViewJiraComponent = viewJira.findViewById(R.id.imageView_component_add)
-                    recyclerViewJiraComponentList =
-                        viewJira.findViewById(R.id.recycler_view_component_list)
-
-                    cardViewJiraFixVersionsList =
-                        viewJira.findViewById(R.id.cardView_fix_versions_list)
-                    imageViewJiraFixVersions =
-                        viewJira.findViewById(R.id.imageView_fix_versions_add)
-                    recyclerViewJiraFixVersionsList =
-                        viewJira.findViewById(R.id.recycler_view_fix_versions_list)
-
-                    jiraAuthentication.callJira(
-                        context = context,
-                        activity = activity,
-                        task = "get",
-                        createMethod = "normal"
-                    )
-
-                    initializeJiraAttachmentRecyclerView(filePathMedia = filePathMedia)
-                    initializeJiraIssueRecyclerView()
-                    initializeJiraLabelRecyclerView()
-                    initializeJiraComponentRecyclerView()
-                    initializeJiraFixVersionsRecyclerView()
-                    buttonClicksJira(filePathMedia = filePathMedia)
-                    attachProgressBar(task = "jira")
-//                    progressBarJiraLayout.visibility = View.VISIBLE
-//                    progressBarJira.visibility = View.VISIBLE
+                    return@setOnTouchListener false
                 }
+                cardViewJiraIssueList = viewJira.findViewById(R.id.cardView_issues_list)
+                imageViewJiraIssue = viewJira.findViewById(R.id.imageView_issue_add)
+                recyclerViewJiraIssueList =
+                    viewJira.findViewById(R.id.recycler_view_issues_list)
+
+                cardViewJiraLabelList = viewJira.findViewById(R.id.cardView_label_list)
+                imageViewJiraLabel = viewJira.findViewById(R.id.imageView_label_add)
+                recyclerViewJiraLabelList = viewJira.findViewById(R.id.recycler_view_label_list)
+
+                cardViewJiraComponentList = viewJira.findViewById(R.id.cardView_component_list)
+                imageViewJiraComponent = viewJira.findViewById(R.id.imageView_component_add)
+                recyclerViewJiraComponentList =
+                    viewJira.findViewById(R.id.recycler_view_component_list)
+
+                cardViewJiraFixVersionsList =
+                    viewJira.findViewById(R.id.cardView_fix_versions_list)
+                imageViewJiraFixVersions =
+                    viewJira.findViewById(R.id.imageView_fix_versions_add)
+                recyclerViewJiraFixVersionsList =
+                    viewJira.findViewById(R.id.recycler_view_fix_versions_list)
+
+                jiraAuthentication.callJira(
+                    context = context,
+                    activity = activity,
+                    task = "get",
+                    createMethod = "normal"
+                )
+
+                initializeJiraAttachmentRecyclerView(filePathMedia = filePathMedia)
+                initializeJiraIssueRecyclerView()
+                initializeJiraLabelRecyclerView()
+                initializeJiraComponentRecyclerView()
+                initializeJiraFixVersionsRecyclerView()
+                buttonClicksJira(filePathMedia = filePathMedia)
+                attachProgressBar(task = "jira")
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -4254,11 +4253,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 autoTextViewLinkedIssues = autoTextViewJiraLinkedIssue
             )
         ) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                progressBarJira.visibility = View.VISIBLE
-//                progressBarJiraLayout.visibility = View.VISIBLE
                 attachProgressBar(task = "jira")
-            }
 //                hideKeyboard(activity = activity)
             jiraAuthentication.callJira(
                 filePathMedia = filePathMedia,
@@ -4407,13 +4402,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     editTextJiraDescription.isFocusable = false
                 }
             }
-
-//            progressBarJiraLayout.visibility = View.GONE
-//            progressBarJira.visibility = View.GONE
             detachProgressBar()
         } catch (e: Exception) {
-//            progressBarJiraLayout.visibility = View.GONE
-//            progressBarJira.visibility = View.GONE
             detachProgressBar()
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -4930,11 +4920,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             projectJiraPosition = position
             controlProjectJiraPosition = true
             jiraAuthentication.setProjectPosition(projectPosition = position)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                progressBarJira.visibility = View.VISIBLE
-//                progressBarJiraLayout.visibility = View.VISIBLE
-                attachProgressBar(task = "jira")
-            }
+            attachProgressBar(task = "jira")
             hideKeyboard(activity = activity, view = viewJira)
             jiraAuthentication.callJira(
                 context = context,
@@ -5029,7 +5015,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @param filePathMedia is used for getting the reference of current media file.
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeSlackLayout(filePathMedia: File) {
         try {
             if (windowManagerSlack != null && this::viewSlack.isInitialized) {
@@ -5386,7 +5372,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for gathering unhandled loggerbird.exception details.
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun gatherUnhandledExceptionDetails() {
         try {
             val sharedPref =
@@ -5539,7 +5525,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     /**
      * This method is used for initializing button clicks of buttons that are inside in the unhandled_duplication_popup.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeUnhandledDuplicationButtons(
         filePath: File,
         field: String
@@ -5609,7 +5595,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for creating email layout which is attached to application overlay.
      * @param filePathMedia is used for getting the reference of current media file.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeEmailLayout(filePathMedia: File) {
         arrayListEmailFileName.clear()
         arraylistEmailToUsername.clear()
@@ -5677,7 +5663,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for initializing button clicks of buttons that are inside in the loggerbird_email_popup.
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeEmailButtons() {
         try {
             buttonEmailCreate.setSafeOnClickListener {
@@ -6238,7 +6224,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeGithubLayout(filePathMedia: File) {
         try {
             removeGithubLayout()
@@ -6758,9 +6744,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGithubRepo.setOnItemClickListener { parent, view, position, id ->
             githubAuthentication.setRepoPosition(repoPosition = position)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 attachProgressBar(task = "github")
-            }
             hideKeyboard(activity = activity, view = viewGithub)
             clearGithubComponents()
             githubAuthentication.callGithub(
@@ -7021,7 +7005,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeTrelloLayout(filePathMedia: File) {
         try {
             removeTrelloLayout()
@@ -8169,7 +8153,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicksGitlab(filePathMedia: File) {
         buttonGitlabCreate.setSafeOnClickListener {
             if (checkGitlabTitleEmpty() && checkGitlabAssigneeEmpty()
@@ -8306,9 +8290,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGitlabProject.setOnItemClickListener { parent, view, position, id ->
             gitlabAuthentication.gitlabProjectPosition(projectPosition = position)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 attachProgressBar(task = "gitlab")
-            }
             gitlabAuthentication.callGitlab(
                 activity = activity,
                 context = context,
@@ -8567,7 +8549,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializePivotalLayout(filePathMedia: File) {
         try {
             removePivotalLayout()
@@ -9399,7 +9381,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeBasecampLayout(filePathMedia: File) {
         try {
             removeBasecampLayout()
@@ -10152,7 +10134,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeAsanaLayout(filePathMedia: File) {
         try {
             removeAsanaLayout()
@@ -10831,7 +10813,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @param filePathMedia is used for getting the reference of current media file.
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeClubhouseLayout(filePathMedia: File) {
         try {
             removeClubhouseLayout()
@@ -10956,7 +10938,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for initializing button clicks of buttons that are inside in the loggerbird_clubhouse_popup.
      * @param filePathMedia is used for getting the reference of current media file.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicksClubhouse(filePathMedia: File) {
         buttonClubhouseCreate.setSafeOnClickListener {
             if (checkClubhouseStoryNameEmpty() && checkClubhouseStoryDescriptionEmpty()
@@ -11061,9 +11043,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewClubhouseProject.setOnItemClickListener { parent, view, position, id ->
             clubhouseAuthentication.clubhouseProjectPosition(projectPosition = position)
             hideKeyboard(activity = activity, view = viewClubhouse)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 attachProgressBar(task = "clubhouse")
-            }
             clubhouseAuthentication.callClubhouse(
                 activity = activity,
                 context = context,
@@ -11912,7 +11892,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun initializeBitbucketLayout(filePathMedia: File) {
         try {
             removeBitbucketLayout()

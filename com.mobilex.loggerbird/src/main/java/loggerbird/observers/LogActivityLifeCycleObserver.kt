@@ -88,17 +88,15 @@ internal class LogActivityLifeCycleObserver() :
     /**
      * This method is called when activity is in onCreate state.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         try {
             this.activity = activity
             this.context = activity
             logActivityLifeCycleObserverInstance = this
             if (!this::intentService.isInitialized) {
-                coroutineCallService.async {
-                    intentService = Intent(context, LoggerBirdService::class.java)
-                    context.startService(intentService)
-                }
+                intentService = Intent(context, LoggerBirdService::class.java)
+                context.startService(intentService)
             }
             LoggerBird.fragmentLifeCycleObserver =
                 LogFragmentLifeCycleObserver()
@@ -157,7 +155,7 @@ internal class LogActivityLifeCycleObserver() :
     /**
      * This method is called when activity is in onStart state.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onActivityStarted(activity: Activity) {
         try {
             if (LoggerBirdService.controlLoggerBirdServiceInit()) {
@@ -185,7 +183,7 @@ internal class LogActivityLifeCycleObserver() :
     /**
      * This method is called when activity is in onResume state.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     override fun onActivityResumed(activity: Activity) {
         try {
             if (LoggerBirdService.controlPermissionRequest) {
