@@ -5024,8 +5024,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
             viewSlack = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_slack_popup, (this.rootView as ViewGroup), false)
-
-            if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsSlack = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
@@ -5088,7 +5086,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     attachProgressBar(task = "slack")
 
                 }
-            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -6230,8 +6227,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeGithubLayout()
             viewGithub = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_github_popup, (this.rootView as ViewGroup), false)
-
-            if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsGithub = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
@@ -6379,8 +6374,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     filePathMedia = filePathMedia
                 )
                 attachProgressBar(task = "github")
-
-            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -7011,8 +7004,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeTrelloLayout()
             viewTrello = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_trello_popup, (this.rootView as ViewGroup), false)
-
-            if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsTrello = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
@@ -7154,7 +7145,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     filePathMedia = filePathMedia
                 )
                 attachProgressBar(task = "trello")
-            }
         } catch (e: Exception) {
             finishShareLayout("trello_error")
             e.printStackTrace()
@@ -7933,7 +7923,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeGitlabLayout()
             viewGitlab = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_gitlab_popup, (this.rootView as ViewGroup), false)
-            if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsGitlab = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
@@ -8018,7 +8007,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 attachProgressBar("gitlab")
                 initializeGitlabAttachmentRecyclerView(filePathMedia = filePathMedia)
                 buttonClicksGitlab(filePathMedia = filePathMedia)
-            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -8559,8 +8547,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-
-            if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsPivotal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
@@ -8728,7 +8714,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     filePathMedia = filePathMedia
                 )
                 attachProgressBar(task = "pivotal")
-            }
         } catch (e: Exception) {
             finishShareLayout("pivotal_error")
             e.printStackTrace()
@@ -9391,8 +9376,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-
-            if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsBaseCamp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
@@ -9549,7 +9532,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     filePathMedia = filePathMedia
                 )
                 attachProgressBar(task = "basecamp")
-            }
         } catch (e: Exception) {
             finishShareLayout("basecamp_error")
             e.printStackTrace()
@@ -10144,8 +10126,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-
-            if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsAsana = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
@@ -10282,7 +10262,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     filePathMedia = filePathMedia
                 )
                 attachProgressBar(task = "asana")
-            }
         } catch (e: Exception) {
             finishShareLayout("asana_error")
             e.printStackTrace()
@@ -10819,7 +10798,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeClubhouseLayout()
             viewClubhouse = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_clubhouse_popup, (this.rootView as ViewGroup), false)
-            if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsClubhouse = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
@@ -10879,7 +10857,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 attachProgressBar(task = "clubhouse")
                 initializeClubhouseAttachmentRecyclerView(filePathMedia = filePathMedia)
                 buttonClicksClubhouse(filePathMedia = filePathMedia)
-            }
         } catch (e: Exception) {
             finishShareLayout("clubhouse_error")
             e.printStackTrace()
@@ -11902,8 +11879,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-
-            if (Settings.canDrawOverlays(activity)) {
                 windowManagerParamsBitbucket = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
@@ -12032,7 +12007,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     filePathMedia = filePathMedia
                 )
                 attachProgressBar(task = "bitbucket")
-            }
         } catch (e: Exception) {
             finishShareLayout("bitbucket_error")
             e.printStackTrace()
