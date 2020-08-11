@@ -400,10 +400,10 @@
     <string name="textView_gitlab_toolbar_title">Create Gitlab Issue</string>
     <string name="textView_gitlab_project">Project</string>
     <string name="textView_gitlab_title">Title</string>
-    <string name="editText_gitlab_title">Write your issue title here!</string>
+    <string name="editText_gitlab_title">Write your issue title here</string>
     <string name="textView_gitlab_description">Description</string>
-    <string name="editText_gitlab_description">Write your issue description here!</string>
-    <string name="editText_gitlab_weight">Write your issue weight here!</string>
+    <string name="editText_gitlab_description">Write your issue description here</string>
+    <string name="editText_gitlab_weight">Write your issue weight here</string>
     <string name="textView_gitlab_confidentiality_enter">Select your issue confidentiality</string>
     <string name="textView_gitlab_labels_enter">Select your issue label</string>
     <string name="textView_gitlab_milestone_enter">Select your issue milestone</string>
@@ -415,7 +415,7 @@
     <string name="editText_gitlab_title_empty">Your title cannot be empty!</string>
     <string name="textView_gitlab_due_date">Due Date</string>
     <string name="textView_gitlab_confidentiality">Confidentiality</string>
-    <string name="textView_gitlab_enter_due_date">Set a due date for issue!</string>
+    <string name="textView_gitlab_enter_due_date">Set a due date for issue</string>
     <string name="textView_gitlab_project_doesnt_exist">This project doesn\'t exist</string>
     <string name="textView_gitlab_assignee_doesnt_exist">This assignee doesn\'t exist</string>
     <string name="textView_gitlab_assignee_not_be_empty">Your assignee cannot be empty!</string>
@@ -423,6 +423,7 @@
     <string name="textView_gitlab_confidentiality_doesnt_exist">This confidentiality doesn\'t exist</string>
     <string name="textView_gitlab_milestone_doesnt_exist">This milestone doesn\'t exist</string>
     <!-- recycler_view_gitlab_item_popup-->
+    <string name="textView_recyclerView_gitlab_header">Delete Attachment</string>
     <string name="textView_recyclerView_gitlab_popup_title">Are you sure to remove attachment from your Gitlab Issue?</string>
     <string name="button_recyclerView_gitlab_yes">Delete Attachment</string>
     <string name="button_recyclerView_gitlab_no">Keep File</string>
@@ -601,10 +602,10 @@
     <string name="textView_clubhouse_requester">Story Requester</string>
     <string name="textView_clubhouse_story_name">Story Name</string>
     <string name="textView_clubhouse_story_description">Story Description</string>
-    <string name="editText_clubhouse_subject">Write your story name here!</string>
-    <string name="editText_clubhouse_story_description">Write your story description here!</string>
-    <string name="editText_clubhouse_story_type_empty">Your story type cannot be empty!</string>
-    <string name="editText_clubhouse_story_requester_empty">Your story requester cannot be empty!</string>
+    <string name="editText_clubhouse_subject">Write your story name here</string>
+    <string name="editText_clubhouse_story_description">Write your story description here</string>
+    <string name="editText_clubhouse_story_type_empty">Your story type cannot be empty</string>
+    <string name="editText_clubhouse_story_requester_empty">Your story requester cannot be empty</string>
     <string name="textView_clubhouse_story_type">Story Type</string>
     <string name="textView_clubhouse_attachment">Attachments</string>
     <string name="textView_clubhouse_no_attachment">There is no attachment.</string>
@@ -624,6 +625,7 @@
     <string name="textView_clubhouse_epic_doesnt_exist">This epic doesn\'t exist</string>
     <string name="textView_clubhouse_user_doesnt_exist">This user doesn\'t exist</string>
     <!-- recycler_view_clubhouse_item_popup-->
+    <string name="textView_recyclerView_clubhouse_popup_header">Delete Attachment</string>
     <string name="textView_recyclerView_clubhouse_popup_title">Are you sure to remove attachment from your Clubhouse story?</string>
     <string name="button_recyclerView_clubhouse_yes">Delete Attachment</string>
     <string name="button_recyclerView_clubhouse_no">Keep File</string>

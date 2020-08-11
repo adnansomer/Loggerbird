@@ -251,7 +251,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewLoggerBirdFileActionPopup: View
     private lateinit var viewLoggerBirdUnhandledExceptionPopup: View
     private lateinit var viewBitbucket: View
-    private val fileLimit: Long = 10485760
+    private val fileLimit: Long = 20971520
     private var sessionTimeStart: Long? = System.currentTimeMillis()
     private var sessionTimeEnd: Long? = null
     private var timeControllerVideo: Long? = null
@@ -2134,17 +2134,32 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+
     /**
      * This method is used for starting the foreground service of video recording.
      */
     private fun takeForegroundService() {
         workQueueLinkedVideo.controlRunnable = true
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            intentForegroundServiceVideo =
-                Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
-            startForegroundServiceVideo()
-        } else {
-            resetEnqueueVideo()
+        intentForegroundServiceVideo =
+            Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                startForegroundServiceVideo()
+            }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> {
+                takeVideoRecording(
+                    requestCode = requestCode,
+                    resultCode = resultCode,
+                    data = dataIntent
+                )
+            }
+            else -> {
+                Toast.makeText(
+                    context,
+                    R.string.screen_recording_unsupported,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 
@@ -2441,8 +2456,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         try {
             if (LoggerBird.isLogInitAttached()) {
                 workQueueLinkedVideo.controlRunnable = false
-                runnableList.clear()
                 workQueueLinkedVideo.clear()
+                runnableList.clear()
                 callForegroundService()
                 if (runnableList.isEmpty()) {
                     workQueueLinkedVideo.put {
@@ -2452,7 +2467,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             data = data
                         )
                     }
-                }
+               }
                 runnableList.add(Runnable {
                     takeVideoRecording(
                         requestCode = requestCode,
@@ -2474,10 +2489,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used when video foreground service methods needs to be in queue and executed in synchronized way.
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun callForegroundService() {
         if (LoggerBird.isLogInitAttached()) {
             if (!videoRecording) {
                 if (runnableList.isEmpty()) {
+                    runnableList.clear()
                     workQueueLinkedVideo.put {
                         takeForegroundService()
                     }
@@ -10941,7 +10958,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     editTextStoryDescription = editTextClubhouseStoryDescription,
                     editTextEstimate = editTextClubhouseEstimate
                 )
-                detachProgressBar()
+                attachProgressBar(task = "clubhouse")
                 clubhouseAuthentication.callClubhouse(
                     activity = activity,
                     context = context,

@@ -28,7 +28,7 @@
                 android:layout_gravity="center"
                 android:textSize="20sp"
                 android:textColor="@color/black"
-                android:text="Delete Attachment" />
+                android:text="@string/textView_recyclerView_gitlab_header" />
 
         </LinearLayout>
 
@@ -45,7 +45,7 @@
                 android:layout_gravity="center"
                 android:textSize="16sp"
                 android:textColor="@color/black"
-                android:text="@string/textView_recyclerView_slack_popup_title">
+                android:text="@string/textView_recyclerView_gitlab_popup_title">
             </TextView>
 
         </LinearLayout>
