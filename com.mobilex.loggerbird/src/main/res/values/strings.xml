@@ -207,7 +207,6 @@
     <string name="bitbucket_priority_doesnt_exist">This priority doesn\'t exist!</string>
     <string name="bitbucket_kind_empty">Kind cannot be empty!</string>
     <string name="bitbucket_kind_doesnt_exist">This kind doesn\'t exist!</string>
-    <string name="screen_recording_unsupported">Unsupported video recording version!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
