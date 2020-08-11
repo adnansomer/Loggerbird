@@ -70,9 +70,8 @@ class LoggerBirdIntegrationBuilder(
                 LoggerBird.decryptTokenKey("BAhbB0kiAbl7ImNsaWVudF9pZCI6IjAyMDM2OGMwNDM4YzQ1ZjIyNjQzYmY5MTM2MDE5MjEzZTQzNGFiY2UiLCJleHBpcmVzX2F0IjoiMjAyMC0wNy0yN1QxMTo0NTo1MloiLCJ1c2VyX2lkcyI6WzQyMzI4NzkyLDQyNDI2NDU3XSwidmVyc2lvbiI6MSwiYXBpX2RlYWRib2x0IjoiODFkYTljZjlkYzljNDA0OThkZjhkOTRhODBmNzg4ZjYifQY6BkVUSXU6CVRpbWUNaxsewMIiQbcJOg1uYW5vX251bWkC3QI6DW5hbm9fZGVuaQY6DXN1Ym1pY3JvIgdzMDoJem9uZUkiCFVUQwY7AEY=--ed8edece558992d6423ab6e85838ce04800eabe5")
             LoggerBird.basecampApiToken = basecampApiToken }
 
-        fun setPivotalIntegraton() =
-            apply {
-                val pivotalApiToken = LoggerBird.decryptTokenKey("fb4f04edbdeaeed3758839f75c1939b1")
+        fun setPivotalIntegraton() = apply {
+                val pivotalApiToken = "070e64617f8042311841cf6616d3af8b"
                 LoggerBird.pivotalApiToken = pivotalApiToken }
 
         fun setTrelloIntegration() = apply {

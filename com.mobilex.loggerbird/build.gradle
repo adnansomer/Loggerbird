@@ -113,6 +113,7 @@ dependencies {
     def room_version = "2.2.0-rc01"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
+    implementation 'commons-io:commons-io:2.6'
 }
 repositories {
     maven { url "https://jitpack.io" }

@@ -386,47 +386,48 @@
     <string name="textView_github_menu_clear">Görev detayı temizle</string>
     <!-- recycler_view_github_assignee_popup-->
     <string name="textView_recyclerView_github_assignee_header">Sorumluyu sil</string>
-    <string name="textView_recyclerView_github_assignee_title">Github görevlendirmenizden bu sorumluyu kaldırmaktan eminmisiniz?</string>
+    <string name="textView_recyclerView_github_assignee_title">Github görevlendirmenizden bu sorumluyu kaldırmaktan emin misiniz?</string>
     <string name="button_recyclerView_github_assignee_delete">Sorumluyu sil</string>
     <string name="button_recyclerView_github_assignee_keep">Sorumluyu tut</string>
     <!-- recycler_view_github_label_popup-->
     <string name="textView_recyclerView_github_label_header">Etiketi sil</string>
-    <string name="textView_recyclerView_github_label_title">Github görevlendirmenizden bu etiketi kaldırmaktan eminmisiniz?</string>
+    <string name="textView_recyclerView_github_label_title">Github görevlendirmenizden bu etiketi kaldırmaktan emin misiniz?</string>
     <string name="button_recyclerView_github_label_delete">Etiketi sil</string>
     <string name="button_recyclerView_github_label_keep">Etiketi tut</string>
     <!-- recycler_view_github_project_popup-->
     <string name="textView_recyclerView_github_project_header">Projeyi sil</string>
-    <string name="textView_recyclerView_github_project_title">Github görevlendirmenizden bu projeyi kaldırmaktan eminmisiniz?</string>
+    <string name="textView_recyclerView_github_project_title">Github görevlendirmenizden bu projeyi kaldırmaktan emin misiniz?</string>
     <string name="button_recyclerView_github_project_delete">Projeyi sil</string>
     <string name="button_recyclerView_github_project_keep">Projeyi tut</string>
     <!-- loggerbird_gitlab_popup-->
-    <string name="textView_gitlab_toolbar_title">Gitlab Konusu Olustur</string>
+    <string name="textView_gitlab_toolbar_title">Gitlab Konusu Oluştur</string>
     <string name="textView_gitlab_project">Proje</string>
-    <string name="textView_gitlab_title">Baslik</string>
-    <string name="editText_gitlab_title">Konu basliginizi buraya yaziniz!</string>
-    <string name="textView_gitlab_description">Aciklama</string>
-    <string name="editText_gitlab_description">Konu aciklamanizi buraya yaziniz!</string>
-    <string name="editText_gitlab_weight">Konu agirligini buraya giriniz!</string>
+    <string name="textView_gitlab_title">Başlık</string>
+    <string name="editText_gitlab_title">Konu başlığınızı buraya yazınız</string>
+    <string name="textView_gitlab_description">Açıklama</string>
+    <string name="editText_gitlab_description">Konu açıklamanızı buraya yazınız</string>
+    <string name="editText_gitlab_weight">Konu ağırlığinı buraya giriniz!</string>
     <string name="textView_gitlab_confidentiality_enter">Görev gizliliği seç</string>
     <string name="textView_gitlab_labels_enter">Görev etiketi seç</string>
     <string name="textView_gitlab_milestone_enter">Görev kilometretaşı seç</string>
-    <string name="textView_gitlab_assginee_enter">Görev sorumlusu seç </string>
+    <string name="textView_gitlab_assginee_enter">Görev sorumlusu seç</string>
     <string name="textView_gitlab_assignee">Sorumlu</string>
     <string name="textView_gitlab_labels">Etiket</string>
-    <string name="textView_gitlab_weight">Agirlik</string>
-    <string name="textView_gitlab_milestone">Donum noktasi</string>
-    <string name="editText_gitlab_title_empty">Konu basliginiz bos olamaz!</string>
-    <string name="textView_gitlab_due_date">Bitis tarihi</string>
+    <string name="textView_gitlab_weight">Ağırlık</string>
+    <string name="textView_gitlab_milestone">Dönüm noktası</string>
+    <string name="editText_gitlab_title_empty">Konu başlığınız boş olamaz!</string>
+    <string name="textView_gitlab_due_date">Bitiş tarihi</string>
     <string name="textView_gitlab_confidentiality">Gizlilik</string>
-    <string name="textView_gitlab_enter_due_date">Konunuz icin bitis tarihi giriniz!</string>
+    <string name="textView_gitlab_enter_due_date">Konunuz icin bitiş tarihi giriniz</string>
     <string name="textView_gitlab_project_doesnt_exist">Bu proje bulunamadı!</string>
     <string name="textView_gitlab_assignee_doesnt_exist">Bu sorumlu bulunamadı!</string>
-    <string name="textView_gitlab_assignee_not_be_empty">Sorumlu boş olamaz!</string>
+    <string name="textView_gitlab_assignee_not_be_empty">Sorumlu alanı boş olamaz!</string>
     <string name="textView_gitlab_label_doesnt_exist">Bu etiket bulunamadı!</string>
-    <string name="textView_gitlab_confidentiality_doesnt_exist">Bu gizlilik bulunamadı!</string>
+    <string name="textView_gitlab_confidentiality_doesnt_exist">Bu gizlilik derecesi bulunamadı!</string>
     <string name="textView_gitlab_milestone_doesnt_exist">Bu kilometre taşı bulunamadı!</string>
     <!-- recycler_view_gitlab_item_popup-->
-    <string name="textView_recyclerView_gitlab_popup_title">Gitlab görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
+    <string name="textView_recyclerView_gitlab_header">Eklentiyi Sil</string>
+    <string name="textView_recyclerView_gitlab_popup_title">Gitlab görevlendirmenizden bu eklentiyi kaldırmak istediğinize emin misiniz?</string>
     <string name="button_recyclerView_gitlab_yes">Eklentiyi sil</string>
     <string name="button_recyclerView_gitlab_no">Eklentiyi tut</string>
     <!-- loggerbird_trello_popup-->
@@ -618,16 +619,17 @@
     <string name="textView_clubhouse_story_duedate_empty">Hikaye bitiş tarihi boş olamaz!</string>
     <string name="textView_clubhouse_story_estimate_empty">Hikaye yaklaşık puanı boş olamaz!</string>
     <string name="textView_clubhouse_due_date">Hikaye bitiş tarihi</string>
-    <string name="textView_clubhouse_enter_due_date">hikaye için bitiş tarihi belirleyiniz!</string>
+    <string name="textView_clubhouse_enter_due_date">hikaye için bitiş tarihi belirleyiniz</string>
     <string name="textView_clubhouse_estimate_point">Yaklaşık puan</string>
-    <string name="editText_clubhouse_estimate_point">Yaklaşık puanınızı buraya yazınız!</string>
-    <string name="textView_clubhouse_epic_enter">Select your story epic here!</string>
+    <string name="editText_clubhouse_estimate_point">Yaklaşık puanınızı buraya yazınız</string>
+    <string name="textView_clubhouse_epic_enter">Hikaye epik konusunu buraya yazınız</string>
     <string name="textView_clubhouse_project_doesnt_exist">Bu proje bulunamadı!</string>
     <string name="textView_clubhouse_story_type_doesnt_exist">Bu hikaye tipi bulunamadı!</string>
-    <string name="textView_clubhouse_epic_doesnt_exist">Bu epik bulunamadı!</string>
+    <string name="textView_clubhouse_epic_doesnt_exist">Bu epik konusu bulunamadı!</string>
     <string name="textView_clubhouse_user_doesnt_exist">Bu kullanıcı bulunamadı!</string>
     <!-- recycler_view_clubhouse_item_popup-->
-    <string name="textView_recyclerView_clubhouse_popup_title">Clubhouse görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
+    <string name="textView_recyclerView_clubhouse_popup_header">Eklentiyi Sil</string>
+    <string name="textView_recyclerView_clubhouse_popup_title">Clubhouse görevlendirmenizden bu eklentiyi kaldırmaktan emin misiniz?</string>
     <string name="button_recyclerView_clubhouse_yes">Eklentiyi sil</string>
     <string name="button_recyclerView_clubhouse_no">Eklentiyi tut</string>
     <!-- loggerbird_trello_check_list_item_popup-->
@@ -642,7 +644,7 @@
     <string name="button_recyclerView_trello_item_yes">Madde sil</string>
     <string name="button_recyclerView_trello_item_no">Madde tut</string>
     <!-- loggerbird_bitbucket_popup-->
-    <string name="textView_bitbucket_project">Projec</string>
+    <string name="textView_bitbucket_project">Proje</string>
     <string name="textView_bitbucket_assignee">Sorumlu</string>
     <string name="textView_bitbucket_priority">Öncelik</string>
     <string name="textView_bitbucket_kind">Tip</string>
