@@ -1,36 +1,5 @@
 package loggerbird.services
 
-import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampCategoryAdapter
-import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloLabelAdapter
-import loggerbird.adapter.recyclerView.api.asana.RecyclerViewAsanaAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.asana.RecyclerViewAsanaSubTaskAdapter
-import loggerbird.adapter.recyclerView.api.basecamp.RecyclerViewBasecampAssigneeAdapter
-import loggerbird.adapter.recyclerView.api.basecamp.RecyclerViewBasecampAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.basecamp.RecyclerViewBasecampNotifyAdapter
-import loggerbird.adapter.recyclerView.api.bitbucket.RecyclerViewBitbucketAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.clubhouse.RecyclerViewClubhouseAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubAssigneeAdapter
-import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubLabelAdapter
-import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubProjectAdapter
-import loggerbird.adapter.recyclerView.api.gitlab.RecyclerViewGitlabAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.jira.RecyclerViewJiraAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.jira.RecyclerViewJiraComponentAdapter
-import loggerbird.adapter.recyclerView.api.jira.RecyclerViewJiraFixVersionsAdapter
-import loggerbird.adapter.recyclerView.api.jira.RecyclerViewJiraIssueAdapter
-import loggerbird.adapter.recyclerView.api.jira.RecyclerViewJiraLabelAdapter
-import loggerbird.adapter.recyclerView.api.pivotal.*
-import loggerbird.adapter.recyclerView.api.pivotal.RecyclerViewPivotalAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.pivotal.RecyclerViewPivotalBlockerAdapter
-import loggerbird.adapter.recyclerView.api.pivotal.RecyclerViewPivotalLabelAdapter
-import loggerbird.adapter.recyclerView.api.pivotal.RecyclerViewPivotalOwnerAdapter
-import loggerbird.adapter.recyclerView.api.slack.RecyclerViewSlackAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloCheckListAdapter
-import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloLabelAdapter
-import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloMemberAdapter
-import loggerbird.adapter.recyclerView.email.RecyclerViewEmaiToListAttachmentAdapter
-import loggerbird.adapter.recyclerView.email.RecyclerViewEmailAttachmentAdapter
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -54,11 +23,14 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.provider.Settings
+import android.text.InputFilter
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
-import android.view.animation.*
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.view.animation.BounceInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -67,6 +39,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -77,33 +50,46 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
-import loggerbird.constants.Constants
-import loggerbird.exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
-import loggerbird.models.*
-import loggerbird.models.recyclerView.*
-import loggerbird.observers.LogActivityLifeCycleObserver
-import loggerbird.paint.PaintActivity
-import loggerbird.paint.PaintView
-import loggerbird.utils.email.EmailUtil
-import loggerbird.utils.other.LinkedBlockingQueueUtil
-import java.io.File
-import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import java.text.SimpleDateFormat
-import android.text.InputFilter
-import androidx.core.widget.addTextChangedListener
+import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampCategoryAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloLabelAdapter
+import loggerbird.adapter.recyclerView.api.asana.RecyclerViewAsanaAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.asana.RecyclerViewAsanaSubTaskAdapter
+import loggerbird.adapter.recyclerView.api.basecamp.RecyclerViewBasecampAssigneeAdapter
+import loggerbird.adapter.recyclerView.api.basecamp.RecyclerViewBasecampAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.basecamp.RecyclerViewBasecampNotifyAdapter
+import loggerbird.adapter.recyclerView.api.bitbucket.RecyclerViewBitbucketAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.clubhouse.RecyclerViewClubhouseAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubAssigneeAdapter
+import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubLabelAdapter
+import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubProjectAdapter
+import loggerbird.adapter.recyclerView.api.gitlab.RecyclerViewGitlabAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.jira.*
+import loggerbird.adapter.recyclerView.api.pivotal.*
+import loggerbird.adapter.recyclerView.api.slack.RecyclerViewSlackAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloCheckListAdapter
+import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloLabelAdapter
+import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloMemberAdapter
+import loggerbird.adapter.recyclerView.email.RecyclerViewEmaiToListAttachmentAdapter
+import loggerbird.adapter.recyclerView.email.RecyclerViewEmailAttachmentAdapter
+import loggerbird.constants.Constants
+import loggerbird.exception.LoggerBirdException
 import loggerbird.listeners.OnSwipeTouchListener
 import loggerbird.listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
 import loggerbird.listeners.layouts.LayoutFeedbackOnTouchListener
 import loggerbird.listeners.layouts.LayoutJiraOnTouchListener
+import loggerbird.models.RecyclerViewModel
+import loggerbird.models.recyclerView.*
 import loggerbird.models.room.UnhandledDuplication
+import loggerbird.observers.LogActivityLifeCycleObserver
+import loggerbird.paint.PaintActivity
+import loggerbird.paint.PaintView
 import loggerbird.room.UnhandledDuplicationDb
 import loggerbird.utils.api.asana.AsanaApi
 import loggerbird.utils.api.basecamp.BasecampApi
@@ -115,8 +101,15 @@ import loggerbird.utils.api.jira.JiraApi
 import loggerbird.utils.api.pivotal.PivotalTrackerApi
 import loggerbird.utils.api.slack.SlackApi
 import loggerbird.utils.api.trello.TrelloApi
+import loggerbird.utils.email.EmailUtil
 import loggerbird.utils.other.DefaultToast
 import loggerbird.utils.other.InputTypeFilter
+import loggerbird.utils.other.LinkedBlockingQueueUtil
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
@@ -790,16 +783,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         internal const val REQUEST_CODE_AUDIO_PERMISSION = 2001
         internal const val REQUEST_CODE_WRITE_EXTERNAL_STORAGE_PERMISSION = 2002
         internal const val REQUEST_CODE_DRAW_OTHER_APP_SETTINGS = 2003
-        private var DISPLAY_WIDTH = 1080
-        private var DISPLAY_HEIGHT = 1920
+        private var DISPLAY_WIDTH = 720
+        private var DISPLAY_HEIGHT = 1280
         private val ORIENTATIONS = SparseIntArray()
         internal var controlPermissionRequest: Boolean = false
         private var runnableList: ArrayList<Runnable> = ArrayList()
         private var runnableListEmail: ArrayList<Runnable> = ArrayList()
-        private var workQueueLinkedVideo: LinkedBlockingQueueUtil =
-            LinkedBlockingQueueUtil()
-        private var workQueueLinkedEmail: LinkedBlockingQueueUtil =
-            LinkedBlockingQueueUtil()
+        private var workQueueLinkedVideo: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
+        private var workQueueLinkedEmail: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
         internal var controlVideoPermission: Boolean = false
         internal var controlAudioPermission: Boolean = false
         internal var controlDrawableSettingsPermission: Boolean = false
@@ -1962,11 +1953,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                     )
                                 )
                             context.startActivity(screenshotIntent)
-//                            context.overridePendingTransition(
-//                                R.anim.slide_in_right,
-//                                R.anim.slide_out_left
-//                            )
-
                         }
 
                     } else {
@@ -2093,7 +2079,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             mediaRecorderAudio?.start()
             state = true
             withContext(Dispatchers.Main) {
-
                 Toast.makeText(context, R.string.audio_recording_start, Toast.LENGTH_SHORT).show()
             }
             audioCounterStart()
@@ -2297,10 +2282,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     mediaRecorderVideo?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
                     mediaRecorderVideo?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
                     val fileDirectory: File = context.filesDir
-                    filePathVideo = File(
-                        fileDirectory,
-                        "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4"
-                    )
+                    filePathVideo = File(fileDirectory, "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4")
                     addFileNameList(fileName = filePathVideo!!.absolutePath)
                     arrayListFile.add(filePathVideo!!)
                     mediaCodecsFile = File("/data/misc/media/media_codecs_profiling_results.xml")
@@ -2308,8 +2290,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     mediaRecorderVideo?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
                     mediaRecorderVideo?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
                     mediaRecorderVideo?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-                    mediaRecorderVideo?.setVideoEncodingBitRate(500000000)
-                    mediaRecorderVideo?.setVideoFrameRate(60)
+                    mediaRecorderVideo?.setVideoEncodingBitRate(1024 * 1024)
+                    //mediaRecorderVideo?.setVideoFrameRate(CameraProfile.QUALITY_HIGH)
+                    mediaRecorderVideo?.setVideoFrameRate(30)
+                    //Device can automatically fix its video frame rate in some devices
                     val rotation: Int = (context as Activity).windowManager.defaultDisplay.rotation
                     val orientation: Int = ORIENTATIONS.get(rotation + 90)
                     mediaRecorderVideo?.setOrientationHint(orientation)
@@ -2347,7 +2331,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val metrics = DisplayMetrics()
         (context as Activity).windowManager.defaultDisplay.getMetrics(metrics)
         screenDensity = metrics.densityDpi
-        DISPLAY_HEIGHT = metrics.heightPixels
+        DISPLAY_HEIGHT = metrics.heightPixels + getNavigationBarHeight()
         DISPLAY_WIDTH = metrics.widthPixels
         return mediaProjection!!.createVirtualDisplay(
             "LoggerBirdFragment",
@@ -2359,6 +2343,21 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             null,
             null
         )
+    }
+
+    private fun getNavigationBarHeight(): Int {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        val metrics = DisplayMetrics()
+        activity.windowManager.defaultDisplay.getMetrics(metrics)
+        val usableHeight = metrics.heightPixels
+        activity.windowManager.defaultDisplay.getRealMetrics(metrics)
+        val realHeight = metrics.heightPixels
+        return if (realHeight > usableHeight)
+            realHeight - usableHeight
+        else
+            0
+        }
+        return 0
     }
 
     /**
