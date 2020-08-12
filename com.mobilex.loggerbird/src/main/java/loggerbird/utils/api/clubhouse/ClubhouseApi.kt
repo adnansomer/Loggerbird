@@ -142,7 +142,7 @@ internal class ClubhouseApi {
             .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onResponse(call: Call, response: Response) {
-                Log.d("clubhouse_response_message", response.message)
+                Log.d("clubhouse_response_msg", response.message)
                 Log.d("clubhouse_response_code", response.code.toString())
                 try {
                     if (response.code in 200..299) {
@@ -486,7 +486,7 @@ internal class ClubhouseApi {
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails
      * method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun createAttachments(filePathMedia: File?, storyId: String) {
         try {
             val requestFile =
@@ -587,7 +587,7 @@ internal class ClubhouseApi {
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails
      * method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun uploadAttachments(storyId: String, description: String) {
         try {
             RetrofitClubhouseClient.getClubhouseUserClient(
@@ -618,8 +618,8 @@ internal class ClubhouseApi {
                             val coroutineCallClubhouseAttachments = CoroutineScope(Dispatchers.IO)
                             coroutineCallClubhouseAttachments.async {
                                 val clubhouseAttachments = response.body()
-                                Log.d("clubhouse_attachment_result", response.code().toString())
-                                Log.d("clubhouse_attachment_result", response.body().toString())
+                                Log.d("clubhouse_attachment_re", response.code().toString())
+                                Log.d("clubhouse_attachment_re", response.body().toString())
                                 LoggerBirdService.loggerBirdService.finishShareLayout("clubhouse")
 
                             }

@@ -7,6 +7,7 @@ import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubProjectAdapt
 import android.app.Activity
 import android.content.Context
 import android.os.Build
+import android.os.FileUtils
 import android.util.Log
 import android.widget.AutoCompleteTextView
 import android.widget.EditText
@@ -374,6 +375,7 @@ internal class GithubApi {
         try {
             val coroutineCallAttachments = CoroutineScope(Dispatchers.IO)
             coroutineCallAttachments.async {
+
                 val jsonObject = JsonObject()
                 jsonObject.addProperty(
                     "message",
@@ -390,6 +392,7 @@ internal class GithubApi {
                             "content",android.util.Base64.encodeToString(org.apache.commons.io.FileUtils.readFileToByteArray(file), android.util.Base64.DEFAULT)
                         )
                     }
+
                 }
                 RetrofitGithubClient.getGithubUserClient(url = "https://api.github.com/repos/${LoggerBird.githubUserName}/$repo/")
                     .create(AccountIdService::class.java)
@@ -405,6 +408,7 @@ internal class GithubApi {
                         ) {
                             githubExceptionHandler(throwable = t)
                         }
+
                         override fun onResponse(
                             call: retrofit2.Call<JsonObject>,
                             response: retrofit2.Response<JsonObject>

@@ -115,10 +115,14 @@ class LoggerBird : LifecycleObserver {
         private var formattedTime: String? = null
         private var fileLimit: Long = 2097152
         internal lateinit var fragmentLifeCycleObserver: LogFragmentLifeCycleObserver
-        private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver = LogRecyclerViewAdapterDataObserver()
-        private var recyclerViewScrollListener: LogRecyclerViewScrollListener = LogRecyclerViewScrollListener()
-        private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener = LogRecyclerViewChildAttachStateChangeListener()
-        private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener = LogRecyclerViewItemTouchListener()
+        private var recyclerViewAdapterDataObserver: LogRecyclerViewAdapterDataObserver =
+            LogRecyclerViewAdapterDataObserver()
+        private var recyclerViewScrollListener: LogRecyclerViewScrollListener =
+            LogRecyclerViewScrollListener()
+        private var recyclerViewChildAttachStateChangeListener: LogRecyclerViewChildAttachStateChangeListener =
+            LogRecyclerViewChildAttachStateChangeListener()
+        private var recyclerViewItemTouchListener: LogRecyclerViewItemTouchListener =
+            LogRecyclerViewItemTouchListener()
         private lateinit var workQueueLinked: LinkedBlockingQueueUtil
         private lateinit var recyclerViewItemObserver: LogDataSetObserver
         private lateinit var textViewFileReader: TextView
@@ -152,12 +156,11 @@ class LoggerBird : LifecycleObserver {
         internal lateinit var bitbucketUserName: String
         internal lateinit var bitbucketPassword: String
         internal lateinit var slackApiToken: String
-        internal var classPathList:ArrayList<String> = ArrayList()
-        internal var classPathCounter:Int = 0
-        internal var classPathListCounter:ArrayList<Int> = ArrayList()
-        internal var classPathTotalCounter:Int = 0
-        internal var logLevel : LoggerBirdLogLevel? = LoggerBirdLogLevel.ALL
-        private val loggerBirdKeyStore = LoggerBirdKeyStore()
+        internal var classPathList: ArrayList<String> = ArrayList()
+        internal var classPathCounter: Int = 0
+        internal var classPathListCounter: ArrayList<Int> = ArrayList()
+        internal var classPathTotalCounter: Int = 0
+        internal var logLevel: LoggerBirdLogLevel? = LoggerBirdLogLevel.ALL
         //---------------Public Methods:---------------//
 
         /**
@@ -197,7 +200,7 @@ class LoggerBird : LifecycleObserver {
                         context.startService(intentServiceMemory)
                     }
                     filePathSecessionName = filePath
-                    if(logLevel != null){
+                    if (logLevel != null) {
                         this.logLevel = logLevel
                     }
                 } catch (e: Exception) {
@@ -272,8 +275,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callCpuDetails() {
             if (controlLogInit) {
-                if(logLevel != LoggerBirdLogLevel.NONE){
-                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
+                if (logLevel != LoggerBirdLogLevel.NONE) {
+                    if (logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO) {
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeCpuDetails()
@@ -296,8 +299,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callMemoryUsageDetails(threshold: Long?) {
             if (controlLogInit) {
-                if(logLevel != LoggerBirdLogLevel.NONE){
-                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
+                if (logLevel != LoggerBirdLogLevel.NONE) {
+                    if (logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO) {
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeMemoryUsageDetails(threshold = threshold)
@@ -321,8 +324,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callComponentDetails(view: View?, resources: Resources?) {
             if (controlLogInit) {
-                if(logLevel != LoggerBirdLogLevel.NONE){
-                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
+                if (logLevel != LoggerBirdLogLevel.NONE) {
+                    if (logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO) {
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeComponentDetails(
@@ -350,8 +353,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callLifeCycleDetails() {
             if (controlLogInit) {
-                if(logLevel != LoggerBirdLogLevel.NONE){
-                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
+                if (logLevel != LoggerBirdLogLevel.NONE) {
+                    if (logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO) {
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put { takeLifeCycleDetails() }
                         }
@@ -371,8 +374,8 @@ class LoggerBird : LifecycleObserver {
          */
         fun callAnalyticsDetails(bundle: Bundle?) {
             if (controlLogInit) {
-                if(logLevel != LoggerBirdLogLevel.NONE){
-                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
+                if (logLevel != LoggerBirdLogLevel.NONE) {
+                    if (logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO) {
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeAnalyticsDetails(bundle = bundle)
@@ -395,7 +398,7 @@ class LoggerBird : LifecycleObserver {
         fun callFragmentManagerDetails(fragmentManager: FragmentManager?) {
             if (controlLogInit) {
                 if (logLevel != LoggerBirdLogLevel.NONE) {
-                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
+                    if (logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO) {
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeFragmentManagerDetails(fragmentManager = fragmentManager)
@@ -418,7 +421,7 @@ class LoggerBird : LifecycleObserver {
         fun callHttpRequestDetails(httpUrlConnection: HttpURLConnection?) {
             if (controlLogInit) {
                 if (logLevel != LoggerBirdLogLevel.NONE) {
-                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
+                    if (logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO) {
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeHttpRequestDetails(httpUrlConnection = httpUrlConnection)
@@ -450,7 +453,7 @@ class LoggerBird : LifecycleObserver {
         ) {
             if (controlLogInit) {
                 if (logLevel != LoggerBirdLogLevel.NONE) {
-                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
+                    if (logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO) {
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeInAPurchaseDetails(
@@ -491,7 +494,7 @@ class LoggerBird : LifecycleObserver {
         ) {
             if (controlLogInit) {
                 if (logLevel != LoggerBirdLogLevel.NONE) {
-                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
+                    if (logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO) {
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeOkHttpDetails(
@@ -527,7 +530,7 @@ class LoggerBird : LifecycleObserver {
         ) {
             if (controlLogInit) {
                 if (logLevel != LoggerBirdLogLevel.NONE) {
-                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
+                    if (logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO) {
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeRetrofitRequestDetails(
@@ -560,7 +563,7 @@ class LoggerBird : LifecycleObserver {
         fun callRealmDetails(realm: Realm? = null, realmModel: RealmModel? = null) {
             if (controlLogInit) {
                 if (logLevel != LoggerBirdLogLevel.NONE) {
-                    if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO){
+                    if (logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.INFO) {
                         if (runnableList.isEmpty()) {
                             workQueueLinked.put {
                                 takeRealmDetails(realm = realm, realmModel = realmModel)
@@ -592,11 +595,15 @@ class LoggerBird : LifecycleObserver {
             tag: String? = null,
             throwable: Throwable? = null
         ) {
-            if(logLevel != LoggerBirdLogLevel.NONE) {
-                if(logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.ERROR){
+            if (logLevel != LoggerBirdLogLevel.NONE) {
+                if (logLevel == LoggerBirdLogLevel.ALL || logLevel == LoggerBirdLogLevel.ERROR) {
                     if (runnableList.isEmpty()) {
                         workQueueLinked.put {
-                            takeExceptionDetails(exception = exception, tag = tag, throwable = throwable)
+                            takeExceptionDetails(
+                                exception = exception,
+                                tag = tag,
+                                throwable = throwable
+                            )
                         }
                     }
                     runnableList.add(Runnable {
@@ -969,10 +976,11 @@ class LoggerBird : LifecycleObserver {
                         if (usedMemorySize > memoryThreshold) {
                             memoryOverused = true
                             stringBuilderMemoryUsage.append(
-                                        "Memory Usage Information:\n"+
-                                        "Memory Overused: $memoryOverused\n"+
-                                        "Memory Usage: $usedMemorySize Bytes\n"+
-                                        "Memory Overused Activity: ${LogActivityLifeCycleObserver.returnActivityLifeCycleClassName}")
+                                "Memory Usage Information:\n" +
+                                        "Memory Overused: $memoryOverused\n" +
+                                        "Memory Usage: $usedMemorySize Bytes\n" +
+                                        "Memory Overused Activity: ${LogActivityLifeCycleObserver.returnActivityLifeCycleClassName}"
+                            )
 
                         }
                         saveMemoryUsageDetails()
@@ -2561,7 +2569,7 @@ class LoggerBird : LifecycleObserver {
          * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be put in the queue with callExceptionDetails ,
          * which it's details gathered by takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        @RequiresApi(Build.VERSION_CODES.M)
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             if (controlLogInit) {
                 try {
@@ -2744,6 +2752,7 @@ class LoggerBird : LifecycleObserver {
             }
             return false
         }
+
         /**
          * This method is used for returning whether Bitbucket credentials is initialized.
          * @return true if it initialized.
@@ -2760,12 +2769,23 @@ class LoggerBird : LifecycleObserver {
          * @param token is necessary to decrypt token
          * @return decrypted token to use.
          */
-        internal fun decryptTokenKey(token: String) : String{
-            val pair = loggerBirdKeyStore.encryptData(token)
-            val encryptedData = pair.second.toString(Charsets.UTF_8)
-            val decryptedData = loggerBirdKeyStore.decryptData(pair.first,pair.second)
-            return decryptedData
+        internal fun decryptTokenKey(token: String): String {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val loggerBirdKeyStore = LoggerBirdKeyStore()
+                val pair = loggerBirdKeyStore.encryptData(token)
+                val encryptedData = pair.second.toString(Charsets.UTF_8)
+                val decryptedData = loggerBirdKeyStore.decryptData(pair.first, pair.second)
+                return decryptedData
+            }
+            val loggerBirdEncryption = LoggerBirdEncryption()
+            val randomStringGenerator = RandomStringGenerator()
+            val secretKey = randomStringGenerator.randomStringGenerator()
+            return loggerBirdEncryption.decrypt(
+                stringToDecrypt = loggerBirdEncryption.encrypt(
+                    stringToEncrypt = token,
+                    secret = secretKey
+                )!!, secret = secretKey
+            )
         }
-
     }
 }

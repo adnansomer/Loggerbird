@@ -140,7 +140,6 @@ internal class RecyclerViewSlackAttachmentAdapter(
          * @param attachmentAdapter is used for getting reference of the custom recyclerView loggerbird.adapter class.
          * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        @RequiresApi(Build.VERSION_CODES.M)
         private fun removeItemPopup(
             activity: Activity,
             rootView: View,
@@ -155,7 +154,6 @@ internal class RecyclerViewSlackAttachmentAdapter(
                         (rootView as ViewGroup),
                         false
                     )
-                if (Settings.canDrawOverlays(activity)) {
                     windowManagerParamsRecyclerViewItemPopup =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             WindowManager.LayoutParams(
@@ -194,7 +192,6 @@ internal class RecyclerViewSlackAttachmentAdapter(
                             position = position
                         )
                     }
-                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
