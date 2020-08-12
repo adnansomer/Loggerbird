@@ -790,8 +790,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         internal const val REQUEST_CODE_AUDIO_PERMISSION = 2001
         internal const val REQUEST_CODE_WRITE_EXTERNAL_STORAGE_PERMISSION = 2002
         internal const val REQUEST_CODE_DRAW_OTHER_APP_SETTINGS = 2003
-        private var DISPLAY_WIDTH = 1080
-        private var DISPLAY_HEIGHT = 1920
+        private var DISPLAY_WIDTH = 720
+        private var DISPLAY_HEIGHT = 1280
         private val ORIENTATIONS = SparseIntArray()
         internal var controlPermissionRequest: Boolean = false
         private var runnableList: ArrayList<Runnable> = ArrayList()
@@ -2144,6 +2144,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                intentForegroundServiceVideo = Intent((context as Activity), LoggerBirdForegroundServiceVideo::class.java)
                 startForegroundServiceVideo()
             }
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> {
@@ -2322,7 +2323,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     mediaRecorderVideo?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
                     mediaRecorderVideo?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
                     mediaRecorderVideo?.setVideoEncodingBitRate(1000000000)
-                    mediaRecorderVideo?.setVideoFrameRate(120)
+                    mediaRecorderVideo?.setVideoFrameRate(60)
                     val rotation: Int = (context as Activity).windowManager.defaultDisplay.rotation
                     val orientation: Int = ORIENTATIONS.get(rotation + 90)
                     mediaRecorderVideo?.setOrientationHint(orientation)
