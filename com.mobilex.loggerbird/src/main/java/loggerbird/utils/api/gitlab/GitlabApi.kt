@@ -563,7 +563,7 @@ internal class GitlabApi {
      * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails
      * method and saves exceptions instance to the txt file with saveExceptionDetails method.
      */
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun createAttachments(projectId: String, filePathMedia: File?, issueId: String) {
         try {
             val jsonObject = JsonObject()

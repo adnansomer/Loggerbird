@@ -215,7 +215,6 @@ internal class RecyclerViewAsanaSubTaskAdapter(
          * @param position is used for getting reference of the current position of the item.
          * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
-        @RequiresApi(Build.VERSION_CODES.M)
         private fun removeItemPopup(
             activity: Activity,
             rootView: View,
@@ -230,7 +229,6 @@ internal class RecyclerViewAsanaSubTaskAdapter(
                         (rootView as ViewGroup),
                         false
                     )
-                if (Settings.canDrawOverlays(activity)) {
                     windowManagerParamsRecyclerViewItemPopup =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             WindowManager.LayoutParams(
@@ -269,7 +267,6 @@ internal class RecyclerViewAsanaSubTaskAdapter(
                             position = position
                         )
                     }
-                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 LoggerBird.callEnqueue()
@@ -338,7 +335,6 @@ internal class RecyclerViewAsanaSubTaskAdapter(
          * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         @SuppressLint("ClickableViewAccessibility")
-        @RequiresApi(Build.VERSION_CODES.M)
         private fun initializeSubLayout(
             activity: Activity,
             context: Context,
@@ -355,7 +351,6 @@ internal class RecyclerViewAsanaSubTaskAdapter(
                         (rootView as ViewGroup),
                         false
                     )
-                if (Settings.canDrawOverlays(activity)) {
                     windowManagerParamsAsanaSub =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             WindowManager.LayoutParams(
@@ -426,7 +421,6 @@ internal class RecyclerViewAsanaSubTaskAdapter(
                         )
                         buttonClicksAsanaSub(activity = activity)
                     }
-                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 LoggerBird.callEnqueue()

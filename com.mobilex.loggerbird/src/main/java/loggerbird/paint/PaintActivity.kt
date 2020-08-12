@@ -150,7 +150,7 @@ internal class PaintActivity : Activity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 pictureInPictureMode()
             } else {
-                finish()
+                Toast.makeText(activity,resources.getText(R.string.pip_unsupported), Toast.LENGTH_SHORT).show()
             }
         }
         paint_floating_action_button_brush.setOnClickListener {

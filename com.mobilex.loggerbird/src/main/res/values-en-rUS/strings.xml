@@ -30,6 +30,7 @@
     <string name="snackbar_ok">OK</string>
     <string name="snackbar_successfully_saved">Successfully saved!</string>
     <string name="drawing_cancelled_message">Drawing is cancelled!</string>
+    <string name="pip_unsupported">Picture in picture mode not supported in this android version!</string>
     <!-- LoggerBirdForegroundServiceVideo -->
     <string name="foreground_service_video_notification_title">LoggerBird screen recording is running.</string>
     <!-- LoggerBirdService -->
@@ -39,6 +40,7 @@
     <string name="audio_recording_finish">Audio recording finished!</string>
     <string name="screen_recording_start">Screen recording started!</string>
     <string name="screen_recording_finish">Screen recording finished!</string>
+    <string name="screen_recording_unsupported">Screen recording not supported in this version of android!</string>
     <string name="feed_back_email_empty_text">Your feedback message cannot be empty!</string>
     <string name="logger_bird_floating_action_button_permission_message">Do you want to activate Loggerbird?</string>
     <string name="logger_bird_floating_action_button_activate">Activate</string>

@@ -30,6 +30,7 @@
     <string name="snackbar_ok">TAMAM</string>
     <string name="snackbar_successfully_saved">Başarılı bir şekilde kaydedildi!</string>
     <string name="drawing_cancelled_message">Resim çizme işlemi iptal edildi!</string>
+    <string name="pip_unsupported">Resim içi resim bu android versiyonunda desteklenmemektedir!</string>
     <!-- LoggerBirdForegroundServiceVideo -->
     <string name="foreground_service_video_notification_title">LoggerBird ekran kaydedicisi çalışıyor.</string>
     <!-- LoggerBirdService -->
@@ -39,6 +40,7 @@
     <string name="audio_recording_finish">Ses kaydetme işlemi bitti!</string>
     <string name="screen_recording_start">Ekran kaydetme işlemi başladı!</string>
     <string name="screen_recording_finish">Ekran kaydetme işlemi bitti!</string>
+    <string name="screen_recording_unsupported">Ekran kaydı alma bu android versiyonunda desteklenmemektedir!</string>
     <string name="feed_back_email_empty_text">Geri bildirim mesajınız boş olamaz!</string>
     <string name="logger_bird_floating_action_button_permission_message">Loggerbird aktifleştirmek ister misiniz?</string>
     <string name="logger_bird_floating_action_button_activate">Aktif et</string>
