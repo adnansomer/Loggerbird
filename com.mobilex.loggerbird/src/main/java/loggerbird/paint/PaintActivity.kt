@@ -17,6 +17,7 @@ import android.util.Rational
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -76,21 +77,24 @@ internal class PaintActivity : Activity() {
      * This method is used for defining margins of floating action button in Paint Activity.
      */
     private fun setButtonDefaultMargins() {
-        paintView.viewTreeObserver.addOnGlobalLayoutListener {
-            paint_floating_action_button.y = activity.window.decorView.height.toFloat() - 2*paint_floating_action_button.height
-            paint_floating_action_button_brush.y =
-                (activity.window.decorView.height.toFloat()  - 3*paint_floating_action_button.height)
-            paint_floating_action_button_palette.y =
-                (activity.window.decorView.height.toFloat()  - 4*paint_floating_action_button.height)
-            paint_floating_action_button_delete.y =
-                (activity.window.decorView.height.toFloat() - 5*paint_floating_action_button.height)
-            paint_floating_action_button_erase.y =
-                (activity.window.decorView.height.toFloat()  - 6*paint_floating_action_button.height)
-            paint_floating_action_button_back.y =
-                (activity.window.decorView.height.toFloat()  - 7*paint_floating_action_button.height)
-            paint_floating_action_button_save.y =
-                (activity.window.decorView.height.toFloat()  - 8*paint_floating_action_button.height)
-        }
+        paintView.viewTreeObserver.addOnGlobalLayoutListener(object:ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                paint_floating_action_button.y = activity.window.decorView.height.toFloat() - 2*paint_floating_action_button.height
+                paint_floating_action_button_brush.y =
+                    (activity.window.decorView.height.toFloat()  - 3*paint_floating_action_button.height)
+                paint_floating_action_button_palette.y =
+                    (activity.window.decorView.height.toFloat()  - 4*paint_floating_action_button.height)
+                paint_floating_action_button_delete.y =
+                    (activity.window.decorView.height.toFloat() - 5*paint_floating_action_button.height)
+                paint_floating_action_button_erase.y =
+                    (activity.window.decorView.height.toFloat()  - 6*paint_floating_action_button.height)
+                paint_floating_action_button_back.y =
+                    (activity.window.decorView.height.toFloat()  - 7*paint_floating_action_button.height)
+                paint_floating_action_button_save.y =
+                    (activity.window.decorView.height.toFloat()  - 8*paint_floating_action_button.height)
+                paintView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+            }
+        })
     }
 
     /**
