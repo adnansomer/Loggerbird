@@ -119,7 +119,6 @@ internal class RecyclerViewJiraLabelAdapter(
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
             textViewFileName.text = item.labelName
             imageButtonCross.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
@@ -127,7 +126,6 @@ internal class RecyclerViewJiraLabelAdapter(
                         position = position,
                         labelAdapter = labelAdapter
                     )
-                }
             }
 
         }

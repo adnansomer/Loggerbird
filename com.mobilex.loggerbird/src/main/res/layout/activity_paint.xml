@@ -96,7 +96,7 @@
             app:borderWidth="0dp"
             app:elevation="0dp"
             app:fabSize="normal"
-            app:srcCompat="@drawable/ic_close_black_24dp" />
+            app:srcCompat="@drawable/ic_add_black_24dp" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

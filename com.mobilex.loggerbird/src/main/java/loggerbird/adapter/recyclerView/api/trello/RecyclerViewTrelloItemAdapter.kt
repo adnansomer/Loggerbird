@@ -140,7 +140,6 @@ internal class RecyclerViewTrelloItemAdapter(
             }
             textViewFileName.text = item.itemName
             imageButtonCross.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
@@ -149,7 +148,6 @@ internal class RecyclerViewTrelloItemAdapter(
                         checkListPosition = checkListPosition,
                         itemAdapter = itemAdapter
                     )
-                }
             }
             checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
                 arrayListItemChecked[position] = isChecked

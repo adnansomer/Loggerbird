@@ -7,6 +7,7 @@ import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -72,51 +73,22 @@ internal class PaintActivity : Activity() {
     }
 
     /**
-     * This method is used for defining margins of floating action button in Paint Activity..
+     * This method is used for defining margins of floating action button in Paint Activity.
      */
     private fun setButtonDefaultMargins() {
-        (paint_floating_action_button.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
-            0,
-            0,
-            0,
-            150
-        )
-        (paint_floating_action_button_brush.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
-            0,
-            0,
-            0,
-            300
-        )
-        (paint_floating_action_button_palette.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
-            0,
-            0,
-            0,
-            450
-        )
-        (paint_floating_action_button_delete.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
-            0,
-            0,
-            0,
-            600
-        )
-        (paint_floating_action_button_erase.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
-            0,
-            0,
-            0,
-            750
-        )
-        (paint_floating_action_button_back.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
-            0,
-            0,
-            0,
-            900
-        )
-        (paint_floating_action_button_save.layoutParams as CoordinatorLayout.LayoutParams).setMargins(
-            0,
-            0,
-            0,
-            1050
-        )
+        paint_floating_action_button.y = 0F
+        paint_floating_action_button_brush.y =
+            (paint_floating_action_button.y + paint_floating_action_button.height)
+        paint_floating_action_button_palette.y =
+            (paint_floating_action_button.y + 2*paint_floating_action_button.height)
+        paint_floating_action_button_delete.y =
+            (paint_floating_action_button.y + 3*paint_floating_action_button.height)
+        paint_floating_action_button_erase.y =
+            (paint_floating_action_button.y + 4*paint_floating_action_button.height)
+        paint_floating_action_button_back.y =
+            (paint_floating_action_button.y  + 5*paint_floating_action_button.height)
+        paint_floating_action_button_save.y =
+            (paint_floating_action_button.y + 6*paint_floating_action_button.height)
     }
 
     /**

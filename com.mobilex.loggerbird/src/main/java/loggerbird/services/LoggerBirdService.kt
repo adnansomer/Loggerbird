@@ -350,7 +350,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var progressBarFeedbackLayout: FrameLayout
 
     //Slack:
-    private val slackAuthentication = SlackApi()
+//    private val slackAuthentication = SlackApi()
     private lateinit var buttonSlackCreate: Button
     internal lateinit var buttonSlackCancel: Button
     private lateinit var buttonSlackCreateUser: Button
@@ -1195,50 +1195,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     }
                 }
             }
-
-            (floating_action_button_screenshot.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                450,
-                0,
-                0
-            )
-            (floating_action_button_video.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                150,
-                0,
-                0
-            )
-            (textView_counter_video.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                150,
-                0,
-                0
-            )
-            (textView_video_size.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                150,
-                0,
-                0
-            )
-            (floating_action_button_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                300,
-                0,
-                0
-            )
-            (textView_counter_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                300,
-                0,
-                0
-            )
-            (textView_audio_size.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                300,
-                0,
-                0
-            )
-
             if (videoRecording) {
                 floating_action_button_video.visibility = View.GONE
             }
@@ -1514,9 +1470,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             val coroutineScopeShareView = CoroutineScope(Dispatchers.IO)
             textView_send_email.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1532,9 +1488,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_jira.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1550,8 +1506,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_slack.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
                     coroutineScopeShareView.async {
                         if (!checkDuplicationField(
                                 sharedPref = sharedPref,
@@ -1568,9 +1524,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_github.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1586,9 +1542,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_gitlab.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1604,9 +1560,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_trello.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1622,9 +1578,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_pivotal.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1639,9 +1595,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             textView_share_basecamp.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1656,9 +1612,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             textView_share_asana.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1673,9 +1629,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             textView_share_clubhouse.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1690,9 +1646,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             textView_share_bitbucket.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -2308,7 +2264,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     mediaRecorderVideo?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
                     mediaRecorderVideo?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
                     mediaRecorderVideo?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-                    mediaRecorderVideo?.setVideoEncodingBitRate(500000000)
+                    mediaRecorderVideo?.setVideoEncodingBitRate(512 * 1000)
                     mediaRecorderVideo?.setVideoFrameRate(60)
                     val rotation: Int = (context as Activity).windowManager.defaultDisplay.rotation
                     val orientation: Int = ORIENTATIONS.get(rotation + 90)
@@ -2561,10 +2517,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.shakerTag)
         }
     }
+
     /**
      * This method is used for initializing actions when device was shaked.
      */
-    private fun initializeShakeAction(){
+    private fun initializeShakeAction() {
         if (checkUnhandledFilePath()) {
             gatherUnhandledExceptionDetails()
         } else {
@@ -4253,7 +4210,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 autoTextViewLinkedIssues = autoTextViewJiraLinkedIssue
             )
         ) {
-                attachProgressBar(task = "jira")
+            attachProgressBar(task = "jira")
 //                hideKeyboard(activity = activity)
             jiraAuthentication.callJira(
                 filePathMedia = filePathMedia,
@@ -5009,6 +4966,106 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing components of jira_calendar_view.
+     */
+    private fun initializeJiraStartDatePicker() {
+        val calendar = Calendar.getInstance()
+        val mYear = calendar.get(Calendar.YEAR)
+        val mMonth = calendar.get(Calendar.MONTH)
+        val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        var startDate = "$mYear-$mMonth-$mDayOfMonth"
+        calendarViewJiraLayout =
+            calendarViewJiraView.findViewById(R.id.jira_calendar_view_layout)
+        calendarViewJiraStartDate = calendarViewJiraView.findViewById(R.id.calendarView_start_date)
+        buttonCalendarViewJiraCancel =
+            calendarViewJiraView.findViewById(R.id.button_jira_calendar_cancel)
+        buttonCalendarViewJiraOk =
+            calendarViewJiraView.findViewById(R.id.button_jira_calendar_ok)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewJiraStartDate.minDate = System.currentTimeMillis()
+        }
+        if (calendarViewJiraDate != null) {
+            calendarViewJiraStartDate.setDate(calendarViewJiraDate!!, true, true)
+        }
+        calendarViewJiraLayout.setOnClickListener {
+            detachJiraDatePicker()
+        }
+        buttonCalendarViewJiraCancel.setOnClickListener {
+            detachJiraDatePicker()
+        }
+
+        buttonCalendarViewJiraOk.setOnClickListener {
+            jiraAuthentication.setStartDate(startDate = startDate)
+            detachJiraDatePicker()
+            imageButtonRemoveDate.visibility = View.VISIBLE
+        }
+        calendarViewJiraStartDate.setOnDateChangeListener { viewStartDate, year, month, dayOfMonth ->
+            calendarViewJiraDate = viewStartDate.date
+            val tempMonth = month + 1
+            startDate = "$year-$tempMonth-$dayOfMonth"
+        }
+
+    }
+
+    /**
+     * This method is used for creating custom jira date-picker layout which is attached to application overlay.
+     * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
+    private fun attachJiraDatePicker() {
+        try {
+            val rootView: ViewGroup =
+                activity.window.decorView.findViewById(android.R.id.content)
+            calendarViewJiraView =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    LayoutInflater.from(activity)
+                        .inflate(R.layout.jira_calendar_view, rootView, false)
+                } else {
+                    LayoutInflater.from(activity)
+                        .inflate(R.layout.jira_calendar_view_lower, rootView, false)
+                }
+            windowManagerParamsJiraDatePicker =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+            windowManagerJiraDatePicker = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerJiraDatePicker as WindowManager).addView(
+                calendarViewJiraView,
+                windowManagerParamsJiraDatePicker
+            )
+            initializeJiraStartDatePicker()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraDatePopupTag)
+        }
+    }
+
+    /**
+     * This method is used for removing jira_calendar_view from window.
+     */
+    private fun detachJiraDatePicker() {
+        if (this::calendarViewJiraView.isInitialized) {
+            (windowManagerJiraDatePicker as WindowManager).removeViewImmediate(
+                calendarViewJiraView
+            )
+        }
+    }
+
     //Slack
     /**
      * This method is used for creating slack layout which is attached to application overlay.
@@ -5024,68 +5081,68 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
             viewSlack = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_slack_popup, (this.rootView as ViewGroup), false)
-                windowManagerParamsSlack = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
+            windowManagerParamsSlack = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
 
-                windowManagerSlack = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            windowManagerSlack = activity.getSystemService(Context.WINDOW_SERVICE)!!
 
-                if (windowManagerSlack != null) {
-                    (windowManagerSlack as WindowManager).addView(
-                        viewSlack,
-                        windowManagerParamsSlack
-                    )
+            if (windowManagerSlack != null) {
+                (windowManagerSlack as WindowManager).addView(
+                    viewSlack,
+                    windowManagerParamsSlack
+                )
 
-                    activity.window.navigationBarColor =
-                        ContextCompat.getColor(this, R.color.black)
-                    activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+                activity.window.navigationBarColor =
+                    ContextCompat.getColor(this, R.color.black)
+                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
 
-                    spinnerChannels = viewSlack.findViewById(R.id.spinner_slack_channel)
-                    spinnerUsers = viewSlack.findViewById(R.id.spinner_slack_user)
-                    slackChannelLayout = viewSlack.findViewById(R.id.slack_send_channel_layout)
-                    slackUserLayout = viewSlack.findViewById(R.id.slack_send_user_layout)
-                    recyclerViewSlackAttachment =
-                        viewSlack.findViewById(R.id.recycler_view_slack_attachment)
-                    recyclerViewSlackAttachmentUser =
-                        viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
-                    editTextMessage = viewSlack.findViewById(R.id.editText_slack_message)
-                    editTextMessageUser =
-                        viewSlack.findViewById(R.id.editText_slack_message_user)
-                    buttonSlackCancel = viewSlack.findViewById(R.id.button_slack_cancel)
-                    buttonSlackCreate = viewSlack.findViewById(R.id.button_slack_create)
-                    buttonSlackCancelUser =
-                        viewSlack.findViewById(R.id.button_slack_cancel_user)
-                    buttonSlackCreateUser =
-                        viewSlack.findViewById(R.id.button_slack_create_user)
-                    toolbarSlack = viewSlack.findViewById(R.id.toolbar_slack)
-                    slackBottomNavigationView =
-                        viewSlack.findViewById(R.id.slack_bottom_nav_view)
+                spinnerChannels = viewSlack.findViewById(R.id.spinner_slack_channel)
+                spinnerUsers = viewSlack.findViewById(R.id.spinner_slack_user)
+                slackChannelLayout = viewSlack.findViewById(R.id.slack_send_channel_layout)
+                slackUserLayout = viewSlack.findViewById(R.id.slack_send_user_layout)
+                recyclerViewSlackAttachment =
+                    viewSlack.findViewById(R.id.recycler_view_slack_attachment)
+                recyclerViewSlackAttachmentUser =
+                    viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
+                editTextMessage = viewSlack.findViewById(R.id.editText_slack_message)
+                editTextMessageUser =
+                    viewSlack.findViewById(R.id.editText_slack_message_user)
+                buttonSlackCancel = viewSlack.findViewById(R.id.button_slack_cancel)
+                buttonSlackCreate = viewSlack.findViewById(R.id.button_slack_create)
+                buttonSlackCancelUser =
+                    viewSlack.findViewById(R.id.button_slack_cancel_user)
+                buttonSlackCreateUser =
+                    viewSlack.findViewById(R.id.button_slack_create_user)
+                toolbarSlack = viewSlack.findViewById(R.id.toolbar_slack)
+                slackBottomNavigationView =
+                    viewSlack.findViewById(R.id.slack_bottom_nav_view)
 
-                    slackAuthentication.callSlack(
-                        context = context,
-                        activity = activity,
-                        filePathMedia = filePathMedia,
-                        slackTask = "get"
-                    )
-                    initializeSlackRecyclerView(filePathMedia = filePathMedia)
-                    buttonClicksSlack(filePathMedia)
-                    attachProgressBar(task = "slack")
+//                    slackAuthentication.callSlack(
+//                        context = context,
+//                        activity = activity,
+//                        filePathMedia = filePathMedia,
+//                        slackTask = "get"
+//                    )
+                initializeSlackRecyclerView(filePathMedia = filePathMedia)
+                buttonClicksSlack(filePathMedia)
+                attachProgressBar(task = "slack")
 
-                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -5110,45 +5167,45 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicksSlack(filePathMedia: File) {
         buttonSlackCreate.setSafeOnClickListener {
-            slackAuthentication.gatherSlackChannelSpinnerDetails(
-                spinnerChannel = spinnerChannels
-            )
-            slackAuthentication.gatherSlackEditTextDetails(editTextMessage = editTextMessage)
-            slackAuthentication.gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems = arrayListSlackFileName)
-            if (slackAuthentication.checkMessageEmpty(activity = activity, context = context)) {
-                attachProgressBar(task = "slack")
-                slackAuthentication.callSlack(
-                    activity = activity,
-                    context = context,
-                    filePathMedia = filePathMedia,
-                    slackTask = "create",
-                    messagePath = slackAuthentication.channel,
-                    slackType = "channel"
-                )
-            }
+            //            slackAuthentication.gatherSlackChannelSpinnerDetails(
+//                spinnerChannel = spinnerChannels
+//            )
+//            slackAuthentication.gatherSlackEditTextDetails(editTextMessage = editTextMessage)
+//            slackAuthentication.gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems = arrayListSlackFileName)
+//            if (slackAuthentication.checkMessageEmpty(activity = activity, context = context)) {
+//                attachProgressBar(task = "slack")
+//                slackAuthentication.callSlack(
+//                    activity = activity,
+//                    context = context,
+//                    filePathMedia = filePathMedia,
+//                    slackTask = "create",
+//                    messagePath = slackAuthentication.channel,
+//                    slackType = "channel"
+//                )
+//            }
         }
 
         buttonSlackCreateUser.setSafeOnClickListener {
-            slackAuthentication.gatherSlackUserSpinnerDetails(
-                spinnerUser = spinnerUsers
-            )
-            slackAuthentication.gatherSlackUserEditTextDetails(editTextMessage = editTextMessageUser)
-            slackAuthentication.gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems = arrayListSlackFileName)
-            if (slackAuthentication.checkMessageEmptyUser(
-                    activity = activity,
-                    context = context
-                )
-            ) {
-                attachProgressBar(task = "slack")
-                slackAuthentication.callSlack(
-                    activity = activity,
-                    context = context,
-                    filePathMedia = filePathMedia,
-                    slackTask = "create",
-                    messagePath = slackAuthentication.user,
-                    slackType = "user"
-                )
-            }
+            //            slackAuthentication.gatherSlackUserSpinnerDetails(
+//                spinnerUser = spinnerUsers
+//            )
+//            slackAuthentication.gatherSlackUserEditTextDetails(editTextMessage = editTextMessageUser)
+//            slackAuthentication.gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems = arrayListSlackFileName)
+//            if (slackAuthentication.checkMessageEmptyUser(
+//                    activity = activity,
+//                    context = context
+//                )
+//            ) {
+//                attachProgressBar(task = "slack")
+//                slackAuthentication.callSlack(
+//                    activity = activity,
+//                    context = context,
+//                    filePathMedia = filePathMedia,
+//                    slackTask = "create",
+//                    messagePath = slackAuthentication.user,
+//                    slackType = "user"
+//                )
+//            }
         }
 
         buttonSlackCancel.setSafeOnClickListener {
@@ -5190,13 +5247,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         toolbarSlack.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.slack_menu_refresh -> {
-                    slackAuthentication.callSlack(
-                        context = context,
-                        activity = activity,
-                        filePathMedia = filePathMedia,
-                        slackTask = "get"
-                    )
-                    attachProgressBar(task = "slack")
+//                    slackAuthentication.callSlack(
+//                        context = context,
+//                        activity = activity,
+//                        filePathMedia = filePathMedia,
+//                        slackTask = "get"
+//                    )
+//                    attachProgressBar(task = "slack")
                 }
             }
             return@setOnMenuItemClickListener true
@@ -5270,99 +5327,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val inputMethodManager =
             (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
-    }
-
-    /**
-     * This method is used for initializing components of jira_calendar_view.
-     */
-    private fun initializeJiraStartDatePicker() {
-        val calendar = Calendar.getInstance()
-        val mYear = calendar.get(Calendar.YEAR)
-        val mMonth = calendar.get(Calendar.MONTH)
-        val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
-        var startDate = "$mYear-$mMonth-$mDayOfMonth"
-        calendarViewJiraLayout =
-            calendarViewJiraView.findViewById(R.id.jira_calendar_view_layout)
-        calendarViewJiraStartDate = calendarViewJiraView.findViewById(R.id.calendarView_start_date)
-        buttonCalendarViewJiraCancel =
-            calendarViewJiraView.findViewById(R.id.button_jira_calendar_cancel)
-        buttonCalendarViewJiraOk =
-            calendarViewJiraView.findViewById(R.id.button_jira_calendar_ok)
-
-        calendarViewJiraStartDate.minDate = System.currentTimeMillis()
-        if (calendarViewJiraDate != null) {
-            calendarViewJiraStartDate.setDate(calendarViewJiraDate!!, true, true)
-        }
-        calendarViewJiraLayout.setOnClickListener {
-            detachJiraDatePicker()
-        }
-        buttonCalendarViewJiraCancel.setOnClickListener {
-            detachJiraDatePicker()
-        }
-
-        buttonCalendarViewJiraOk.setOnClickListener {
-            jiraAuthentication.setStartDate(startDate = startDate)
-            detachJiraDatePicker()
-            imageButtonRemoveDate.visibility = View.VISIBLE
-        }
-        calendarViewJiraStartDate.setOnDateChangeListener { viewStartDate, year, month, dayOfMonth ->
-            calendarViewJiraDate = viewStartDate.date
-            startDate = "$year-$month-$dayOfMonth"
-        }
-
-    }
-
-    /**
-     * This method is used for creating custom jira date-picker layout which is attached to application overlay.
-     * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-     */
-    private fun attachJiraDatePicker() {
-        try {
-            val rootView: ViewGroup =
-                activity.window.decorView.findViewById(android.R.id.content)
-            calendarViewJiraView =
-                LayoutInflater.from(activity)
-                    .inflate(R.layout.jira_calendar_view, rootView, false)
-            windowManagerParamsJiraDatePicker =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-            windowManagerJiraDatePicker = activity.getSystemService(Context.WINDOW_SERVICE)!!
-            (windowManagerJiraDatePicker as WindowManager).addView(
-                calendarViewJiraView,
-                windowManagerParamsJiraDatePicker
-            )
-            initializeJiraStartDatePicker()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraDatePopupTag)
-        }
-    }
-
-    /**
-     * This method is used for removing jira_calendar_view from window.
-     */
-    private fun detachJiraDatePicker() {
-        if (this::calendarViewJiraView.isInitialized) {
-            (windowManagerJiraDatePicker as WindowManager).removeViewImmediate(
-                calendarViewJiraView
-            )
-        }
     }
 
     /**
@@ -5992,8 +5956,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         removeFutureDateLayout()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         viewFutureDate =
-            LayoutInflater.from(activity)
-                .inflate(R.layout.future_calendar_view, rootView, false)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.future_calendar_view, rootView, false)
+            } else {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.future_calendar_view_lower, rootView, false)
+            }
         windowManagerParamsFutureDate =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams(
@@ -6047,12 +6016,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val mMonth = calendar.get(Calendar.MONTH)
         val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         calendarFuture.set(mYear, mMonth, mDayOfMonth)
-        calendarViewFutureTask.minDate = System.currentTimeMillis()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewFutureTask.minDate = System.currentTimeMillis()
+        }
         frameLayoutFutureDate.setOnClickListener {
             removeFutureDateLayout()
         }
         calendarViewFutureTask.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            calendarFuture.set(year, month, dayOfMonth)
+            calendarFuture.set(year, month+1, dayOfMonth)
         }
         buttonFutureTaskDateCreate.setSafeOnClickListener {
             futureStartDate = calendarViewFutureTask.date
@@ -6227,153 +6198,153 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeGithubLayout()
             viewGithub = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_github_popup, (this.rootView as ViewGroup), false)
-                windowManagerParamsGithub = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerGithub = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerGithub as WindowManager).addView(
-                    viewGithub,
-                    windowManagerParamsGithub
+            windowManagerParamsGithub = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                buttonGithubCreate = viewGithub.findViewById(R.id.button_github_create)
-                buttonGithubCancel = viewGithub.findViewById(R.id.button_github_cancel)
-                autoTextViewGithubAssignee =
-                    viewGithub.findViewById(R.id.auto_textView_github_assignee)
-                autoTextViewGithubLabels = viewGithub.findViewById(R.id.auto_textView_github_labels)
-                autoTextViewGithubLinkedRequests =
-                    viewGithub.findViewById(R.id.auto_textView_github_linked_requests)
-                autoTextViewGithubMileStone =
-                    viewGithub.findViewById(R.id.auto_textView_github_milestone)
-                autoTextViewGithubRepo =
-                    viewGithub.findViewById(R.id.auto_textView_github_repo)
-                autoTextViewGithubProject =
-                    viewGithub.findViewById(R.id.auto_textView_github_project)
-                editTextGithubTitle = viewGithub.findViewById(R.id.editText_github_title)
-                editTextGithubComment = viewGithub.findViewById(R.id.editText_github_comment)
-                recyclerViewGithubAttachment =
-                    viewGithub.findViewById(R.id.recycler_view_github_attachment)
-                toolbarGithub = viewGithub.findViewById(R.id.toolbar_github)
-                scrollViewGithub = viewGithub.findViewById(R.id.scrollView_github)
-                scrollViewGithub.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        hideKeyboard(activity = activity, view = viewGithub)
-                    }
-                    return@setOnTouchListener false
-                }
-                recyclerViewGithubAssignee =
-                    viewGithub.findViewById(R.id.recycler_view_assignee_list)
-                cardViewGithubAssigneeList = viewGithub.findViewById(R.id.cardView_assignee_list)
-                imageViewGithubAssignee = viewGithub.findViewById(R.id.imageView_assignee_add)
-
-                recyclerViewGithubLabel = viewGithub.findViewById(R.id.recycler_view_label_list)
-                cardViewGithubLabelList = viewGithub.findViewById(R.id.cardView_label_list)
-                imageViewGithubLabel = viewGithub.findViewById(R.id.imageView_label_add)
-
-                recyclerViewGithubProject = viewGithub.findViewById(R.id.recycler_view_project_list)
-                cardViewGithubProjectList = viewGithub.findViewById(R.id.cardView_project_list)
-                imageViewGithubProject = viewGithub.findViewById(R.id.imageView_project_add)
-
-                toolbarGithub.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.github_menu_save -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString(
-                                    "github_repo",
-                                    autoTextViewGithubRepo.editableText.toString()
-                                )
-                                putString(
-                                    "github_project",
-                                    autoTextViewGithubProject.editableText.toString()
-                                )
-                                putString("github_title", editTextGithubTitle.text.toString())
-                                putString("github_comment", editTextGithubComment.text.toString())
-                                putString(
-                                    "github_assignee",
-                                    autoTextViewGithubAssignee.editableText.toString()
-                                )
-                                putString(
-                                    "github_labels",
-                                    autoTextViewGithubLabels.editableText.toString()
-                                )
-                                putString(
-                                    "github_milestone",
-                                    autoTextViewGithubMileStone.editableText.toString()
-                                )
-                                putString(
-                                    "github_pull_requests",
-                                    autoTextViewGithubLinkedRequests.editableText.toString()
-                                )
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.github_issue_preferences_save)
-                            )
-                        }
-                        R.id.github_menu_clear -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            val editor: SharedPreferences.Editor = sharedPref.edit()
-                            editor.remove("github_comment")
-                            editor.remove("github_title")
-                            editor.remove("github_repo")
-                            editor.remove("github_project")
-                            editor.remove("github_milestone")
-                            editor.remove("github_assignee")
-                            editor.remove("github_labels")
-                            editor.remove("github_pull_requests")
-                            editor.apply()
-                            clearGithubComponents()
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.github_issue_preferences_delete)
-                            )
-                        }
-                    }
-                    return@setOnMenuItemClickListener true
-                }
-
-                toolbarGithub.setNavigationOnClickListener {
-                    removeGithubLayout()
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.VISIBLE
-                    }
-                }
-
-                initializeGithubAttachmentRecyclerView(filePathMedia = filePathMedia)
-                initializeGithubAssigneeRecyclerView()
-                initializeGithubLabelRecyclerView()
-                initializeGithubProjectRecyclerView()
-                buttonClicksGithub(filePathMedia = filePathMedia)
-                githubAuthentication.callGithub(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "github")
+            }
+
+            windowManagerGithub = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerGithub as WindowManager).addView(
+                viewGithub,
+                windowManagerParamsGithub
+            )
+
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+            buttonGithubCreate = viewGithub.findViewById(R.id.button_github_create)
+            buttonGithubCancel = viewGithub.findViewById(R.id.button_github_cancel)
+            autoTextViewGithubAssignee =
+                viewGithub.findViewById(R.id.auto_textView_github_assignee)
+            autoTextViewGithubLabels = viewGithub.findViewById(R.id.auto_textView_github_labels)
+            autoTextViewGithubLinkedRequests =
+                viewGithub.findViewById(R.id.auto_textView_github_linked_requests)
+            autoTextViewGithubMileStone =
+                viewGithub.findViewById(R.id.auto_textView_github_milestone)
+            autoTextViewGithubRepo =
+                viewGithub.findViewById(R.id.auto_textView_github_repo)
+            autoTextViewGithubProject =
+                viewGithub.findViewById(R.id.auto_textView_github_project)
+            editTextGithubTitle = viewGithub.findViewById(R.id.editText_github_title)
+            editTextGithubComment = viewGithub.findViewById(R.id.editText_github_comment)
+            recyclerViewGithubAttachment =
+                viewGithub.findViewById(R.id.recycler_view_github_attachment)
+            toolbarGithub = viewGithub.findViewById(R.id.toolbar_github)
+            scrollViewGithub = viewGithub.findViewById(R.id.scrollView_github)
+            scrollViewGithub.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    hideKeyboard(activity = activity, view = viewGithub)
+                }
+                return@setOnTouchListener false
+            }
+            recyclerViewGithubAssignee =
+                viewGithub.findViewById(R.id.recycler_view_assignee_list)
+            cardViewGithubAssigneeList = viewGithub.findViewById(R.id.cardView_assignee_list)
+            imageViewGithubAssignee = viewGithub.findViewById(R.id.imageView_assignee_add)
+
+            recyclerViewGithubLabel = viewGithub.findViewById(R.id.recycler_view_label_list)
+            cardViewGithubLabelList = viewGithub.findViewById(R.id.cardView_label_list)
+            imageViewGithubLabel = viewGithub.findViewById(R.id.imageView_label_add)
+
+            recyclerViewGithubProject = viewGithub.findViewById(R.id.recycler_view_project_list)
+            cardViewGithubProjectList = viewGithub.findViewById(R.id.cardView_project_list)
+            imageViewGithubProject = viewGithub.findViewById(R.id.imageView_project_add)
+
+            toolbarGithub.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.github_menu_save -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        with(sharedPref.edit()) {
+                            putString(
+                                "github_repo",
+                                autoTextViewGithubRepo.editableText.toString()
+                            )
+                            putString(
+                                "github_project",
+                                autoTextViewGithubProject.editableText.toString()
+                            )
+                            putString("github_title", editTextGithubTitle.text.toString())
+                            putString("github_comment", editTextGithubComment.text.toString())
+                            putString(
+                                "github_assignee",
+                                autoTextViewGithubAssignee.editableText.toString()
+                            )
+                            putString(
+                                "github_labels",
+                                autoTextViewGithubLabels.editableText.toString()
+                            )
+                            putString(
+                                "github_milestone",
+                                autoTextViewGithubMileStone.editableText.toString()
+                            )
+                            putString(
+                                "github_pull_requests",
+                                autoTextViewGithubLinkedRequests.editableText.toString()
+                            )
+                            commit()
+                        }
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.github_issue_preferences_save)
+                        )
+                    }
+                    R.id.github_menu_clear -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("github_comment")
+                        editor.remove("github_title")
+                        editor.remove("github_repo")
+                        editor.remove("github_project")
+                        editor.remove("github_milestone")
+                        editor.remove("github_assignee")
+                        editor.remove("github_labels")
+                        editor.remove("github_pull_requests")
+                        editor.apply()
+                        clearGithubComponents()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.github_issue_preferences_delete)
+                        )
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            toolbarGithub.setNavigationOnClickListener {
+                removeGithubLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+
+            initializeGithubAttachmentRecyclerView(filePathMedia = filePathMedia)
+            initializeGithubAssigneeRecyclerView()
+            initializeGithubLabelRecyclerView()
+            initializeGithubProjectRecyclerView()
+            buttonClicksGithub(filePathMedia = filePathMedia)
+            githubAuthentication.callGithub(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "github")
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -6737,7 +6708,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGithubRepo.setOnItemClickListener { parent, view, position, id ->
             githubAuthentication.setRepoPosition(repoPosition = position)
-                attachProgressBar(task = "github")
+            attachProgressBar(task = "github")
             hideKeyboard(activity = activity, view = viewGithub)
             clearGithubComponents()
             githubAuthentication.callGithub(
@@ -7004,147 +6975,147 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeTrelloLayout()
             viewTrello = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_trello_popup, (this.rootView as ViewGroup), false)
-                windowManagerParamsTrello = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerTrello = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerTrello as WindowManager).addView(
-                    viewTrello,
-                    windowManagerParamsTrello
+            windowManagerParamsTrello = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                buttonTrelloCancel = viewTrello.findViewById(R.id.button_trello_cancel)
-                buttonTrelloCreate = viewTrello.findViewById(R.id.button_trello_create)
-                editTextTrelloTitle = viewTrello.findViewById(R.id.editText_trello_title)
-                editTextTrelloDescription =
-                    viewTrello.findViewById(R.id.editText_trello_description)
-                editTextTrelloCheckList = viewTrello.findViewById(R.id.editText_trello_check_list)
-                toolbarTrello = viewTrello.findViewById(R.id.toolbar_trello)
-                recyclerViewTrelloAttachment =
-                    viewTrello.findViewById(R.id.recycler_view_trello_attachment)
-                autoTextViewTrelloProject =
-                    viewTrello.findViewById(R.id.auto_textView_trello_project)
-                autoTextViewTrelloBoard = viewTrello.findViewById(R.id.auto_textView_trello_board)
-                autoTextViewTrelloMember = viewTrello.findViewById(R.id.auto_textView_trello_member)
-                autoTextViewTrelloLabel = viewTrello.findViewById(R.id.auto_textView_trello_label)
-                recyclerViewTrelloLabel = viewTrello.findViewById(R.id.recycler_view_label_list)
-                imageViewTrelloLabel = viewTrello.findViewById(R.id.imageView_label_add)
-                cardViewTrelloLabelList = viewTrello.findViewById(R.id.cardView_label_list)
-                recyclerViewTrelloMember = viewTrello.findViewById(R.id.recycler_view_member_list)
-                imageViewTrelloMember = viewTrello.findViewById(R.id.imageView_member_add)
-                cardViewTrelloMemberList = viewTrello.findViewById(R.id.cardView_member_list)
-                recyclerViewTrelloCheckList =
-                    viewTrello.findViewById(R.id.recycler_view_check_list_list)
-                imageViewTrelloCheckList = viewTrello.findViewById(R.id.imageView_check_list_add)
-                cardViewTrelloCheckList = viewTrello.findViewById(R.id.cardView_check_list_list)
-                imageViewTrelloCalendar = viewTrello.findViewById(R.id.imageView_start_date)
-                imageButtonTrelloRemoveTimeline =
-                    viewTrello.findViewById(R.id.image_button_trello_remove_date)
-                scrollViewTrello = viewTrello.findViewById(R.id.scrollView_trello)
-                scrollViewTrello.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        hideKeyboard(activity = activity, view = viewTrello)
-                    }
-                    return@setOnTouchListener false
-                }
-
-                toolbarTrello.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.trello_menu_save -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString(
-                                    "trello_project",
-                                    autoTextViewTrelloProject.editableText.toString()
-                                )
-                                putString(
-                                    "trello_board",
-                                    autoTextViewTrelloBoard.editableText.toString()
-                                )
-                                putString("trello_title", editTextTrelloTitle.text.toString())
-                                putString(
-                                    "trello_description",
-                                    editTextTrelloDescription.text.toString()
-                                )
-                                putString(
-                                    "trello_checklist",
-                                    editTextTrelloCheckList.text.toString()
-                                )
-                                putString(
-                                    "trello_member",
-                                    autoTextViewTrelloMember.editableText.toString()
-                                )
-                                putString(
-                                    "trello_label",
-                                    autoTextViewTrelloLabel.editableText.toString()
-                                )
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.trello_issue_preferences_save)
-                            )
-                        }
-                        R.id.trello_menu_clear -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            val editor: SharedPreferences.Editor = sharedPref.edit()
-                            editor.remove("trello_title")
-                            editor.remove("trello_description")
-                            editor.remove("trello_project")
-                            editor.remove("trello_board")
-                            editor.remove("trello_member")
-                            editor.remove("trello_label")
-                            editor.remove("trello_checklist")
-                            editor.apply()
-                            clearTrelloComponents()
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.trello_issue_preferences_delete)
-                            )
-                        }
-                    }
-                    return@setOnMenuItemClickListener true
-                }
-
-                toolbarTrello.setNavigationOnClickListener {
-                    removeTrelloLayout()
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.VISIBLE
-                    }
-                }
-                initializeTrelloRecyclerView(filePathMedia = filePathMedia)
-                initializeTrelloLabelRecyclerView()
-                initializeTrelloMemberRecyclerView()
-                initializeTrelloCheckListRecyclerView()
-                buttonClicksTrello()
-                trelloAuthentication.callTrello(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "trello")
+            }
+
+            windowManagerTrello = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerTrello as WindowManager).addView(
+                viewTrello,
+                windowManagerParamsTrello
+            )
+
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+            buttonTrelloCancel = viewTrello.findViewById(R.id.button_trello_cancel)
+            buttonTrelloCreate = viewTrello.findViewById(R.id.button_trello_create)
+            editTextTrelloTitle = viewTrello.findViewById(R.id.editText_trello_title)
+            editTextTrelloDescription =
+                viewTrello.findViewById(R.id.editText_trello_description)
+            editTextTrelloCheckList = viewTrello.findViewById(R.id.editText_trello_check_list)
+            toolbarTrello = viewTrello.findViewById(R.id.toolbar_trello)
+            recyclerViewTrelloAttachment =
+                viewTrello.findViewById(R.id.recycler_view_trello_attachment)
+            autoTextViewTrelloProject =
+                viewTrello.findViewById(R.id.auto_textView_trello_project)
+            autoTextViewTrelloBoard = viewTrello.findViewById(R.id.auto_textView_trello_board)
+            autoTextViewTrelloMember = viewTrello.findViewById(R.id.auto_textView_trello_member)
+            autoTextViewTrelloLabel = viewTrello.findViewById(R.id.auto_textView_trello_label)
+            recyclerViewTrelloLabel = viewTrello.findViewById(R.id.recycler_view_label_list)
+            imageViewTrelloLabel = viewTrello.findViewById(R.id.imageView_label_add)
+            cardViewTrelloLabelList = viewTrello.findViewById(R.id.cardView_label_list)
+            recyclerViewTrelloMember = viewTrello.findViewById(R.id.recycler_view_member_list)
+            imageViewTrelloMember = viewTrello.findViewById(R.id.imageView_member_add)
+            cardViewTrelloMemberList = viewTrello.findViewById(R.id.cardView_member_list)
+            recyclerViewTrelloCheckList =
+                viewTrello.findViewById(R.id.recycler_view_check_list_list)
+            imageViewTrelloCheckList = viewTrello.findViewById(R.id.imageView_check_list_add)
+            cardViewTrelloCheckList = viewTrello.findViewById(R.id.cardView_check_list_list)
+            imageViewTrelloCalendar = viewTrello.findViewById(R.id.imageView_start_date)
+            imageButtonTrelloRemoveTimeline =
+                viewTrello.findViewById(R.id.image_button_trello_remove_date)
+            scrollViewTrello = viewTrello.findViewById(R.id.scrollView_trello)
+            scrollViewTrello.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    hideKeyboard(activity = activity, view = viewTrello)
+                }
+                return@setOnTouchListener false
+            }
+
+            toolbarTrello.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.trello_menu_save -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        with(sharedPref.edit()) {
+                            putString(
+                                "trello_project",
+                                autoTextViewTrelloProject.editableText.toString()
+                            )
+                            putString(
+                                "trello_board",
+                                autoTextViewTrelloBoard.editableText.toString()
+                            )
+                            putString("trello_title", editTextTrelloTitle.text.toString())
+                            putString(
+                                "trello_description",
+                                editTextTrelloDescription.text.toString()
+                            )
+                            putString(
+                                "trello_checklist",
+                                editTextTrelloCheckList.text.toString()
+                            )
+                            putString(
+                                "trello_member",
+                                autoTextViewTrelloMember.editableText.toString()
+                            )
+                            putString(
+                                "trello_label",
+                                autoTextViewTrelloLabel.editableText.toString()
+                            )
+                            commit()
+                        }
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.trello_issue_preferences_save)
+                        )
+                    }
+                    R.id.trello_menu_clear -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("trello_title")
+                        editor.remove("trello_description")
+                        editor.remove("trello_project")
+                        editor.remove("trello_board")
+                        editor.remove("trello_member")
+                        editor.remove("trello_label")
+                        editor.remove("trello_checklist")
+                        editor.apply()
+                        clearTrelloComponents()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.trello_issue_preferences_delete)
+                        )
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            toolbarTrello.setNavigationOnClickListener {
+                removeTrelloLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+            initializeTrelloRecyclerView(filePathMedia = filePathMedia)
+            initializeTrelloLabelRecyclerView()
+            initializeTrelloMemberRecyclerView()
+            initializeTrelloCheckListRecyclerView()
+            buttonClicksTrello()
+            trelloAuthentication.callTrello(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "trello")
         } catch (e: Exception) {
             finishShareLayout("trello_error")
             e.printStackTrace()
@@ -7755,8 +7726,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         calendarTrello = Calendar.getInstance()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         viewTrelloDate =
-            LayoutInflater.from(activity)
-                .inflate(R.layout.trello_calendar_view, rootView, false)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.trello_calendar_view, rootView, false)
+            } else {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.trello_calendar_view_lower, rootView, false)
+            }
         windowManagerParamsTrelloDate =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams(
@@ -7808,12 +7784,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val mMonth = calendar.get(Calendar.MONTH)
         val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         calendarTrello?.set(mYear, mMonth, mDayOfMonth)
-        calendarViewTrello.minDate = System.currentTimeMillis()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewTrello.minDate = System.currentTimeMillis()
+        }
         frameLayoutTrelloDate.setOnClickListener {
             removeTrelloDateLayout()
         }
         calendarViewTrello.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            calendarTrello?.set(year, month, dayOfMonth)
+            calendarTrello?.set(year, month+1, dayOfMonth)
 //            startDate = "$year-$month-$dayOfMonth"
         }
         buttonTrelloDateCreate.setSafeOnClickListener {
@@ -7923,90 +7901,90 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeGitlabLayout()
             viewGitlab = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_gitlab_popup, (this.rootView as ViewGroup), false)
-                windowManagerParamsGitlab = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-                windowManagerGitlab = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                if (windowManagerGitlab != null) {
-                    (windowManagerGitlab as WindowManager).addView(
-                        viewGitlab,
-                        windowManagerParamsGitlab
-                    )
-                }
-                if (Build.VERSION.SDK_INT >= 23) {
+            windowManagerParamsGitlab = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+            windowManagerGitlab = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            if (windowManagerGitlab != null) {
+                (windowManagerGitlab as WindowManager).addView(
+                    viewGitlab,
+                    windowManagerParamsGitlab
+                )
+            }
+            if (Build.VERSION.SDK_INT >= 23) {
+                activity.window.navigationBarColor =
+                    resources.getColor(R.color.black, theme)
+                activity.window.statusBarColor =
+                    resources.getColor(R.color.black, theme)
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     activity.window.navigationBarColor =
-                        resources.getColor(R.color.black, theme)
-                    activity.window.statusBarColor =
-                        resources.getColor(R.color.black, theme)
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        activity.window.navigationBarColor =
-                            resources.getColor(R.color.black)
-                        activity.window.statusBarColor = resources.getColor(R.color.black)
-                    }
+                        resources.getColor(R.color.black)
+                    activity.window.statusBarColor = resources.getColor(R.color.black)
                 }
-                toolbarGitlab = viewGitlab.findViewById(R.id.toolbar_gitlab)
-                autoTextViewGitlabProject =
-                    viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
-                editTextGitlabTitle = viewGitlab.findViewById(R.id.editText_gitlab_title)
-                editTextGitlabDescription =
-                    viewGitlab.findViewById(R.id.editText_gitlab_description)
-                editTextGitlabWeight = viewGitlab.findViewById(R.id.editText_gitlab_weight)
-                autoTextViewGitlabMilestone =
-                    viewGitlab.findViewById(R.id.auto_textView_gitlab_milestone)
-                autoTextViewGitlabAssignee =
-                    viewGitlab.findViewById(R.id.auto_textView_gitlab_assignee)
-                autoTextViewGitlabLabels = viewGitlab.findViewById(R.id.auto_textView_gitlab_labels)
-                autoTextViewGitlabConfidentiality =
-                    viewGitlab.findViewById(R.id.auto_textView_gitlab_confidentiality)
-                textViewGitlabDueDate = viewGitlab.findViewById(R.id.textView_gitlab_due_date)
-                buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
-                buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
-                linearLayoutGitlabConfidentiality =
-                    viewGitlab.findViewById(R.id.linearLayout_gitlab_confidentiality)
-                linearLayoutGitlabMilestone =
-                    viewGitlab.findViewById(R.id.linearLayout_gitlab_milestone)
-                textViewGitlabMilestone = viewGitlab.findViewById(R.id.textView_gitlab_milestone)
-                imageViewGitlabMilestone = viewGitlab.findViewById(R.id.imageView_delete_milestone)
-                linearLayoutGitlabAssignee =
-                    viewGitlab.findViewById(R.id.linearLayout_gitlab_assignee)
-                linearLayoutGitlabLabels = viewGitlab.findViewById(R.id.linearLayout_gitlab_labels)
-                textViewGitlabLabels = viewGitlab.findViewById(R.id.textView_gitlab_labels)
-                imageViewGitlabLabels = viewGitlab.findViewById(R.id.imageView_delete_labels)
-                imageViewGitlabDueDate =
-                    viewGitlab.findViewById(R.id.imageView_gitlab_delete_due_date)
-                recyclerViewGitlabAttachment =
-                    viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
-                editTextGitlabWeight.filters = arrayOf<InputFilter>(
-                    InputTypeFilter(
-                        "0",
-                        "100"
-                    )
+            }
+            toolbarGitlab = viewGitlab.findViewById(R.id.toolbar_gitlab)
+            autoTextViewGitlabProject =
+                viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
+            editTextGitlabTitle = viewGitlab.findViewById(R.id.editText_gitlab_title)
+            editTextGitlabDescription =
+                viewGitlab.findViewById(R.id.editText_gitlab_description)
+            editTextGitlabWeight = viewGitlab.findViewById(R.id.editText_gitlab_weight)
+            autoTextViewGitlabMilestone =
+                viewGitlab.findViewById(R.id.auto_textView_gitlab_milestone)
+            autoTextViewGitlabAssignee =
+                viewGitlab.findViewById(R.id.auto_textView_gitlab_assignee)
+            autoTextViewGitlabLabels = viewGitlab.findViewById(R.id.auto_textView_gitlab_labels)
+            autoTextViewGitlabConfidentiality =
+                viewGitlab.findViewById(R.id.auto_textView_gitlab_confidentiality)
+            textViewGitlabDueDate = viewGitlab.findViewById(R.id.textView_gitlab_due_date)
+            buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
+            buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
+            linearLayoutGitlabConfidentiality =
+                viewGitlab.findViewById(R.id.linearLayout_gitlab_confidentiality)
+            linearLayoutGitlabMilestone =
+                viewGitlab.findViewById(R.id.linearLayout_gitlab_milestone)
+            textViewGitlabMilestone = viewGitlab.findViewById(R.id.textView_gitlab_milestone)
+            imageViewGitlabMilestone = viewGitlab.findViewById(R.id.imageView_delete_milestone)
+            linearLayoutGitlabAssignee =
+                viewGitlab.findViewById(R.id.linearLayout_gitlab_assignee)
+            linearLayoutGitlabLabels = viewGitlab.findViewById(R.id.linearLayout_gitlab_labels)
+            textViewGitlabLabels = viewGitlab.findViewById(R.id.textView_gitlab_labels)
+            imageViewGitlabLabels = viewGitlab.findViewById(R.id.imageView_delete_labels)
+            imageViewGitlabDueDate =
+                viewGitlab.findViewById(R.id.imageView_gitlab_delete_due_date)
+            recyclerViewGitlabAttachment =
+                viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
+            editTextGitlabWeight.filters = arrayOf<InputFilter>(
+                InputTypeFilter(
+                    "0",
+                    "100"
                 )
-                gitlabAuthentication.callGitlab(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
-                )
+            )
+            gitlabAuthentication.callGitlab(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
 
-                attachProgressBar("gitlab")
-                initializeGitlabAttachmentRecyclerView(filePathMedia = filePathMedia)
-                buttonClicksGitlab(filePathMedia = filePathMedia)
+            attachProgressBar("gitlab")
+            initializeGitlabAttachmentRecyclerView(filePathMedia = filePathMedia)
+            buttonClicksGitlab(filePathMedia = filePathMedia)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -8033,7 +8011,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         buttonCalendarViewGitlabOk =
             calendarViewGitlabView.findViewById(R.id.button_gitlab_calendar_ok)
 
-        calendarViewGitlabDueDate.minDate = System.currentTimeMillis()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewGitlabDueDate.minDate = System.currentTimeMillis()
+        }
         if (calendarViewGitlabDate != null) {
             calendarViewGitlabDueDate.date = calendarViewGitlabDate!!
         }
@@ -8085,9 +8065,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         try {
             val rootView: ViewGroup =
                 activity.window.decorView.findViewById(android.R.id.content)
-            calendarViewGitlabView =
+            calendarViewGitlabView = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 LayoutInflater.from(activity)
                     .inflate(R.layout.gitlab_calendar_view, rootView, false)
+            } else {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.gitlab_calendar_view_lower, rootView, false)
+            }
             windowManagerParamsGitlabDatePicker =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
@@ -8278,7 +8262,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGitlabProject.setOnItemClickListener { parent, view, position, id ->
             gitlabAuthentication.gitlabProjectPosition(projectPosition = position)
-                attachProgressBar(task = "gitlab")
+            attachProgressBar(task = "gitlab")
             gitlabAuthentication.callGitlab(
                 activity = activity,
                 context = context,
@@ -8547,173 +8531,173 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-                windowManagerParamsPivotal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerPivotal = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerPivotal as WindowManager).addView(
-                    viewPivotal,
-                    windowManagerParamsPivotal
+            windowManagerParamsPivotal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                buttonPivotalCancel = viewPivotal.findViewById(R.id.button_pivotal_cancel)
-                buttonPivotalCreate = viewPivotal.findViewById(R.id.button_pivotal_create)
-                toolbarPivotal = viewPivotal.findViewById(R.id.toolbar_pivotal)
-                scrollViewPivotal = viewPivotal.findViewById(R.id.scrollView_pivotal)
-                editTextPivotalTitle = viewPivotal.findViewById(R.id.editText_pivotal_title)
-                autoTextViewPivotalStoryType =
-                    viewPivotal.findViewById(R.id.auto_textView_pivotal_story_type)
-                autoTextViewPivotalPoints =
-                    viewPivotal.findViewById(R.id.auto_textView_pivotal_points)
-                autoTextViewPivotalRequester =
-                    viewPivotal.findViewById(R.id.auto_textView_pivotal_requester)
-                autoTextViewPivotalProject =
-                    viewPivotal.findViewById(R.id.auto_textView_pivotal_project)
-                autoTextViewPivotalOwners =
-                    viewPivotal.findViewById(R.id.auto_textView_pivotal_owner)
-                autoTextViewPivotalLabel =
-                    viewPivotal.findViewById(R.id.auto_textView_pivotal_label)
-                imageViewPivotalOwners = viewPivotal.findViewById(R.id.imageView_owner_add)
-                cardViewPivotalOwnersList = viewPivotal.findViewById(R.id.cardView_owner_list)
-                recyclerViewPivotalOwnerList =
-                    viewPivotal.findViewById(R.id.recycler_view_pivotal_owner_list)
-                editTextPivotalBlockers = viewPivotal.findViewById(R.id.editText_pivotal_blockers)
-                imageViewPivotalBlockers = viewPivotal.findViewById(R.id.imageView_block_add)
-                cardViewPivotalBlockersList = viewPivotal.findViewById(R.id.cardView_blockers_list)
-                recyclerViewPivotalBlockersList =
-                    viewPivotal.findViewById(R.id.recycler_view_pivotal_blockers_list)
-                editTextPivotalDescription =
-                    viewPivotal.findViewById(R.id.editText_pivotal_description)
-                imageViewPivotalLabel = viewPivotal.findViewById(R.id.imageView_label_add)
-                cardViewPivotalLabelList = viewPivotal.findViewById(R.id.cardView_label_list)
-                recyclerViewPivotalLabelList =
-                    viewPivotal.findViewById(R.id.recycler_view_pivotal_label_list)
-                editTextPivotalTasks = viewPivotal.findViewById(R.id.editText_pivotal_tasks)
-                imageViewPivotalTask = viewPivotal.findViewById(R.id.imageView_task_add)
-                cardViewPivotalTasksList = viewPivotal.findViewById(R.id.cardView_task_list)
-                recyclerViewPivotalTaskList =
-                    viewPivotal.findViewById(R.id.recycler_view_pivotal_task_list)
-                cardViewPivotalAttachments = viewPivotal.findViewById(R.id.cardView_attachment)
-                recyclerViewPivotalAttachmentList =
-                    viewPivotal.findViewById(R.id.recycler_view_pivotal_attachment)
-
-                scrollViewPivotal.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        hideKeyboard(activity = activity, view = viewPivotal)
-                    }
-                    return@setOnTouchListener false
-                }
-
-                toolbarPivotal.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.pivotal_menu_save -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString(
-                                    "pivotal_project",
-                                    autoTextViewPivotalProject.editableText.toString()
-                                )
-                                putString(
-                                    "pivotal_label",
-                                    autoTextViewPivotalLabel.editableText.toString()
-                                )
-                                putString(
-                                    "pivotal_owner",
-                                    autoTextViewPivotalOwners.editableText.toString()
-                                )
-                                putString(
-                                    "pivotal_points",
-                                    autoTextViewPivotalPoints.editableText.toString()
-                                )
-                                putString(
-                                    "pivotal_requester",
-                                    autoTextViewPivotalRequester.editableText.toString()
-                                )
-                                putString(
-                                    "pivotal_story_type",
-                                    autoTextViewPivotalStoryType.editableText.toString()
-                                )
-                                putString("pivotal_title", editTextPivotalTitle.text.toString())
-                                putString(
-                                    "pivotal_blockers",
-                                    editTextPivotalBlockers.text.toString()
-                                )
-                                putString(
-                                    "pivotal_description",
-                                    editTextPivotalDescription.text.toString()
-                                )
-                                putString("pivotal_tasks", editTextPivotalTasks.text.toString())
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.pivotal_issue_preferences_save)
-                            )
-                        }
-                        R.id.pivotal_menu_clear -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            val editor: SharedPreferences.Editor = sharedPref.edit()
-                            editor.remove("pivotal_project")
-                            editor.remove("pivotal_label")
-                            editor.remove("pivotal_owner")
-                            editor.remove("pivotal_points")
-                            editor.remove("pivotal_requester")
-                            editor.remove("pivotal_story_type")
-                            editor.remove("pivotal_title")
-                            editor.remove("pivotal_blockers")
-                            editor.remove("pivotal_description")
-                            editor.remove("pivotal_tasks")
-                            editor.apply()
-                            clearPivotalComponents()
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.pivotal_issue_preferences_delete)
-                            )
-                        }
-                    }
-                    return@setOnMenuItemClickListener true
-                }
-
-                toolbarPivotal.setNavigationOnClickListener {
-                    removePivotalLayout()
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.VISIBLE
-                    }
-                }
-                initializePivotalAttachmentRecyclerView(filePathMedia = filePathMedia)
-                initializePivotalTaskRecyclerView()
-                initializePivotalBlockerRecyclerView()
-                initializePivotalLabelRecyclerView()
-                initializePivotalOwnerRecyclerView()
-                buttonClicksPivotal()
-                pivotalAuthentication.callPivotal(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "pivotal")
+            }
+
+            windowManagerPivotal = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerPivotal as WindowManager).addView(
+                viewPivotal,
+                windowManagerParamsPivotal
+            )
+
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+            buttonPivotalCancel = viewPivotal.findViewById(R.id.button_pivotal_cancel)
+            buttonPivotalCreate = viewPivotal.findViewById(R.id.button_pivotal_create)
+            toolbarPivotal = viewPivotal.findViewById(R.id.toolbar_pivotal)
+            scrollViewPivotal = viewPivotal.findViewById(R.id.scrollView_pivotal)
+            editTextPivotalTitle = viewPivotal.findViewById(R.id.editText_pivotal_title)
+            autoTextViewPivotalStoryType =
+                viewPivotal.findViewById(R.id.auto_textView_pivotal_story_type)
+            autoTextViewPivotalPoints =
+                viewPivotal.findViewById(R.id.auto_textView_pivotal_points)
+            autoTextViewPivotalRequester =
+                viewPivotal.findViewById(R.id.auto_textView_pivotal_requester)
+            autoTextViewPivotalProject =
+                viewPivotal.findViewById(R.id.auto_textView_pivotal_project)
+            autoTextViewPivotalOwners =
+                viewPivotal.findViewById(R.id.auto_textView_pivotal_owner)
+            autoTextViewPivotalLabel =
+                viewPivotal.findViewById(R.id.auto_textView_pivotal_label)
+            imageViewPivotalOwners = viewPivotal.findViewById(R.id.imageView_owner_add)
+            cardViewPivotalOwnersList = viewPivotal.findViewById(R.id.cardView_owner_list)
+            recyclerViewPivotalOwnerList =
+                viewPivotal.findViewById(R.id.recycler_view_pivotal_owner_list)
+            editTextPivotalBlockers = viewPivotal.findViewById(R.id.editText_pivotal_blockers)
+            imageViewPivotalBlockers = viewPivotal.findViewById(R.id.imageView_block_add)
+            cardViewPivotalBlockersList = viewPivotal.findViewById(R.id.cardView_blockers_list)
+            recyclerViewPivotalBlockersList =
+                viewPivotal.findViewById(R.id.recycler_view_pivotal_blockers_list)
+            editTextPivotalDescription =
+                viewPivotal.findViewById(R.id.editText_pivotal_description)
+            imageViewPivotalLabel = viewPivotal.findViewById(R.id.imageView_label_add)
+            cardViewPivotalLabelList = viewPivotal.findViewById(R.id.cardView_label_list)
+            recyclerViewPivotalLabelList =
+                viewPivotal.findViewById(R.id.recycler_view_pivotal_label_list)
+            editTextPivotalTasks = viewPivotal.findViewById(R.id.editText_pivotal_tasks)
+            imageViewPivotalTask = viewPivotal.findViewById(R.id.imageView_task_add)
+            cardViewPivotalTasksList = viewPivotal.findViewById(R.id.cardView_task_list)
+            recyclerViewPivotalTaskList =
+                viewPivotal.findViewById(R.id.recycler_view_pivotal_task_list)
+            cardViewPivotalAttachments = viewPivotal.findViewById(R.id.cardView_attachment)
+            recyclerViewPivotalAttachmentList =
+                viewPivotal.findViewById(R.id.recycler_view_pivotal_attachment)
+
+            scrollViewPivotal.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    hideKeyboard(activity = activity, view = viewPivotal)
+                }
+                return@setOnTouchListener false
+            }
+
+            toolbarPivotal.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.pivotal_menu_save -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        with(sharedPref.edit()) {
+                            putString(
+                                "pivotal_project",
+                                autoTextViewPivotalProject.editableText.toString()
+                            )
+                            putString(
+                                "pivotal_label",
+                                autoTextViewPivotalLabel.editableText.toString()
+                            )
+                            putString(
+                                "pivotal_owner",
+                                autoTextViewPivotalOwners.editableText.toString()
+                            )
+                            putString(
+                                "pivotal_points",
+                                autoTextViewPivotalPoints.editableText.toString()
+                            )
+                            putString(
+                                "pivotal_requester",
+                                autoTextViewPivotalRequester.editableText.toString()
+                            )
+                            putString(
+                                "pivotal_story_type",
+                                autoTextViewPivotalStoryType.editableText.toString()
+                            )
+                            putString("pivotal_title", editTextPivotalTitle.text.toString())
+                            putString(
+                                "pivotal_blockers",
+                                editTextPivotalBlockers.text.toString()
+                            )
+                            putString(
+                                "pivotal_description",
+                                editTextPivotalDescription.text.toString()
+                            )
+                            putString("pivotal_tasks", editTextPivotalTasks.text.toString())
+                            commit()
+                        }
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.pivotal_issue_preferences_save)
+                        )
+                    }
+                    R.id.pivotal_menu_clear -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("pivotal_project")
+                        editor.remove("pivotal_label")
+                        editor.remove("pivotal_owner")
+                        editor.remove("pivotal_points")
+                        editor.remove("pivotal_requester")
+                        editor.remove("pivotal_story_type")
+                        editor.remove("pivotal_title")
+                        editor.remove("pivotal_blockers")
+                        editor.remove("pivotal_description")
+                        editor.remove("pivotal_tasks")
+                        editor.apply()
+                        clearPivotalComponents()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.pivotal_issue_preferences_delete)
+                        )
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            toolbarPivotal.setNavigationOnClickListener {
+                removePivotalLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+            initializePivotalAttachmentRecyclerView(filePathMedia = filePathMedia)
+            initializePivotalTaskRecyclerView()
+            initializePivotalBlockerRecyclerView()
+            initializePivotalLabelRecyclerView()
+            initializePivotalOwnerRecyclerView()
+            buttonClicksPivotal()
+            pivotalAuthentication.callPivotal(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "pivotal")
         } catch (e: Exception) {
             finishShareLayout("pivotal_error")
             e.printStackTrace()
@@ -9376,162 +9360,162 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-                windowManagerParamsBaseCamp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerBasecamp = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerBasecamp as WindowManager).addView(
-                    viewBasecamp,
-                    windowManagerParamsBaseCamp
+            windowManagerParamsBaseCamp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                buttonBasecampCancel = viewBasecamp.findViewById(R.id.button_basecamp_cancel)
-                buttonBasecampCreate = viewBasecamp.findViewById(R.id.button_basecamp_create)
-                toolbarBasecamp = viewBasecamp.findViewById(R.id.toolbar_basecamp)
-                autoTextViewBasecampProject =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_project)
-                autoTextViewBasecampAssignee =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_assignee)
-                autoTextViewBasecampCategory =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_category)
-                autoTextViewBasecampNotify =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_notify)
-                editTextBasecampDescriptionMessage =
-                    viewBasecamp.findViewById(R.id.editText_basecamp_description_messsage)
-                editTextBasecampDescriptionTodo =
-                    viewBasecamp.findViewById(R.id.editText_basecamp_description_todo)
-                editTextBasecampTitle =
-                    viewBasecamp.findViewById(R.id.editText_basecamp_title)
-                editTextBasecampContent = viewBasecamp.findViewById(R.id.editText_basecamp_content)
-                editTextBasecampName = viewBasecamp.findViewById(R.id.editText_basecamp_name)
-                imageViewBasecampAssignee = viewBasecamp.findViewById(R.id.imageView_assignee_add)
-                imageViewBasecampNotify = viewBasecamp.findViewById(R.id.imageView_notify_add)
-                cardViewBasecampAssigneeList =
-                    viewBasecamp.findViewById(R.id.cardView_assignee_list)
-                cardViewBasecampNotifyList = viewBasecamp.findViewById(R.id.cardView_notify_list)
-                recyclerViewBasecampAssigneeList =
-                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_assignee_list)
-                recyclerViewBasecampNotifyList =
-                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_notify_list)
-                recyclerViewBasecampAttachmentList =
-                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_attachment)
-                imageButtonBasecampRemoveDate =
-                    viewBasecamp.findViewById(R.id.image_button_basecamp_remove_date)
-                imageViewBasecampDate = viewBasecamp.findViewById(R.id.imageView_start_date)
-                scrollViewBasecamp = viewBasecamp.findViewById(R.id.scrollView_basecamp)
-                scrollViewBasecamp.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        hideKeyboard(activity = activity, view = viewBasecamp)
-                    }
-                    return@setOnTouchListener false
-                }
-
-                toolbarBasecamp.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.basecamp_menu_save -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString(
-                                    "basecamp_project",
-                                    autoTextViewBasecampProject.editableText.toString()
-                                )
-                                putString(
-                                    "basecamp_assignee",
-                                    autoTextViewBasecampAssignee.editableText.toString()
-                                )
-                                putString(
-                                    "basecamp_category",
-                                    autoTextViewBasecampCategory.editableText.toString()
-                                )
-                                putString(
-                                    "basecamp_notify",
-                                    autoTextViewBasecampNotify.editableText.toString()
-                                )
-                                putString(
-                                    "basecamp_description_message",
-                                    editTextBasecampDescriptionMessage.text.toString()
-                                )
-                                putString(
-                                    "basecamp_description_todo",
-                                    editTextBasecampDescriptionTodo.text.toString()
-                                )
-                                putString(
-                                    "basecamp_title",
-                                    editTextBasecampTitle.text.toString()
-                                )
-                                putString(
-                                    "basecamp_content",
-                                    editTextBasecampContent.text.toString()
-                                )
-                                putString("basecamp_name", editTextBasecampName.text.toString())
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.basecamp_issue_preferences_save)
-                            )
-                        }
-                        R.id.basecamp_menu_clear -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            val editor: SharedPreferences.Editor = sharedPref.edit()
-                            editor.remove("basecamp_project")
-                            editor.remove("basecamp_assignee")
-                            editor.remove("basecamp_category")
-                            editor.remove("basecamp_notify")
-                            editor.remove("basecamp_description_message")
-                            editor.remove("basecamp_description_todo")
-                            editor.remove("basecamp_title")
-                            editor.remove("basecamp_content")
-                            editor.remove("basecamp_name")
-                            editor.apply()
-                            clearBasecampComponents()
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.basecamp_issue_preferences_delete)
-                            )
-                        }
-                    }
-                    return@setOnMenuItemClickListener true
-                }
-
-                toolbarBasecamp.setNavigationOnClickListener {
-                    removeBasecampLayout()
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.VISIBLE
-                    }
-                }
-                initializeBasecampAttachmentRecyclerView(filePathMedia = filePathMedia)
-                initializeBasecampAssigneeRecyclerView()
-                initializeBasecampNotifyRecyclerView()
-                buttonClicksBasecamp()
-                basecampAuthentication.callBasecamp(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "basecamp")
+            }
+
+            windowManagerBasecamp = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerBasecamp as WindowManager).addView(
+                viewBasecamp,
+                windowManagerParamsBaseCamp
+            )
+
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+            buttonBasecampCancel = viewBasecamp.findViewById(R.id.button_basecamp_cancel)
+            buttonBasecampCreate = viewBasecamp.findViewById(R.id.button_basecamp_create)
+            toolbarBasecamp = viewBasecamp.findViewById(R.id.toolbar_basecamp)
+            autoTextViewBasecampProject =
+                viewBasecamp.findViewById(R.id.auto_textView_basecamp_project)
+            autoTextViewBasecampAssignee =
+                viewBasecamp.findViewById(R.id.auto_textView_basecamp_assignee)
+            autoTextViewBasecampCategory =
+                viewBasecamp.findViewById(R.id.auto_textView_basecamp_category)
+            autoTextViewBasecampNotify =
+                viewBasecamp.findViewById(R.id.auto_textView_basecamp_notify)
+            editTextBasecampDescriptionMessage =
+                viewBasecamp.findViewById(R.id.editText_basecamp_description_messsage)
+            editTextBasecampDescriptionTodo =
+                viewBasecamp.findViewById(R.id.editText_basecamp_description_todo)
+            editTextBasecampTitle =
+                viewBasecamp.findViewById(R.id.editText_basecamp_title)
+            editTextBasecampContent = viewBasecamp.findViewById(R.id.editText_basecamp_content)
+            editTextBasecampName = viewBasecamp.findViewById(R.id.editText_basecamp_name)
+            imageViewBasecampAssignee = viewBasecamp.findViewById(R.id.imageView_assignee_add)
+            imageViewBasecampNotify = viewBasecamp.findViewById(R.id.imageView_notify_add)
+            cardViewBasecampAssigneeList =
+                viewBasecamp.findViewById(R.id.cardView_assignee_list)
+            cardViewBasecampNotifyList = viewBasecamp.findViewById(R.id.cardView_notify_list)
+            recyclerViewBasecampAssigneeList =
+                viewBasecamp.findViewById(R.id.recycler_view_basecamp_assignee_list)
+            recyclerViewBasecampNotifyList =
+                viewBasecamp.findViewById(R.id.recycler_view_basecamp_notify_list)
+            recyclerViewBasecampAttachmentList =
+                viewBasecamp.findViewById(R.id.recycler_view_basecamp_attachment)
+            imageButtonBasecampRemoveDate =
+                viewBasecamp.findViewById(R.id.image_button_basecamp_remove_date)
+            imageViewBasecampDate = viewBasecamp.findViewById(R.id.imageView_start_date)
+            scrollViewBasecamp = viewBasecamp.findViewById(R.id.scrollView_basecamp)
+            scrollViewBasecamp.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    hideKeyboard(activity = activity, view = viewBasecamp)
+                }
+                return@setOnTouchListener false
+            }
+
+            toolbarBasecamp.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.basecamp_menu_save -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        with(sharedPref.edit()) {
+                            putString(
+                                "basecamp_project",
+                                autoTextViewBasecampProject.editableText.toString()
+                            )
+                            putString(
+                                "basecamp_assignee",
+                                autoTextViewBasecampAssignee.editableText.toString()
+                            )
+                            putString(
+                                "basecamp_category",
+                                autoTextViewBasecampCategory.editableText.toString()
+                            )
+                            putString(
+                                "basecamp_notify",
+                                autoTextViewBasecampNotify.editableText.toString()
+                            )
+                            putString(
+                                "basecamp_description_message",
+                                editTextBasecampDescriptionMessage.text.toString()
+                            )
+                            putString(
+                                "basecamp_description_todo",
+                                editTextBasecampDescriptionTodo.text.toString()
+                            )
+                            putString(
+                                "basecamp_title",
+                                editTextBasecampTitle.text.toString()
+                            )
+                            putString(
+                                "basecamp_content",
+                                editTextBasecampContent.text.toString()
+                            )
+                            putString("basecamp_name", editTextBasecampName.text.toString())
+                            commit()
+                        }
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.basecamp_issue_preferences_save)
+                        )
+                    }
+                    R.id.basecamp_menu_clear -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("basecamp_project")
+                        editor.remove("basecamp_assignee")
+                        editor.remove("basecamp_category")
+                        editor.remove("basecamp_notify")
+                        editor.remove("basecamp_description_message")
+                        editor.remove("basecamp_description_todo")
+                        editor.remove("basecamp_title")
+                        editor.remove("basecamp_content")
+                        editor.remove("basecamp_name")
+                        editor.apply()
+                        clearBasecampComponents()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.basecamp_issue_preferences_delete)
+                        )
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            toolbarBasecamp.setNavigationOnClickListener {
+                removeBasecampLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+            initializeBasecampAttachmentRecyclerView(filePathMedia = filePathMedia)
+            initializeBasecampAssigneeRecyclerView()
+            initializeBasecampNotifyRecyclerView()
+            buttonClicksBasecamp()
+            basecampAuthentication.callBasecamp(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "basecamp")
         } catch (e: Exception) {
             finishShareLayout("basecamp_error")
             e.printStackTrace()
@@ -10040,8 +10024,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //        calendarTrello = Calendar.getInstance()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         viewBasecampDate =
-            LayoutInflater.from(activity)
-                .inflate(R.layout.basecamp_calendar_view, rootView, false)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.basecamp_calendar_view, rootView, false)
+            } else {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.basecamp_calendar_view_lower, rootView, false)
+            }
         windowManagerParamsBaseCampDate =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams(
@@ -10091,12 +10080,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val mMonth = calendar.get(Calendar.MONTH)
         val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         var startDate = "$mYear-$mMonth-$mDayOfMonth"
-        calendarViewBasecamp.minDate = System.currentTimeMillis()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewBasecamp.minDate = System.currentTimeMillis()
+        }
         frameLayoutBasecampDate.setOnClickListener {
             removeBasecampDateLayout()
         }
         calendarViewBasecamp.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            startDate = "$year-$month-$dayOfMonth"
+            val tempMonth = month + 1
+            startDate = "$year-$tempMonth-$dayOfMonth"
         }
         buttonBasecampDateCreate.setSafeOnClickListener {
             imageButtonBasecampRemoveDate.visibility = View.VISIBLE
@@ -10126,142 +10118,142 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-                windowManagerParamsAsana = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerAsana = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerAsana as WindowManager).addView(
-                    viewAsana,
-                    windowManagerParamsAsana
+            windowManagerParamsAsana = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                buttonAsanaCancel = viewAsana.findViewById(R.id.button_asana_cancel)
-                buttonAsanaCreate = viewAsana.findViewById(R.id.button_asana_create)
-                toolbarAsana = viewAsana.findViewById(R.id.toolbar_asana)
-                autoTextViewAsanaProject = viewAsana.findViewById(R.id.auto_textView_asana_project)
-                autoTextViewAsanaAssignee =
-                    viewAsana.findViewById(R.id.auto_textView_asana_assignee)
-                autoTextViewAsanaSector =
-                    viewAsana.findViewById(R.id.auto_textView_asana_section)
-                autoTextViewAsanaPriority =
-                    viewAsana.findViewById(R.id.auto_textView_asana_priority)
-                editTextAsanaDescription = viewAsana.findViewById(R.id.editText_asana_description)
-                editTextAsanaSubTask = viewAsana.findViewById(R.id.editText_asana_sub_tasks)
-                editTextAsanaTaskName = viewAsana.findViewById(R.id.editText_asana_task_name)
-                imageViewAsanaStartDate = viewAsana.findViewById(R.id.imageView_start_date)
-                imageViewAsanaTaskAdd = viewAsana.findViewById(R.id.imageView_task_add)
-                imageButtonAsanaRemoveDate =
-                    viewAsana.findViewById(R.id.image_button_asana_remove_date)
-                recyclerViewAsanaAttachmentList =
-                    viewAsana.findViewById(R.id.recycler_view_asana_attachment)
-                recyclerViewAsanaSubTasksList =
-                    viewAsana.findViewById(R.id.recycler_view_asana_sub_tasks_list)
-                cardViewAsanaSubTasksList = viewAsana.findViewById(R.id.cardView_sub_tasks_list)
-                scrollViewAsana = viewAsana.findViewById(R.id.scrollView_asana)
-                scrollViewAsana.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        hideKeyboard(activity = activity, view = viewAsana)
-                    }
-                    return@setOnTouchListener false
-                }
-
-                toolbarAsana.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.asana_menu_save -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString(
-                                    "asana_project",
-                                    autoTextViewAsanaProject.editableText.toString()
-                                )
-                                putString(
-                                    "asana_assignee",
-                                    autoTextViewAsanaAssignee.editableText.toString()
-                                )
-                                putString(
-                                    "asana_section",
-                                    autoTextViewAsanaSector.editableText.toString()
-                                )
-                                putString(
-                                    "asana_priority",
-                                    autoTextViewAsanaPriority.editableText.toString()
-                                )
-                                putString(
-                                    "asana_description",
-                                    editTextAsanaDescription.text.toString()
-                                )
-                                putString(
-                                    "asana_subtask",
-                                    editTextAsanaSubTask.text.toString()
-                                )
-                                putString(
-                                    "asana_task_name",
-                                    editTextAsanaTaskName.text.toString()
-                                )
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.asana_issue_preferences_save)
-                            )
-                        }
-                        R.id.asana_menu_clear -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            val editor: SharedPreferences.Editor = sharedPref.edit()
-                            editor.remove("asana_project")
-                            editor.remove("asana_assignee")
-                            editor.remove("asana_section")
-                            editor.remove("asana_priority")
-                            editor.remove("asana_description")
-                            editor.remove("asana_subtask")
-                            editor.remove("asana_task_name")
-                            editor.apply()
-                            clearAsanaComponents()
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.asana_issue_preferences_delete)
-                            )
-                        }
-                    }
-                    return@setOnMenuItemClickListener true
-                }
-
-                toolbarAsana.setNavigationOnClickListener {
-                    removeAsanaLayout()
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.VISIBLE
-                    }
-                }
-                initializeAsanaAttachmentRecyclerView(filePathMedia = filePathMedia)
-                buttonClicksAsana()
-                asanaAuthentication.callAsana(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "asana")
+            }
+
+            windowManagerAsana = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerAsana as WindowManager).addView(
+                viewAsana,
+                windowManagerParamsAsana
+            )
+
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+            buttonAsanaCancel = viewAsana.findViewById(R.id.button_asana_cancel)
+            buttonAsanaCreate = viewAsana.findViewById(R.id.button_asana_create)
+            toolbarAsana = viewAsana.findViewById(R.id.toolbar_asana)
+            autoTextViewAsanaProject = viewAsana.findViewById(R.id.auto_textView_asana_project)
+            autoTextViewAsanaAssignee =
+                viewAsana.findViewById(R.id.auto_textView_asana_assignee)
+            autoTextViewAsanaSector =
+                viewAsana.findViewById(R.id.auto_textView_asana_section)
+            autoTextViewAsanaPriority =
+                viewAsana.findViewById(R.id.auto_textView_asana_priority)
+            editTextAsanaDescription = viewAsana.findViewById(R.id.editText_asana_description)
+            editTextAsanaSubTask = viewAsana.findViewById(R.id.editText_asana_sub_tasks)
+            editTextAsanaTaskName = viewAsana.findViewById(R.id.editText_asana_task_name)
+            imageViewAsanaStartDate = viewAsana.findViewById(R.id.imageView_start_date)
+            imageViewAsanaTaskAdd = viewAsana.findViewById(R.id.imageView_task_add)
+            imageButtonAsanaRemoveDate =
+                viewAsana.findViewById(R.id.image_button_asana_remove_date)
+            recyclerViewAsanaAttachmentList =
+                viewAsana.findViewById(R.id.recycler_view_asana_attachment)
+            recyclerViewAsanaSubTasksList =
+                viewAsana.findViewById(R.id.recycler_view_asana_sub_tasks_list)
+            cardViewAsanaSubTasksList = viewAsana.findViewById(R.id.cardView_sub_tasks_list)
+            scrollViewAsana = viewAsana.findViewById(R.id.scrollView_asana)
+            scrollViewAsana.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    hideKeyboard(activity = activity, view = viewAsana)
+                }
+                return@setOnTouchListener false
+            }
+
+            toolbarAsana.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.asana_menu_save -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        with(sharedPref.edit()) {
+                            putString(
+                                "asana_project",
+                                autoTextViewAsanaProject.editableText.toString()
+                            )
+                            putString(
+                                "asana_assignee",
+                                autoTextViewAsanaAssignee.editableText.toString()
+                            )
+                            putString(
+                                "asana_section",
+                                autoTextViewAsanaSector.editableText.toString()
+                            )
+                            putString(
+                                "asana_priority",
+                                autoTextViewAsanaPriority.editableText.toString()
+                            )
+                            putString(
+                                "asana_description",
+                                editTextAsanaDescription.text.toString()
+                            )
+                            putString(
+                                "asana_subtask",
+                                editTextAsanaSubTask.text.toString()
+                            )
+                            putString(
+                                "asana_task_name",
+                                editTextAsanaTaskName.text.toString()
+                            )
+                            commit()
+                        }
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.asana_issue_preferences_save)
+                        )
+                    }
+                    R.id.asana_menu_clear -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("asana_project")
+                        editor.remove("asana_assignee")
+                        editor.remove("asana_section")
+                        editor.remove("asana_priority")
+                        editor.remove("asana_description")
+                        editor.remove("asana_subtask")
+                        editor.remove("asana_task_name")
+                        editor.apply()
+                        clearAsanaComponents()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.asana_issue_preferences_delete)
+                        )
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            toolbarAsana.setNavigationOnClickListener {
+                removeAsanaLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+            initializeAsanaAttachmentRecyclerView(filePathMedia = filePathMedia)
+            buttonClicksAsana()
+            asanaAuthentication.callAsana(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "asana")
         } catch (e: Exception) {
             finishShareLayout("asana_error")
             e.printStackTrace()
@@ -10677,8 +10669,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         removeAsanaDateLayout()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         viewAsanaDate =
-            LayoutInflater.from(activity)
-                .inflate(R.layout.asana_calendar_view, rootView, false)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.asana_calendar_view, rootView, false)
+            } else {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.asana_calendar_view_lower, rootView, false)
+            }
         windowManagerParamsAsanaDate =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams(
@@ -10743,15 +10740,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             mDayOfMonth.toString()
         }
         var startDate = "$mYear-$mTempMonth-$mTempDay"
-        calendarViewAsana.minDate = System.currentTimeMillis() + 86400000
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewAsana.minDate = System.currentTimeMillis() + 86400000
+        }
         frameLayoutAsanaDate.setOnClickListener {
             removeAsanaDateLayout()
         }
         calendarViewAsana.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            val tempMonth: String = if (month in 1..9) {
-                "0$month"
+            val tempMonthMonth = month +1
+            val tempMonth: String = if (tempMonthMonth in 1..9) {
+                "0$tempMonthMonth"
             } else {
-                month.toString()
+                tempMonthMonth.toString()
             }
             val tempDay: String = if (dayOfMonth in 1..9) {
                 "0$dayOfMonth"
@@ -10798,65 +10798,65 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeClubhouseLayout()
             viewClubhouse = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_clubhouse_popup, (this.rootView as ViewGroup), false)
-                windowManagerParamsClubhouse = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-                windowManagerClubhouse = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerClubhouse as WindowManager).addView(
-                    viewClubhouse,
-                    windowManagerParamsClubhouse
+            windowManagerParamsClubhouse = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-                toolbarClubhouse = viewClubhouse.findViewById(R.id.toolbar_clubhouse)
-                buttonClubhouseCancel = viewClubhouse.findViewById(R.id.button_clubhouse_cancel)
-                buttonClubhouseCreate = viewClubhouse.findViewById(R.id.button_clubhouse_create)
-                editTextClubhouseStoryName =
-                    viewClubhouse.findViewById(R.id.editText_clubhouse_story_name)
-                editTextClubhouseStoryDescription =
-                    viewClubhouse.findViewById(R.id.editText_clubhouse_description)
-                autoTextViewClubhouseRequester =
-                    viewClubhouse.findViewById(R.id.auto_textView_clubhouse_requester)
-                autoTextViewClubhouseStoryType =
-                    viewClubhouse.findViewById(R.id.auto_textView_clubhouse_story_type)
-                recyclerViewClubhouseAttachment =
-                    viewClubhouse.findViewById(R.id.recycler_view_clubhouse_attachment)
-                autoTextViewClubhouseProject =
-                    viewClubhouse.findViewById(R.id.auto_textview_clubhouse_project)
-                autoTextViewClubhouseEpic =
-                    viewClubhouse.findViewById(R.id.auto_textView_clubhouse_epic)
-                textViewClubhouseDueDate =
-                    viewClubhouse.findViewById(R.id.textView_clubhouse_due_date)
-                editTextClubhouseEstimate =
-                    viewClubhouse.findViewById(R.id.editText_clubhouse_estimate_point)
-                textViewClubhouseEpic = viewClubhouse.findViewById(R.id.textView_clubhouse_epic)
-                linearLayoutClubhouseEpic =
-                    viewClubhouse.findViewById(R.id.linearLayout_clubhouse_epic)
-                imageViewClubhouseDueDate =
-                    viewClubhouse.findViewById(R.id.imageView_delete_clubhouse_dueDate)
-                clubhouseAuthentication.callClubhouse(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "clubhouse")
-                initializeClubhouseAttachmentRecyclerView(filePathMedia = filePathMedia)
-                buttonClicksClubhouse(filePathMedia = filePathMedia)
+            }
+            windowManagerClubhouse = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerClubhouse as WindowManager).addView(
+                viewClubhouse,
+                windowManagerParamsClubhouse
+            )
+            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+            toolbarClubhouse = viewClubhouse.findViewById(R.id.toolbar_clubhouse)
+            buttonClubhouseCancel = viewClubhouse.findViewById(R.id.button_clubhouse_cancel)
+            buttonClubhouseCreate = viewClubhouse.findViewById(R.id.button_clubhouse_create)
+            editTextClubhouseStoryName =
+                viewClubhouse.findViewById(R.id.editText_clubhouse_story_name)
+            editTextClubhouseStoryDescription =
+                viewClubhouse.findViewById(R.id.editText_clubhouse_description)
+            autoTextViewClubhouseRequester =
+                viewClubhouse.findViewById(R.id.auto_textView_clubhouse_requester)
+            autoTextViewClubhouseStoryType =
+                viewClubhouse.findViewById(R.id.auto_textView_clubhouse_story_type)
+            recyclerViewClubhouseAttachment =
+                viewClubhouse.findViewById(R.id.recycler_view_clubhouse_attachment)
+            autoTextViewClubhouseProject =
+                viewClubhouse.findViewById(R.id.auto_textview_clubhouse_project)
+            autoTextViewClubhouseEpic =
+                viewClubhouse.findViewById(R.id.auto_textView_clubhouse_epic)
+            textViewClubhouseDueDate =
+                viewClubhouse.findViewById(R.id.textView_clubhouse_due_date)
+            editTextClubhouseEstimate =
+                viewClubhouse.findViewById(R.id.editText_clubhouse_estimate_point)
+            textViewClubhouseEpic = viewClubhouse.findViewById(R.id.textView_clubhouse_epic)
+            linearLayoutClubhouseEpic =
+                viewClubhouse.findViewById(R.id.linearLayout_clubhouse_epic)
+            imageViewClubhouseDueDate =
+                viewClubhouse.findViewById(R.id.imageView_delete_clubhouse_dueDate)
+            clubhouseAuthentication.callClubhouse(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "clubhouse")
+            initializeClubhouseAttachmentRecyclerView(filePathMedia = filePathMedia)
+            buttonClicksClubhouse(filePathMedia = filePathMedia)
         } catch (e: Exception) {
             finishShareLayout("clubhouse_error")
             e.printStackTrace()
@@ -11020,7 +11020,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewClubhouseProject.setOnItemClickListener { parent, view, position, id ->
             clubhouseAuthentication.clubhouseProjectPosition(projectPosition = position)
             hideKeyboard(activity = activity, view = viewClubhouse)
-                attachProgressBar(task = "clubhouse")
+            attachProgressBar(task = "clubhouse")
             clubhouseAuthentication.callClubhouse(
                 activity = activity,
                 context = context,
@@ -11160,8 +11160,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         try {
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             calendarViewClubhouseView =
-                LayoutInflater.from(activity)
-                    .inflate(R.layout.clubhouse_calendar_view, rootView, false)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    LayoutInflater.from(activity)
+                        .inflate(R.layout.clubhouse_calendar_view, rootView, false)
+                } else {
+                    LayoutInflater.from(activity)
+                        .inflate(R.layout.clubhouse_calendar_view_lower, rootView, false)
+                }
             windowManagerParamsClubhouseDatePicker =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
@@ -11211,7 +11216,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_cancel)
         buttonCalendarViewClubhouseOk =
             calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_ok)
-        calendarViewClubhouseDueDate.minDate = System.currentTimeMillis()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewClubhouseDueDate.minDate = System.currentTimeMillis()
+        }
         if (calendarViewClubhouseDate != null) {
             calendarViewClubhouseDueDate.date = calendarViewClubhouseDate!!
         }
@@ -11879,134 +11886,134 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-                windowManagerParamsBitbucket = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerBitbucket = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerBitbucket as WindowManager).addView(
-                    viewBitbucket,
-                    windowManagerParamsBitbucket
+            windowManagerParamsBitbucket = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                buttonBitbucketCancel = viewBitbucket.findViewById(R.id.button_bitbucket_cancel)
-                buttonBitbucketCreate = viewBitbucket.findViewById(R.id.button_bitbucket_create)
-                toolbarBitbucket = viewBitbucket.findViewById(R.id.toolbar_bitbucket)
-                autoTextViewBitbucketProject =
-                    viewBitbucket.findViewById(R.id.auto_textView_bitbucket_project)
-                autoTextviewBitbucketKind =
-                    viewBitbucket.findViewById(R.id.auto_textView_bitbucket_kind)
-                autoTextViewBitbucketAssignee =
-                    viewBitbucket.findViewById(R.id.auto_textView_bitbucket_assignee)
-                autoTextViewBitbucketPriority =
-                    viewBitbucket.findViewById(R.id.auto_textView_bitbucket_priority)
-                editTextBitbucketTitle = viewBitbucket.findViewById(R.id.editText_bitbucket_title)
-                editTextBitbucketDescription =
-                    viewBitbucket.findViewById(R.id.editText_bitbucket_description)
-                editTextBitbucketTitle = viewBitbucket.findViewById(R.id.editText_bitbucket_title)
-                editTextBitbucketDescription =
-                    viewBitbucket.findViewById(R.id.editText_bitbucket_description)
-                recyclerViewBitbucketAttachmentList =
-                    viewBitbucket.findViewById(R.id.recycler_view_bitbucket_attachment)
-                scrollViewBitbucket = viewBitbucket.findViewById(R.id.scrollView_bitbucket)
-                scrollViewBitbucket.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        hideKeyboard(activity = activity, view = viewBitbucket)
-                    }
-                    return@setOnTouchListener false
-                }
-
-                toolbarBitbucket.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.bitbucket_menu_save -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString(
-                                    "bitbucket_project",
-                                    autoTextViewBitbucketProject.editableText.toString()
-                                )
-                                putString(
-                                    "bitbucket_assignee",
-                                    autoTextViewBitbucketAssignee.editableText.toString()
-                                )
-                                putString(
-                                    "bitbucket_kind",
-                                    autoTextviewBitbucketKind.editableText.toString()
-                                )
-                                putString(
-                                    "bitbucket_priority",
-                                    autoTextViewBitbucketPriority.editableText.toString()
-                                )
-                                putString(
-                                    "bitbucket_description",
-                                    editTextBitbucketDescription.text.toString()
-                                )
-                                putString(
-                                    "bitbucket_title",
-                                    editTextBitbucketTitle.text.toString()
-                                )
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.bitbucket_issue_preferences_save)
-                            )
-                        }
-                        R.id.bitbucket_menu_clear -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            val editor: SharedPreferences.Editor = sharedPref.edit()
-                            editor.remove("bitbucket_project")
-                            editor.remove("bitbucket_assignee")
-                            editor.remove("bitbucket_kind")
-                            editor.remove("bitbucket_priority")
-                            editor.remove("bitbucket_description")
-                            editor.remove("bitbucket_title")
-                            editor.apply()
-                            clearBitbucketComponents()
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.bitbucket_issue_preferences_delete)
-                            )
-                        }
-                    }
-                    return@setOnMenuItemClickListener true
-                }
-
-                toolbarBitbucket.setNavigationOnClickListener {
-                    removeBitbucketLayout()
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.VISIBLE
-                    }
-                }
-                initializeBitbucketAttachmentRecyclerView(filePathMedia = filePathMedia)
-                buttonClicksBitbucket()
-                bitbucketAuthentication.callBitbucket(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "bitbucket")
+            }
+
+            windowManagerBitbucket = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerBitbucket as WindowManager).addView(
+                viewBitbucket,
+                windowManagerParamsBitbucket
+            )
+
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+            buttonBitbucketCancel = viewBitbucket.findViewById(R.id.button_bitbucket_cancel)
+            buttonBitbucketCreate = viewBitbucket.findViewById(R.id.button_bitbucket_create)
+            toolbarBitbucket = viewBitbucket.findViewById(R.id.toolbar_bitbucket)
+            autoTextViewBitbucketProject =
+                viewBitbucket.findViewById(R.id.auto_textView_bitbucket_project)
+            autoTextviewBitbucketKind =
+                viewBitbucket.findViewById(R.id.auto_textView_bitbucket_kind)
+            autoTextViewBitbucketAssignee =
+                viewBitbucket.findViewById(R.id.auto_textView_bitbucket_assignee)
+            autoTextViewBitbucketPriority =
+                viewBitbucket.findViewById(R.id.auto_textView_bitbucket_priority)
+            editTextBitbucketTitle = viewBitbucket.findViewById(R.id.editText_bitbucket_title)
+            editTextBitbucketDescription =
+                viewBitbucket.findViewById(R.id.editText_bitbucket_description)
+            editTextBitbucketTitle = viewBitbucket.findViewById(R.id.editText_bitbucket_title)
+            editTextBitbucketDescription =
+                viewBitbucket.findViewById(R.id.editText_bitbucket_description)
+            recyclerViewBitbucketAttachmentList =
+                viewBitbucket.findViewById(R.id.recycler_view_bitbucket_attachment)
+            scrollViewBitbucket = viewBitbucket.findViewById(R.id.scrollView_bitbucket)
+            scrollViewBitbucket.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    hideKeyboard(activity = activity, view = viewBitbucket)
+                }
+                return@setOnTouchListener false
+            }
+
+            toolbarBitbucket.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.bitbucket_menu_save -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        with(sharedPref.edit()) {
+                            putString(
+                                "bitbucket_project",
+                                autoTextViewBitbucketProject.editableText.toString()
+                            )
+                            putString(
+                                "bitbucket_assignee",
+                                autoTextViewBitbucketAssignee.editableText.toString()
+                            )
+                            putString(
+                                "bitbucket_kind",
+                                autoTextviewBitbucketKind.editableText.toString()
+                            )
+                            putString(
+                                "bitbucket_priority",
+                                autoTextViewBitbucketPriority.editableText.toString()
+                            )
+                            putString(
+                                "bitbucket_description",
+                                editTextBitbucketDescription.text.toString()
+                            )
+                            putString(
+                                "bitbucket_title",
+                                editTextBitbucketTitle.text.toString()
+                            )
+                            commit()
+                        }
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.bitbucket_issue_preferences_save)
+                        )
+                    }
+                    R.id.bitbucket_menu_clear -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("bitbucket_project")
+                        editor.remove("bitbucket_assignee")
+                        editor.remove("bitbucket_kind")
+                        editor.remove("bitbucket_priority")
+                        editor.remove("bitbucket_description")
+                        editor.remove("bitbucket_title")
+                        editor.apply()
+                        clearBitbucketComponents()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.bitbucket_issue_preferences_delete)
+                        )
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            toolbarBitbucket.setNavigationOnClickListener {
+                removeBitbucketLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+            initializeBitbucketAttachmentRecyclerView(filePathMedia = filePathMedia)
+            buttonClicksBitbucket()
+            bitbucketAuthentication.callBitbucket(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "bitbucket")
         } catch (e: Exception) {
             finishShareLayout("bitbucket_error")
             e.printStackTrace()

@@ -1,5 +1,6 @@
 package loggerbird.observers
 
+import android.util.Log
 import androidx.preference.PreferenceManager
 import loggerbird.constants.Constants
 import loggerbird.LoggerBird
@@ -11,6 +12,19 @@ internal class UnhandledExceptionObserver : Thread.UncaughtExceptionHandler {
      */
     override fun uncaughtException(t: Thread, e: Throwable) {
         try {
+//            if(e.cause != null){
+//                e.cause!!.stackTrace.forEach {
+//                    Log.d("loggerbird_error",it.className)
+//                    Log.d("loggerbird_error",it.methodName)
+//                    Log.d("loggerbird_error",it.lineNumber.toString())
+//                }
+//            }else{
+//                e.stackTrace.forEach {
+//                    Log.d("loggerbird_error",it.className)
+//                    Log.d("loggerbird_error",it.methodName)
+//                    Log.d("loggerbird_error",it.lineNumber.toString())
+//                }
+//            }
             val sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(LoggerBird.context.applicationContext)
             if (e.cause != null) {
