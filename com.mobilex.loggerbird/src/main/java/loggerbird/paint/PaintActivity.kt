@@ -76,19 +76,21 @@ internal class PaintActivity : Activity() {
      * This method is used for defining margins of floating action button in Paint Activity.
      */
     private fun setButtonDefaultMargins() {
-        paint_floating_action_button.y = 0F
-        paint_floating_action_button_brush.y =
-            (paint_floating_action_button.y + paint_floating_action_button.height)
-        paint_floating_action_button_palette.y =
-            (paint_floating_action_button.y + 2*paint_floating_action_button.height)
-        paint_floating_action_button_delete.y =
-            (paint_floating_action_button.y + 3*paint_floating_action_button.height)
-        paint_floating_action_button_erase.y =
-            (paint_floating_action_button.y + 4*paint_floating_action_button.height)
-        paint_floating_action_button_back.y =
-            (paint_floating_action_button.y  + 5*paint_floating_action_button.height)
-        paint_floating_action_button_save.y =
-            (paint_floating_action_button.y + 6*paint_floating_action_button.height)
+        paintView.viewTreeObserver.addOnGlobalLayoutListener {
+            paint_floating_action_button.y = activity.window.decorView.height.toFloat() - 2*paint_floating_action_button.height
+            paint_floating_action_button_brush.y =
+                (activity.window.decorView.height.toFloat()  - 3*paint_floating_action_button.height)
+            paint_floating_action_button_palette.y =
+                (activity.window.decorView.height.toFloat()  - 4*paint_floating_action_button.height)
+            paint_floating_action_button_delete.y =
+                (activity.window.decorView.height.toFloat() - 5*paint_floating_action_button.height)
+            paint_floating_action_button_erase.y =
+                (activity.window.decorView.height.toFloat()  - 6*paint_floating_action_button.height)
+            paint_floating_action_button_back.y =
+                (activity.window.decorView.height.toFloat()  - 7*paint_floating_action_button.height)
+            paint_floating_action_button_save.y =
+                (activity.window.decorView.height.toFloat()  - 8*paint_floating_action_button.height)
+        }
     }
 
     /**
