@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.preference.PreferenceManager
 import loggerbird.constants.Constants
 import loggerbird.LoggerBird
+import loggerbird.services.LoggerBirdService
 
 //Custom UnHandledExceptionObserver class used for observing unhandled exceptions in the attached application and library itself.
 internal class UnhandledExceptionObserver : Thread.UncaughtExceptionHandler {
@@ -27,6 +28,12 @@ internal class UnhandledExceptionObserver : Thread.UncaughtExceptionHandler {
 //            }
             val sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(LoggerBird.context.applicationContext)
+            if(LoggerBirdService.audioRecording || LoggerBirdService.videoRecording || LoggerBirdService.screenshotDrawing){
+                with(sharedPref.edit()){
+                    putString("unhandled_media_file_path",LoggerBirdService.arrayListFile[LoggerBirdService.arrayListFile.lastIndex].absolutePath)
+                    commit()
+                }
+            }
             if (e.cause != null) {
                 with(sharedPref.edit()) {
                     putString("unhandled_stack_exception",e.toString())

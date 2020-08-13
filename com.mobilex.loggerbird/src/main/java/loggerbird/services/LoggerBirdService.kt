@@ -262,6 +262,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var controlFileAction: Boolean = false
     private lateinit var progressBarView: View
     private val defaultToast: DefaultToast = DefaultToast()
+    private var unhandledMediaFilePath:String? = null
 
     //Jira:
     internal val jiraAuthentication = JiraApi()
@@ -3345,8 +3346,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         filepath.delete()
                     }
                 }
+                if(sharedPref.getString("unhandled_media_file_path",null) != null){
+                    val mediaFilePath = File(sharedPref.getString("unhandled_media_file_path",null)!!)
+                    if(mediaFilePath.exists()){
+                        mediaFilePath.exists()
+                    }
+                }
                 val editor: SharedPreferences.Editor = sharedPref.edit()
                 editor.remove("unhandled_file_path")
+                editor.remove("unhandled_media_file_path")
                 editor.apply()
                 if (sharedPref.getBoolean(
                         "duplication_enabled",
@@ -4249,6 +4257,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun addJiraFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
             arrayListJiraFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if(unhandledMediaFilePath != null){
+            arrayListJiraFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListJiraFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -5310,6 +5321,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      */
     private fun addSlackFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         arrayListSlackFileName.add(RecyclerViewModel(file = filePathMedia))
+        if(unhandledMediaFilePath != null){
+            arrayListSlackFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
+        }
         arrayListSlackFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         return arrayListSlackFileName
     }
@@ -5394,6 +5408,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                    )
 //                }
 //            }
+            if(sharedPref.getString("unhandled_media_file_path",null) != null){
+                unhandledMediaFilePath = sharedPref.getString("unhandled_media_file_path",null)
+            }
             return true
         }
         return false
@@ -5837,6 +5854,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun addEmailFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
             arrayListEmailFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if(unhandledMediaFilePath != null){
+            arrayListEmailFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListEmailFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -6567,6 +6587,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun addGithubFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
             arrayListGithubFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if(unhandledMediaFilePath != null){
+            arrayListGithubFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListGithubFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -7570,6 +7593,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListTrelloFileName.add(RecyclerViewModel(file = filePathMedia))
         }
+        if(unhandledMediaFilePath != null){
+            arrayListTrelloFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
+        }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListTrelloFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
@@ -8508,6 +8534,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListGitlabFileName.add(RecyclerViewModel(file = filePathMedia))
         }
+        if(unhandledMediaFilePath != null){
+            arrayListGitlabFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
+        }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListGitlabFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
@@ -9255,6 +9284,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListPivotalFileName.add(RecyclerViewModel(file = filePathMedia))
         }
+        if(unhandledMediaFilePath != null){
+            arrayListPivotalFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
+        }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListPivotalFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
@@ -9969,6 +10001,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListBasecampFileName.add(RecyclerViewModel(file = filePathMedia))
         }
+        if(unhandledMediaFilePath != null){
+            arrayListBasecampFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
+        }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListBasecampFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
@@ -10403,6 +10438,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun addAsanaFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
             arrayListAsanaFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if(unhandledMediaFilePath != null){
+            arrayListAsanaFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListAsanaFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -10922,6 +10960,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun addClubhouseFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
             arrayListClubhouseFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if(unhandledMediaFilePath != null){
+            arrayListClubhouseFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListClubhouseFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -11870,8 +11911,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (filePath.exists()) {
                 filePath.delete()
             }
+            if(sharedPref.getString("unhandled_media_file_path",null) != null){
+                val mediaFile = File(sharedPref.getString("unhandled_media_file_path",null)!!)
+                mediaFile.delete()
+            }
             val editor: SharedPreferences.Editor = sharedPref.edit()
             editor.remove("unhandled_file_path")
+            if(sharedPref.getString("unhandled_media_file_path",null) != null){
+                editor.remove("unhandled_media_file_path")
+            }
             editor.apply()
             defaultToast.attachToast(
                 activity = activity,
@@ -12068,6 +12116,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun addBitbucketFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
             arrayListBitbucketFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if(unhandledMediaFilePath != null){
+            arrayListBitbucketFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListBitbucketFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
