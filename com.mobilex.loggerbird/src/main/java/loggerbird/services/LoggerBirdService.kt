@@ -350,7 +350,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var progressBarFeedbackLayout: FrameLayout
 
     //Slack:
-//    private val slackAuthentication = SlackApi()
+    private val slackAuthentication = SlackApi()
     private lateinit var buttonSlackCreate: Button
     internal lateinit var buttonSlackCancel: Button
     private lateinit var buttonSlackCreateUser: Button
@@ -790,8 +790,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         internal const val REQUEST_CODE_AUDIO_PERMISSION = 2001
         internal const val REQUEST_CODE_WRITE_EXTERNAL_STORAGE_PERMISSION = 2002
         internal const val REQUEST_CODE_DRAW_OTHER_APP_SETTINGS = 2003
-        private var DISPLAY_WIDTH = 1080
-        private var DISPLAY_HEIGHT = 1920
+        private var DISPLAY_WIDTH = 720
+        private var DISPLAY_HEIGHT = 1280
         private val ORIENTATIONS = SparseIntArray()
         internal var controlPermissionRequest: Boolean = false
         private var runnableList: ArrayList<Runnable> = ArrayList()
@@ -1918,10 +1918,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                     )
                                 )
                             context.startActivity(screenshotIntent)
-//                            context.overridePendingTransition(
-//                                R.anim.slide_in_right,
-//                                R.anim.slide_out_left
-//                            )
 
                         }
 
@@ -2264,8 +2260,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     mediaRecorderVideo?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
                     mediaRecorderVideo?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
                     mediaRecorderVideo?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-                    mediaRecorderVideo?.setVideoEncodingBitRate(512 * 1000)
-                    mediaRecorderVideo?.setVideoFrameRate(60)
+                    mediaRecorderVideo?.setVideoEncodingBitRate(1024 * 1024)
+                    //mediaRecorderVideo?.setVideoFrameRate(CameraProfile.QUALITY_HIGH)
+                    mediaRecorderVideo?.setVideoFrameRate(30)
+                    //Device can automatically fix its video frame rate in some devices
                     val rotation: Int = (context as Activity).windowManager.defaultDisplay.rotation
                     val orientation: Int = ORIENTATIONS.get(rotation + 90)
                     mediaRecorderVideo?.setOrientationHint(orientation)
@@ -2303,7 +2301,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val metrics = DisplayMetrics()
         (context as Activity).windowManager.defaultDisplay.getMetrics(metrics)
         screenDensity = metrics.densityDpi
-        DISPLAY_HEIGHT = metrics.heightPixels
+        DISPLAY_HEIGHT = metrics.heightPixels + getNavigationBarHeight()
         DISPLAY_WIDTH = metrics.widthPixels
         return mediaProjection!!.createVirtualDisplay(
             "LoggerBirdFragment",
@@ -2315,6 +2313,24 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             null,
             null
         )
+    }
+    /**
+     * This method is used for getting height of navigation bar of device.
+     */
+    private fun getNavigationBarHeight(): Int {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            val metrics = DisplayMetrics()
+            activity.windowManager.defaultDisplay.getMetrics(metrics)
+            val usableHeight = metrics.heightPixels
+            activity.windowManager.defaultDisplay.getRealMetrics(metrics)
+            val realHeight = metrics.heightPixels
+            return if (realHeight > usableHeight){
+                realHeight - usableHeight
+            }else{
+                0
+            }
+        }
+        return 0
     }
 
     /**
@@ -2827,7 +2843,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (sessionTimeEnd != null && sessionTimeStart != null) {
             val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
             val sharedPref =
-                PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
                     ?: return
             with(sharedPref.edit()) {
                 putLong("session_time", sharedPref.getLong("session_time", 0) + sessionDuration)
@@ -3125,6 +3141,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
 
                 "slack" -> {
+                    detachProgressBar()
+                    removeSlackLayout()
                     Toast.makeText(context, R.string.slack_sent, Toast.LENGTH_SHORT).show()
                     finishSuccessFab(duplicationField = "slack")
                 }
@@ -5132,12 +5150,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 slackBottomNavigationView =
                     viewSlack.findViewById(R.id.slack_bottom_nav_view)
 
-//                    slackAuthentication.callSlack(
-//                        context = context,
-//                        activity = activity,
-//                        filePathMedia = filePathMedia,
-//                        slackTask = "get"
-//                    )
+                    slackAuthentication.callSlack(
+                        context = context,
+                        activity = activity,
+                        filePathMedia = filePathMedia,
+                        slackTask = "get"
+                    )
                 initializeSlackRecyclerView(filePathMedia = filePathMedia)
                 buttonClicksSlack(filePathMedia)
                 attachProgressBar(task = "slack")
@@ -5167,45 +5185,45 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicksSlack(filePathMedia: File) {
         buttonSlackCreate.setSafeOnClickListener {
-            //            slackAuthentication.gatherSlackChannelSpinnerDetails(
-//                spinnerChannel = spinnerChannels
-//            )
-//            slackAuthentication.gatherSlackEditTextDetails(editTextMessage = editTextMessage)
-//            slackAuthentication.gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems = arrayListSlackFileName)
-//            if (slackAuthentication.checkMessageEmpty(activity = activity, context = context)) {
-//                attachProgressBar(task = "slack")
-//                slackAuthentication.callSlack(
-//                    activity = activity,
-//                    context = context,
-//                    filePathMedia = filePathMedia,
-//                    slackTask = "create",
-//                    messagePath = slackAuthentication.channel,
-//                    slackType = "channel"
-//                )
-//            }
+                        slackAuthentication.gatherSlackChannelSpinnerDetails(
+                spinnerChannel = spinnerChannels
+            )
+            slackAuthentication.gatherSlackEditTextDetails(editTextMessage = editTextMessage)
+            slackAuthentication.gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems = arrayListSlackFileName)
+            if (slackAuthentication.checkMessageEmpty(activity = activity, context = context)) {
+                attachProgressBar(task = "slack")
+                slackAuthentication.callSlack(
+                    activity = activity,
+                    context = context,
+                    filePathMedia = filePathMedia,
+                    slackTask = "create",
+                    messagePath = slackAuthentication.channel,
+                    slackType = "channel"
+                )
+            }
         }
 
         buttonSlackCreateUser.setSafeOnClickListener {
-            //            slackAuthentication.gatherSlackUserSpinnerDetails(
-//                spinnerUser = spinnerUsers
-//            )
-//            slackAuthentication.gatherSlackUserEditTextDetails(editTextMessage = editTextMessageUser)
-//            slackAuthentication.gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems = arrayListSlackFileName)
-//            if (slackAuthentication.checkMessageEmptyUser(
-//                    activity = activity,
-//                    context = context
-//                )
-//            ) {
-//                attachProgressBar(task = "slack")
-//                slackAuthentication.callSlack(
-//                    activity = activity,
-//                    context = context,
-//                    filePathMedia = filePathMedia,
-//                    slackTask = "create",
-//                    messagePath = slackAuthentication.user,
-//                    slackType = "user"
-//                )
-//            }
+                        slackAuthentication.gatherSlackUserSpinnerDetails(
+                spinnerUser = spinnerUsers
+            )
+            slackAuthentication.gatherSlackUserEditTextDetails(editTextMessage = editTextMessageUser)
+            slackAuthentication.gatherSlackRecyclerViewDetails(arrayListRecyclerViewItems = arrayListSlackFileName)
+            if (slackAuthentication.checkMessageEmptyUser(
+                    activity = activity,
+                    context = context
+                )
+            ) {
+                attachProgressBar(task = "slack")
+                slackAuthentication.callSlack(
+                    activity = activity,
+                    context = context,
+                    filePathMedia = filePathMedia,
+                    slackTask = "create",
+                    messagePath = slackAuthentication.user,
+                    slackType = "user"
+                )
+            }
         }
 
         buttonSlackCancel.setSafeOnClickListener {
@@ -5247,13 +5265,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         toolbarSlack.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.slack_menu_refresh -> {
-//                    slackAuthentication.callSlack(
-//                        context = context,
-//                        activity = activity,
-//                        filePathMedia = filePathMedia,
-//                        slackTask = "get"
-//                    )
-//                    attachProgressBar(task = "slack")
+                    slackAuthentication.callSlack(
+                        context = context,
+                        activity = activity,
+                        filePathMedia = filePathMedia,
+                        slackTask = "get"
+                    )
+                    attachProgressBar(task = "slack")
                 }
             }
             return@setOnMenuItemClickListener true
