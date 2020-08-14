@@ -768,13 +768,17 @@ internal class SlackApi {
                             Log.d("slack_access_token_suc", response.code().toString())
                             val accessTokenList = response.body()
                             if(accessTokenList != null){
-                                val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                                with(sharedPref.edit()) {
-                                    putString("slackAccessToken",accessTokenList["access_token"].asString)
-                                    commit()
+                                try {
+                                    val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                                    with(sharedPref.edit()) {
+                                        putString("slackAccessToken",accessTokenList["access_token"].asString)
+                                        commit()
+                                    }
+                                    gatherTaskChannels()
+                                    gatherTaskUsers()
+                                } catch (e: Exception) {
+                                   slackExceptionHandler(e = e)
                                 }
-                                gatherTaskChannels()
-                                gatherTaskUsers()
                             }else{
                                 slackExceptionHandler()
                             }

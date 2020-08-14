@@ -231,6 +231,7 @@ internal class PaintView @JvmOverloads constructor(context: Context, attrs: Attr
                     os.close()
                 }
                 arrayListFileNameScreenshot.add(filePathScreenShot!!.absolutePath)
+                LoggerBirdService.loggerBirdService.addFileListAsync()
                 LoggerBirdService.callShareView(filePathMedia = filePathScreenShot)
             } catch (e: Exception) {
                 e.printStackTrace()

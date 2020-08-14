@@ -196,6 +196,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var coroutineCallVideoStarter = CoroutineScope(Dispatchers.IO)
     private val coroutineCallSendSingleFile: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private val coroutineCallDiscardFile: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineCallFileActionList:CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var mediaRecorderAudio: MediaRecorder? = null
     private var state: Boolean = false
     private var filePathVideo: File? = null
@@ -1026,9 +1027,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         it.delete()
                     }
                 }
-            } else {
-                addFileList()
             }
+//            else {
+//                addFileList()
+//            }
             dailySessionTimeRecorder(activity = activity)
             controlServiceOnDestroyState = true
             LoggerBird.takeLifeCycleDetails()
@@ -1683,38 +1685,38 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 discardMediaFile()
             }
 
-            if (sharedPref.getBoolean("future_task_check", false)) {
-                checkBoxFutureTask.isChecked = true
-            }
-            checkBoxFutureTask.setOnCheckedChangeListener { buttonView, isChecked ->
-                if (isChecked) {
-                    with(sharedPref.edit()) {
-                        putBoolean("future_task_check", true)
-                        commit()
-                    }
-                } else {
-                    stopService(Intent(context, LoggerBirdFutureTaskService::class.java))
-                }
-            }
-            checkBoxFutureTask.setOnClickListener {
-                if (checkBoxFutureTask.isChecked) {
-                    defaultToast.attachToast(
-                        activity = activity,
-                        toastMessage = activity.resources.getString(R.string.future_task_enabled)
-                    )
-                    initializeFutureTaskLayout(filePathMedia = filePathMedia)
-                } else {
-                    with(sharedPref.edit()) {
-                        remove("future_task_time")
-                        remove("future_file_path")
-                        commit()
-                    }
-                    defaultToast.attachToast(
-                        activity = activity,
-                        toastMessage = activity.resources.getString(R.string.future_task_disabled)
-                    )
-                }
-            }
+//            if (sharedPref.getBoolean("future_task_check", false)) {
+//                checkBoxFutureTask.isChecked = true
+//            }
+//            checkBoxFutureTask.setOnCheckedChangeListener { buttonView, isChecked ->
+//                if (isChecked) {
+//                    with(sharedPref.edit()) {
+//                        putBoolean("future_task_check", true)
+//                        commit()
+//                    }
+//                } else {
+//                    stopService(Intent(context, LoggerBirdFutureTaskService::class.java))
+//                }
+//            }
+//            checkBoxFutureTask.setOnClickListener {
+//                if (checkBoxFutureTask.isChecked) {
+//                    defaultToast.attachToast(
+//                        activity = activity,
+//                        toastMessage = activity.resources.getString(R.string.future_task_enabled)
+//                    )
+//                    initializeFutureTaskLayout(filePathMedia = filePathMedia)
+//                } else {
+//                    with(sharedPref.edit()) {
+//                        remove("future_task_time")
+//                        remove("future_file_path")
+//                        commit()
+//                    }
+//                    defaultToast.attachToast(
+//                        activity = activity,
+//                        toastMessage = activity.resources.getString(R.string.future_task_disabled)
+//                    )
+//                }
+//            }
         }
     }
 
@@ -1969,6 +1971,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             )
                             addFileNameList(fileName = filePathAudio!!.absolutePath)
                             arrayListFile.add(filePathAudio!!)
+                            addFileListAsync()
                             mediaRecorderAudio = MediaRecorder()
                             mediaRecorderAudio?.setAudioSource(MediaRecorder.AudioSource.MIC)
                             mediaRecorderAudio?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
@@ -2271,6 +2274,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     )
                     addFileNameList(fileName = filePathVideo!!.absolutePath)
                     arrayListFile.add(filePathVideo!!)
+                    addFileListAsync()
                     mediaCodecsFile = File("/data/misc/media/media_codecs_profiling_results.xml")
                     mediaRecorderVideo?.setOutputFile(filePathVideo!!.path)
                     mediaRecorderVideo?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
@@ -2908,6 +2912,25 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             commit()
         }
     }
+    /**
+     * This method is used for adding Loggerbird file list in async way.
+     */
+    internal fun addFileListAsync(){
+        coroutineCallFileActionList.async {
+            if (getFileList() != null) {
+                arrayListFileName.addAll(getFileList()!!)
+            }
+            arrayListFileName.addAll(PaintView.arrayListFileNameScreenshot)
+            val gson = Gson()
+            val json = gson.toJson(arrayListFileName)
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+            with(sharedPref.edit()) {
+                putString("file_quantity", json)
+                apply()
+            }
+        }
+    }
 
     /**
      * This method is used for getting Loggerbird file list.
@@ -2952,9 +2975,23 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      */
     private fun controlActionFiles() {
         if (getFileList() != null) {
-            if (getFileList()!!.size > 10) {
-                chooseActionFiles()
+            val arrayListFileList:ArrayList<String> = getFileList()!!
+            arrayListFileList.forEach {
+                if(!File(it).exists()){
+                    arrayListFileList.remove(it)
+                }
             }
+            val gson = Gson()
+            val json = gson.toJson(arrayListFileList)
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
+            with(sharedPref.edit()) {
+                putString("file_quantity", json)
+                commit()
+            }
+                if (getFileList()!!.size > 10) {
+                    chooseActionFiles()
+                }
         }
     }
 
