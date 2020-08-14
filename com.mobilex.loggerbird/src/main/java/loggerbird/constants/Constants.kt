@@ -117,5 +117,7 @@ internal class Constants {
         internal const val encryptionTag: String = "Encryption"
         internal const val layoutOnTouchTag: String = "Layout OnTouch"
         internal const val componentObserverTag: String = "Component Observer"
+        internal const val recyclerViewFileActionListAdapterTag: String = "RecyclerView File Action List Adapter"
+        internal const val loggerBirdFileActionListPopupTag = "LoggerBird File Action List Popup"
     }
 }

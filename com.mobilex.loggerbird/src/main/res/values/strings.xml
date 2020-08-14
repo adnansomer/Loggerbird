@@ -50,7 +50,7 @@
     <string name="last_session_time">Last session duration:</string>
     <string name="session_file_limit">You have achieved maximum save file limit in one session!</string>
     <string name="files_action_limit">You have achieved maximum save file limit , loggerbird will not be started until file action is choosed!</string>
-    <string name="files_action_mail">Send e-mail and discard!</string>
+    <string name="files_action_share">Share file!</string>
     <string name="files_action_discard">Discard files!</string>
     <string name="files_action_mail_success">Files sent as e-mail successfully!</string>
     <string name="files_action_delete_success">Files discarded successfully!</string>
@@ -659,4 +659,11 @@
     <string name="textView_bitbucket_menu_clear">Clear Issue Info</string>
     <!-- recycler_view_bitbucket_item_popup-->
     <string name="textView_recyclerView_bitbucket_popup_title">Are you sure to remove attachment from your bitbucket issue?</string>
+    <!-- loggerbird_file_action_list-->
+    <string name="textView_file_action_list_title">Files:</string>
+    <!-- recycler_view_file_action_list_popup-->
+    <string name="textView_recyclerView_file_action_list_header">Delete File</string>
+    <string name="textView_recyclerView_file_action_list_title">Are you sure to remove file from your file action list?</string>
+    <string name="button_recyclerView_file_action_list_delete">Delete file</string>
+    <string name="button_recyclerView_file_action_list_keep">Keep file</string>
 </resources>

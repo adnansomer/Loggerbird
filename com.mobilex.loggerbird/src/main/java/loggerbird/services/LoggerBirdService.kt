@@ -99,6 +99,7 @@ import kotlin.collections.HashMap
 import java.text.SimpleDateFormat
 import android.text.InputFilter
 import androidx.core.widget.addTextChangedListener
+import loggerbird.adapter.recyclerView.fileAction.RecyclerViewFileActionAttachmentAdapter
 import loggerbird.listeners.OnSwipeTouchListener
 import loggerbird.listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
 import loggerbird.listeners.layouts.LayoutFeedbackOnTouchListener
@@ -156,6 +157,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerLoggerBirdFileActionPopup: Any? = null
     private var windowManagerLoggerBirdUnhandledException: Any? = null
     private var windowManagerBitbucket: Any? = null
+    private var windowManagerLoggerBirdFileActionListPopup: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -187,6 +189,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsLoggerBirdFileAction: WindowManager.LayoutParams
     private lateinit var windowManagerParamsLoggerBirdUnhandledException: WindowManager.LayoutParams
     private lateinit var windowManagerParamsBitbucket: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsLoggerBirdFileActionList: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudio: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -250,6 +253,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewLoggerBirdDismissPopup: View
     private lateinit var viewLoggerBirdFileActionPopup: View
     private lateinit var viewLoggerBirdUnhandledExceptionPopup: View
+    private lateinit var viewLoggerBirdFileActionListPopup: View
     private lateinit var viewBitbucket: View
     private val fileLimit: Long = 20971520
     private var sessionTimeStart: Long? = System.currentTimeMillis()
@@ -262,7 +266,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var controlFileAction: Boolean = false
     private lateinit var progressBarView: View
     private val defaultToast: DefaultToast = DefaultToast()
-    private var unhandledMediaFilePath:String? = null
+    private var unhandledMediaFilePath: String? = null
 
     //Jira:
     internal val jiraAuthentication = JiraApi()
@@ -727,6 +731,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //LoggerBird File Action Popup:
     private lateinit var textViewLoggerBirdFileActionPopupDiscard: TextView
     private lateinit var textViewLoggerBirdFileActionPopupEmail: TextView
+    //LoggerBird File Action List Popup:
+    private lateinit var imageViewLoggerBirdFileActionListPopupBack: ImageView
+    private lateinit var recyclerViewLoggerBirdFileActionListPopup: RecyclerView
+    private lateinit var loggerBirdFileActionListAdapter: RecyclerViewFileActionAttachmentAdapter
+    private var arrayListLoggerBirdFileActionList: ArrayList<RecyclerViewModel> = ArrayList()
 
     //LoggerBird Unhandled Exception Popup:
     private lateinit var textViewLoggerBirdUnhandledExceptionPopupDiscard: TextView
@@ -1011,15 +1020,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         try {
-            if (!controlFutureTask) {
+            if (!audioRecording && !videoRecording && !screenshotDrawing) {
                 arrayListFile.forEach {
                     if (it.exists()) {
                         it.delete()
                     }
                 }
+            } else {
+                addFileList()
             }
-            dailySessionTimeRecorder()
-            addFileList()
+            dailySessionTimeRecorder(activity = activity)
             controlServiceOnDestroyState = true
             LoggerBird.takeLifeCycleDetails()
         } catch (e: Exception) {
@@ -1067,7 +1077,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     controlMediaFile()
                 }
                 (windowManager as WindowManager).removeViewImmediate(view)
-                if (!checkUnhandledFilePath()) {
+                if (!checkUnhandledFilePath() && !this.controlFileAction) {
                     initializeLoggerBirdClosePopup(activity = activity)
                 }
                 windowManager = null
@@ -1152,6 +1162,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             revealLinearLayoutShare = view.findViewById(R.id.reveal_linear_layout_share)
             textView_send_email = view.findViewById(R.id.textView_send_email)
             textView_discard = view.findViewById(R.id.textView_discard)
+            if (this.controlFileAction) {
+                textView_discard.visibility = View.GONE
+            } else {
+                textView_discard.visibility = View.VISIBLE
+            }
             textView_share_jira = view.findViewById(R.id.textView_share_jira)
             textView_share_slack = view.findViewById(R.id.textView_share_slack)
             textView_share_github = view.findViewById(R.id.textView_share_github)
@@ -1205,7 +1220,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 buttonClicks()
             }
-            if (!checkUnhandledFilePath()) {
+            if (!checkUnhandledFilePath() && !this.controlFileAction) {
                 initializeLoggerBirdStartPopup(activity = activity)
             }
             isFabEnable = true
@@ -2315,6 +2330,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             null
         )
     }
+
     /**
      * This method is used for getting height of navigation bar of device.
      */
@@ -2325,9 +2341,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val usableHeight = metrics.heightPixels
             activity.windowManager.defaultDisplay.getRealMetrics(metrics)
             val realHeight = metrics.heightPixels
-            return if (realHeight > usableHeight){
+            return if (realHeight > usableHeight) {
                 realHeight - usableHeight
-            }else{
+            } else {
                 0
             }
         }
@@ -2839,7 +2855,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     /**
      * This method is used for saving total and last session time.
      */
-    private fun dailySessionTimeRecorder() {
+    private fun dailySessionTimeRecorder(activity: Activity) {
         sessionTimeEnd = System.currentTimeMillis()
         if (sessionTimeEnd != null && sessionTimeStart != null) {
             val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
@@ -2878,7 +2894,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     /**
      * This method is used for adding Loggerbird file list.
      */
-    private fun addFileList() {
+    internal fun addFileList() {
         if (getFileList() != null) {
             arrayListFileName.addAll(getFileList()!!)
         }
@@ -2958,31 +2974,28 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val arrayListOldFiles: ArrayList<String> = ArrayList()
         if (getFileList() != null) {
             arrayListOldFiles.addAll(getFileList()!!)
-            if (arrayListOldFiles.size > 10) {
-                var fileName: File
-                var fileCounter = 0
-                do {
-                    fileName = File(arrayListOldFiles[fileCounter])
-                    if (fileName.exists()) {
-                        fileName.delete()
-                    }
-                    fileCounter++
-                    if (fileCounter == arrayListOldFiles.size) {
-                        if (controlEmailAction != null) {
-                            activity.runOnUiThread {
-                                Toast.makeText(
-                                    context,
-                                    R.string.files_action_mail_success,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+            var fileName: File
+            var fileCounter = 0
+            do {
+                fileName = File(arrayListOldFiles[fileCounter])
+                if (fileName.exists()) {
+                    fileName.delete()
+                }
+                fileCounter++
+                if (fileCounter == arrayListOldFiles.size) {
+                    if (controlEmailAction != null) {
+                        activity.runOnUiThread {
+                            Toast.makeText(
+                                context,
+                                R.string.files_action_mail_success,
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-                        break
                     }
-                } while (arrayListOldFiles.iterator().hasNext())
-                deleteOldFilesList()
-            }
-
+                    break
+                }
+            } while (arrayListOldFiles.iterator().hasNext())
+            deleteOldFilesList()
         }
     }
 
@@ -3325,7 +3338,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
 
             }
-            if (controlFloatingActionButtonView()) {
+            if (controlFloatingActionButtonView() && !this.controlFileAction) {
                 floatingActionButtonView.visibility = View.VISIBLE
             }
         }
@@ -3346,9 +3359,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         filepath.delete()
                     }
                 }
-                if(sharedPref.getString("unhandled_media_file_path",null) != null){
-                    val mediaFilePath = File(sharedPref.getString("unhandled_media_file_path",null)!!)
-                    if(mediaFilePath.exists()){
+                if (sharedPref.getString("unhandled_media_file_path", null) != null) {
+                    val mediaFilePath =
+                        File(sharedPref.getString("unhandled_media_file_path", null)!!)
+                    if (mediaFilePath.exists()) {
                         mediaFilePath.exists()
                     }
                 }
@@ -3376,6 +3390,29 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         )
                         with(unhandledDuplicationDao) {
                             this?.insertUnhandledDuplication(unhandledDuplication = unhandledDuplication)
+                        }
+                    }
+                }
+            }
+            if (this.controlFileAction) {
+                if (RecyclerViewFileActionAttachmentAdapter.ViewHolder.position != null) {
+                    val arrayListTempFileAction: ArrayList<String> = ArrayList()
+                    if (arrayListLoggerBirdFileActionList.size > RecyclerViewFileActionAttachmentAdapter.ViewHolder.position!!) {
+                        arrayListLoggerBirdFileActionList.removeAt(
+                            RecyclerViewFileActionAttachmentAdapter.ViewHolder.position!!
+                        )
+                        recyclerViewLoggerBirdFileActionListPopup.adapter?.notifyDataSetChanged()
+                        arrayListLoggerBirdFileActionList.forEach {
+                            arrayListTempFileAction.add(it.file.absolutePath)
+                        }
+                        val gson = Gson()
+                        val json = gson.toJson(arrayListTempFileAction)
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                                ?: return
+                        with(sharedPref.edit()) {
+                            putString("file_quantity", json)
+                            commit()
                         }
                     }
                 }
@@ -4258,7 +4295,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListJiraFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if(unhandledMediaFilePath != null){
+        if (unhandledMediaFilePath != null) {
             arrayListJiraFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
@@ -5161,12 +5198,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 slackBottomNavigationView =
                     viewSlack.findViewById(R.id.slack_bottom_nav_view)
 
-                    slackAuthentication.callSlack(
-                        context = context,
-                        activity = activity,
-                        filePathMedia = filePathMedia,
-                        slackTask = "get"
-                    )
+                slackAuthentication.callSlack(
+                    context = context,
+                    activity = activity,
+                    filePathMedia = filePathMedia,
+                    slackTask = "get"
+                )
                 initializeSlackRecyclerView(filePathMedia = filePathMedia)
                 buttonClicksSlack(filePathMedia)
                 attachProgressBar(task = "slack")
@@ -5196,7 +5233,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     private fun buttonClicksSlack(filePathMedia: File) {
         buttonSlackCreate.setSafeOnClickListener {
-                        slackAuthentication.gatherSlackChannelSpinnerDetails(
+            slackAuthentication.gatherSlackChannelSpinnerDetails(
                 spinnerChannel = spinnerChannels
             )
             slackAuthentication.gatherSlackEditTextDetails(editTextMessage = editTextMessage)
@@ -5215,7 +5252,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
 
         buttonSlackCreateUser.setSafeOnClickListener {
-                        slackAuthentication.gatherSlackUserSpinnerDetails(
+            slackAuthentication.gatherSlackUserSpinnerDetails(
                 spinnerUser = spinnerUsers
             )
             slackAuthentication.gatherSlackUserEditTextDetails(editTextMessage = editTextMessageUser)
@@ -5321,7 +5358,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      */
     private fun addSlackFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         arrayListSlackFileName.add(RecyclerViewModel(file = filePathMedia))
-        if(unhandledMediaFilePath != null){
+        if (unhandledMediaFilePath != null) {
             arrayListSlackFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         arrayListSlackFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -5408,8 +5445,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                    )
 //                }
 //            }
-            if(sharedPref.getString("unhandled_media_file_path",null) != null){
-                unhandledMediaFilePath = sharedPref.getString("unhandled_media_file_path",null)
+            if (sharedPref.getString("unhandled_media_file_path", null) != null) {
+                unhandledMediaFilePath = sharedPref.getString("unhandled_media_file_path", null)
             }
             return true
         }
@@ -5855,7 +5892,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListEmailFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if(unhandledMediaFilePath != null){
+        if (unhandledMediaFilePath != null) {
             arrayListEmailFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
@@ -6061,7 +6098,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeFutureDateLayout()
         }
         calendarViewFutureTask.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            calendarFuture.set(year, month+1, dayOfMonth)
+            calendarFuture.set(year, month + 1, dayOfMonth)
         }
         buttonFutureTaskDateCreate.setSafeOnClickListener {
             futureStartDate = calendarViewFutureTask.date
@@ -6588,7 +6625,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListGithubFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if(unhandledMediaFilePath != null){
+        if (unhandledMediaFilePath != null) {
             arrayListGithubFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
@@ -7593,7 +7630,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListTrelloFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if(unhandledMediaFilePath != null){
+        if (unhandledMediaFilePath != null) {
             arrayListTrelloFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
@@ -7835,7 +7872,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeTrelloDateLayout()
         }
         calendarViewTrello.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            calendarTrello?.set(year, month+1, dayOfMonth)
+            calendarTrello?.set(year, month + 1, dayOfMonth)
 //            startDate = "$year-$month-$dayOfMonth"
         }
         buttonTrelloDateCreate.setSafeOnClickListener {
@@ -8534,7 +8571,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListGitlabFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if(unhandledMediaFilePath != null){
+        if (unhandledMediaFilePath != null) {
             arrayListGitlabFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
@@ -9284,7 +9321,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListPivotalFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if(unhandledMediaFilePath != null){
+        if (unhandledMediaFilePath != null) {
             arrayListPivotalFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
@@ -10001,7 +10038,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListBasecampFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if(unhandledMediaFilePath != null){
+        if (unhandledMediaFilePath != null) {
             arrayListBasecampFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
@@ -10439,7 +10476,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListAsanaFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if(unhandledMediaFilePath != null){
+        if (unhandledMediaFilePath != null) {
             arrayListAsanaFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
@@ -10803,7 +10840,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeAsanaDateLayout()
         }
         calendarViewAsana.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            val tempMonthMonth = month +1
+            val tempMonthMonth = month + 1
             val tempMonth: String = if (tempMonthMonth in 1..9) {
                 "0$tempMonthMonth"
             } else {
@@ -10961,7 +10998,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListClubhouseFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if(unhandledMediaFilePath != null){
+        if (unhandledMediaFilePath != null) {
             arrayListClubhouseFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
@@ -11734,7 +11771,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 viewLoggerBirdFileActionPopup.findViewById(R.id.textView_files_action_discard)
             textViewLoggerBirdFileActionPopupEmail =
                 viewLoggerBirdFileActionPopup.findViewById(R.id.textView_files_action_mail)
-            initializeButtonClicksLoggerBirdFileActionPopup()
+            initializeButtonClicksLoggerBirdFileActionPopup(activity = activity)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -11760,7 +11797,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     /**
      * This method is used for initializing button clicks of Loggerbird file action popup.
      */
-    private fun initializeButtonClicksLoggerBirdFileActionPopup() {
+    private fun initializeButtonClicksLoggerBirdFileActionPopup(activity: Activity) {
         textViewLoggerBirdFileActionPopupDiscard.setSafeOnClickListener {
             if (this.controlFileAction) {
                 this.controlFileAction = false
@@ -11770,12 +11807,108 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         textViewLoggerBirdFileActionPopupEmail.setSafeOnClickListener {
             if (this.controlFileAction) {
-                this.controlFileAction = false
-                removeLoggerBirdFileActionLayout()
-                sendOldFilesEmail()
+//                this.controlFileAction = false
+//                removeLoggerBirdFileActionLayout()
+                initializeLoggerBirdFileActionListPopup(activity = activity)
+//                sendOldFilesEmail()
             }
         }
     }
+
+    /**
+     * This method is used for initializing button clicks of Loggerbird file action list popup to determine to where to share files.
+     * @param activity is used for getting reference of current activity.
+     */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun initializeLoggerBirdFileActionListPopup(activity: Activity) {
+        try {
+            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+            viewLoggerBirdFileActionListPopup =
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.loggerbird_file_action_list, rootView, false)
+            windowManagerParamsLoggerBirdFileActionList =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+            windowManagerLoggerBirdFileActionListPopup =
+                activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerLoggerBirdFileActionListPopup as WindowManager).addView(
+                viewLoggerBirdFileActionListPopup,
+                windowManagerParamsLoggerBirdFileActionList
+            )
+            imageViewLoggerBirdFileActionListPopupBack =
+                viewLoggerBirdFileActionListPopup.findViewById(R.id.imageView_file_action_list_back)
+            recyclerViewLoggerBirdFileActionListPopup =
+                viewLoggerBirdFileActionListPopup.findViewById(R.id.recycler_view_file_action_list_attachment)
+            initializeLoggerBirdFileActionListAttachmentRecyclerView(rootView = rootView)
+            initializeButtonClicksLoggerBirdFileActionListPopup()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.loggerBirdFileActionListPopupTag
+            )
+        }
+    }
+
+    /**
+     * This method is used for removing Loggerbird file action list popup.
+     */
+    internal fun removeLoggerBirdFileActionListLayout() {
+        if (this::viewLoggerBirdFileActionListPopup.isInitialized && windowManagerLoggerBirdFileActionListPopup != null) {
+            (windowManagerLoggerBirdFileActionListPopup as WindowManager).removeViewImmediate(
+                viewLoggerBirdFileActionListPopup
+            )
+            windowManagerLoggerBirdFileActionListPopup = null
+        }
+    }
+
+    /**
+     * This method is used for initializing button clicks of Loggerbird file action list popup.
+     */
+    private fun initializeButtonClicksLoggerBirdFileActionListPopup() {
+        imageViewLoggerBirdFileActionListPopupBack.setSafeOnClickListener {
+            removeLoggerBirdFileActionListLayout()
+        }
+    }
+
+    /**
+     * This method is used for initializing file action list attachment recyclerView.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeLoggerBirdFileActionListAttachmentRecyclerView(rootView: ViewGroup) {
+        arrayListLoggerBirdFileActionList.clear()
+        getFileList()?.forEach {
+            arrayListLoggerBirdFileActionList.add(RecyclerViewModel(File(it)))
+        }
+        recyclerViewLoggerBirdFileActionListPopup.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        loggerBirdFileActionListAdapter =
+            RecyclerViewFileActionAttachmentAdapter(
+                arrayListLoggerBirdFileActionList,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewLoggerBirdFileActionListPopup.adapter = loggerBirdFileActionListAdapter
+    }
+
 
     /**
      * This method is used for initializing Loggerbird unhandled loggerbird.exception popup.
@@ -11911,13 +12044,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (filePath.exists()) {
                 filePath.delete()
             }
-            if(sharedPref.getString("unhandled_media_file_path",null) != null){
-                val mediaFile = File(sharedPref.getString("unhandled_media_file_path",null)!!)
+            if (sharedPref.getString("unhandled_media_file_path", null) != null) {
+                val mediaFile = File(sharedPref.getString("unhandled_media_file_path", null)!!)
                 mediaFile.delete()
             }
             val editor: SharedPreferences.Editor = sharedPref.edit()
             editor.remove("unhandled_file_path")
-            if(sharedPref.getString("unhandled_media_file_path",null) != null){
+            if (sharedPref.getString("unhandled_media_file_path", null) != null) {
                 editor.remove("unhandled_media_file_path")
             }
             editor.apply()
@@ -12117,7 +12250,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListBitbucketFileName.add(RecyclerViewModel(file = filePathMedia))
         }
-        if(unhandledMediaFilePath != null){
+        if (unhandledMediaFilePath != null) {
             arrayListBitbucketFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
