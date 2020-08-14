@@ -99,6 +99,10 @@ import kotlin.collections.HashMap
 import java.text.SimpleDateFormat
 import android.text.InputFilter
 import androidx.core.widget.addTextChangedListener
+import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaPriorityAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaSectorAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.github.*
 import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubAssigneeAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubLabelAdapter
@@ -675,13 +679,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var toolbarAsana: Toolbar
     private lateinit var scrollViewAsana: ScrollView
     private lateinit var autoTextViewAsanaProject: AutoCompleteTextView
-    private lateinit var autoTextViewAsanaProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaProjectAdapter: AutoCompleteTextViewAsanaProjectAdapter
     private lateinit var autoTextViewAsanaAssignee: AutoCompleteTextView
-    private lateinit var autoTextViewAsanaAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaAssigneeAdapter: AutoCompleteTextViewAsanaAssigneeAdapter
     private lateinit var autoTextViewAsanaSector: AutoCompleteTextView
-    private lateinit var autoTextViewAsanaCategoryAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaSectorAdapter: AutoCompleteTextViewAsanaSectorAdapter
     private lateinit var autoTextViewAsanaPriority: AutoCompleteTextView
-    private lateinit var autoTextViewAsanaPriorityAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaPriorityAdapter: AutoCompleteTextViewAsanaPriorityAdapter
     private lateinit var editTextAsanaDescription: EditText
     private lateinit var editTextAsanaSubTask: EditText
     private lateinit var editTextAsanaTaskName: EditText
@@ -10625,9 +10629,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewAsanaProjectAdapter = ArrayAdapter(
+        autoTextViewAsanaProjectAdapter = AutoCompleteTextViewAsanaProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_asana_project_item,
             arrayListAsanaProject
         )
         autoTextViewAsanaProject.setAdapter(autoTextViewAsanaProjectAdapter)
@@ -10679,12 +10683,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaSection: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewAsanaCategoryAdapter = ArrayAdapter(
+        autoTextViewAsanaSectorAdapter = AutoCompleteTextViewAsanaSectorAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_asana_sector_item,
             arrayListAsanaSection
         )
-        autoTextViewAsanaSector.setAdapter(autoTextViewAsanaCategoryAdapter)
+        autoTextViewAsanaSector.setAdapter(autoTextViewAsanaSectorAdapter)
         if (arrayListAsanaSection.isNotEmpty() && autoTextViewAsanaSector.editableText.isEmpty()) {
             if (sharedPref.getString("asana_section", null) != null) {
                 if (arrayListAsanaSection.contains(
@@ -10725,9 +10729,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaPriority: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewAsanaPriorityAdapter = ArrayAdapter(
+        autoTextViewAsanaPriorityAdapter = AutoCompleteTextViewAsanaPriorityAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_asana_priority_item,
             arrayListAsanaPriority
         )
         autoTextViewAsanaPriority.setAdapter(autoTextViewAsanaPriorityAdapter)
@@ -10770,10 +10774,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewAsanaAssigneeAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            arrayListAsanaAssignee
+        autoTextViewAsanaAssigneeAdapter  = AutoCompleteTextViewAsanaAssigneeAdapter(
+        this,
+        R.layout.auto_text_view_asana_assignee_item,
+        arrayListAsanaAssignee
         )
         autoTextViewAsanaAssignee.setAdapter(autoTextViewAsanaAssigneeAdapter)
         if (arrayListAsanaAssignee.isNotEmpty() && autoTextViewAsanaAssignee.editableText.isEmpty()) {
