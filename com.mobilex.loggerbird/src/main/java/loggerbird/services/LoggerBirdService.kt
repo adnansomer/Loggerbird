@@ -7,6 +7,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
@@ -210,6 +211,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var coroutineCallFeedback: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var counterVideo: Int = 0
     private var counterAudio: Int = 0
+    private var counterMediaLimit: Int = 60000
     private var timerVideo: Timer? = null
     private var timerAudio: Timer? = null
     private var timerVideoFileSize: Timer? = null
@@ -431,18 +433,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewGitlabMilestoneAdapter: ArrayAdapter<String>
     private lateinit var autoTextViewGitlabConfidentialityAdapter: ArrayAdapter<String>
     private val arrayListGitlabFileName: ArrayList<RecyclerViewModel> = ArrayList()
-    private lateinit var linearLayoutGitlabConfidentiality: LinearLayout
     private lateinit var textViewGitlabConfidentiality: TextView
     private lateinit var imageViewGitlabConfidentiality: ImageView
     private lateinit var textViewGitlabMilestone: TextView
-    private lateinit var linearLayoutGitlabMilestone: LinearLayout
     private lateinit var imageViewGitlabMilestone: ImageView
     private lateinit var textViewGitlabAssignee: TextView
-    private lateinit var linearLayoutGitlabAssignee: LinearLayout
     private lateinit var imageViewGitlabAssignee: ImageView
-    private lateinit var textViewGitlabLabels: TextView
-    private lateinit var linearLayoutGitlabLabels: LinearLayout
-    private lateinit var imageViewGitlabLabels: ImageView
     private lateinit var imageViewGitlabDueDate: ImageView
     //Github
     internal val githubAuthentication = GithubApi()
@@ -984,6 +980,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
             controlActionFiles()
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -2605,12 +2602,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                 activity,
                                 fileSize
                             )
-                        if (fileSize > fileLimit) {
-                            timerVideoTaskFileSize?.cancel()
-                            activity.runOnUiThread {
-                                textView_counter_video.performClick()
-                            }
-                        }
+//                        if (fileSize > fileLimit) {
+//                            timerVideoTaskFileSize?.cancel()
+//                            activity.runOnUiThread {
+//                               textView_counter_video.performClick()
+//                            }
+//                        }
                         activity.runOnUiThread {
                             textView_video_size.text = sizePrintVideo
                         }
@@ -2667,12 +2664,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                 activity,
                                 fileSize
                             )
-                        if (fileSize > fileLimit) {
-                            timerAudioTaskFileSize?.cancel()
-                            activity.runOnUiThread {
-                                textView_counter_audio.performClick()
-                            }
-                        }
+//                        if (fileSize > fileLimit) {
+//                            timerAudioTaskFileSize?.cancel()
+//                            activity.runOnUiThread {
+//                                textView_counter_audio.performClick()
+//                            }
+//                        }
                         activity.runOnUiThread {
                             textView_audio_size.text = sizePrintAudio
                         }
@@ -2749,6 +2746,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             activity.runOnUiThread {
                                 textView_counter_video.text = timeStringHour(counterTime)
                             }
+                            if(counterTime > counterMediaLimit){
+                                activity.runOnUiThread {
+                                    timerTaskVideo?.cancel()
+                                    textView_counter_video.performClick()
+                                }
+                            }
                         }
                     }
                 }
@@ -2787,6 +2790,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         counterAudio++
                         activity.runOnUiThread {
                             textView_counter_audio.text = timeStringHour(counterTimer)
+                        }
+                        if(counterTimer > counterMediaLimit){
+                            activity.runOnUiThread {
+                                timerTaskAudio?.cancel()
+                                textView_counter_audio.performClick()
+                            }
                         }
                     }
                 }
@@ -7975,17 +7984,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 textViewGitlabDueDate = viewGitlab.findViewById(R.id.textView_gitlab_due_date)
                 buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
                 buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
-                linearLayoutGitlabConfidentiality =
-                    viewGitlab.findViewById(R.id.linearLayout_gitlab_confidentiality)
-                linearLayoutGitlabMilestone =
-                    viewGitlab.findViewById(R.id.linearLayout_gitlab_milestone)
-                textViewGitlabMilestone = viewGitlab.findViewById(R.id.textView_gitlab_milestone)
-                imageViewGitlabMilestone = viewGitlab.findViewById(R.id.imageView_delete_milestone)
-                linearLayoutGitlabAssignee =
-                    viewGitlab.findViewById(R.id.linearLayout_gitlab_assignee)
-                linearLayoutGitlabLabels = viewGitlab.findViewById(R.id.linearLayout_gitlab_labels)
-                textViewGitlabLabels = viewGitlab.findViewById(R.id.textView_gitlab_labels)
-                imageViewGitlabLabels = viewGitlab.findViewById(R.id.imageView_delete_labels)
                 imageViewGitlabDueDate =
                     viewGitlab.findViewById(R.id.imageView_gitlab_delete_due_date)
                 recyclerViewGitlabAttachment =
@@ -8161,8 +8159,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     autoTextViewProject = autoTextViewGitlabProject
                 )
             ) {
-//                progressBarGitlabLayout.visibility = View.VISIBLE
-//                progressBarGitlab.visibility = View.VISIBLE
                 attachProgressBar(task = "gitlab")
                 gitlabAuthentication.gatherGitlabEditTextDetails(
                     editTextTitle = editTextGitlabTitle,
@@ -8192,14 +8188,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
             }
-        }
-        textViewGitlabLabels.setSafeOnClickListener {
-            linearLayoutGitlabLabels.visibility = View.VISIBLE
-            textViewGitlabLabels.visibility = View.GONE
-        }
-        textViewGitlabMilestone.setSafeOnClickListener {
-            linearLayoutGitlabMilestone.visibility = View.VISIBLE
-            textViewGitlabMilestone.visibility = View.GONE
         }
         buttonGitlabCancel.setSafeOnClickListener {
             removeGitlabLayout()
@@ -8366,10 +8354,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewGitlabLabels.setOnItemClickListener { parent, view, position, id ->
             gitlabAuthentication.gitlabLabelPosition(labelPosition = position)
         }
-        imageViewGitlabLabels.setSafeOnClickListener {
-            linearLayoutGitlabLabels.visibility = View.GONE
-            textViewGitlabLabels.visibility = View.VISIBLE
-        }
         autoTextViewGitlabLabels.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 if (!arrayListGitlabLabels.contains(autoTextViewGitlabLabels.editableText.toString())) {
@@ -8455,11 +8439,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGitlabMilestone.setOnItemClickListener { parent, view, position, id ->
             gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = position)
-        }
-        imageViewGitlabMilestone.setSafeOnClickListener {
-            linearLayoutGitlabMilestone.visibility = View.GONE
-            textViewGitlabMilestone.visibility = View.VISIBLE
-            gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = 0)
         }
         autoTextViewGitlabMilestone.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewGitlab)

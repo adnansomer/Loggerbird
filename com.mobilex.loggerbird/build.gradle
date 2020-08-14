@@ -114,6 +114,7 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     implementation 'commons-io:commons-io:2.6'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 }
 repositories {
     maven { url "https://jitpack.io" }

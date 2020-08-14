@@ -30,7 +30,8 @@
 
         <service android:name="loggerbird.services.LoggerBirdMemoryService"
                  android:enabled="true"
-                 android:exported="true" />
+                 android:exported="true"
+                />
         <service android:name="loggerbird.services.LoggerBirdService"
                  android:theme="@style/AppTheme"/>
         <service android:name="loggerbird.services.LoggerBirdForegroundServiceVideo"
