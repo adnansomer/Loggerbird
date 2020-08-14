@@ -1,4 +1,4 @@
-package loggerbird.adapter.recyclerView.api.bitbucket
+package loggerbird.adapter.recyclerView.fileAction
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -16,26 +16,25 @@ import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
 import loggerbird.models.RecyclerViewModel
 import java.util.concurrent.TimeUnit
-import android.provider.Settings
 import android.widget.Button
-import androidx.annotation.RequiresApi
 import loggerbird.constants.Constants
 import loggerbird.LoggerBird
+import loggerbird.services.LoggerBirdService
 
-//Custom recyclerView loggerbird.adapter class for Bitbucket attachment.
+//Custom recyclerView loggerbird.adapter class for fileAction attachment.
 /**
  * @param fileList is for getting the list of files that will be used in recyclerView.
  * @param context is for getting reference from the application context.
  * @param activity is for getting reference of current activity in the application.
  * @param rootView is for getting reference of the view that is in the root of current activity.
  */
-internal class RecyclerViewBitbucketAttachmentAdapter(
+internal class RecyclerViewFileActionAttachmentAdapter(
     private val fileList: ArrayList<RecyclerViewModel>,
     private val context: Context,
     private val activity: Activity,
     private val rootView: View
 ) :
-    RecyclerView.Adapter<RecyclerViewBitbucketAttachmentAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerViewFileActionAttachmentAdapter.ViewHolder>() {
 
     /**
      * Default RecyclerView.Adapter class method.
@@ -46,7 +45,7 @@ internal class RecyclerViewBitbucketAttachmentAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.recycler_view_bitbucket_item,
+                R.layout.recycler_view_file_action_list_item,
                 parent,
                 false
             )
@@ -78,9 +77,9 @@ internal class RecyclerViewBitbucketAttachmentAdapter(
         )
     }
 
-    //Inner ViewHolder class for RecyclerViewBitbucketAttachmentAdapter class.
+    //Inner ViewHolder class for RecyclerViewFileActionAttachmentAdapter class.
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        //Global variables.
+        //Global variables:
         private var windowManagerRecyclerViewItemPopup: Any? = null
         private lateinit var windowManagerParamsRecyclerViewItemPopup: WindowManager.LayoutParams
         private lateinit var viewRecyclerViewItems: View
@@ -88,10 +87,18 @@ internal class RecyclerViewBitbucketAttachmentAdapter(
         private lateinit var buttonYes: Button
         private lateinit var buttonNo: Button
 
-        //Static variables.
+        //Static variables:
         companion object {
             internal lateinit var arrayListFilePaths: ArrayList<RecyclerViewModel>
+            internal fun controlArrayListFilePaths(): Boolean {
+                if (this::arrayListFilePaths.isInitialized) {
+                    return true
+                }
+                return false
+            }
+            internal var position: Int? = null
         }
+
 
         /**
          * This method is used for binding the items into recyclerView.
@@ -105,7 +112,7 @@ internal class RecyclerViewBitbucketAttachmentAdapter(
          */
         internal fun bindItems(
             item: RecyclerViewModel,
-            attachmentAdapter: RecyclerViewBitbucketAttachmentAdapter,
+            attachmentAdapter: RecyclerViewFileActionAttachmentAdapter,
             position: Int,
             fileList: ArrayList<RecyclerViewModel>,
             context: Context,
@@ -115,6 +122,7 @@ internal class RecyclerViewBitbucketAttachmentAdapter(
             arrayListFilePaths = fileList
             val textViewFileName = itemView.findViewById<TextView>(R.id.textView_file_name)
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
+            val imageButtonShareFile = itemView.findViewById<ImageButton>(R.id.image_button_share)
             textViewFileName.text = item.file.name
             imageButtonCross.setSafeOnClickListener {
                     removeItemPopup(
@@ -122,8 +130,16 @@ internal class RecyclerViewBitbucketAttachmentAdapter(
                         rootView = rootView,
                         fileList = fileList,
                         position = position,
-                        attachmentAdapter = attachmentAdapter
+                        fileAdapter = attachmentAdapter
                     )
+            }
+            imageButtonShareFile.setSafeOnClickListener {
+                LoggerBirdService.loggerBirdService.initializeFloatingActionButton(activity = activity)
+                LoggerBirdService.loggerBirdService.shareView(filePathMedia = arrayListFilePaths[position].file)
+                Companion.position = position
+//                fileList.removeAt(position)
+//                arrayListFilePaths = fileList
+//                attachmentAdapter.notifyDataSetChanged()
             }
 
         }
@@ -134,7 +150,7 @@ internal class RecyclerViewBitbucketAttachmentAdapter(
          * @param rootView is for getting reference of the view that is in the root of current activity.
          * @param fileList is used for getting reference of the list of files that will be used in recyclerView.
          * @param position is used for getting reference of the current position of the item.
-         * @param attachmentAdapter is used for getting reference of the custom recyclerView loggerbird.adapter class.
+         * @param fileAdapter is used for getting reference of the custom recyclerView loggerbird.adapter class.
          * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         private fun removeItemPopup(
@@ -142,12 +158,12 @@ internal class RecyclerViewBitbucketAttachmentAdapter(
             rootView: View,
             fileList: ArrayList<RecyclerViewModel>,
             position: Int,
-            attachmentAdapter: RecyclerViewBitbucketAttachmentAdapter
+            fileAdapter: RecyclerViewFileActionAttachmentAdapter
         ) {
             try {
                 viewRecyclerViewItems = LayoutInflater.from(activity)
                     .inflate(
-                        R.layout.recycler_view_bitbucket_item_popup,
+                        R.layout.recycler_view_file_action_list_item_popup,
                         (rootView as ViewGroup),
                         false
                     )
@@ -178,13 +194,13 @@ internal class RecyclerViewBitbucketAttachmentAdapter(
                             windowManagerParamsRecyclerViewItemPopup
                         )
                         textViewTitle =
-                            viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_bitbucket_title)
+                            viewRecyclerViewItems.findViewById(R.id.textView_recycler_view_file_action_list_title)
                         buttonYes =
-                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_bitbucket_yes)
+                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_file_action_list_yes)
                         buttonNo =
-                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_bitbucket_no)
-                        buttonClicksBitbucketPopup(
-                            attachmentAdapter = attachmentAdapter,
+                            viewRecyclerViewItems.findViewById(R.id.button_recycler_view_file_action_list_no)
+                        buttonClicksFileActionListPopup(
+                            fileAdapter = fileAdapter,
                             fileList = fileList,
                             position = position
                         )
@@ -194,26 +210,26 @@ internal class RecyclerViewBitbucketAttachmentAdapter(
                 LoggerBird.callEnqueue()
                 LoggerBird.callExceptionDetails(
                     exception = e,
-                    tag = Constants.recyclerViewBitbucketAdapterTag
+                    tag = Constants.recyclerViewFileActionListAdapterTag
                 )
             }
         }
 
         /**
-         * This method is used for initializing button clicks of buttons that are inside in the recycler_view_bitbucket_item_popup.
+         * This method is used for initializing button clicks of buttons that are inside in the recycler_view_file_action_list_item_popup.
          * @param fileList is used for getting reference of the list of files that will be used in recyclerView.
          * @param position is used for getting reference of the current position of the item.
-         * @param attachmentAdapter is used for getting reference of the custom recyclerView loggerbird.adapter class.
+         * @param fileAdapter is used for getting reference of the custom recyclerView loggerbird.adapter class.
          */
-        private fun buttonClicksBitbucketPopup(
+        private fun buttonClicksFileActionListPopup(
             fileList: ArrayList<RecyclerViewModel>,
             position: Int,
-            attachmentAdapter: RecyclerViewBitbucketAttachmentAdapter
+            fileAdapter: RecyclerViewFileActionAttachmentAdapter
         ) {
             buttonYes.setSafeOnClickListener {
                 fileList.removeAt(position)
                 arrayListFilePaths = fileList
-                attachmentAdapter.notifyDataSetChanged()
+                fileAdapter.notifyDataSetChanged()
                 removePopupLayout()
             }
             buttonNo.setSafeOnClickListener {
@@ -223,7 +239,7 @@ internal class RecyclerViewBitbucketAttachmentAdapter(
         }
 
         /**
-         * This method is used for removing recycler_view_bitbucket_item_popup from window.
+         * This method is used for removing recycler_view_email_item_popup from window.
          */
         private fun removePopupLayout() {
             if (windowManagerRecyclerViewItemPopup != null && this::viewRecyclerViewItems.isInitialized) {
@@ -238,7 +254,7 @@ internal class RecyclerViewBitbucketAttachmentAdapter(
          * This method is used for preventing spamming of a button and allows to be button click methods executed in every 2 second.
          */
         @SuppressLint("CheckResult")
-       private fun View.setSafeOnClickListener(onClick: (View) -> Unit) {
+        private fun View.setSafeOnClickListener(onClick: (View) -> Unit) {
             RxView.clicks(this).throttleFirst(2000, TimeUnit.MILLISECONDS).subscribe {
                 onClick(this)
             }

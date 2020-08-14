@@ -50,7 +50,7 @@
     <string name="last_session_time">Son oturum zamanı:</string>
     <string name="session_file_limit">Bir oturumdaki maksimum dosya kaydetme limitine ulaştınız!</string>
     <string name="files_action_limit">Maksimum dosya kaydetme limitine ulaştınız , loggerbird herhangi bir dosya aksiyonu almadığınız sürece başlamayacaktır!</string>
-    <string name="files_action_mail">Dosyaları e-mail at ve sil!</string>
+    <string name="files_action_share">Dosyaları paylaş!</string>
     <string name="files_action_discard">Dosyaları sil!</string>
     <string name="files_action_mail_success">Dosyalar başarılı bir şekilde e-mailinize yollandı!</string>
     <string name="files_action_delete_success">Dosyalar başarılı bir şekilde silindi!</string>
@@ -660,4 +660,11 @@
     <string name="textView_bitbucket_menu_clear">Görev detayı temizle</string>
     <!-- recycler_view_bitbucket_item_popup-->
     <string name="textView_recyclerView_bitbucket_popup_title">Bitbucket görevlendirmenizden bu eklentiyi çıkarmaktan eminmisiniz?</string>
+    <!-- loggerbird_file_action_list-->
+    <string name="textView_file_action_list_title">Dosyalar:</string>
+    <!-- recycler_view_file_action_list_popup-->
+    <string name="textView_recyclerView_file_action_list_header">Dosya Sil</string>
+    <string name="textView_recyclerView_file_action_list_title">Bu dosyayı dosya listenizden kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_file_action_list_delete">Dosya sil</string>
+    <string name="button_recyclerView_file_action_list_keep">Dosya tut</string>
 </resources>

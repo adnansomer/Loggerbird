@@ -47,7 +47,7 @@ class LoggerBirdIntegrationBuilder(
 
         fun setSlackIntegration() = apply {
             val slackApiToken =
-                LoggerBird.decryptTokenKey("523949707746.1268116258213.06a731caf79457dbcf80018e08d0727a7625e0e10c6ea7bc02006bfb8c445e41")
+                LoggerBird.decryptTokenKey("523949707746.1304661535556.1a87f1a5f3b6c5b29c554d87c64cd61b2effc105d008a69c31651e1c9d3093b7")
             LoggerBird.slackApiToken = slackApiToken }
 
         fun setGitlabIntegration() = apply {

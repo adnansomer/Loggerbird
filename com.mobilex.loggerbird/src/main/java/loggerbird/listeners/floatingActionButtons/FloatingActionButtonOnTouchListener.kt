@@ -3,15 +3,18 @@ package loggerbird.listeners.floatingActionButtons
 import android.content.res.Resources
 import android.os.Build
 import android.util.Log
-import android.view.*
-import android.widget.FrameLayout
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.view.isVisible
 import com.google.android.material.circularreveal.CircularRevealLinearLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import loggerbird.constants.Constants
 import loggerbird.LoggerBird
+import loggerbird.constants.Constants
 
 //This class is used for making floating action buttons movable.
 internal class FloatingActionButtonOnTouchListener(
@@ -38,7 +41,6 @@ internal class FloatingActionButtonOnTouchListener(
         try {
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-
                     floatingActionButtonScreenShot.visibility = View.GONE
                     floatingActionButtonVideo.visibility = View.GONE
                     floatingActionButtonAudio.visibility = View.GONE
@@ -63,208 +65,23 @@ internal class FloatingActionButtonOnTouchListener(
                     if (deviceWidth < (event.rawX + (floatingActionButton.width))) {
                         Log.d("corner", "a")
                             windowManagerParams.x = deviceWidth / 2
-                            (floatingActionButton.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                450,
-                                0,
-                                0,
-                                0
-                            )
-                            (floatingActionButtonScreenShot.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                0,
-                                0,
-                                0
-                            )
-                            (floatingActionButtonVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                300,
-                                0,
-                                0,
-                                0
-                            )
-                            (textViewCounterVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                300,
-                                0,
-                                0,
-                                0
-                            )
-                            (textViewVideoSize.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                300,
-                                0,
-                                0,
-                                0
-                            )
-                            (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                150,
-                                0,
-                                0,
-                                0
-                            )
-                            (textViewCounterAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                150,
-                                0,
-                                0,
-                                0
-                            )
-                            (textViewAudioSize.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                150,
-                                0,
-                                0,
-                                0
-                            )
+                        (floatingActionButton.parent as LinearLayout).orientation = LinearLayout.HORIZONTAL
+                        (floatingActionButton.parent as LinearLayout).layoutDirection = View.LAYOUT_DIRECTION_RTL
                     } else if (event.rawX - (floatingActionButton.width) < 0) {
                         Log.d("corner", "b")
                             windowManagerParams.x = -(deviceWidth / 2)
-                            (floatingActionButton.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                0,
-                                0,
-                                0
-                            )
-                            (floatingActionButtonScreenShot.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                450,
-                                0,
-                                0,
-                                0
-                            )
-                            (floatingActionButtonVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                150,
-                                0,
-                                0,
-                                0
-                            )
-                            (textViewCounterVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                150,
-                                0,
-                                0,
-                                0
-                            )
-                            (textViewVideoSize.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                150,
-                                0,
-                                0,
-                                0
-                            )
-                            (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                300,
-                                0,
-                                0,
-                                0
-                            )
-                            (textViewCounterAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                300,
-                                0,
-                                0,
-                                0
-                            )
-                            (textViewAudioSize.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                300,
-                                0,
-                                0,
-                                0
-                            )
+                        (floatingActionButton.parent as LinearLayout).orientation = LinearLayout.HORIZONTAL
+                        (floatingActionButton.parent as LinearLayout).layoutDirection = View.LAYOUT_DIRECTION_LTR
                     }
                     if (deviceHeight < (event.rawY + (floatingActionButton.height))) {
                         Log.d("corner", "c")
                             windowManagerParams.y = (deviceHeight / 2)
-                            (floatingActionButton.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                450,
-                                0,
-                                0
-                            )
-                            (floatingActionButtonScreenShot.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                0,
-                                0,
-                                0
-                            )
-                            (floatingActionButtonVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                300,
-                                0,
-                                0
-                            )
-                            (textViewCounterVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                300,
-                                0,
-                                0
-                            )
-                            (textViewVideoSize.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                300,
-                                0,
-                                0
-                            )
-                            (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                150,
-                                0,
-                                0
-                            )
-                            (textViewCounterAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                150,
-                                0,
-                                0
-                            )
-                            (textViewAudioSize.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                150,
-                                0,
-                                0
-                            )
+                        reverseLayout(viewGroup = floatingActionButton.parent as LinearLayout)
+                        (floatingActionButton.parent as LinearLayout).orientation = LinearLayout.VERTICAL
                     } else if (event.rawY - (floatingActionButton.height) < 0) {
                         Log.d("corner", "d")
                             windowManagerParams.y = -(deviceHeight / 2)
-                            (floatingActionButton.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                0,
-                                0,
-                                0
-                            )
-                            (floatingActionButtonScreenShot.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                450,
-                                0,
-                                0
-                            )
-                            (floatingActionButtonVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                150,
-                                0,
-                                0
-                            )
-                            (textViewCounterVideo.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                150,
-                                0,
-                                0
-                            )
-                            (textViewVideoSize.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                150,
-                                0,
-                                0
-                            )
-                            (floatingActionButtonAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                300,
-                                0,
-                                0
-                            )
-                            (textViewCounterAudio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                300,
-                                0,
-                                0
-                            )
-                            (textViewAudioSize.layoutParams as FrameLayout.LayoutParams).setMargins(
-                                0,
-                                300,
-                                0,
-                                0
-                            )
+                        (floatingActionButton.parent as LinearLayout).orientation = LinearLayout.VERTICAL
                     }
 //                    floatingActionButton.setImageResource(R.drawable.ic_close_black_24dp)
 //                    floatingActionButtonScreenShot.visibility = View.VISIBLE
@@ -290,5 +107,12 @@ internal class FloatingActionButtonOnTouchListener(
             )
         }
         return true
+    }
+    private fun reverseLayout(viewGroup: ViewGroup){
+        for (child in (viewGroup).childCount - 1 downTo 0) {
+            val item: View = (viewGroup).getChildAt(child)
+            (viewGroup).removeViewAt(child)
+            (viewGroup).addView(item)
+        }
     }
 }

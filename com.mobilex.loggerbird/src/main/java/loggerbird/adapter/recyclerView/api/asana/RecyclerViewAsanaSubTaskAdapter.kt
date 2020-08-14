@@ -184,7 +184,6 @@ internal class RecyclerViewAsanaSubTaskAdapter(
             textViewFileName.text = item.subtaskName
             subtaskName = item.subtaskName
             imageButtonCross.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
@@ -192,7 +191,6 @@ internal class RecyclerViewAsanaSubTaskAdapter(
                         position = position,
                         subtaskAdapter = subtaskAdapter
                     )
-                }
             }
             subtaskButton.setSafeOnClickListener {
                 initializeSubLayout(
@@ -629,8 +627,13 @@ internal class RecyclerViewAsanaSubTaskAdapter(
             removeAsanaSubDateLayout()
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             viewAsanaSubDate =
-                LayoutInflater.from(activity)
-                    .inflate(R.layout.asana_calendar_view, rootView, false)
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                    LayoutInflater.from(activity)
+                        .inflate(R.layout.asana_calendar_view, rootView, false)
+                }else{
+                    LayoutInflater.from(activity)
+                        .inflate(R.layout.asana_calendar_view_lower, rootView, false)
+                }
             windowManagerParamsAsanaSubDate =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
@@ -695,15 +698,18 @@ internal class RecyclerViewAsanaSubTaskAdapter(
                 mDayOfMonth.toString()
             }
             var startDate = "$mYear-$mTempMonth-$mTempDay"
-            calendarViewAsanaSub.minDate = System.currentTimeMillis() + 86400000
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                calendarViewAsanaSub.minDate = System.currentTimeMillis() + 86400000
+            }
             frameLayoutAsanaSubDate.setOnClickListener {
                 removeAsanaSubDateLayout()
             }
             calendarViewAsanaSub.setOnDateChangeListener { view, year, month, dayOfMonth ->
-                val tempMonth: String = if (month in 1..9) {
-                    "0$month"
+                val tempMonthMonth = month +1
+                val tempMonth: String = if (tempMonthMonth in 1..9) {
+                    "0$tempMonthMonth"
                 } else {
-                    month.toString()
+                    tempMonthMonth.toString()
                 }
                 val tempDay: String = if (dayOfMonth in 1..9) {
                     "0$dayOfMonth"

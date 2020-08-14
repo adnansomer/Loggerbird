@@ -120,7 +120,6 @@ internal class RecyclerViewPivotalOwnerAdapter(
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
             textViewFileName.text = item.ownerName
             imageButtonCross.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
@@ -128,7 +127,6 @@ internal class RecyclerViewPivotalOwnerAdapter(
                         position = position,
                         ownerAdapter = ownerAdapter
                     )
-                }
             }
 
         }

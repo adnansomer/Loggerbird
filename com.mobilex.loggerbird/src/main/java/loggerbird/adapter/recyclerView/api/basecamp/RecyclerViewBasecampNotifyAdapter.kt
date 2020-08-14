@@ -120,7 +120,6 @@ internal class RecyclerViewBasecampNotifyAdapter(
             val imageButtonCross = itemView.findViewById<ImageButton>(R.id.image_button_cross)
             textViewFileName.text = item.notifyName
             imageButtonCross.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
@@ -128,7 +127,6 @@ internal class RecyclerViewBasecampNotifyAdapter(
                         position = position,
                         notifyAdapter = notifyAdapter
                     )
-                }
             }
 
         }

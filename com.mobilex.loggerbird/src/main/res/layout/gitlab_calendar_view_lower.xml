@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/gitlab_calendar_view_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/darkTransparent"
+    android:layout_gravity="center">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
+
+        <CalendarView
+            android:id="@+id/calendarView_gitlab_due_date"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="@drawable/pop_up_shape"
+            android:padding="15dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:padding="5dp">
+
+            <Button
+                android:id="@+id/button_gitlab_calendar_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorFab"
+                android:text="@string/button_CalendarView_cancel" />
+
+            <Button
+                android:id="@+id/button_gitlab_calendar_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorFab"
+                android:text="@string/button_CalendarView_ok" />
+
+
+        </LinearLayout>
+
+
+    </FrameLayout>
+
+</FrameLayout>
