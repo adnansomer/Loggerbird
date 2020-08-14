@@ -99,6 +99,12 @@ import kotlin.collections.HashMap
 import java.text.SimpleDateFormat
 import android.text.InputFilter
 import androidx.core.widget.addTextChangedListener
+import loggerbird.adapter.autoCompleteTextViews.api.github.*
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubLabelAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubMilestoneAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubRepoAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.gitlab.*
 import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabAssigneeAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabConfidentialityAdapter
@@ -483,12 +489,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewGithubProject: AutoCompleteTextView
     private lateinit var autoTextViewGithubMileStone: AutoCompleteTextView
     private lateinit var autoTextViewGithubLinkedRequests: AutoCompleteTextView
-    private lateinit var autoTextViewGithubAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubLabelsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubRepoAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubMileStoneAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubLinkedRequestsAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGithubAssigneeAdapter: AutoCompleteTextViewGithubAssigneeAdapter
+    private lateinit var autoTextViewGithubLabelsAdapter:  AutoCompleteTextViewGithubLabelAdapter
+    private lateinit var autoTextViewGithubRepoAdapter:  AutoCompleteTextViewGithubRepoAdapter
+    private lateinit var autoTextViewGithubProjectAdapter:  AutoCompleteTextViewGithubProjectAdapter
+    private lateinit var autoTextViewGithubMileStoneAdapter:  AutoCompleteTextViewGithubMilestoneAdapter
+    private lateinit var autoTextViewGithubLinkedRequestsAdapter:  AutoCompleteTextViewGithubLinkedRequestsAdapter
     private val arrayListGithubFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var scrollViewGithub: ScrollView
     private lateinit var recyclerViewGithubAssignee: RecyclerView
@@ -6817,9 +6823,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubRepos: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubRepoAdapter = ArrayAdapter(
+        autoTextViewGithubRepoAdapter = AutoCompleteTextViewGithubRepoAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_repo_item,
             arrayListGithubRepos
         )
         autoTextViewGithubRepo.setAdapter(autoTextViewGithubRepoAdapter)
@@ -6887,9 +6893,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubAssigneeAdapter = ArrayAdapter(
+        autoTextViewGithubAssigneeAdapter = AutoCompleteTextViewGithubAssigneeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_assignee_item,
             arrayListGithubAssignee
         )
         autoTextViewGithubAssignee.setAdapter(autoTextViewGithubAssigneeAdapter)
@@ -6931,9 +6937,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubMileStones: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubMileStoneAdapter = ArrayAdapter(
+        autoTextViewGithubMileStoneAdapter = AutoCompleteTextViewGithubMilestoneAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_milestone_item,
             arrayListGithubMileStones
         )
         autoTextViewGithubMileStone.setAdapter(autoTextViewGithubMileStoneAdapter)
@@ -6976,9 +6982,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubProjectAdapter = ArrayAdapter(
+        autoTextViewGithubProjectAdapter = AutoCompleteTextViewGithubProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_project_item,
             arrayListGithubProject
         )
         autoTextViewGithubProject.setAdapter(autoTextViewGithubProjectAdapter)
@@ -7021,9 +7027,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubLabels: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubLabelsAdapter = ArrayAdapter(
+        autoTextViewGithubLabelsAdapter = AutoCompleteTextViewGithubLabelAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_labels_item,
             arrayListGithubLabels
         )
         autoTextViewGithubLabels.setAdapter(autoTextViewGithubLabelsAdapter)
@@ -7056,10 +7062,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubLinkedRequests: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubLinkedRequestsAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            arrayListGithubLinkedRequests
+        autoTextViewGithubLinkedRequestsAdapter  = AutoCompleteTextViewGithubLinkedRequestsAdapter(
+                this,
+        R.layout.auto_text_view_github_linked_request_item,
+        arrayListGithubLinkedRequests
         )
         autoTextViewGithubLinkedRequests.setAdapter(autoTextViewGithubLinkedRequestsAdapter)
         if (arrayListGithubLinkedRequests.isNotEmpty() && autoTextViewGithubLinkedRequests.editableText.isEmpty()) {
