@@ -51,8 +51,8 @@ internal class AutoCompleteTextViewBasecampCategoryAdapter(
             parent,
             false
         )
-        val textViewIconName = view.findViewById<TextView>(R.id.textView_icon_name)
-        val textViewIconShape = view.findViewById<TextView>(R.id.textView_icon_shape)
+        val textViewIconName = view.findViewById<TextView>(R.id.textView_basecamp_icon_name)
+        val textViewIconShape = view.findViewById<TextView>(R.id.textView_basecamp_icon_shape)
         textViewIconName.text = arrayListIconName[position]
         textViewIconShape.text = arrayListIconShape[position]
         return view

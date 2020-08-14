@@ -99,6 +99,17 @@ import kotlin.collections.HashMap
 import java.text.SimpleDateFormat
 import android.text.InputFilter
 import androidx.core.widget.addTextChangedListener
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.*
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabConfidentialityAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabLabelAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.*
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraIssueAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraIssueTypeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraLinkedIssueAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraReporterAdapter
 import loggerbird.adapter.recyclerView.fileAction.RecyclerViewFileActionAttachmentAdapter
 import loggerbird.listeners.OnSwipeTouchListener
 import loggerbird.listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
@@ -308,19 +319,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var scrollViewJira: ScrollView
     private val arrayListJiraFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var jiraAttachmentAdapter: RecyclerViewJiraAttachmentAdapter
-    private lateinit var autoTextViewJiraProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraIssueTypeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraReporterAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraLinkedIssueAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraIssueAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraPriorityAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewFixVersionsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraComponentAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraLabelAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraEpicLinkAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraSprintAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraEpicNameAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewJiraProjectAdapter: AutoCompleteTextViewJiraProjectAdapter
+    private lateinit var autoTextViewJiraIssueTypeAdapter:AutoCompleteTextViewJiraIssueTypeAdapter
+    private lateinit var autoTextViewJiraReporterAdapter: AutoCompleteTextViewJiraReporterAdapter
+    private lateinit var autoTextViewJiraLinkedIssueAdapter: AutoCompleteTextViewJiraLinkedIssueAdapter
+    private lateinit var autoTextViewJiraIssueAdapter: AutoCompleteTextViewJiraIssueAdapter
+    private lateinit var autoTextViewJiraAssigneeAdapter: AutoCompleteTextViewJiraAssigneeAdapter
+    private lateinit var autoTextViewJiraPriorityAdapter: AutoCompleteTextViewJiraPriorityAdapter
+    private lateinit var autoTextViewFixVersionsAdapter: AutoCompleteTextViewJiraFixVersionsAdapter
+    private lateinit var autoTextViewJiraComponentAdapter: AutoCompleteTextViewJiraComponentAdapter
+    private lateinit var autoTextViewJiraLabelAdapter: AutoCompleteTextViewJiraLabelAdapter
+    private lateinit var autoTextViewJiraEpicLinkAdapter: AutoCompleteTextViewJiraEpicLinkAdapter
+    private lateinit var autoTextViewJiraSprintAdapter: AutoCompleteTextViewJiraSprintAdapter
+    private lateinit var autoTextViewJiraEpicNameAdapter: AutoCompleteTextViewJiraEpicNameAdapter
     private var projectJiraPosition: Int = 0
     private var controlProjectJiraPosition: Boolean = false
     internal lateinit var cardViewJiraIssueList: CardView
@@ -438,11 +449,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonCalendarViewGitlabOk: Button
     private lateinit var recyclerViewGitlabAttachment: RecyclerView
     private lateinit var gitlabAttachmentAdapter: RecyclerViewGitlabAttachmentAdapter
-    private lateinit var autoTextViewGitlabProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabLabelsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabMilestoneAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabConfidentialityAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGitlabProjectAdapter: AutoCompleteTextViewGitlabProjectAdapter
+    private lateinit var autoTextViewGitlabAssigneeAdapter: AutoCompleteTextViewGitlabAssigneeAdapter
+    private lateinit var autoTextViewGitlabLabelsAdapter: AutoCompleteTextViewGitlabLabelAdapter
+    private lateinit var autoTextViewGitlabMilestoneAdapter: AutoCompleteTextViewGitlabMilestoneAdapter
+    private lateinit var autoTextViewGitlabConfidentialityAdapter: AutoCompleteTextViewGitlabConfidentialityAdapter
     private val arrayListGitlabFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var linearLayoutGitlabConfidentiality: LinearLayout
     private lateinit var textViewGitlabConfidentiality: TextView
@@ -4439,7 +4450,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 arrayListJiraFixVersions = arrayListJiraFixVersions,
                 sharedPref = sharedPref
             )
-            initializeJiraLabels(arrayListLabel = arrayListJiraLabel, sharedPref = sharedPref)
+            initializeJiraLabels(arrayListJiraLabel = arrayListJiraLabel, sharedPref = sharedPref)
             initializeJiraEpicLink(
                 arrayListJiraEpicLink = arrayListJiraEpicLink,
                 sharedPref = sharedPref
@@ -4498,12 +4509,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (hashMapJiraBoardList[arrayListJiraProjectKeys[projectJiraPosition]] == "scrum") {
             cardViewJiraSprint.visibility = View.VISIBLE
             cardViewJiraStartDate.visibility = View.VISIBLE
-            autoTextViewJiraSprintAdapter =
-                ArrayAdapter(
-                    this,
-                    android.R.layout.simple_dropdown_item_1line,
-                    arrayListJiraSprint
-                )
+            autoTextViewJiraSprintAdapter = AutoCompleteTextViewJiraSprintAdapter(
+                this,
+                R.layout.auto_text_view_jira_sprint_item,
+                arrayListJiraSprint
+            )
             autoTextViewJiraSprint.setAdapter(autoTextViewJiraSprintAdapter)
             if (arrayListJiraSprint.isNotEmpty()) {
                 if (sharedPref.getString("jira_sprint", null) != null) {
@@ -4539,12 +4549,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraEpicLink: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraEpicLinkAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraEpicLink
-            )
+        autoTextViewJiraEpicLinkAdapter = AutoCompleteTextViewJiraEpicLinkAdapter(
+            this,
+            R.layout.auto_text_view_jira_epic_link_item,
+            arrayListJiraEpicLink
+        )
         autoTextViewJiraEpicLink.setAdapter(autoTextViewJiraEpicLinkAdapter)
         if (arrayListJiraEpicLink.isNotEmpty()) {
             if (sharedPref.getString("jira_epic_link", null) != null) {
@@ -4572,13 +4581,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeJiraLabels(
-        arrayListLabel: ArrayList<String>,
+        arrayListJiraLabel: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraLabelAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListLabel)
+        autoTextViewJiraLabelAdapter = AutoCompleteTextViewJiraLabelAdapter(
+            this,
+            R.layout.auto_text_view_jira_label_item,
+            arrayListJiraLabel
+        )
         autoTextViewJiraLabel.setAdapter(autoTextViewJiraLabelAdapter)
-        if (arrayListLabel.isNotEmpty()) {
+        if (arrayListJiraLabel.isNotEmpty()) {
             if (sharedPref.getString("jira_labels", null) != null) {
                 autoTextViewJiraLabel.setText(sharedPref.getString("jira_labels", null), false)
             }
@@ -4591,7 +4603,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewJiraLabel.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewJira)
         }
-        this.arrayListJiraLabel = arrayListLabel
+        this.arrayListJiraLabel = arrayListJiraLabel
     }
 
     /**
@@ -4605,10 +4617,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraFixVersions: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewFixVersionsAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            arrayListJiraFixVersions
+        autoTextViewFixVersionsAdapter  = AutoCompleteTextViewJiraFixVersionsAdapter(
+        this,
+        R.layout.auto_text_view_jira_fix_versions_item,
+        arrayListJiraFixVersions
         )
         autoTextViewJiraFixVersions.setAdapter(autoTextViewFixVersionsAdapter)
         if (arrayListJiraFixVersions.isNotEmpty()) {
@@ -4642,12 +4654,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraComponent: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraComponentAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraComponent
-            )
+        autoTextViewJiraComponentAdapter = AutoCompleteTextViewJiraComponentAdapter(
+            this,
+            R.layout.auto_text_view_jira_component_item,
+           arrayListJiraComponent
+        )
         autoTextViewJiraComponent.setAdapter(autoTextViewJiraComponentAdapter)
         if (arrayListJiraComponent.isNotEmpty()) {
             if (sharedPref.getString("jira_component", null) != null) {
@@ -4679,12 +4690,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraPriority: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraPriorityAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraPriority
-            )
+        autoTextViewJiraPriorityAdapter = AutoCompleteTextViewJiraPriorityAdapter(
+            this,
+            R.layout.auto_text_view_jira_priority_item,
+            arrayListJiraPriority
+        )
         autoTextViewJiraPriority.setAdapter(autoTextViewJiraPriorityAdapter)
         if (arrayListJiraPriority.isNotEmpty()) {
             if (sharedPref.getString("jira_priority", null) != null) {
@@ -4735,12 +4745,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraAssigneeAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraAssignee
-            )
+        autoTextViewJiraAssigneeAdapter = AutoCompleteTextViewJiraAssigneeAdapter(
+            this,
+            R.layout.auto_text_view_jira_assignee_item,
+            arrayListJiraAssignee
+        )
         autoTextViewJiraAssignee.setAdapter(autoTextViewJiraAssigneeAdapter)
         if (arrayListJiraAssignee.isNotEmpty()) {
             if (sharedPref.getString("jira_assignee", null) != null) {
@@ -4772,8 +4781,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraIssues: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraIssueAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListJiraIssues)
+        autoTextViewJiraIssueAdapter = AutoCompleteTextViewJiraIssueAdapter(
+            this,
+            R.layout.auto_text_view_jira_issue_item,
+           arrayListJiraIssues
+        )
         autoTextViewJiraIssue.setAdapter(autoTextViewJiraIssueAdapter)
         if (arrayListJiraIssues.isNotEmpty()) {
             if (sharedPref.getString("jira_issue", null) != null) {
@@ -4802,9 +4814,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraLinkedIssues: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraLinkedIssueAdapter = ArrayAdapter(
+        autoTextViewJiraLinkedIssueAdapter = AutoCompleteTextViewJiraLinkedIssueAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_jira_linked_issue_item,
             arrayListJiraLinkedIssues
         )
         autoTextViewJiraLinkedIssue.setAdapter(autoTextViewJiraLinkedIssueAdapter)
@@ -4857,10 +4869,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraReporterNames: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraReporterAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            arrayListJiraReporterNames
+        autoTextViewJiraReporterAdapter  = AutoCompleteTextViewJiraReporterAdapter(
+                this,
+        R.layout.auto_text_view_jira_reporter_item,
+        arrayListJiraReporterNames
         )
         autoTextViewJiraReporter.setAdapter(autoTextViewJiraReporterAdapter)
         if (arrayListJiraReporterNames.isNotEmpty()) {
@@ -4896,12 +4908,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraEpicName: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraIssueTypeAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraIssueTypes
-            )
+        autoTextViewJiraIssueTypeAdapter = AutoCompleteTextViewJiraIssueTypeAdapter(
+            this,
+            R.layout.auto_text_view_jira_issue_type_item,
+            arrayListJiraIssueTypes
+        )
         autoTextViewJiraIssueType.setAdapter(autoTextViewJiraIssueTypeAdapter)
         if (checkUnhandledFilePath()) {
             autoTextViewJiraIssueType.setText(arrayListJiraIssueTypes[2], false)
@@ -4961,11 +4972,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraProjectNames: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraProjectAdapter = ArrayAdapter(
+        autoTextViewJiraProjectAdapter = AutoCompleteTextViewJiraProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_jira_project_item,
             arrayListJiraProjectNames
-        )
+            )
         autoTextViewJiraProject.setAdapter(autoTextViewJiraProjectAdapter)
         if (arrayListJiraProjectNames.isNotEmpty() && autoTextViewJiraProject.text.isEmpty()) {
             if (sharedPref.getString("jira_project", null) != null) {
@@ -5026,10 +5037,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (autoTextViewJiraIssueType.editableText.toString() == "Epic") {
             cardViewJiraEpicName.visibility = View.VISIBLE
             cardViewJiraEpicLink.visibility = View.GONE
-            autoTextViewJiraEpicNameAdapter = ArrayAdapter(
+            autoTextViewJiraEpicNameAdapter = AutoCompleteTextViewJiraEpicNameAdapter(
                 this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraEpicName
+                R.layout.auto_text_view_jira_epic_name_item,
+               arrayListJiraEpicName
             )
             autoTextViewJiraEpicName.setAdapter(autoTextViewJiraEpicNameAdapter)
             if (arrayListJiraEpicName.isNotEmpty()) {
@@ -8371,7 +8382,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGitlabProjects: ArrayList<String>
     ) {
         autoTextViewGitlabProjectAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabProjects)
+            AutoCompleteTextViewGitlabProjectAdapter(this, R.layout.auto_text_view_gitlab_project_item, arrayListGitlabProjects)
         autoTextViewGitlabProject.setAdapter(autoTextViewGitlabProjectAdapter)
         if (arrayListGitlabProjects.isNotEmpty() && autoTextViewGitlabProject.text.isEmpty()) {
             autoTextViewGitlabProject.setText(arrayListGitlabProjects[0], false)
@@ -8418,7 +8429,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGitlabAssignee: ArrayList<String>
     ) {
         autoTextViewGitlabAssigneeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabAssignee)
+            AutoCompleteTextViewGitlabAssigneeAdapter(this, R.layout.auto_text_view_gitlab_assignee_item, arrayListGitlabAssignee)
         autoTextViewGitlabAssignee.setAdapter(autoTextViewGitlabAssigneeAdapter)
         if (arrayListGitlabAssignee.isNotEmpty() && autoTextViewGitlabAssignee.text.isEmpty()) {
             autoTextViewGitlabAssignee.setText(arrayListGitlabAssignee[0], false)
@@ -8458,8 +8469,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabLabels(
         arrayListGitlabLabels: ArrayList<String>
     ) {
-        autoTextViewGitlabLabelsAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabLabels)
+        autoTextViewGitlabLabelsAdapter = AutoCompleteTextViewGitlabLabelAdapter(this, R.layout.auto_text_view_gitlab_label_item, arrayListGitlabLabels)
         autoTextViewGitlabLabels.setAdapter(autoTextViewGitlabLabelsAdapter)
         if (arrayListGitlabLabels.isNotEmpty() && autoTextViewGitlabLabels.text.isEmpty()) {
             autoTextViewGitlabLabels.setText(arrayListGitlabLabels[0], false)
@@ -8502,11 +8512,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabConfidentiality(
         arrayListGitlabConfidentiality: ArrayList<String>
     ) {
-        autoTextViewGitlabConfidentialityAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            arrayListGitlabConfidentiality
-        )
+        autoTextViewGitlabConfidentialityAdapter = AutoCompleteTextViewGitlabConfidentialityAdapter(this, R.layout.auto_text_view_gitlab_confidentiality_item, arrayListGitlabConfidentiality)
         autoTextViewGitlabConfidentiality.setAdapter(autoTextViewGitlabConfidentialityAdapter)
         if (arrayListGitlabConfidentiality.isNotEmpty() && autoTextViewGitlabConfidentiality.text.isEmpty()) {
             autoTextViewGitlabConfidentiality.setText(arrayListGitlabConfidentiality[0], false)
@@ -8548,11 +8554,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabMilestones(
         arrayListGitlabMilestones: ArrayList<String>
     ) {
-        autoTextViewGitlabMilestoneAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            arrayListGitlabMilestones
-        )
+        autoTextViewGitlabMilestoneAdapter = AutoCompleteTextViewGitlabMilestoneAdapter(this, R.layout.auto_text_view_gitlab_milestone_item, arrayListGitlabMilestones)
         autoTextViewGitlabMilestone.setAdapter(autoTextViewGitlabMilestoneAdapter)
         if (arrayListGitlabMilestones.isNotEmpty() && autoTextViewGitlabMilestone.text.isEmpty()) {
             autoTextViewGitlabMilestone.setText(arrayListGitlabMilestones[0], false)

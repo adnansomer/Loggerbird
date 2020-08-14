@@ -7,19 +7,17 @@
     android:orientation="horizontal"
     android:layout_gravity="center_horizontal"
     android:layout_marginTop="10dp"
-    android:layout_marginStart="10dp"
-    android:layout_marginLeft="10dp"
-    android:background="@drawable/linear_layout"
+    android:background="@null"
     >
 
         <TextView
-            android:id="@+id/textView_trello_label_name"
+            android:id="@+id/textView_jira_epic_name_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="PLACEHOLDER.TXT"
             android:background="@color/white"
             android:textColor="@color/black"
-            android:textSize="16sp">
+            android:textSize="22sp">
         </TextView>
 
 
