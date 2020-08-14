@@ -1021,16 +1021,21 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         try {
-            if (!audioRecording && !videoRecording && !screenshotDrawing) {
-                arrayListFile.forEach {
-                    if (it.exists()) {
-                        it.delete()
-                    }
-                }
-            }
+//            if (!audioRecording && !videoRecording && !screenshotDrawing) {
+//                arrayListFile.forEach {
+//                    if (it.exists()) {
+//                        it.delete()
+//                    }
+//                }
+//            }
 //            else {
 //                addFileList()
 //            }
+            arrayListFile.forEach {
+                if (it.exists()) {
+                    it.delete()
+                }
+            }
             dailySessionTimeRecorder(activity = activity)
             controlServiceOnDestroyState = true
             LoggerBird.takeLifeCycleDetails()

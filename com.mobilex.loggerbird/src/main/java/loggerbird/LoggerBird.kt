@@ -1623,6 +1623,7 @@ class LoggerBird : LifecycleObserver {
                     }
                 } else {
                     stringBuilderException = StringBuilder()
+                    stringBuilderException.append(stringBuilderActivityLifeCycleObserver.toString() + stringBuilderFragmentManager.toString())
                     stringBuilderException.append("\n")
                     val date = Calendar.getInstance().time
                     val formatter =
@@ -1666,7 +1667,6 @@ class LoggerBird : LifecycleObserver {
                             unhandledExceptionMessage = throwable.stackTrace[0].className
                         )
                     }
-                    stringBuilderException.append(stringBuilderActivityLifeCycleObserver.toString() + stringBuilderFragmentManager.toString())
                     saveExceptionDetails()
                 }
 
