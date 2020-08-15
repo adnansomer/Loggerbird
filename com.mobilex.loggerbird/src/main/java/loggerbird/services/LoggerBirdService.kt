@@ -103,10 +103,17 @@ import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAs
 import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaPriorityAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaProjectAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaSectorAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampNotifyAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampProjectAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.bitbucket.AutoCompleteTextViewBitbucketAssigneeAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.bitbucket.AutoCompleteTextViewBitbucketKindAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.bitbucket.AutoCompleteTextViewBitbucketPriorityAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.bitbucket.AutoCompleteTextViewBitbucketProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.clubhouse.AutoCompleteTextViewClubhouseEpicAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.clubhouse.AutoCompleteTextViewClubhouseProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.clubhouse.AutoCompleteTextViewClubhouseRequesterAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.clubhouse.AutoCompleteTextViewClubhouseStoryTypeAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.github.*
 import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubAssigneeAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubLabelAdapter
@@ -124,6 +131,12 @@ import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJir
 import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraLinkedIssueAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraProjectAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraReporterAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.*
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalOwnersAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalPointsAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalRequesterAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalStoryTypeAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloBoardAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloMemberAdapter
 import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloProjectAdapter
@@ -605,12 +618,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewPivotalOwners: AutoCompleteTextView
     private lateinit var autoTextViewPivotalLabel: AutoCompleteTextView
     private lateinit var autoTextViewPivotalRequester: AutoCompleteTextView
-    private lateinit var autoTextViewPivotalProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalLabelAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalStoryTypeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalPointsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalOwnersAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalRequesterAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalProjectAdapter: AutoCompleteTextViewPivotalProjectAdapter
+    private lateinit var autoTextViewPivotalLabelAdapter: AutoCompleteTextViewPivotalLabelAdapter
+    private lateinit var autoTextViewPivotalStoryTypeAdapter: AutoCompleteTextViewPivotalStoryTypeAdapter
+    private lateinit var autoTextViewPivotalPointsAdapter: AutoCompleteTextViewPivotalPointsAdapter
+    private lateinit var autoTextViewPivotalOwnersAdapter: AutoCompleteTextViewPivotalOwnersAdapter
+    private lateinit var autoTextViewPivotalRequesterAdapter: AutoCompleteTextViewPivotalRequesterAdapter
     private lateinit var imageViewPivotalOwners: ImageView
     internal lateinit var cardViewPivotalOwnersList: CardView
     private lateinit var recyclerViewPivotalOwnerList: RecyclerView
@@ -648,10 +661,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewBasecampCategory: AutoCompleteTextView
     private lateinit var autoTextViewBasecampAssignee: AutoCompleteTextView
     private lateinit var autoTextViewBasecampNotify: AutoCompleteTextView
-    private lateinit var autoTextViewBasecampProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewBasecampCategoryCategoryAdapter: AutoCompleteTextViewBasecampCategoryAdapter
-    private lateinit var autoTextViewBasecampAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewBasecampNotifyAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBasecampProjectAdapter: AutoCompleteTextViewBasecampProjectAdapter
+    private lateinit var autoTextViewBasecampCategoryAdapter: AutoCompleteTextViewBasecampCategoryAdapter
+    private lateinit var autoTextViewBasecampAssigneeAdapter: AutoCompleteTextViewBasecampAssigneeAdapter
+    private lateinit var autoTextViewBasecampNotifyAdapter: AutoCompleteTextViewBasecampNotifyAdapter
     private lateinit var editTextBasecampDescriptionMessage: EditText
     private lateinit var editTextBasecampDescriptionTodo: EditText
     private lateinit var editTextBasecampTitle: EditText
@@ -730,16 +743,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonCalendarViewClubhouseOk: Button
     private lateinit var textViewClubhouseDueDate: TextView
     private lateinit var autoTextViewClubhouseProject: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseProjectAdapter: AutoCompleteTextViewClubhouseProjectAdapter
     private lateinit var autoTextViewClubhouseEpic: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseEpicAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseEpicAdapter: AutoCompleteTextViewClubhouseEpicAdapter
     private lateinit var editTextClubhouseStoryName: EditText
     private lateinit var editTextClubhouseStoryDescription: EditText
     private lateinit var editTextClubhouseEstimate: EditText
     private lateinit var autoTextViewClubhouseStoryType: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseStoryTypeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseStoryTypeAdapter:  AutoCompleteTextViewClubhouseStoryTypeAdapter
     private lateinit var autoTextViewClubhouseRequester: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseRequesterAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseRequesterAdapter:   AutoCompleteTextViewClubhouseRequesterAdapter
     private val arrayListClubhouseFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var clubhouseAttachmentAdapter: RecyclerViewClubhouseAttachmentAdapter
     private lateinit var recyclerViewClubhouseAttachment: RecyclerView
@@ -9132,9 +9145,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalProjectAdapter = ArrayAdapter(
+        autoTextViewPivotalProjectAdapter = AutoCompleteTextViewPivotalProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_project_item,
             arrayListPivotalProject
         )
         autoTextViewPivotalProject.setAdapter(autoTextViewPivotalProjectAdapter)
@@ -9185,9 +9198,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalStoryType: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalStoryTypeAdapter = ArrayAdapter(
+        autoTextViewPivotalStoryTypeAdapter = AutoCompleteTextViewPivotalStoryTypeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_story_item,
             arrayListPivotalStoryType
         )
         autoTextViewPivotalStoryType.setAdapter(autoTextViewPivotalStoryTypeAdapter)
@@ -9228,9 +9241,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalPoints: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalPointsAdapter = ArrayAdapter(
+        autoTextViewPivotalPointsAdapter = AutoCompleteTextViewPivotalPointsAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_points_item,
             arrayListPivotalPoints
         )
         autoTextViewPivotalPoints.setAdapter(autoTextViewPivotalPointsAdapter)
@@ -9271,9 +9284,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalRequester: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalRequesterAdapter = ArrayAdapter(
+        autoTextViewPivotalRequesterAdapter = AutoCompleteTextViewPivotalRequesterAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_requester_item,
             arrayListPivotalRequester
         )
         autoTextViewPivotalRequester.setAdapter(autoTextViewPivotalRequesterAdapter)
@@ -9314,9 +9327,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalOwners: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalOwnersAdapter = ArrayAdapter(
+        autoTextViewPivotalOwnersAdapter = AutoCompleteTextViewPivotalOwnersAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_owners_item,
             arrayListPivotalOwners
         )
         autoTextViewPivotalOwners.setAdapter(autoTextViewPivotalOwnersAdapter)
@@ -9359,9 +9372,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalLabel: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalLabelAdapter = ArrayAdapter(
+        autoTextViewPivotalLabelAdapter = AutoCompleteTextViewPivotalLabelAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_label_item,
             arrayListPivotalLabel
         )
         autoTextViewPivotalLabel.setAdapter(autoTextViewPivotalLabelAdapter)
@@ -9888,7 +9901,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
         )
         initializeBasecampProject(
-            arrayListProject = arrayListBasecampProject,
+            arrayListBasecampProject = arrayListBasecampProject,
             sharedPref = sharedPref
         )
         initializeBasecampCategory(
@@ -9915,18 +9928,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializeBasecampProject(
-        arrayListProject: ArrayList<String>,
+        arrayListBasecampProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBasecampProjectAdapter = ArrayAdapter(
+        autoTextViewBasecampProjectAdapter = AutoCompleteTextViewBasecampProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
-            arrayListProject
+            R.layout.auto_text_view_basecamp_project_item,
+            arrayListBasecampProject
         )
         autoTextViewBasecampProject.setAdapter(autoTextViewBasecampProjectAdapter)
-        if (arrayListProject.isNotEmpty() && autoTextViewBasecampProject.editableText.isEmpty()) {
+        if (arrayListBasecampProject.isNotEmpty() && autoTextViewBasecampProject.editableText.isEmpty()) {
             if (sharedPref.getString("basecamp_project", null) != null) {
-                if (arrayListProject.contains(
+                if (arrayListBasecampProject.contains(
                         sharedPref.getString(
                             "basecamp_project",
                             null
@@ -9938,10 +9951,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         false
                     )
                 } else {
-                    autoTextViewBasecampProject.setText(arrayListProject[0], false)
+                    autoTextViewBasecampProject.setText(arrayListBasecampProject[0], false)
                 }
             } else {
-                autoTextViewBasecampProject.setText(arrayListProject[0], false)
+                autoTextViewBasecampProject.setText(arrayListBasecampProject[0], false)
             }
         }
         autoTextViewBasecampProject.setOnTouchListener { v, event ->
@@ -9974,19 +9987,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBasecampCategoryIcon: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-//        autoTextViewBasecampCategoryAdapter = ArrayAdapter(
-//            this,
-//            android.R.layout.simple_dropdown_item_1line,
-//            arrayListCategory
-//        )
-        autoTextViewBasecampCategoryCategoryAdapter =
+        autoTextViewBasecampCategoryAdapter =
             AutoCompleteTextViewBasecampCategoryAdapter(
                 this,
-                R.layout.auto_text_view_basecamp_icon_item,
+                R.layout.auto_text_view_basecamp_category_item,
                 arrayListBasecampCategory,
                 arrayListBasecampCategoryIcon
             )
-        autoTextViewBasecampCategory.setAdapter(autoTextViewBasecampCategoryCategoryAdapter)
+        autoTextViewBasecampCategory.setAdapter(autoTextViewBasecampCategoryAdapter)
         if (arrayListBasecampCategory.isNotEmpty() && autoTextViewBasecampCategory.editableText.isEmpty()) {
             if (sharedPref.getString("basecamp_category", null) != null) {
                 if (arrayListBasecampCategory.contains(
@@ -10026,9 +10034,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBasecampAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBasecampAssigneeAdapter = ArrayAdapter(
+        autoTextViewBasecampAssigneeAdapter = AutoCompleteTextViewBasecampAssigneeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_basecamp_assignee_item,
             arrayListBasecampAssignee
         )
         autoTextViewBasecampAssignee.setAdapter(autoTextViewBasecampAssigneeAdapter)
@@ -10071,9 +10079,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBasecampNotify: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBasecampNotifyAdapter = ArrayAdapter(
+        autoTextViewBasecampNotifyAdapter = AutoCompleteTextViewBasecampNotifyAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_basecamp_notify_item,
             arrayListBasecampNotify
         )
         autoTextViewBasecampNotify.setAdapter(autoTextViewBasecampNotifyAdapter)
@@ -11196,9 +11204,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseProject(
         arrayListClubhouseProjects: ArrayList<String>
     ) {
-        autoTextViewClubhouseProjectAdapter = ArrayAdapter(
+        autoTextViewClubhouseProjectAdapter = AutoCompleteTextViewClubhouseProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_clubhouse_project_item,
             arrayListClubhouseProjects
         )
         autoTextViewClubhouseProject.setAdapter(autoTextViewClubhouseProjectAdapter)
@@ -11229,8 +11237,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseEpic(
         arrayListClubhouseEpic: ArrayList<String>
     ) {
-        autoTextViewClubhouseEpicAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseEpic)
+        autoTextViewClubhouseEpicAdapter = AutoCompleteTextViewClubhouseEpicAdapter(
+            this,
+            R.layout.auto_text_view_clubhouse_epic_item,
+            arrayListClubhouseEpic
+        )
         autoTextViewClubhouseEpic.setAdapter(autoTextViewClubhouseEpicAdapter)
         if (arrayListClubhouseEpic.isNotEmpty() && autoTextViewClubhouseEpic.text.isEmpty()) {
             autoTextViewClubhouseEpic.setText(arrayListClubhouseEpic[0], false)
@@ -11267,9 +11278,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseStoryType(
         arrayListClubhouseStoryType: ArrayList<String>
     ) {
-        autoTextViewClubhouseStoryTypeAdapter = ArrayAdapter(
+        autoTextViewClubhouseStoryTypeAdapter = AutoCompleteTextViewClubhouseStoryTypeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_clubhouse_story_item,
             arrayListClubhouseStoryType
         )
         autoTextViewClubhouseStoryType.setAdapter(autoTextViewClubhouseStoryTypeAdapter)
@@ -11310,9 +11321,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseRequester(
         arrayListClubhouseRequester: ArrayList<String>
     ) {
-        autoTextViewClubhouseRequesterAdapter = ArrayAdapter(
+        autoTextViewClubhouseRequesterAdapter = AutoCompleteTextViewClubhouseRequesterAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_clubhouse_requester_item,
             arrayListClubhouseRequester
         )
         autoTextViewClubhouseRequester.setAdapter(autoTextViewClubhouseRequesterAdapter)

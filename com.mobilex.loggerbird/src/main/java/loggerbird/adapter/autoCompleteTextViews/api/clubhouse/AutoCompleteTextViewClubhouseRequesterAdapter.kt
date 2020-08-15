@@ -1,4 +1,4 @@
-package loggerbird.adapter.autoCompleteTextViews.api.basecamp
+package loggerbird.adapter.autoCompleteTextViews.api.clubhouse
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -8,26 +8,24 @@ import android.widget.*
 import androidx.annotation.LayoutRes
 import com.mobilex.loggerbird.R
 
-//Custom autoCompleteTextView loggerbird.adapter class for basecamp category.
+//Custom autoCompleteTextView loggerbird.adapter class for clubhouse story requesters.
 /**
  * @param context is for getting reference from the application context.
  * @param resource is for getting the custom layout resources of the loggerbird.adapter.
- * @param arrayListIconName is for getting the list of icon names that will be used in the autoCompleteTextView.
- * @param arrayListIconShape is for getting the list of icon shapes that will be used in the autoCompleteTextView.
+ * @param arrayListRequesterName is for getting the list that will be used in the autoCompleteTextView.
  */
-internal class AutoCompleteTextViewBasecampCategoryAdapter(
+internal class AutoCompleteTextViewClubhouseRequesterAdapter(
     context: Context,
     @LayoutRes private val resource: Int,
-    private val arrayListIconName: ArrayList<String>,
-    private val arrayListIconShape: ArrayList<String>
-) : ArrayAdapter<String>(context, resource, arrayListIconName) {
+    private val arrayListRequesterName: ArrayList<String>
+) : ArrayAdapter<String>(context, resource, arrayListRequesterName) {
 
     /**
      * Default ArrayAdapter class method.
      * @return size of the list that will be used in the autoCompleteTextView.
      */
     override fun getCount(): Int {
-        return arrayListIconName.size
+        return arrayListRequesterName.size
     }
 
     /**
@@ -35,7 +33,7 @@ internal class AutoCompleteTextViewBasecampCategoryAdapter(
      * @return the specific item in the given position , which is in the list of autoCompleteTextView.
      */
     override fun getItem(position: Int): String? {
-        return arrayListIconName[position]
+        return arrayListRequesterName[position]
     }
 
     /**
@@ -47,14 +45,12 @@ internal class AutoCompleteTextViewBasecampCategoryAdapter(
      */
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = LayoutInflater.from(parent.context).inflate(
-            R.layout.auto_text_view_basecamp_category_item,
+            R.layout.auto_text_view_clubhouse_requester_item,
             parent,
             false
         )
-        val textViewIconName = view.findViewById<TextView>(R.id.textView_basecamp_icon_name)
-        val textViewIconShape = view.findViewById<TextView>(R.id.textView_basecamp_icon_shape)
-        textViewIconName.text = arrayListIconName[position]
-        textViewIconShape.text = arrayListIconShape[position]
+        val textViewName = view.findViewById<TextView>(R.id.textView_clubhouse_requester_name)
+        textViewName.text = arrayListRequesterName[position]
         return view
     }
 }
