@@ -1339,7 +1339,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         floating_action_button_screenshot.setSafeOnClickListener {
             if (floating_action_button_screenshot.visibility == View.VISIBLE) {
-                if (!PaintActivity.controlPaintInPictureState) {
+                if (!PaintActivity.controlPaintInPictureState && !screenshotDrawing) {
                     if (!audioRecording && !videoRecording) {
                         resetFileReferences()
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
