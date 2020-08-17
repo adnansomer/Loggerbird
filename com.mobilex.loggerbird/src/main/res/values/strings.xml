@@ -405,7 +405,7 @@
     <string name="editText_gitlab_title">Write your issue title here!</string>
     <string name="textView_gitlab_description">Description</string>
     <string name="editText_gitlab_description">Write your issue description here!</string>
-    <string name="editText_gitlab_weight">Write your issue weight here!</string>
+    <string name="editText_gitlab_weight">Write your issue weight here</string>
     <string name="textView_gitlab_confidentiality_enter">Select your issue confidentiality</string>
     <string name="textView_gitlab_labels_enter">Select your issue label</string>
     <string name="textView_gitlab_milestone_enter">Select your issue milestone</string>
