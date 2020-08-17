@@ -463,6 +463,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewGitlabProject: AutoCompleteTextView
     private lateinit var editTextGitlabTitle: EditText
     private lateinit var editTextGitlabDescription: EditText
+    private lateinit var autoTextViewGitlabProjectAdapter: AutoCompleteTextViewGitlabProjectAdapter
+    private lateinit var autoTextViewGitlabAssigneeAdapter: AutoCompleteTextViewGitlabAssigneeAdapter
+    private lateinit var autoTextViewGitlabLabelsAdapter: AutoCompleteTextViewGitlabLabelAdapter
+    private lateinit var autoTextViewGitlabMilestoneAdapter: AutoCompleteTextViewGitlabMilestoneAdapter
+    private lateinit var autoTextViewGitlabConfidentialityAdapter: AutoCompleteTextViewGitlabConfidentialityAdapter
     private lateinit var autoTextViewGitlabMilestone: AutoCompleteTextView
     private lateinit var autoTextViewGitlabAssignee: AutoCompleteTextView
     private lateinit var editTextGitlabWeight: EditText
@@ -480,11 +485,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonCalendarViewGitlabOk: Button
     private lateinit var recyclerViewGitlabAttachment: RecyclerView
     private lateinit var gitlabAttachmentAdapter: RecyclerViewGitlabAttachmentAdapter
-    private lateinit var autoTextViewGitlabProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabLabelsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabMilestoneAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabConfidentialityAdapter: ArrayAdapter<String>
     private val arrayListGitlabFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var textViewGitlabConfidentiality: TextView
     private lateinit var imageViewGitlabConfidentiality: ImageView
@@ -8415,7 +8415,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGitlabProjects: ArrayList<String>
     ) {
         autoTextViewGitlabProjectAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabProjects)
+            AutoCompleteTextViewGitlabProjectAdapter(
+                this,
+                R.layout.auto_text_view_gitlab_project_item,
+                arrayListGitlabProjects
+            )
         autoTextViewGitlabProject.setAdapter(autoTextViewGitlabProjectAdapter)
         if (arrayListGitlabProjects.isNotEmpty() && autoTextViewGitlabProject.text.isEmpty()) {
             autoTextViewGitlabProject.setText(arrayListGitlabProjects[0], false)
@@ -8506,8 +8510,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabLabels(
         arrayListGitlabLabels: ArrayList<String>
     ) {
-        autoTextViewGitlabLabelsAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabLabels)
+        autoTextViewGitlabLabelsAdapter = AutoCompleteTextViewGitlabLabelAdapter(
+            this,
+            R.layout.auto_text_view_gitlab_label_item,
+            arrayListGitlabLabels
+        )
         autoTextViewGitlabLabels.setAdapter(autoTextViewGitlabLabelsAdapter)
         if (arrayListGitlabLabels.isNotEmpty() && autoTextViewGitlabLabels.text.isEmpty()) {
             autoTextViewGitlabLabels.setText(arrayListGitlabLabels[0], false)
@@ -8593,9 +8600,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabMilestones(
         arrayListGitlabMilestones: ArrayList<String>
     ) {
-        autoTextViewGitlabMilestoneAdapter = ArrayAdapter(
+        autoTextViewGitlabMilestoneAdapter = AutoCompleteTextViewGitlabMilestoneAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_gitlab_milestone_item,
             arrayListGitlabMilestones
         )
         autoTextViewGitlabMilestone.setAdapter(autoTextViewGitlabMilestoneAdapter)
