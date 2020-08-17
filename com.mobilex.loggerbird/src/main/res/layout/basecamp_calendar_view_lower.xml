@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/basecamp_calendar_view_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        >
+        <CalendarView
+            android:id="@+id/calendarView_start_date"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="@color/orange"
+            />
+
+        <Button
+            android:id="@+id/button_basecamp_calendar_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:background="@null"
+            android:text="@string/button_CalendarView_ok" />
+
+        <Button
+            android:id="@+id/button_basecamp_calendar_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="100dp"
+            android:layout_marginRight="100dp"
+            android:background="@null"
+            android:text="@string/button_CalendarView_cancel" />
+    </FrameLayout>
+
+</FrameLayout>

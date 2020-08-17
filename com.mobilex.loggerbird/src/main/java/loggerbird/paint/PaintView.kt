@@ -60,7 +60,6 @@ internal class PaintView @JvmOverloads constructor(context: Context, attrs: Attr
         var BRUSH_SIZE = 10
         const val DEFAULT_BRUSH_COLOR = Color.BLACK
         private const val TOUCH_TOLERANCE = 4.0f
-        internal val arrayListFileNameScreenshot:ArrayList<String> = ArrayList()
         internal var filePathScreenShot : File? = null
         internal fun controlScreenShotFile(): Boolean {
             if (filePathScreenShot != null) {
@@ -230,7 +229,8 @@ internal class PaintView @JvmOverloads constructor(context: Context, attrs: Attr
                     os.flush()
                     os.close()
                 }
-                arrayListFileNameScreenshot.add(filePathScreenShot!!.absolutePath)
+                LoggerBirdService.loggerBirdService.addFileNameList(fileName= filePathScreenShot!!.absolutePath)
+                LoggerBirdService.loggerBirdService.addFileListAsync()
                 LoggerBirdService.callShareView(filePathMedia = filePathScreenShot)
             } catch (e: Exception) {
                 e.printStackTrace()

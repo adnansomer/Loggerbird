@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="end"
-            android:text="@string/files_action_mail"
+            android:text="@string/files_action_share"
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:textStyle="bold" />

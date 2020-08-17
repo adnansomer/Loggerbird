@@ -146,7 +146,6 @@ internal class RecyclerViewTrelloCheckListAdapter(
 //            }
             textViewFileName.text = item.checkListName
             imageButtonCross.setSafeOnClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     removeItemPopup(
                         activity = activity,
                         rootView = rootView,
@@ -154,7 +153,6 @@ internal class RecyclerViewTrelloCheckListAdapter(
                         position = position,
                         checkListAdapter = checkListAdapter
                     )
-                }
             }
             imageViewAdd.setSafeOnClickListener {
                 initializeItemLayout(
@@ -302,7 +300,6 @@ internal class RecyclerViewTrelloCheckListAdapter(
          * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
          */
         @SuppressLint("ClickableViewAccessibility")
-        @RequiresApi(Build.VERSION_CODES.M)
         private fun initializeItemLayout(
             activity: Activity,
             context: Context,
@@ -317,7 +314,6 @@ internal class RecyclerViewTrelloCheckListAdapter(
                         (rootView as ViewGroup),
                         false
                     )
-                if (Settings.canDrawOverlays(activity)) {
                     windowManagerParamsTrelloItem =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             WindowManager.LayoutParams(
@@ -362,7 +358,6 @@ internal class RecyclerViewTrelloCheckListAdapter(
                         )
                         buttonClicksTrelloItem(activity = activity, position = position)
                     }
-                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 LoggerBird.callEnqueue()

@@ -49,7 +49,7 @@ internal class AutoCompleteTextViewAsanaSubAdapter(
             parent,
             false
         )
-        val textViewName = view.findViewById<TextView>(R.id.textView_name)
+        val textViewName = view.findViewById<TextView>(R.id.textView_asana_name)
         textViewName.text = arrayListName[position]
         return view
     }

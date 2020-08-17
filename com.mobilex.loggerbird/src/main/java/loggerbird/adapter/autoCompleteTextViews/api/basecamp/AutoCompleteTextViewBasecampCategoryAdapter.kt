@@ -47,12 +47,12 @@ internal class AutoCompleteTextViewBasecampCategoryAdapter(
      */
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = LayoutInflater.from(parent.context).inflate(
-            R.layout.auto_text_view_basecamp_icon_item,
+            R.layout.auto_text_view_basecamp_category_item,
             parent,
             false
         )
-        val textViewIconName = view.findViewById<TextView>(R.id.textView_icon_name)
-        val textViewIconShape = view.findViewById<TextView>(R.id.textView_icon_shape)
+        val textViewIconName = view.findViewById<TextView>(R.id.textView_basecamp_icon_name)
+        val textViewIconShape = view.findViewById<TextView>(R.id.textView_basecamp_icon_shape)
         textViewIconName.text = arrayListIconName[position]
         textViewIconShape.text = arrayListIconShape[position]
         return view

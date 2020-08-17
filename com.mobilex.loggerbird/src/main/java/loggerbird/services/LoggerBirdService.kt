@@ -1,5 +1,36 @@
 package loggerbird.services
 
+import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampCategoryAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloLabelAdapter
+import loggerbird.adapter.recyclerView.api.asana.RecyclerViewAsanaAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.asana.RecyclerViewAsanaSubTaskAdapter
+import loggerbird.adapter.recyclerView.api.basecamp.RecyclerViewBasecampAssigneeAdapter
+import loggerbird.adapter.recyclerView.api.basecamp.RecyclerViewBasecampAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.basecamp.RecyclerViewBasecampNotifyAdapter
+import loggerbird.adapter.recyclerView.api.bitbucket.RecyclerViewBitbucketAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.clubhouse.RecyclerViewClubhouseAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubAssigneeAdapter
+import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubLabelAdapter
+import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubProjectAdapter
+import loggerbird.adapter.recyclerView.api.gitlab.RecyclerViewGitlabAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.jira.RecyclerViewJiraAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.jira.RecyclerViewJiraComponentAdapter
+import loggerbird.adapter.recyclerView.api.jira.RecyclerViewJiraFixVersionsAdapter
+import loggerbird.adapter.recyclerView.api.jira.RecyclerViewJiraIssueAdapter
+import loggerbird.adapter.recyclerView.api.jira.RecyclerViewJiraLabelAdapter
+import loggerbird.adapter.recyclerView.api.pivotal.*
+import loggerbird.adapter.recyclerView.api.pivotal.RecyclerViewPivotalAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.pivotal.RecyclerViewPivotalBlockerAdapter
+import loggerbird.adapter.recyclerView.api.pivotal.RecyclerViewPivotalLabelAdapter
+import loggerbird.adapter.recyclerView.api.pivotal.RecyclerViewPivotalOwnerAdapter
+import loggerbird.adapter.recyclerView.api.slack.RecyclerViewSlackAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
+import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloCheckListAdapter
+import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloLabelAdapter
+import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloMemberAdapter
+import loggerbird.adapter.recyclerView.email.RecyclerViewEmaiToListAttachmentAdapter
+import loggerbird.adapter.recyclerView.email.RecyclerViewEmailAttachmentAdapter
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -7,7 +38,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
@@ -24,14 +54,11 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.provider.Settings
-import android.text.InputFilter
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.view.animation.BounceInterpolator
+import android.view.animation.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -40,7 +67,6 @@ import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.core.widget.addTextChangedListener
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -51,46 +77,75 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jakewharton.rxbinding2.view.RxView
 import com.mobilex.loggerbird.R
+import loggerbird.constants.Constants
+import loggerbird.exception.LoggerBirdException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import loggerbird.LoggerBird
-import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampCategoryAdapter
-import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloLabelAdapter
-import loggerbird.adapter.recyclerView.api.asana.RecyclerViewAsanaAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.asana.RecyclerViewAsanaSubTaskAdapter
-import loggerbird.adapter.recyclerView.api.basecamp.RecyclerViewBasecampAssigneeAdapter
-import loggerbird.adapter.recyclerView.api.basecamp.RecyclerViewBasecampAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.basecamp.RecyclerViewBasecampNotifyAdapter
-import loggerbird.adapter.recyclerView.api.bitbucket.RecyclerViewBitbucketAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.clubhouse.RecyclerViewClubhouseAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubAssigneeAdapter
-import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubLabelAdapter
-import loggerbird.adapter.recyclerView.api.github.RecyclerViewGithubProjectAdapter
-import loggerbird.adapter.recyclerView.api.gitlab.RecyclerViewGitlabAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.jira.*
-import loggerbird.adapter.recyclerView.api.pivotal.*
-import loggerbird.adapter.recyclerView.api.slack.RecyclerViewSlackAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloAttachmentAdapter
-import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloCheckListAdapter
-import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloLabelAdapter
-import loggerbird.adapter.recyclerView.api.trello.RecyclerViewTrelloMemberAdapter
-import loggerbird.adapter.recyclerView.email.RecyclerViewEmaiToListAttachmentAdapter
-import loggerbird.adapter.recyclerView.email.RecyclerViewEmailAttachmentAdapter
-import loggerbird.constants.Constants
-import loggerbird.exception.LoggerBirdException
+import loggerbird.models.*
+import loggerbird.models.recyclerView.*
+import loggerbird.observers.LogActivityLifeCycleObserver
+import loggerbird.paint.PaintActivity
+import loggerbird.paint.PaintView
+import loggerbird.utils.email.EmailUtil
+import loggerbird.utils.other.LinkedBlockingQueueUtil
+import java.io.File
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import java.text.SimpleDateFormat
+import android.text.InputFilter
+import androidx.core.widget.addTextChangedListener
+import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaPriorityAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaSectorAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampNotifyAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.bitbucket.AutoCompleteTextViewBitbucketAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.bitbucket.AutoCompleteTextViewBitbucketKindAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.bitbucket.AutoCompleteTextViewBitbucketPriorityAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.bitbucket.AutoCompleteTextViewBitbucketProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.clubhouse.AutoCompleteTextViewClubhouseEpicAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.clubhouse.AutoCompleteTextViewClubhouseProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.clubhouse.AutoCompleteTextViewClubhouseRequesterAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.clubhouse.AutoCompleteTextViewClubhouseStoryTypeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.*
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubLabelAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubMilestoneAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubRepoAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.*
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabConfidentialityAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabLabelAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.*
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraIssueAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraIssueTypeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraLinkedIssueAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraReporterAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.*
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalOwnersAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalPointsAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalRequesterAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalStoryTypeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloBoardAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloMemberAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloProjectAdapter
+import loggerbird.adapter.recyclerView.fileAction.RecyclerViewFileActionAttachmentAdapter
 import loggerbird.listeners.OnSwipeTouchListener
 import loggerbird.listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
 import loggerbird.listeners.layouts.LayoutFeedbackOnTouchListener
 import loggerbird.listeners.layouts.LayoutJiraOnTouchListener
-import loggerbird.models.RecyclerViewModel
-import loggerbird.models.recyclerView.*
 import loggerbird.models.room.UnhandledDuplication
-import loggerbird.observers.LogActivityLifeCycleObserver
-import loggerbird.paint.PaintActivity
-import loggerbird.paint.PaintView
 import loggerbird.room.UnhandledDuplicationDb
 import loggerbird.utils.api.asana.AsanaApi
 import loggerbird.utils.api.basecamp.BasecampApi
@@ -102,15 +157,8 @@ import loggerbird.utils.api.jira.JiraApi
 import loggerbird.utils.api.pivotal.PivotalTrackerApi
 import loggerbird.utils.api.slack.SlackApi
 import loggerbird.utils.api.trello.TrelloApi
-import loggerbird.utils.email.EmailUtil
 import loggerbird.utils.other.DefaultToast
 import loggerbird.utils.other.InputTypeFilter
-import loggerbird.utils.other.LinkedBlockingQueueUtil
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
 
 internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //Global variables:
@@ -150,6 +198,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var windowManagerLoggerBirdFileActionPopup: Any? = null
     private var windowManagerLoggerBirdUnhandledException: Any? = null
     private var windowManagerBitbucket: Any? = null
+    private var windowManagerLoggerBirdFileActionListPopup: Any? = null
     private lateinit var windowManagerParams: WindowManager.LayoutParams
     private lateinit var windowManagerParamsFeedback: WindowManager.LayoutParams
     private lateinit var windowManagerParamsProgressBar: WindowManager.LayoutParams
@@ -181,12 +230,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var windowManagerParamsLoggerBirdFileAction: WindowManager.LayoutParams
     private lateinit var windowManagerParamsLoggerBirdUnhandledException: WindowManager.LayoutParams
     private lateinit var windowManagerParamsBitbucket: WindowManager.LayoutParams
+    private lateinit var windowManagerParamsLoggerBirdFileActionList: WindowManager.LayoutParams
     private var coroutineCallScreenShot: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideo: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallAudio: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var coroutineCallVideoStarter = CoroutineScope(Dispatchers.IO)
     private val coroutineCallSendSingleFile: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private val coroutineCallDiscardFile: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineCallFileActionList: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var mediaRecorderAudio: MediaRecorder? = null
     private var state: Boolean = false
     private var filePathVideo: File? = null
@@ -211,7 +262,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var coroutineCallFeedback: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var counterVideo: Int = 0
     private var counterAudio: Int = 0
-    private var counterMediaLimit: Int = 60000
     private var timerVideo: Timer? = null
     private var timerAudio: Timer? = null
     private var timerVideoFileSize: Timer? = null
@@ -245,6 +295,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var viewLoggerBirdDismissPopup: View
     private lateinit var viewLoggerBirdFileActionPopup: View
     private lateinit var viewLoggerBirdUnhandledExceptionPopup: View
+    private lateinit var viewLoggerBirdFileActionListPopup: View
     private lateinit var viewBitbucket: View
     private val fileLimit: Long = 20971520
     private var sessionTimeStart: Long? = System.currentTimeMillis()
@@ -257,6 +308,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var controlFileAction: Boolean = false
     private lateinit var progressBarView: View
     private val defaultToast: DefaultToast = DefaultToast()
+    private var unhandledMediaFilePath: String? = null
 
     //Jira:
     internal val jiraAuthentication = JiraApi()
@@ -297,19 +349,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var scrollViewJira: ScrollView
     private val arrayListJiraFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var jiraAttachmentAdapter: RecyclerViewJiraAttachmentAdapter
-    private lateinit var autoTextViewJiraProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraIssueTypeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraReporterAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraLinkedIssueAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraIssueAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraPriorityAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewFixVersionsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraComponentAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraLabelAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraEpicLinkAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraSprintAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraEpicNameAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewJiraProjectAdapter: AutoCompleteTextViewJiraProjectAdapter
+    private lateinit var autoTextViewJiraIssueTypeAdapter: AutoCompleteTextViewJiraIssueTypeAdapter
+    private lateinit var autoTextViewJiraReporterAdapter: AutoCompleteTextViewJiraReporterAdapter
+    private lateinit var autoTextViewJiraLinkedIssueAdapter: AutoCompleteTextViewJiraLinkedIssueAdapter
+    private lateinit var autoTextViewJiraIssueAdapter: AutoCompleteTextViewJiraIssueAdapter
+    private lateinit var autoTextViewJiraAssigneeAdapter: AutoCompleteTextViewJiraAssigneeAdapter
+    private lateinit var autoTextViewJiraPriorityAdapter: AutoCompleteTextViewJiraPriorityAdapter
+    private lateinit var autoTextViewFixVersionsAdapter: AutoCompleteTextViewJiraFixVersionsAdapter
+    private lateinit var autoTextViewJiraComponentAdapter: AutoCompleteTextViewJiraComponentAdapter
+    private lateinit var autoTextViewJiraLabelAdapter: AutoCompleteTextViewJiraLabelAdapter
+    private lateinit var autoTextViewJiraEpicLinkAdapter: AutoCompleteTextViewJiraEpicLinkAdapter
+    private lateinit var autoTextViewJiraSprintAdapter: AutoCompleteTextViewJiraSprintAdapter
+    private lateinit var autoTextViewJiraEpicNameAdapter: AutoCompleteTextViewJiraEpicNameAdapter
     private var projectJiraPosition: Int = 0
     private var controlProjectJiraPosition: Boolean = false
     internal lateinit var cardViewJiraIssueList: CardView
@@ -427,18 +479,24 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonCalendarViewGitlabOk: Button
     private lateinit var recyclerViewGitlabAttachment: RecyclerView
     private lateinit var gitlabAttachmentAdapter: RecyclerViewGitlabAttachmentAdapter
-    private lateinit var autoTextViewGitlabProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabLabelsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabMilestoneAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabConfidentialityAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGitlabProjectAdapter: AutoCompleteTextViewGitlabProjectAdapter
+    private lateinit var autoTextViewGitlabAssigneeAdapter: AutoCompleteTextViewGitlabAssigneeAdapter
+    private lateinit var autoTextViewGitlabLabelsAdapter: AutoCompleteTextViewGitlabLabelAdapter
+    private lateinit var autoTextViewGitlabMilestoneAdapter: AutoCompleteTextViewGitlabMilestoneAdapter
+    private lateinit var autoTextViewGitlabConfidentialityAdapter: AutoCompleteTextViewGitlabConfidentialityAdapter
     private val arrayListGitlabFileName: ArrayList<RecyclerViewModel> = ArrayList()
+    private lateinit var linearLayoutGitlabConfidentiality: LinearLayout
     private lateinit var textViewGitlabConfidentiality: TextView
     private lateinit var imageViewGitlabConfidentiality: ImageView
     private lateinit var textViewGitlabMilestone: TextView
+    private lateinit var linearLayoutGitlabMilestone: LinearLayout
     private lateinit var imageViewGitlabMilestone: ImageView
     private lateinit var textViewGitlabAssignee: TextView
+    private lateinit var linearLayoutGitlabAssignee: LinearLayout
     private lateinit var imageViewGitlabAssignee: ImageView
+    private lateinit var textViewGitlabLabels: TextView
+    private lateinit var linearLayoutGitlabLabels: LinearLayout
+    private lateinit var imageViewGitlabLabels: ImageView
     private lateinit var imageViewGitlabDueDate: ImageView
     //Github
     internal val githubAuthentication = GithubApi()
@@ -455,12 +513,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewGithubProject: AutoCompleteTextView
     private lateinit var autoTextViewGithubMileStone: AutoCompleteTextView
     private lateinit var autoTextViewGithubLinkedRequests: AutoCompleteTextView
-    private lateinit var autoTextViewGithubAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubLabelsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubRepoAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubMileStoneAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubLinkedRequestsAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGithubAssigneeAdapter: AutoCompleteTextViewGithubAssigneeAdapter
+    private lateinit var autoTextViewGithubLabelsAdapter: AutoCompleteTextViewGithubLabelAdapter
+    private lateinit var autoTextViewGithubRepoAdapter: AutoCompleteTextViewGithubRepoAdapter
+    private lateinit var autoTextViewGithubProjectAdapter: AutoCompleteTextViewGithubProjectAdapter
+    private lateinit var autoTextViewGithubMileStoneAdapter: AutoCompleteTextViewGithubMilestoneAdapter
+    private lateinit var autoTextViewGithubLinkedRequestsAdapter: AutoCompleteTextViewGithubLinkedRequestsAdapter
     private val arrayListGithubFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var scrollViewGithub: ScrollView
     private lateinit var recyclerViewGithubAssignee: RecyclerView
@@ -495,9 +553,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewTrelloBoard: AutoCompleteTextView
     private lateinit var autoTextViewTrelloMember: AutoCompleteTextView
     private lateinit var autoTextViewTrelloLabel: AutoCompleteTextView
-    private lateinit var autoTextViewTrelloProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewTrelloBoardAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewTrelloMemberAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewTrelloProjectAdapter: AutoCompleteTextViewTrelloProjectAdapter
+    private lateinit var autoTextViewTrelloBoardAdapter: AutoCompleteTextViewTrelloBoardAdapter
+    private lateinit var autoTextViewTrelloMemberAdapter: AutoCompleteTextViewTrelloMemberAdapter
     private lateinit var autoTextViewTrelloLabelAdapter: AutoCompleteTextViewTrelloLabelAdapter
     private lateinit var recyclerViewTrelloLabel: RecyclerView
     private lateinit var trelloLabelAdapter: RecyclerViewTrelloLabelAdapter
@@ -560,12 +618,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewPivotalOwners: AutoCompleteTextView
     private lateinit var autoTextViewPivotalLabel: AutoCompleteTextView
     private lateinit var autoTextViewPivotalRequester: AutoCompleteTextView
-    private lateinit var autoTextViewPivotalProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalLabelAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalStoryTypeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalPointsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalOwnersAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalRequesterAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalProjectAdapter: AutoCompleteTextViewPivotalProjectAdapter
+    private lateinit var autoTextViewPivotalLabelAdapter: AutoCompleteTextViewPivotalLabelAdapter
+    private lateinit var autoTextViewPivotalStoryTypeAdapter: AutoCompleteTextViewPivotalStoryTypeAdapter
+    private lateinit var autoTextViewPivotalPointsAdapter: AutoCompleteTextViewPivotalPointsAdapter
+    private lateinit var autoTextViewPivotalOwnersAdapter: AutoCompleteTextViewPivotalOwnersAdapter
+    private lateinit var autoTextViewPivotalRequesterAdapter: AutoCompleteTextViewPivotalRequesterAdapter
     private lateinit var imageViewPivotalOwners: ImageView
     internal lateinit var cardViewPivotalOwnersList: CardView
     private lateinit var recyclerViewPivotalOwnerList: RecyclerView
@@ -603,10 +661,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewBasecampCategory: AutoCompleteTextView
     private lateinit var autoTextViewBasecampAssignee: AutoCompleteTextView
     private lateinit var autoTextViewBasecampNotify: AutoCompleteTextView
-    private lateinit var autoTextViewBasecampProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewBasecampCategoryCategoryAdapter: AutoCompleteTextViewBasecampCategoryAdapter
-    private lateinit var autoTextViewBasecampAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewBasecampNotifyAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBasecampProjectAdapter: AutoCompleteTextViewBasecampProjectAdapter
+    private lateinit var autoTextViewBasecampCategoryAdapter: AutoCompleteTextViewBasecampCategoryAdapter
+    private lateinit var autoTextViewBasecampAssigneeAdapter: AutoCompleteTextViewBasecampAssigneeAdapter
+    private lateinit var autoTextViewBasecampNotifyAdapter: AutoCompleteTextViewBasecampNotifyAdapter
     private lateinit var editTextBasecampDescriptionMessage: EditText
     private lateinit var editTextBasecampDescriptionTodo: EditText
     private lateinit var editTextBasecampTitle: EditText
@@ -641,13 +699,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var toolbarAsana: Toolbar
     private lateinit var scrollViewAsana: ScrollView
     private lateinit var autoTextViewAsanaProject: AutoCompleteTextView
-    private lateinit var autoTextViewAsanaProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaProjectAdapter: AutoCompleteTextViewAsanaProjectAdapter
     private lateinit var autoTextViewAsanaAssignee: AutoCompleteTextView
-    private lateinit var autoTextViewAsanaAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaAssigneeAdapter: AutoCompleteTextViewAsanaAssigneeAdapter
     private lateinit var autoTextViewAsanaSector: AutoCompleteTextView
-    private lateinit var autoTextViewAsanaCategoryAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaSectorAdapter: AutoCompleteTextViewAsanaSectorAdapter
     private lateinit var autoTextViewAsanaPriority: AutoCompleteTextView
-    private lateinit var autoTextViewAsanaPriorityAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaPriorityAdapter: AutoCompleteTextViewAsanaPriorityAdapter
     private lateinit var editTextAsanaDescription: EditText
     private lateinit var editTextAsanaSubTask: EditText
     private lateinit var editTextAsanaTaskName: EditText
@@ -685,16 +743,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonCalendarViewClubhouseOk: Button
     private lateinit var textViewClubhouseDueDate: TextView
     private lateinit var autoTextViewClubhouseProject: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseProjectAdapter: AutoCompleteTextViewClubhouseProjectAdapter
     private lateinit var autoTextViewClubhouseEpic: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseEpicAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseEpicAdapter: AutoCompleteTextViewClubhouseEpicAdapter
     private lateinit var editTextClubhouseStoryName: EditText
     private lateinit var editTextClubhouseStoryDescription: EditText
     private lateinit var editTextClubhouseEstimate: EditText
     private lateinit var autoTextViewClubhouseStoryType: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseStoryTypeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseStoryTypeAdapter:  AutoCompleteTextViewClubhouseStoryTypeAdapter
     private lateinit var autoTextViewClubhouseRequester: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseRequesterAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseRequesterAdapter:   AutoCompleteTextViewClubhouseRequesterAdapter
     private val arrayListClubhouseFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var clubhouseAttachmentAdapter: RecyclerViewClubhouseAttachmentAdapter
     private lateinit var recyclerViewClubhouseAttachment: RecyclerView
@@ -715,26 +773,31 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     //LoggerBird File Action Popup:
     private lateinit var textViewLoggerBirdFileActionPopupDiscard: TextView
     private lateinit var textViewLoggerBirdFileActionPopupEmail: TextView
+    //LoggerBird File Action List Popup:
+    private lateinit var imageViewLoggerBirdFileActionListPopupBack: ImageView
+    private lateinit var recyclerViewLoggerBirdFileActionListPopup: RecyclerView
+    private lateinit var loggerBirdFileActionListAdapter: RecyclerViewFileActionAttachmentAdapter
+    private var arrayListLoggerBirdFileActionList: ArrayList<RecyclerViewModel> = ArrayList()
 
     //LoggerBird Unhandled Exception Popup:
     private lateinit var textViewLoggerBirdUnhandledExceptionPopupDiscard: TextView
     private lateinit var textViewLoggerBirdUnhandledExceptionPopupShare: TextView
     private lateinit var checkBoxLoggerBirdUnhandledExceptionPopupDuplication: CheckBox
 
-    //LoggerBird Bitbucket Popup:
+    //Bitbucket:
     internal val bitbucketAuthentication = BitbucketApi()
     private lateinit var buttonBitbucketCancel: Button
     private lateinit var buttonBitbucketCreate: Button
     private lateinit var toolbarBitbucket: Toolbar
     private lateinit var scrollViewBitbucket: ScrollView
     private lateinit var autoTextViewBitbucketProject: AutoCompleteTextView
-    private lateinit var autoTextViewBitbucketProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBitbucketProjectAdapter: AutoCompleteTextViewBitbucketProjectAdapter
     private lateinit var autoTextviewBitbucketKind: AutoCompleteTextView
-    private lateinit var autoTextViewBitbucketKindAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBitbucketKindAdapter: AutoCompleteTextViewBitbucketKindAdapter
     private lateinit var autoTextViewBitbucketAssignee: AutoCompleteTextView
-    private lateinit var autoTextViewBitbucketAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBitbucketAssigneeAdapter: AutoCompleteTextViewBitbucketAssigneeAdapter
     private lateinit var autoTextViewBitbucketPriority: AutoCompleteTextView
-    private lateinit var autoTextViewBitbucketPriorityAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBitbucketPriorityAdapter: AutoCompleteTextViewBitbucketPriorityAdapter
     private lateinit var editTextBitbucketTitle: EditText
     private lateinit var editTextBitbucketDescription: EditText
     private lateinit var recyclerViewBitbucketAttachmentList: RecyclerView
@@ -785,8 +848,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         internal var controlPermissionRequest: Boolean = false
         private var runnableList: ArrayList<Runnable> = ArrayList()
         private var runnableListEmail: ArrayList<Runnable> = ArrayList()
-        private var workQueueLinkedVideo: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
-        private var workQueueLinkedEmail: LinkedBlockingQueueUtil = LinkedBlockingQueueUtil()
+        private var workQueueLinkedVideo: LinkedBlockingQueueUtil =
+            LinkedBlockingQueueUtil()
+        private var workQueueLinkedEmail: LinkedBlockingQueueUtil =
+            LinkedBlockingQueueUtil()
         internal var controlVideoPermission: Boolean = false
         internal var controlAudioPermission: Boolean = false
         internal var controlDrawableSettingsPermission: Boolean = false
@@ -980,7 +1045,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 LogActivityLifeCycleObserver.logActivityLifeCycleObserverInstance
             initializeActivity(activity = logActivityLifeCycleObserver.activityInstance())
             controlActionFiles()
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -998,15 +1062,24 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         try {
-            if (!controlFutureTask) {
-                arrayListFile.forEach {
-                    if (it.exists()) {
-                        it.delete()
-                    }
+//            if (!audioRecording && !videoRecording && !screenshotDrawing) {
+//                arrayListFile.forEach {
+//                    if (it.exists()) {
+//                        it.delete()
+//                    }
+//                }
+//            }
+//            else {
+//                addFileList()
+//            }
+            arrayListFile.forEach {
+                if (it.exists()) {
+                    it.delete()
                 }
             }
-            dailySessionTimeRecorder()
-            addFileList()
+            if(this::activity.isInitialized){
+                dailySessionTimeRecorder(activity = activity)
+            }
             controlServiceOnDestroyState = true
             LoggerBird.takeLifeCycleDetails()
         } catch (e: Exception) {
@@ -1054,7 +1127,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     controlMediaFile()
                 }
                 (windowManager as WindowManager).removeViewImmediate(view)
-                if (!checkUnhandledFilePath()) {
+                if (!checkUnhandledFilePath() && !this.controlFileAction) {
                     initializeLoggerBirdClosePopup(activity = activity)
                 }
                 windowManager = null
@@ -1139,6 +1212,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             revealLinearLayoutShare = view.findViewById(R.id.reveal_linear_layout_share)
             textView_send_email = view.findViewById(R.id.textView_send_email)
             textView_discard = view.findViewById(R.id.textView_discard)
+            if (this.controlFileAction) {
+                textView_discard.visibility = View.GONE
+            } else {
+                textView_discard.visibility = View.VISIBLE
+            }
             textView_share_jira = view.findViewById(R.id.textView_share_jira)
             textView_share_slack = view.findViewById(R.id.textView_share_slack)
             textView_share_github = view.findViewById(R.id.textView_share_github)
@@ -1183,50 +1261,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     }
                 }
             }
-
-            (floating_action_button_screenshot.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                450,
-                0,
-                0
-            )
-            (floating_action_button_video.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                150,
-                0,
-                0
-            )
-            (textView_counter_video.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                150,
-                0,
-                0
-            )
-            (textView_video_size.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                150,
-                0,
-                0
-            )
-            (floating_action_button_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                300,
-                0,
-                0
-            )
-            (textView_counter_audio.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                300,
-                0,
-                0
-            )
-            (textView_audio_size.layoutParams as FrameLayout.LayoutParams).setMargins(
-                0,
-                300,
-                0,
-                0
-            )
-
             if (videoRecording) {
                 floating_action_button_video.visibility = View.GONE
             }
@@ -1236,7 +1270,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 buttonClicks()
             }
-            if (!checkUnhandledFilePath()) {
+            if (!checkUnhandledFilePath() && !this.controlFileAction) {
                 initializeLoggerBirdStartPopup(activity = activity)
             }
             isFabEnable = true
@@ -1318,7 +1352,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         floating_action_button_screenshot.setSafeOnClickListener {
             if (floating_action_button_screenshot.visibility == View.VISIBLE) {
-                if (!PaintActivity.controlPaintInPictureState) {
+                if (!PaintActivity.controlPaintInPictureState && !screenshotDrawing) {
                     if (!audioRecording && !videoRecording) {
                         resetFileReferences()
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
@@ -1502,9 +1536,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             val coroutineScopeShareView = CoroutineScope(Dispatchers.IO)
             textView_send_email.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1520,9 +1554,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_jira.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1538,8 +1572,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_slack.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
                     coroutineScopeShareView.async {
                         if (!checkDuplicationField(
                                 sharedPref = sharedPref,
@@ -1556,9 +1590,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_github.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1574,9 +1608,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_gitlab.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1592,9 +1626,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_trello.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1610,9 +1644,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
 
             textView_share_pivotal.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1627,9 +1661,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             textView_share_basecamp.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1644,9 +1678,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             textView_share_asana.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1661,9 +1695,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             textView_share_clubhouse.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1678,9 +1712,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
             }
             textView_share_bitbucket.setSafeOnClickListener {
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.GONE
-                    }
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.GONE
+                }
                 coroutineScopeShareView.async {
                     if (!checkDuplicationField(
                             sharedPref = sharedPref,
@@ -1699,38 +1733,38 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 discardMediaFile()
             }
 
-            if (sharedPref.getBoolean("future_task_check", false)) {
-                checkBoxFutureTask.isChecked = true
-            }
-            checkBoxFutureTask.setOnCheckedChangeListener { buttonView, isChecked ->
-                if (isChecked) {
-                    with(sharedPref.edit()) {
-                        putBoolean("future_task_check", true)
-                        commit()
-                    }
-                } else {
-                    stopService(Intent(context, LoggerBirdFutureTaskService::class.java))
-                }
-            }
-            checkBoxFutureTask.setOnClickListener {
-                if (checkBoxFutureTask.isChecked) {
-                    defaultToast.attachToast(
-                        activity = activity,
-                        toastMessage = activity.resources.getString(R.string.future_task_enabled)
-                    )
-                    initializeFutureTaskLayout(filePathMedia = filePathMedia)
-                } else {
-                    with(sharedPref.edit()) {
-                        remove("future_task_time")
-                        remove("future_file_path")
-                        commit()
-                    }
-                    defaultToast.attachToast(
-                        activity = activity,
-                        toastMessage = activity.resources.getString(R.string.future_task_disabled)
-                    )
-                }
-            }
+//            if (sharedPref.getBoolean("future_task_check", false)) {
+//                checkBoxFutureTask.isChecked = true
+//            }
+//            checkBoxFutureTask.setOnCheckedChangeListener { buttonView, isChecked ->
+//                if (isChecked) {
+//                    with(sharedPref.edit()) {
+//                        putBoolean("future_task_check", true)
+//                        commit()
+//                    }
+//                } else {
+//                    stopService(Intent(context, LoggerBirdFutureTaskService::class.java))
+//                }
+//            }
+//            checkBoxFutureTask.setOnClickListener {
+//                if (checkBoxFutureTask.isChecked) {
+//                    defaultToast.attachToast(
+//                        activity = activity,
+//                        toastMessage = activity.resources.getString(R.string.future_task_enabled)
+//                    )
+//                    initializeFutureTaskLayout(filePathMedia = filePathMedia)
+//                } else {
+//                    with(sharedPref.edit()) {
+//                        remove("future_task_time")
+//                        remove("future_file_path")
+//                        commit()
+//                    }
+//                    defaultToast.attachToast(
+//                        activity = activity,
+//                        toastMessage = activity.resources.getString(R.string.future_task_disabled)
+//                    )
+//                }
+//            }
         }
     }
 
@@ -1918,6 +1952,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             PaintActivity.closeActivitySession()
             coroutineCallScreenShot.async {
                 try {
+                    arrayListFileName.clear()
+                    if(getFileList() != null){
+                        arrayListFileName.addAll(getFileList()!!)
+                    }
                     if (arrayListFileName.size <= 10) {
                         withContext(Dispatchers.IO) {
                             screenshotBitmap = createScreenShot(view = view)
@@ -1950,11 +1988,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                     )
                                 )
                             context.startActivity(screenshotIntent)
+
                         }
 
                     } else {
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(context, R.string.session_file_limit, Toast.LENGTH_SHORT)
+                        activity.runOnUiThread {
+                            Toast.makeText(context, R.string.session_file_limit, Toast.LENGTH_SHORT).show()
                         }
                     }
                 } catch (e: Exception) {
@@ -1976,6 +2015,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             coroutineCallAudio.async {
                 try {
                     if (!audioRecording) {
+                        arrayListFileName.clear()
+                        if(getFileList() != null){
+                            arrayListFileName.addAll(getFileList()!!)
+                        }
                         if (arrayListFileName.size <= 10) {
                             val fileDirectory: File = context.filesDir
                             filePathAudio = File(
@@ -1984,6 +2027,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             )
                             addFileNameList(fileName = filePathAudio!!.absolutePath)
                             arrayListFile.add(filePathAudio!!)
+                            addFileListAsync()
                             mediaRecorderAudio = MediaRecorder()
                             mediaRecorderAudio?.setAudioSource(MediaRecorder.AudioSource.MIC)
                             mediaRecorderAudio?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
@@ -2035,7 +2079,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                     )
                             }
                         } else {
-                            withContext(Dispatchers.Main) {
+                            activity.runOnUiThread {
                                 Toast.makeText(
                                     context,
                                     R.string.session_file_limit,
@@ -2076,6 +2120,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             mediaRecorderAudio?.start()
             state = true
             withContext(Dispatchers.Main) {
+
                 Toast.makeText(context, R.string.audio_recording_start, Toast.LENGTH_SHORT).show()
             }
             audioCounterStart()
@@ -2136,13 +2181,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             coroutineCallVideo.async {
                 try {
                     if (!videoRecording) {
+                        arrayListFileName.clear()
+                        if(getFileList() != null){
+                            arrayListFileName.addAll(getFileList()!!)
+                        }
                         if (arrayListFileName.size <= 10) {
                             this@LoggerBirdService.requestCode = requestCode
                             this@LoggerBirdService.resultCode = resultCode
                             this@LoggerBirdService.dataIntent = data
                             startScreenRecording()
                         } else {
-                            withContext(Dispatchers.Main) {
+                            activity.runOnUiThread {
                                 Toast.makeText(
                                     context,
                                     R.string.session_file_limit,
@@ -2279,9 +2328,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     mediaRecorderVideo?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
                     mediaRecorderVideo?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
                     val fileDirectory: File = context.filesDir
-                    filePathVideo = File(fileDirectory, "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4")
+                    filePathVideo = File(
+                        fileDirectory,
+                        "logger_bird_video" + System.currentTimeMillis().toString() + ".mp4"
+                    )
                     addFileNameList(fileName = filePathVideo!!.absolutePath)
                     arrayListFile.add(filePathVideo!!)
+                    addFileListAsync()
                     mediaCodecsFile = File("/data/misc/media/media_codecs_profiling_results.xml")
                     mediaRecorderVideo?.setOutputFile(filePathVideo!!.path)
                     mediaRecorderVideo?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
@@ -2342,17 +2395,21 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         )
     }
 
+    /**
+     * This method is used for getting height of navigation bar of device.
+     */
     private fun getNavigationBarHeight(): Int {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-        val metrics = DisplayMetrics()
-        activity.windowManager.defaultDisplay.getMetrics(metrics)
-        val usableHeight = metrics.heightPixels
-        activity.windowManager.defaultDisplay.getRealMetrics(metrics)
-        val realHeight = metrics.heightPixels
-        return if (realHeight > usableHeight)
-            realHeight - usableHeight
-        else
-            0
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            val metrics = DisplayMetrics()
+            activity.windowManager.defaultDisplay.getMetrics(metrics)
+            val usableHeight = metrics.heightPixels
+            activity.windowManager.defaultDisplay.getRealMetrics(metrics)
+            val realHeight = metrics.heightPixels
+            return if (realHeight > usableHeight) {
+                realHeight - usableHeight
+            } else {
+                0
+            }
         }
         return 0
     }
@@ -2557,10 +2614,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             LoggerBird.callExceptionDetails(exception = e, tag = Constants.shakerTag)
         }
     }
+
     /**
      * This method is used for initializing actions when device was shaked.
      */
-    private fun initializeShakeAction(){
+    private fun initializeShakeAction() {
         if (checkUnhandledFilePath()) {
             gatherUnhandledExceptionDetails()
         } else {
@@ -2602,12 +2660,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                 activity,
                                 fileSize
                             )
-//                        if (fileSize > fileLimit) {
-//                            timerVideoTaskFileSize?.cancel()
-//                            activity.runOnUiThread {
-//                               textView_counter_video.performClick()
-//                            }
-//                        }
+                        if (fileSize > fileLimit) {
+                            timerVideoTaskFileSize?.cancel()
+                            activity.runOnUiThread {
+                                textView_counter_video.performClick()
+                            }
+                        }
                         activity.runOnUiThread {
                             textView_video_size.text = sizePrintVideo
                         }
@@ -2664,12 +2722,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                 activity,
                                 fileSize
                             )
-//                        if (fileSize > fileLimit) {
-//                            timerAudioTaskFileSize?.cancel()
-//                            activity.runOnUiThread {
-//                                textView_counter_audio.performClick()
-//                            }
-//                        }
+                        if (fileSize > fileLimit) {
+                            timerAudioTaskFileSize?.cancel()
+                            activity.runOnUiThread {
+                                textView_counter_audio.performClick()
+                            }
+                        }
                         activity.runOnUiThread {
                             textView_audio_size.text = sizePrintAudio
                         }
@@ -2746,12 +2804,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                             activity.runOnUiThread {
                                 textView_counter_video.text = timeStringHour(counterTime)
                             }
-                            if(counterTime > counterMediaLimit){
-                                activity.runOnUiThread {
-                                    timerTaskVideo?.cancel()
-                                    textView_counter_video.performClick()
-                                }
-                            }
                         }
                     }
                 }
@@ -2790,12 +2842,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         counterAudio++
                         activity.runOnUiThread {
                             textView_counter_audio.text = timeStringHour(counterTimer)
-                        }
-                        if(counterTimer > counterMediaLimit){
-                            activity.runOnUiThread {
-                                timerTaskAudio?.cancel()
-                                textView_counter_audio.performClick()
-                            }
                         }
                     }
                 }
@@ -2873,13 +2919,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     /**
      * This method is used for saving total and last session time.
      */
-    private fun dailySessionTimeRecorder() {
+    private fun dailySessionTimeRecorder(activity: Activity) {
         sessionTimeEnd = System.currentTimeMillis()
         if (sessionTimeEnd != null && sessionTimeStart != null) {
             val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
             val sharedPref =
-                PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
-                    ?: return
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
             with(sharedPref.edit()) {
                 putLong("session_time", sharedPref.getLong("session_time", 0) + sessionDuration)
                 commit()
@@ -2912,11 +2957,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     /**
      * This method is used for adding Loggerbird file list.
      */
-    private fun addFileList() {
+    internal fun addFileList() {
+        arrayListFileName.clear()
         if (getFileList() != null) {
             arrayListFileName.addAll(getFileList()!!)
         }
-        arrayListFileName.addAll(PaintView.arrayListFileNameScreenshot)
+        arrayListFile.forEach {
+            arrayListFileName.add(it.absolutePath)
+        }
         val gson = Gson()
         val json = gson.toJson(arrayListFileName)
         val sharedPref =
@@ -2928,6 +2976,27 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     }
 
     /**
+     * This method is used for adding Loggerbird file list in async way.
+     */
+    internal fun addFileListAsync() {
+        coroutineCallFileActionList.async {
+           getFileList()?.forEach {
+               if(!arrayListFileName.contains(it)){
+                   arrayListFileName.add(it)
+               }
+           }
+            val gson = Gson()
+            val json = gson.toJson(arrayListFileName)
+            val sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+            with(sharedPref.edit()) {
+                putString("file_quantity", json)
+                apply()
+            }
+        }
+    }
+
+    /**
      * This method is used for getting Loggerbird file list.
      */
     private fun getFileList(): ArrayList<String>? {
@@ -2935,7 +3004,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val gson = Gson()
         val json = sharedPref.getString("file_quantity", "")
         if (json?.isNotEmpty()!!) {
-            return gson.fromJson(json, object : TypeToken<ArrayList<String>>() {}.type)
+            val arrayListFile:ArrayList<String> = gson.fromJson(json, object : TypeToken<ArrayList<String>>() {}.type)
+                for(file in 0..arrayListFile.size){
+                    if(arrayListFile.size <= file ){
+                        break
+                    }else{
+                        if(!File(arrayListFile[file]).exists()){
+                            arrayListFile.removeAt(file)
+                        }
+                    }
+                }
+            return arrayListFile
         }
         return null
     }
@@ -2944,7 +3023,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for adding file name to file name list.
      * @param fileName is used for getting reference of current file.
      */
-    private fun addFileNameList(fileName: String) {
+    internal fun addFileNameList(fileName: String) {
         arrayListFileName.add(fileName)
     }
 
@@ -2969,11 +3048,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for checking that number of Loggerbird files greater than ten.
      */
     private fun controlActionFiles() {
-        if (getFileList() != null) {
-            if (getFileList()!!.size > 10) {
-                chooseActionFiles()
+            val arrayListFileList: ArrayList<String>? = getFileList()
+            if(arrayListFileList != null){
+                if (arrayListFileList.size > 10) {
+                    chooseActionFiles()
+                }
             }
-        }
     }
 
     /**
@@ -2992,31 +3072,28 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val arrayListOldFiles: ArrayList<String> = ArrayList()
         if (getFileList() != null) {
             arrayListOldFiles.addAll(getFileList()!!)
-            if (arrayListOldFiles.size > 10) {
-                var fileName: File
-                var fileCounter = 0
-                do {
-                    fileName = File(arrayListOldFiles[fileCounter])
-                    if (fileName.exists()) {
-                        fileName.delete()
-                    }
-                    fileCounter++
-                    if (fileCounter == arrayListOldFiles.size) {
-                        if (controlEmailAction != null) {
-                            activity.runOnUiThread {
-                                Toast.makeText(
-                                    context,
-                                    R.string.files_action_mail_success,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+            var fileName: File
+            var fileCounter = 0
+            do {
+                fileName = File(arrayListOldFiles[fileCounter])
+                if (fileName.exists()) {
+                    fileName.delete()
+                }
+                fileCounter++
+                if (fileCounter == arrayListOldFiles.size) {
+                    if (controlEmailAction != null) {
+                        activity.runOnUiThread {
+                            Toast.makeText(
+                                context,
+                                R.string.files_action_mail_success,
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-                        break
                     }
-                } while (arrayListOldFiles.iterator().hasNext())
-                deleteOldFilesList()
-            }
-
+                    break
+                }
+            } while (arrayListOldFiles.iterator().hasNext())
+            deleteOldFilesList()
         }
     }
 
@@ -3176,6 +3253,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
 
                 "slack" -> {
+                    detachProgressBar()
+                    removeSlackLayout()
                     Toast.makeText(context, R.string.slack_sent, Toast.LENGTH_SHORT).show()
                     finishSuccessFab(duplicationField = "slack")
                 }
@@ -3357,7 +3436,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 }
 
             }
-            if (controlFloatingActionButtonView()) {
+            if (controlFloatingActionButtonView() && !this.controlFileAction) {
                 floatingActionButtonView.visibility = View.VISIBLE
             }
         }
@@ -3378,8 +3457,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         filepath.delete()
                     }
                 }
+                if (sharedPref.getString("unhandled_media_file_path", null) != null) {
+                    val mediaFilePath =
+                        File(sharedPref.getString("unhandled_media_file_path", null)!!)
+                    if (mediaFilePath.exists()) {
+                        mediaFilePath.exists()
+                    }
+                }
                 val editor: SharedPreferences.Editor = sharedPref.edit()
                 editor.remove("unhandled_file_path")
+                editor.remove("unhandled_media_file_path")
                 editor.apply()
                 if (sharedPref.getBoolean(
                         "duplication_enabled",
@@ -3401,6 +3488,29 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         )
                         with(unhandledDuplicationDao) {
                             this?.insertUnhandledDuplication(unhandledDuplication = unhandledDuplication)
+                        }
+                    }
+                }
+            }
+            if (this.controlFileAction) {
+                if (RecyclerViewFileActionAttachmentAdapter.ViewHolder.position != null) {
+                    val arrayListTempFileAction: ArrayList<String> = ArrayList()
+                    if (arrayListLoggerBirdFileActionList.size > RecyclerViewFileActionAttachmentAdapter.ViewHolder.position!!) {
+                        arrayListLoggerBirdFileActionList.removeAt(
+                            RecyclerViewFileActionAttachmentAdapter.ViewHolder.position!!
+                        )
+                        recyclerViewLoggerBirdFileActionListPopup.adapter?.notifyDataSetChanged()
+                        arrayListLoggerBirdFileActionList.forEach {
+                            arrayListTempFileAction.add(it.file.absolutePath)
+                        }
+                        val gson = Gson()
+                        val json = gson.toJson(arrayListTempFileAction)
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                                ?: return
+                        with(sharedPref.edit()) {
+                            putString("file_quantity", json)
+                            commit()
                         }
                     }
                 }
@@ -4261,7 +4371,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 autoTextViewLinkedIssues = autoTextViewJiraLinkedIssue
             )
         ) {
-                attachProgressBar(task = "jira")
+            attachProgressBar(task = "jira")
 //                hideKeyboard(activity = activity)
             jiraAuthentication.callJira(
                 filePathMedia = filePathMedia,
@@ -4282,6 +4392,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun addJiraFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
             arrayListJiraFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (unhandledMediaFilePath != null) {
+            arrayListJiraFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListJiraFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -4382,7 +4495,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 arrayListJiraFixVersions = arrayListJiraFixVersions,
                 sharedPref = sharedPref
             )
-            initializeJiraLabels(arrayListLabel = arrayListJiraLabel, sharedPref = sharedPref)
+            initializeJiraLabels(arrayListJiraLabel = arrayListJiraLabel, sharedPref = sharedPref)
             initializeJiraEpicLink(
                 arrayListJiraEpicLink = arrayListJiraEpicLink,
                 sharedPref = sharedPref
@@ -4441,12 +4554,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (hashMapJiraBoardList[arrayListJiraProjectKeys[projectJiraPosition]] == "scrum") {
             cardViewJiraSprint.visibility = View.VISIBLE
             cardViewJiraStartDate.visibility = View.VISIBLE
-            autoTextViewJiraSprintAdapter =
-                ArrayAdapter(
-                    this,
-                    android.R.layout.simple_dropdown_item_1line,
-                    arrayListJiraSprint
-                )
+            autoTextViewJiraSprintAdapter = AutoCompleteTextViewJiraSprintAdapter(
+                this,
+                R.layout.auto_text_view_jira_sprint_item,
+                arrayListJiraSprint
+            )
             autoTextViewJiraSprint.setAdapter(autoTextViewJiraSprintAdapter)
             if (arrayListJiraSprint.isNotEmpty()) {
                 if (sharedPref.getString("jira_sprint", null) != null) {
@@ -4482,12 +4594,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraEpicLink: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraEpicLinkAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraEpicLink
-            )
+        autoTextViewJiraEpicLinkAdapter = AutoCompleteTextViewJiraEpicLinkAdapter(
+            this,
+            R.layout.auto_text_view_jira_epic_link_item,
+            arrayListJiraEpicLink
+        )
         autoTextViewJiraEpicLink.setAdapter(autoTextViewJiraEpicLinkAdapter)
         if (arrayListJiraEpicLink.isNotEmpty()) {
             if (sharedPref.getString("jira_epic_link", null) != null) {
@@ -4515,13 +4626,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeJiraLabels(
-        arrayListLabel: ArrayList<String>,
+        arrayListJiraLabel: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraLabelAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListLabel)
+        autoTextViewJiraLabelAdapter = AutoCompleteTextViewJiraLabelAdapter(
+            this,
+            R.layout.auto_text_view_jira_label_item,
+            arrayListJiraLabel
+        )
         autoTextViewJiraLabel.setAdapter(autoTextViewJiraLabelAdapter)
-        if (arrayListLabel.isNotEmpty()) {
+        if (arrayListJiraLabel.isNotEmpty()) {
             if (sharedPref.getString("jira_labels", null) != null) {
                 autoTextViewJiraLabel.setText(sharedPref.getString("jira_labels", null), false)
             }
@@ -4534,7 +4648,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewJiraLabel.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewJira)
         }
-        this.arrayListJiraLabel = arrayListLabel
+        this.arrayListJiraLabel = arrayListJiraLabel
     }
 
     /**
@@ -4548,9 +4662,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraFixVersions: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewFixVersionsAdapter = ArrayAdapter(
+        autoTextViewFixVersionsAdapter = AutoCompleteTextViewJiraFixVersionsAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_jira_fix_versions_item,
             arrayListJiraFixVersions
         )
         autoTextViewJiraFixVersions.setAdapter(autoTextViewFixVersionsAdapter)
@@ -4585,12 +4699,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraComponent: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraComponentAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraComponent
-            )
+        autoTextViewJiraComponentAdapter = AutoCompleteTextViewJiraComponentAdapter(
+            this,
+            R.layout.auto_text_view_jira_component_item,
+            arrayListJiraComponent
+        )
         autoTextViewJiraComponent.setAdapter(autoTextViewJiraComponentAdapter)
         if (arrayListJiraComponent.isNotEmpty()) {
             if (sharedPref.getString("jira_component", null) != null) {
@@ -4622,12 +4735,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraPriority: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraPriorityAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraPriority
-            )
+        autoTextViewJiraPriorityAdapter = AutoCompleteTextViewJiraPriorityAdapter(
+            this,
+            R.layout.auto_text_view_jira_priority_item,
+            arrayListJiraPriority
+        )
         autoTextViewJiraPriority.setAdapter(autoTextViewJiraPriorityAdapter)
         if (arrayListJiraPriority.isNotEmpty()) {
             if (sharedPref.getString("jira_priority", null) != null) {
@@ -4678,12 +4790,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraAssigneeAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraAssignee
-            )
+        autoTextViewJiraAssigneeAdapter = AutoCompleteTextViewJiraAssigneeAdapter(
+            this,
+            R.layout.auto_text_view_jira_assignee_item,
+            arrayListJiraAssignee
+        )
         autoTextViewJiraAssignee.setAdapter(autoTextViewJiraAssigneeAdapter)
         if (arrayListJiraAssignee.isNotEmpty()) {
             if (sharedPref.getString("jira_assignee", null) != null) {
@@ -4715,8 +4826,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraIssues: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraIssueAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListJiraIssues)
+        autoTextViewJiraIssueAdapter = AutoCompleteTextViewJiraIssueAdapter(
+            this,
+            R.layout.auto_text_view_jira_issue_item,
+            arrayListJiraIssues
+        )
         autoTextViewJiraIssue.setAdapter(autoTextViewJiraIssueAdapter)
         if (arrayListJiraIssues.isNotEmpty()) {
             if (sharedPref.getString("jira_issue", null) != null) {
@@ -4745,9 +4859,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraLinkedIssues: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraLinkedIssueAdapter = ArrayAdapter(
+        autoTextViewJiraLinkedIssueAdapter = AutoCompleteTextViewJiraLinkedIssueAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_jira_linked_issue_item,
             arrayListJiraLinkedIssues
         )
         autoTextViewJiraLinkedIssue.setAdapter(autoTextViewJiraLinkedIssueAdapter)
@@ -4800,9 +4914,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraReporterNames: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraReporterAdapter = ArrayAdapter(
+        autoTextViewJiraReporterAdapter = AutoCompleteTextViewJiraReporterAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_jira_reporter_item,
             arrayListJiraReporterNames
         )
         autoTextViewJiraReporter.setAdapter(autoTextViewJiraReporterAdapter)
@@ -4839,12 +4953,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraEpicName: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraIssueTypeAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraIssueTypes
-            )
+        autoTextViewJiraIssueTypeAdapter = AutoCompleteTextViewJiraIssueTypeAdapter(
+            this,
+            R.layout.auto_text_view_jira_issue_type_item,
+            arrayListJiraIssueTypes
+        )
         autoTextViewJiraIssueType.setAdapter(autoTextViewJiraIssueTypeAdapter)
         if (checkUnhandledFilePath()) {
             autoTextViewJiraIssueType.setText(arrayListJiraIssueTypes[2], false)
@@ -4904,9 +5017,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraProjectNames: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraProjectAdapter = ArrayAdapter(
+        autoTextViewJiraProjectAdapter = AutoCompleteTextViewJiraProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_jira_project_item,
             arrayListJiraProjectNames
         )
         autoTextViewJiraProject.setAdapter(autoTextViewJiraProjectAdapter)
@@ -4969,9 +5082,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (autoTextViewJiraIssueType.editableText.toString() == "Epic") {
             cardViewJiraEpicName.visibility = View.VISIBLE
             cardViewJiraEpicLink.visibility = View.GONE
-            autoTextViewJiraEpicNameAdapter = ArrayAdapter(
+            autoTextViewJiraEpicNameAdapter = AutoCompleteTextViewJiraEpicNameAdapter(
                 this,
-                android.R.layout.simple_dropdown_item_1line,
+                R.layout.auto_text_view_jira_epic_name_item,
                 arrayListJiraEpicName
             )
             autoTextViewJiraEpicName.setAdapter(autoTextViewJiraEpicNameAdapter)
@@ -5017,6 +5130,106 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
     }
 
+    /**
+     * This method is used for initializing components of jira_calendar_view.
+     */
+    private fun initializeJiraStartDatePicker() {
+        val calendar = Calendar.getInstance()
+        val mYear = calendar.get(Calendar.YEAR)
+        val mMonth = calendar.get(Calendar.MONTH)
+        val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        var startDate = "$mYear-$mMonth-$mDayOfMonth"
+        calendarViewJiraLayout =
+            calendarViewJiraView.findViewById(R.id.jira_calendar_view_layout)
+        calendarViewJiraStartDate = calendarViewJiraView.findViewById(R.id.calendarView_start_date)
+        buttonCalendarViewJiraCancel =
+            calendarViewJiraView.findViewById(R.id.button_jira_calendar_cancel)
+        buttonCalendarViewJiraOk =
+            calendarViewJiraView.findViewById(R.id.button_jira_calendar_ok)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewJiraStartDate.minDate = System.currentTimeMillis()
+        }
+        if (calendarViewJiraDate != null) {
+            calendarViewJiraStartDate.setDate(calendarViewJiraDate!!, true, true)
+        }
+        calendarViewJiraLayout.setOnClickListener {
+            detachJiraDatePicker()
+        }
+        buttonCalendarViewJiraCancel.setOnClickListener {
+            detachJiraDatePicker()
+        }
+
+        buttonCalendarViewJiraOk.setOnClickListener {
+            jiraAuthentication.setStartDate(startDate = startDate)
+            detachJiraDatePicker()
+            imageButtonRemoveDate.visibility = View.VISIBLE
+        }
+        calendarViewJiraStartDate.setOnDateChangeListener { viewStartDate, year, month, dayOfMonth ->
+            calendarViewJiraDate = viewStartDate.date
+            val tempMonth = month + 1
+            startDate = "$year-$tempMonth-$dayOfMonth"
+        }
+
+    }
+
+    /**
+     * This method is used for creating custom jira date-picker layout which is attached to application overlay.
+     * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
+     */
+    private fun attachJiraDatePicker() {
+        try {
+            val rootView: ViewGroup =
+                activity.window.decorView.findViewById(android.R.id.content)
+            calendarViewJiraView =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    LayoutInflater.from(activity)
+                        .inflate(R.layout.jira_calendar_view, rootView, false)
+                } else {
+                    LayoutInflater.from(activity)
+                        .inflate(R.layout.jira_calendar_view_lower, rootView, false)
+                }
+            windowManagerParamsJiraDatePicker =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+            windowManagerJiraDatePicker = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerJiraDatePicker as WindowManager).addView(
+                calendarViewJiraView,
+                windowManagerParamsJiraDatePicker
+            )
+            initializeJiraStartDatePicker()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraDatePopupTag)
+        }
+    }
+
+    /**
+     * This method is used for removing jira_calendar_view from window.
+     */
+    private fun detachJiraDatePicker() {
+        if (this::calendarViewJiraView.isInitialized) {
+            (windowManagerJiraDatePicker as WindowManager).removeViewImmediate(
+                calendarViewJiraView
+            )
+        }
+    }
+
     //Slack
     /**
      * This method is used for creating slack layout which is attached to application overlay.
@@ -5032,68 +5245,68 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
             viewSlack = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_slack_popup, (this.rootView as ViewGroup), false)
-                windowManagerParamsSlack = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
+            windowManagerParamsSlack = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
 
-                windowManagerSlack = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            windowManagerSlack = activity.getSystemService(Context.WINDOW_SERVICE)!!
 
-                if (windowManagerSlack != null) {
-                    (windowManagerSlack as WindowManager).addView(
-                        viewSlack,
-                        windowManagerParamsSlack
-                    )
+            if (windowManagerSlack != null) {
+                (windowManagerSlack as WindowManager).addView(
+                    viewSlack,
+                    windowManagerParamsSlack
+                )
 
-                    activity.window.navigationBarColor =
-                        ContextCompat.getColor(this, R.color.black)
-                    activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+                activity.window.navigationBarColor =
+                    ContextCompat.getColor(this, R.color.black)
+                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
 
-                    spinnerChannels = viewSlack.findViewById(R.id.spinner_slack_channel)
-                    spinnerUsers = viewSlack.findViewById(R.id.spinner_slack_user)
-                    slackChannelLayout = viewSlack.findViewById(R.id.slack_send_channel_layout)
-                    slackUserLayout = viewSlack.findViewById(R.id.slack_send_user_layout)
-                    recyclerViewSlackAttachment =
-                        viewSlack.findViewById(R.id.recycler_view_slack_attachment)
-                    recyclerViewSlackAttachmentUser =
-                        viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
-                    editTextMessage = viewSlack.findViewById(R.id.editText_slack_message)
-                    editTextMessageUser =
-                        viewSlack.findViewById(R.id.editText_slack_message_user)
-                    buttonSlackCancel = viewSlack.findViewById(R.id.button_slack_cancel)
-                    buttonSlackCreate = viewSlack.findViewById(R.id.button_slack_create)
-                    buttonSlackCancelUser =
-                        viewSlack.findViewById(R.id.button_slack_cancel_user)
-                    buttonSlackCreateUser =
-                        viewSlack.findViewById(R.id.button_slack_create_user)
-                    toolbarSlack = viewSlack.findViewById(R.id.toolbar_slack)
-                    slackBottomNavigationView =
-                        viewSlack.findViewById(R.id.slack_bottom_nav_view)
+                spinnerChannels = viewSlack.findViewById(R.id.spinner_slack_channel)
+                spinnerUsers = viewSlack.findViewById(R.id.spinner_slack_user)
+                slackChannelLayout = viewSlack.findViewById(R.id.slack_send_channel_layout)
+                slackUserLayout = viewSlack.findViewById(R.id.slack_send_user_layout)
+                recyclerViewSlackAttachment =
+                    viewSlack.findViewById(R.id.recycler_view_slack_attachment)
+                recyclerViewSlackAttachmentUser =
+                    viewSlack.findViewById(R.id.recycler_view_slack_attachment_user)
+                editTextMessage = viewSlack.findViewById(R.id.editText_slack_message)
+                editTextMessageUser =
+                    viewSlack.findViewById(R.id.editText_slack_message_user)
+                buttonSlackCancel = viewSlack.findViewById(R.id.button_slack_cancel)
+                buttonSlackCreate = viewSlack.findViewById(R.id.button_slack_create)
+                buttonSlackCancelUser =
+                    viewSlack.findViewById(R.id.button_slack_cancel_user)
+                buttonSlackCreateUser =
+                    viewSlack.findViewById(R.id.button_slack_create_user)
+                toolbarSlack = viewSlack.findViewById(R.id.toolbar_slack)
+                slackBottomNavigationView =
+                    viewSlack.findViewById(R.id.slack_bottom_nav_view)
 
-                    slackAuthentication.callSlack(
-                        context = context,
-                        activity = activity,
-                        filePathMedia = filePathMedia,
-                        slackTask = "get"
-                    )
-                    initializeSlackRecyclerView(filePathMedia = filePathMedia)
-                    buttonClicksSlack(filePathMedia)
-                    attachProgressBar(task = "slack")
+                slackAuthentication.callSlack(
+                    context = context,
+                    activity = activity,
+                    filePathMedia = filePathMedia,
+                    slackTask = "get"
+                )
+                initializeSlackRecyclerView(filePathMedia = filePathMedia)
+                buttonClicksSlack(filePathMedia)
+                attachProgressBar(task = "slack")
 
-                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -5243,6 +5456,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      */
     private fun addSlackFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         arrayListSlackFileName.add(RecyclerViewModel(file = filePathMedia))
+        if (unhandledMediaFilePath != null) {
+            arrayListSlackFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
+        }
         arrayListSlackFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         return arrayListSlackFileName
     }
@@ -5278,99 +5494,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val inputMethodManager =
             (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
-    }
-
-    /**
-     * This method is used for initializing components of jira_calendar_view.
-     */
-    private fun initializeJiraStartDatePicker() {
-        val calendar = Calendar.getInstance()
-        val mYear = calendar.get(Calendar.YEAR)
-        val mMonth = calendar.get(Calendar.MONTH)
-        val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
-        var startDate = "$mYear-$mMonth-$mDayOfMonth"
-        calendarViewJiraLayout =
-            calendarViewJiraView.findViewById(R.id.jira_calendar_view_layout)
-        calendarViewJiraStartDate = calendarViewJiraView.findViewById(R.id.calendarView_start_date)
-        buttonCalendarViewJiraCancel =
-            calendarViewJiraView.findViewById(R.id.button_jira_calendar_cancel)
-        buttonCalendarViewJiraOk =
-            calendarViewJiraView.findViewById(R.id.button_jira_calendar_ok)
-
-        calendarViewJiraStartDate.minDate = System.currentTimeMillis()
-        if (calendarViewJiraDate != null) {
-            calendarViewJiraStartDate.setDate(calendarViewJiraDate!!, true, true)
-        }
-        calendarViewJiraLayout.setOnClickListener {
-            detachJiraDatePicker()
-        }
-        buttonCalendarViewJiraCancel.setOnClickListener {
-            detachJiraDatePicker()
-        }
-
-        buttonCalendarViewJiraOk.setOnClickListener {
-            jiraAuthentication.setStartDate(startDate = startDate)
-            detachJiraDatePicker()
-            imageButtonRemoveDate.visibility = View.VISIBLE
-        }
-        calendarViewJiraStartDate.setOnDateChangeListener { viewStartDate, year, month, dayOfMonth ->
-            calendarViewJiraDate = viewStartDate.date
-            startDate = "$year-$month-$dayOfMonth"
-        }
-
-    }
-
-    /**
-     * This method is used for creating custom jira date-picker layout which is attached to application overlay.
-     * @throws exception if error occurs then com.mobilex.loggerbird.loggerbird.exception message will be hold in the instance of takeExceptionDetails method and saves exceptions instance to the txt file with saveExceptionDetails method.
-     */
-    private fun attachJiraDatePicker() {
-        try {
-            val rootView: ViewGroup =
-                activity.window.decorView.findViewById(android.R.id.content)
-            calendarViewJiraView =
-                LayoutInflater.from(activity)
-                    .inflate(R.layout.jira_calendar_view, rootView, false)
-            windowManagerParamsJiraDatePicker =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-            windowManagerJiraDatePicker = activity.getSystemService(Context.WINDOW_SERVICE)!!
-            (windowManagerJiraDatePicker as WindowManager).addView(
-                calendarViewJiraView,
-                windowManagerParamsJiraDatePicker
-            )
-            initializeJiraStartDatePicker()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            LoggerBird.callEnqueue()
-            LoggerBird.callExceptionDetails(exception = e, tag = Constants.jiraDatePopupTag)
-        }
-    }
-
-    /**
-     * This method is used for removing jira_calendar_view from window.
-     */
-    private fun detachJiraDatePicker() {
-        if (this::calendarViewJiraView.isInitialized) {
-            (windowManagerJiraDatePicker as WindowManager).removeViewImmediate(
-                calendarViewJiraView
-            )
-        }
     }
 
     /**
@@ -5420,6 +5543,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //                    )
 //                }
 //            }
+            if (sharedPref.getString("unhandled_media_file_path", null) != null) {
+                unhandledMediaFilePath = sharedPref.getString("unhandled_media_file_path", null)
+            }
             return true
         }
         return false
@@ -5864,6 +5990,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListEmailFileName.add(RecyclerViewModel(file = filePathMedia))
         }
+        if (unhandledMediaFilePath != null) {
+            arrayListEmailFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
+        }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListEmailFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
@@ -6000,8 +6129,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         removeFutureDateLayout()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         viewFutureDate =
-            LayoutInflater.from(activity)
-                .inflate(R.layout.future_calendar_view, rootView, false)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.future_calendar_view, rootView, false)
+            } else {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.future_calendar_view_lower, rootView, false)
+            }
         windowManagerParamsFutureDate =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams(
@@ -6055,12 +6189,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val mMonth = calendar.get(Calendar.MONTH)
         val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         calendarFuture.set(mYear, mMonth, mDayOfMonth)
-        calendarViewFutureTask.minDate = System.currentTimeMillis()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewFutureTask.minDate = System.currentTimeMillis()
+        }
         frameLayoutFutureDate.setOnClickListener {
             removeFutureDateLayout()
         }
         calendarViewFutureTask.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            calendarFuture.set(year, month, dayOfMonth)
+            calendarFuture.set(year, month + 1, dayOfMonth)
         }
         buttonFutureTaskDateCreate.setSafeOnClickListener {
             futureStartDate = calendarViewFutureTask.date
@@ -6235,153 +6371,153 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeGithubLayout()
             viewGithub = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_github_popup, (this.rootView as ViewGroup), false)
-                windowManagerParamsGithub = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerGithub = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerGithub as WindowManager).addView(
-                    viewGithub,
-                    windowManagerParamsGithub
+            windowManagerParamsGithub = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                buttonGithubCreate = viewGithub.findViewById(R.id.button_github_create)
-                buttonGithubCancel = viewGithub.findViewById(R.id.button_github_cancel)
-                autoTextViewGithubAssignee =
-                    viewGithub.findViewById(R.id.auto_textView_github_assignee)
-                autoTextViewGithubLabels = viewGithub.findViewById(R.id.auto_textView_github_labels)
-                autoTextViewGithubLinkedRequests =
-                    viewGithub.findViewById(R.id.auto_textView_github_linked_requests)
-                autoTextViewGithubMileStone =
-                    viewGithub.findViewById(R.id.auto_textView_github_milestone)
-                autoTextViewGithubRepo =
-                    viewGithub.findViewById(R.id.auto_textView_github_repo)
-                autoTextViewGithubProject =
-                    viewGithub.findViewById(R.id.auto_textView_github_project)
-                editTextGithubTitle = viewGithub.findViewById(R.id.editText_github_title)
-                editTextGithubComment = viewGithub.findViewById(R.id.editText_github_comment)
-                recyclerViewGithubAttachment =
-                    viewGithub.findViewById(R.id.recycler_view_github_attachment)
-                toolbarGithub = viewGithub.findViewById(R.id.toolbar_github)
-                scrollViewGithub = viewGithub.findViewById(R.id.scrollView_github)
-                scrollViewGithub.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        hideKeyboard(activity = activity, view = viewGithub)
-                    }
-                    return@setOnTouchListener false
-                }
-                recyclerViewGithubAssignee =
-                    viewGithub.findViewById(R.id.recycler_view_assignee_list)
-                cardViewGithubAssigneeList = viewGithub.findViewById(R.id.cardView_assignee_list)
-                imageViewGithubAssignee = viewGithub.findViewById(R.id.imageView_assignee_add)
-
-                recyclerViewGithubLabel = viewGithub.findViewById(R.id.recycler_view_label_list)
-                cardViewGithubLabelList = viewGithub.findViewById(R.id.cardView_label_list)
-                imageViewGithubLabel = viewGithub.findViewById(R.id.imageView_label_add)
-
-                recyclerViewGithubProject = viewGithub.findViewById(R.id.recycler_view_project_list)
-                cardViewGithubProjectList = viewGithub.findViewById(R.id.cardView_project_list)
-                imageViewGithubProject = viewGithub.findViewById(R.id.imageView_project_add)
-
-                toolbarGithub.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.github_menu_save -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString(
-                                    "github_repo",
-                                    autoTextViewGithubRepo.editableText.toString()
-                                )
-                                putString(
-                                    "github_project",
-                                    autoTextViewGithubProject.editableText.toString()
-                                )
-                                putString("github_title", editTextGithubTitle.text.toString())
-                                putString("github_comment", editTextGithubComment.text.toString())
-                                putString(
-                                    "github_assignee",
-                                    autoTextViewGithubAssignee.editableText.toString()
-                                )
-                                putString(
-                                    "github_labels",
-                                    autoTextViewGithubLabels.editableText.toString()
-                                )
-                                putString(
-                                    "github_milestone",
-                                    autoTextViewGithubMileStone.editableText.toString()
-                                )
-                                putString(
-                                    "github_pull_requests",
-                                    autoTextViewGithubLinkedRequests.editableText.toString()
-                                )
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.github_issue_preferences_save)
-                            )
-                        }
-                        R.id.github_menu_clear -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            val editor: SharedPreferences.Editor = sharedPref.edit()
-                            editor.remove("github_comment")
-                            editor.remove("github_title")
-                            editor.remove("github_repo")
-                            editor.remove("github_project")
-                            editor.remove("github_milestone")
-                            editor.remove("github_assignee")
-                            editor.remove("github_labels")
-                            editor.remove("github_pull_requests")
-                            editor.apply()
-                            clearGithubComponents()
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.github_issue_preferences_delete)
-                            )
-                        }
-                    }
-                    return@setOnMenuItemClickListener true
-                }
-
-                toolbarGithub.setNavigationOnClickListener {
-                    removeGithubLayout()
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.VISIBLE
-                    }
-                }
-
-                initializeGithubAttachmentRecyclerView(filePathMedia = filePathMedia)
-                initializeGithubAssigneeRecyclerView()
-                initializeGithubLabelRecyclerView()
-                initializeGithubProjectRecyclerView()
-                buttonClicksGithub(filePathMedia = filePathMedia)
-                githubAuthentication.callGithub(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "github")
+            }
+
+            windowManagerGithub = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerGithub as WindowManager).addView(
+                viewGithub,
+                windowManagerParamsGithub
+            )
+
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+            buttonGithubCreate = viewGithub.findViewById(R.id.button_github_create)
+            buttonGithubCancel = viewGithub.findViewById(R.id.button_github_cancel)
+            autoTextViewGithubAssignee =
+                viewGithub.findViewById(R.id.auto_textView_github_assignee)
+            autoTextViewGithubLabels = viewGithub.findViewById(R.id.auto_textView_github_labels)
+            autoTextViewGithubLinkedRequests =
+                viewGithub.findViewById(R.id.auto_textView_github_linked_requests)
+            autoTextViewGithubMileStone =
+                viewGithub.findViewById(R.id.auto_textView_github_milestone)
+            autoTextViewGithubRepo =
+                viewGithub.findViewById(R.id.auto_textView_github_repo)
+            autoTextViewGithubProject =
+                viewGithub.findViewById(R.id.auto_textView_github_project)
+            editTextGithubTitle = viewGithub.findViewById(R.id.editText_github_title)
+            editTextGithubComment = viewGithub.findViewById(R.id.editText_github_comment)
+            recyclerViewGithubAttachment =
+                viewGithub.findViewById(R.id.recycler_view_github_attachment)
+            toolbarGithub = viewGithub.findViewById(R.id.toolbar_github)
+            scrollViewGithub = viewGithub.findViewById(R.id.scrollView_github)
+            scrollViewGithub.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    hideKeyboard(activity = activity, view = viewGithub)
+                }
+                return@setOnTouchListener false
+            }
+            recyclerViewGithubAssignee =
+                viewGithub.findViewById(R.id.recycler_view_assignee_list)
+            cardViewGithubAssigneeList = viewGithub.findViewById(R.id.cardView_assignee_list)
+            imageViewGithubAssignee = viewGithub.findViewById(R.id.imageView_assignee_add)
+
+            recyclerViewGithubLabel = viewGithub.findViewById(R.id.recycler_view_label_list)
+            cardViewGithubLabelList = viewGithub.findViewById(R.id.cardView_label_list)
+            imageViewGithubLabel = viewGithub.findViewById(R.id.imageView_label_add)
+
+            recyclerViewGithubProject = viewGithub.findViewById(R.id.recycler_view_project_list)
+            cardViewGithubProjectList = viewGithub.findViewById(R.id.cardView_project_list)
+            imageViewGithubProject = viewGithub.findViewById(R.id.imageView_project_add)
+
+            toolbarGithub.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.github_menu_save -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        with(sharedPref.edit()) {
+                            putString(
+                                "github_repo",
+                                autoTextViewGithubRepo.editableText.toString()
+                            )
+                            putString(
+                                "github_project",
+                                autoTextViewGithubProject.editableText.toString()
+                            )
+                            putString("github_title", editTextGithubTitle.text.toString())
+                            putString("github_comment", editTextGithubComment.text.toString())
+                            putString(
+                                "github_assignee",
+                                autoTextViewGithubAssignee.editableText.toString()
+                            )
+                            putString(
+                                "github_labels",
+                                autoTextViewGithubLabels.editableText.toString()
+                            )
+                            putString(
+                                "github_milestone",
+                                autoTextViewGithubMileStone.editableText.toString()
+                            )
+                            putString(
+                                "github_pull_requests",
+                                autoTextViewGithubLinkedRequests.editableText.toString()
+                            )
+                            commit()
+                        }
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.github_issue_preferences_save)
+                        )
+                    }
+                    R.id.github_menu_clear -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("github_comment")
+                        editor.remove("github_title")
+                        editor.remove("github_repo")
+                        editor.remove("github_project")
+                        editor.remove("github_milestone")
+                        editor.remove("github_assignee")
+                        editor.remove("github_labels")
+                        editor.remove("github_pull_requests")
+                        editor.apply()
+                        clearGithubComponents()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.github_issue_preferences_delete)
+                        )
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            toolbarGithub.setNavigationOnClickListener {
+                removeGithubLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+
+            initializeGithubAttachmentRecyclerView(filePathMedia = filePathMedia)
+            initializeGithubAssigneeRecyclerView()
+            initializeGithubLabelRecyclerView()
+            initializeGithubProjectRecyclerView()
+            buttonClicksGithub(filePathMedia = filePathMedia)
+            githubAuthentication.callGithub(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "github")
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -6587,6 +6723,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListGithubFileName.add(RecyclerViewModel(file = filePathMedia))
         }
+        if (unhandledMediaFilePath != null) {
+            arrayListGithubFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
+        }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListGithubFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
@@ -6723,9 +6862,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubRepos: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubRepoAdapter = ArrayAdapter(
+        autoTextViewGithubRepoAdapter = AutoCompleteTextViewGithubRepoAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_repo_item,
             arrayListGithubRepos
         )
         autoTextViewGithubRepo.setAdapter(autoTextViewGithubRepoAdapter)
@@ -6745,7 +6884,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGithubRepo.setOnItemClickListener { parent, view, position, id ->
             githubAuthentication.setRepoPosition(repoPosition = position)
-                attachProgressBar(task = "github")
+            attachProgressBar(task = "github")
             hideKeyboard(activity = activity, view = viewGithub)
             clearGithubComponents()
             githubAuthentication.callGithub(
@@ -6793,9 +6932,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubAssigneeAdapter = ArrayAdapter(
+        autoTextViewGithubAssigneeAdapter = AutoCompleteTextViewGithubAssigneeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_assignee_item,
             arrayListGithubAssignee
         )
         autoTextViewGithubAssignee.setAdapter(autoTextViewGithubAssigneeAdapter)
@@ -6837,9 +6976,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubMileStones: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubMileStoneAdapter = ArrayAdapter(
+        autoTextViewGithubMileStoneAdapter = AutoCompleteTextViewGithubMilestoneAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_milestone_item,
             arrayListGithubMileStones
         )
         autoTextViewGithubMileStone.setAdapter(autoTextViewGithubMileStoneAdapter)
@@ -6882,9 +7021,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubProjectAdapter = ArrayAdapter(
+        autoTextViewGithubProjectAdapter = AutoCompleteTextViewGithubProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_project_item,
             arrayListGithubProject
         )
         autoTextViewGithubProject.setAdapter(autoTextViewGithubProjectAdapter)
@@ -6927,9 +7066,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubLabels: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubLabelsAdapter = ArrayAdapter(
+        autoTextViewGithubLabelsAdapter = AutoCompleteTextViewGithubLabelAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_labels_item,
             arrayListGithubLabels
         )
         autoTextViewGithubLabels.setAdapter(autoTextViewGithubLabelsAdapter)
@@ -6962,9 +7101,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubLinkedRequests: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubLinkedRequestsAdapter = ArrayAdapter(
+        autoTextViewGithubLinkedRequestsAdapter = AutoCompleteTextViewGithubLinkedRequestsAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_linked_request_item,
             arrayListGithubLinkedRequests
         )
         autoTextViewGithubLinkedRequests.setAdapter(autoTextViewGithubLinkedRequestsAdapter)
@@ -7012,147 +7151,147 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeTrelloLayout()
             viewTrello = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_trello_popup, (this.rootView as ViewGroup), false)
-                windowManagerParamsTrello = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerTrello = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerTrello as WindowManager).addView(
-                    viewTrello,
-                    windowManagerParamsTrello
+            windowManagerParamsTrello = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                buttonTrelloCancel = viewTrello.findViewById(R.id.button_trello_cancel)
-                buttonTrelloCreate = viewTrello.findViewById(R.id.button_trello_create)
-                editTextTrelloTitle = viewTrello.findViewById(R.id.editText_trello_title)
-                editTextTrelloDescription =
-                    viewTrello.findViewById(R.id.editText_trello_description)
-                editTextTrelloCheckList = viewTrello.findViewById(R.id.editText_trello_check_list)
-                toolbarTrello = viewTrello.findViewById(R.id.toolbar_trello)
-                recyclerViewTrelloAttachment =
-                    viewTrello.findViewById(R.id.recycler_view_trello_attachment)
-                autoTextViewTrelloProject =
-                    viewTrello.findViewById(R.id.auto_textView_trello_project)
-                autoTextViewTrelloBoard = viewTrello.findViewById(R.id.auto_textView_trello_board)
-                autoTextViewTrelloMember = viewTrello.findViewById(R.id.auto_textView_trello_member)
-                autoTextViewTrelloLabel = viewTrello.findViewById(R.id.auto_textView_trello_label)
-                recyclerViewTrelloLabel = viewTrello.findViewById(R.id.recycler_view_label_list)
-                imageViewTrelloLabel = viewTrello.findViewById(R.id.imageView_label_add)
-                cardViewTrelloLabelList = viewTrello.findViewById(R.id.cardView_label_list)
-                recyclerViewTrelloMember = viewTrello.findViewById(R.id.recycler_view_member_list)
-                imageViewTrelloMember = viewTrello.findViewById(R.id.imageView_member_add)
-                cardViewTrelloMemberList = viewTrello.findViewById(R.id.cardView_member_list)
-                recyclerViewTrelloCheckList =
-                    viewTrello.findViewById(R.id.recycler_view_check_list_list)
-                imageViewTrelloCheckList = viewTrello.findViewById(R.id.imageView_check_list_add)
-                cardViewTrelloCheckList = viewTrello.findViewById(R.id.cardView_check_list_list)
-                imageViewTrelloCalendar = viewTrello.findViewById(R.id.imageView_start_date)
-                imageButtonTrelloRemoveTimeline =
-                    viewTrello.findViewById(R.id.image_button_trello_remove_date)
-                scrollViewTrello = viewTrello.findViewById(R.id.scrollView_trello)
-                scrollViewTrello.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        hideKeyboard(activity = activity, view = viewTrello)
-                    }
-                    return@setOnTouchListener false
-                }
-
-                toolbarTrello.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.trello_menu_save -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString(
-                                    "trello_project",
-                                    autoTextViewTrelloProject.editableText.toString()
-                                )
-                                putString(
-                                    "trello_board",
-                                    autoTextViewTrelloBoard.editableText.toString()
-                                )
-                                putString("trello_title", editTextTrelloTitle.text.toString())
-                                putString(
-                                    "trello_description",
-                                    editTextTrelloDescription.text.toString()
-                                )
-                                putString(
-                                    "trello_checklist",
-                                    editTextTrelloCheckList.text.toString()
-                                )
-                                putString(
-                                    "trello_member",
-                                    autoTextViewTrelloMember.editableText.toString()
-                                )
-                                putString(
-                                    "trello_label",
-                                    autoTextViewTrelloLabel.editableText.toString()
-                                )
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.trello_issue_preferences_save)
-                            )
-                        }
-                        R.id.trello_menu_clear -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            val editor: SharedPreferences.Editor = sharedPref.edit()
-                            editor.remove("trello_title")
-                            editor.remove("trello_description")
-                            editor.remove("trello_project")
-                            editor.remove("trello_board")
-                            editor.remove("trello_member")
-                            editor.remove("trello_label")
-                            editor.remove("trello_checklist")
-                            editor.apply()
-                            clearTrelloComponents()
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.trello_issue_preferences_delete)
-                            )
-                        }
-                    }
-                    return@setOnMenuItemClickListener true
-                }
-
-                toolbarTrello.setNavigationOnClickListener {
-                    removeTrelloLayout()
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.VISIBLE
-                    }
-                }
-                initializeTrelloRecyclerView(filePathMedia = filePathMedia)
-                initializeTrelloLabelRecyclerView()
-                initializeTrelloMemberRecyclerView()
-                initializeTrelloCheckListRecyclerView()
-                buttonClicksTrello()
-                trelloAuthentication.callTrello(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "trello")
+            }
+
+            windowManagerTrello = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerTrello as WindowManager).addView(
+                viewTrello,
+                windowManagerParamsTrello
+            )
+
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+            buttonTrelloCancel = viewTrello.findViewById(R.id.button_trello_cancel)
+            buttonTrelloCreate = viewTrello.findViewById(R.id.button_trello_create)
+            editTextTrelloTitle = viewTrello.findViewById(R.id.editText_trello_title)
+            editTextTrelloDescription =
+                viewTrello.findViewById(R.id.editText_trello_description)
+            editTextTrelloCheckList = viewTrello.findViewById(R.id.editText_trello_check_list)
+            toolbarTrello = viewTrello.findViewById(R.id.toolbar_trello)
+            recyclerViewTrelloAttachment =
+                viewTrello.findViewById(R.id.recycler_view_trello_attachment)
+            autoTextViewTrelloProject =
+                viewTrello.findViewById(R.id.auto_textView_trello_project)
+            autoTextViewTrelloBoard = viewTrello.findViewById(R.id.auto_textView_trello_board)
+            autoTextViewTrelloMember = viewTrello.findViewById(R.id.auto_textView_trello_member)
+            autoTextViewTrelloLabel = viewTrello.findViewById(R.id.auto_textView_trello_label)
+            recyclerViewTrelloLabel = viewTrello.findViewById(R.id.recycler_view_label_list)
+            imageViewTrelloLabel = viewTrello.findViewById(R.id.imageView_label_add)
+            cardViewTrelloLabelList = viewTrello.findViewById(R.id.cardView_label_list)
+            recyclerViewTrelloMember = viewTrello.findViewById(R.id.recycler_view_member_list)
+            imageViewTrelloMember = viewTrello.findViewById(R.id.imageView_member_add)
+            cardViewTrelloMemberList = viewTrello.findViewById(R.id.cardView_member_list)
+            recyclerViewTrelloCheckList =
+                viewTrello.findViewById(R.id.recycler_view_check_list_list)
+            imageViewTrelloCheckList = viewTrello.findViewById(R.id.imageView_check_list_add)
+            cardViewTrelloCheckList = viewTrello.findViewById(R.id.cardView_check_list_list)
+            imageViewTrelloCalendar = viewTrello.findViewById(R.id.imageView_start_date)
+            imageButtonTrelloRemoveTimeline =
+                viewTrello.findViewById(R.id.image_button_trello_remove_date)
+            scrollViewTrello = viewTrello.findViewById(R.id.scrollView_trello)
+            scrollViewTrello.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    hideKeyboard(activity = activity, view = viewTrello)
+                }
+                return@setOnTouchListener false
+            }
+
+            toolbarTrello.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.trello_menu_save -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        with(sharedPref.edit()) {
+                            putString(
+                                "trello_project",
+                                autoTextViewTrelloProject.editableText.toString()
+                            )
+                            putString(
+                                "trello_board",
+                                autoTextViewTrelloBoard.editableText.toString()
+                            )
+                            putString("trello_title", editTextTrelloTitle.text.toString())
+                            putString(
+                                "trello_description",
+                                editTextTrelloDescription.text.toString()
+                            )
+                            putString(
+                                "trello_checklist",
+                                editTextTrelloCheckList.text.toString()
+                            )
+                            putString(
+                                "trello_member",
+                                autoTextViewTrelloMember.editableText.toString()
+                            )
+                            putString(
+                                "trello_label",
+                                autoTextViewTrelloLabel.editableText.toString()
+                            )
+                            commit()
+                        }
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.trello_issue_preferences_save)
+                        )
+                    }
+                    R.id.trello_menu_clear -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("trello_title")
+                        editor.remove("trello_description")
+                        editor.remove("trello_project")
+                        editor.remove("trello_board")
+                        editor.remove("trello_member")
+                        editor.remove("trello_label")
+                        editor.remove("trello_checklist")
+                        editor.apply()
+                        clearTrelloComponents()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.trello_issue_preferences_delete)
+                        )
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            toolbarTrello.setNavigationOnClickListener {
+                removeTrelloLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+            initializeTrelloRecyclerView(filePathMedia = filePathMedia)
+            initializeTrelloLabelRecyclerView()
+            initializeTrelloMemberRecyclerView()
+            initializeTrelloCheckListRecyclerView()
+            buttonClicksTrello()
+            trelloAuthentication.callTrello(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "trello")
         } catch (e: Exception) {
             finishShareLayout("trello_error")
             e.printStackTrace()
@@ -7375,9 +7514,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListTrelloProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewTrelloProjectAdapter = ArrayAdapter(
+        autoTextViewTrelloProjectAdapter = AutoCompleteTextViewTrelloProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_trello_project_item,
             arrayListTrelloProject
         )
         autoTextViewTrelloProject.setAdapter(autoTextViewTrelloProjectAdapter)
@@ -7429,9 +7568,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListTrelloBoards: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewTrelloBoardAdapter = ArrayAdapter(
+        autoTextViewTrelloBoardAdapter = AutoCompleteTextViewTrelloBoardAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_trello_board_item,
             arrayListTrelloBoards
         )
         autoTextViewTrelloBoard.setAdapter(autoTextViewTrelloBoardAdapter)
@@ -7477,9 +7616,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListTrelloMember: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewTrelloMemberAdapter = ArrayAdapter(
+        autoTextViewTrelloMemberAdapter = AutoCompleteTextViewTrelloMemberAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_trello_member_item,
             arrayListTrelloMember
         )
         autoTextViewTrelloMember.setAdapter(autoTextViewTrelloMemberAdapter)
@@ -7588,6 +7727,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun addTrelloFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
             arrayListTrelloFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (unhandledMediaFilePath != null) {
+            arrayListTrelloFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListTrelloFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -7763,8 +7905,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         calendarTrello = Calendar.getInstance()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         viewTrelloDate =
-            LayoutInflater.from(activity)
-                .inflate(R.layout.trello_calendar_view, rootView, false)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.trello_calendar_view, rootView, false)
+            } else {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.trello_calendar_view_lower, rootView, false)
+            }
         windowManagerParamsTrelloDate =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams(
@@ -7816,12 +7963,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val mMonth = calendar.get(Calendar.MONTH)
         val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         calendarTrello?.set(mYear, mMonth, mDayOfMonth)
-        calendarViewTrello.minDate = System.currentTimeMillis()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewTrello.minDate = System.currentTimeMillis()
+        }
         frameLayoutTrelloDate.setOnClickListener {
             removeTrelloDateLayout()
         }
         calendarViewTrello.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            calendarTrello?.set(year, month, dayOfMonth)
+            calendarTrello?.set(year, month + 1, dayOfMonth)
 //            startDate = "$year-$month-$dayOfMonth"
         }
         buttonTrelloDateCreate.setSafeOnClickListener {
@@ -7931,79 +8080,90 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeGitlabLayout()
             viewGitlab = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_gitlab_popup, (this.rootView as ViewGroup), false)
-                windowManagerParamsGitlab = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-                windowManagerGitlab = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                if (windowManagerGitlab != null) {
-                    (windowManagerGitlab as WindowManager).addView(
-                        viewGitlab,
-                        windowManagerParamsGitlab
-                    )
-                }
-                if (Build.VERSION.SDK_INT >= 23) {
+            windowManagerParamsGitlab = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
+                )
+            }
+            windowManagerGitlab = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            if (windowManagerGitlab != null) {
+                (windowManagerGitlab as WindowManager).addView(
+                    viewGitlab,
+                    windowManagerParamsGitlab
+                )
+            }
+            if (Build.VERSION.SDK_INT >= 23) {
+                activity.window.navigationBarColor =
+                    resources.getColor(R.color.black, theme)
+                activity.window.statusBarColor =
+                    resources.getColor(R.color.black, theme)
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     activity.window.navigationBarColor =
-                        resources.getColor(R.color.black, theme)
-                    activity.window.statusBarColor =
-                        resources.getColor(R.color.black, theme)
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        activity.window.navigationBarColor =
-                            resources.getColor(R.color.black)
-                        activity.window.statusBarColor = resources.getColor(R.color.black)
-                    }
+                        resources.getColor(R.color.black)
+                    activity.window.statusBarColor = resources.getColor(R.color.black)
                 }
-                toolbarGitlab = viewGitlab.findViewById(R.id.toolbar_gitlab)
-                autoTextViewGitlabProject =
-                    viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
-                editTextGitlabTitle = viewGitlab.findViewById(R.id.editText_gitlab_title)
-                editTextGitlabDescription =
-                    viewGitlab.findViewById(R.id.editText_gitlab_description)
-                editTextGitlabWeight = viewGitlab.findViewById(R.id.editText_gitlab_weight)
-                autoTextViewGitlabMilestone =
-                    viewGitlab.findViewById(R.id.auto_textView_gitlab_milestone)
-                autoTextViewGitlabAssignee =
-                    viewGitlab.findViewById(R.id.auto_textView_gitlab_assignee)
-                autoTextViewGitlabLabels = viewGitlab.findViewById(R.id.auto_textView_gitlab_labels)
-                autoTextViewGitlabConfidentiality =
-                    viewGitlab.findViewById(R.id.auto_textView_gitlab_confidentiality)
-                textViewGitlabDueDate = viewGitlab.findViewById(R.id.textView_gitlab_due_date)
-                buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
-                buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
-                imageViewGitlabDueDate =
-                    viewGitlab.findViewById(R.id.imageView_gitlab_delete_due_date)
-                recyclerViewGitlabAttachment =
-                    viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
-                editTextGitlabWeight.filters = arrayOf<InputFilter>(
-                    InputTypeFilter(
-                        "0",
-                        "100"
-                    )
+            }
+            toolbarGitlab = viewGitlab.findViewById(R.id.toolbar_gitlab)
+            autoTextViewGitlabProject =
+                viewGitlab.findViewById(R.id.auto_textview_gitlab_project)
+            editTextGitlabTitle = viewGitlab.findViewById(R.id.editText_gitlab_title)
+            editTextGitlabDescription =
+                viewGitlab.findViewById(R.id.editText_gitlab_description)
+            editTextGitlabWeight = viewGitlab.findViewById(R.id.editText_gitlab_weight)
+            autoTextViewGitlabMilestone =
+                viewGitlab.findViewById(R.id.auto_textView_gitlab_milestone)
+            autoTextViewGitlabAssignee =
+                viewGitlab.findViewById(R.id.auto_textView_gitlab_assignee)
+            autoTextViewGitlabLabels = viewGitlab.findViewById(R.id.auto_textView_gitlab_labels)
+            autoTextViewGitlabConfidentiality =
+                viewGitlab.findViewById(R.id.auto_textView_gitlab_confidentiality)
+            textViewGitlabDueDate = viewGitlab.findViewById(R.id.textView_gitlab_due_date)
+            buttonGitlabCreate = viewGitlab.findViewById(R.id.button_gitlab_create)
+            buttonGitlabCancel = viewGitlab.findViewById(R.id.button_gitlab_cancel)
+            linearLayoutGitlabConfidentiality =
+                viewGitlab.findViewById(R.id.linearLayout_gitlab_confidentiality)
+            linearLayoutGitlabMilestone =
+                viewGitlab.findViewById(R.id.linearLayout_gitlab_milestone)
+            textViewGitlabMilestone = viewGitlab.findViewById(R.id.textView_gitlab_milestone)
+            imageViewGitlabMilestone = viewGitlab.findViewById(R.id.imageView_delete_milestone)
+            linearLayoutGitlabAssignee =
+                viewGitlab.findViewById(R.id.linearLayout_gitlab_assignee)
+            linearLayoutGitlabLabels = viewGitlab.findViewById(R.id.linearLayout_gitlab_labels)
+            textViewGitlabLabels = viewGitlab.findViewById(R.id.textView_gitlab_labels)
+            imageViewGitlabLabels = viewGitlab.findViewById(R.id.imageView_delete_labels)
+            imageViewGitlabDueDate =
+                viewGitlab.findViewById(R.id.imageView_gitlab_delete_due_date)
+            recyclerViewGitlabAttachment =
+                viewGitlab.findViewById(R.id.recycler_view_gitlab_attachment)
+            editTextGitlabWeight.filters = arrayOf<InputFilter>(
+                InputTypeFilter(
+                    "0",
+                    "100"
                 )
-                gitlabAuthentication.callGitlab(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
-                )
+            )
+            gitlabAuthentication.callGitlab(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
 
-                attachProgressBar("gitlab")
-                initializeGitlabAttachmentRecyclerView(filePathMedia = filePathMedia)
-                buttonClicksGitlab(filePathMedia = filePathMedia)
+            attachProgressBar("gitlab")
+            initializeGitlabAttachmentRecyclerView(filePathMedia = filePathMedia)
+            buttonClicksGitlab(filePathMedia = filePathMedia)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -8030,7 +8190,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         buttonCalendarViewGitlabOk =
             calendarViewGitlabView.findViewById(R.id.button_gitlab_calendar_ok)
 
-        calendarViewGitlabDueDate.minDate = System.currentTimeMillis()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewGitlabDueDate.minDate = System.currentTimeMillis()
+        }
         if (calendarViewGitlabDate != null) {
             calendarViewGitlabDueDate.date = calendarViewGitlabDate!!
         }
@@ -8082,9 +8244,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         try {
             val rootView: ViewGroup =
                 activity.window.decorView.findViewById(android.R.id.content)
-            calendarViewGitlabView =
+            calendarViewGitlabView = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 LayoutInflater.from(activity)
                     .inflate(R.layout.gitlab_calendar_view, rootView, false)
+            } else {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.gitlab_calendar_view_lower, rootView, false)
+            }
             windowManagerParamsGitlabDatePicker =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
@@ -8159,6 +8325,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     autoTextViewProject = autoTextViewGitlabProject
                 )
             ) {
+//                progressBarGitlabLayout.visibility = View.VISIBLE
+//                progressBarGitlab.visibility = View.VISIBLE
                 attachProgressBar(task = "gitlab")
                 gitlabAuthentication.gatherGitlabEditTextDetails(
                     editTextTitle = editTextGitlabTitle,
@@ -8188,6 +8356,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (controlFloatingActionButtonView()) {
                 floatingActionButtonView.visibility = View.VISIBLE
             }
+        }
+        textViewGitlabLabels.setSafeOnClickListener {
+            linearLayoutGitlabLabels.visibility = View.VISIBLE
+            textViewGitlabLabels.visibility = View.GONE
+        }
+        textViewGitlabMilestone.setSafeOnClickListener {
+            linearLayoutGitlabMilestone.visibility = View.VISIBLE
+            textViewGitlabMilestone.visibility = View.GONE
         }
         buttonGitlabCancel.setSafeOnClickListener {
             removeGitlabLayout()
@@ -8251,7 +8427,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGitlabProjects: ArrayList<String>
     ) {
         autoTextViewGitlabProjectAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabProjects)
+            AutoCompleteTextViewGitlabProjectAdapter(
+                this,
+                R.layout.auto_text_view_gitlab_project_item,
+                arrayListGitlabProjects
+            )
         autoTextViewGitlabProject.setAdapter(autoTextViewGitlabProjectAdapter)
         if (arrayListGitlabProjects.isNotEmpty() && autoTextViewGitlabProject.text.isEmpty()) {
             autoTextViewGitlabProject.setText(arrayListGitlabProjects[0], false)
@@ -8265,7 +8445,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGitlabProject.setOnItemClickListener { parent, view, position, id ->
             gitlabAuthentication.gitlabProjectPosition(projectPosition = position)
-                attachProgressBar(task = "gitlab")
+            attachProgressBar(task = "gitlab")
             gitlabAuthentication.callGitlab(
                 activity = activity,
                 context = context,
@@ -8298,7 +8478,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGitlabAssignee: ArrayList<String>
     ) {
         autoTextViewGitlabAssigneeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabAssignee)
+            AutoCompleteTextViewGitlabAssigneeAdapter(
+                this,
+                R.layout.auto_text_view_gitlab_assignee_item,
+                arrayListGitlabAssignee
+            )
         autoTextViewGitlabAssignee.setAdapter(autoTextViewGitlabAssigneeAdapter)
         if (arrayListGitlabAssignee.isNotEmpty() && autoTextViewGitlabAssignee.text.isEmpty()) {
             autoTextViewGitlabAssignee.setText(arrayListGitlabAssignee[0], false)
@@ -8338,8 +8522,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabLabels(
         arrayListGitlabLabels: ArrayList<String>
     ) {
-        autoTextViewGitlabLabelsAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabLabels)
+        autoTextViewGitlabLabelsAdapter = AutoCompleteTextViewGitlabLabelAdapter(
+            this,
+            R.layout.auto_text_view_gitlab_label_item,
+            arrayListGitlabLabels
+        )
         autoTextViewGitlabLabels.setAdapter(autoTextViewGitlabLabelsAdapter)
         if (arrayListGitlabLabels.isNotEmpty() && autoTextViewGitlabLabels.text.isEmpty()) {
             autoTextViewGitlabLabels.setText(arrayListGitlabLabels[0], false)
@@ -8353,6 +8540,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGitlabLabels.setOnItemClickListener { parent, view, position, id ->
             gitlabAuthentication.gitlabLabelPosition(labelPosition = position)
+        }
+        imageViewGitlabLabels.setSafeOnClickListener {
+            linearLayoutGitlabLabels.visibility = View.GONE
+            textViewGitlabLabels.visibility = View.VISIBLE
         }
         autoTextViewGitlabLabels.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
@@ -8378,9 +8569,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabConfidentiality(
         arrayListGitlabConfidentiality: ArrayList<String>
     ) {
-        autoTextViewGitlabConfidentialityAdapter = ArrayAdapter(
+        autoTextViewGitlabConfidentialityAdapter = AutoCompleteTextViewGitlabConfidentialityAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_gitlab_confidentiality_item,
             arrayListGitlabConfidentiality
         )
         autoTextViewGitlabConfidentiality.setAdapter(autoTextViewGitlabConfidentialityAdapter)
@@ -8424,9 +8615,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabMilestones(
         arrayListGitlabMilestones: ArrayList<String>
     ) {
-        autoTextViewGitlabMilestoneAdapter = ArrayAdapter(
+        autoTextViewGitlabMilestoneAdapter = AutoCompleteTextViewGitlabMilestoneAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_gitlab_milestone_item,
             arrayListGitlabMilestones
         )
         autoTextViewGitlabMilestone.setAdapter(autoTextViewGitlabMilestoneAdapter)
@@ -8439,6 +8630,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         autoTextViewGitlabMilestone.setOnItemClickListener { parent, view, position, id ->
             gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = position)
+        }
+        imageViewGitlabMilestone.setSafeOnClickListener {
+            linearLayoutGitlabMilestone.visibility = View.GONE
+            textViewGitlabMilestone.visibility = View.VISIBLE
+            gitlabAuthentication.gitlabMilestonesPosition(milestonePosition = 0)
         }
         autoTextViewGitlabMilestone.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewGitlab)
@@ -8484,6 +8680,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListGitlabFileName.add(RecyclerViewModel(file = filePathMedia))
         }
+        if (unhandledMediaFilePath != null) {
+            arrayListGitlabFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
+        }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListGitlabFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
@@ -8525,173 +8724,173 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-                windowManagerParamsPivotal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerPivotal = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerPivotal as WindowManager).addView(
-                    viewPivotal,
-                    windowManagerParamsPivotal
+            windowManagerParamsPivotal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                buttonPivotalCancel = viewPivotal.findViewById(R.id.button_pivotal_cancel)
-                buttonPivotalCreate = viewPivotal.findViewById(R.id.button_pivotal_create)
-                toolbarPivotal = viewPivotal.findViewById(R.id.toolbar_pivotal)
-                scrollViewPivotal = viewPivotal.findViewById(R.id.scrollView_pivotal)
-                editTextPivotalTitle = viewPivotal.findViewById(R.id.editText_pivotal_title)
-                autoTextViewPivotalStoryType =
-                    viewPivotal.findViewById(R.id.auto_textView_pivotal_story_type)
-                autoTextViewPivotalPoints =
-                    viewPivotal.findViewById(R.id.auto_textView_pivotal_points)
-                autoTextViewPivotalRequester =
-                    viewPivotal.findViewById(R.id.auto_textView_pivotal_requester)
-                autoTextViewPivotalProject =
-                    viewPivotal.findViewById(R.id.auto_textView_pivotal_project)
-                autoTextViewPivotalOwners =
-                    viewPivotal.findViewById(R.id.auto_textView_pivotal_owner)
-                autoTextViewPivotalLabel =
-                    viewPivotal.findViewById(R.id.auto_textView_pivotal_label)
-                imageViewPivotalOwners = viewPivotal.findViewById(R.id.imageView_owner_add)
-                cardViewPivotalOwnersList = viewPivotal.findViewById(R.id.cardView_owner_list)
-                recyclerViewPivotalOwnerList =
-                    viewPivotal.findViewById(R.id.recycler_view_pivotal_owner_list)
-                editTextPivotalBlockers = viewPivotal.findViewById(R.id.editText_pivotal_blockers)
-                imageViewPivotalBlockers = viewPivotal.findViewById(R.id.imageView_block_add)
-                cardViewPivotalBlockersList = viewPivotal.findViewById(R.id.cardView_blockers_list)
-                recyclerViewPivotalBlockersList =
-                    viewPivotal.findViewById(R.id.recycler_view_pivotal_blockers_list)
-                editTextPivotalDescription =
-                    viewPivotal.findViewById(R.id.editText_pivotal_description)
-                imageViewPivotalLabel = viewPivotal.findViewById(R.id.imageView_label_add)
-                cardViewPivotalLabelList = viewPivotal.findViewById(R.id.cardView_label_list)
-                recyclerViewPivotalLabelList =
-                    viewPivotal.findViewById(R.id.recycler_view_pivotal_label_list)
-                editTextPivotalTasks = viewPivotal.findViewById(R.id.editText_pivotal_tasks)
-                imageViewPivotalTask = viewPivotal.findViewById(R.id.imageView_task_add)
-                cardViewPivotalTasksList = viewPivotal.findViewById(R.id.cardView_task_list)
-                recyclerViewPivotalTaskList =
-                    viewPivotal.findViewById(R.id.recycler_view_pivotal_task_list)
-                cardViewPivotalAttachments = viewPivotal.findViewById(R.id.cardView_attachment)
-                recyclerViewPivotalAttachmentList =
-                    viewPivotal.findViewById(R.id.recycler_view_pivotal_attachment)
-
-                scrollViewPivotal.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        hideKeyboard(activity = activity, view = viewPivotal)
-                    }
-                    return@setOnTouchListener false
-                }
-
-                toolbarPivotal.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.pivotal_menu_save -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString(
-                                    "pivotal_project",
-                                    autoTextViewPivotalProject.editableText.toString()
-                                )
-                                putString(
-                                    "pivotal_label",
-                                    autoTextViewPivotalLabel.editableText.toString()
-                                )
-                                putString(
-                                    "pivotal_owner",
-                                    autoTextViewPivotalOwners.editableText.toString()
-                                )
-                                putString(
-                                    "pivotal_points",
-                                    autoTextViewPivotalPoints.editableText.toString()
-                                )
-                                putString(
-                                    "pivotal_requester",
-                                    autoTextViewPivotalRequester.editableText.toString()
-                                )
-                                putString(
-                                    "pivotal_story_type",
-                                    autoTextViewPivotalStoryType.editableText.toString()
-                                )
-                                putString("pivotal_title", editTextPivotalTitle.text.toString())
-                                putString(
-                                    "pivotal_blockers",
-                                    editTextPivotalBlockers.text.toString()
-                                )
-                                putString(
-                                    "pivotal_description",
-                                    editTextPivotalDescription.text.toString()
-                                )
-                                putString("pivotal_tasks", editTextPivotalTasks.text.toString())
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.pivotal_issue_preferences_save)
-                            )
-                        }
-                        R.id.pivotal_menu_clear -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            val editor: SharedPreferences.Editor = sharedPref.edit()
-                            editor.remove("pivotal_project")
-                            editor.remove("pivotal_label")
-                            editor.remove("pivotal_owner")
-                            editor.remove("pivotal_points")
-                            editor.remove("pivotal_requester")
-                            editor.remove("pivotal_story_type")
-                            editor.remove("pivotal_title")
-                            editor.remove("pivotal_blockers")
-                            editor.remove("pivotal_description")
-                            editor.remove("pivotal_tasks")
-                            editor.apply()
-                            clearPivotalComponents()
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.pivotal_issue_preferences_delete)
-                            )
-                        }
-                    }
-                    return@setOnMenuItemClickListener true
-                }
-
-                toolbarPivotal.setNavigationOnClickListener {
-                    removePivotalLayout()
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.VISIBLE
-                    }
-                }
-                initializePivotalAttachmentRecyclerView(filePathMedia = filePathMedia)
-                initializePivotalTaskRecyclerView()
-                initializePivotalBlockerRecyclerView()
-                initializePivotalLabelRecyclerView()
-                initializePivotalOwnerRecyclerView()
-                buttonClicksPivotal()
-                pivotalAuthentication.callPivotal(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "pivotal")
+            }
+
+            windowManagerPivotal = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerPivotal as WindowManager).addView(
+                viewPivotal,
+                windowManagerParamsPivotal
+            )
+
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+            buttonPivotalCancel = viewPivotal.findViewById(R.id.button_pivotal_cancel)
+            buttonPivotalCreate = viewPivotal.findViewById(R.id.button_pivotal_create)
+            toolbarPivotal = viewPivotal.findViewById(R.id.toolbar_pivotal)
+            scrollViewPivotal = viewPivotal.findViewById(R.id.scrollView_pivotal)
+            editTextPivotalTitle = viewPivotal.findViewById(R.id.editText_pivotal_title)
+            autoTextViewPivotalStoryType =
+                viewPivotal.findViewById(R.id.auto_textView_pivotal_story_type)
+            autoTextViewPivotalPoints =
+                viewPivotal.findViewById(R.id.auto_textView_pivotal_points)
+            autoTextViewPivotalRequester =
+                viewPivotal.findViewById(R.id.auto_textView_pivotal_requester)
+            autoTextViewPivotalProject =
+                viewPivotal.findViewById(R.id.auto_textView_pivotal_project)
+            autoTextViewPivotalOwners =
+                viewPivotal.findViewById(R.id.auto_textView_pivotal_owner)
+            autoTextViewPivotalLabel =
+                viewPivotal.findViewById(R.id.auto_textView_pivotal_label)
+            imageViewPivotalOwners = viewPivotal.findViewById(R.id.imageView_owner_add)
+            cardViewPivotalOwnersList = viewPivotal.findViewById(R.id.cardView_owner_list)
+            recyclerViewPivotalOwnerList =
+                viewPivotal.findViewById(R.id.recycler_view_pivotal_owner_list)
+            editTextPivotalBlockers = viewPivotal.findViewById(R.id.editText_pivotal_blockers)
+            imageViewPivotalBlockers = viewPivotal.findViewById(R.id.imageView_block_add)
+            cardViewPivotalBlockersList = viewPivotal.findViewById(R.id.cardView_blockers_list)
+            recyclerViewPivotalBlockersList =
+                viewPivotal.findViewById(R.id.recycler_view_pivotal_blockers_list)
+            editTextPivotalDescription =
+                viewPivotal.findViewById(R.id.editText_pivotal_description)
+            imageViewPivotalLabel = viewPivotal.findViewById(R.id.imageView_label_add)
+            cardViewPivotalLabelList = viewPivotal.findViewById(R.id.cardView_label_list)
+            recyclerViewPivotalLabelList =
+                viewPivotal.findViewById(R.id.recycler_view_pivotal_label_list)
+            editTextPivotalTasks = viewPivotal.findViewById(R.id.editText_pivotal_tasks)
+            imageViewPivotalTask = viewPivotal.findViewById(R.id.imageView_task_add)
+            cardViewPivotalTasksList = viewPivotal.findViewById(R.id.cardView_task_list)
+            recyclerViewPivotalTaskList =
+                viewPivotal.findViewById(R.id.recycler_view_pivotal_task_list)
+            cardViewPivotalAttachments = viewPivotal.findViewById(R.id.cardView_attachment)
+            recyclerViewPivotalAttachmentList =
+                viewPivotal.findViewById(R.id.recycler_view_pivotal_attachment)
+
+            scrollViewPivotal.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    hideKeyboard(activity = activity, view = viewPivotal)
+                }
+                return@setOnTouchListener false
+            }
+
+            toolbarPivotal.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.pivotal_menu_save -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        with(sharedPref.edit()) {
+                            putString(
+                                "pivotal_project",
+                                autoTextViewPivotalProject.editableText.toString()
+                            )
+                            putString(
+                                "pivotal_label",
+                                autoTextViewPivotalLabel.editableText.toString()
+                            )
+                            putString(
+                                "pivotal_owner",
+                                autoTextViewPivotalOwners.editableText.toString()
+                            )
+                            putString(
+                                "pivotal_points",
+                                autoTextViewPivotalPoints.editableText.toString()
+                            )
+                            putString(
+                                "pivotal_requester",
+                                autoTextViewPivotalRequester.editableText.toString()
+                            )
+                            putString(
+                                "pivotal_story_type",
+                                autoTextViewPivotalStoryType.editableText.toString()
+                            )
+                            putString("pivotal_title", editTextPivotalTitle.text.toString())
+                            putString(
+                                "pivotal_blockers",
+                                editTextPivotalBlockers.text.toString()
+                            )
+                            putString(
+                                "pivotal_description",
+                                editTextPivotalDescription.text.toString()
+                            )
+                            putString("pivotal_tasks", editTextPivotalTasks.text.toString())
+                            commit()
+                        }
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.pivotal_issue_preferences_save)
+                        )
+                    }
+                    R.id.pivotal_menu_clear -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("pivotal_project")
+                        editor.remove("pivotal_label")
+                        editor.remove("pivotal_owner")
+                        editor.remove("pivotal_points")
+                        editor.remove("pivotal_requester")
+                        editor.remove("pivotal_story_type")
+                        editor.remove("pivotal_title")
+                        editor.remove("pivotal_blockers")
+                        editor.remove("pivotal_description")
+                        editor.remove("pivotal_tasks")
+                        editor.apply()
+                        clearPivotalComponents()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.pivotal_issue_preferences_delete)
+                        )
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            toolbarPivotal.setNavigationOnClickListener {
+                removePivotalLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+            initializePivotalAttachmentRecyclerView(filePathMedia = filePathMedia)
+            initializePivotalTaskRecyclerView()
+            initializePivotalBlockerRecyclerView()
+            initializePivotalLabelRecyclerView()
+            initializePivotalOwnerRecyclerView()
+            buttonClicksPivotal()
+            pivotalAuthentication.callPivotal(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "pivotal")
         } catch (e: Exception) {
             finishShareLayout("pivotal_error")
             e.printStackTrace()
@@ -8946,9 +9145,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalProjectAdapter = ArrayAdapter(
+        autoTextViewPivotalProjectAdapter = AutoCompleteTextViewPivotalProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_project_item,
             arrayListPivotalProject
         )
         autoTextViewPivotalProject.setAdapter(autoTextViewPivotalProjectAdapter)
@@ -8999,9 +9198,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalStoryType: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalStoryTypeAdapter = ArrayAdapter(
+        autoTextViewPivotalStoryTypeAdapter = AutoCompleteTextViewPivotalStoryTypeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_story_item,
             arrayListPivotalStoryType
         )
         autoTextViewPivotalStoryType.setAdapter(autoTextViewPivotalStoryTypeAdapter)
@@ -9042,9 +9241,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalPoints: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalPointsAdapter = ArrayAdapter(
+        autoTextViewPivotalPointsAdapter = AutoCompleteTextViewPivotalPointsAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_points_item,
             arrayListPivotalPoints
         )
         autoTextViewPivotalPoints.setAdapter(autoTextViewPivotalPointsAdapter)
@@ -9085,9 +9284,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalRequester: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalRequesterAdapter = ArrayAdapter(
+        autoTextViewPivotalRequesterAdapter = AutoCompleteTextViewPivotalRequesterAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_requester_item,
             arrayListPivotalRequester
         )
         autoTextViewPivotalRequester.setAdapter(autoTextViewPivotalRequesterAdapter)
@@ -9128,9 +9327,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalOwners: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalOwnersAdapter = ArrayAdapter(
+        autoTextViewPivotalOwnersAdapter = AutoCompleteTextViewPivotalOwnersAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_owners_item,
             arrayListPivotalOwners
         )
         autoTextViewPivotalOwners.setAdapter(autoTextViewPivotalOwnersAdapter)
@@ -9173,9 +9372,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalLabel: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalLabelAdapter = ArrayAdapter(
+        autoTextViewPivotalLabelAdapter = AutoCompleteTextViewPivotalLabelAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_label_item,
             arrayListPivotalLabel
         )
         autoTextViewPivotalLabel.setAdapter(autoTextViewPivotalLabelAdapter)
@@ -9230,6 +9429,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun addPivotalFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
             arrayListPivotalFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (unhandledMediaFilePath != null) {
+            arrayListPivotalFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListPivotalFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -9354,162 +9556,162 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-                windowManagerParamsBaseCamp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerBasecamp = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerBasecamp as WindowManager).addView(
-                    viewBasecamp,
-                    windowManagerParamsBaseCamp
+            windowManagerParamsBaseCamp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                buttonBasecampCancel = viewBasecamp.findViewById(R.id.button_basecamp_cancel)
-                buttonBasecampCreate = viewBasecamp.findViewById(R.id.button_basecamp_create)
-                toolbarBasecamp = viewBasecamp.findViewById(R.id.toolbar_basecamp)
-                autoTextViewBasecampProject =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_project)
-                autoTextViewBasecampAssignee =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_assignee)
-                autoTextViewBasecampCategory =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_category)
-                autoTextViewBasecampNotify =
-                    viewBasecamp.findViewById(R.id.auto_textView_basecamp_notify)
-                editTextBasecampDescriptionMessage =
-                    viewBasecamp.findViewById(R.id.editText_basecamp_description_messsage)
-                editTextBasecampDescriptionTodo =
-                    viewBasecamp.findViewById(R.id.editText_basecamp_description_todo)
-                editTextBasecampTitle =
-                    viewBasecamp.findViewById(R.id.editText_basecamp_title)
-                editTextBasecampContent = viewBasecamp.findViewById(R.id.editText_basecamp_content)
-                editTextBasecampName = viewBasecamp.findViewById(R.id.editText_basecamp_name)
-                imageViewBasecampAssignee = viewBasecamp.findViewById(R.id.imageView_assignee_add)
-                imageViewBasecampNotify = viewBasecamp.findViewById(R.id.imageView_notify_add)
-                cardViewBasecampAssigneeList =
-                    viewBasecamp.findViewById(R.id.cardView_assignee_list)
-                cardViewBasecampNotifyList = viewBasecamp.findViewById(R.id.cardView_notify_list)
-                recyclerViewBasecampAssigneeList =
-                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_assignee_list)
-                recyclerViewBasecampNotifyList =
-                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_notify_list)
-                recyclerViewBasecampAttachmentList =
-                    viewBasecamp.findViewById(R.id.recycler_view_basecamp_attachment)
-                imageButtonBasecampRemoveDate =
-                    viewBasecamp.findViewById(R.id.image_button_basecamp_remove_date)
-                imageViewBasecampDate = viewBasecamp.findViewById(R.id.imageView_start_date)
-                scrollViewBasecamp = viewBasecamp.findViewById(R.id.scrollView_basecamp)
-                scrollViewBasecamp.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        hideKeyboard(activity = activity, view = viewBasecamp)
-                    }
-                    return@setOnTouchListener false
-                }
-
-                toolbarBasecamp.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.basecamp_menu_save -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString(
-                                    "basecamp_project",
-                                    autoTextViewBasecampProject.editableText.toString()
-                                )
-                                putString(
-                                    "basecamp_assignee",
-                                    autoTextViewBasecampAssignee.editableText.toString()
-                                )
-                                putString(
-                                    "basecamp_category",
-                                    autoTextViewBasecampCategory.editableText.toString()
-                                )
-                                putString(
-                                    "basecamp_notify",
-                                    autoTextViewBasecampNotify.editableText.toString()
-                                )
-                                putString(
-                                    "basecamp_description_message",
-                                    editTextBasecampDescriptionMessage.text.toString()
-                                )
-                                putString(
-                                    "basecamp_description_todo",
-                                    editTextBasecampDescriptionTodo.text.toString()
-                                )
-                                putString(
-                                    "basecamp_title",
-                                    editTextBasecampTitle.text.toString()
-                                )
-                                putString(
-                                    "basecamp_content",
-                                    editTextBasecampContent.text.toString()
-                                )
-                                putString("basecamp_name", editTextBasecampName.text.toString())
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.basecamp_issue_preferences_save)
-                            )
-                        }
-                        R.id.basecamp_menu_clear -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            val editor: SharedPreferences.Editor = sharedPref.edit()
-                            editor.remove("basecamp_project")
-                            editor.remove("basecamp_assignee")
-                            editor.remove("basecamp_category")
-                            editor.remove("basecamp_notify")
-                            editor.remove("basecamp_description_message")
-                            editor.remove("basecamp_description_todo")
-                            editor.remove("basecamp_title")
-                            editor.remove("basecamp_content")
-                            editor.remove("basecamp_name")
-                            editor.apply()
-                            clearBasecampComponents()
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.basecamp_issue_preferences_delete)
-                            )
-                        }
-                    }
-                    return@setOnMenuItemClickListener true
-                }
-
-                toolbarBasecamp.setNavigationOnClickListener {
-                    removeBasecampLayout()
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.VISIBLE
-                    }
-                }
-                initializeBasecampAttachmentRecyclerView(filePathMedia = filePathMedia)
-                initializeBasecampAssigneeRecyclerView()
-                initializeBasecampNotifyRecyclerView()
-                buttonClicksBasecamp()
-                basecampAuthentication.callBasecamp(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "basecamp")
+            }
+
+            windowManagerBasecamp = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerBasecamp as WindowManager).addView(
+                viewBasecamp,
+                windowManagerParamsBaseCamp
+            )
+
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+            buttonBasecampCancel = viewBasecamp.findViewById(R.id.button_basecamp_cancel)
+            buttonBasecampCreate = viewBasecamp.findViewById(R.id.button_basecamp_create)
+            toolbarBasecamp = viewBasecamp.findViewById(R.id.toolbar_basecamp)
+            autoTextViewBasecampProject =
+                viewBasecamp.findViewById(R.id.auto_textView_basecamp_project)
+            autoTextViewBasecampAssignee =
+                viewBasecamp.findViewById(R.id.auto_textView_basecamp_assignee)
+            autoTextViewBasecampCategory =
+                viewBasecamp.findViewById(R.id.auto_textView_basecamp_category)
+            autoTextViewBasecampNotify =
+                viewBasecamp.findViewById(R.id.auto_textView_basecamp_notify)
+            editTextBasecampDescriptionMessage =
+                viewBasecamp.findViewById(R.id.editText_basecamp_description_messsage)
+            editTextBasecampDescriptionTodo =
+                viewBasecamp.findViewById(R.id.editText_basecamp_description_todo)
+            editTextBasecampTitle =
+                viewBasecamp.findViewById(R.id.editText_basecamp_title)
+            editTextBasecampContent = viewBasecamp.findViewById(R.id.editText_basecamp_content)
+            editTextBasecampName = viewBasecamp.findViewById(R.id.editText_basecamp_name)
+            imageViewBasecampAssignee = viewBasecamp.findViewById(R.id.imageView_assignee_add)
+            imageViewBasecampNotify = viewBasecamp.findViewById(R.id.imageView_notify_add)
+            cardViewBasecampAssigneeList =
+                viewBasecamp.findViewById(R.id.cardView_assignee_list)
+            cardViewBasecampNotifyList = viewBasecamp.findViewById(R.id.cardView_notify_list)
+            recyclerViewBasecampAssigneeList =
+                viewBasecamp.findViewById(R.id.recycler_view_basecamp_assignee_list)
+            recyclerViewBasecampNotifyList =
+                viewBasecamp.findViewById(R.id.recycler_view_basecamp_notify_list)
+            recyclerViewBasecampAttachmentList =
+                viewBasecamp.findViewById(R.id.recycler_view_basecamp_attachment)
+            imageButtonBasecampRemoveDate =
+                viewBasecamp.findViewById(R.id.image_button_basecamp_remove_date)
+            imageViewBasecampDate = viewBasecamp.findViewById(R.id.imageView_start_date)
+            scrollViewBasecamp = viewBasecamp.findViewById(R.id.scrollView_basecamp)
+            scrollViewBasecamp.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    hideKeyboard(activity = activity, view = viewBasecamp)
+                }
+                return@setOnTouchListener false
+            }
+
+            toolbarBasecamp.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.basecamp_menu_save -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        with(sharedPref.edit()) {
+                            putString(
+                                "basecamp_project",
+                                autoTextViewBasecampProject.editableText.toString()
+                            )
+                            putString(
+                                "basecamp_assignee",
+                                autoTextViewBasecampAssignee.editableText.toString()
+                            )
+                            putString(
+                                "basecamp_category",
+                                autoTextViewBasecampCategory.editableText.toString()
+                            )
+                            putString(
+                                "basecamp_notify",
+                                autoTextViewBasecampNotify.editableText.toString()
+                            )
+                            putString(
+                                "basecamp_description_message",
+                                editTextBasecampDescriptionMessage.text.toString()
+                            )
+                            putString(
+                                "basecamp_description_todo",
+                                editTextBasecampDescriptionTodo.text.toString()
+                            )
+                            putString(
+                                "basecamp_title",
+                                editTextBasecampTitle.text.toString()
+                            )
+                            putString(
+                                "basecamp_content",
+                                editTextBasecampContent.text.toString()
+                            )
+                            putString("basecamp_name", editTextBasecampName.text.toString())
+                            commit()
+                        }
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.basecamp_issue_preferences_save)
+                        )
+                    }
+                    R.id.basecamp_menu_clear -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("basecamp_project")
+                        editor.remove("basecamp_assignee")
+                        editor.remove("basecamp_category")
+                        editor.remove("basecamp_notify")
+                        editor.remove("basecamp_description_message")
+                        editor.remove("basecamp_description_todo")
+                        editor.remove("basecamp_title")
+                        editor.remove("basecamp_content")
+                        editor.remove("basecamp_name")
+                        editor.apply()
+                        clearBasecampComponents()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.basecamp_issue_preferences_delete)
+                        )
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            toolbarBasecamp.setNavigationOnClickListener {
+                removeBasecampLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+            initializeBasecampAttachmentRecyclerView(filePathMedia = filePathMedia)
+            initializeBasecampAssigneeRecyclerView()
+            initializeBasecampNotifyRecyclerView()
+            buttonClicksBasecamp()
+            basecampAuthentication.callBasecamp(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "basecamp")
         } catch (e: Exception) {
             finishShareLayout("basecamp_error")
             e.printStackTrace()
@@ -9699,7 +9901,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
         )
         initializeBasecampProject(
-            arrayListProject = arrayListBasecampProject,
+            arrayListBasecampProject = arrayListBasecampProject,
             sharedPref = sharedPref
         )
         initializeBasecampCategory(
@@ -9726,18 +9928,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializeBasecampProject(
-        arrayListProject: ArrayList<String>,
+        arrayListBasecampProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBasecampProjectAdapter = ArrayAdapter(
+        autoTextViewBasecampProjectAdapter = AutoCompleteTextViewBasecampProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
-            arrayListProject
+            R.layout.auto_text_view_basecamp_project_item,
+            arrayListBasecampProject
         )
         autoTextViewBasecampProject.setAdapter(autoTextViewBasecampProjectAdapter)
-        if (arrayListProject.isNotEmpty() && autoTextViewBasecampProject.editableText.isEmpty()) {
+        if (arrayListBasecampProject.isNotEmpty() && autoTextViewBasecampProject.editableText.isEmpty()) {
             if (sharedPref.getString("basecamp_project", null) != null) {
-                if (arrayListProject.contains(
+                if (arrayListBasecampProject.contains(
                         sharedPref.getString(
                             "basecamp_project",
                             null
@@ -9749,10 +9951,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         false
                     )
                 } else {
-                    autoTextViewBasecampProject.setText(arrayListProject[0], false)
+                    autoTextViewBasecampProject.setText(arrayListBasecampProject[0], false)
                 }
             } else {
-                autoTextViewBasecampProject.setText(arrayListProject[0], false)
+                autoTextViewBasecampProject.setText(arrayListBasecampProject[0], false)
             }
         }
         autoTextViewBasecampProject.setOnTouchListener { v, event ->
@@ -9785,19 +9987,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBasecampCategoryIcon: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-//        autoTextViewBasecampCategoryAdapter = ArrayAdapter(
-//            this,
-//            android.R.layout.simple_dropdown_item_1line,
-//            arrayListCategory
-//        )
-        autoTextViewBasecampCategoryCategoryAdapter =
+        autoTextViewBasecampCategoryAdapter =
             AutoCompleteTextViewBasecampCategoryAdapter(
                 this,
-                R.layout.auto_text_view_basecamp_icon_item,
+                R.layout.auto_text_view_basecamp_category_item,
                 arrayListBasecampCategory,
                 arrayListBasecampCategoryIcon
             )
-        autoTextViewBasecampCategory.setAdapter(autoTextViewBasecampCategoryCategoryAdapter)
+        autoTextViewBasecampCategory.setAdapter(autoTextViewBasecampCategoryAdapter)
         if (arrayListBasecampCategory.isNotEmpty() && autoTextViewBasecampCategory.editableText.isEmpty()) {
             if (sharedPref.getString("basecamp_category", null) != null) {
                 if (arrayListBasecampCategory.contains(
@@ -9837,9 +10034,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBasecampAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBasecampAssigneeAdapter = ArrayAdapter(
+        autoTextViewBasecampAssigneeAdapter = AutoCompleteTextViewBasecampAssigneeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_basecamp_assignee_item,
             arrayListBasecampAssignee
         )
         autoTextViewBasecampAssignee.setAdapter(autoTextViewBasecampAssigneeAdapter)
@@ -9882,9 +10079,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBasecampNotify: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBasecampNotifyAdapter = ArrayAdapter(
+        autoTextViewBasecampNotifyAdapter = AutoCompleteTextViewBasecampNotifyAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_basecamp_notify_item,
             arrayListBasecampNotify
         )
         autoTextViewBasecampNotify.setAdapter(autoTextViewBasecampNotifyAdapter)
@@ -9944,6 +10141,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun addBasecampFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
             arrayListBasecampFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (unhandledMediaFilePath != null) {
+            arrayListBasecampFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListBasecampFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -10018,8 +10218,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
 //        calendarTrello = Calendar.getInstance()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         viewBasecampDate =
-            LayoutInflater.from(activity)
-                .inflate(R.layout.basecamp_calendar_view, rootView, false)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.basecamp_calendar_view, rootView, false)
+            } else {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.basecamp_calendar_view_lower, rootView, false)
+            }
         windowManagerParamsBaseCampDate =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams(
@@ -10069,12 +10274,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val mMonth = calendar.get(Calendar.MONTH)
         val mDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         var startDate = "$mYear-$mMonth-$mDayOfMonth"
-        calendarViewBasecamp.minDate = System.currentTimeMillis()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewBasecamp.minDate = System.currentTimeMillis()
+        }
         frameLayoutBasecampDate.setOnClickListener {
             removeBasecampDateLayout()
         }
         calendarViewBasecamp.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            startDate = "$year-$month-$dayOfMonth"
+            val tempMonth = month + 1
+            startDate = "$year-$tempMonth-$dayOfMonth"
         }
         buttonBasecampDateCreate.setSafeOnClickListener {
             imageButtonBasecampRemoveDate.visibility = View.VISIBLE
@@ -10104,142 +10312,142 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-                windowManagerParamsAsana = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerAsana = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerAsana as WindowManager).addView(
-                    viewAsana,
-                    windowManagerParamsAsana
+            windowManagerParamsAsana = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                buttonAsanaCancel = viewAsana.findViewById(R.id.button_asana_cancel)
-                buttonAsanaCreate = viewAsana.findViewById(R.id.button_asana_create)
-                toolbarAsana = viewAsana.findViewById(R.id.toolbar_asana)
-                autoTextViewAsanaProject = viewAsana.findViewById(R.id.auto_textView_asana_project)
-                autoTextViewAsanaAssignee =
-                    viewAsana.findViewById(R.id.auto_textView_asana_assignee)
-                autoTextViewAsanaSector =
-                    viewAsana.findViewById(R.id.auto_textView_asana_section)
-                autoTextViewAsanaPriority =
-                    viewAsana.findViewById(R.id.auto_textView_asana_priority)
-                editTextAsanaDescription = viewAsana.findViewById(R.id.editText_asana_description)
-                editTextAsanaSubTask = viewAsana.findViewById(R.id.editText_asana_sub_tasks)
-                editTextAsanaTaskName = viewAsana.findViewById(R.id.editText_asana_task_name)
-                imageViewAsanaStartDate = viewAsana.findViewById(R.id.imageView_start_date)
-                imageViewAsanaTaskAdd = viewAsana.findViewById(R.id.imageView_task_add)
-                imageButtonAsanaRemoveDate =
-                    viewAsana.findViewById(R.id.image_button_asana_remove_date)
-                recyclerViewAsanaAttachmentList =
-                    viewAsana.findViewById(R.id.recycler_view_asana_attachment)
-                recyclerViewAsanaSubTasksList =
-                    viewAsana.findViewById(R.id.recycler_view_asana_sub_tasks_list)
-                cardViewAsanaSubTasksList = viewAsana.findViewById(R.id.cardView_sub_tasks_list)
-                scrollViewAsana = viewAsana.findViewById(R.id.scrollView_asana)
-                scrollViewAsana.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        hideKeyboard(activity = activity, view = viewAsana)
-                    }
-                    return@setOnTouchListener false
-                }
-
-                toolbarAsana.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.asana_menu_save -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString(
-                                    "asana_project",
-                                    autoTextViewAsanaProject.editableText.toString()
-                                )
-                                putString(
-                                    "asana_assignee",
-                                    autoTextViewAsanaAssignee.editableText.toString()
-                                )
-                                putString(
-                                    "asana_section",
-                                    autoTextViewAsanaSector.editableText.toString()
-                                )
-                                putString(
-                                    "asana_priority",
-                                    autoTextViewAsanaPriority.editableText.toString()
-                                )
-                                putString(
-                                    "asana_description",
-                                    editTextAsanaDescription.text.toString()
-                                )
-                                putString(
-                                    "asana_subtask",
-                                    editTextAsanaSubTask.text.toString()
-                                )
-                                putString(
-                                    "asana_task_name",
-                                    editTextAsanaTaskName.text.toString()
-                                )
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.asana_issue_preferences_save)
-                            )
-                        }
-                        R.id.asana_menu_clear -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            val editor: SharedPreferences.Editor = sharedPref.edit()
-                            editor.remove("asana_project")
-                            editor.remove("asana_assignee")
-                            editor.remove("asana_section")
-                            editor.remove("asana_priority")
-                            editor.remove("asana_description")
-                            editor.remove("asana_subtask")
-                            editor.remove("asana_task_name")
-                            editor.apply()
-                            clearAsanaComponents()
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.asana_issue_preferences_delete)
-                            )
-                        }
-                    }
-                    return@setOnMenuItemClickListener true
-                }
-
-                toolbarAsana.setNavigationOnClickListener {
-                    removeAsanaLayout()
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.VISIBLE
-                    }
-                }
-                initializeAsanaAttachmentRecyclerView(filePathMedia = filePathMedia)
-                buttonClicksAsana()
-                asanaAuthentication.callAsana(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "asana")
+            }
+
+            windowManagerAsana = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerAsana as WindowManager).addView(
+                viewAsana,
+                windowManagerParamsAsana
+            )
+
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+            buttonAsanaCancel = viewAsana.findViewById(R.id.button_asana_cancel)
+            buttonAsanaCreate = viewAsana.findViewById(R.id.button_asana_create)
+            toolbarAsana = viewAsana.findViewById(R.id.toolbar_asana)
+            autoTextViewAsanaProject = viewAsana.findViewById(R.id.auto_textView_asana_project)
+            autoTextViewAsanaAssignee =
+                viewAsana.findViewById(R.id.auto_textView_asana_assignee)
+            autoTextViewAsanaSector =
+                viewAsana.findViewById(R.id.auto_textView_asana_section)
+            autoTextViewAsanaPriority =
+                viewAsana.findViewById(R.id.auto_textView_asana_priority)
+            editTextAsanaDescription = viewAsana.findViewById(R.id.editText_asana_description)
+            editTextAsanaSubTask = viewAsana.findViewById(R.id.editText_asana_sub_tasks)
+            editTextAsanaTaskName = viewAsana.findViewById(R.id.editText_asana_task_name)
+            imageViewAsanaStartDate = viewAsana.findViewById(R.id.imageView_start_date)
+            imageViewAsanaTaskAdd = viewAsana.findViewById(R.id.imageView_task_add)
+            imageButtonAsanaRemoveDate =
+                viewAsana.findViewById(R.id.image_button_asana_remove_date)
+            recyclerViewAsanaAttachmentList =
+                viewAsana.findViewById(R.id.recycler_view_asana_attachment)
+            recyclerViewAsanaSubTasksList =
+                viewAsana.findViewById(R.id.recycler_view_asana_sub_tasks_list)
+            cardViewAsanaSubTasksList = viewAsana.findViewById(R.id.cardView_sub_tasks_list)
+            scrollViewAsana = viewAsana.findViewById(R.id.scrollView_asana)
+            scrollViewAsana.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    hideKeyboard(activity = activity, view = viewAsana)
+                }
+                return@setOnTouchListener false
+            }
+
+            toolbarAsana.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.asana_menu_save -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        with(sharedPref.edit()) {
+                            putString(
+                                "asana_project",
+                                autoTextViewAsanaProject.editableText.toString()
+                            )
+                            putString(
+                                "asana_assignee",
+                                autoTextViewAsanaAssignee.editableText.toString()
+                            )
+                            putString(
+                                "asana_section",
+                                autoTextViewAsanaSector.editableText.toString()
+                            )
+                            putString(
+                                "asana_priority",
+                                autoTextViewAsanaPriority.editableText.toString()
+                            )
+                            putString(
+                                "asana_description",
+                                editTextAsanaDescription.text.toString()
+                            )
+                            putString(
+                                "asana_subtask",
+                                editTextAsanaSubTask.text.toString()
+                            )
+                            putString(
+                                "asana_task_name",
+                                editTextAsanaTaskName.text.toString()
+                            )
+                            commit()
+                        }
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.asana_issue_preferences_save)
+                        )
+                    }
+                    R.id.asana_menu_clear -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("asana_project")
+                        editor.remove("asana_assignee")
+                        editor.remove("asana_section")
+                        editor.remove("asana_priority")
+                        editor.remove("asana_description")
+                        editor.remove("asana_subtask")
+                        editor.remove("asana_task_name")
+                        editor.apply()
+                        clearAsanaComponents()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.asana_issue_preferences_delete)
+                        )
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            toolbarAsana.setNavigationOnClickListener {
+                removeAsanaLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+            initializeAsanaAttachmentRecyclerView(filePathMedia = filePathMedia)
+            buttonClicksAsana()
+            asanaAuthentication.callAsana(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "asana")
         } catch (e: Exception) {
             finishShareLayout("asana_error")
             e.printStackTrace()
@@ -10372,6 +10580,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (filePathMedia.exists()) {
             arrayListAsanaFileName.add(RecyclerViewModel(file = filePathMedia))
         }
+        if (unhandledMediaFilePath != null) {
+            arrayListAsanaFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
+        }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListAsanaFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
         }
@@ -10468,9 +10679,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewAsanaProjectAdapter = ArrayAdapter(
+        autoTextViewAsanaProjectAdapter = AutoCompleteTextViewAsanaProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_asana_project_item,
             arrayListAsanaProject
         )
         autoTextViewAsanaProject.setAdapter(autoTextViewAsanaProjectAdapter)
@@ -10522,12 +10733,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaSection: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewAsanaCategoryAdapter = ArrayAdapter(
+        autoTextViewAsanaSectorAdapter = AutoCompleteTextViewAsanaSectorAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_asana_sector_item,
             arrayListAsanaSection
         )
-        autoTextViewAsanaSector.setAdapter(autoTextViewAsanaCategoryAdapter)
+        autoTextViewAsanaSector.setAdapter(autoTextViewAsanaSectorAdapter)
         if (arrayListAsanaSection.isNotEmpty() && autoTextViewAsanaSector.editableText.isEmpty()) {
             if (sharedPref.getString("asana_section", null) != null) {
                 if (arrayListAsanaSection.contains(
@@ -10568,9 +10779,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaPriority: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewAsanaPriorityAdapter = ArrayAdapter(
+        autoTextViewAsanaPriorityAdapter = AutoCompleteTextViewAsanaPriorityAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_asana_priority_item,
             arrayListAsanaPriority
         )
         autoTextViewAsanaPriority.setAdapter(autoTextViewAsanaPriorityAdapter)
@@ -10613,9 +10824,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewAsanaAssigneeAdapter = ArrayAdapter(
+        autoTextViewAsanaAssigneeAdapter = AutoCompleteTextViewAsanaAssigneeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_asana_assignee_item,
             arrayListAsanaAssignee
         )
         autoTextViewAsanaAssignee.setAdapter(autoTextViewAsanaAssigneeAdapter)
@@ -10655,8 +10866,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         removeAsanaDateLayout()
         val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
         viewAsanaDate =
-            LayoutInflater.from(activity)
-                .inflate(R.layout.asana_calendar_view, rootView, false)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.asana_calendar_view, rootView, false)
+            } else {
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.asana_calendar_view_lower, rootView, false)
+            }
         windowManagerParamsAsanaDate =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams(
@@ -10721,15 +10937,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             mDayOfMonth.toString()
         }
         var startDate = "$mYear-$mTempMonth-$mTempDay"
-        calendarViewAsana.minDate = System.currentTimeMillis() + 86400000
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewAsana.minDate = System.currentTimeMillis() + 86400000
+        }
         frameLayoutAsanaDate.setOnClickListener {
             removeAsanaDateLayout()
         }
         calendarViewAsana.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            val tempMonth: String = if (month in 1..9) {
-                "0$month"
+            val tempMonthMonth = month + 1
+            val tempMonth: String = if (tempMonthMonth in 1..9) {
+                "0$tempMonthMonth"
             } else {
-                month.toString()
+                tempMonthMonth.toString()
             }
             val tempDay: String = if (dayOfMonth in 1..9) {
                 "0$dayOfMonth"
@@ -10776,65 +10995,65 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             removeClubhouseLayout()
             viewClubhouse = LayoutInflater.from(activity)
                 .inflate(R.layout.loggerbird_clubhouse_popup, (this.rootView as ViewGroup), false)
-                windowManagerParamsClubhouse = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-                windowManagerClubhouse = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerClubhouse as WindowManager).addView(
-                    viewClubhouse,
-                    windowManagerParamsClubhouse
+            windowManagerParamsClubhouse = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-                toolbarClubhouse = viewClubhouse.findViewById(R.id.toolbar_clubhouse)
-                buttonClubhouseCancel = viewClubhouse.findViewById(R.id.button_clubhouse_cancel)
-                buttonClubhouseCreate = viewClubhouse.findViewById(R.id.button_clubhouse_create)
-                editTextClubhouseStoryName =
-                    viewClubhouse.findViewById(R.id.editText_clubhouse_story_name)
-                editTextClubhouseStoryDescription =
-                    viewClubhouse.findViewById(R.id.editText_clubhouse_description)
-                autoTextViewClubhouseRequester =
-                    viewClubhouse.findViewById(R.id.auto_textView_clubhouse_requester)
-                autoTextViewClubhouseStoryType =
-                    viewClubhouse.findViewById(R.id.auto_textView_clubhouse_story_type)
-                recyclerViewClubhouseAttachment =
-                    viewClubhouse.findViewById(R.id.recycler_view_clubhouse_attachment)
-                autoTextViewClubhouseProject =
-                    viewClubhouse.findViewById(R.id.auto_textview_clubhouse_project)
-                autoTextViewClubhouseEpic =
-                    viewClubhouse.findViewById(R.id.auto_textView_clubhouse_epic)
-                textViewClubhouseDueDate =
-                    viewClubhouse.findViewById(R.id.textView_clubhouse_due_date)
-                editTextClubhouseEstimate =
-                    viewClubhouse.findViewById(R.id.editText_clubhouse_estimate_point)
-                textViewClubhouseEpic = viewClubhouse.findViewById(R.id.textView_clubhouse_epic)
-                linearLayoutClubhouseEpic =
-                    viewClubhouse.findViewById(R.id.linearLayout_clubhouse_epic)
-                imageViewClubhouseDueDate =
-                    viewClubhouse.findViewById(R.id.imageView_delete_clubhouse_dueDate)
-                clubhouseAuthentication.callClubhouse(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "clubhouse")
-                initializeClubhouseAttachmentRecyclerView(filePathMedia = filePathMedia)
-                buttonClicksClubhouse(filePathMedia = filePathMedia)
+            }
+            windowManagerClubhouse = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerClubhouse as WindowManager).addView(
+                viewClubhouse,
+                windowManagerParamsClubhouse
+            )
+            activity.window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+            toolbarClubhouse = viewClubhouse.findViewById(R.id.toolbar_clubhouse)
+            buttonClubhouseCancel = viewClubhouse.findViewById(R.id.button_clubhouse_cancel)
+            buttonClubhouseCreate = viewClubhouse.findViewById(R.id.button_clubhouse_create)
+            editTextClubhouseStoryName =
+                viewClubhouse.findViewById(R.id.editText_clubhouse_story_name)
+            editTextClubhouseStoryDescription =
+                viewClubhouse.findViewById(R.id.editText_clubhouse_description)
+            autoTextViewClubhouseRequester =
+                viewClubhouse.findViewById(R.id.auto_textView_clubhouse_requester)
+            autoTextViewClubhouseStoryType =
+                viewClubhouse.findViewById(R.id.auto_textView_clubhouse_story_type)
+            recyclerViewClubhouseAttachment =
+                viewClubhouse.findViewById(R.id.recycler_view_clubhouse_attachment)
+            autoTextViewClubhouseProject =
+                viewClubhouse.findViewById(R.id.auto_textview_clubhouse_project)
+            autoTextViewClubhouseEpic =
+                viewClubhouse.findViewById(R.id.auto_textView_clubhouse_epic)
+            textViewClubhouseDueDate =
+                viewClubhouse.findViewById(R.id.textView_clubhouse_due_date)
+            editTextClubhouseEstimate =
+                viewClubhouse.findViewById(R.id.editText_clubhouse_estimate_point)
+            textViewClubhouseEpic = viewClubhouse.findViewById(R.id.textView_clubhouse_epic)
+            linearLayoutClubhouseEpic =
+                viewClubhouse.findViewById(R.id.linearLayout_clubhouse_epic)
+            imageViewClubhouseDueDate =
+                viewClubhouse.findViewById(R.id.imageView_delete_clubhouse_dueDate)
+            clubhouseAuthentication.callClubhouse(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "clubhouse")
+            initializeClubhouseAttachmentRecyclerView(filePathMedia = filePathMedia)
+            buttonClicksClubhouse(filePathMedia = filePathMedia)
         } catch (e: Exception) {
             finishShareLayout("clubhouse_error")
             e.printStackTrace()
@@ -10882,6 +11101,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun addClubhouseFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
             arrayListClubhouseFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (unhandledMediaFilePath != null) {
+            arrayListClubhouseFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListClubhouseFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -10982,9 +11204,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseProject(
         arrayListClubhouseProjects: ArrayList<String>
     ) {
-        autoTextViewClubhouseProjectAdapter = ArrayAdapter(
+        autoTextViewClubhouseProjectAdapter = AutoCompleteTextViewClubhouseProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_clubhouse_project_item,
             arrayListClubhouseProjects
         )
         autoTextViewClubhouseProject.setAdapter(autoTextViewClubhouseProjectAdapter)
@@ -10998,7 +11220,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewClubhouseProject.setOnItemClickListener { parent, view, position, id ->
             clubhouseAuthentication.clubhouseProjectPosition(projectPosition = position)
             hideKeyboard(activity = activity, view = viewClubhouse)
-                attachProgressBar(task = "clubhouse")
+            attachProgressBar(task = "clubhouse")
             clubhouseAuthentication.callClubhouse(
                 activity = activity,
                 context = context,
@@ -11015,8 +11237,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseEpic(
         arrayListClubhouseEpic: ArrayList<String>
     ) {
-        autoTextViewClubhouseEpicAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseEpic)
+        autoTextViewClubhouseEpicAdapter = AutoCompleteTextViewClubhouseEpicAdapter(
+            this,
+            R.layout.auto_text_view_clubhouse_epic_item,
+            arrayListClubhouseEpic
+        )
         autoTextViewClubhouseEpic.setAdapter(autoTextViewClubhouseEpicAdapter)
         if (arrayListClubhouseEpic.isNotEmpty() && autoTextViewClubhouseEpic.text.isEmpty()) {
             autoTextViewClubhouseEpic.setText(arrayListClubhouseEpic[0], false)
@@ -11053,9 +11278,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseStoryType(
         arrayListClubhouseStoryType: ArrayList<String>
     ) {
-        autoTextViewClubhouseStoryTypeAdapter = ArrayAdapter(
+        autoTextViewClubhouseStoryTypeAdapter = AutoCompleteTextViewClubhouseStoryTypeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_clubhouse_story_item,
             arrayListClubhouseStoryType
         )
         autoTextViewClubhouseStoryType.setAdapter(autoTextViewClubhouseStoryTypeAdapter)
@@ -11096,9 +11321,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseRequester(
         arrayListClubhouseRequester: ArrayList<String>
     ) {
-        autoTextViewClubhouseRequesterAdapter = ArrayAdapter(
+        autoTextViewClubhouseRequesterAdapter = AutoCompleteTextViewClubhouseRequesterAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_clubhouse_requester_item,
             arrayListClubhouseRequester
         )
         autoTextViewClubhouseRequester.setAdapter(autoTextViewClubhouseRequesterAdapter)
@@ -11138,8 +11363,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         try {
             val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
             calendarViewClubhouseView =
-                LayoutInflater.from(activity)
-                    .inflate(R.layout.clubhouse_calendar_view, rootView, false)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    LayoutInflater.from(activity)
+                        .inflate(R.layout.clubhouse_calendar_view, rootView, false)
+                } else {
+                    LayoutInflater.from(activity)
+                        .inflate(R.layout.clubhouse_calendar_view_lower, rootView, false)
+                }
             windowManagerParamsClubhouseDatePicker =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams(
@@ -11189,7 +11419,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_cancel)
         buttonCalendarViewClubhouseOk =
             calendarViewClubhouseView.findViewById(R.id.button_clubhouse_calendar_ok)
-        calendarViewClubhouseDueDate.minDate = System.currentTimeMillis()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            calendarViewClubhouseDueDate.minDate = System.currentTimeMillis()
+        }
         if (calendarViewClubhouseDate != null) {
             calendarViewClubhouseDueDate.date = calendarViewClubhouseDate!!
         }
@@ -11646,7 +11878,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 viewLoggerBirdFileActionPopup.findViewById(R.id.textView_files_action_discard)
             textViewLoggerBirdFileActionPopupEmail =
                 viewLoggerBirdFileActionPopup.findViewById(R.id.textView_files_action_mail)
-            initializeButtonClicksLoggerBirdFileActionPopup()
+            initializeButtonClicksLoggerBirdFileActionPopup(activity = activity)
         } catch (e: Exception) {
             e.printStackTrace()
             LoggerBird.callEnqueue()
@@ -11672,7 +11904,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     /**
      * This method is used for initializing button clicks of Loggerbird file action popup.
      */
-    private fun initializeButtonClicksLoggerBirdFileActionPopup() {
+    private fun initializeButtonClicksLoggerBirdFileActionPopup(activity: Activity) {
         textViewLoggerBirdFileActionPopupDiscard.setSafeOnClickListener {
             if (this.controlFileAction) {
                 this.controlFileAction = false
@@ -11682,12 +11914,108 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         textViewLoggerBirdFileActionPopupEmail.setSafeOnClickListener {
             if (this.controlFileAction) {
-                this.controlFileAction = false
-                removeLoggerBirdFileActionLayout()
-                sendOldFilesEmail()
+//                this.controlFileAction = false
+//                removeLoggerBirdFileActionLayout()
+                initializeLoggerBirdFileActionListPopup(activity = activity)
+//                sendOldFilesEmail()
             }
         }
     }
+
+    /**
+     * This method is used for initializing button clicks of Loggerbird file action list popup to determine to where to share files.
+     * @param activity is used for getting reference of current activity.
+     */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun initializeLoggerBirdFileActionListPopup(activity: Activity) {
+        try {
+            val rootView: ViewGroup = activity.window.decorView.findViewById(android.R.id.content)
+            viewLoggerBirdFileActionListPopup =
+                LayoutInflater.from(activity)
+                    .inflate(R.layout.loggerbird_file_action_list, rootView, false)
+            windowManagerParamsLoggerBirdFileActionList =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+
+                    )
+                } else {
+                    WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSLUCENT
+                    )
+                }
+            windowManagerLoggerBirdFileActionListPopup =
+                activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerLoggerBirdFileActionListPopup as WindowManager).addView(
+                viewLoggerBirdFileActionListPopup,
+                windowManagerParamsLoggerBirdFileActionList
+            )
+            imageViewLoggerBirdFileActionListPopupBack =
+                viewLoggerBirdFileActionListPopup.findViewById(R.id.imageView_file_action_list_back)
+            recyclerViewLoggerBirdFileActionListPopup =
+                viewLoggerBirdFileActionListPopup.findViewById(R.id.recycler_view_file_action_list_attachment)
+            initializeLoggerBirdFileActionListAttachmentRecyclerView(rootView = rootView)
+            initializeButtonClicksLoggerBirdFileActionListPopup()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            LoggerBird.callEnqueue()
+            LoggerBird.callExceptionDetails(
+                exception = e,
+                tag = Constants.loggerBirdFileActionListPopupTag
+            )
+        }
+    }
+
+    /**
+     * This method is used for removing Loggerbird file action list popup.
+     */
+    internal fun removeLoggerBirdFileActionListLayout() {
+        if (this::viewLoggerBirdFileActionListPopup.isInitialized && windowManagerLoggerBirdFileActionListPopup != null) {
+            (windowManagerLoggerBirdFileActionListPopup as WindowManager).removeViewImmediate(
+                viewLoggerBirdFileActionListPopup
+            )
+            windowManagerLoggerBirdFileActionListPopup = null
+        }
+    }
+
+    /**
+     * This method is used for initializing button clicks of Loggerbird file action list popup.
+     */
+    private fun initializeButtonClicksLoggerBirdFileActionListPopup() {
+        imageViewLoggerBirdFileActionListPopupBack.setSafeOnClickListener {
+            removeLoggerBirdFileActionListLayout()
+        }
+    }
+
+    /**
+     * This method is used for initializing file action list attachment recyclerView.
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun initializeLoggerBirdFileActionListAttachmentRecyclerView(rootView: ViewGroup) {
+        arrayListLoggerBirdFileActionList.clear()
+        getFileList()?.forEach {
+            arrayListLoggerBirdFileActionList.add(RecyclerViewModel(File(it)))
+        }
+        recyclerViewLoggerBirdFileActionListPopup.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        loggerBirdFileActionListAdapter =
+            RecyclerViewFileActionAttachmentAdapter(
+                arrayListLoggerBirdFileActionList,
+                context = context,
+                activity = activity,
+                rootView = rootView
+            )
+        recyclerViewLoggerBirdFileActionListPopup.adapter = loggerBirdFileActionListAdapter
+    }
+
 
     /**
      * This method is used for initializing Loggerbird unhandled loggerbird.exception popup.
@@ -11823,8 +12151,15 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             if (filePath.exists()) {
                 filePath.delete()
             }
+            if (sharedPref.getString("unhandled_media_file_path", null) != null) {
+                val mediaFile = File(sharedPref.getString("unhandled_media_file_path", null)!!)
+                mediaFile.delete()
+            }
             val editor: SharedPreferences.Editor = sharedPref.edit()
             editor.remove("unhandled_file_path")
+            if (sharedPref.getString("unhandled_media_file_path", null) != null) {
+                editor.remove("unhandled_media_file_path")
+            }
             editor.apply()
             defaultToast.attachToast(
                 activity = activity,
@@ -11857,134 +12192,134 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     (this.rootView as ViewGroup),
                     false
                 )
-                windowManagerParamsBitbucket = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                } else {
-                    WindowManager.LayoutParams(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                        PixelFormat.TRANSLUCENT
-                    )
-                }
-
-                windowManagerBitbucket = activity.getSystemService(Context.WINDOW_SERVICE)!!
-                (windowManagerBitbucket as WindowManager).addView(
-                    viewBitbucket,
-                    windowManagerParamsBitbucket
+            windowManagerParamsBitbucket = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-
-                activity.window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-                activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
-
-                buttonBitbucketCancel = viewBitbucket.findViewById(R.id.button_bitbucket_cancel)
-                buttonBitbucketCreate = viewBitbucket.findViewById(R.id.button_bitbucket_create)
-                toolbarBitbucket = viewBitbucket.findViewById(R.id.toolbar_bitbucket)
-                autoTextViewBitbucketProject =
-                    viewBitbucket.findViewById(R.id.auto_textView_bitbucket_project)
-                autoTextviewBitbucketKind =
-                    viewBitbucket.findViewById(R.id.auto_textView_bitbucket_kind)
-                autoTextViewBitbucketAssignee =
-                    viewBitbucket.findViewById(R.id.auto_textView_bitbucket_assignee)
-                autoTextViewBitbucketPriority =
-                    viewBitbucket.findViewById(R.id.auto_textView_bitbucket_priority)
-                editTextBitbucketTitle = viewBitbucket.findViewById(R.id.editText_bitbucket_title)
-                editTextBitbucketDescription =
-                    viewBitbucket.findViewById(R.id.editText_bitbucket_description)
-                editTextBitbucketTitle = viewBitbucket.findViewById(R.id.editText_bitbucket_title)
-                editTextBitbucketDescription =
-                    viewBitbucket.findViewById(R.id.editText_bitbucket_description)
-                recyclerViewBitbucketAttachmentList =
-                    viewBitbucket.findViewById(R.id.recycler_view_bitbucket_attachment)
-                scrollViewBitbucket = viewBitbucket.findViewById(R.id.scrollView_bitbucket)
-                scrollViewBitbucket.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                        hideKeyboard(activity = activity, view = viewBitbucket)
-                    }
-                    return@setOnTouchListener false
-                }
-
-                toolbarBitbucket.setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.bitbucket_menu_save -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            with(sharedPref.edit()) {
-                                putString(
-                                    "bitbucket_project",
-                                    autoTextViewBitbucketProject.editableText.toString()
-                                )
-                                putString(
-                                    "bitbucket_assignee",
-                                    autoTextViewBitbucketAssignee.editableText.toString()
-                                )
-                                putString(
-                                    "bitbucket_kind",
-                                    autoTextviewBitbucketKind.editableText.toString()
-                                )
-                                putString(
-                                    "bitbucket_priority",
-                                    autoTextViewBitbucketPriority.editableText.toString()
-                                )
-                                putString(
-                                    "bitbucket_description",
-                                    editTextBitbucketDescription.text.toString()
-                                )
-                                putString(
-                                    "bitbucket_title",
-                                    editTextBitbucketTitle.text.toString()
-                                )
-                                commit()
-                            }
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.bitbucket_issue_preferences_save)
-                            )
-                        }
-                        R.id.bitbucket_menu_clear -> {
-                            val sharedPref =
-                                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                            val editor: SharedPreferences.Editor = sharedPref.edit()
-                            editor.remove("bitbucket_project")
-                            editor.remove("bitbucket_assignee")
-                            editor.remove("bitbucket_kind")
-                            editor.remove("bitbucket_priority")
-                            editor.remove("bitbucket_description")
-                            editor.remove("bitbucket_title")
-                            editor.apply()
-                            clearBitbucketComponents()
-                            defaultToast.attachToast(
-                                activity = activity,
-                                toastMessage = context.resources.getString(R.string.bitbucket_issue_preferences_delete)
-                            )
-                        }
-                    }
-                    return@setOnMenuItemClickListener true
-                }
-
-                toolbarBitbucket.setNavigationOnClickListener {
-                    removeBitbucketLayout()
-                    if (controlFloatingActionButtonView()) {
-                        floatingActionButtonView.visibility = View.VISIBLE
-                    }
-                }
-                initializeBitbucketAttachmentRecyclerView(filePathMedia = filePathMedia)
-                buttonClicksBitbucket()
-                bitbucketAuthentication.callBitbucket(
-                    activity = activity,
-                    context = context,
-                    task = "get",
-                    filePathMedia = filePathMedia
+            } else {
+                WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT
                 )
-                attachProgressBar(task = "bitbucket")
+            }
+
+            windowManagerBitbucket = activity.getSystemService(Context.WINDOW_SERVICE)!!
+            (windowManagerBitbucket as WindowManager).addView(
+                viewBitbucket,
+                windowManagerParamsBitbucket
+            )
+
+            activity.window.navigationBarColor =
+                ContextCompat.getColor(this, R.color.black)
+            activity.window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+            buttonBitbucketCancel = viewBitbucket.findViewById(R.id.button_bitbucket_cancel)
+            buttonBitbucketCreate = viewBitbucket.findViewById(R.id.button_bitbucket_create)
+            toolbarBitbucket = viewBitbucket.findViewById(R.id.toolbar_bitbucket)
+            autoTextViewBitbucketProject =
+                viewBitbucket.findViewById(R.id.auto_textView_bitbucket_project)
+            autoTextviewBitbucketKind =
+                viewBitbucket.findViewById(R.id.auto_textView_bitbucket_kind)
+            autoTextViewBitbucketAssignee =
+                viewBitbucket.findViewById(R.id.auto_textView_bitbucket_assignee)
+            autoTextViewBitbucketPriority =
+                viewBitbucket.findViewById(R.id.auto_textView_bitbucket_priority)
+            editTextBitbucketTitle = viewBitbucket.findViewById(R.id.editText_bitbucket_title)
+            editTextBitbucketDescription =
+                viewBitbucket.findViewById(R.id.editText_bitbucket_description)
+            editTextBitbucketTitle = viewBitbucket.findViewById(R.id.editText_bitbucket_title)
+            editTextBitbucketDescription =
+                viewBitbucket.findViewById(R.id.editText_bitbucket_description)
+            recyclerViewBitbucketAttachmentList =
+                viewBitbucket.findViewById(R.id.recycler_view_bitbucket_attachment)
+            scrollViewBitbucket = viewBitbucket.findViewById(R.id.scrollView_bitbucket)
+            scrollViewBitbucket.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    hideKeyboard(activity = activity, view = viewBitbucket)
+                }
+                return@setOnTouchListener false
+            }
+
+            toolbarBitbucket.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.bitbucket_menu_save -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        with(sharedPref.edit()) {
+                            putString(
+                                "bitbucket_project",
+                                autoTextViewBitbucketProject.editableText.toString()
+                            )
+                            putString(
+                                "bitbucket_assignee",
+                                autoTextViewBitbucketAssignee.editableText.toString()
+                            )
+                            putString(
+                                "bitbucket_kind",
+                                autoTextviewBitbucketKind.editableText.toString()
+                            )
+                            putString(
+                                "bitbucket_priority",
+                                autoTextViewBitbucketPriority.editableText.toString()
+                            )
+                            putString(
+                                "bitbucket_description",
+                                editTextBitbucketDescription.text.toString()
+                            )
+                            putString(
+                                "bitbucket_title",
+                                editTextBitbucketTitle.text.toString()
+                            )
+                            commit()
+                        }
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.bitbucket_issue_preferences_save)
+                        )
+                    }
+                    R.id.bitbucket_menu_clear -> {
+                        val sharedPref =
+                            PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.remove("bitbucket_project")
+                        editor.remove("bitbucket_assignee")
+                        editor.remove("bitbucket_kind")
+                        editor.remove("bitbucket_priority")
+                        editor.remove("bitbucket_description")
+                        editor.remove("bitbucket_title")
+                        editor.apply()
+                        clearBitbucketComponents()
+                        defaultToast.attachToast(
+                            activity = activity,
+                            toastMessage = context.resources.getString(R.string.bitbucket_issue_preferences_delete)
+                        )
+                    }
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            toolbarBitbucket.setNavigationOnClickListener {
+                removeBitbucketLayout()
+                if (controlFloatingActionButtonView()) {
+                    floatingActionButtonView.visibility = View.VISIBLE
+                }
+            }
+            initializeBitbucketAttachmentRecyclerView(filePathMedia = filePathMedia)
+            buttonClicksBitbucket()
+            bitbucketAuthentication.callBitbucket(
+                activity = activity,
+                context = context,
+                task = "get",
+                filePathMedia = filePathMedia
+            )
+            attachProgressBar(task = "bitbucket")
         } catch (e: Exception) {
             finishShareLayout("bitbucket_error")
             e.printStackTrace()
@@ -12021,6 +12356,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private fun addBitbucketFileNames(filePathMedia: File): ArrayList<RecyclerViewModel> {
         if (filePathMedia.exists()) {
             arrayListBitbucketFileName.add(RecyclerViewModel(file = filePathMedia))
+        }
+        if (unhandledMediaFilePath != null) {
+            arrayListBitbucketFileName.add(RecyclerViewModel(file = File(unhandledMediaFilePath!!)))
         }
         if (LoggerBird.filePathSecessionName.exists()) {
             arrayListBitbucketFileName.add(RecyclerViewModel(file = LoggerBird.filePathSecessionName))
@@ -12150,9 +12488,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBitbucketProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBitbucketProjectAdapter = ArrayAdapter(
+        autoTextViewBitbucketProjectAdapter = AutoCompleteTextViewBitbucketProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_bitbucket_project_item,
             arrayListBitbucketProject
         )
         autoTextViewBitbucketProject.setAdapter(autoTextViewBitbucketProjectAdapter)
@@ -12204,9 +12542,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBitbucketAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBitbucketAssigneeAdapter = ArrayAdapter(
+        autoTextViewBitbucketAssigneeAdapter = AutoCompleteTextViewBitbucketAssigneeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_bitbucket_assignee_item,
             arrayListBitbucketAssignee
         )
         autoTextViewBitbucketAssignee.setAdapter(autoTextViewBitbucketAssigneeAdapter)
@@ -12249,9 +12587,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBitbucketPriority: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBitbucketPriorityAdapter = ArrayAdapter(
+        autoTextViewBitbucketPriorityAdapter = AutoCompleteTextViewBitbucketPriorityAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_bitbucket_priority_item,
             arrayListBitbucketPriority
         )
         autoTextViewBitbucketPriority.setAdapter(autoTextViewBitbucketPriorityAdapter)
@@ -12295,9 +12633,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBitbucketKind: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBitbucketKindAdapter = ArrayAdapter(
+        autoTextViewBitbucketKindAdapter = AutoCompleteTextViewBitbucketKindAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_bitbucket_kind_item,
             arrayListBitbucketKind
         )
         autoTextviewBitbucketKind.setAdapter(autoTextViewBitbucketKindAdapter)

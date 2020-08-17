@@ -195,8 +195,8 @@ class MainActivity : AppCompatActivity() {
 //
 //        }
         button_add.setOnClickListener() {
-            val coroutineScope = CoroutineScope(Dispatchers.IO)
-//                throw  NullPointerException("Parameter Type cannot be null");
+//            val coroutineScope = CoroutineScope(Dispatchers.IO)
+                throw  NullPointerException("Parameter Type cannot be null");
 
 
 

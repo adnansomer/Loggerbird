@@ -178,7 +178,6 @@
         android:textAllCaps="false"
         android:layout_below="@id/button_next_activity"
         android:text="performance" />
-
     <androidx.appcompat.widget.AppCompatImageView
         android:visibility="gone"
         android:layout_width="match_parent"

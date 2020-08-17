@@ -121,15 +121,15 @@ internal class FloatingActionButtonPaintOnTouchListener(
                         floatingActionButtonPaintBrush.x =
                             (view.x - view.width)
                         floatingActionButtonPaintPalette.x =
-                            (view.x - view.width) - 150
+                            (view.x - view.width) - (view.width)
                         floatingActionButtonPaintDelete.x =
-                            (view.x - view.width) - 300
+                            (view.x - view.width) - (view.width*2)
                         floatingActionButtonPaintErase.x =
-                            (view.x - view.width) - 450
+                            (view.x - view.width)  - (view.width*3)
                         floatingActionButtonPaintBack.x =
-                            (view.x - view.width) - 600
+                            (view.x - view.width)  - (view.width*4)
                         floatingActionButtonPaintSave.x =
-                            (view.x - view.width) - 750
+                            (view.x - view.width)  - (view.width*5)
 
                     } else if (event.rawX - (floatingActionButtonPaint.width) < 0) {
                         Log.d("corner", "b")
@@ -142,17 +142,17 @@ internal class FloatingActionButtonPaintOnTouchListener(
                         floatingActionButtonPaintSave.y = view.y
                         view.x = 0F
                         floatingActionButtonPaintBrush.x =
-                            view.width.toFloat()
+                            (view.width.toFloat())
                         floatingActionButtonPaintPalette.x =
-                            view.width.toFloat() + 150
+                            2*(view.width.toFloat() )
                         floatingActionButtonPaintDelete.x =
-                            view.width.toFloat() + 300
+                            3*(view.width.toFloat())
                         floatingActionButtonPaintErase.x =
-                            view.width.toFloat() + 450
+                            4*(view.width.toFloat())
                         floatingActionButtonPaintBack.x =
-                            view.width.toFloat() + 600
+                            5*(view.width.toFloat())
                         floatingActionButtonPaintSave.x =
-                            view.width.toFloat() + 750
+                            6*(view.width.toFloat())
                     }
                     if (deviceHeight < (event.rawY + (floatingActionButtonPaint.height))) {
                         Log.d("corner", "c")
@@ -167,15 +167,15 @@ internal class FloatingActionButtonPaintOnTouchListener(
                         floatingActionButtonPaintBrush.y =
                             (view.y - view.height)
                         floatingActionButtonPaintPalette.y =
-                            (view.y - view.height) - 150
+                            (view.y - view.height) - view.height
                         floatingActionButtonPaintDelete.y =
-                            (view.y - view.height) - 300
+                            (view.y - view.height) - 2*(view.height)
                         floatingActionButtonPaintErase.y =
-                            (view.y - view.height) - 450
+                            (view.y - view.height) - 3*(view.height)
                         floatingActionButtonPaintBack.y =
-                            (view.y - view.height) - 600
+                            (view.y - view.height) - 4*(view.height)
                         floatingActionButtonPaintSave.y =
-                            (view.y - view.height) - 750
+                            (view.y - view.height) - 5*(view.height)
 
                     } else if (event.rawY - (floatingActionButtonPaint.height) < 0) {
                         Log.d("corner", "d")
@@ -190,15 +190,15 @@ internal class FloatingActionButtonPaintOnTouchListener(
                         floatingActionButtonPaintBrush.y =
                             view.height.toFloat()
                         floatingActionButtonPaintPalette.y =
-                            view.height.toFloat() + 150
+                            view.height.toFloat() + (view.height)
                         floatingActionButtonPaintDelete.y =
-                            view.height.toFloat() + 300
+                            view.height.toFloat() + 2*(view.height)
                         floatingActionButtonPaintErase.y =
-                            view.height.toFloat() + 450
+                            view.height.toFloat() + 3*(view.height)
                         floatingActionButtonPaintBack.y =
-                            view.height.toFloat() + 600
+                            view.height.toFloat() + 4*(view.height)
                         floatingActionButtonPaintSave.y =
-                            view.height.toFloat() + 750
+                            view.height.toFloat() + 5*(view.height)
 
                     }
 //                    floatingActionButtonPaint.setImageResource(R.drawable.ic_close_black_24dp)
