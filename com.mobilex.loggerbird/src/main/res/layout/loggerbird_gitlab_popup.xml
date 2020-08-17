@@ -1,18 +1,12 @@
-<FrameLayout
+<androidx.core.widget.NestedScrollView
+    android:id="@+id/nestedScrollViewHost"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/darkTransparent"
-    android:id="@+id/layout_gitlab"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/nestedScrollViewHost"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:layout_margin="10dp"
-        android:scrollbars="none">
+    android:fillViewport="true"
+    android:layout_margin="20dp"
+    android:scrollbars="none"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -24,9 +18,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
+                android:layout_margin="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -388,13 +380,9 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"/>
 
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
-
 
     </androidx.core.widget.NestedScrollView>
 
-</FrameLayout>
 
 
