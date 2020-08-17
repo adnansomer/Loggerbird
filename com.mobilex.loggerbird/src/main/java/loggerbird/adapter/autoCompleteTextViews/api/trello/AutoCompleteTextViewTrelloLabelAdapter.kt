@@ -52,7 +52,7 @@ internal class AutoCompleteTextViewTrelloLabelAdapter(
             parent,
             false
         )
-        val textViewLabel = view.findViewById<TextView>(R.id.textView_label_name)
+        val textViewLabel = view.findViewById<TextView>(R.id.textView_trello_label_name)
         var backgroundColor: Int = ContextCompat.getColor(context, R.color.white)
         textViewLabel.text = arrayListLabelName[position]
 

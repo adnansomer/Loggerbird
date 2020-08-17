@@ -99,6 +99,47 @@ import kotlin.collections.HashMap
 import java.text.SimpleDateFormat
 import android.text.InputFilter
 import androidx.core.widget.addTextChangedListener
+import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaPriorityAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaSectorAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampNotifyAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.basecamp.AutoCompleteTextViewBasecampProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.bitbucket.AutoCompleteTextViewBitbucketAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.bitbucket.AutoCompleteTextViewBitbucketKindAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.bitbucket.AutoCompleteTextViewBitbucketPriorityAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.bitbucket.AutoCompleteTextViewBitbucketProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.clubhouse.AutoCompleteTextViewClubhouseEpicAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.clubhouse.AutoCompleteTextViewClubhouseProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.clubhouse.AutoCompleteTextViewClubhouseRequesterAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.clubhouse.AutoCompleteTextViewClubhouseStoryTypeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.*
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubLabelAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubMilestoneAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.github.AutoCompleteTextViewGithubRepoAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.*
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabAssigneeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabConfidentialityAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabLabelAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.gitlab.AutoCompleteTextViewGitlabProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.*
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraIssueAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraIssueTypeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraLinkedIssueAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.jira.AutoCompleteTextViewJiraReporterAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.*
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalOwnersAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalPointsAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalProjectAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalRequesterAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.pivotal.AutoCompleteTextViewPivotalStoryTypeAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloBoardAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloMemberAdapter
+import loggerbird.adapter.autoCompleteTextViews.api.trello.AutoCompleteTextViewTrelloProjectAdapter
 import loggerbird.adapter.recyclerView.fileAction.RecyclerViewFileActionAttachmentAdapter
 import loggerbird.listeners.OnSwipeTouchListener
 import loggerbird.listeners.floatingActionButtons.FloatingActionButtonOnTouchListener
@@ -196,7 +237,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private var coroutineCallVideoStarter = CoroutineScope(Dispatchers.IO)
     private val coroutineCallSendSingleFile: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private val coroutineCallDiscardFile: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private val coroutineCallFileActionList:CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineCallFileActionList: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var mediaRecorderAudio: MediaRecorder? = null
     private var state: Boolean = false
     private var filePathVideo: File? = null
@@ -308,19 +349,19 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var scrollViewJira: ScrollView
     private val arrayListJiraFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var jiraAttachmentAdapter: RecyclerViewJiraAttachmentAdapter
-    private lateinit var autoTextViewJiraProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraIssueTypeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraReporterAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraLinkedIssueAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraIssueAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraPriorityAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewFixVersionsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraComponentAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraLabelAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraEpicLinkAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraSprintAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewJiraEpicNameAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewJiraProjectAdapter: AutoCompleteTextViewJiraProjectAdapter
+    private lateinit var autoTextViewJiraIssueTypeAdapter: AutoCompleteTextViewJiraIssueTypeAdapter
+    private lateinit var autoTextViewJiraReporterAdapter: AutoCompleteTextViewJiraReporterAdapter
+    private lateinit var autoTextViewJiraLinkedIssueAdapter: AutoCompleteTextViewJiraLinkedIssueAdapter
+    private lateinit var autoTextViewJiraIssueAdapter: AutoCompleteTextViewJiraIssueAdapter
+    private lateinit var autoTextViewJiraAssigneeAdapter: AutoCompleteTextViewJiraAssigneeAdapter
+    private lateinit var autoTextViewJiraPriorityAdapter: AutoCompleteTextViewJiraPriorityAdapter
+    private lateinit var autoTextViewFixVersionsAdapter: AutoCompleteTextViewJiraFixVersionsAdapter
+    private lateinit var autoTextViewJiraComponentAdapter: AutoCompleteTextViewJiraComponentAdapter
+    private lateinit var autoTextViewJiraLabelAdapter: AutoCompleteTextViewJiraLabelAdapter
+    private lateinit var autoTextViewJiraEpicLinkAdapter: AutoCompleteTextViewJiraEpicLinkAdapter
+    private lateinit var autoTextViewJiraSprintAdapter: AutoCompleteTextViewJiraSprintAdapter
+    private lateinit var autoTextViewJiraEpicNameAdapter: AutoCompleteTextViewJiraEpicNameAdapter
     private var projectJiraPosition: Int = 0
     private var controlProjectJiraPosition: Boolean = false
     internal lateinit var cardViewJiraIssueList: CardView
@@ -438,11 +479,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonCalendarViewGitlabOk: Button
     private lateinit var recyclerViewGitlabAttachment: RecyclerView
     private lateinit var gitlabAttachmentAdapter: RecyclerViewGitlabAttachmentAdapter
-    private lateinit var autoTextViewGitlabProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabLabelsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabMilestoneAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGitlabConfidentialityAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGitlabProjectAdapter: AutoCompleteTextViewGitlabProjectAdapter
+    private lateinit var autoTextViewGitlabAssigneeAdapter: AutoCompleteTextViewGitlabAssigneeAdapter
+    private lateinit var autoTextViewGitlabLabelsAdapter: AutoCompleteTextViewGitlabLabelAdapter
+    private lateinit var autoTextViewGitlabMilestoneAdapter: AutoCompleteTextViewGitlabMilestoneAdapter
+    private lateinit var autoTextViewGitlabConfidentialityAdapter: AutoCompleteTextViewGitlabConfidentialityAdapter
     private val arrayListGitlabFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var linearLayoutGitlabConfidentiality: LinearLayout
     private lateinit var textViewGitlabConfidentiality: TextView
@@ -472,12 +513,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewGithubProject: AutoCompleteTextView
     private lateinit var autoTextViewGithubMileStone: AutoCompleteTextView
     private lateinit var autoTextViewGithubLinkedRequests: AutoCompleteTextView
-    private lateinit var autoTextViewGithubAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubLabelsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubRepoAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubMileStoneAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewGithubLinkedRequestsAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewGithubAssigneeAdapter: AutoCompleteTextViewGithubAssigneeAdapter
+    private lateinit var autoTextViewGithubLabelsAdapter: AutoCompleteTextViewGithubLabelAdapter
+    private lateinit var autoTextViewGithubRepoAdapter: AutoCompleteTextViewGithubRepoAdapter
+    private lateinit var autoTextViewGithubProjectAdapter: AutoCompleteTextViewGithubProjectAdapter
+    private lateinit var autoTextViewGithubMileStoneAdapter: AutoCompleteTextViewGithubMilestoneAdapter
+    private lateinit var autoTextViewGithubLinkedRequestsAdapter: AutoCompleteTextViewGithubLinkedRequestsAdapter
     private val arrayListGithubFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var scrollViewGithub: ScrollView
     private lateinit var recyclerViewGithubAssignee: RecyclerView
@@ -512,9 +553,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewTrelloBoard: AutoCompleteTextView
     private lateinit var autoTextViewTrelloMember: AutoCompleteTextView
     private lateinit var autoTextViewTrelloLabel: AutoCompleteTextView
-    private lateinit var autoTextViewTrelloProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewTrelloBoardAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewTrelloMemberAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewTrelloProjectAdapter: AutoCompleteTextViewTrelloProjectAdapter
+    private lateinit var autoTextViewTrelloBoardAdapter: AutoCompleteTextViewTrelloBoardAdapter
+    private lateinit var autoTextViewTrelloMemberAdapter: AutoCompleteTextViewTrelloMemberAdapter
     private lateinit var autoTextViewTrelloLabelAdapter: AutoCompleteTextViewTrelloLabelAdapter
     private lateinit var recyclerViewTrelloLabel: RecyclerView
     private lateinit var trelloLabelAdapter: RecyclerViewTrelloLabelAdapter
@@ -577,12 +618,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewPivotalOwners: AutoCompleteTextView
     private lateinit var autoTextViewPivotalLabel: AutoCompleteTextView
     private lateinit var autoTextViewPivotalRequester: AutoCompleteTextView
-    private lateinit var autoTextViewPivotalProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalLabelAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalStoryTypeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalPointsAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalOwnersAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewPivotalRequesterAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewPivotalProjectAdapter: AutoCompleteTextViewPivotalProjectAdapter
+    private lateinit var autoTextViewPivotalLabelAdapter: AutoCompleteTextViewPivotalLabelAdapter
+    private lateinit var autoTextViewPivotalStoryTypeAdapter: AutoCompleteTextViewPivotalStoryTypeAdapter
+    private lateinit var autoTextViewPivotalPointsAdapter: AutoCompleteTextViewPivotalPointsAdapter
+    private lateinit var autoTextViewPivotalOwnersAdapter: AutoCompleteTextViewPivotalOwnersAdapter
+    private lateinit var autoTextViewPivotalRequesterAdapter: AutoCompleteTextViewPivotalRequesterAdapter
     private lateinit var imageViewPivotalOwners: ImageView
     internal lateinit var cardViewPivotalOwnersList: CardView
     private lateinit var recyclerViewPivotalOwnerList: RecyclerView
@@ -620,10 +661,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewBasecampCategory: AutoCompleteTextView
     private lateinit var autoTextViewBasecampAssignee: AutoCompleteTextView
     private lateinit var autoTextViewBasecampNotify: AutoCompleteTextView
-    private lateinit var autoTextViewBasecampProjectAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewBasecampCategoryCategoryAdapter: AutoCompleteTextViewBasecampCategoryAdapter
-    private lateinit var autoTextViewBasecampAssigneeAdapter: ArrayAdapter<String>
-    private lateinit var autoTextViewBasecampNotifyAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBasecampProjectAdapter: AutoCompleteTextViewBasecampProjectAdapter
+    private lateinit var autoTextViewBasecampCategoryAdapter: AutoCompleteTextViewBasecampCategoryAdapter
+    private lateinit var autoTextViewBasecampAssigneeAdapter: AutoCompleteTextViewBasecampAssigneeAdapter
+    private lateinit var autoTextViewBasecampNotifyAdapter: AutoCompleteTextViewBasecampNotifyAdapter
     private lateinit var editTextBasecampDescriptionMessage: EditText
     private lateinit var editTextBasecampDescriptionTodo: EditText
     private lateinit var editTextBasecampTitle: EditText
@@ -658,13 +699,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var toolbarAsana: Toolbar
     private lateinit var scrollViewAsana: ScrollView
     private lateinit var autoTextViewAsanaProject: AutoCompleteTextView
-    private lateinit var autoTextViewAsanaProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaProjectAdapter: AutoCompleteTextViewAsanaProjectAdapter
     private lateinit var autoTextViewAsanaAssignee: AutoCompleteTextView
-    private lateinit var autoTextViewAsanaAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaAssigneeAdapter: AutoCompleteTextViewAsanaAssigneeAdapter
     private lateinit var autoTextViewAsanaSector: AutoCompleteTextView
-    private lateinit var autoTextViewAsanaCategoryAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaSectorAdapter: AutoCompleteTextViewAsanaSectorAdapter
     private lateinit var autoTextViewAsanaPriority: AutoCompleteTextView
-    private lateinit var autoTextViewAsanaPriorityAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewAsanaPriorityAdapter: AutoCompleteTextViewAsanaPriorityAdapter
     private lateinit var editTextAsanaDescription: EditText
     private lateinit var editTextAsanaSubTask: EditText
     private lateinit var editTextAsanaTaskName: EditText
@@ -702,16 +743,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var buttonCalendarViewClubhouseOk: Button
     private lateinit var textViewClubhouseDueDate: TextView
     private lateinit var autoTextViewClubhouseProject: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseProjectAdapter: AutoCompleteTextViewClubhouseProjectAdapter
     private lateinit var autoTextViewClubhouseEpic: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseEpicAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseEpicAdapter: AutoCompleteTextViewClubhouseEpicAdapter
     private lateinit var editTextClubhouseStoryName: EditText
     private lateinit var editTextClubhouseStoryDescription: EditText
     private lateinit var editTextClubhouseEstimate: EditText
     private lateinit var autoTextViewClubhouseStoryType: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseStoryTypeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseStoryTypeAdapter:  AutoCompleteTextViewClubhouseStoryTypeAdapter
     private lateinit var autoTextViewClubhouseRequester: AutoCompleteTextView
-    private lateinit var autoTextViewClubhouseRequesterAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewClubhouseRequesterAdapter:   AutoCompleteTextViewClubhouseRequesterAdapter
     private val arrayListClubhouseFileName: ArrayList<RecyclerViewModel> = ArrayList()
     private lateinit var clubhouseAttachmentAdapter: RecyclerViewClubhouseAttachmentAdapter
     private lateinit var recyclerViewClubhouseAttachment: RecyclerView
@@ -743,20 +784,20 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var textViewLoggerBirdUnhandledExceptionPopupShare: TextView
     private lateinit var checkBoxLoggerBirdUnhandledExceptionPopupDuplication: CheckBox
 
-    //LoggerBird Bitbucket Popup:
+    //Bitbucket:
     internal val bitbucketAuthentication = BitbucketApi()
     private lateinit var buttonBitbucketCancel: Button
     private lateinit var buttonBitbucketCreate: Button
     private lateinit var toolbarBitbucket: Toolbar
     private lateinit var scrollViewBitbucket: ScrollView
     private lateinit var autoTextViewBitbucketProject: AutoCompleteTextView
-    private lateinit var autoTextViewBitbucketProjectAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBitbucketProjectAdapter: AutoCompleteTextViewBitbucketProjectAdapter
     private lateinit var autoTextviewBitbucketKind: AutoCompleteTextView
-    private lateinit var autoTextViewBitbucketKindAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBitbucketKindAdapter: AutoCompleteTextViewBitbucketKindAdapter
     private lateinit var autoTextViewBitbucketAssignee: AutoCompleteTextView
-    private lateinit var autoTextViewBitbucketAssigneeAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBitbucketAssigneeAdapter: AutoCompleteTextViewBitbucketAssigneeAdapter
     private lateinit var autoTextViewBitbucketPriority: AutoCompleteTextView
-    private lateinit var autoTextViewBitbucketPriorityAdapter: ArrayAdapter<String>
+    private lateinit var autoTextViewBitbucketPriorityAdapter: AutoCompleteTextViewBitbucketPriorityAdapter
     private lateinit var editTextBitbucketTitle: EditText
     private lateinit var editTextBitbucketDescription: EditText
     private lateinit var recyclerViewBitbucketAttachmentList: RecyclerView
@@ -1036,7 +1077,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     it.delete()
                 }
             }
-            dailySessionTimeRecorder(activity = activity)
+            if(this::activity.isInitialized){
+                dailySessionTimeRecorder(activity = activity)
+            }
             controlServiceOnDestroyState = true
             LoggerBird.takeLifeCycleDetails()
         } catch (e: Exception) {
@@ -1309,7 +1352,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         }
         floating_action_button_screenshot.setSafeOnClickListener {
             if (floating_action_button_screenshot.visibility == View.VISIBLE) {
-                if (!PaintActivity.controlPaintInPictureState) {
+                if (!PaintActivity.controlPaintInPictureState && !screenshotDrawing) {
                     if (!audioRecording && !videoRecording) {
                         resetFileReferences()
                         takeScreenShot(view = activity.window.decorView.rootView, context = context)
@@ -1909,6 +1952,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             PaintActivity.closeActivitySession()
             coroutineCallScreenShot.async {
                 try {
+                    arrayListFileName.clear()
+                    if(getFileList() != null){
+                        arrayListFileName.addAll(getFileList()!!)
+                    }
                     if (arrayListFileName.size <= 10) {
                         withContext(Dispatchers.IO) {
                             screenshotBitmap = createScreenShot(view = view)
@@ -1945,8 +1992,8 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         }
 
                     } else {
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(context, R.string.session_file_limit, Toast.LENGTH_SHORT)
+                        activity.runOnUiThread {
+                            Toast.makeText(context, R.string.session_file_limit, Toast.LENGTH_SHORT).show()
                         }
                     }
                 } catch (e: Exception) {
@@ -1968,6 +2015,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             coroutineCallAudio.async {
                 try {
                     if (!audioRecording) {
+                        arrayListFileName.clear()
+                        if(getFileList() != null){
+                            arrayListFileName.addAll(getFileList()!!)
+                        }
                         if (arrayListFileName.size <= 10) {
                             val fileDirectory: File = context.filesDir
                             filePathAudio = File(
@@ -2028,7 +2079,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                                     )
                             }
                         } else {
-                            withContext(Dispatchers.Main) {
+                            activity.runOnUiThread {
                                 Toast.makeText(
                                     context,
                                     R.string.session_file_limit,
@@ -2130,13 +2181,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             coroutineCallVideo.async {
                 try {
                     if (!videoRecording) {
+                        arrayListFileName.clear()
+                        if(getFileList() != null){
+                            arrayListFileName.addAll(getFileList()!!)
+                        }
                         if (arrayListFileName.size <= 10) {
                             this@LoggerBirdService.requestCode = requestCode
                             this@LoggerBirdService.resultCode = resultCode
                             this@LoggerBirdService.dataIntent = data
                             startScreenRecording()
                         } else {
-                            withContext(Dispatchers.Main) {
+                            activity.runOnUiThread {
                                 Toast.makeText(
                                     context,
                                     R.string.session_file_limit,
@@ -2870,7 +2925,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             val sessionDuration = sessionTimeEnd!! - sessionTimeStart!!
             val sharedPref =
                 PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-                    ?: return
             with(sharedPref.edit()) {
                 putLong("session_time", sharedPref.getLong("session_time", 0) + sessionDuration)
                 commit()
@@ -2904,10 +2958,13 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for adding Loggerbird file list.
      */
     internal fun addFileList() {
+        arrayListFileName.clear()
         if (getFileList() != null) {
             arrayListFileName.addAll(getFileList()!!)
         }
-        arrayListFileName.addAll(PaintView.arrayListFileNameScreenshot)
+        arrayListFile.forEach {
+            arrayListFileName.add(it.absolutePath)
+        }
         val gson = Gson()
         val json = gson.toJson(arrayListFileName)
         val sharedPref =
@@ -2917,15 +2974,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             commit()
         }
     }
+
     /**
      * This method is used for adding Loggerbird file list in async way.
      */
-    internal fun addFileListAsync(){
+    internal fun addFileListAsync() {
         coroutineCallFileActionList.async {
-            if (getFileList() != null) {
-                arrayListFileName.addAll(getFileList()!!)
-            }
-            arrayListFileName.addAll(PaintView.arrayListFileNameScreenshot)
+           getFileList()?.forEach {
+               if(!arrayListFileName.contains(it)){
+                   arrayListFileName.add(it)
+               }
+           }
             val gson = Gson()
             val json = gson.toJson(arrayListFileName)
             val sharedPref =
@@ -2945,7 +3004,17 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         val gson = Gson()
         val json = sharedPref.getString("file_quantity", "")
         if (json?.isNotEmpty()!!) {
-            return gson.fromJson(json, object : TypeToken<ArrayList<String>>() {}.type)
+            val arrayListFile:ArrayList<String> = gson.fromJson(json, object : TypeToken<ArrayList<String>>() {}.type)
+                for(file in 0..arrayListFile.size){
+                    if(arrayListFile.size <= file ){
+                        break
+                    }else{
+                        if(!File(arrayListFile[file]).exists()){
+                            arrayListFile.removeAt(file)
+                        }
+                    }
+                }
+            return arrayListFile
         }
         return null
     }
@@ -2954,7 +3023,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for adding file name to file name list.
      * @param fileName is used for getting reference of current file.
      */
-    private fun addFileNameList(fileName: String) {
+    internal fun addFileNameList(fileName: String) {
         arrayListFileName.add(fileName)
     }
 
@@ -2979,25 +3048,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
      * This method is used for checking that number of Loggerbird files greater than ten.
      */
     private fun controlActionFiles() {
-        if (getFileList() != null) {
-            val arrayListFileList:ArrayList<String> = getFileList()!!
-            arrayListFileList.forEach {
-                if(!File(it).exists()){
-                    arrayListFileList.remove(it)
-                }
-            }
-            val gson = Gson()
-            val json = gson.toJson(arrayListFileList)
-            val sharedPref =
-                PreferenceManager.getDefaultSharedPreferences(activity.applicationContext) ?: return
-            with(sharedPref.edit()) {
-                putString("file_quantity", json)
-                commit()
-            }
-                if (getFileList()!!.size > 10) {
+            val arrayListFileList: ArrayList<String>? = getFileList()
+            if(arrayListFileList != null){
+                if (arrayListFileList.size > 10) {
                     chooseActionFiles()
                 }
-        }
+            }
     }
 
     /**
@@ -4439,7 +4495,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 arrayListJiraFixVersions = arrayListJiraFixVersions,
                 sharedPref = sharedPref
             )
-            initializeJiraLabels(arrayListLabel = arrayListJiraLabel, sharedPref = sharedPref)
+            initializeJiraLabels(arrayListJiraLabel = arrayListJiraLabel, sharedPref = sharedPref)
             initializeJiraEpicLink(
                 arrayListJiraEpicLink = arrayListJiraEpicLink,
                 sharedPref = sharedPref
@@ -4498,12 +4554,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (hashMapJiraBoardList[arrayListJiraProjectKeys[projectJiraPosition]] == "scrum") {
             cardViewJiraSprint.visibility = View.VISIBLE
             cardViewJiraStartDate.visibility = View.VISIBLE
-            autoTextViewJiraSprintAdapter =
-                ArrayAdapter(
-                    this,
-                    android.R.layout.simple_dropdown_item_1line,
-                    arrayListJiraSprint
-                )
+            autoTextViewJiraSprintAdapter = AutoCompleteTextViewJiraSprintAdapter(
+                this,
+                R.layout.auto_text_view_jira_sprint_item,
+                arrayListJiraSprint
+            )
             autoTextViewJiraSprint.setAdapter(autoTextViewJiraSprintAdapter)
             if (arrayListJiraSprint.isNotEmpty()) {
                 if (sharedPref.getString("jira_sprint", null) != null) {
@@ -4539,12 +4594,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraEpicLink: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraEpicLinkAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraEpicLink
-            )
+        autoTextViewJiraEpicLinkAdapter = AutoCompleteTextViewJiraEpicLinkAdapter(
+            this,
+            R.layout.auto_text_view_jira_epic_link_item,
+            arrayListJiraEpicLink
+        )
         autoTextViewJiraEpicLink.setAdapter(autoTextViewJiraEpicLinkAdapter)
         if (arrayListJiraEpicLink.isNotEmpty()) {
             if (sharedPref.getString("jira_epic_link", null) != null) {
@@ -4572,13 +4626,16 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeJiraLabels(
-        arrayListLabel: ArrayList<String>,
+        arrayListJiraLabel: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraLabelAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListLabel)
+        autoTextViewJiraLabelAdapter = AutoCompleteTextViewJiraLabelAdapter(
+            this,
+            R.layout.auto_text_view_jira_label_item,
+            arrayListJiraLabel
+        )
         autoTextViewJiraLabel.setAdapter(autoTextViewJiraLabelAdapter)
-        if (arrayListLabel.isNotEmpty()) {
+        if (arrayListJiraLabel.isNotEmpty()) {
             if (sharedPref.getString("jira_labels", null) != null) {
                 autoTextViewJiraLabel.setText(sharedPref.getString("jira_labels", null), false)
             }
@@ -4591,7 +4648,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         autoTextViewJiraLabel.setOnItemClickListener { parent, view, position, id ->
             hideKeyboard(activity = activity, view = viewJira)
         }
-        this.arrayListJiraLabel = arrayListLabel
+        this.arrayListJiraLabel = arrayListJiraLabel
     }
 
     /**
@@ -4605,9 +4662,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraFixVersions: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewFixVersionsAdapter = ArrayAdapter(
+        autoTextViewFixVersionsAdapter = AutoCompleteTextViewJiraFixVersionsAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_jira_fix_versions_item,
             arrayListJiraFixVersions
         )
         autoTextViewJiraFixVersions.setAdapter(autoTextViewFixVersionsAdapter)
@@ -4642,12 +4699,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraComponent: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraComponentAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraComponent
-            )
+        autoTextViewJiraComponentAdapter = AutoCompleteTextViewJiraComponentAdapter(
+            this,
+            R.layout.auto_text_view_jira_component_item,
+            arrayListJiraComponent
+        )
         autoTextViewJiraComponent.setAdapter(autoTextViewJiraComponentAdapter)
         if (arrayListJiraComponent.isNotEmpty()) {
             if (sharedPref.getString("jira_component", null) != null) {
@@ -4679,12 +4735,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraPriority: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraPriorityAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraPriority
-            )
+        autoTextViewJiraPriorityAdapter = AutoCompleteTextViewJiraPriorityAdapter(
+            this,
+            R.layout.auto_text_view_jira_priority_item,
+            arrayListJiraPriority
+        )
         autoTextViewJiraPriority.setAdapter(autoTextViewJiraPriorityAdapter)
         if (arrayListJiraPriority.isNotEmpty()) {
             if (sharedPref.getString("jira_priority", null) != null) {
@@ -4735,12 +4790,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraAssigneeAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraAssignee
-            )
+        autoTextViewJiraAssigneeAdapter = AutoCompleteTextViewJiraAssigneeAdapter(
+            this,
+            R.layout.auto_text_view_jira_assignee_item,
+            arrayListJiraAssignee
+        )
         autoTextViewJiraAssignee.setAdapter(autoTextViewJiraAssigneeAdapter)
         if (arrayListJiraAssignee.isNotEmpty()) {
             if (sharedPref.getString("jira_assignee", null) != null) {
@@ -4772,8 +4826,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraIssues: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraIssueAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListJiraIssues)
+        autoTextViewJiraIssueAdapter = AutoCompleteTextViewJiraIssueAdapter(
+            this,
+            R.layout.auto_text_view_jira_issue_item,
+            arrayListJiraIssues
+        )
         autoTextViewJiraIssue.setAdapter(autoTextViewJiraIssueAdapter)
         if (arrayListJiraIssues.isNotEmpty()) {
             if (sharedPref.getString("jira_issue", null) != null) {
@@ -4802,9 +4859,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraLinkedIssues: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraLinkedIssueAdapter = ArrayAdapter(
+        autoTextViewJiraLinkedIssueAdapter = AutoCompleteTextViewJiraLinkedIssueAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_jira_linked_issue_item,
             arrayListJiraLinkedIssues
         )
         autoTextViewJiraLinkedIssue.setAdapter(autoTextViewJiraLinkedIssueAdapter)
@@ -4857,9 +4914,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraReporterNames: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraReporterAdapter = ArrayAdapter(
+        autoTextViewJiraReporterAdapter = AutoCompleteTextViewJiraReporterAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_jira_reporter_item,
             arrayListJiraReporterNames
         )
         autoTextViewJiraReporter.setAdapter(autoTextViewJiraReporterAdapter)
@@ -4896,12 +4953,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraEpicName: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraIssueTypeAdapter =
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                arrayListJiraIssueTypes
-            )
+        autoTextViewJiraIssueTypeAdapter = AutoCompleteTextViewJiraIssueTypeAdapter(
+            this,
+            R.layout.auto_text_view_jira_issue_type_item,
+            arrayListJiraIssueTypes
+        )
         autoTextViewJiraIssueType.setAdapter(autoTextViewJiraIssueTypeAdapter)
         if (checkUnhandledFilePath()) {
             autoTextViewJiraIssueType.setText(arrayListJiraIssueTypes[2], false)
@@ -4961,9 +5017,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListJiraProjectNames: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewJiraProjectAdapter = ArrayAdapter(
+        autoTextViewJiraProjectAdapter = AutoCompleteTextViewJiraProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_jira_project_item,
             arrayListJiraProjectNames
         )
         autoTextViewJiraProject.setAdapter(autoTextViewJiraProjectAdapter)
@@ -5026,9 +5082,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         if (autoTextViewJiraIssueType.editableText.toString() == "Epic") {
             cardViewJiraEpicName.visibility = View.VISIBLE
             cardViewJiraEpicLink.visibility = View.GONE
-            autoTextViewJiraEpicNameAdapter = ArrayAdapter(
+            autoTextViewJiraEpicNameAdapter = AutoCompleteTextViewJiraEpicNameAdapter(
                 this,
-                android.R.layout.simple_dropdown_item_1line,
+                R.layout.auto_text_view_jira_epic_name_item,
                 arrayListJiraEpicName
             )
             autoTextViewJiraEpicName.setAdapter(autoTextViewJiraEpicNameAdapter)
@@ -6806,9 +6862,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubRepos: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubRepoAdapter = ArrayAdapter(
+        autoTextViewGithubRepoAdapter = AutoCompleteTextViewGithubRepoAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_repo_item,
             arrayListGithubRepos
         )
         autoTextViewGithubRepo.setAdapter(autoTextViewGithubRepoAdapter)
@@ -6876,9 +6932,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubAssigneeAdapter = ArrayAdapter(
+        autoTextViewGithubAssigneeAdapter = AutoCompleteTextViewGithubAssigneeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_assignee_item,
             arrayListGithubAssignee
         )
         autoTextViewGithubAssignee.setAdapter(autoTextViewGithubAssigneeAdapter)
@@ -6920,9 +6976,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubMileStones: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubMileStoneAdapter = ArrayAdapter(
+        autoTextViewGithubMileStoneAdapter = AutoCompleteTextViewGithubMilestoneAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_milestone_item,
             arrayListGithubMileStones
         )
         autoTextViewGithubMileStone.setAdapter(autoTextViewGithubMileStoneAdapter)
@@ -6965,9 +7021,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubProjectAdapter = ArrayAdapter(
+        autoTextViewGithubProjectAdapter = AutoCompleteTextViewGithubProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_project_item,
             arrayListGithubProject
         )
         autoTextViewGithubProject.setAdapter(autoTextViewGithubProjectAdapter)
@@ -7010,9 +7066,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubLabels: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubLabelsAdapter = ArrayAdapter(
+        autoTextViewGithubLabelsAdapter = AutoCompleteTextViewGithubLabelAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_labels_item,
             arrayListGithubLabels
         )
         autoTextViewGithubLabels.setAdapter(autoTextViewGithubLabelsAdapter)
@@ -7045,9 +7101,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGithubLinkedRequests: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewGithubLinkedRequestsAdapter = ArrayAdapter(
+        autoTextViewGithubLinkedRequestsAdapter = AutoCompleteTextViewGithubLinkedRequestsAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_github_linked_request_item,
             arrayListGithubLinkedRequests
         )
         autoTextViewGithubLinkedRequests.setAdapter(autoTextViewGithubLinkedRequestsAdapter)
@@ -7458,9 +7514,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListTrelloProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewTrelloProjectAdapter = ArrayAdapter(
+        autoTextViewTrelloProjectAdapter = AutoCompleteTextViewTrelloProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_trello_project_item,
             arrayListTrelloProject
         )
         autoTextViewTrelloProject.setAdapter(autoTextViewTrelloProjectAdapter)
@@ -7512,9 +7568,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListTrelloBoards: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewTrelloBoardAdapter = ArrayAdapter(
+        autoTextViewTrelloBoardAdapter = AutoCompleteTextViewTrelloBoardAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_trello_board_item,
             arrayListTrelloBoards
         )
         autoTextViewTrelloBoard.setAdapter(autoTextViewTrelloBoardAdapter)
@@ -7560,9 +7616,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListTrelloMember: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewTrelloMemberAdapter = ArrayAdapter(
+        autoTextViewTrelloMemberAdapter = AutoCompleteTextViewTrelloMemberAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_trello_member_item,
             arrayListTrelloMember
         )
         autoTextViewTrelloMember.setAdapter(autoTextViewTrelloMemberAdapter)
@@ -8371,7 +8427,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGitlabProjects: ArrayList<String>
     ) {
         autoTextViewGitlabProjectAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabProjects)
+            AutoCompleteTextViewGitlabProjectAdapter(
+                this,
+                R.layout.auto_text_view_gitlab_project_item,
+                arrayListGitlabProjects
+            )
         autoTextViewGitlabProject.setAdapter(autoTextViewGitlabProjectAdapter)
         if (arrayListGitlabProjects.isNotEmpty() && autoTextViewGitlabProject.text.isEmpty()) {
             autoTextViewGitlabProject.setText(arrayListGitlabProjects[0], false)
@@ -8418,7 +8478,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListGitlabAssignee: ArrayList<String>
     ) {
         autoTextViewGitlabAssigneeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabAssignee)
+            AutoCompleteTextViewGitlabAssigneeAdapter(
+                this,
+                R.layout.auto_text_view_gitlab_assignee_item,
+                arrayListGitlabAssignee
+            )
         autoTextViewGitlabAssignee.setAdapter(autoTextViewGitlabAssigneeAdapter)
         if (arrayListGitlabAssignee.isNotEmpty() && autoTextViewGitlabAssignee.text.isEmpty()) {
             autoTextViewGitlabAssignee.setText(arrayListGitlabAssignee[0], false)
@@ -8458,8 +8522,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabLabels(
         arrayListGitlabLabels: ArrayList<String>
     ) {
-        autoTextViewGitlabLabelsAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListGitlabLabels)
+        autoTextViewGitlabLabelsAdapter = AutoCompleteTextViewGitlabLabelAdapter(
+            this,
+            R.layout.auto_text_view_gitlab_label_item,
+            arrayListGitlabLabels
+        )
         autoTextViewGitlabLabels.setAdapter(autoTextViewGitlabLabelsAdapter)
         if (arrayListGitlabLabels.isNotEmpty() && autoTextViewGitlabLabels.text.isEmpty()) {
             autoTextViewGitlabLabels.setText(arrayListGitlabLabels[0], false)
@@ -8502,9 +8569,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabConfidentiality(
         arrayListGitlabConfidentiality: ArrayList<String>
     ) {
-        autoTextViewGitlabConfidentialityAdapter = ArrayAdapter(
+        autoTextViewGitlabConfidentialityAdapter = AutoCompleteTextViewGitlabConfidentialityAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_gitlab_confidentiality_item,
             arrayListGitlabConfidentiality
         )
         autoTextViewGitlabConfidentiality.setAdapter(autoTextViewGitlabConfidentialityAdapter)
@@ -8548,9 +8615,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeGitlabMilestones(
         arrayListGitlabMilestones: ArrayList<String>
     ) {
-        autoTextViewGitlabMilestoneAdapter = ArrayAdapter(
+        autoTextViewGitlabMilestoneAdapter = AutoCompleteTextViewGitlabMilestoneAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_gitlab_milestone_item,
             arrayListGitlabMilestones
         )
         autoTextViewGitlabMilestone.setAdapter(autoTextViewGitlabMilestoneAdapter)
@@ -9078,9 +9145,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalProjectAdapter = ArrayAdapter(
+        autoTextViewPivotalProjectAdapter = AutoCompleteTextViewPivotalProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_project_item,
             arrayListPivotalProject
         )
         autoTextViewPivotalProject.setAdapter(autoTextViewPivotalProjectAdapter)
@@ -9131,9 +9198,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalStoryType: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalStoryTypeAdapter = ArrayAdapter(
+        autoTextViewPivotalStoryTypeAdapter = AutoCompleteTextViewPivotalStoryTypeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_story_item,
             arrayListPivotalStoryType
         )
         autoTextViewPivotalStoryType.setAdapter(autoTextViewPivotalStoryTypeAdapter)
@@ -9174,9 +9241,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalPoints: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalPointsAdapter = ArrayAdapter(
+        autoTextViewPivotalPointsAdapter = AutoCompleteTextViewPivotalPointsAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_points_item,
             arrayListPivotalPoints
         )
         autoTextViewPivotalPoints.setAdapter(autoTextViewPivotalPointsAdapter)
@@ -9217,9 +9284,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalRequester: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalRequesterAdapter = ArrayAdapter(
+        autoTextViewPivotalRequesterAdapter = AutoCompleteTextViewPivotalRequesterAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_requester_item,
             arrayListPivotalRequester
         )
         autoTextViewPivotalRequester.setAdapter(autoTextViewPivotalRequesterAdapter)
@@ -9260,9 +9327,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalOwners: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalOwnersAdapter = ArrayAdapter(
+        autoTextViewPivotalOwnersAdapter = AutoCompleteTextViewPivotalOwnersAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_owners_item,
             arrayListPivotalOwners
         )
         autoTextViewPivotalOwners.setAdapter(autoTextViewPivotalOwnersAdapter)
@@ -9305,9 +9372,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListPivotalLabel: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewPivotalLabelAdapter = ArrayAdapter(
+        autoTextViewPivotalLabelAdapter = AutoCompleteTextViewPivotalLabelAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_pivotal_label_item,
             arrayListPivotalLabel
         )
         autoTextViewPivotalLabel.setAdapter(autoTextViewPivotalLabelAdapter)
@@ -9834,7 +9901,7 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             )
         )
         initializeBasecampProject(
-            arrayListProject = arrayListBasecampProject,
+            arrayListBasecampProject = arrayListBasecampProject,
             sharedPref = sharedPref
         )
         initializeBasecampCategory(
@@ -9861,18 +9928,18 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun initializeBasecampProject(
-        arrayListProject: ArrayList<String>,
+        arrayListBasecampProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBasecampProjectAdapter = ArrayAdapter(
+        autoTextViewBasecampProjectAdapter = AutoCompleteTextViewBasecampProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
-            arrayListProject
+            R.layout.auto_text_view_basecamp_project_item,
+            arrayListBasecampProject
         )
         autoTextViewBasecampProject.setAdapter(autoTextViewBasecampProjectAdapter)
-        if (arrayListProject.isNotEmpty() && autoTextViewBasecampProject.editableText.isEmpty()) {
+        if (arrayListBasecampProject.isNotEmpty() && autoTextViewBasecampProject.editableText.isEmpty()) {
             if (sharedPref.getString("basecamp_project", null) != null) {
-                if (arrayListProject.contains(
+                if (arrayListBasecampProject.contains(
                         sharedPref.getString(
                             "basecamp_project",
                             null
@@ -9884,10 +9951,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                         false
                     )
                 } else {
-                    autoTextViewBasecampProject.setText(arrayListProject[0], false)
+                    autoTextViewBasecampProject.setText(arrayListBasecampProject[0], false)
                 }
             } else {
-                autoTextViewBasecampProject.setText(arrayListProject[0], false)
+                autoTextViewBasecampProject.setText(arrayListBasecampProject[0], false)
             }
         }
         autoTextViewBasecampProject.setOnTouchListener { v, event ->
@@ -9920,19 +9987,14 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBasecampCategoryIcon: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-//        autoTextViewBasecampCategoryAdapter = ArrayAdapter(
-//            this,
-//            android.R.layout.simple_dropdown_item_1line,
-//            arrayListCategory
-//        )
-        autoTextViewBasecampCategoryCategoryAdapter =
+        autoTextViewBasecampCategoryAdapter =
             AutoCompleteTextViewBasecampCategoryAdapter(
                 this,
-                R.layout.auto_text_view_basecamp_icon_item,
+                R.layout.auto_text_view_basecamp_category_item,
                 arrayListBasecampCategory,
                 arrayListBasecampCategoryIcon
             )
-        autoTextViewBasecampCategory.setAdapter(autoTextViewBasecampCategoryCategoryAdapter)
+        autoTextViewBasecampCategory.setAdapter(autoTextViewBasecampCategoryAdapter)
         if (arrayListBasecampCategory.isNotEmpty() && autoTextViewBasecampCategory.editableText.isEmpty()) {
             if (sharedPref.getString("basecamp_category", null) != null) {
                 if (arrayListBasecampCategory.contains(
@@ -9972,9 +10034,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBasecampAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBasecampAssigneeAdapter = ArrayAdapter(
+        autoTextViewBasecampAssigneeAdapter = AutoCompleteTextViewBasecampAssigneeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_basecamp_assignee_item,
             arrayListBasecampAssignee
         )
         autoTextViewBasecampAssignee.setAdapter(autoTextViewBasecampAssigneeAdapter)
@@ -10017,9 +10079,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBasecampNotify: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBasecampNotifyAdapter = ArrayAdapter(
+        autoTextViewBasecampNotifyAdapter = AutoCompleteTextViewBasecampNotifyAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_basecamp_notify_item,
             arrayListBasecampNotify
         )
         autoTextViewBasecampNotify.setAdapter(autoTextViewBasecampNotifyAdapter)
@@ -10617,9 +10679,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewAsanaProjectAdapter = ArrayAdapter(
+        autoTextViewAsanaProjectAdapter = AutoCompleteTextViewAsanaProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_asana_project_item,
             arrayListAsanaProject
         )
         autoTextViewAsanaProject.setAdapter(autoTextViewAsanaProjectAdapter)
@@ -10671,12 +10733,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaSection: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewAsanaCategoryAdapter = ArrayAdapter(
+        autoTextViewAsanaSectorAdapter = AutoCompleteTextViewAsanaSectorAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_asana_sector_item,
             arrayListAsanaSection
         )
-        autoTextViewAsanaSector.setAdapter(autoTextViewAsanaCategoryAdapter)
+        autoTextViewAsanaSector.setAdapter(autoTextViewAsanaSectorAdapter)
         if (arrayListAsanaSection.isNotEmpty() && autoTextViewAsanaSector.editableText.isEmpty()) {
             if (sharedPref.getString("asana_section", null) != null) {
                 if (arrayListAsanaSection.contains(
@@ -10717,9 +10779,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaPriority: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewAsanaPriorityAdapter = ArrayAdapter(
+        autoTextViewAsanaPriorityAdapter = AutoCompleteTextViewAsanaPriorityAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_asana_priority_item,
             arrayListAsanaPriority
         )
         autoTextViewAsanaPriority.setAdapter(autoTextViewAsanaPriorityAdapter)
@@ -10762,9 +10824,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListAsanaAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewAsanaAssigneeAdapter = ArrayAdapter(
+        autoTextViewAsanaAssigneeAdapter = AutoCompleteTextViewAsanaAssigneeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_asana_assignee_item,
             arrayListAsanaAssignee
         )
         autoTextViewAsanaAssignee.setAdapter(autoTextViewAsanaAssigneeAdapter)
@@ -11142,9 +11204,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseProject(
         arrayListClubhouseProjects: ArrayList<String>
     ) {
-        autoTextViewClubhouseProjectAdapter = ArrayAdapter(
+        autoTextViewClubhouseProjectAdapter = AutoCompleteTextViewClubhouseProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_clubhouse_project_item,
             arrayListClubhouseProjects
         )
         autoTextViewClubhouseProject.setAdapter(autoTextViewClubhouseProjectAdapter)
@@ -11175,8 +11237,11 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseEpic(
         arrayListClubhouseEpic: ArrayList<String>
     ) {
-        autoTextViewClubhouseEpicAdapter =
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayListClubhouseEpic)
+        autoTextViewClubhouseEpicAdapter = AutoCompleteTextViewClubhouseEpicAdapter(
+            this,
+            R.layout.auto_text_view_clubhouse_epic_item,
+            arrayListClubhouseEpic
+        )
         autoTextViewClubhouseEpic.setAdapter(autoTextViewClubhouseEpicAdapter)
         if (arrayListClubhouseEpic.isNotEmpty() && autoTextViewClubhouseEpic.text.isEmpty()) {
             autoTextViewClubhouseEpic.setText(arrayListClubhouseEpic[0], false)
@@ -11213,9 +11278,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseStoryType(
         arrayListClubhouseStoryType: ArrayList<String>
     ) {
-        autoTextViewClubhouseStoryTypeAdapter = ArrayAdapter(
+        autoTextViewClubhouseStoryTypeAdapter = AutoCompleteTextViewClubhouseStoryTypeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_clubhouse_story_item,
             arrayListClubhouseStoryType
         )
         autoTextViewClubhouseStoryType.setAdapter(autoTextViewClubhouseStoryTypeAdapter)
@@ -11256,9 +11321,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     internal fun initializeClubhouseRequester(
         arrayListClubhouseRequester: ArrayList<String>
     ) {
-        autoTextViewClubhouseRequesterAdapter = ArrayAdapter(
+        autoTextViewClubhouseRequesterAdapter = AutoCompleteTextViewClubhouseRequesterAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_clubhouse_requester_item,
             arrayListClubhouseRequester
         )
         autoTextViewClubhouseRequester.setAdapter(autoTextViewClubhouseRequesterAdapter)
@@ -12423,9 +12488,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBitbucketProject: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBitbucketProjectAdapter = ArrayAdapter(
+        autoTextViewBitbucketProjectAdapter = AutoCompleteTextViewBitbucketProjectAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_bitbucket_project_item,
             arrayListBitbucketProject
         )
         autoTextViewBitbucketProject.setAdapter(autoTextViewBitbucketProjectAdapter)
@@ -12477,9 +12542,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBitbucketAssignee: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBitbucketAssigneeAdapter = ArrayAdapter(
+        autoTextViewBitbucketAssigneeAdapter = AutoCompleteTextViewBitbucketAssigneeAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_bitbucket_assignee_item,
             arrayListBitbucketAssignee
         )
         autoTextViewBitbucketAssignee.setAdapter(autoTextViewBitbucketAssigneeAdapter)
@@ -12522,9 +12587,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBitbucketPriority: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBitbucketPriorityAdapter = ArrayAdapter(
+        autoTextViewBitbucketPriorityAdapter = AutoCompleteTextViewBitbucketPriorityAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_bitbucket_priority_item,
             arrayListBitbucketPriority
         )
         autoTextViewBitbucketPriority.setAdapter(autoTextViewBitbucketPriorityAdapter)
@@ -12568,9 +12633,9 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
         arrayListBitbucketKind: ArrayList<String>,
         sharedPref: SharedPreferences
     ) {
-        autoTextViewBitbucketKindAdapter = ArrayAdapter(
+        autoTextViewBitbucketKindAdapter = AutoCompleteTextViewBitbucketKindAdapter(
             this,
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.auto_text_view_bitbucket_kind_item,
             arrayListBitbucketKind
         )
         autoTextviewBitbucketKind.setAdapter(autoTextViewBitbucketKindAdapter)
