@@ -23,8 +23,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:navigationIcon="@drawable/ic_asana_logo_24dp"
             app:menu="@menu/loggerbird_asana_menu"
+            app:navigationIcon="@drawable/ic_asana_logo_24dp"
             app:title="@string/textView_loggerbird_asana_title"></androidx.appcompat.widget.Toolbar>
 
         <TextView
@@ -151,11 +151,11 @@
         <ImageView
             android:id="@+id/imageView_asana_remove_date"
             android:layout_width="wrap_content"
-            android:visibility="gone"
             android:layout_height="20dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="5dp"
             android:layout_weight="1"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintTop_toBottomOf="@+id/textView_asana_start_date_title"
@@ -322,10 +322,10 @@
             android:id="@+id/imageView_asana_subtask"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="visible"
             android:layout_marginLeft="5dp"
             android:layout_marginTop="10dp"
             android:layout_marginRight="5dp"
+            android:visibility="visible"
             app:layout_constraintEnd_toStartOf="@+id/recycler_view_asana_sub_tasks_list"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
@@ -336,16 +336,13 @@
             android:id="@+id/recycler_view_asana_sub_tasks_list"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:visibility="visible"
             android:layout_marginLeft="5dp"
             android:layout_marginTop="10dp"
+            android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/imageView_asana_subtask"
-            app:layout_constraintTop_toBottomOf="@+id/textView_sub_tasks_list">
-        </androidx.recyclerview.widget.RecyclerView>
-
-
+            app:layout_constraintTop_toBottomOf="@+id/textView_sub_tasks_list"></androidx.recyclerview.widget.RecyclerView>
 
         <TextView
             android:id="@+id/textView_asana_attachments"
@@ -388,11 +385,9 @@
         <Button
             android:id="@+id/button_asana_create"
             style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
             android:layout_marginTop="25dp"
-            android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:background="@drawable/pop_up_button_shape"
             android:fontFamily="@font/galanogrotesquesemibold"
@@ -401,19 +396,16 @@
             android:textColor="@color/white"
             android:textSize="18sp"
             app:elevation="5dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/guideline2"
+            app:layout_constraintStart_toEndOf="@id/guideline"
             app:layout_constraintTop_toBottomOf="@+id/recycler_view_asana_attachment" />
 
         <Button
             android:id="@+id/button_asana_cancel"
             style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_marginLeft="5dp"
             android:layout_marginTop="10dp"
-            android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:background="@drawable/pop_up_cancel_button_shape"
             android:fontFamily="@font/galanogrotesquesemibold"
@@ -422,8 +414,8 @@
             android:textColor="@color/black"
             android:textSize="18sp"
             app:elevation="5dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/guideline2"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
             app:layout_constraintTop_toBottomOf="@+id/button_asana_create" />
 
         <androidx.constraintlayout.widget.Group
@@ -431,8 +423,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            app:constraint_referenced_ids="textView_sub_tasks_list,imageView_asana_subtask,recycler_view_asana_sub_tasks_list">
-        </androidx.constraintlayout.widget.Group>
+            app:constraint_referenced_ids="textView_sub_tasks_list,imageView_asana_subtask,recycler_view_asana_sub_tasks_list"></androidx.constraintlayout.widget.Group>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="5dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="5dp" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
