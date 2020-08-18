@@ -423,7 +423,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            app:constraint_referenced_ids="textView_sub_tasks_list,imageView_asana_subtask,recycler_view_asana_sub_tasks_list"></androidx.constraintlayout.widget.Group>
+            app:constraint_referenced_ids="textView_sub_tasks_list,imageView_asana_subtask,recycler_view_asana_sub_tasks_list">
+        </androidx.constraintlayout.widget.Group>
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
@@ -439,11 +440,7 @@
             android:orientation="vertical"
             app:layout_constraintGuide_end="5dp" />
 
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
 
 </androidx.core.widget.NestedScrollView>
 
