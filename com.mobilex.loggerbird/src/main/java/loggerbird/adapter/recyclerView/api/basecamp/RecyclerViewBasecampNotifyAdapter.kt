@@ -218,10 +218,10 @@ internal class RecyclerViewBasecampNotifyAdapter(
                 arrayListNotify = notifyList
                 notifyAdapter.notifyDataSetChanged()
                 removePopupLayout()
-                if (notifyList.size <= 0) {
-                    LoggerBirdService.loggerBirdService.cardViewBasecampNotifyList.visibility =
-                        View.GONE
-                }
+//                if (notifyList.size <= 0) {
+//                    LoggerBirdService.loggerBirdService.cardViewBasecampNotifyList.visibility =
+//                        View.GONE
+//                }
             }
             buttonNo.setSafeOnClickListener {
                 removePopupLayout()

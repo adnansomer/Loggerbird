@@ -577,6 +577,7 @@
     <string name="textView_asana_sub_tasks_list">Subtasks list</string>
     <string name="textView_asana_attachment">Attachments</string>
     <string name="textView_asana_start_date">Start date</string>
+    <string name="textView_asana_enter_start_date_enter">Enter a start date for issue</string>
     <string name="button_asana_create">Create</string>
     <string name="button_asana_cancel">Cancel</string>
     <!-- loggerbird_asana_sub_popup-->

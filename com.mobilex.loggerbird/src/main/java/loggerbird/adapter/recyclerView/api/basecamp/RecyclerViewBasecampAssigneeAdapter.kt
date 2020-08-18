@@ -206,9 +206,9 @@ internal class RecyclerViewBasecampAssigneeAdapter(
                 arrayListAssignee = assigneeList
                 assigneeAdapter.notifyDataSetChanged()
                 removePopupLayout()
-                if(assigneeList.size <=0){
-                    LoggerBirdService.loggerBirdService.cardViewBasecampAssigneeList.visibility = View.GONE
-                }
+//                if(assigneeList.size <=0){
+//                    LoggerBirdService.loggerBirdService.cardViewBasecampAssigneeList.visibility = View.GONE
+//                }
             }
             buttonNo.setSafeOnClickListener {
                 removePopupLayout()

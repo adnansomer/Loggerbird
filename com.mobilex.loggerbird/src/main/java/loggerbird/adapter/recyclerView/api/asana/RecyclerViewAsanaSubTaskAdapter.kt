@@ -299,8 +299,9 @@ internal class RecyclerViewAsanaSubTaskAdapter(
                     hashMapSubFile.remove(subtaskList[position].subtaskName)
                 }
                 if (subtaskList.size <= 0) {
-                    LoggerBirdService.loggerBirdService.cardViewAsanaSubTasksList.visibility =
-                        View.GONE
+                    //LoggerBirdService.loggerBirdService.cardViewAsanaSubTasksList.visibility = View.GONE
+                    LoggerBirdService.loggerBirdService.imageViewAsanaSubTask.visibility = View.GONE
+                    LoggerBirdService.loggerBirdService.recyclerViewAsanaSubTasksList.visibility = View.GONE
                 }
             }
             buttonNo.setSafeOnClickListener {

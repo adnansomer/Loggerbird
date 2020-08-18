@@ -577,6 +577,7 @@
     <string name="textView_asana_sub_tasks_list">Subtasks list</string>
     <string name="textView_asana_attachment">Attachments</string>
     <string name="textView_asana_start_date">Start date</string>
+    <string name="textView_asana_enter_start_date_enter">Enter a start date for issue</string>
     <string name="button_asana_create">Create</string>
     <string name="button_asana_cancel">Cancel</string>
     <!-- loggerbird_asana_sub_popup-->
@@ -643,6 +644,7 @@
     <string name="button_recyclerView_trello_item_yes">Delete Item</string>
     <string name="button_recyclerView_trello_item_no">Keep Item</string>
     <!-- loggerbird_bitbucket_popup-->
+    <string name="textView_bitbucket_toolbar_title">Create Bitbucket Issue</string>
     <string name="textView_bitbucket_project">Project</string>
     <string name="textView_bitbucket_assignee">Assignee</string>
     <string name="textView_bitbucket_priority">Priority</string>

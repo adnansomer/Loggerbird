@@ -1,730 +1,592 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/layout_basecamp"
+<androidx.core.widget.NestedScrollView xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView_basecamp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:layout_margin="10dp"
+    android:scrollbars="vertical"
+    android:scrollbarStyle="insideOverlay"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-
-    <LinearLayout
-        style="@style/Dialog"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorFab"
-        android:orientation="vertical">
+        android:background="@drawable/pop_up_shape">
 
-        <LinearLayout
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_basecamp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorFab"
-            android:orientation="vertical">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar_basecamp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/colorFab"
-                app:menu="@menu/loggerbird_basecamp_menu"
-                app:navigationIcon="@drawable/ic_arrow_back_black_24dp"
-                app:title="@string/textView_jira_title"
-                app:titleTextColor="@color/black"></androidx.appcompat.widget.Toolbar>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="3dp"
-                    android:background="@drawable/toolbar_shadow"></View>
-
-            </FrameLayout>
-
-        </LinearLayout>
-
-        <ScrollView
-            android:id="@+id/scrollView_basecamp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/white"
-            android:clickable="true"
-            android:focusable="true">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#f5f5f5"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/textView_basecamp_message_board"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="5dp"
-                    android:text="@string/textView_basecamp_message_board"
-                    android:textColor="@color/black"
-                    android:textSize="17sp"></TextView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_project"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView_basecamp_project"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/textView_basecamp_project"
-                            android:textColor="@color/black"
-                            android:textSize="17sp"></TextView>
-
-                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                            android:id="@+id/auto_textView_basecamp_project"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@null"
-                            android:dropDownHeight="100dp"
-                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-
-                    </LinearLayout>
-
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_basecamp_title"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"></TextView>
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editText_basecamp_title"
-                            android:layout_width="match_parent"
-                            android:layout_height="30dp"
-                            android:layout_marginEnd="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@null"
-                            android:cursorVisible="true"
-                            android:gravity="top"
-                            android:hint="@string/editText_basecamp_title_hint"
-                            android:lines="5"
-                            android:maxLines="5"
-                            android:textCursorDrawable="@color/colorBlack"
-                            android:textSize="16sp">
-
-                        </com.google.android.material.textfield.TextInputEditText>
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_category"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView_basecamp_category"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/textView_basecamp_category"
-                            android:textColor="@color/black"
-                            android:textSize="17sp"></TextView>
-
-                        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                            android:id="@+id/auto_textView_basecamp_category"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@null"
-                            android:dropDownHeight="100dp"
-                            android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-
-                    </LinearLayout>
-
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_description_message"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_basecamp_description_message"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"></TextView>
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editText_basecamp_description_messsage"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@null"
-                            android:cursorVisible="true"
-                            android:gravity="top"
-                            android:hint="@string/editText_basecamp_description_message"
-                            android:lines="5"
-                            android:maxLines="5"
-                            android:textCursorDrawable="@color/colorBlack"
-                            android:textSize="16sp">
-
-                        </com.google.android.material.textfield.TextInputEditText>
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <TextView
-                    android:id="@+id/textView_basecamp_todo_board"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="5dp"
-                    android:text="@string/textView_basecamp_todo_board"
-                    android:textColor="@color/black"
-                    android:textSize="17sp"></TextView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_basecamp_name"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"></TextView>
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editText_basecamp_name"
-                            android:layout_width="match_parent"
-                            android:layout_height="30dp"
-                            android:layout_marginEnd="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@null"
-                            android:cursorVisible="true"
-                            android:gravity="top"
-                            android:hint="@string/editText_basecamp_name_hint"
-                            android:lines="5"
-                            android:maxLines="5"
-                            android:textCursorDrawable="@color/colorBlack"
-                            android:textSize="16sp">
-
-                        </com.google.android.material.textfield.TextInputEditText>
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_basecamp_description_todo"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"></TextView>
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editText_basecamp_description_todo"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@null"
-                            android:cursorVisible="true"
-                            android:gravity="top"
-                            android:hint="@string/editText_basecamp_description_todo"
-                            android:lines="5"
-                            android:maxLines="5"
-                            android:textCursorDrawable="@color/colorBlack"
-                            android:textSize="16sp">
-
-                        </com.google.android.material.textfield.TextInputEditText>
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_content"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_basecamp_content"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"></TextView>
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editText_basecamp_content"
-                            android:layout_width="match_parent"
-                            android:layout_height="30dp"
-                            android:layout_marginEnd="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@null"
-                            android:cursorVisible="true"
-                            android:gravity="top"
-                            android:hint="@string/editText_basecamp_content_hint"
-                            android:lines="5"
-                            android:maxLines="5"
-                            android:textCursorDrawable="@color/colorBlack"
-                            android:textSize="16sp">
-
-                        </com.google.android.material.textfield.TextInputEditText>
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_assignee"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_basecamp_assignee"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"></TextView>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_basecamp_assignee"
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:background="@null"
-                                android:dropDownHeight="100dp"
-                                android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-
-                            <ImageView
-                                android:id="@+id/imageView_assignee_add"
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                app:srcCompat="@drawable/ic_add_black_24dp" />
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_assignee_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    android:visibility="gone"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView_assignee_list"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/textView_basecamp_assignee_list"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                app:srcCompat="@drawable/ic_account_circle_black_24dp">
-
-                            </ImageView>
-
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/recycler_view_basecamp_assignee_list"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_notify"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_basecamp_notify"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"></TextView>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                                android:id="@+id/auto_textView_basecamp_notify"
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:background="@null"
-                                android:dropDownHeight="100dp"
-                                android:singleLine="true"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-
-                            <ImageView
-                                android:id="@+id/imageView_notify_add"
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                app:srcCompat="@drawable/ic_add_black_24dp" />
-                        </LinearLayout>
-
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_notify_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    android:visibility="gone"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView_notify_list"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/textView_basecamp_notify_list"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                app:srcCompat="@drawable/ic_account_circle_black_24dp">
-
-                            </ImageView>
-
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/recycler_view_basecamp_notify_list"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_start_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/textView_asana_start_date"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="@string/textView_basecamp_start_date"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-
-                        <ImageView
-                            android:id="@+id/imageView_start_date"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="5dp"
-                            android:layout_marginLeft="5dp"
-                            app:srcCompat="@drawable/ic_date_range_black_24dp">
-
-                        </ImageView>
-
-                        <ImageButton
-                            android:id="@+id/image_button_basecamp_remove_date"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="5dp"
-                            android:layout_marginLeft="5dp"
-                            android:background="@color/white"
-                            android:visibility="gone"
-                            app:srcCompat="@drawable/ic_close_black_24dp"></ImageButton>
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <TextView
-                    android:id="@+id/textView_basecamp_attachments_board"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="5dp"
-                    android:text="@string/textView_basecamp_attachments_board"
-                    android:textColor="@color/black"
-                    android:textSize="17sp"></TextView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardView_attachment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView_basecamp_attachments"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/textView_pivotal_attachment"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:gravity="center"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                app:srcCompat="@drawable/ic_attach_file_black_24dp">
-
-                            </ImageView>
-
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/recycler_view_basecamp_attachment"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-
-                </androidx.cardview.widget.CardView>
-
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="10dp"
-                    android:orientation="horizontal"
-                    android:weightSum="2">
-
-                    <Button
-                        android:id="@+id/button_basecamp_cancel"
-                        style="@style/Widget.AppCompat.Button.Borderless"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="start"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp"
-                        android:layout_weight="1"
-                        android:background="@color/colorFab"
-                        android:text="@string/button_basecamp_cancel"
-                        android:textAllCaps="false"
-                        android:textColor="@color/secondaryColor"
-                        android:textSize="18sp"
-                        app:elevation="5dp" />
-
-                    <Button
-                        android:id="@+id/button_basecamp_create"
-                        style="@style/Widget.AppCompat.Button.Borderless"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:background="@color/colorFab"
-                        android:text="@string/button_basecamp_create"
-                        android:textAllCaps="false"
-                        android:textColor="@color/black"
-                        android:textSize="18sp"
-                        app:elevation="5dp" />
-
-                </LinearLayout>
-
-
-            </LinearLayout>
-
-        </ScrollView>
-
-    </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/basecamp_progressbar_background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/darkTransparent"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone">
-
-        <ProgressBar
-            android:id="@+id/basecamp_progressbar"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:indeterminate="true"
-            android:indeterminateDrawable="@drawable/progress_bar_loading"
-            android:indeterminateDuration="1000"
-            android:visibility="gone"></ProgressBar>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/loggerbird_basecamp_menu"
+            app:navigationIcon="@drawable/ic_basecamp_logo_24dp"
+            app:title="@string/textView_bitbucket_toolbar_title"></androidx.appcompat.widget.Toolbar>
 
-    </FrameLayout>
+        <TextView
+            android:id="@+id/textView_basecamp_project"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_basecamp_project"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_basecamp"></TextView>
 
+        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+            android:id="@+id/auto_textView_basecamp_project"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="5dp"
+            android:background="@null"
+            android:dropDownHeight="100dp"
+            android:singleLine="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_project"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
-</FrameLayout>
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_basecamp_title"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/auto_textView_basecamp_project"></TextView>
 
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_basecamp_title"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="5dp"
+            android:background="@null"
+            android:cursorVisible="true"
+            android:gravity="top"
+            android:hint="@string/editText_basecamp_title_hint"
+            android:lines="5"
+            android:maxLines="5"
+            android:textCursorDrawable="@color/colorBlack"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView7"></com.google.android.material.textfield.TextInputEditText>
 
+        <TextView
+            android:id="@+id/textView_basecamp_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_basecamp_category"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editText_basecamp_title"></TextView>
+
+        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+            android:id="@+id/auto_textView_basecamp_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="5dp"
+            android:background="@null"
+            android:dropDownHeight="100dp"
+            android:singleLine="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_category"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_basecamp_description_message"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/auto_textView_basecamp_category"></TextView>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_basecamp_description_messsage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="5dp"
+            android:background="@null"
+            android:cursorVisible="true"
+            android:gravity="top"
+            android:hint="@string/editText_basecamp_description_message"
+            android:lines="5"
+            android:maxLines="5"
+            android:textCursorDrawable="@color/colorBlack"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView9">
+
+        </com.google.android.material.textfield.TextInputEditText>
+
+        <TextView
+            android:id="@+id/textView_basecamp_todo_board"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="5dp"
+            android:fontFamily="@font/ptserifbold"
+            android:text="@string/textView_basecamp_todo_board"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editText_basecamp_description_messsage"></TextView>
+
+        <TextView
+            android:id="@+id/textView_basecamp_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_basecamp_name"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_todo_board"></TextView>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_basecamp_name"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="5dp"
+            android:background="@null"
+            android:cursorVisible="true"
+            android:gravity="top"
+            android:hint="@string/editText_basecamp_name_hint"
+            android:lines="5"
+            android:maxLines="5"
+            android:textCursorDrawable="@color/colorBlack"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_name"></com.google.android.material.textfield.TextInputEditText>
+
+        <TextView
+            android:id="@+id/textView_basecamp_description_todo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_basecamp_description_todo"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editText_basecamp_name"></TextView>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_basecamp_description_todo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="5dp"
+            android:background="@null"
+            android:cursorVisible="true"
+            android:gravity="top"
+            android:hint="@string/editText_basecamp_description_todo"
+            android:lines="5"
+            android:maxLines="5"
+            android:textCursorDrawable="@color/colorBlack"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_description_todo"></com.google.android.material.textfield.TextInputEditText>
+
+        <TextView
+            android:id="@+id/textView_basecamp_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_basecamp_content"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editText_basecamp_description_todo"></TextView>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_basecamp_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="5dp"
+            android:background="@null"
+            android:cursorVisible="true"
+            android:gravity="top"
+            android:hint="@string/editText_basecamp_content_hint"
+            android:lines="5"
+            android:maxLines="5"
+            android:textCursorDrawable="@color/colorBlack"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_content"></com.google.android.material.textfield.TextInputEditText>
+
+        <TextView
+            android:id="@+id/textView_basecamp_assignee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_basecamp_assignee"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editText_basecamp_content"></TextView>
+
+        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+            android:id="@+id/auto_textView_basecamp_assignee"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="5dp"
+            android:background="@null"
+            android:dropDownHeight="100dp"
+            android:singleLine="true"
+            app:layout_constraintEnd_toStartOf="@+id/imageView_assignee_add"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_assignee"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+
+        <ImageView
+            android:id="@+id/imageView_assignee_add"
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/auto_textView_basecamp_assignee"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_assignee"
+            app:srcCompat="@drawable/ic_add_black_24dp" />
+
+        <TextView
+            android:id="@+id/textView_assignee_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_basecamp_assignee_list"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/auto_textView_basecamp_assignee" />
+
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintEnd_toStartOf="@+id/recycler_view_basecamp_assignee_list"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_assignee_list"
+            app:srcCompat="@drawable/ic_account_circle_black_24dp"></ImageView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_basecamp_assignee_list"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/imageView3"
+            app:layout_constraintTop_toBottomOf="@+id/textView_assignee_list"></androidx.recyclerview.widget.RecyclerView>
+
+        <TextView
+            android:id="@+id/textView_basecamp_notify"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_basecamp_notify"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/recycler_view_basecamp_assignee_list"></TextView>
+
+        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+            android:id="@+id/auto_textView_basecamp_notify"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="5dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:dropDownHeight="100dp"
+            android:singleLine="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/imageView_notify_add"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_notify"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+
+        <ImageView
+            android:id="@+id/imageView_notify_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintEnd_toStartOf="@+id/auto_textView_basecamp_notify"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_notify"
+            app:srcCompat="@drawable/ic_add_black_24dp" />
+
+        <TextView
+            android:id="@+id/textView_notify_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_basecamp_notify_list"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/auto_textView_basecamp_notify" />
+
+        <ImageView
+            android:id="@+id/imageView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintEnd_toStartOf="@+id/recycler_view_basecamp_notify_list"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_notify_list"
+            app:srcCompat="@drawable/ic_account_circle_black_24dp"></ImageView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_basecamp_notify_list"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="5dp"
+            android:autofillHints="Nothing selected"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/imageView4"
+            app:layout_constraintTop_toBottomOf="@+id/textView_notify_list"></androidx.recyclerview.widget.RecyclerView>
+
+        <TextView
+            android:id="@+id/textView_basecamp_start_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_basecamp_start_date"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_goneMarginTop="15dp"
+            app:layout_constraintTop_toBottomOf="@+id/recycler_view_basecamp_notify_list" />
+
+        <TextView
+            android:id="@+id/textView_basecamp_start_date_enter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="10dp"
+            android:hint="@string/textView_asana_enter_start_date_enter"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/imageView_delete_basecamp_startDate"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_start_date" />
+
+        <ImageView
+            android:id="@+id/imageView_delete_basecamp_startDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="5dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/textView_basecamp_start_date_enter"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_start_date"
+            app:srcCompat="@drawable/ic_delete_black_24dp"></ImageView>
+
+        <TextView
+            android:id="@+id/textView_basecamp_attachments_board"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:fontFamily="@font/ptserifbold"
+            android:gravity="center"
+            android:text="@string/textView_basecamp_attachments_board"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_start_date_enter"></TextView>
+
+        <TextView
+            android:id="@+id/textView_basecamp_attachments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_pivotal_attachment"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_attachments_board" />
+
+        <ImageView
+            android:id="@+id/imageView5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintEnd_toStartOf="@+id/recycler_view_basecamp_attachment"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_attachments"
+            app:srcCompat="@drawable/ic_attach_file_black_24dp"></ImageView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_basecamp_attachment"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/imageView5"
+            app:layout_constraintTop_toBottomOf="@+id/textView_basecamp_attachments"></androidx.recyclerview.widget.RecyclerView>
+
+        <Button
+            android:id="@+id/button_basecamp_create"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="25dp"
+            android:text="@string/button_basecamp_create"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:background="@drawable/pop_up_button_shape"
+            app:elevation="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/recycler_view_basecamp_attachment"/>
+
+        <Button
+            android:id="@+id/button_basecamp_cancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/pop_up_cancel_button_shape"
+            android:gravity="center"
+            android:text="@string/button_slack_cancel"
+            android:textAllCaps="true"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:layout_marginBottom="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/button_basecamp_create" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="top" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>
