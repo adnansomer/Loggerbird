@@ -1,461 +1,385 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/layout_slack"
+<FrameLayout
     android:layout_width="match_parent"
-    android:background="@color/darkTransparent"
-    android:layout_height="match_parent">
-
-    <LinearLayout
-        android:layout_margin="20dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="@drawable/pop_up_shape"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorFab"
-            android:orientation="vertical">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar_slack"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/colorFab"
-                app:navigationIcon="@drawable/ic_slack_logo_24dp"
-                app:menu="@menu/loggerbird_slack_toolbar_menu"
-                app:title="@string/textView_slack_title"
-                app:titleTextColor="@color/black">
-            </androidx.appcompat.widget.Toolbar>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@drawable/toolbar_shadow">
-                </View>
-            </FrameLayout>
-
-        </LinearLayout>
-
-        <ScrollView
-            android:id="@+id/slack_send_channel_layout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:visibility="visible"
-            android:background="@color/colorFab">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="visible"
-                android:layout_margin="10dp">
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView_slack_channel"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:baselineAligned="false"
-                            android:text="@string/textView_slack_channel"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-                        <Spinner
-                            android:id="@+id/spinner_slack_channel"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp" />
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_slack_message"
-                            android:textColor="@color/black"
-                            android:textSize="16sp">
-                        </TextView>
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editText_slack_message"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@null"
-                            android:cursorVisible="true"
-                            android:gravity="top"
-                            android:hint="@string/editText_slack_message"
-                            android:lines="6"
-                            android:maxLines="6"
-                            android:textCursorDrawable="@color/colorBlack"
-                            android:textSize="16sp">
-                        </com.google.android.material.textfield.TextInputEditText>
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView_slack_attachments"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/textView_slack_attachment"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                app:srcCompat="@drawable/ic_attach_file_black_24dp">
-
-                            </ImageView>
-
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:visibility="visible"
-                                android:id="@+id/recycler_view_slack_attachment"
-                                android:layout_width="match_parent"
-                                android:layout_gravity="center"
-                                android:layout_height="wrap_content">
-                            </androidx.recyclerview.widget.RecyclerView>
-
-                            <TextView
-                                android:id="@+id/textView_slack_no_attachment"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:textSize="16sp"
-                                android:visibility="gone"
-                                android:text="@string/textView_slack_no_attachment">
-                            </TextView>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-
-                </androidx.cardview.widget.CardView>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:orientation="vertical"
-                    android:weightSum="2">
-
-                    <Button
-                        android:id="@+id/button_slack_create"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:layout_gravity="center"
-                        android:background="@drawable/pop_up_button_shape"
-                        android:text="@string/button_slack_create"
-                        android:textAllCaps="true"
-                        android:textColor="@color/white"
-                        android:textSize="18sp"
-                        app:elevation="5dp" />
-
-                    <Button
-                        android:id="@+id/button_slack_cancel"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:layout_weight="1"
-                        android:background="@drawable/pop_up_cancel_button_shape"
-                        android:text="@string/button_slack_cancel"
-                        android:textAllCaps="true"
-                        android:textColor="@color/black"
-                        android:textSize="18sp" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </ScrollView>
-
-        <ScrollView
-            android:id="@+id/slack_send_user_layout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:visibility="gone"
-            android:background="@color/colorFab">
-
-            <LinearLayout
-
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_margin="10dp"
-                android:visibility="visible">
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:baselineAligned="false"
-                            android:text="@string/textView_slack_user"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-                        <Spinner
-                            android:id="@+id/spinner_slack_user"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp" />
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="@string/textView_slack_message"
-                            android:textColor="@color/black"
-                            android:textSize="16sp">
-                        </TextView>
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editText_slack_message_user"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@null"
-                            android:cursorVisible="true"
-                            android:gravity="top"
-                            android:hint="@string/editText_slack_message"
-                            android:lines="6"
-                            android:maxLines="6"
-                            android:textCursorDrawable="@color/colorBlack"
-                            android:textSize="16sp">
-                        </com.google.android.material.textfield.TextInputEditText>
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    app:cardElevation="5dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView_slack_attachments_user"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/textView_slack_attachment"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                app:srcCompat="@drawable/ic_attach_file_black_24dp">
-
-                            </ImageView>
-
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/recycler_view_slack_attachment_user"
-                                android:layout_width="match_parent"
-                                android:visibility="visible"
-                                android:layout_gravity="center"
-                                android:layout_height="wrap_content">
-                            </androidx.recyclerview.widget.RecyclerView>
-
-                            <TextView
-                                android:id="@+id/textView_slack_user_no_attachment"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:textSize="16sp"
-                                android:visibility="gone"
-                                android:text="@string/textView_slack_no_attachment">
-                            </TextView>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-
-                </androidx.cardview.widget.CardView>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:orientation="vertical"
-                    android:weightSum="2">
-
-                    <Button
-                        android:id="@+id/button_slack_create_user"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:layout_gravity="center"
-                        android:background="@drawable/pop_up_button_shape"
-                        android:text="@string/button_slack_create"
-                        android:textAllCaps="true"
-                        android:textColor="@color/white"
-                        android:textSize="18sp"
-                        app:elevation="5dp" />
-
-                    <Button
-                        android:id="@+id/button_slack_cancel_user"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:layout_weight="1"
-                        android:background="@drawable/pop_up_cancel_button_shape"
-                        android:text="@string/button_slack_cancel"
-                        android:textAllCaps="true"
-                        android:textColor="@color/black"
-                        android:textSize="18sp" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </ScrollView>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@drawable/toolbar_shadow">
-                </View>
-            </FrameLayout>
-
-            <com.google.android.material.bottomnavigation.BottomNavigationView
-                android:id="@+id/slack_bottom_nav_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/colorFab"
-                android:theme="@style/BottomNavigationTheme"
-                app:menu="@menu/loggerbird_slack_menu">
-
-            </com.google.android.material.bottomnavigation.BottomNavigationView>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/slack_progressbar_background"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/slack_send_channel_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:focusable="true"
-        android:clickable="true"
-        android:background="@color/darkTransparent"
-        android:visibility="gone">
+        android:visibility="visible"
+        android:background="@drawable/pop_up_shape">
 
-        <ProgressBar
-            android:id="@+id/slack_progressbar"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_gitlab_channel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_margin="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/loggerbird_slack_toolbar_menu"
+            app:navigationIcon="@drawable/ic_slack_logo_24dp"
+            app:title="@string/textView_slack_title">
+        </androidx.appcompat.widget.Toolbar>
+
+        <TextView
+            android:id="@+id/textView_slack_channel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:baselineAligned="false"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_slack_channel"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_gitlab_channel" />
+
+        <Spinner
+            android:id="@+id/spinner_slack_channel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView_slack_channel" />
+
+        <TextView
+            android:id="@+id/textView_slack_message"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_slack_message"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_slack_channel">
+        </TextView>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_slack_message"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@null"
+            android:cursorVisible="true"
+            android:gravity="top"
+            android:hint="@string/editText_slack_message"
+            android:lines="6"
+            android:maxLines="6"
+            android:textCursorDrawable="@color/colorBlack"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView_slack_message">
+        </com.google.android.material.textfield.TextInputEditText>
+
+        <TextView
+            android:id="@+id/textView_slack_attachments"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_slack_attachment"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/editText_slack_message" />
+
+        <ImageView
+            android:id="@+id/imageView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            android:indeterminateDrawable="@drawable/progress_bar_loading"
-            android:indeterminateDuration="1000"
-            android:visibility="visible">
-        </ProgressBar>
+            android:layout_marginTop="10dp"
+            app:layout_constraintEnd_toStartOf="@+id/recycler_view_slack_attachment"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@id/guidelineLeft"
+            app:layout_constraintTop_toBottomOf="@+id/textView_slack_attachments"
+            app:srcCompat="@drawable/ic_attach_file_black_24dp">
+        </ImageView>
 
-    </FrameLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_slack_attachment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="@id/guidelineRight"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/imageView6"
+            app:layout_constraintTop_toBottomOf="@+id/textView_slack_attachments">
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <Button
+            android:id="@+id/button_slack_create"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
+            android:layout_weight="1"
+            android:background="@drawable/pop_up_button_shape"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:gravity="center"
+            android:text="@string/button_slack_create"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            app:elevation="5dp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view_slack_attachment" />
+
+        <Button
+            android:id="@+id/button_slack_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/pop_up_cancel_button_shape"
+            android:gravity="center"
+            android:text="@string/button_slack_cancel"
+            android:textAllCaps="true"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
+            app:layout_constraintTop_toBottomOf="@id/button_slack_create" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="5dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="5dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineBottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_end="5dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/slack_send_user_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:background="@drawable/pop_up_shape">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_gitlab_user"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/loggerbird_slack_toolbar_menu"
+            app:navigationIcon="@drawable/ic_slack_logo_24dp"
+            app:title="@string/textView_slack_title">
+        </androidx.appcompat.widget.Toolbar>
+
+        <TextView
+            android:id="@+id/textView_slack_user"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:baselineAligned="false"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_slack_user"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight_2"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft_2"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_gitlab_user" />
+
+        <Spinner
+            android:id="@+id/spinner_slack_user"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight_2"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft_2"
+            app:layout_constraintTop_toBottomOf="@+id/textView_slack_user" />
+
+        <TextView
+            android:id="@+id/textView_slack_message_user"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_slack_message"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight_2"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft_2"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_slack_user">
+        </TextView>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_slack_message_user"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@null"
+            android:cursorVisible="true"
+            android:gravity="top"
+            android:hint="@string/editText_slack_message"
+            android:lines="6"
+            android:maxLines="6"
+            android:textCursorDrawable="@color/colorBlack"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight_2"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft_2"
+            app:layout_constraintTop_toBottomOf="@+id/textView_slack_message_user">
+        </com.google.android.material.textfield.TextInputEditText>
+
+        <TextView
+            android:id="@+id/textView_slack_attachments_user"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:text="@string/textView_slack_attachment"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight_2"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft_2"
+            app:layout_constraintTop_toBottomOf="@+id/editText_slack_message_user" />
+
+        <ImageView
+            android:id="@+id/imageView_slack_attachment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:layout_constraintEnd_toStartOf="@+id/recycler_view_slack_attachment_user"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@id/guidelineLeft_2"
+            app:layout_constraintTop_toBottomOf="@+id/textView_slack_attachments_user"
+            app:srcCompat="@drawable/ic_attach_file_black_24dp">
+        </ImageView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_slack_attachment_user"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="@id/guidelineRight_2"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/imageView_slack_attachment"
+            app:layout_constraintTop_toBottomOf="@+id/textView_slack_attachments_user">
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <Button
+            android:id="@+id/button_slack_create_user"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
+            android:layout_weight="1"
+            android:background="@drawable/pop_up_button_shape"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            android:gravity="center"
+            android:text="@string/button_slack_create"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            app:elevation="5dp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight_2"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft_2"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view_slack_attachment_user" />
+
+        <Button
+            android:id="@+id/button_slack_cancel_user"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/pop_up_cancel_button_shape"
+            android:gravity="center"
+            android:text="@string/button_slack_cancel"
+            android:textAllCaps="true"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/galanogrotesquesemibold"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight_2"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft_2"
+            app:layout_constraintTop_toBottomOf="@id/button_slack_create_user" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineLeft_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="5dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineRight_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="5dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineBottom_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_end="5dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/slack_bottom_nav_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorFab"
+        android:theme="@style/BottomNavigationTheme"
+        android:layout_gravity="bottom"
+        app:menu="@menu/loggerbird_slack_menu">
+
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
 
 </FrameLayout>
+
+
+
+
+

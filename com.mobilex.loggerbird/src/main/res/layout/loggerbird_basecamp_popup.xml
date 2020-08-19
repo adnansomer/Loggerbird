@@ -1,4 +1,4 @@
-<androidx.core.widget.NestedScrollView xmlns:tools="http://schemas.android.com/tools"
+<androidx.core.widget.NestedScrollView
     android:id="@+id/scrollView_basecamp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -14,7 +14,6 @@
         android:layout_height="match_parent"
         android:background="@drawable/pop_up_shape">
 
-
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_basecamp"
             android:layout_width="match_parent"
@@ -25,7 +24,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:menu="@menu/loggerbird_basecamp_menu"
             app:navigationIcon="@drawable/ic_basecamp_logo_24dp"
-            app:title="@string/textView_bitbucket_toolbar_title"></androidx.appcompat.widget.Toolbar>
+            app:title="@string/textView_basecamp_toolbar_title">
+        </androidx.appcompat.widget.Toolbar>
 
         <TextView
             android:id="@+id/textView_basecamp_project"
@@ -40,7 +40,8 @@
             android:textSize="17sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar_basecamp"></TextView>
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_basecamp">
+        </TextView>
 
         <androidx.appcompat.widget.AppCompatAutoCompleteTextView
             android:id="@+id/auto_textView_basecamp_project"
@@ -464,7 +465,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:layout_marginTop="10dp"
-            android:hint="@string/textView_asana_enter_start_date_enter"
             android:textColor="@color/black"
             android:textSize="16sp"
             app:layout_constraintEnd_toStartOf="@+id/imageView_delete_basecamp_startDate"

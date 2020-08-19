@@ -20,7 +20,6 @@
         android:layout_margin="50dp"
         android:elevation="8dp"
         app:layout_behavior="com.google.android.material.transformation.FabTransformationSheetBehavior">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -223,7 +222,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/loggerbird" />
-
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fragment_floating_action_button_video"
                 android:layout_margin="1dp"
@@ -312,5 +310,4 @@
             android:visibility="gone">
         </TextView>
     </LinearLayout>
-
 </FrameLayout>

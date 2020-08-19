@@ -524,6 +524,7 @@
     <string name="textView_basecamp_menu_save">Save Issue Info</string>
     <string name="textView_basecamp_menu_clear">Clear Issue Info</string>
     <!-- loggerbird_basecamp_popup-->
+    <string name="textView_basecamp_toolbar_title">Create Basecamp Story</string>
     <string name="textView_basecamp_message_board">Message board</string>
     <string name="textView_basecamp_project">Project</string>
     <string name="textView_basecamp_title">Title</string>

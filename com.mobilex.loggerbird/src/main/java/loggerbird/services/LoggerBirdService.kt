@@ -99,6 +99,7 @@ import kotlin.collections.HashMap
 import java.text.SimpleDateFormat
 import android.text.InputFilter
 import androidx.constraintlayout.solver.widgets.ConstraintWidgetGroup
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.NestedScrollView
 import androidx.core.widget.addTextChangedListener
 import loggerbird.adapter.autoCompleteTextViews.api.asana.AutoCompleteTextViewAsanaAssigneeAdapter
@@ -396,8 +397,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var floating_action_button_feed_close: Button
     private lateinit var editText_feedback: EditText
     private lateinit var toolbarFeedback: Toolbar
-    private lateinit var progressBarFeedback: ProgressBar
-    private lateinit var progressBarFeedbackLayout: FrameLayout
 
     //Slack:
     private val slackAuthentication = SlackApi()
@@ -415,10 +414,12 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var recyclerViewSlackAttachment: RecyclerView
     private lateinit var recyclerViewSlackAttachmentUser: RecyclerView
     private val arrayListSlackFileName: ArrayList<RecyclerViewModel> = ArrayList()
-    private lateinit var slackChannelLayout: ScrollView
-    private lateinit var slackUserLayout: ScrollView
+    private lateinit var slackChannelLayout: ConstraintLayout
+    private lateinit var slackUserLayout: ConstraintLayout
     private lateinit var slackBottomNavigationView: BottomNavigationView
-    private lateinit var toolbarSlack: Toolbar
+    //private lateinit var toolbarSlack: Toolbar
+    private lateinit var toolbarSlackUser : Toolbar
+    private lateinit var toolbarSlackChannel: Toolbar
 
     //Email:
     private lateinit var buttonEmailCreate: Button
@@ -517,7 +518,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
     private lateinit var autoTextViewGithubMileStoneAdapter: AutoCompleteTextViewGithubMilestoneAdapter
     private lateinit var autoTextViewGithubLinkedRequestsAdapter: AutoCompleteTextViewGithubLinkedRequestsAdapter
     private val arrayListGithubFileName: ArrayList<RecyclerViewModel> = ArrayList()
-    private lateinit var scrollViewGithub: ScrollView
     private lateinit var recyclerViewGithubAssignee: RecyclerView
     private lateinit var githubAssigneeAdapter: RecyclerViewGithubAssigneeAdapter
     internal lateinit var cardViewGithubAssigneeList: CardView
@@ -3778,9 +3778,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                     viewFeedback.findViewById(R.id.floating_action_button_feed_dismiss)
                 editText_feedback = viewFeedback.findViewById(R.id.editText_feed_back)
                 toolbarFeedback = viewFeedback.findViewById(R.id.toolbar_feedback)
-                progressBarFeedback = viewFeedback.findViewById(R.id.feedback_progressbar)
-                progressBarFeedbackLayout =
-                    viewFeedback.findViewById(R.id.feedback_progressbar_background)
                 buttonClicksFeedback()
             }
         } catch (e: Exception) {
@@ -5304,11 +5301,10 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
                 buttonSlackCreate = viewSlack.findViewById(R.id.button_slack_create)
                 buttonSlackCancelUser =
                     viewSlack.findViewById(R.id.button_slack_cancel_user)
-                buttonSlackCreateUser =
-                    viewSlack.findViewById(R.id.button_slack_create_user)
-                toolbarSlack = viewSlack.findViewById(R.id.toolbar_slack)
-                slackBottomNavigationView =
-                    viewSlack.findViewById(R.id.slack_bottom_nav_view)
+                buttonSlackCreateUser = viewSlack.findViewById(R.id.button_slack_create_user)
+                toolbarSlackUser = viewSlack.findViewById(R.id.toolbar_gitlab_user)
+                toolbarSlackChannel = viewSlack.findViewById(R.id.toolbar_gitlab_channel)
+                slackBottomNavigationView = viewSlack.findViewById(R.id.slack_bottom_nav_view)
 
                 slackAuthentication.callSlack(
                     context = context,
@@ -5400,13 +5396,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
         }
 
-        toolbarSlack.setNavigationOnClickListener {
-            removeSlackLayout()
-            if (controlFloatingActionButtonView()) {
-                floatingActionButtonView.visibility = View.VISIBLE
-            }
-        }
-
         slackBottomNavigationView.setOnNavigationItemSelectedListener {
             when (it.itemId) {
 
@@ -5422,7 +5411,22 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             }
             return@setOnNavigationItemSelectedListener true
         }
-        toolbarSlack.setOnMenuItemClickListener {
+        toolbarSlackUser.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.slack_menu_refresh -> {
+                    slackAuthentication.callSlack(
+                        context = context,
+                        activity = activity,
+                        filePathMedia = filePathMedia,
+                        slackTask = "get"
+                    )
+                    attachProgressBar(task = "slack")
+                }
+            }
+            return@setOnMenuItemClickListener true
+        }
+
+        toolbarSlackChannel.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.slack_menu_refresh -> {
                     slackAuthentication.callSlack(
@@ -6430,13 +6434,6 @@ internal class LoggerBirdService : Service(), LoggerBirdShakeDetector.Listener {
             recyclerViewGithubAttachment =
                 viewGithub.findViewById(R.id.recycler_view_github_attachment)
             toolbarGithub = viewGithub.findViewById(R.id.toolbar_github)
-            scrollViewGithub = viewGithub.findViewById(R.id.scrollView_github)
-            scrollViewGithub.setOnTouchListener { v, event ->
-                if (event.action == MotionEvent.ACTION_DOWN) {
-                    hideKeyboard(activity = activity, view = viewGithub)
-                }
-                return@setOnTouchListener false
-            }
             recyclerViewGithubAssignee =
                 viewGithub.findViewById(R.id.recycler_view_assignee_list)
             cardViewGithubAssigneeList = viewGithub.findViewById(R.id.cardView_assignee_list)

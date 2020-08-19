@@ -254,7 +254,7 @@
     <string name="button_feedback_create">Send</string>
     <!-- loggerbird_jira_popup-->
     <string name="textView_jira_auth_title">Step 1/2 - Authorization</string>
-    <string name="textView_jira_title">Create Issue</string>
+    <string name="textView_jira_title">Create Gitlab Issue</string>
     <string name="textView_jira_project">Project</string>
     <string name="textView_jira_issue_type">Issue Type</string>
     <string name="textView_jira_summary">Summary</string>
@@ -378,6 +378,9 @@
     <string name="textView_github_project_list">Project list</string>
     <string name="button_github_create">Create</string>
     <string name="button_github_cancel">Cancel</string>
+    <string name="textView_github_enter_milestone">Enter your issue milestone</string>
+    <string name="textView_github_enter_linked_pull">Enter your linked pull requests of issue</string>
+
     <!-- recycler_view_github_item_popup-->
     <string name="textView_recyclerView_github_popup_title">Are you sure to remove attachment from your Github issue?</string>
     <!-- loggerbird_github_menu-->
@@ -524,6 +527,7 @@
     <string name="textView_basecamp_menu_save">Save Issue Info</string>
     <string name="textView_basecamp_menu_clear">Clear Issue Info</string>
     <!-- loggerbird_basecamp_popup-->
+    <string name="textView_basecamp_toolbar_title">Create Basecamp Story</string>
     <string name="textView_basecamp_message_board">Message board</string>
     <string name="textView_basecamp_project">Project</string>
     <string name="textView_basecamp_title">Title</string>
@@ -566,18 +570,22 @@
     <!-- loggerbird_asana_popup-->
     <string name="textView_asana_project">Project</string>
     <string name="textView_asana_task_name">Task name</string>
-    <string name="editText_asana_task_name">Enter a task name for this task…</string>
+    <string name="editText_asana_task_name">Enter a task name for this task</string>
     <string name="textView_asana_assignee">Assignee</string>
     <string name="textView_asana_section">Section</string>
     <string name="textView_asana_priority">Priority</string>
     <string name="textView_asana_description">Description</string>
-    <string name="editText_asana_description">Enter a description for this task…</string>
+    <string name="editText_asana_description">Enter a description for this task</string>
     <string name="textView_asana_sub_tasks">Subtasks</string>
     <string name="editText_asana_sub_tasks">Add more detail to this task…</string>
     <string name="textView_asana_sub_tasks_list">Subtasks list</string>
     <string name="textView_asana_attachment">Attachments</string>
     <string name="textView_asana_start_date">Start date</string>
-    <string name="textView_asana_enter_start_date_enter">Enter a start date for issue</string>
+    <string name="textView_asana_enter_section">Enter a section for this task</string>
+    <string name="textView_asana_enter_priority">Enter a priority for this task</string>
+    <string name="textView_asana_enter_assignee">Enter an assignee for this task</string>
+    <string name="textView_asana_enter_date">Enter a start date for this task</string>
+
     <string name="button_asana_create">Create</string>
     <string name="button_asana_cancel">Cancel</string>
     <!-- loggerbird_asana_sub_popup-->
