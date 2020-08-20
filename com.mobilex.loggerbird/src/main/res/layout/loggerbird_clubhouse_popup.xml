@@ -1,4 +1,5 @@
-<androidx.core.widget.NestedScrollView xmlns:tools="http://schemas.android.com/tools"
+<androidx.core.widget.NestedScrollView
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nestedScrollViewHost"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -23,8 +24,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:navigationIcon="@drawable/ic_clubhouse_logo_24dp"
-            app:title="@string/textView_clubhouse_toolbar_title">
-        </androidx.appcompat.widget.Toolbar>
+            app:title="@string/textView_clubhouse_toolbar_title"></androidx.appcompat.widget.Toolbar>
 
         <TextView
             android:id="@+id/textview_clubhouse_project"
@@ -33,14 +33,13 @@
             android:layout_marginLeft="5dp"
             android:layout_marginTop="15dp"
             android:layout_marginRight="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
             android:text="@string/textView_clubhouse_projects"
             android:textColor="@color/black"
             android:textSize="17sp"
-            android:fontFamily="@font/galanogrotesquesemibold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar_clubhouse">
-        </TextView>
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_clubhouse"></TextView>
 
         <AutoCompleteTextView
             android:id="@+id/auto_textview_clubhouse_project"
@@ -53,8 +52,7 @@
             android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textview_clubhouse_project">
-        </AutoCompleteTextView>
+            app:layout_constraintTop_toBottomOf="@+id/textview_clubhouse_project"></AutoCompleteTextView>
 
         <TextView
             android:id="@+id/textView_clubhouse_requester"
@@ -64,10 +62,10 @@
             android:layout_marginTop="15dp"
             android:layout_marginRight="5dp"
             android:baselineAligned="false"
+            android:fontFamily="@font/galanogrotesquesemibold"
             android:text="@string/textView_clubhouse_requester"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:fontFamily="@font/galanogrotesquesemibold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/auto_textview_clubhouse_project" />
@@ -84,8 +82,7 @@
             android:singleLine="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_requester">
-        </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_requester"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
         <TextView
             android:id="@+id/textView_clubhouse_story_type"
@@ -94,14 +91,13 @@
             android:layout_marginStart="5dp"
             android:layout_marginTop="15dp"
             android:layout_marginEnd="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
             android:text="@string/textView_clubhouse_story_type"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:fontFamily="@font/galanogrotesquesemibold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/auto_textView_clubhouse_requester">
-        </TextView>
+            app:layout_constraintTop_toBottomOf="@+id/auto_textView_clubhouse_requester"></TextView>
 
         <androidx.appcompat.widget.AppCompatAutoCompleteTextView
             android:id="@+id/auto_textView_clubhouse_story_type"
@@ -116,8 +112,7 @@
             android:singleLine="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_story_type">
-        </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_story_type"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
         <TextView
             android:id="@+id/textView_clubhouse_story_name"
@@ -152,8 +147,7 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_story_name">
-        </com.google.android.material.textfield.TextInputEditText>
+            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_story_name"></com.google.android.material.textfield.TextInputEditText>
 
         <TextView
             android:id="@+id/textView_clubhouse_story_description"
@@ -162,14 +156,13 @@
             android:layout_marginStart="5dp"
             android:layout_marginTop="15dp"
             android:layout_marginEnd="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
             android:text="@string/textView_clubhouse_story_description"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:fontFamily="@font/galanogrotesquesemibold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editText_clubhouse_story_name">
-        </TextView>
+            app:layout_constraintTop_toBottomOf="@+id/editText_clubhouse_story_name"></TextView>
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editText_clubhouse_description"
@@ -188,8 +181,7 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_story_description">
-        </com.google.android.material.textfield.TextInputEditText>
+            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_story_description"></com.google.android.material.textfield.TextInputEditText>
 
         <TextView
             android:id="@+id/textView_clubhouse_epic"
@@ -198,14 +190,13 @@
             android:layout_marginStart="5dp"
             android:layout_marginTop="15dp"
             android:layout_marginEnd="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
             android:text="@string/textView_clubhouse_epic"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:fontFamily="@font/galanogrotesquesemibold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editText_clubhouse_description">
-        </TextView>
+            app:layout_constraintTop_toBottomOf="@+id/editText_clubhouse_description"></TextView>
 
         <androidx.appcompat.widget.AppCompatAutoCompleteTextView
             android:id="@+id/auto_textView_clubhouse_epic"
@@ -217,12 +208,11 @@
             android:layout_weight="10"
             android:background="@null"
             android:dropDownHeight="100dp"
-            android:singleLine="true"
             android:hint="@string/textView_clubhouse_epic_enter"
+            android:singleLine="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_epic">
-        </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_epic"></androidx.appcompat.widget.AppCompatAutoCompleteTextView>
 
         <TextView
             android:id="@+id/textView_clubhouse_due_date_title"
@@ -231,14 +221,13 @@
             android:layout_marginStart="5dp"
             android:layout_marginTop="15dp"
             android:layout_marginEnd="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
             android:text="@string/textView_clubhouse_due_date"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:fontFamily="@font/galanogrotesquesemibold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/auto_textView_clubhouse_epic">
-        </TextView>
+            app:layout_constraintTop_toBottomOf="@+id/auto_textView_clubhouse_epic"></TextView>
 
         <TextView
             android:id="@+id/textView_clubhouse_due_date"
@@ -257,19 +246,18 @@
 
 
         <ImageView
-            android:visibility="gone"
             android:id="@+id/imageView_delete_clubhouse_dueDate"
             android:layout_width="wrap_content"
             android:layout_height="20dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="5dp"
             android:layout_weight="1"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/textView_clubhouse_due_date"
             app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_due_date_title"
-            app:srcCompat="@drawable/ic_delete_black_24dp">
-        </ImageView>
+            app:srcCompat="@drawable/ic_delete_black_24dp"></ImageView>
 
         <TextView
             android:id="@+id/textView_clubhouse_estimate_point"
@@ -278,14 +266,13 @@
             android:layout_marginStart="5dp"
             android:layout_marginTop="15dp"
             android:layout_marginEnd="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
             android:text="@string/textView_clubhouse_estimate_point"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:fontFamily="@font/galanogrotesquesemibold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_due_date">
-        </TextView>
+            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_due_date"></TextView>
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editText_clubhouse_estimate_point"
@@ -305,8 +292,7 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_estimate_point">
-        </com.google.android.material.textfield.TextInputEditText>
+            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_estimate_point"></com.google.android.material.textfield.TextInputEditText>
 
         <TextView
             android:id="@+id/textView_clubhouse_attachments"
@@ -315,10 +301,10 @@
             android:layout_marginStart="5dp"
             android:layout_marginTop="15dp"
             android:layout_marginEnd="5dp"
+            android:fontFamily="@font/galanogrotesquesemibold"
             android:text="@string/textView_clubhouse_attachment"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:fontFamily="@font/galanogrotesquesemibold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editText_clubhouse_estimate_point" />
@@ -327,8 +313,8 @@
             android:id="@+id/imageView"
             android:layout_width="0dp"
             android:layout_height="20dp"
-            android:layout_marginTop="15dp"
             android:layout_marginStart="5dp"
+            android:layout_marginTop="15dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_attachments"
             app:srcCompat="@drawable/ic_attach_file_black_24dp"></ImageView>
@@ -343,8 +329,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/imageView"
-            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_attachments">
-        </androidx.recyclerview.widget.RecyclerView>
+            app:layout_constraintTop_toBottomOf="@+id/textView_clubhouse_attachments"></androidx.recyclerview.widget.RecyclerView>
 
         <Button
             android:id="@+id/button_clubhouse_create"
@@ -354,13 +339,13 @@
             android:layout_marginTop="25dp"
             android:layout_weight="1"
             android:background="@drawable/pop_up_button_shape"
+            android:fontFamily="@font/galanogrotesquesemibold"
             android:gravity="center"
             android:text="@string/button_slack_create"
             android:textAllCaps="true"
             android:textColor="@color/white"
             android:textSize="18sp"
             app:elevation="5dp"
-            android:fontFamily="@font/galanogrotesquesemibold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/recycler_view_clubhouse_attachment" />
@@ -370,15 +355,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:layout_weight="1"
             android:background="@drawable/pop_up_cancel_button_shape"
+            android:fontFamily="@font/galanogrotesquesemibold"
             android:gravity="center"
             android:text="@string/button_slack_cancel"
             android:textAllCaps="true"
             android:textColor="@color/black"
             android:textSize="18sp"
-            android:fontFamily="@font/galanogrotesquesemibold"
-            android:layout_marginBottom="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/button_clubhouse_create" />

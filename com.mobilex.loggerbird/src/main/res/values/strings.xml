@@ -1,6 +1,4 @@
 <resources>
-    <!-- Application -->
-    <string name="app_name">LoggerBird</string>
     <!-- Library -->
     <string name="library_name">LoggerBird</string>
     <!-- Classes:-->
