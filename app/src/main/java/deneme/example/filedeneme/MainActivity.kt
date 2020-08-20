@@ -5,9 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
 import android.net.Uri
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
@@ -21,35 +18,20 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.core.app.ComponentActivity
-import androidx.core.view.drawToBitmap
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions.bitmapTransform
-import deneme.example.filedeneme.ApiServiceInterface.Companion.client
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.Sort
 import kotlinx.coroutines.*
 import loggerbird.LoggerBird
 import io.reactivex.disposables.Disposable
-import jp.wasabeef.glide.transformations.BlurTransformation
-import kotlinx.android.synthetic.main.recycler_view_item.*
-import loggerbird.LoggerBird.Companion.loggerBirdInterceptorClient
-import okhttp3.FormBody
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Response
-import okhttp3.Request
 import retrofit2.Callback
 import retrofit2.Retrofit
 import org.json.JSONObject;
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.NullPointerException
+import javax.crypto.KeyGenerator
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
 
@@ -182,10 +164,21 @@ class MainActivity : AppCompatActivity() {
         val intent: Intent = getIntent()
         val uri: Uri? = intent.data
         Log.d("deep_link_url", uri.toString())
+        Thread.getAllStackTraces().forEach {
+            Log.d("thread",it.key.name)
+            it.value.forEach {
+                Log.d("thread_class",it.className)
+                Log.d("thread_method",it.methodName)
+                Log.d("thread_line",it.lineNumber.toString())
+            }
+        }
+
+        LoggerBird.callMemoryUsageDetails(1)
+
         //addRecyclerViewList()
 //        recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-//        adapter = RecyclerViewAdapter(this,recyclerViewList)
-//        recycler_view.adapter = adapter
+//        loggerbird.adapter = RecyclerViewAdapter(this,recyclerViewList)
+//        recycler_view.loggerbird.adapter = loggerbird.adapter
 //        LoggerBird.registerRecyclerViewObservers(recycler_view)
 
 //        (this as androidx.activity.ComponentActivity).prepareCall(
@@ -202,13 +195,14 @@ class MainActivity : AppCompatActivity() {
 //
 //        }
         button_add.setOnClickListener() {
-            val coroutineScope = CoroutineScope(Dispatchers.IO)
+//            val coroutineScope = CoroutineScope(Dispatchers.IO)
                 throw  NullPointerException("Parameter Type cannot be null");
+
 
 
             //recyclerViewList.removeAt(0)
             //recyclerViewList.add(RecyclerModel("hello how are you"))
-//            adapter.notifyDataSetChanged()
+//            loggerbird.adapter.notifyDataSetChanged()
 //            LoggerBird.callComponentDetails(
 //                view = recycler_view,
 //                resources = recycler_view.resources
@@ -269,7 +263,7 @@ class MainActivity : AppCompatActivity() {
 //            }
         }
         button_read_logs.setOnClickListener(View.OnClickListener {
-            throw  NullPointerException("asdf");
+            throw  NullPointerException("asdf123123");
 //            getCurrentData()
 //            beginSearch("dog", this)
             // LogDeneme.saveComponentDetails(view=button_read_logs,resources = button_read_logs.resources)
@@ -279,22 +273,43 @@ class MainActivity : AppCompatActivity() {
         })
 
         button_next_activity.setOnClickListener({
-            //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
-//            LogDeneme.saveAllDetails(context=this)
-            //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
-            // LoggerBird.saveLifeCycleDetails()
+//            throw  NullPointerException("asdf12")
+//            //            LogDeneme.saveComponentDetails(context = this,view = button_next_activity,resources = button_next_activity.resources)
+////            LogDeneme.saveAllDetails(context=this)
+//            //LogDeneme.saveComponentDetails(view=button_next_activity,resources = button_next_activity.resources)
+//            // LoggerBird.saveLifeCycleDetails()
+//
+////            LoggerBird.takeLifeCycleDetails()
+//            supportFragmentManager.beginTransaction().add(R.id.main_activity_layout,FragmentMain3.newInstance()).commit()
+          startActivity(Intent(this@MainActivity, Main2Activity::class.java))
 
-//            LoggerBird.takeLifeCycleDetails()
-
-
-            startActivity(Intent(this@MainActivity, Main3Activity::class.java))
+//            var encrypted = "582D3163703A2ADA6E40FE5B9D176402"
+//            var decrypted = ""
+//
+//            try {
+//                decrypted = AESUtils.decrypt(encrypted)
+//                android.util.Log.d("TEST", "decrypted:" + decrypted)
+//            } catch (e: java.lang.Exception) {
+//                e.printStackTrace()
+//            }
         })
 
-        button_performance.setOnClickListener {
 
-            //            LoggerBird.takeDeviceInformationDetails()
-//            LoggerBird.takeDevicePerformanceDetails()
-//            LoggerBird.takeDeviceCpuDetails()
+
+        button_performance.setOnClickListener {
+//            LoggerBird.callLifeCycleDetails()
+            LoggerBird.callComponentDetails(view=it,resources = it.resources)
+//            var encrypted: String = ""
+//            var sourceStr: String = "LOGGERBIRD"
+//            try {
+//                encrypted = AESUtils.encrypt(sourceStr)
+//                android.util.Log.d("TEST", "encrypted:" + encrypted)
+//            } catch (e: java.lang.Exception) {
+//                e.printStackTrace()
+//            }
+
+
+
 
 
         }
@@ -313,59 +328,59 @@ class MainActivity : AppCompatActivity() {
 
     private fun beginSearch(srsearch: String, context: Context) {
         var retrofit: Retrofit? = ApiServiceInterface.createObject()
-        val ApiService by lazy {
-            ApiServiceInterface.create(this)
+//        val ApiService by lazy {
+//            ApiServiceInterface.create(this)
+////
+//        }
+//        ApiService.run {
+//            hitCountCheck().enqueue(object :
+//                Callback<RetroFitModel.Result> {
+//                override fun onFailure(call: Call<RetroFitModel.Result>, t: Throwable) {
+//                    t.printStackTrace()
+//                }
 //
-        }
-        ApiService.run {
-            hitCountCheck().enqueue(object :
-                Callback<RetroFitModel.Result> {
-                override fun onFailure(call: Call<RetroFitModel.Result>, t: Throwable) {
-                    t.printStackTrace()
-                }
-
-                override fun onResponse(
-                    call: Call<RetroFitModel.Result>,
-                    response: Response<RetroFitModel.Result>?
-                ) {
-                    Log.d("response", "response Success!")
-
-//                    val httpUrl: HttpUrl = HttpUrl.Builder()
-//                        .scheme("http")
-//                        .host("api.openweathermap.org")
-////                        .addPathSegment("search")
-////                        .addQueryParameter("q", "DNA")
-////                        .addQueryParameter("q", "DNA2")
-////                        .addQueryParameter("q", "DNA3")
-////                        .addQueryParameter("z", "title:RNA")
-//                        .build();
+//                override fun onResponse(
+//                    call: Call<RetroFitModel.Result>,
+//                    response: Response<RetroFitModel.Result>?
+//                ) {
+//                    Log.d("response", "response Success!")
 //
-//                    val fromBodyBuilder = FormBody.Builder()
-//                    val request = Request.Builder()
-//                        .url(httpUrl)
-//                        .post(fromBodyBuilder.build())
-//                        .build()
-
-
-//                    coroutineCallInternet.async {
+////                    val httpUrl: HttpUrl = HttpUrl.Builder()
+////                        .scheme("http")
+////                        .host("api.openweathermap.org")
+//////                        .addPathSegment("search")
+//////                        .addQueryParameter("q", "DNA")
+//////                        .addQueryParameter("q", "DNA2")
+//////                        .addQueryParameter("q", "DNA3")
+//////                        .addQueryParameter("z", "title:RNA")
+////                        .build();
+////
+////                    val fromBodyBuilder = FormBody.Builder()
+////                    val request = Request.Builder()
+////                        .url(httpUrl)
+////                        .post(fromBodyBuilder.build())
+////                        .build()
 //
-//                       // LoggerBird.saveRetrofitRequestDetails()
-//                    }
-//                    for (i in 0..10) {
-//                        LoggerBird.callRetrofitRequestDetails(
-//                            response = ApiServiceInterface.httpClient(
-//                                request
-//                            ), request = request
-//                        )
-//                    }
-
-
-                    //  LogDeneme.saveRetrofitRequestDetails()
-                    //  LogDeneme.saveAllDetails(response=ApiServiceInterface.httpClient(request),context = context,request=request)
-
-                }
-            })
-        }
+//
+////                    coroutineCallInternet.async {
+////
+////                       // LoggerBird.saveRetrofitRequestDetails()
+////                    }
+////                    for (i in 0..10) {
+////                        LoggerBird.callRetrofitRequestDetails(
+////                            response = ApiServiceInterface.httpClient(
+////                                request
+////                            ), request = request
+////                        )
+////                    }
+//
+//
+//                    //  LogDeneme.saveRetrofitRequestDetails()
+//                    //  LogDeneme.saveAllDetails(response=ApiServiceInterface.httpClient(request),context = context,request=request)
+//
+//                }
+//            })
+//        }
 
 
     }

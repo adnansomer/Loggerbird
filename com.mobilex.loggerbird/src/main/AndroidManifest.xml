@@ -2,45 +2,51 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.mobilex.loggerbird">
+
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACTION_MANAGE_OVERLAY_PERMISSION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
-    <application
-        android:theme="@style/AppTheme">
-        <activity android:name="observers.LogActivityLifeCycleObserver"
+    <application android:theme="@style/AppTheme">
+        <activity
+            android:name="loggerbird.observers.LogActivityLifeCycleObserver"
             android:enabled="true" />
-        <activity android:name="paint.PaintActivity"
-                android:exported="true"
-                android:enabled="true"
-                android:resizeableActivity="true"
-                android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-                android:taskAffinity="paint.PaintActivity"
-                android:supportsPictureInPicture="true"
-                android:autoRemoveFromRecents="true"
-                android:launchMode="singleTop"
-                android:theme="@style/AppTheme"
-                tools:targetApi="n">
+        <activity
+            android:name="loggerbird.paint.PaintActivity"
+            android:autoRemoveFromRecents="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:enabled="true"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            android:taskAffinity="paint.PaintActivity"
+            android:theme="@style/AppTheme"
+            tools:targetApi="n">
         </activity>
 
-        <service android:name="services.LoggerBirdMemoryService"
-                 android:enabled="true"
-                 android:exported="true" />
-        <service android:name="services.LoggerBirdService"
-                 android:theme="@style/AppTheme"/>
-        <service android:name="services.LoggerBirdForegroundServiceVideo"
-                 android:foregroundServiceType="mediaProjection"
-                 android:stopWithTask="true"
-                 android:enabled="true"
-                 android:exported="false" />
-        <service android:name="services.LoggerBirdFutureTaskService"
-            android:foregroundServiceType="dataSync"
-            android:exported = "true"
-            />
+        <service
+            android:name="loggerbird.services.LoggerBirdMemoryService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name="loggerbird.services.LoggerBirdService"
+            android:theme="@style/AppTheme" />
+        <service
+            android:name="loggerbird.services.LoggerBirdForegroundServiceVideo"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection"
+            android:stopWithTask="true" />
+        <service
+            android:name="loggerbird.services.LoggerBirdFutureTaskService"
+            android:exported="true"
+            android:foregroundServiceType="dataSync" />
 
     </application>
 

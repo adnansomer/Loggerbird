@@ -1,6 +1,4 @@
 <resources>
-    <!-- Application -->
-    <string name="app_name">denemekotlinlibrary</string>
     <!-- Library -->
     <string name="library_name">LoggerBird</string>
     <!-- Classes:-->
@@ -30,6 +28,7 @@
     <string name="snackbar_ok">TAMAM</string>
     <string name="snackbar_successfully_saved">Başarılı bir şekilde kaydedildi!</string>
     <string name="drawing_cancelled_message">Resim çizme işlemi iptal edildi!</string>
+    <string name="pip_unsupported">Resim içi resim bu android versiyonunda desteklenmemektedir!</string>
     <!-- LoggerBirdForegroundServiceVideo -->
     <string name="foreground_service_video_notification_title">LoggerBird ekran kaydedicisi çalışıyor.</string>
     <!-- LoggerBirdService -->
@@ -39,6 +38,7 @@
     <string name="audio_recording_finish">Ses kaydetme işlemi bitti!</string>
     <string name="screen_recording_start">Ekran kaydetme işlemi başladı!</string>
     <string name="screen_recording_finish">Ekran kaydetme işlemi bitti!</string>
+    <string name="screen_recording_unsupported">Ekran kaydı alma bu android versiyonunda desteklenmemektedir!</string>
     <string name="feed_back_email_empty_text">Geri bildirim mesajınız boş olamaz!</string>
     <string name="logger_bird_floating_action_button_permission_message">Loggerbird aktifleştirmek ister misiniz?</string>
     <string name="logger_bird_floating_action_button_activate">Aktif et</string>
@@ -48,7 +48,7 @@
     <string name="last_session_time">Son oturum zamanı:</string>
     <string name="session_file_limit">Bir oturumdaki maksimum dosya kaydetme limitine ulaştınız!</string>
     <string name="files_action_limit">Maksimum dosya kaydetme limitine ulaştınız , loggerbird herhangi bir dosya aksiyonu almadığınız sürece başlamayacaktır!</string>
-    <string name="files_action_mail">Dosyaları e-mail at ve sil!</string>
+    <string name="files_action_share">Dosyaları paylaş!</string>
     <string name="files_action_discard">Dosyaları sil!</string>
     <string name="files_action_mail_success">Dosyalar başarılı bir şekilde e-mailinize yollandı!</string>
     <string name="files_action_delete_success">Dosyalar başarılı bir şekilde silindi!</string>
@@ -62,6 +62,10 @@
     <string name="jira_sent_error">Jira dosyası açılmaya çalışırken bir hatayla karşılaşıldı!</string>
     <string name="jira_sent_error_time_out">Jira dosyası açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
     <string name="media_recording_error">Lütfen önce diğer medya operasyonunuzu tamamlayın!</string>
+    <string name="jira_project_empty">Proje boş olamaz!</string>
+    <string name="jira_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="jira_issue_type_empty">Görev tipi boş olamaz!</string>
+    <string name="jira_issue_type_doesnt_exist">Bu görev tipi bulunamadı!</string>
     <string name="jira_summary_empty">Özet boş olamaz!</string>
     <string name="jira_reporter_empty">Bildiren bulunamadı!</string>
     <string name="jira_fix_version_empty">Düzeltme versiyonu bulunamadı!</string>
@@ -72,13 +76,25 @@
     <string name="jira_description_unhandled_exception">Beklenmeyen bir hata tespit edilmiştir daha çok detay için log dosyasına bakınız!</string>
     <string name="jira_issue_preferences_save">Konu tercihleri kaydedildi!</string>
     <string name="jira_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="jira_issue_exist">Bu görev zaten listeye eklendi!</string>
+    <string name="jira_issue_doesnt_exist">Bu görev bulunamadı!</string>
+    <string name="jira_label_exist">Bu eklenti zaten listeye eklendi!</string>
+    <string name="jira_label_doesnt_exist">Bu eklenti bulunamadı!</string>
+    <string name="jira_component_exist">Bu komponent zaten listeye eklendi!</string>
+    <string name="jira_component_doesnt_exist">Bu komponent bulunamadı!</string>
+    <string name="jira_fix_versions_exist">Bu düzeltme versiyonu zaten listeye eklendi!</string>
+    <string name="jira_fix_versions_doesnt_exist">Bu düzeltme versiyonu bulunamadı!</string>
+    <string name="jira_priority_empty">Öncelik boş olamaz!</string>
+    <string name="jira_priority_doesnt_exist">Bu öncelik bulunamadı!</string>
+    <string name="jira_linked_issue_empty">Bağlantılı görev boş olamaz!</string>
+    <string name="jira_linked_issue_doesnt_exist">Bu bağlantılı görev bulunamadı!</string>
     <string name="slack_message_empty">Mesaj boş olamaz!</string>
     <string name="slack_sent">Slack mesajı gönderildi!</string>
     <string name="slack_sent_error">Slack mesajı gönderilmeye çalışırken bir hatayla karşılaşıldı!</string>
     <string name="slack_sent_error_time_out">Slack mesajı gönderilmeye çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
-    <string name="unhandled_title">En son açılan oturumda bir hata ile karşılaşıldı , bu hatayı jira ile paylaşmak istermisiniz?</string>
+    <string name="unhandled_title">En son açılan oturumda bir hata ile karşılaşıldı , bu hata dosyasını paylaşmak istermisiniz?</string>
     <string name="unhandled_discard">Dosyayı sil!</string>
-    <string name="unhandled_share_with_jira">Dosyayı jira ile paylaş:</string>
+    <string name="unhandled_share">Dosyayı paylaş</string>
     <string name="unhandled_customize_jira">*Jira konusunu özelleştir ve gönder!</string>
     <string name="unhandled_send">*Gönder!</string>
     <string name="unhandled_file_doesnt_exist">Dosya konumu bulunamadı!</string>
@@ -90,6 +106,105 @@
     <string name="future_task_disabled">Gelecek zaman görevi kapatıldı!</string>
     <string name="future_task_empty">Tarih ve saati boş olamaz!</string>
     <string name="future_task_gathered">Gelecek zaman detayları alındı!</string>
+    <string name="github_title_empty">Başlık boş olamaz!</string>
+    <string name="github_issue_success">Görev başarılı bir şekilde açıldı!</string>
+    <string name="github_issue_failure">Github görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="github_issue_time_out">Github görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="github_issue_preferences_save">Konu tercihleri kaydedildi!</string>
+    <string name="github_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="github_repo_empty">Veri deposu boş olamaz!</string>
+    <string name="github_repo_doesnt_exist">Böyle bir veri deposu bulunamadı!</string>
+    <string name="github_assignee_exist">Bu sorumlu zaten listeye eklendi!</string>
+    <string name="github_assignee_doesnt_exist">Bu sorumlu bulunamadı!</string>
+    <string name="github_label_exist">Bu etiket zaten listeye eklendi!</string>
+    <string name="github_label_doesnt_exist">Bu etiket bulunamadı!</string>
+    <string name="github_project_exist">Bu proje zaten listeye eklendi!</string>
+    <string name="github_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="github_mile_stone_doesnt_exist">Bu kilometre taşı bulunamadı!</string>
+    <string name="github_linked_pull_request_doesnt_exist">Bu bağlantılı çekme isteği taşı bulunamadı!!</string>
+    <string name="gitlab_sent">Gitlab görevi başarılı bir şekilde açıldı!</string>
+    <string name="gitlab_sent_error">Gitlab görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="gitlab_sent_error_time_out">Gitlab görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="trello_issue_success">Görev başarılı bir şekilde açıldı!</string>
+    <string name="trello_issue_failure">Trello görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="trello_issue_time_out">Trello görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="trello_label_exist">Bu etiket zaten listeye eklendi!</string>
+    <string name="trello_label_doesnt_exist">Bu etiket bulunamadı!</string>
+    <string name="trello_member_exist">Bu üye zaten listeye eklendi!</string>
+    <string name="trello_member_doesnt_exist">Bu üye bulunamadı!</string>
+    <string name="trello_project_empty">Proje boş olamaz!</string>
+    <string name="trello_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="trello_board_empty">Pano boş olamaz!</string>
+    <string name="trello_board_doesnt_exist">Bu pano bulunamadı!</string>
+    <string name="trello_title_empty">Başlık boş olamaz!</string>
+    <string name="trello_issue_preferences_save">Konu tercihleri kaydedildi!</string>
+    <string name="trello_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="trello_time_line_empty">Tarih veya zaman boş olamaz!</string>
+    <string name="trello_time_line_success">Zaman çizelgesi detayları alındı!</string>
+    <string name="trello_check_list_exist">Bu kontrol listesi zaten listenize eklendi!</string>
+    <string name="trello_check_list_empty">Kontrol listesi boş olamaz!</string>
+    <string name="pivotal_issue_success">Görev başarılı bir şekilde açıldı!</string>
+    <string name="pivotal_issue_failure">Pivotal görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="pivotal_issue_time_out">Pivotal görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="pivotal_issue_preferences_save">Konu tercihleri kaydedildi!</string>
+    <string name="pivotal_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="pivotal_task_exist">Bu görev zaten listeye eklendi!</string>
+    <string name="pivotal_task_empty">Görev boş olamaz!</string>
+    <string name="pivotal_blocker_exist">Bu bloklayan zaten listeye eklendi!</string>
+    <string name="pivotal_blocker_empty">Bloklayan boş olamaz!</string>
+    <string name="pivotal_label_exist">Bu etiket zaten listeye eklendi!</string>
+    <string name="pivotal_label_doesnt_exist">Bu etiket bulunamadı!</string>
+    <string name="pivotal_owner_exist">Bu sahip zaten listeye eklendi</string>
+    <string name="pivotal_owner_doesnt_exist">Bu sahip bulunamadı!</string>
+    <string name="pivotal_project_empty">Proje boş olamaz!</string>
+    <string name="pivotal_project_doesnt_exist">Bu proje boş olamaz!</string>
+    <string name="pivotal_requester_doesnt_exist">Bu isteyen bulunamadı!</string>
+    <string name="pivotal_title_empty">Başlık boş olamaz!</string>
+    <string name="pivotal_story_type_doesnt_exist">Bu hikaye tipi bulunamadı!</string>
+    <string name="pivotal_points_doesnt_exist">Bu puan bulunamadı!</string>
+    <string name="basecamp_issue_success">Görev başarılı bir şekilde açıldı!</string>
+    <string name="basecamp_issue_failure">Basecamp görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="basecamp_issue_time_out">Basecamp görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="basecamp_issue_preferences_save">Konu tercihleri kaydedildi!</string>
+    <string name="basecamp_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="basecamp_assignee_exist">Bu sorumlu zaten listeye eklendi!</string>
+    <string name="basecamp_assignee_doesnt_exist">Bu sorumlu bulunamadı!</string>
+    <string name="basecamp_notify_exist">Bu bildiri zaten listeye eklendi</string>
+    <string name="basecamp_notify_doesnt_exist">Bu bildiri bulunamadı!</string>
+    <string name="basecamp_project_empty">Proje boş olamaz!</string>
+    <string name="basecamp_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="basecamp_title_empty">Başlık boş olamaz!</string>
+    <string name="basecamp_category_doesnt_exist">Bu kategori bulunamadı!</string>
+    <string name="basecamp_name_empty">İsim boş olamaz!</string>
+    <string name="basecamp_content_empty">İçerik boş olamaz!</string>
+    <string name="asana_issue_success">Görev başarılı bir şekilde açıldı!</string>
+    <string name="asana_issue_failure">Asana görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="asana_issue_time_out">Asana görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="asana_issue_preferences_save">Konu tercihleri kaydedildi!</string>
+    <string name="asana_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="asana_sub_task_exist">Bu yan iş zaten listeye eklendi!</string>
+    <string name="asana_sub_task_empty">Yan iş boş olamaz!</string>
+    <string name="asana_project_empty">Proje boş olamaz!</string>
+    <string name="asana_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="asana_task_empty">Görev boş olamaz</string>
+    <string name="asana_section_doesnt_exist">Bu kategori bulunamadı!</string>
+    <string name="asana_assignee_doesnt_exist">Bu kullanıcı bulunamadı!</string>
+    <string name="clubhouse_issue_success">Clubhouse görevi başarılı bir şekilde açıldı!</string>
+    <string name="clubhouse_issue_failure">Clubhouse görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="clubhouse_issue_time_out">Clubhouse görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="bitbucket_issue_preferences_save">Konu tercihleri kaydedildi!</string>
+    <string name="bitbucket_issue_preferences_delete">Konu tercihleri silindi!</string>
+    <string name="bitbucket_issue_success">Görev başarılı bir şekilde açıldı!</string>
+    <string name="bitbucket_issue_failure">Asana görevi açılmaya çalışırken bir hata ile karşılaşıldı!</string>
+    <string name="bitbucket_issue_time_out">Asana görevi açılmaya çalışırken bir hatayla karşılaşıldı , sistem zaman aşımına uğradı!</string>
+    <string name="bitbucket_project_empty">Proje boş olamaz!</string>
+    <string name="bitbucket_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="bitbucket_title_empty">Başlık boş olamaz!</string>
+    <string name="bitbucket_assignee_doesnt_exist">Bu kullanıcı bulunamadı!</string>
+    <string name="bitbucket_priority_empty">Öncelik boş olamaz!</string>
+    <string name="bitbucket_priority_doesnt_exist">Bu öncelik bulunamadı!</string>
+    <string name="bitbucket_kind_empty">Tip boş olamaz!</string>
+    <string name="bitbucket_kind_doesnt_exist">Bu tip bulunamadı!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Geçersiz ağ karşılığı!</string>
     <string name="internet_connection_check_failure">geçersiz internet bağlantı karşılık kodu!</string>
@@ -108,6 +223,14 @@
     <string name="textView_loggerbird_slack_title">Slack ile paylaş</string>
     <string name="textView_loggerbird_discard_title">Dosyayı sil</string>
     <string name="textView_loggerbird_future_title">Gelecek zaman görevi olarak ata</string>
+    <string name="textView_loggerbird_gitlab_title">Gitlab ile paylaş</string>
+    <string name="textView_loggerbird_github_title">Github ile paylaş</string>
+    <string name="textView_loggerbird_trello_title">Trello ile paylaş</string>
+    <string name="textView_loggerbird_pivotal_title">Pivotal-tracker ile paylaş</string>
+    <string name="textView_loggerbird_basecamp_title">Basecamp ile paylaş</string>
+    <string name="textView_loggerbird_asana_title">Asana ile paylaş</string>
+    <string name="textView_loggerbird_clubhouse_title">Clubhouse ile paylaş</string>
+    <string name="textView_loggerbird_bitbucket_title">Bitbucket ile paylaş</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Fırça boyutu ayarla</string>
     <!-- activity_paint_save_dialog-->
@@ -139,12 +262,16 @@
     <string name="editText_jira_description">Sorunu detayli bir sekilde anlatiniz.</string>
     <string name="textView_jira_reporter">Bildiren</string>
     <string name="textView_jira_component">Bileşen</string>
+    <string name="textView_jira_component_list">Komponent listesi</string>
     <string name="textView_jira_fix_versions">Düzeltme versiyonu</string>
+    <string name="textView_jira_fix_versions_list">Düzeltme versiyonu listesi</string>
     <string name="textView_jira_linked_issue">Bağlantılı Konu</string>
     <string name="textView_jira_issue">Konu</string>
+    <string name="textView_jira_issue_list">Konu listesi</string>
     <string name="textView_jira_assignee">Sorumlu</string>
     <string name="textView_jira_priority">Öncelik</string>
-    <string name="textView_jira_label">Etiketler</string>
+    <string name="textView_jira_label">Etiket</string>
+    <string name="textView_jira_label_list">Etiket listesi</string>
     <string name="textView_jira_epic_link">Epik konu</string>
     <string name="textView_jira_sprint">Sprint</string>
     <string name="textView_jira_epic_name">Epik İsim</string>
@@ -162,6 +289,29 @@
     <string name="textView_recyclerView_popup_title">Jira görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
     <string name="button_recyclerView_yes">Evet</string>
     <string name="button_recyclerView_no">Hayır</string>
+    <!-- loggerbird_jira_menu-->
+    <string name="textView_jira_menu_save">Görev detayı kaydet</string>
+    <string name="textView_jira_menu_clear">Görev detayı temizle</string>
+    <!-- recycler_view_jira_issue_popup-->
+    <string name="textView_recyclerView_jira_issue_header">Görev sil</string>
+    <string name="textView_recyclerView_jira_issue_title">Jira görevlendirmenizden bu görevi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_jira_issue_delete">Görevi sil</string>
+    <string name="button_recyclerView_jira_issue_keep">Görevi tut</string>
+    <!-- recycler_view_jira_label_popup-->
+    <string name="textView_recyclerView_jira_label_header">Etiketi sil</string>
+    <string name="textView_recyclerView_jira_label_title">Jira görevlendirmenizden bu etiketi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_jira_label_delete">Etiketi sil</string>
+    <string name="button_recyclerView_jira_label_keep">Etiketi tut</string>
+    <!-- recycler_view_jira_component_popup-->
+    <string name="textView_recyclerView_jira_component_header">Komponenti sil</string>
+    <string name="textView_recyclerView_jira_component_title">Jira görevlendirmenizden bu komponenti kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_jira_component_delete">Komponenti sil</string>
+    <string name="button_recyclerView_jira_component_keep">Komponenti tut</string>
+    <!-- recycler_view_jira_fix_popup-->
+    <string name="textView_recyclerView_jira_fix_header">Düzeltme versiyonu sil</string>
+    <string name="textView_recyclerView_jira_fix_title">Jira görevlendirmenizden bu düzeltme versiyonunu kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_jira_fix_delete">Düzeltme versiyonu sil</string>
+    <string name="button_recyclerView_jira_fix_keep">Düzeltme versiyonu tut</string>
     <!-- loggerbird_slack_popup-->
     <string name="textView_slack_title">Slack mesajı oluştur</string>
     <string name="textView_slack_message">Mesaj</string>
@@ -192,10 +342,10 @@
     <string name="textView_email_issue">Yeni İleti</string>
     <string name="editText_email_to">Alıcılar:</string>
     <string name="editText_email_subject">Konu:</string>
-    <string name="editText_email_content">Mesajınızı buraya yazınız!</string>
-    <string name="textView_email_message">Mesaj</string>
+    <string name="editText_email_content">Mesajınızı buraya yazınız:</string>
     <string name="textView_email_attachments">Eklentiler</string>
     <string name="textView_email_to_list">Alıcılar Listesi</string>
+    <string name="textView_email_content">Mesaj</string>
     <string name="button_email_create">Oluştur</string>
     <string name="button_email_cancel">İptal</string>
     <string name="textView_recyclerView_email_popup_title">E-mailiniz\'den bu eklentiyi kaldırmaktan eminmisiniz?</string>
@@ -210,4 +360,309 @@
     <string name="button_future_task_cancel">İptal</string>
     <string name="textView_future_task_date">Başlangıç tarihi</string>
     <string name="textView_future_task_time">Başlangıç zamanı</string>
+    <!-- loggerbird_github_popup-->
+    <string name="textView_github_repo">Veri deposu</string>
+    <string name="textView_github_project">Proje</string>
+    <string name="textView_github_assignee">Sorumlu</string>
+    <string name="textView_github_title">Başlık</string>
+    <string name="editText_github_title">Gönderiniz için bir başlık yazınız.</string>
+    <string name="editText_github_comment">Sorunu detayli bir sekilde yorumlayınız.</string>
+    <string name="textView_github_comment">Yorum</string>
+    <string name="textView_github_labels">Etiketler</string>
+    <string name="textView_github_milestone">Kilometre Taşı</string>
+    <string name="textView_github_linked_requests">Bağlantılı çekme isteği</string>
+    <string name="textView_github_attachment">Eklentiler</string>
+    <string name="textView_github_assignee_list">Sorumlu listesi</string>
+    <string name="textView_github_label_list">Etiketler listesi</string>
+    <string name="textView_github_project_list">Proje listesi</string>
+    <string name="button_github_create">Oluştur</string>
+    <string name="button_github_cancel">İptal</string>
+    <!-- recycler_view_github_item_popup-->
+    <string name="textView_recyclerView_github_popup_title">Github görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
+    <!-- loggerbird_github_menu-->
+    <string name="textView_github_menu_save">Görev detayı kaydet</string>
+    <string name="textView_github_menu_clear">Görev detayı temizle</string>
+    <!-- recycler_view_github_assignee_popup-->
+    <string name="textView_recyclerView_github_assignee_header">Sorumluyu sil</string>
+    <string name="textView_recyclerView_github_assignee_title">Github görevlendirmenizden bu sorumluyu kaldırmaktan emin misiniz?</string>
+    <string name="button_recyclerView_github_assignee_delete">Sorumluyu sil</string>
+    <string name="button_recyclerView_github_assignee_keep">Sorumluyu tut</string>
+    <!-- recycler_view_github_label_popup-->
+    <string name="textView_recyclerView_github_label_header">Etiketi sil</string>
+    <string name="textView_recyclerView_github_label_title">Github görevlendirmenizden bu etiketi kaldırmaktan emin misiniz?</string>
+    <string name="button_recyclerView_github_label_delete">Etiketi sil</string>
+    <string name="button_recyclerView_github_label_keep">Etiketi tut</string>
+    <!-- recycler_view_github_project_popup-->
+    <string name="textView_recyclerView_github_project_header">Projeyi sil</string>
+    <string name="textView_recyclerView_github_project_title">Github görevlendirmenizden bu projeyi kaldırmaktan emin misiniz?</string>
+    <string name="button_recyclerView_github_project_delete">Projeyi sil</string>
+    <string name="button_recyclerView_github_project_keep">Projeyi tut</string>
+    <!-- loggerbird_gitlab_popup-->
+    <string name="textView_gitlab_toolbar_title">Gitlab Konusu Oluştur</string>
+    <string name="textView_gitlab_project">Proje</string>
+    <string name="textView_gitlab_title">Başlık</string>
+    <string name="editText_gitlab_title">Konu başlığınızı buraya yazınız</string>
+    <string name="textView_gitlab_description">Açıklama</string>
+    <string name="editText_gitlab_description">Konu açıklamanızı buraya yazınız</string>
+    <string name="editText_gitlab_weight">Konu ağırlığinı buraya giriniz!</string>
+    <string name="textView_gitlab_confidentiality_enter">Görev gizliliği seç</string>
+    <string name="textView_gitlab_labels_enter">Görev etiketi seç</string>
+    <string name="textView_gitlab_milestone_enter">Görev kilometretaşı seç</string>
+    <string name="textView_gitlab_assginee_enter">Görev sorumlusu seç</string>
+    <string name="textView_gitlab_assignee">Sorumlu</string>
+    <string name="textView_gitlab_labels">Etiket</string>
+    <string name="textView_gitlab_weight">Ağırlık</string>
+    <string name="textView_gitlab_milestone">Dönüm noktası</string>
+    <string name="editText_gitlab_title_empty">Konu başlığınız boş olamaz!</string>
+    <string name="textView_gitlab_due_date">Bitiş tarihi</string>
+    <string name="textView_gitlab_confidentiality">Gizlilik</string>
+    <string name="textView_gitlab_enter_due_date">Konunuz icin bitiş tarihi giriniz</string>
+    <string name="textView_gitlab_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="textView_gitlab_assignee_doesnt_exist">Bu sorumlu bulunamadı!</string>
+    <string name="textView_gitlab_assignee_not_be_empty">Sorumlu alanı boş olamaz!</string>
+    <string name="textView_gitlab_label_doesnt_exist">Bu etiket bulunamadı!</string>
+    <string name="textView_gitlab_confidentiality_doesnt_exist">Bu gizlilik derecesi bulunamadı!</string>
+    <string name="textView_gitlab_milestone_doesnt_exist">Bu kilometre taşı bulunamadı!</string>
+    <!-- recycler_view_gitlab_item_popup-->
+    <string name="textView_recyclerView_gitlab_header">Eklentiyi Sil</string>
+    <string name="textView_recyclerView_gitlab_popup_title">Gitlab görevlendirmenizden bu eklentiyi kaldırmak istediğinize emin misiniz?</string>
+    <string name="button_recyclerView_gitlab_yes">Eklentiyi sil</string>
+    <string name="button_recyclerView_gitlab_no">Eklentiyi tut</string>
+    <!-- loggerbird_trello_popup-->
+    <string name="textView_trello_project">Proje</string>
+    <string name="textView_trello_board">Pano</string>
+    <string name="textView_trello_title">Başlık</string>
+    <string name="editText_trello_title_hint">Bu kart için bir başlık giriniz…</string>
+    <string name="textView_trello_description">Açıklama</string>
+    <string name="editText_trello_description_hint">Bu kart için bir açıklama giriniz…</string>
+    <string name="textView_trello_member">Üye</string>
+    <string name="textView_trello_member_list">Üye listesi</string>
+    <string name="textView_trello_label">Etiket</string>
+    <string name="textView_trello_label_list">Etiket listesi</string>
+    <string name="textView_trello_check_list">Kontrol listesi</string>
+    <string name="textView_trello_check_list_list">Kontrol lisesi listesi</string>
+    <string name="editText_trello_check_list">Bu kontrol listesi için bir başlık giriniz…</string>
+    <string name="textView_trello_start_date">Başlangıç tarihi</string>
+    <string name="textView_trello_attachment">Eklentiler</string>
+    <string name="button_trello_create">Oluştur</string>
+    <string name="button_trello_cancel">İptal</string>
+    <!-- loggerbird_trello_menu-->
+    <string name="textView_trello_menu_save">Görev detayı kaydet</string>
+    <string name="textView_trello_menu_clear">Görev detayı temizle</string>
+    <!-- recycler_view_trello_item_popup-->
+    <string name="textView_recyclerView_popup_trello_title">Trello görevlendirmenizden bu eklentiyi kaldırmaktan eminmisiniz?</string>
+    <!-- recycler_view_trello_label_popup-->
+    <string name="textView_recyclerView_trello_label_header">Etiketi sil</string>
+    <string name="textView_recyclerView_trello_label_title">Trello görevlendirmenizden bu etiketi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_trello_label_delete">Etiketi sil</string>
+    <string name="button_recyclerView_trello_label_keep">Etiketi tut</string>
+    <!-- recycler_view_trello_label_popup-->
+    <string name="textView_recyclerView_trello_member_header">Üyeyi sil</string>
+    <string name="textView_recyclerView_trello_member_title">Trello görevlendirmenizden bu üyeyi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_trello_member_delete">Üyeyi sil</string>
+    <string name="button_recyclerView_trello_member_keep">Üyeyi tut</string>
+    <!-- recycler_view_trello_check_list_popup-->
+    <string name="textView_recyclerView_trello_check_list_header">Kontrol listesini sil</string>
+    <string name="textView_recyclerView_trello_check_list_title">Trello görevlendirmenizden bu kontrol listesini kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_trello_check_list_delete">Kontrol listesini sil</string>
+    <string name="button_recyclerView_trello_check_list_keep">Kontrol listesini tut</string>
+    <!-- loggerbird_trello_start_date_popup-->
+    <string name="textView_trello_date_title">Zaman çizelgesi belirle</string>
+    <string name="button_trello_date_proceed">Devam</string>
+    <string name="button_trello_date_cancel">İptal</string>
+    <string name="textView_trello_start_time">Başlangıç zamanı</string>
+    <!-- loggerbird_pivotal_menu-->
+    <string name="textView_pivotal_menu_save">Görev detayı kaydet</string>
+    <string name="textView_pivotal_menu_clear">Görev detayı temizle</string>
+    <!-- loggerbird_pivotal_popup-->
+    <string name="textView_pivotal_project">Proje</string>
+    <string name="textView_pivotal_title">Başlık</string>
+    <string name="editText_pivotal_title_hint">Bu hikaye için bir başlık giriniz…</string>
+    <string name="textView_pivotal_type">Hikaye tipi</string>
+    <string name="textView_pivotal_requester">İsteyen</string>
+    <string name="textView_pivotal_points">Puanlar</string>
+    <string name="textView_pivotal_owners">Sahipler</string>
+    <string name="textView_pivotal_owners_list">Sahipler listesi</string>
+    <string name="textView_pivotal_blockers">Bloklayan</string>
+    <string name="textView_pivotal_blockers_list">Blocklayan listesi</string>
+    <string name="textView_pivotal_description">Açıklama</string>
+    <string name="textView_pivotal_labels">Etiketler</string>
+    <string name="textView_pivotal_labels_list">Etiketler listesi</string>
+    <string name="textView_pivotal_tasks">Görevler</string>
+    <string name="textView_pivotal_tasks_list">Görevler listesi</string>
+    <string name="textView_pivotal_attachment">Eklentiler</string>
+    <string name="editText_pivotal_description">Bu hikaye için bir açıklama giriniz …</string>
+    <string name="editText_pivotal_task">Bu hikaye için bir görev giriniz …</string>
+    <string name="editText_pivotal_block">Bu hikaye için bir engelleyen giriniz …</string>
+    <string name="editText_pivotal_title">Bu hikaye için bir başlık giriniz … …</string>
+    <string name="button_pivotal_create">Oluştur</string>
+    <string name="button_pivotal_cancel">İptal</string>
+    <!-- recycler_view_pivotal_item_popup-->
+    <string name="textView_recyclerView_pivotal_popup_title">Pivotal görevlendirmenizden bu eklentiyi çıkarmaktan eminmisiniz?</string>
+    <!-- recycler_view_pivotal_task_item_popup-->
+    <string name="textView_recyclerView_pivotal_task_header">Görevi sil</string>
+    <string name="textView_recyclerView_pivotal_task_popup_title">Pivotal görevlendirmenizden bu görevi çıkarmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_pivotal_task_delete">Görevi sil</string>
+    <string name="button_recyclerView_pivotal_task_keep">Görevi tut</string>
+    <!-- recycler_view_pivotal_blocker_item_popup-->
+    <string name="textView_recyclerView_pivotal_blocker_header">Bloklayanı sil</string>
+    <string name="textView_recyclerView_pivotal_blocker_popup_title">Pivotal görevlendirmenizden bu bloklayanı çıkarmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_pivotal_blocker_delete">Bloklayanı sil</string>
+    <string name="button_recyclerView_pivotal_blocker_keep">Bloklayanı tut</string>
+    <!-- recycler_view_pivotal_label_item_popup-->
+    <string name="textView_recyclerView_pivotal_label_header">Etiketi sil</string>
+    <string name="textView_recyclerView_pivotal_label_popup_title">Pivotal görevlendirmenizden bu etiketi çıkarmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_pivotal_label_delete">Etiketi sil</string>
+    <string name="button_recyclerView_pivotal_label_keep">Etiketi tut</string>
+    <!-- recycler_view_pivotal_owner_item_popup-->
+    <string name="textView_recyclerView_pivotal_owner_header">Sahibi sil</string>
+    <string name="textView_recyclerView_pivotal_owner_popup_title">Pivotal görevlendirmenizden bu sahibi çıkarmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_pivotal_owner_delete">Sahibi sil</string>
+    <string name="button_recyclerView_pivotal_owner_keep">Sahibi tut</string>
+    <!-- loggerbird_basecamp_menu-->
+    <string name="textView_basecamp_menu_save">Görev detayı kaydet</string>
+    <string name="textView_basecamp_menu_clear">Görev detayı temizle</string>
+    <!-- loggerbird_basecamp_popup-->
+    <string name="textView_basecamp_message_board">Message board</string>
+    <string name="textView_basecamp_project">Proje</string>
+    <string name="textView_basecamp_title">Başlık</string>
+    <string name="editText_basecamp_title_hint">Bu mesaj için bir başlık giriniz…</string>
+    <string name="textView_basecamp_category">Kategori</string>
+    <string name="textView_basecamp_description_message">Mesaj açıklaması</string>
+    <string name="editText_basecamp_description_message">Bu mesaj için bir açıklama giriniz…</string>
+    <string name="textView_basecamp_name">İsim</string>
+    <string name="editText_basecamp_name_hint">Bu yapılacaklar için bir isim giriniz…</string>
+    <string name="textView_basecamp_content">İçerik</string>
+    <string name="editText_basecamp_content_hint">Bu yapılacaklar için bir içerik giriniz…</string>
+    <string name="textView_basecamp_description_todo">Yapılacaklar açıklaması</string>
+    <string name="editText_basecamp_description_todo">Bu yapılacaklar için bir açıklama giriniz…</string>
+    <string name="textView_basecamp_todo_board">yapılacaklar</string>
+    <string name="textView_basecamp_assignee">Sorumlu</string>
+    <string name="textView_basecamp_assignee_list">Sorumlu listesi</string>
+    <string name="textView_basecamp_notify">Bildir</string>
+    <string name="textView_basecamp_notify_list">Bildir listesi</string>
+    <string name="textView_basecamp_due_date">Bitis tarihi</string>
+    <string name="button_basecamp_create">Oluştur</string>
+    <string name="button_basecamp_cancel">İptal</string>
+    <string name="textView_basecamp_attachment">Eklentiler</string>
+    <string name="textView_basecamp_attachments_board">Dokümanlar&amp;Dosyalar</string>
+    <string name="textView_basecamp_start_date">Başlangıç tarihi</string>
+    <!-- recycler_view_basecamp_item_popup-->
+    <string name="textView_recyclerView_basecamp_popup_title">Basecamp görevlendirmenizden bu eklentiyi çıkarmaktan eminmisiniz?</string>
+    <!-- recycler_view_basecamp_assignee_popup-->
+    <string name="textView_recyclerView_basecamp_assignee_header">Sorumluyu sil</string>
+    <string name="textView_recyclerView_basecamp_assignee_title">Basecamp görevlendirmenizden bu sorumluyu kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_basecamp_assignee_delete">Sorumluyu sil</string>
+    <string name="button_recyclerView_basecamp_assignee_keep">Sorumluyu tut</string>
+    <!-- recycler_view_basecamp_notify_popup-->
+    <string name="textView_recyclerView_basecamp_notify_header">Bildiriyi sil</string>
+    <string name="textView_recyclerView_basecamp_notify_title">Basecamp görevlendirmenizden bu bildiriyi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_basecamp_notify_delete">Bildiriyi sil</string>
+    <string name="button_recyclerView_basecamp_notify_keep">Bildiriyi tut</string>
+    <!-- loggerbird_asana_menu-->
+    <string name="textView_asana_menu_save">Görev detayı kaydet</string>
+    <string name="textView_asana_menu_clear">Görev detayı temizle</string>
+    <!-- loggerbird_asana_popup-->
+    <string name="textView_asana_project">Proje</string>
+    <string name="textView_asana_task_name">Görev ismi</string>
+    <string name="editText_asana_task_name">Bu görev için bir görev ismi giriniz…</string>
+    <string name="textView_asana_assignee">Sorumlu</string>
+    <string name="textView_asana_section">Kategori</string>
+    <string name="textView_asana_priority">Öncelik</string>
+    <string name="textView_asana_description">Açıklama</string>
+    <string name="editText_asana_description">Bu görev için bir açıklama giriniz…</string>
+    <string name="textView_asana_sub_tasks">Yan işler</string>
+    <string name="editText_asana_sub_tasks">Bu yan iş için daha fazla detay ekleyiniz…</string>
+    <string name="textView_asana_sub_tasks_list">Yan işler listesi</string>
+    <string name="textView_asana_attachment">Eklentiler</string>
+    <string name="textView_asana_start_date">Başlangıç tarihi</string>
+    <string name="button_asana_create">Oluştur</string>
+    <string name="button_asana_cancel">İptal</string>
+    <!-- loggerbird_asana_sub_popup-->
+    <string name="textView_asana_sub_task_name">Yan iş ismi</string>
+    <string name="editText_asana_sub_task_name">Bu yan iş için bir yan görev ismi giriniz…</string>
+    <string name="textView_asana_sub_assignee">Yan iş sorumlusu</string>
+    <string name="textView_asana_sub_section">Yan iş kategorisi</string>
+    <string name="textView_asana_sub_description">Yan iş açıklaması</string>
+    <string name="editText_asana_sub_description">Bu yan iş için bir yan iş ismi giriniz…</string>
+    <string name="textView_asana_sub_attachment">Yan iş eklentisi</string>
+    <string name="textView_asana_sub_start_date">Yan iş başlangıç tarihi</string>
+    <string name="button_asana_sub_create">Yan iş oluştur</string>
+    <string name="button_asana_sub_cancel">Yan iş iptal</string>
+    <!-- recycler_view_asana_item_popup-->
+    <string name="textView_recyclerView_asana_popup_title">Asana görevlendirmenizden bu eklentiyi çıkarmaktan eminmisiniz?</string>
+    <!-- recycler_view_asana_subtask_popup-->
+    <string name="textView_recyclerView_asana_subtask_header">Yan işi sil</string>
+    <string name="textView_recyclerView_asana_subtask_title">Asana görevlendirmenizden bu yan işi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_asana_subtask_delete">Yan işi sil</string>
+    <string name="button_recyclerView_asana_subtask_keep">Yan işi tut</string>
+    <!-- loggerbird_clubhouse_popup-->
+    <string name="textView_clubhouse_toolbar_title">Clubhouse hikayesi oluştur</string>
+    <string name="textView_clubhouse_projects">Projeler</string>
+    <string name="textView_clubhouse_epic">Epik</string>
+    <string name="textView_clubhouse_requester">Hikaye isteyeni</string>
+    <string name="textView_clubhouse_story_name">Hikaye ismi</string>
+    <string name="textView_clubhouse_story_description">Hikaye açıklaması</string>
+    <string name="editText_clubhouse_subject">Hikaye ismini buraya yazınız!</string>
+    <string name="editText_clubhouse_story_description">Hikaye açıklamanızı buraya yazınız!</string>
+    <string name="editText_clubhouse_story_type_empty">Hikaye tipi boş olamaz!</string>
+    <string name="editText_clubhouse_story_requester_empty">Hikaye isteyicisi boş olamaz!</string>
+    <string name="textView_clubhouse_story_type">Hikaye tipi</string>
+    <string name="textView_clubhouse_attachment">Eklentiler</string>
+    <string name="textView_clubhouse_no_attachment">Eklenti yok.</string>
+    <string name="button_clubhouse_create">Oluştur</string>
+    <string name="button_clubhouse_cancel">İptal</string>
+    <string name="editText_clubhouse_story_empty">Hikaye isminiz boş olamaz!</string>
+    <string name="editText_clubhouse_story_description_empty">Hikaye açıklamanız boş olamaz!</string>
+    <string name="textView_clubhouse_story_duedate_empty">Hikaye bitiş tarihi boş olamaz!</string>
+    <string name="textView_clubhouse_story_estimate_empty">Hikaye yaklaşık puanı boş olamaz!</string>
+    <string name="textView_clubhouse_due_date">Hikaye bitiş tarihi</string>
+    <string name="textView_clubhouse_enter_due_date">hikaye için bitiş tarihi belirleyiniz</string>
+    <string name="textView_clubhouse_estimate_point">Yaklaşık puan</string>
+    <string name="editText_clubhouse_estimate_point">Yaklaşık puanınızı buraya yazınız</string>
+    <string name="textView_clubhouse_epic_enter">Hikaye epik konusunu buraya yazınız</string>
+    <string name="textView_clubhouse_project_doesnt_exist">Bu proje bulunamadı!</string>
+    <string name="textView_clubhouse_story_type_doesnt_exist">Bu hikaye tipi bulunamadı!</string>
+    <string name="textView_clubhouse_epic_doesnt_exist">Bu epik konusu bulunamadı!</string>
+    <string name="textView_clubhouse_user_doesnt_exist">Bu kullanıcı bulunamadı!</string>
+    <!-- recycler_view_clubhouse_item_popup-->
+    <string name="textView_recyclerView_clubhouse_popup_header">Eklentiyi Sil</string>
+    <string name="textView_recyclerView_clubhouse_popup_title">Clubhouse görevlendirmenizden bu eklentiyi kaldırmaktan emin misiniz?</string>
+    <string name="button_recyclerView_clubhouse_yes">Eklentiyi sil</string>
+    <string name="button_recyclerView_clubhouse_no">Eklentiyi tut</string>
+    <!-- loggerbird_trello_check_list_item_popup-->
+    <string name="button_trello_check_create">Oluştur</string>
+    <string name="button_trello_check_cancel">İptal</string>
+    <string name="textView_trello_check_title">Madde başlığı</string>
+    <string name="editText_trello_check_hint">Bu madde için bir isim giriniz…</string>
+    <string name="textView_trello_check_item_list">Madde listesi</string>
+    <!-- recycler_view_item_item_popup-->
+    <string name="textView_recyclerView_trello_item_popup_header">Madde sil</string>
+    <string name="textView_recyclerView_trello_item_popup_title">Madde listenizden bu maddeyi kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_trello_item_yes">Madde sil</string>
+    <string name="button_recyclerView_trello_item_no">Madde tut</string>
+    <!-- loggerbird_bitbucket_popup-->
+    <string name="textView_bitbucket_project">Proje</string>
+    <string name="textView_bitbucket_assignee">Sorumlu</string>
+    <string name="textView_bitbucket_priority">Öncelik</string>
+    <string name="textView_bitbucket_kind">Tip</string>
+    <string name="textView_bitbucket_title">Başlık</string>
+    <string name="editText_bitbucket_title">Gönderiniz için bir başlık yazınız…</string>
+    <string name="editText_bitbucket_description">Sorunu detaylı bir şekilde anlatınız…</string>
+    <string name="textView_bitbucket_description">Açıklama</string>
+    <string name="textView_bitbucket_attachment">Eklentiler</string>
+    <string name="button_bitbucket_create">Oluştur</string>
+    <string name="button_bitbucket_cancel">İptal</string>
+    <!-- loggerbird_bitbucket_menu-->
+    <string name="textView_bitbucket_menu_save">Görev detayı kaydet</string>
+    <string name="textView_bitbucket_menu_clear">Görev detayı temizle</string>
+    <!-- recycler_view_bitbucket_item_popup-->
+    <string name="textView_recyclerView_bitbucket_popup_title">Bitbucket görevlendirmenizden bu eklentiyi çıkarmaktan eminmisiniz?</string>
+    <!-- loggerbird_file_action_list-->
+    <string name="textView_file_action_list_title">Dosyalar:</string>
+    <!-- recycler_view_file_action_list_popup-->
+    <string name="textView_recyclerView_file_action_list_header">Dosya Sil</string>
+    <string name="textView_recyclerView_file_action_list_title">Bu dosyayı dosya listenizden kaldırmaktan eminmisiniz?</string>
+    <string name="button_recyclerView_file_action_list_delete">Dosya sil</string>
+    <string name="button_recyclerView_file_action_list_keep">Dosya tut</string>
 </resources>

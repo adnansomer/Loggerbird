@@ -7,18 +7,18 @@
     android:background="@color/cookieBarColor"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    android:paddingBottom="16dp"
     android:paddingLeft="16dp"
+    android:paddingTop="35dp"
     android:paddingRight="16dp"
-    android:paddingTop="35dp">
+    android:paddingBottom="16dp">
 
 
     <TextView
         android:id="@+id/textView_unhandled_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="start"
         android:layout_gravity="center"
+        android:gravity="start"
         android:text="@string/unhandled_title"
         android:textColor="@android:color/white"
         android:textSize="15sp" />
@@ -27,22 +27,22 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_marginTop="15dp"
         android:baselineAligned="false"
-        android:layout_marginTop="15dp">
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_weight="1"
-            >
+            android:orientation="vertical">
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:gravity="center"
-                >
+                android:orientation="horizontal">
+
                 <TextView
                     android:id="@+id/textView_unhandled_check"
                     android:layout_width="wrap_content"
@@ -53,60 +53,35 @@
                     android:textSize="15sp" />
 
                 <CheckBox
-                    android:id="@+id/checkBox_unhandled_jira"
+                    android:id="@+id/checkBox_unhandled"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:buttonTint="@color/white"
-                    android:background="@null" />
+                    android:background="@null"
+                    android:buttonTint="@color/white" />
             </LinearLayout>
+
             <TextView
                 android:id="@+id/textView_unhandled_discard"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="start"
                 android:layout_gravity="bottom"
+                android:gravity="start"
                 android:text="@string/unhandled_discard"
                 android:textColor="@android:color/white"
                 android:textSize="15sp" />
         </LinearLayout>
 
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/textView_unhandled_share_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            >
-
-            <TextView
-                android:id="@+id/textView_unhandled_jira_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:text="@string/unhandled_share_with_jira"
-                android:textColor="@android:color/white"
-                android:textSize="15sp" />
-            <TextView
-                android:id="@+id/textView_unhandled_jira_customize"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:text="@string/unhandled_customize_jira"
-                android:textColor="@android:color/white"
-                android:textSize="15sp" />
-            <TextView
-                android:id="@+id/textView_unhandled_share_jira"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/unhandled_send"
-                android:layout_gravity="start"
-                android:textColor="@android:color/white"
-                android:textSize="15sp"
-                android:textStyle="italic" />
-
-        </LinearLayout>
+            android:layout_gravity="bottom"
+            android:gravity="start"
+            android:text="@string/unhandled_share"
+            android:textColor="@android:color/white"
+            android:textSize="15sp" />
 
     </LinearLayout>
-
 </LinearLayout>
 

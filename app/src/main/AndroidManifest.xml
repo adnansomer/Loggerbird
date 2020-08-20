@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="deneme.example.filedeneme">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -17,9 +18,11 @@
         android:launchMode="standard"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        tools:replace="label"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Main3Activity"></activity>
+        <activity android:name=".Main3Activity">
+        </activity>
 
         <receiver
             android:name="com.adjust.sdk.AdjustReferrerReceiver"

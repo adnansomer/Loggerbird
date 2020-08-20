@@ -1,6 +1,4 @@
 <resources>
-    <!-- Application -->
-    <string name="app_name">denemekotlinlibrary</string>
     <!-- Library -->
     <string name="library_name">LoggerBird</string>
     <!-- Classes:-->
@@ -30,6 +28,7 @@
     <string name="snackbar_ok">OK</string>
     <string name="snackbar_successfully_saved">Successfully saved!</string>
     <string name="drawing_cancelled_message">Drawing is cancelled!</string>
+    <string name="pip_unsupported">Picture in picture mode not supported in this android version!</string>
     <!-- LoggerBirdForegroundServiceVideo -->
     <string name="foreground_service_video_notification_title">LoggerBird screen recording is running.</string>
     <!-- LoggerBirdService -->
@@ -39,6 +38,7 @@
     <string name="audio_recording_finish">Audio recording finished!</string>
     <string name="screen_recording_start">Screen recording started!</string>
     <string name="screen_recording_finish">Screen recording finished!</string>
+    <string name="screen_recording_unsupported">Screen recording not supported in this version of android!</string>
     <string name="feed_back_email_empty_text">Your feedback message cannot be empty!</string>
     <string name="logger_bird_floating_action_button_permission_message">Do you want to activate Loggerbird?</string>
     <string name="logger_bird_floating_action_button_activate">Activate</string>
@@ -48,7 +48,7 @@
     <string name="last_session_time">Last session duration:</string>
     <string name="session_file_limit">You have achieved maximum save file limit in one session!</string>
     <string name="files_action_limit">You have achieved maximum save file limit , loggerbird will not be started until file action is choosed!</string>
-    <string name="files_action_mail">Send e-mail and discard!</string>
+    <string name="files_action_share">Share file!</string>
     <string name="files_action_discard">Discard files!</string>
     <string name="files_action_mail_success">Files sent as e-mail successfully!</string>
     <string name="files_action_delete_success">Files discarded successfully!</string>
@@ -62,6 +62,10 @@
     <string name="jira_sent_error">An error happened while trying to open jira issue!</string>
     <string name="jira_sent_error_time_out">An error happened while trying to open jira issue , system has been timed out!</string>
     <string name="media_recording_error">Please complete your other media operation!</string>
+    <string name="jira_project_empty">Project cannot be empty!</string>
+    <string name="jira_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="jira_issue_type_empty">Issue type cannot be empty!</string>
+    <string name="jira_issue_type_doesnt_exist">This issue type doesn\'t exist!</string>
     <string name="jira_summary_empty">Summary cannot be empty!</string>
     <string name="jira_reporter_empty">Reporter doesn\'t exist!</string>
     <string name="jira_fix_version_empty">Fix version doesn\'t exist!</string>
@@ -72,13 +76,25 @@
     <string name="jira_description_unhandled_exception">An unhandled exception detected check log file for more details!</string>
     <string name="jira_issue_preferences_save">Issue preferences are saved!</string>
     <string name="jira_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="jira_issue_exist">This issue already added to list!</string>
+    <string name="jira_issue_doesnt_exist">This issue doesn\'t exist!</string>
+    <string name="jira_label_exist">This label already added to list!</string>
+    <string name="jira_label_doesnt_exist">This label doesn\'t exist!</string>
+    <string name="jira_component_exist">This component already added to list!</string>
+    <string name="jira_component_doesnt_exist">This component doesn\'t exist!</string>
+    <string name="jira_fix_versions_exist">This fix-version already added to list!</string>
+    <string name="jira_fix_versions_doesnt_exist">This fix-version doesn\'t exist!</string>
+    <string name="jira_priority_empty">Priority cannot be empty!</string>
+    <string name="jira_priority_doesnt_exist">This priority doesn\'t exist!</string>
+    <string name="jira_linked_issue_empty">Linked issue cannot be empty!</string>
+    <string name="jira_linked_issue_doesnt_exist">This linked issue doesn\'t exist!</string>
     <string name="slack_message_empty">Message cannot be empty!</string>
     <string name="slack_sent">Slack message sent!</string>
     <string name="slack_sent_error">An error happened while trying to send slack message!</string>
     <string name="slack_sent_error_time_out">An error happened while trying to open slack message , system has been timed out!</string>
-    <string name="unhandled_title">We have detected an error from your last session , do you want to share with jira?</string>
+    <string name="unhandled_title">We have detected an error from your last session , do you want to share this file?</string>
     <string name="unhandled_discard">Discard!</string>
-    <string name="unhandled_share_with_jira">Share with jira:</string>
+    <string name="unhandled_share">Share file</string>
     <string name="unhandled_customize_jira">*Customize and send!</string>
     <string name="unhandled_send">*Send!</string>
     <string name="unhandled_file_doesnt_exist">File path doesn\'t exist!</string>
@@ -90,6 +106,105 @@
     <string name="future_task_disabled">Future-task disabled!</string>
     <string name="future_task_empty">Date or time cannot be empty!</string>
     <string name="future_task_gathered">Future-task details have been gathered!</string>
+    <string name="github_title_empty">Title cannot be empty!</string>
+    <string name="github_issue_success">Issue opened successfully!</string>
+    <string name="github_issue_failure">An error happened while trying to open github issue!</string>
+    <string name="github_issue_time_out">An error happened while trying to open github issue , system has been timed out!</string>
+    <string name="github_issue_preferences_save">Issue preferences are saved!</string>
+    <string name="github_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="github_repo_empty">Repository cannot be empty!</string>
+    <string name="github_repo_doesnt_exist">This repository doesn\'t exist!</string>
+    <string name="github_assignee_exist">This assignee already added to list!</string>
+    <string name="github_assignee_doesnt_exist">This assignee doesn\'t exist!</string>
+    <string name="github_label_exist">This label already added to list!</string>
+    <string name="github_label_doesnt_exist">This label doesn\'t exist!</string>
+    <string name="github_mile_stone_doesnt_exist">This milestone doesn\'t exist!</string>
+    <string name="github_linked_pull_request_doesnt_exist">This linked pull request doesn\'t exist!</string>
+    <string name="github_project_exist">This project already added to list!</string>
+    <string name="github_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="gitlab_sent">Gitlab issue is created!</string>
+    <string name="gitlab_sent_error">An error happened while trying to create Gitlab issue!</string>
+    <string name="gitlab_sent_error_time_out">An error happened while trying to open Gitlab issue , system has been timed out!</string>
+    <string name="trello_issue_success">Issue opened successfully!</string>
+    <string name="trello_issue_failure">An error happened while trying to open trello issue!</string>
+    <string name="trello_issue_time_out">An error happened while trying to open trello issue , system has been timed out!</string>
+    <string name="trello_label_exist">This label already added to list!</string>
+    <string name="trello_label_doesnt_exist">This label doesn\'t exist!</string>
+    <string name="trello_member_exist">This member already added to list!</string>
+    <string name="trello_member_doesnt_exist">This member doesn\'t exist!</string>
+    <string name="trello_project_empty">Project cannot be empty!</string>
+    <string name="trello_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="trello_board_empty">Board cannot be empty!</string>
+    <string name="trello_board_doesnt_exist">This board doesn\'t exist!</string>
+    <string name="trello_title_empty">Title cannot be empty!</string>
+    <string name="trello_issue_preferences_save">Issue preferences are saved!</string>
+    <string name="trello_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="trello_time_line_empty">Date or time cannot be empty!</string>
+    <string name="trello_time_line_success">Timeline details have been gathered!</string>
+    <string name="trello_check_list_exist">This checklist already added to list!</string>
+    <string name="trello_check_list_empty">Checklist cannot be empty!</string>
+    <string name="pivotal_issue_success">Issue opened successfully!</string>
+    <string name="pivotal_issue_failure">An error happened while trying to open pivotal issue!</string>
+    <string name="pivotal_issue_time_out">An error happened while trying to open pivotal issue , system has been timed out!</string>
+    <string name="pivotal_issue_preferences_save">Issue preferences are saved!</string>
+    <string name="pivotal_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="pivotal_task_exist">This task already added to list!</string>
+    <string name="pivotal_task_empty">Task cannot be empty!</string>
+    <string name="pivotal_blocker_exist">This blocker already added to list!</string>
+    <string name="pivotal_blocker_empty">Blocker cannot be empty!</string>
+    <string name="pivotal_label_exist">This label already added to list!</string>
+    <string name="pivotal_label_doesnt_exist">This label doesn\'t exist!</string>
+    <string name="pivotal_owner_exist">This owner already added to list!</string>
+    <string name="pivotal_owner_doesnt_exist">This owner doesn\'t exist!</string>
+    <string name="pivotal_project_empty">Project cannot be empty!</string>
+    <string name="pivotal_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="pivotal_requester_doesnt_exist">This requester doesn\'t exist!</string>
+    <string name="pivotal_title_empty">Title cannot be empty!</string>
+    <string name="pivotal_story_type_doesnt_exist">This story type doesn\'t exist!</string>
+    <string name="pivotal_points_doesnt_exist">This point value doesn\'t exist!</string>
+    <string name="basecamp_issue_success">Issue opened successfully!</string>
+    <string name="basecamp_issue_failure">An error happened while trying to open basecamp issue!</string>
+    <string name="basecamp_issue_time_out">An error happened while trying to open basecamp issue , system has been timed out!</string>
+    <string name="basecamp_issue_preferences_save">Issue preferences are saved!</string>
+    <string name="basecamp_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="basecamp_assignee_exist">This assignee already added to list!</string>
+    <string name="basecamp_assignee_doesnt_exist">This assignee doesn\'t exist!</string>
+    <string name="basecamp_notify_exist">This notify already added to list!</string>
+    <string name="basecamp_notify_doesnt_exist">This notify doesn\'t exist!</string>
+    <string name="basecamp_project_empty">Project cannot be empty!</string>
+    <string name="basecamp_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="basecamp_title_empty">Title cannot be empty!</string>
+    <string name="basecamp_category_doesnt_exist">This category doesn\'t exist!</string>
+    <string name="basecamp_name_empty">Name cannot be empty!</string>
+    <string name="basecamp_content_empty">Content cannot be empty!</string>
+    <string name="asana_issue_success">Issue opened successfully!</string>
+    <string name="asana_issue_failure">An error happened while trying to open asana issue!</string>
+    <string name="asana_issue_time_out">An error happened while trying to open asana issue , system has been timed out!</string>
+    <string name="asana_issue_preferences_save">Issue preferences are saved!</string>
+    <string name="asana_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="asana_sub_task_exist">This sub-task already added to list!</string>
+    <string name="asana_sub_task_empty">Sub-task cannot be empty!</string>
+    <string name="asana_project_empty">Project cannot be empty!</string>
+    <string name="asana_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="asana_task_empty">Task cannot be empty!</string>
+    <string name="asana_section_doesnt_exist">This section doesn\'t exist!</string>
+    <string name="asana_assignee_doesnt_exist">This assignee doesn\'t exist!</string>
+    <string name="clubhouse_issue_success">Clubhouse Story opened successfully!</string>
+    <string name="clubhouse_issue_failure">An error happened while trying to open Clubhouse Story!</string>
+    <string name="clubhouse_issue_time_out">An error happened while trying to open Clubhouse Story , system has been timed out!</string>
+    <string name="bitbucket_issue_preferences_save">Issue preferences are saved!</string>
+    <string name="bitbucket_issue_preferences_delete">Issue preferences are deleted!</string>
+    <string name="bitbucket_issue_success">Issue opened successfully!</string>
+    <string name="bitbucket_issue_failure">An error happened while trying to open bitbucket issue!</string>
+    <string name="bitbucket_issue_time_out">An error happened while trying to open bitbucket issue , system has been timed out!</string>
+    <string name="bitbucket_project_empty">Project cannot be empty!</string>
+    <string name="bitbucket_project_doesnt_exist">This project doesn\'t exist!</string>
+    <string name="bitbucket_title_empty">Title cannot be empty!</string>
+    <string name="bitbucket_assignee_doesnt_exist">This assignee doesn\'t exist!</string>
+    <string name="bitbucket_priority_empty">Priority cannot be empty!</string>
+    <string name="bitbucket_priority_doesnt_exist">This priority doesn\'t exist!</string>
+    <string name="bitbucket_kind_empty">Kind cannot be empty!</string>
+    <string name="bitbucket_kind_doesnt_exist">This kind doesn\'t exist!</string>
     <!-- EmailUtil -->
     <string name="network_check_failure">Invalid network response!</string>
     <string name="internet_connection_check_failure">Invalid internet connection response code!</string>
@@ -108,6 +223,14 @@
     <string name="textView_loggerbird_slack_title">Send to Slack</string>
     <string name="textView_loggerbird_discard_title">Discard</string>
     <string name="textView_loggerbird_future_title">Set as future task</string>
+    <string name="textView_loggerbird_gitlab_title">Send to Gitlab</string>
+    <string name="textView_loggerbird_github_title">Send to Github</string>
+    <string name="textView_loggerbird_trello_title">Share with Trello</string>
+    <string name="textView_loggerbird_pivotal_title">Share with Pivotal-tracker</string>
+    <string name="textView_loggerbird_basecamp_title">Share with Basecamp</string>
+    <string name="textView_loggerbird_asana_title">Share with Asana</string>
+    <string name="textView_loggerbird_clubhouse_title">Share with Clubhouse</string>
+    <string name="textView_loggerbird_bitbucket_title">Share with Bitbucket</string>
     <!-- activity_paint_seek_view-->
     <string name="textView_brush_width_adjust">Adjust your brush width</string>
     <!-- activity_paint_save_dialog-->
@@ -138,12 +261,16 @@
     <string name="editText_jira_description">Describe your issue in details.</string>
     <string name="textView_jira_reporter">Reporter</string>
     <string name="textView_jira_component">Component</string>
+    <string name="textView_jira_component_list">Component list</string>
     <string name="textView_jira_fix_versions">Fix versions</string>
+    <string name="textView_jira_fix_versions_list">Fix versions list</string>
     <string name="textView_jira_linked_issue">Linked Issues</string>
     <string name="textView_jira_issue">Issue</string>
+    <string name="textView_jira_issue_list">Issue list</string>
     <string name="textView_jira_assignee">Assignee</string>
     <string name="textView_jira_priority">Priority</string>
-    <string name="textView_jira_label">Labels</string>
+    <string name="textView_jira_label">Label</string>
+    <string name="textView_jira_label_list">Label list</string>
     <string name="textView_jira_epic_link">Epic Link</string>
     <string name="textView_jira_sprint">Sprint</string>
     <string name="textView_jira_epic_name">Epic Name</string>
@@ -161,6 +288,29 @@
     <string name="textView_recyclerView_popup_title">Are you sure to remove attachment from your Jira issue?</string>
     <string name="button_recyclerView_yes">Delete Attachment</string>
     <string name="button_recyclerView_no">Keep File</string>
+    <!-- loggerbird_jira_menu-->
+    <string name="textView_jira_menu_save">Save Issue Info</string>
+    <string name="textView_jira_menu_clear">Clear Issue Info</string>
+    <!-- recycler_view_jira_issue_popup-->
+    <string name="textView_recyclerView_jira_issue_header">Delete issue</string>
+    <string name="textView_recyclerView_jira_issue_title">Are you sure to remove issue from your jira issue?</string>
+    <string name="button_recyclerView_jira_issue_delete">Delete issue</string>
+    <string name="button_recyclerView_jira_issue_keep">Keep issue</string>
+    <!-- recycler_view_jira_label_popup-->
+    <string name="textView_recyclerView_jira_label_header">Delete label</string>
+    <string name="textView_recyclerView_jira_label_title">Are you sure to remove label from your jira issue?</string>
+    <string name="button_recyclerView_jira_label_delete">Delete label</string>
+    <string name="button_recyclerView_jira_label_keep">Keep label</string>
+    <!-- recycler_view_jira_component_popup-->
+    <string name="textView_recyclerView_jira_component_header">Delete component</string>
+    <string name="textView_recyclerView_jira_component_title">Are you sure to remove component from your jira issue?</string>
+    <string name="button_recyclerView_jira_component_delete">Delete component</string>
+    <string name="button_recyclerView_jira_component_keep">Keep component</string>
+    <!-- recycler_view_jira_fix_popup-->
+    <string name="textView_recyclerView_jira_fix_header">Delete fix-version</string>
+    <string name="textView_recyclerView_jira_fix_title">Are you sure to remove fix-version from your jira issue?</string>
+    <string name="button_recyclerView_jira_fix_delete">Delete fix-version</string>
+    <string name="button_recyclerView_jira_fix_keep">Keep fix-version</string>
     <!-- loggerbird_slack_popup-->
     <string name="textView_slack_title">Create Slack Message</string>
     <string name="textView_slack_message">Message</string>
@@ -191,10 +341,10 @@
     <string name="textView_email_issue">New Issue</string>
     <string name="editText_email_to">To:</string>
     <string name="editText_email_subject">Subject:</string>
-    <string name="editText_email_content">Write your message here!</string>
-    <string name="textView_email_message">Message</string>
+    <string name="editText_email_content">Write your message here:</string>
     <string name="textView_email_attachments">Attachments</string>
     <string name="textView_email_to_list">To list</string>
+    <string name="textView_email_content">Message</string>
     <string name="button_email_create">Create</string>
     <string name="button_email_cancel">Cancel</string>
     <string name="textView_recyclerView_email_popup_title">Are you sure to remove attachment from your Email?</string>
@@ -209,4 +359,311 @@
     <string name="button_future_task_cancel">Cancel</string>
     <string name="textView_future_task_date">Start date</string>
     <string name="textView_future_task_time">Start time</string>
+    <!-- loggerbird_github_popup-->
+    <string name="textView_github_repo">Repository</string>
+    <string name="textView_github_project">Project</string>
+    <string name="textView_github_assignee">Assignee</string>
+    <string name="textView_github_title">Title</string>
+    <string name="editText_github_title">Write a title about your issue.</string>
+    <string name="editText_github_comment">Comment your issue in details.</string>
+    <string name="textView_github_comment">Comment</string>
+    <string name="textView_github_labels">Labels</string>
+    <string name="textView_github_milestone">Milestone</string>
+    <string name="textView_github_linked_requests">Linked pull requests</string>
+    <string name="textView_github_attachment">Attachments</string>
+    <string name="textView_github_assignee_list">Assignee list</string>
+    <string name="textView_github_label_list">Label list</string>
+    <string name="textView_github_project_list">Project list</string>
+    <string name="button_github_create">Create</string>
+    <string name="button_github_cancel">Cancel</string>
+    <!-- recycler_view_github_item_popup-->
+    <string name="textView_recyclerView_github_popup_title">Are you sure to remove attachment from your Github issue?</string>
+    <!-- loggerbird_github_menu-->
+    <string name="textView_github_menu_save">Save Issue Info</string>
+    <string name="textView_github_menu_clear">Clear Issue Info</string>
+    <!-- recycler_view_github_assignee_popup-->
+    <string name="textView_recyclerView_github_assignee_header">Delete assignee</string>
+    <string name="textView_recyclerView_github_assignee_title">Are you sure to remove assignee from your github issue?</string>
+    <string name="button_recyclerView_github_assignee_delete">Delete assignee</string>
+    <string name="button_recyclerView_github_assignee_keep">Keep assignee</string>
+    <!-- recycler_view_github_label_popup-->
+    <string name="textView_recyclerView_github_label_header">Delete label</string>
+    <string name="textView_recyclerView_github_label_title">Are you sure to remove label from your github issue?</string>
+    <string name="button_recyclerView_github_label_delete">Delete label</string>
+    <string name="button_recyclerView_github_label_keep">Keep label</string>
+    <!-- recycler_view_github_project_popup-->
+    <string name="textView_recyclerView_github_project_header">Delete project</string>
+    <string name="textView_recyclerView_github_project_title">Are you sure to remove project from your github issue?</string>
+    <string name="button_recyclerView_github_project_delete">Delete project</string>
+    <string name="button_recyclerView_github_project_keep">Keep project</string>
+    <!-- loggerbird_gitlab_popup-->
+    <string name="textView_gitlab_toolbar_title">Create Gitlab Issue</string>
+    <string name="textView_gitlab_project">Project</string>
+    <string name="textView_gitlab_title">Title</string>
+    <string name="editText_gitlab_title">Write your issue title here</string>
+    <string name="textView_gitlab_description">Description</string>
+    <string name="editText_gitlab_description">Write your issue description here</string>
+    <string name="editText_gitlab_weight">Write your issue weight here</string>
+    <string name="textView_gitlab_confidentiality_enter">Select your issue confidentiality</string>
+    <string name="textView_gitlab_labels_enter">Select your issue label</string>
+    <string name="textView_gitlab_milestone_enter">Select your issue milestone</string>
+    <string name="textView_gitlab_assginee_enter">Select your issue assignee</string>
+    <string name="textView_gitlab_assignee">Assignee</string>
+    <string name="textView_gitlab_labels">Labels</string>
+    <string name="textView_gitlab_weight">Weight</string>
+    <string name="textView_gitlab_milestone">Milestone</string>
+    <string name="editText_gitlab_title_empty">Your title cannot be empty!</string>
+    <string name="textView_gitlab_due_date">Due Date</string>
+    <string name="textView_gitlab_confidentiality">Confidentiality</string>
+    <string name="textView_gitlab_enter_due_date">Set a due date for issue</string>
+    <string name="textView_gitlab_project_doesnt_exist">This project doesn\'t exist</string>
+    <string name="textView_gitlab_assignee_doesnt_exist">This assignee doesn\'t exist</string>
+    <string name="textView_gitlab_assignee_not_be_empty">Your assignee cannot be empty!</string>
+    <string name="textView_gitlab_label_doesnt_exist">This label doesn\'t exist</string>
+    <string name="textView_gitlab_confidentiality_doesnt_exist">This confidentiality doesn\'t exist</string>
+    <string name="textView_gitlab_milestone_doesnt_exist">This milestone doesn\'t exist</string>
+    <!-- recycler_view_gitlab_item_popup-->
+    <string name="textView_recyclerView_gitlab_header">Delete Attachment</string>
+    <string name="textView_recyclerView_gitlab_popup_title">Are you sure to remove attachment from your Gitlab Issue?</string>
+    <string name="button_recyclerView_gitlab_yes">Delete Attachment</string>
+    <string name="button_recyclerView_gitlab_no">Keep File</string>
+    <!-- loggerbird_trello_popup-->
+    <string name="textView_trello_project">Project</string>
+    <string name="textView_trello_board">Board</string>
+    <string name="textView_trello_title">Title</string>
+    <string name="editText_trello_title_hint">Enter a title for this card…</string>
+    <string name="textView_trello_description">Description</string>
+    <string name="editText_trello_description_hint">Enter a description for this card…</string>
+    <string name="textView_trello_member">Member</string>
+    <string name="textView_trello_member_list">Member list</string>
+    <string name="textView_trello_label">Label</string>
+    <string name="textView_trello_label_list">Label list</string>
+    <string name="textView_trello_check_list">Checklist</string>
+    <string name="textView_trello_check_list_list">Checklist list</string>
+    <string name="editText_trello_check_list">Enter a title for this checklist…</string>
+    <string name="textView_trello_start_date">Start date</string>
+    <string name="textView_trello_attachment">Attachments</string>
+    <string name="button_trello_create">Create</string>
+    <string name="button_trello_cancel">Cancel</string>
+    <!-- loggerbird_trello_menu-->
+    <string name="textView_trello_menu_save">Save Issue Info</string>
+    <string name="textView_trello_menu_clear">Clear Issue Info</string>
+    <!-- recycler_view_trello_item_popup-->
+    <string name="textView_recyclerView_popup_trello_title">Are you sure to remove attachment from your Trello issue?</string>
+    <!-- recycler_view_trello_label_popup-->
+    <string name="textView_recyclerView_trello_label_header">Delete label</string>
+    <string name="textView_recyclerView_trello_label_title">Are you sure to remove label from your trello issue?</string>
+    <string name="button_recyclerView_trello_label_delete">Delete label</string>
+    <string name="button_recyclerView_trello_label_keep">Keep label</string>
+    <!-- recycler_view_trello_member_popup-->
+    <string name="textView_recyclerView_trello_member_header">Delete member</string>
+    <string name="textView_recyclerView_trello_member_title">Are you sure to remove member from your trello issue?</string>
+    <string name="button_recyclerView_trello_member_delete">Delete member</string>
+    <string name="button_recyclerView_trello_member_keep">Keep member</string>
+    <!-- recycler_view_trello_check_list_popup-->
+    <string name="textView_recyclerView_trello_check_list_header">Delete checklist</string>
+    <string name="textView_recyclerView_trello_check_list_title">Are you sure to remove checklist from your trello issue?</string>
+    <string name="button_recyclerView_trello_check_list_delete">Delete checklist</string>
+    <string name="button_recyclerView_trello_check_list_keep">Keep checklist</string>
+    <!-- loggerbird_trello_start_date_popup-->
+    <string name="textView_trello_date_title">Set timeline</string>
+    <string name="button_trello_date_proceed">Proceed</string>
+    <string name="button_trello_date_cancel">Cancel</string>
+    <string name="textView_trello_start_time">Start time</string>
+    <!-- loggerbird_pivotal_menu-->
+    <string name="textView_pivotal_menu_save">Save Issue Info</string>
+    <string name="textView_pivotal_menu_clear">Clear Issue Info</string>
+    <!-- loggerbird_pivotal_popup-->
+    <string name="textView_pivotal_project">Project</string>
+    <string name="textView_pivotal_title">Title</string>
+    <string name="editText_pivotal_title_hint">Enter a title for this story…</string>
+    <string name="textView_pivotal_type">Story Type</string>
+    <string name="textView_pivotal_requester">Requester</string>
+    <string name="textView_pivotal_points">Points</string>
+    <string name="textView_pivotal_owners">Owners</string>
+    <string name="textView_pivotal_owners_list">Owners list</string>
+    <string name="textView_pivotal_blockers">Blockers</string>
+    <string name="textView_pivotal_blockers_list">Blockers list</string>
+    <string name="textView_pivotal_description">Description</string>
+    <string name="textView_pivotal_labels">Labels</string>
+    <string name="textView_pivotal_labels_list">Labels list</string>
+    <string name="textView_pivotal_tasks">Task</string>
+    <string name="textView_pivotal_tasks_list">Task list</string>
+    <string name="textView_pivotal_attachment">Attachments</string>
+    <string name="editText_pivotal_description">Enter a description for this story …</string>
+    <string name="editText_pivotal_task">Enter a task for this story …</string>
+    <string name="editText_pivotal_block">Enter a block for this story …</string>
+    <string name="editText_pivotal_title">Enter a title for this story …</string>
+    <string name="button_pivotal_create">Create</string>
+    <string name="button_pivotal_cancel">Cancel</string>
+    <!-- recycler_view_pivotal_item_popup-->
+    <string name="textView_recyclerView_pivotal_popup_title">Are you sure to remove attachment from your Pivotal issue?</string>
+    <!-- recycler_view_pivotal_task_item_popup-->
+    <string name="textView_recyclerView_pivotal_task_header">Delete task</string>
+    <string name="textView_recyclerView_pivotal_task_popup_title">Are you sure to remove task from your Pivotal issue?</string>
+    <string name="button_recyclerView_pivotal_task_delete">Delete task</string>
+    <string name="button_recyclerView_pivotal_task_keep">Keep task</string>
+    <!-- recycler_view_pivotal_blocker_item_popup-->
+    <string name="textView_recyclerView_pivotal_blocker_header">Delete blocker</string>
+    <string name="textView_recyclerView_pivotal_blocker_popup_title">Are you sure to remove blocker from your Pivotal issue?</string>
+    <string name="button_recyclerView_pivotal_blocker_delete">Delete blocker</string>
+    <string name="button_recyclerView_pivotal_blocker_keep">Keep blocker</string>
+    <!-- recycler_view_pivotal_label_item_popup-->
+    <string name="textView_recyclerView_pivotal_label_header">Delete label</string>
+    <string name="textView_recyclerView_pivotal_label_popup_title">Are you sure to remove label from your Pivotal issue?</string>
+    <string name="button_recyclerView_pivotal_label_delete">Delete label</string>
+    <string name="button_recyclerView_pivotal_label_keep">Keep label</string>
+    <!-- recycler_view_pivotal_owner_item_popup-->
+    <string name="textView_recyclerView_pivotal_owner_header">Delete owner</string>
+    <string name="textView_recyclerView_pivotal_owner_popup_title">Are you sure to remove owner from your Pivotal issue?</string>
+    <string name="button_recyclerView_pivotal_owner_delete">Delete owner</string>
+    <string name="button_recyclerView_pivotal_owner_keep">Keep owner</string>
+    <!-- loggerbird_basecamp_menu-->
+    <string name="textView_basecamp_menu_save">Save Issue Info</string>
+    <string name="textView_basecamp_menu_clear">Clear Issue Info</string>
+    <!-- loggerbird_basecamp_popup-->
+    <string name="textView_basecamp_toolbar_title">Create Basecamp Story</string>
+    <string name="textView_basecamp_message_board">Message board</string>
+    <string name="textView_basecamp_project">Project</string>
+    <string name="textView_basecamp_title">Title</string>
+    <string name="editText_basecamp_title_hint">Enter a title for this message…</string>
+    <string name="textView_basecamp_category">Category</string>
+    <string name="textView_basecamp_description_message">Description message</string>
+    <string name="editText_basecamp_description_message">Enter a description for this message…</string>
+    <string name="textView_basecamp_name">Name</string>
+    <string name="editText_basecamp_name_hint">Enter a name for this message…</string>
+    <string name="textView_basecamp_content">Content</string>
+    <string name="editText_basecamp_content_hint">Enter a content for this message…</string>
+    <string name="textView_basecamp_description_todo">Description to-dos</string>
+    <string name="editText_basecamp_description_todo">Enter a description for this to-dos…</string>
+    <string name="textView_basecamp_todo_board">To-dos</string>
+    <string name="textView_basecamp_assignee">Assignee</string>
+    <string name="textView_basecamp_assignee_list">Assignee list</string>
+    <string name="textView_basecamp_notify">Notify</string>
+    <string name="textView_basecamp_notify_list">Notify list</string>
+    <string name="textView_basecamp_due_date">Due date</string>
+    <string name="button_basecamp_create">Create</string>
+    <string name="button_basecamp_cancel">Cancel</string>
+    <string name="textView_basecamp_attachment">Attachments</string>
+    <string name="textView_basecamp_attachments_board">Docs&amp;Files</string>
+    <string name="textView_basecamp_start_date">Start date</string>
+    <!-- recycler_view_basecamp_item_popup-->
+    <string name="textView_recyclerView_basecamp_popup_title">Are you sure to remove attachment from your basecamp issue?</string>
+    <!-- recycler_view_basecamp_assignee_popup-->
+    <string name="textView_recyclerView_basecamp_assignee_header">Delete assignee</string>
+    <string name="textView_recyclerView_basecamp_assignee_title">Are you sure to remove assignee from your basecamp issue?</string>
+    <string name="button_recyclerView_basecamp_assignee_delete">Delete assignee</string>
+    <string name="button_recyclerView_basecamp_assignee_keep">Keep assignee</string>
+    <!-- recycler_view_basecamp_notify_popup-->
+    <string name="textView_recyclerView_basecamp_notify_header">Delete notify</string>
+    <string name="textView_recyclerView_basecamp_notify_title">Are you sure to remove notify from your basecamp issue?</string>
+    <string name="button_recyclerView_basecamp_notify_delete">Delete notify</string>
+    <string name="button_recyclerView_basecamp_notify_keep">Keep notify</string>
+    <!-- loggerbird_asana_menu-->
+    <string name="textView_asana_menu_save">Save Issue Info</string>
+    <string name="textView_asana_menu_clear">Clear Issue Info</string>
+    <!-- loggerbird_asana_popup-->
+    <string name="textView_asana_project">Project</string>
+    <string name="textView_asana_task_name">Task name</string>
+    <string name="editText_asana_task_name">Enter a task name for this task…</string>
+    <string name="textView_asana_assignee">Assignee</string>
+    <string name="textView_asana_section">Category</string>
+    <string name="textView_asana_priority">Priority</string>
+    <string name="textView_asana_description">Description</string>
+    <string name="editText_asana_description">Enter a description for this task…</string>
+    <string name="textView_asana_sub_tasks">Subtasks</string>
+    <string name="editText_asana_sub_tasks">Add more detail to this task…</string>
+    <string name="textView_asana_sub_tasks_list">Subtasks list</string>
+    <string name="textView_asana_attachment">Attachments</string>
+    <string name="textView_asana_start_date">Start date</string>
+    <string name="textView_asana_enter_start_date_enter">Enter a start date for issue</string>
+    <string name="button_asana_create">Create</string>
+    <string name="button_asana_cancel">Cancel</string>
+    <!-- loggerbird_asana_sub_popup-->
+    <string name="textView_asana_sub_task_name">Subtask name</string>
+    <string name="editText_asana_sub_task_name">Enter a subtask name for this subtask…</string>
+    <string name="textView_asana_sub_assignee">Subtask assignee</string>
+    <string name="textView_asana_sub_section">Subtask section</string>
+    <string name="textView_asana_sub_description">Subtask description</string>
+    <string name="editText_asana_sub_description">Enter a description for this subtask…</string>
+    <string name="textView_asana_sub_attachment">Subtask attachments</string>
+    <string name="textView_asana_sub_start_date">Subtask start date</string>
+    <string name="button_asana_sub_create">Subtask create</string>
+    <string name="button_asana_sub_cancel">Subtask cancel</string>
+    <!-- recycler_view_asana_item_popup-->
+    <string name="textView_recyclerView_asana_popup_title">Are you sure to remove attachment from your asana issue?</string>
+    <!-- recycler_view_asana_subtask_popup-->
+    <string name="textView_recyclerView_asana_subtask_header">Delete subtask</string>
+    <string name="textView_recyclerView_asana_subtask_title">Are you sure to remove subtask from your asana issue?</string>
+    <string name="button_recyclerView_asana_subtask_delete">Delete subtask</string>
+    <string name="button_recyclerView_asana_subtask_keep">Keep subtask</string>
+    <!-- loggerbird_clubhouse_popup-->
+    <string name="textView_clubhouse_toolbar_title">Create Clubhouse Story</string>
+    <string name="textView_clubhouse_projects">Projects</string>
+    <string name="textView_clubhouse_epic">Epic</string>
+    <string name="textView_clubhouse_requester">Story Requester</string>
+    <string name="textView_clubhouse_story_name">Story Name</string>
+    <string name="textView_clubhouse_story_description">Story Description</string>
+    <string name="editText_clubhouse_subject">Write your story name here</string>
+    <string name="editText_clubhouse_story_description">Write your story description here</string>
+    <string name="editText_clubhouse_story_type_empty">Your story type cannot be empty</string>
+    <string name="editText_clubhouse_story_requester_empty">Your story requester cannot be empty</string>
+    <string name="textView_clubhouse_story_type">Story Type</string>
+    <string name="textView_clubhouse_attachment">Attachments</string>
+    <string name="textView_clubhouse_no_attachment">There is no attachment.</string>
+    <string name="button_clubhouse_create">Create</string>
+    <string name="button_clubhouse_cancel">Cancel</string>
+    <string name="editText_clubhouse_story_empty">Your story name cannot be empty!</string>
+    <string name="editText_clubhouse_story_description_empty">Your story description cannot be empty!</string>
+    <string name="textView_clubhouse_story_duedate_empty">Your story due date cannot be empty!</string>
+    <string name="textView_clubhouse_story_estimate_empty">Your story estimate cannot be empty!</string>
+    <string name="textView_clubhouse_due_date">Due date</string>
+    <string name="textView_clubhouse_enter_due_date">Set a due date for story!</string>
+    <string name="textView_clubhouse_estimate_point">Estimate Point</string>
+    <string name="editText_clubhouse_estimate_point">Write your estimate point here!</string>
+    <string name="textView_clubhouse_epic_enter">Select your story epic here!</string>
+    <string name="textView_clubhouse_project_doesnt_exist">This project doesn\'t exist</string>
+    <string name="textView_clubhouse_story_type_doesnt_exist">This story type doesn\'t exist</string>
+    <string name="textView_clubhouse_epic_doesnt_exist">This epic doesn\'t exist</string>
+    <string name="textView_clubhouse_user_doesnt_exist">This user doesn\'t exist</string>
+    <!-- recycler_view_clubhouse_item_popup-->
+    <string name="textView_recyclerView_clubhouse_popup_header">Delete Attachment</string>
+    <string name="textView_recyclerView_clubhouse_popup_title">Are you sure to remove attachment from your Clubhouse story?</string>
+    <string name="button_recyclerView_clubhouse_yes">Delete Attachment</string>
+    <string name="button_recyclerView_clubhouse_no">Keep File</string>
+    <!-- loggerbird_trello_check_list_item_popup-->
+    <string name="button_trello_check_create">Create</string>
+    <string name="button_trello_check_cancel">Cancel</string>
+    <string name="textView_trello_check_title">Item title</string>
+    <string name="editText_trello_check_hint">Enter a name for this item…</string>
+    <string name="textView_trello_check_item_list">Item List</string>
+    <!-- recycler_view_item_item_popup-->
+    <string name="textView_recyclerView_trello_item_popup_header">Delete Item</string>
+    <string name="textView_recyclerView_trello_item_popup_title">Are you sure to remove item from your Item list?</string>
+    <string name="button_recyclerView_trello_item_yes">Delete Item</string>
+    <string name="button_recyclerView_trello_item_no">Keep Item</string>
+    <!-- loggerbird_bitbucket_popup-->
+    <string name="textView_bitbucket_project">Project</string>
+    <string name="textView_bitbucket_assignee">Assignee</string>
+    <string name="textView_bitbucket_priority">Priority</string>
+    <string name="textView_bitbucket_kind">Kind</string>
+    <string name="textView_bitbucket_title">Title</string>
+    <string name="editText_bitbucket_title">Write a title about your issue…</string>
+    <string name="editText_bitbucket_description">Describe your issue in details…</string>
+    <string name="textView_bitbucket_description">Description</string>
+    <string name="textView_bitbucket_attachment">Attachments</string>
+    <string name="button_bitbucket_create">Create</string>
+    <string name="button_bitbucket_cancel">Cancel</string>
+    <!-- loggerbird_bitbucket_menu-->
+    <string name="textView_bitbucket_menu_save">Save Issue Info</string>
+    <string name="textView_bitbucket_menu_clear">Clear Issue Info</string>
+    <!-- recycler_view_bitbucket_item_popup-->
+    <string name="textView_recyclerView_bitbucket_popup_title">Are you sure to remove attachment from your bitbucket issue?</string>
+    <!-- loggerbird_file_action_list-->
+    <string name="textView_file_action_list_title">Files:</string>
+    <!-- recycler_view_file_action_list_popup-->
+    <string name="textView_recyclerView_file_action_list_header">Delete File</string>
+    <string name="textView_recyclerView_file_action_list_title">Are you sure to remove file from your file action list?</string>
+    <string name="button_recyclerView_file_action_list_delete">Delete file</string>
+    <string name="button_recyclerView_file_action_list_keep">Keep file</string>
 </resources>

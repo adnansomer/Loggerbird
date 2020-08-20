@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#ffffff</color>
+    <color name="colorPrimary">#000000</color>
     <color name="colorPrimaryDark">#ffffff</color>
     <color name="colorAccent">#000000</color>
     <color name="colorBlack">#000000</color>
@@ -18,4 +18,8 @@
     <color name="darkTransparent">#99000000</color>
     <color name="mediaRecordColor">#c62828</color>
     <color name="orange">#ff9800</color>
+    <color name="green">#2ECC71 </color>
+    <color name="yellow">#F7DC6F</color>
+    <color name="purple">#8E44AD</color>
+    <color name="paintEraseColor">#7F0000</color>
 </resources>
