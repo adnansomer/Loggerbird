@@ -372,7 +372,6 @@ internal class PaintActivity : Activity() {
                 if(pipModeChange){
                     Toast.makeText(activity,  resources.getText(R.string.snackbar_successfully_saved), Toast.LENGTH_SHORT).show()
                     finish()
-//                    overridePendingTransition(R.anim.slide_in_bottom,R.anim.no_animation)
                 }
             }
             saveDialog.setNegativeButton(
